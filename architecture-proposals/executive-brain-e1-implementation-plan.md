@@ -1,6 +1,6 @@
 # Executive Brain E1 — Implementation Plan (Plan Only)
 
-Status: PLAN (rev 2, pre-implementation corrections applied) — not implemented
+Status: PLAN (rev 3, final pre-implementation corrections) — not implemented
 Baseline: approved-architecture/executive-brain-v2.md (commit 545b59a)
 Author: Chief of Staff (Hermes)
 Date: 2026-09-21
@@ -79,6 +79,14 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       reclassification_reason TEXT,            -- required when supersedes is set
       created_at     TEXT NOT NULL,             -- ISO-8601 UTC
       request_text   TEXT NOT NULL,             -- verbatim owner words
+      source_system  TEXT,                      -- e.g. discord | cli | cron
+      source_event_id TEXT,                     -- source's stable event id
+                                             -- (Discord: real inbound
+                                             -- message_id when available)
+      -- idempotency: a retry with the same non-null source identity returns
+      -- the EXISTING TaskRecord instead of creating a duplicate. NULL
+      -- (manual/CLI) tasks always create new records intentionally.
+      UNIQUE(source_system, source_event_id),
       task_type      TEXT NOT NULL,             -- enum §3
       capability_roles TEXT NOT NULL,           -- JSON array
       reasoning_depth INTEGER NOT NULL,         -- 0..4
@@ -109,6 +117,12 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       floor_id       TEXT PRIMARY KEY,          -- fl-<taskid>-<n>
       task_id        TEXT NOT NULL REFERENCES task_record(task_id),
       subtask_id     TEXT REFERENCES subtask_record(subtask_id),
+      -- deterministic classification key: SQLite UNIQUE treats NULLs as
+      -- distinct, so UNIQUE(task_id, subtask_id) could NOT guarantee one
+      -- floor for a top-level task (subtask_id NULL). classification_key
+      -- closes that hole for BOTH task-level and subtask floors.
+      classification_key TEXT NOT NULL UNIQUE,  -- 'task:<task_id>' or
+                                             -- 'subtask:<subtask_id>'
       frozen_at      TEXT NOT NULL,
       seq            INTEGER NOT NULL UNIQUE,   -- deterministic chain order
       min_reasoning_depth INTEGER NOT NULL,
@@ -119,10 +133,9 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       strategy_constraints TEXT,
       record_sha256  TEXT NOT NULL,             -- hash of canonical fields
       prev_sha256    TEXT,                      -- hash-chain link
-      schema_version INTEGER NOT NULL DEFAULT 1,
-      UNIQUE(task_id, subtask_id)               -- ONE floor per classification;
-                                             -- second freeze on the same
-                                             -- task/subtask is REFUSED
+      schema_version INTEGER NOT NULL DEFAULT 1
+      -- ONE floor per classification, enforced by classification_key UNIQUE:
+      -- a second freeze of the same task OR subtask is a constraint violation
     );
 
     CREATE TABLE strategy_decision (
@@ -154,7 +167,16 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       floor_id       TEXT NOT NULL REFERENCES quality_floor(floor_id),
       overridden_at  TEXT NOT NULL,
       original_floor_summary TEXT NOT NULL,
-      actual_route   TEXT NOT NULL,
+      -- the override authorizes EXACTLY ONE below-floor exception, not every
+      -- future below-floor route on this floor. route_fingerprint is the
+      -- SHA-256 of the canonical proposed-route fields (strategy,
+      -- chosen_class, chosen_worker, proposed_reasoning_depth,
+      -- proposed_verification, execution_scope, proposed_egress,
+      -- claimed_roles). `eb route` may use an override ONLY when the proposed
+      -- route's fingerprint matches. A materially different below-floor route
+      -- (different worker, reasoning, egress, ...) requires a NEW override.
+      route_fingerprint TEXT NOT NULL,
+      actual_route   TEXT NOT NULL,              -- human-readable route desc
       warning_text   TEXT NOT NULL,             -- Chief's written warning
       owner_confirmation TEXT NOT NULL,         -- how owner approved (verbatim
                                                  -- quote of owner message/id)
@@ -174,16 +196,24 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       schema_version INTEGER NOT NULL DEFAULT 1
     );
 
-    -- Database-level immutability: triggers reject UPDATE/DELETE on frozen
-    -- records. PRAGMA foreign_keys = ON is set on EVERY connection.
+    -- Database-level immutability: triggers reject UPDATE/DELETE on ALL
+    -- historical/audit records. PRAGMA foreign_keys = ON on EVERY connection.
     CREATE TRIGGER trg_task_record_no_update BEFORE UPDATE ON task_record
       BEGIN SELECT RAISE(ABORT, 'task_record is append-only'); END;
     CREATE TRIGGER trg_task_record_no_delete BEFORE DELETE ON task_record
       BEGIN SELECT RAISE(ABORT, 'task_record is append-only'); END;
+    CREATE TRIGGER trg_subtask_no_update BEFORE UPDATE ON subtask_record
+      BEGIN SELECT RAISE(ABORT, 'subtask_record is append-only'); END;
+    CREATE TRIGGER trg_subtask_no_delete BEFORE DELETE ON subtask_record
+      BEGIN SELECT RAISE(ABORT, 'subtask_record is append-only'); END;
     CREATE TRIGGER trg_quality_floor_no_update BEFORE UPDATE ON quality_floor
       BEGIN SELECT RAISE(ABORT, 'quality_floor is immutable'); END;
     CREATE TRIGGER trg_quality_floor_no_delete BEFORE DELETE ON quality_floor
       BEGIN SELECT RAISE(ABORT, 'quality_floor is immutable'); END;
+    CREATE TRIGGER trg_strategy_no_update BEFORE UPDATE ON strategy_decision
+      BEGIN SELECT RAISE(ABORT, 'strategy_decision is append-only'); END;
+    CREATE TRIGGER trg_strategy_no_delete BEFORE DELETE ON strategy_decision
+      BEGIN SELECT RAISE(ABORT, 'strategy_decision is append-only'); END;
     CREATE TRIGGER trg_override_no_update BEFORE UPDATE ON override_record
       BEGIN SELECT RAISE(ABORT, 'override_record is append-only'); END;
     CREATE TRIGGER trg_override_no_delete BEFORE DELETE ON override_record
@@ -198,14 +228,19 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
 Four layers, all deterministic:
 
 1. Database-level (primary): the triggers above ABORT any UPDATE/DELETE on
-   task_record, quality_floor, override_record, and audit_log — including
-   direct SQL attempts through any connection that has the schema loaded.
+   task_record, subtask_record, quality_floor, strategy_decision,
+   override_record, and audit_log — including direct SQL attempts through
+   any connection that has the schema loaded.
    `PRAGMA foreign_keys = ON` on every connection also rejects orphaned
    references (e.g. a route pointing at a nonexistent floor).
 2. Application-level: the CLI contains no UPDATE/DELETE code path for these
    tables; the writer opens one transaction per command (single INSERT).
-3. One-floor-per-classification: UNIQUE(task_id, subtask_id) on quality_floor
-   makes a second freeze of the same classification a constraint violation.
+3. One-floor-per-classification: classification_key TEXT NOT NULL UNIQUE
+   ('task:<task_id>' | 'subtask:<subtask_id>'). A plain
+   UNIQUE(task_id, subtask_id) was rejected in review because SQLite treats
+   NULLs as distinct — it would allow multiple task-level floors when
+   subtask_id IS NULL. classification_key makes a second freeze of the same
+   classification impossible for BOTH task-level and subtask floors.
    A changed understanding REQUIRES a new TaskRecord (supersedes_task_id +
    reclassification_reason) and a new floor. There are no floor "revisions" —
    only new lineages. The previous task/floor rows remain immutable forever.
@@ -289,8 +324,16 @@ If classification_confidence = low:
   frozen floor — the command refuses an empty warning
 - requires owner confirmation evidence C (verbatim owner message quote or
   message id); empty C is refused
-- writes OverrideRecord + audit row; only then may `eb route` accept a
-  sub-floor route for that floor (gate_result records the override id)
+- computes route_fingerprint = SHA-256 over the canonical proposed-route
+  fields (strategy, chosen_class, chosen_worker, proposed_reasoning_depth,
+  proposed_verification, execution_scope, proposed_egress, claimed_roles)
+- writes OverrideRecord + audit row
+- `eb route` may use an override ONLY when the proposed route's fingerprint
+  EXACTLY matches the override's route_fingerprint. The override authorizes
+  that single approved exception — not every future below-floor route on the
+  floor. Any materially different below-floor route (different worker,
+  reasoning, verification, scope, egress, or roles) requires a NEW owner
+  override. (gate_result records the override id used.)
 
 ## 8. Interaction with existing Hermes sessions/tools
 
@@ -308,9 +351,14 @@ If classification_confidence = low:
 - Any CLI error (locked db, bad enum, missing floor) → non-zero exit +
   human-readable error + audit row where possible; no partial writes
   (single INSERT per command inside one transaction).
-- DB locked (concurrent Chief turns) → sqlite busy_timeout 5s, then clean
-  failure; retry is safe (commands are idempotent by design: re-running
-  classify creates a new task, never corrupts an old one).
+- Concurrency: two INDEPENDENT valid classify operations both succeed —
+  SQLite serializes writers under locking/busy_timeout (5s), so each waits
+  its turn. A clean failure happens only after timeout expiry, and retry is
+  safe. For DUPLICATE retries carrying the same (source_system,
+  source_event_id): UNIQUE(source_system, source_event_id) guarantees
+  exactly one TaskRecord — the retry returns the existing record instead of
+  creating a second one. Manual/CLI tasks without a source_event_id
+  intentionally create new TaskRecords each time.
 - Hash-chain verification failure on `eb audit --verify` → loud report;
   routing for affected tasks is blocked until the owner is informed
   (invariant: never route on an unverified floor).
@@ -349,18 +397,23 @@ If classification_confidence = low:
 | T2 | eb classify with invalid enum/task_type | refused, exit != 0, no row |
 | T3 | eb decompose before classify | refused (no task) |
 | T4 | eb freeze after classify | floor written, hash chain extends, audit |
-| T5 | eb freeze twice on the SAME task/subtask | REFUSED (UNIQUE constraint violation); no "revision" path exists |
+| T5 | eb freeze twice on the SAME task (task-level, subtask_id NULL) | REFUSED (classification_key 'task:<id>' UNIQUE); no "revision" path exists |
 | T5a | reclassification after changed understanding | new TaskRecord with supersedes_task_id + reason; new subtasks; new floor; old rows untouched |
+| T5b | eb freeze twice on the SAME subtask | REFUSED (classification_key 'subtask:<id>' UNIQUE) |
 | T6 | eb route WITHOUT freeze | refused: FLOOR REQUIRED BEFORE ROUTING, reject audit row |
 | T7 | eb route after freeze, floor-consistent | StrategyDecision written, gate accept |
 | T8 | eb route sub-floor WITHOUT override | refused |
 | T9 | eb override with empty warning/confirmation | refused |
-| T10 | eb override with warning+confirmation, then sub-floor route | accepted, OverrideRecord linked |
+| T10 | eb override with warning+confirmation, then sub-floor route with EXACTLY matching fingerprint | accepted, OverrideRecord linked |
+| T10a | below-floor route with DIFFERENT worker/reasoning/egress than the approved override | refused — old override does not authorize the new exception |
+| T10b | classify retried with same (source_system, source_event_id) | returns EXISTING TaskRecord; no duplicate |
+| T10c | classify with a different source_event_id | new TaskRecord allowed |
 | T11 | tamper a floor row directly in SQLite (UPDATE) | trigger ABORTs; row unchanged |
 | T11a | tamper a floor row by direct DELETE | trigger ABORTs; row unchanged |
-| T11b | tamper task_record / override_record / audit_log by UPDATE/DELETE | triggers ABORT all |
+| T11b | tamper task_record / subtask_record / strategy_decision / override_record / audit_log by UPDATE/DELETE | triggers ABORT all |
 | T11c | delete final chain-tail floor row with triggers dropped externally | chain alone OK but head anchor mismatch reported |
-| T12 | concurrent classify x2 (two processes) | one succeeds, other retries/clean-fails; no corruption |
+| T12 | two INDEPENDENT valid classify operations, two processes | BOTH succeed serially under busy_timeout; clean failure only after timeout; no corruption |
+| T12a | duplicate classify retry, same source_event_id, two processes | exactly ONE TaskRecord exists afterwards |
 | T13 | Discord gateway + scheduled ChiefDiscordSync still work after install | unchanged (no gateway files touched) |
 | T14 | curated summary generation | only allowed fields, no request_text of P2/P3 tasks, no secrets |
 | T15 | full pipeline dry-run on a real small task | classify→decompose→freeze→route in order, audit shows sequence |
@@ -385,7 +438,7 @@ discipline (skill enforces habit; audit trail verifies). Existing workflows
 
 - eb.py (CLI + 6 tables + triggers + hash chain + audit + backup): ~600–750
   lines, stdlib only
-- tests: ~350–450 lines, 23 cases
+- tests: ~400–500 lines, 28 cases
 - SKILL.md: ~80 lines
 - repo docs: small
 - Total: one to two focused implementation sessions; MEDIUM complexity;
