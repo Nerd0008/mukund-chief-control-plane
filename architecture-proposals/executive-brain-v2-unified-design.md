@@ -2,7 +2,11 @@
 
 Status: PROPOSAL — not approved, not implemented
 Author: Chief of Staff (Hermes)
-Date: 2026-09-21 (amended same day: DeepSeek provider-class assumptions + secret handling, §8)
+Date: 2026-09-21 (amended: DeepSeek provider-class assumptions + secret handling, §8;
+pre-approval amendments: central Qualification Gate, cold-start states,
+multidimensional capacity, routing objective, proactive checkpointing,
+stronger evidence model, privacy/egress split, unknown-capacity rules,
+brief format, revised pipeline)
 Scope: Executive Brain, No-Degradation Invariant, Resource Governor only
 Baseline note: No prior on-disk Executive Brain / Resource Governor design was
 found (searched Documents trees, Hermes skills, scratch, control-plane repo).
@@ -22,8 +26,10 @@ APIs, local models. Nothing in this design adds a second Chief.
 Pipeline (strict order):
 
     Understand → Classify → Decompose (optional) → Freeze quality floors
-    → Select strategy → Select specialist class → Provider routing
-    → Execute + monitor → Verify → Record + learn
+    → Candidate Generation → Provider Router Proposal (per candidate)
+    → Central Qualification Gate (Brain-owned) → Resource Governor check
+    → Final Route Selection → Execution + monitor + proactive checkpoints
+    → Verification → Record + learn
 
 Components:
 
@@ -32,10 +38,13 @@ Components:
 | Task Classifier | Produces the task classification record (§3) |
 | Floor Freezer | Freezes per-subtask quality floors (§4) before any resource lookup |
 | Decomposer | Splits a request into subtasks under §7 rules |
+| Candidate Generation | Builds the candidate worker set (classes, models, workflows) |
+| Provider Router (per provider) | PROPOSES model/reasoning/profile + claimed capabilities (§6) |
+| Central Qualification Gate | Brain-owned; validates proposals against the frozen floor (§5a) |
 | Strategy Selector | Chooses execution strategy (below) |
-| Executive Router | Chooses specialist class (§5) |
-| Governor Interface | Queries qualified capacity; never influences floors |
-| Monitor | Tracks execution, consumption, confidence signals |
+| Resource Governor | Multidimensional capacity check (§9a); never influences floors |
+| Final Route Selection | Ranks QUALIFIED candidates (§5b); picks the route |
+| Monitor | Tracks execution, consumption, confidence, checkpoints |
 | Verifier | Enforces the verification level from the floor |
 | Learner | Writes performance history (§13) |
 | Safe Mode | Deterministic fallback (§15) |
@@ -92,6 +101,10 @@ Rules:
     risk_class         R0 read-only | R1 reversible-local | R2 reversible-public/
                        financial | R3 irreversible/high-impact
     privacy_class      P0 public | P1 internal | P2 personal | P3 secrets-adjacent
+    egress_policy      data-egress rule, owner-controlled, separate from
+                       privacy_class (§4a): LOCAL_ONLY |
+                       APPROVED_PROVIDERS_ONLY | REDACT_BEFORE_EXTERNAL |
+                       EXTERNAL_ALLOWED | OWNER_APPROVAL_REQUIRED
     deadline           hard | soft | none (+ datetime)
     idempotent         bool (safe to retry?)
     context_size       small | medium | large
@@ -100,23 +113,71 @@ Rules:
 Classification confidence is recorded. Low confidence → escalate per §14
 before any execution, because everything downstream inherits the floor.
 
+### 4a. Privacy / data-egress policy
+
+privacy_class (what the data IS) and egress_policy (where it may GO) are
+separate fields. The owner controls egress policy; it is not inferred from
+sensitivity alone. Defaults:
+
+- secrets/credentials → LOCAL_ONLY always (hard default, not configurable
+  away by policy short of explicit owner instruction recorded as an
+  OverrideRecord)
+- P2 personal → OWNER_APPROVAL_REQUIRED before any external egress unless
+  the owner has set a standing policy (e.g. APPROVED_PROVIDERS_ONLY with a
+  named provider list)
+- REDACT_BEFORE_EXTERNAL requires a deterministic redaction step with its own
+  verification before external routing
+
+Provider credentials themselves never enter prompts, logs, GitHub, reports,
+or any egress path (§8 secret handling).
+
 ## 4. Quality-floor schema (frozen record)
 
     floor_id           per task/subtask
     task_id / subtask_id
     frozen_at          timestamp
     min_reasoning_depth      (from classification; may exceed, never below)
-    required_roles           with evidence tier per role:
-                             PROVEN(task_type) | UNPROVEN
+    required_roles           with worker state per role (§4):
+                             UNPROVEN | EVALUATING | QUALIFIED | SUSPENDED
     min_verification         V0–V3
     risk_constraints         e.g. R2+ requires owner pre-approval
-    privacy_constraints      e.g. P3 forbids external providers entirely
+    egress_constraints       from the task's egress_policy (§4a); e.g.
+                             LOCAL_ONLY forbids every external class
     strategy_constraints     e.g. "deterministic only" or "existing workflow only"
     immutable          true after freeze
 
-Evidence tiers: a provider+model is PROVEN for a task type only through
-performance history (§13). Everything else is UNPROVEN. UNPROVEN workers may
-run low-risk subtasks; R2+ or V3 subtasks require PROVEN or owner approval.
+Evidence tiers (worker states, per (task_type, capability_role) pair):
+
+    UNPROVEN    no verified evidence yet
+    EVALUATING  running controlled evaluation tasks (§4b)
+    QUALIFIED   task-specific verified evidence meets the threshold (§13)
+    SUSPENDED   serious verified failure; excluded until re-qualified
+
+UNPROVEN/EVALUATING workers may run only low-risk subtasks (see §4b);
+R2+ or V3 subtasks require QUALIFIED workers or owner approval.
+
+### 4b. Cold-start qualification path
+
+The bootstrap problem: new models/providers/profiles have no evidence, but
+without tasks they can never earn any. Resolution — controlled evaluation:
+
+An UNPROVEN worker may be routed ONLY to evaluation tasks where:
+- risk is low (R0/R1)
+- the result can be independently verified (deterministic check, test suite,
+  or independent critic — not the worker assessing itself)
+- failure has no material consequence
+- production output is not relied upon without that verification
+
+Evaluation tasks are real work that happens to be verifiable (test-coverage
+runs, doc extraction against a source, refactor behind tests) — not
+synthetic benchmarks, and not owner-override gateways. No owner override is
+needed merely to gather safe qualification evidence; the owner IS notified
+when evaluation runs happen and sees promotion decisions.
+
+Promotion EVALUATING → QUALIFIED requires task-specific verified evidence
+(§13): independently verified outcomes, first-pass success rate, correction
+severity, across a minimum sample. A serious verified failure at any point
+→ SUSPENDED immediately.
 
 ## 5. Hierarchical routing design
 
@@ -125,30 +186,73 @@ Two levels, explicit contract between them:
     Executive Brain
       → specialist class: deterministic-tools | Codex | Antigravity | DeepSeek |
         Nous/LongCat | local-models | future-providers
-        → provider router (provider-owned, §6)
-          → capability profile: scout | builder | architect | researcher |
-            critic | classifier | writer | vision | compressor
-            → model + reasoning level + execution profile
+        → provider router (provider-owned, §6) PROPOSES a worker:
+          capability profile: scout | builder | architect | researcher |
+          critic | classifier | writer | vision | compressor
+          → model + reasoning level + execution profile
+        → central Qualification Gate (Brain-owned, §5a) validates the proposal
+          against the frozen floor → accept / reject
+        → Final Route Selection (§5b) among gate-accepted candidates
 
 - The executive level chooses the CLASS based on: floor qualification,
   performance history, Governor capacity, cost policy.
 - The provider level may freely choose model/reasoning/profile INTERNALLY, but
-  must return a self-declared qualification against the floor, and refusal is a
-  first-class answer.
+  its choice is a PROPOSAL, not a self-certification. Refusal is a
+  first-class answer; acceptance is not.
 - Capability roles are stable vocabulary; model names are not. Routers translate
   roles → concrete models, so model churn never touches the Brain's logic.
+
+### 5a. Central Qualification Gate (Brain-owned)
+
+A provider router may PROPOSE model, reasoning level, execution profile, and
+claimed capabilities — but it may NOT be the final authority on whether its
+own choice meets the frozen quality floor. A provider cannot self-certify
+itself into a task.
+
+The Gate (owned by the Executive Brain) validates every proposal using:
+
+- task-specific performance history (§13)
+- capability registry (roles each worker has QUALIFIED for, by task type)
+- verification history (V-level outcomes, not self-assessment)
+- known model/tool constraints (context limits, tool support, licensing)
+- current provider state (Governor, §9a)
+
+Provider self-description is evidence, not proof. Output: accept | reject
+(with reason, recorded). A rejected proposal may be followed by another
+proposal from the same or another provider; the Gate re-validates each.
+
+### 5b. Routing objective (after the quality gate)
+
+Quality is primary. After all candidates below the floor are REMOVED, the
+remaining QUALIFIED candidates are ranked by:
+
+1. expected verified task quality (history-weighted)
+2. probability of successful completion without handover
+3. continuity/resource risk (Governor dimensions, §9a)
+4. verification strength available for this task
+5. latency, when the task is latency-sensitive
+6. cost
+
+Cost must not outrank expected quality among materially different qualified
+candidates unless owner policy explicitly permits it. The Brain must not
+automatically choose the cheapest qualified model when evidence suggests
+another qualified worker materially improves the expected verified result.
+Ties or near-equivalents → cheaper wins (registry cost policy applies).
 
 ## 6. Provider-router contract
 
 Input (from Brain):  capability role, frozen floor, task context summary,
                      verification needs, budget hints (advisory only).
-Output (from router): model id, reasoning level, execution profile,
-                     qualified: yes/no (against the floor),
-                     estimated usage (tokens/cost), confidence.
+Output (from router): PROPOSAL — model id, reasoning level, execution profile,
+                     claimed capabilities, estimated usage (tokens/cost),
+                     confidence. (The router's qualified:yes is an opinion the
+                     Gate must confirm; it is not acceptance.)
 Obligations:
-- MUST refuse when the floor cannot be met; never silently substitute.
-- Any substitution (model unavailable mid-task) re-checks the floor and
-  notifies the Brain; a substitution that breaks the floor triggers §12.
+- MUST refuse when the router believes the floor cannot be met; never silently
+  substitute.
+- Any substitution (model unavailable mid-task) re-checks the floor via the
+  Gate and notifies the Brain; a substitution that breaks the floor triggers
+  §12 handover.
 - Estimates are labelled estimates; no fabricated precision.
 
 ## 7. Task-decomposition rules
@@ -225,18 +329,15 @@ pauses/reroutes DeepSeek work; it never lowers the floor.
 
 ## 9. Provider telemetry contract (per provider, per window)
 
+Provider capacity is NOT one scalar when the provider has multiple
+independent limits. Capacity is tracked as separate DIMENSIONS (§9a), each
+with its own remaining/reserve/runway/reset/source/confidence. The fields
+below are the per-provider summary; §9a holds the dimension table.
+
     provider            class id
     operational         up | degraded | down | unknown
     available_models    [ids] (+ roles each can serve, per history)
-    reported_remaining  provider-stated quota/credits | UNKNOWN
-    reset_time          provider-stated | UNKNOWN
-    protected_reserve   Governor-held reserve (§11)
-    effective_usable    reported_remaining − protected_reserve (never negative)
-    burn_rate_recent    usage/hour over trailing window (observed)
-    projected_exhaustion earliest time effective_usable hits 0 at burn rate
-    task_consumption    usage charged to current running task
-    estimated_remaining estimated usage to finish current task + verification
-    cost_rate           per-unit provider/API cost
+    dimensions          [CapacityDimension] (§9a) — the authoritative view
     rate_limit_state    ok | throttled | cooldown-until
     last_success_at     timestamp of last successful request
     telemetry_source    provider API | observed-only | mixed
@@ -246,20 +347,61 @@ pauses/reroutes DeepSeek work; it never lowers the floor.
 
 All numeric fields carry provenance. "Do not pretend estimates are exact" is
 enforced by labelling: every projected number renders with its confidence.
+Never mathematically subtract or combine incompatible units (requests,
+tokens, credits, currency are never merged into one number).
+
+### 9a. Multidimensional capacity
+
+Each provider exposes zero or more capacity dimensions:
+
+    dimension_kind      request_window | token_window | daily_allowance |
+                        weekly_allowance | monthly_allowance |
+                        monetary_balance | concurrency | rate_limit |
+                        provider_credit
+    remaining           current remaining (unit-labelled) | UNKNOWN
+    reserve             protected reserve in this dimension (§11)
+    effective_usable    remaining − reserve (never negative; unit-preserved)
+    reset_renewal       when this dimension renews | UNKNOWN
+    source              provider API | observed | inferred
+    confidence          high | medium | low
+
+A task may proceed ONLY if ALL binding dimensions have adequate runway
+(§10 evaluated per dimension). Incompatible dimensions are never summed or
+averaged; each renders separately.
+
+DeepSeek dimensions (per amendment): monetary budget | account/billing
+availability | API rate limits | token usage — four separate dimensions,
+never compressed into one.
+
+### 9b. Unknown capacity
+
+When quota/capacity telemetry is UNKNOWN, it is NEVER interpreted as zero,
+unlimited, or healthy. Instead the Governor uses: observed recent usage,
+provider errors (429s, failures), historical behavior, and conservative
+estimates — all labelled with confidence.
+
+For long or high-value tasks, insufficient capacity confidence may justify:
+- routing to another qualified provider
+- checkpoint-first execution (§10a)
+- an owner warning
+- pause
+
+It must never lower the quality floor.
 
 ## 10. Predictive exhaustion algorithm
 
-Run before accepting any new subtask, and periodically during execution:
+Run before accepting any new subtask, and periodically during execution —
+EVALUATED PER CAPACITY DIMENSION (§9a), never on a merged scalar:
 
-    runway = effective_usable
-    need   = estimated_remaining_task_usage
-           + verification_requirement (floor V-level cost estimate)
-           + checkpoint_handover_reserve (§11)
+    runway(d) = effective_usable(d)          for each binding dimension d
+    need(d)   = estimated_remaining_task_usage(d)
+              + verification_requirement(d)  (floor V-level cost estimate)
+              + checkpoint_handover_reserve(d) (§11)
 
-    if runway >= need: proceed
-    else:
+    if runway(d) >= need(d) for ALL binding d: proceed
+    else (any dimension short):
       1. stop assigning new noncritical work on that provider
-      2. reach a safe checkpoint (commit state, write partial results)
+      2. reach the latest checkpoint (§10a) — or create one now
       3. preserve state (task record + context + floor)
       4. prepare handover (HandoverRecord, §18)
       5. find equivalent qualified worker (same floor, other provider/model)
@@ -267,22 +409,51 @@ Run before accepting any new subtask, and periodically during execution:
       7. otherwise PAUSE and notify owner
 
 Thresholds are conservative: warn when projected exhaustion < need + 20%
-margin; act when runway < need.
+margin; act when runway < need (in any binding dimension).
+
+### 10a. Proactive checkpointing
+
+The first checkpoint is NOT created at exhaustion time. Long, expensive, or
+high-risk tasks checkpoint periodically based on:
+
+- task duration (time-based cadence for long runs)
+- task phase (natural boundaries — see below)
+- risk class (R2+ checkpoints more often)
+- estimated provider runway (checkpoint more often when telemetry confidence
+  is low or runway is tight)
+- artifact maturity (checkpoint when a coherent artifact exists)
+
+Phase-boundary checkpoints, e.g.:
+- architecture decision completed
+- code phase completed
+- tests completed
+- major research stage completed
+
+Predictive exhaustion uses the LATEST checkpoint, making handover cheap and
+reliable: a handover resumes from the checkpoint with (completed steps,
+artifacts, context digest, verification state, next step) rather than
+restarting.
+
+Changing provider, model, or reasoning profile mid-task is a CONTINUITY
+EVENT: state must be preserved across it (checkpoint written before the
+change, HandoverRecord after), regardless of why the change happened.
 
 ## 11. Protected-reserve system
 
-Per provider, the Governor holds reserves that are NOT working capacity:
+Per provider, the Governor holds reserves that are NOT working capacity.
+Reserves are held PER CAPACITY DIMENSION (§9a), never as one merged number:
 
-    reserve = checkpoint_reserve + handover_reserve + verification_reserve
-              + critical_owner_reserve
+    reserve(d) = checkpoint_reserve(d) + handover_reserve(d)
+               + verification_reserve(d) + critical_owner_reserve(d)
 
-- checkpoint/handover reserve: enough tokens/requests to stop gracefully mid-task
+- checkpoint/handover reserve: enough to stop gracefully mid-task
 - verification reserve: enough to run the floor V-level on current work
 - critical owner reserve: small buffer for owner-flagged urgent requests
 
-Daily reporting shows three distinct numbers per provider: provider-reported
-remaining | protected reserve | effective usable capacity. Reserve is released
-only when the task completes or pauses cleanly; stale reserves time out.
+Daily reporting shows, per dimension: reported remaining | protected
+reserve | effective usable — three distinct numbers, never compressed into
+one percentage. Reserve is released only when the task completes or pauses
+cleanly; stale reserves time out.
 
 ## 12. Handover trigger logic
 
@@ -303,16 +474,36 @@ One row per executed subtask:
 
     subtask_id | task_type | provider | model | reasoning_level
     execution_profile | strategy | success (bool) | first_pass_success (bool)
-    verification_outcome (V-level + pass/fail) | retries | owner_corrections
+    verification_outcome (V-level + pass/fail) | verification_independent (bool)
+    retries | owner_corrections | correction_severity (minor|major|rework)
+    deterministic_test_results (where applicable)
+    task_complexity (floor reasoning_depth as proxy)
+    recency (timestamp) | sample_count (running, per pair)
+    failure_severity (none | minor | serious)
     runtime_s | usage (tokens/requests) | monetary_cost
     floor_id | notes
+
+Qualification evidence model (replaces simple N ≥ 3 consecutive successes):
+
+QUALIFIED status for a (task_type, capability_role) pair requires, at a
+minimum evidence threshold:
+- independently verified outcomes (self-assessment alone NEVER establishes
+  QUALIFIED — verification must be V2+ or an independent critic)
+- a first-pass success rate above threshold over the sample
+- no unaddressed major owner corrections in the sample
+- recency: stale evidence decays toward UNPROVEN (an old success does not
+  certify a changed model)
+
+Weighting considers severity, not just counts: a minor correction and a
+rework are different evidence. A serious VERIFIED failure suspends the pair
+immediately (QUALIFIED → SUSPENDED); re-qualification restarts evidence
+gathering.
 
 Rules:
 - Evidence is task-type-specific. No universal model leaderboard exists or is
   built; a model may be excellent for one task type and poor for another.
-- PROVEN status requires N ≥ 3 consecutive successful, verified executions for
-  a (task_type, capability_role) pair, including the floor verification.
-- Any owner correction demotes the pair to UNPROVEN (re-earned via N again).
+- Minimum thresholds exist but avoid false precision: thresholds are coarse
+  (e.g. "small / adequate / strong sample"), not pseudo-numeric scores.
 - Unknown capability = UNPROVEN. Absence of evidence is never evidence.
 
 ## 14. Confidence and escalation logic
@@ -338,7 +529,7 @@ If intelligent routing fails (bug, missing telemetry, own error):
 
     deterministic safe mode:
     - inspect and report state (files, git, trackers, gateway status)
-    - run known verified workflows only (registry PROVEN entries)
+    - run known verified workflows only (registry-verified entries)
     - execute deterministic tools (scripts, git, SQL)
     - queue tasks with their frozen floors intact
     - notify owner that safe mode is active
@@ -349,32 +540,53 @@ of the routing path.
 
 ## 16. Daily Resource Brief (morning report)
 
-Per configured provider:
-availability | reported remaining | protected reserve | effective usable |
-reset time | previous-day usage | burn trend | expected today demand |
-projected exhaustion risk | active handovers | conserve/reserved state
+Per configured provider, resource dimensions are shown SEPARATELY —
+fundamentally different limits are never compressed into one misleading
+percentage. Example shapes:
 
-Plus: important expected tasks today, likely assigned providers, capacity
-risks, next important resets. Rendered with confidence labels; UNKNOWN shown
-as UNKNOWN, never as zero. Delivered via existing morning channels.
+    Codex
+    - short-window allowance: remaining | reserve | effective | reset | confidence
+    - weekly allowance:       remaining | reserve | effective | reset | confidence
+    - telemetry confidence per dimension
+
+    DeepSeek
+    - configured spending budget | actual spend | projected spend
+    - API/rate-limit health
+    - billing/account health
+    - token usage (input/output) | telemetry confidence
+
+Plus, for every provider: availability, previous-day usage, burn trend,
+expected today demand, projected exhaustion risk (per dimension), active
+handovers, conserve/reserved state.
+
+Also reported: important expected tasks today, likely assigned providers,
+capacity risks, next important resets. Rendered with confidence labels;
+UNKNOWN shown as UNKNOWN, never as zero. Delivered via existing morning
+channels.
 
 ## 17. Failure modes (design-level)
 
 | Failure | Behaviour |
 |---|---|
-| Governor telemetry missing | qualification falls back to history-only; low confidence shown; no fabrication |
+| Governor telemetry missing | qualification falls back to history-only; low confidence shown; no fabrication; UNKNOWN never read as zero/unlimited/healthy (§9b) |
 | Provider misreports quota | observed counters (429s, failures) override reported numbers; confidence drops |
 | Floor-freeze bypass attempt | mechanical ordering: Governor queried only after freeze; code path cannot see pre-freeze state |
 | Decomposition abuse (floor dodging) | §7 legality test + critic spot-check on split tasks |
+| Provider self-certification attempt | Qualification Gate (§5a) rejects; provider proposals are evidence, never acceptance |
+| Cold-start bypass (UNPROVEN on high-risk work) | §4b gates: only R0/R1 independently-verifiable evaluation tasks |
 | Brain itself broken | safe mode (§15) |
 | Reserve leak (task never completes) | reserves time out and release after task terminal state |
 | Handover loop (A→B→A) | handover chain length capped; then pause + owner |
 | Estimate drift | every estimate carries confidence; low confidence triggers conservative action |
+| Mid-task model/profile switch | continuity event (§10a): checkpoint + HandoverRecord; floor re-checked via Gate |
 
 ## 18. Data schemas (persistent state)
 
     TaskRecord, SubtaskRecord, QualityFloor (immutable), StrategyDecision,
-    OverrideRecord (owner), ProviderTelemetry (time-series), ReserveState,
+    QualificationDecision (Gate accept/reject + reasons),
+    WorkerCapability (pair state: UNPROVEN|EVALUATING|QUALIFIED|SUSPENDED),
+    OverrideRecord (owner), ProviderTelemetry (time-series, per dimension),
+    CapacityDimension, ReserveState (per dimension), CheckpointRecord,
     HandoverRecord, PerformanceRow, SafeModeEvent, DailyBrief
 
 Storage: local JSON/SQLite under Hermes home (raw, high-frequency) with
@@ -386,7 +598,8 @@ resource-status/, decisions/) — consistent with the existing local/GitHub spli
 - Phase E1: schemas + floor-freeze ordering + manual routing discipline
   (Brain procedure documented; Governor as manual checklist)
 - Phase E2: provider adapters + telemetry ledger + daily brief (deterministic)
-- Phase E3: performance history + PROVEN/UNPROVEN gating + handover records
+- Phase E3: performance history + worker-state gating (UNPROVEN/EVALUATING/
+  QUALIFIED/SUSPENDED) + Qualification Gate + handover records
 - Phase E4: predictive exhaustion + reserves (enforced, not advisory)
 - Phase E5: safe mode + failure-mode drills + owner override UX
 
