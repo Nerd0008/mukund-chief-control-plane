@@ -2,7 +2,7 @@
 
 Status: PROPOSAL — not approved, not implemented
 Author: Chief of Staff (Hermes)
-Date: 2026-09-21
+Date: 2026-09-21 (amended same day: DeepSeek provider-class assumptions + secret handling, §8)
 Scope: Executive Brain, No-Degradation Invariant, Resource Governor only
 Baseline note: No prior on-disk Executive Brain / Resource Governor design was
 found (searched Documents trees, Hermes skills, scratch, control-plane repo).
@@ -184,6 +184,44 @@ Adapter duties: poll/parse provider-reported state where an API exists
 429s), and expose one normalized view. Where a provider reports nothing
 (e.g. some free tiers), the adapter says UNKNOWN and the Governor marks
 telemetry confidence low — estimates are never presented as facts.
+
+### Provider-class assumptions (amendment 2026-09-21 — DeepSeek)
+
+DeepSeek is an API-backed provider:
+
+- accessed through its API using an existing owner-held API key
+- a paid, metered resource — capacity is bounded by spending budget, not a
+  free-tier quota window
+- a provider with its own internal model router (chooses DeepSeek model +
+  reasoning level per the §6 contract; may refuse when the floor is unmet)
+- eligible for task-specific routing ONLY when it meets the frozen quality
+  floor — payment ability never substitutes for qualification
+
+DeepSeek adapter tracks (in addition to the §9 contract):
+
+    api_availability      API up | degraded | down | unknown
+    selected_model        DeepSeek model chosen by its router for the task
+    token_usage           input tokens / output tokens (observed per request)
+    monetary_cost         actual metered spend (observed, per request + total)
+    spending_budget       configured budget for the period (owner-set)
+    rate_limit_state      ok | throttled | cooldown-until
+    burn_rate_recent      spend/hour over trailing window
+    projected_spend       projected spend to end of period at current burn
+    historical_quality    task-specific performance history (§13 evidence)
+    telemetry_confidence  high | medium | low (API-reported vs observed)
+
+For a metered provider, "exhaustion" (§10) means projected spend reaching
+the configured budget, and effective_usable = remaining budget − protected
+reserve. Budget is a Governor input, never a floor input: a low budget
+pauses/reroutes DeepSeek work; it never lowers the floor.
+
+### Secret handling (DeepSeek key, and any provider credential)
+
+- The API key stays LOCAL: environment/secret storage only.
+- It never enters GitHub, logs, reports, prompts, or source code.
+- No design artifact, brief, or telemetry record contains the key.
+- The Chief does not request, display, or echo the key; adapters read it from
+  secret storage at call time by name, never by value.
 
 ## 9. Provider telemetry contract (per provider, per window)
 
