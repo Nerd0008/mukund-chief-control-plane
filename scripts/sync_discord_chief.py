@@ -173,8 +173,21 @@ def main():
 
     total = sum(len(r) for r in published.values())
     git("add", *[str(c.relative_to(REPO)) for c in changed])
-    git("commit", "-m", f"sync: Chief Discord transcript {', '.join(sorted(published))} ({total} msgs)")
-    git("push")
+    # Nothing-to-commit is OK: every new record was already published (e.g. a
+    # previous run committed but crashed before the checkpoint advanced). Treat
+    # as success so the checkpoint can advance; push still runs below.
+    cr = git("commit", "-m",
+             f"sync: Chief Discord transcript {', '.join(sorted(published))} ({total} msgs)",
+             check=False)
+    if cr.returncode != 0 and "nothing to commit" not in (cr.stdout or "") + (cr.stderr or "") \
+            and "no changes added to commit" not in (cr.stdout or "") + (cr.stderr or ""):
+        raise RuntimeError(f"git commit: {(cr.stderr or cr.stdout).strip()}")
+    # Push must succeed before the checkpoint advances; if the local branch is
+    # already in sync with origin (record pushed by an earlier recovery), that
+    # also counts as success.
+    pr = git("push", check=False)
+    if pr.returncode != 0 and "Everything up-to-date" not in (pr.stdout or "") + (pr.stderr or ""):
+        raise RuntimeError(f"git push: {pr.stderr.strip()}")
     save_checkpoint(cp)
     print(f"Published {total} records across {len(published)} day-file(s); rejected {rejected}. Pushed.")
     return 0
