@@ -150,13 +150,23 @@ def main():
             except Exception:
                 existing = []
         merged = existing + recs
-        # dedupe by (timestamp, direction, content hash) — safety net
-        seen, uniq = set(), []
+        # Dedupe: identity = direction + message_id when message_id is present
+        # (a Discord message ID appears only once per direction); fallback identity
+        # = timestamp + direction + content hash. Content matching alone never
+        # dedupes distinct messages.
+        seen_ids, seen_fb, uniq = set(), set(), []
         for r in merged:
-            key = (r.get("timestamp"), r.get("direction"), hashlib.sha256(str(r.get("content")).encode()).hexdigest())
-            if key in seen:
-                continue
-            seen.add(key)
+            mid = r.get("message_id")
+            if mid:
+                key = (r.get("direction"), str(mid))
+                if key in seen_ids:
+                    continue
+                seen_ids.add(key)
+            else:
+                key = (r.get("timestamp"), r.get("direction"), hashlib.sha256(str(r.get("content")).encode()).hexdigest())
+                if key in seen_fb:
+                    continue
+                seen_fb.add(key)
             uniq.append(r)
         dest.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in uniq) + "\n", encoding="utf-8")
         changed.append(dest)
