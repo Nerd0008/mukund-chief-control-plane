@@ -1,6 +1,8 @@
-# Executive Brain v2 — Unified Design (Proposal)
+# Executive Brain v2 — Unified Design (Approved Baseline)
 
-Status: PROPOSAL — approved 2026-09-21; finalized as approved-architecture/executive-brain-v2.md (this file preserved as history)
+Status: APPROVED BASELINE — not yet implemented
+Approved by owner: 2026-09-21. This copy is the authoritative baseline;
+amendment history lives in architecture-proposals/executive-brain-v2-unified-design.md
 Author: Chief of Staff (Hermes)
 Date: 2026-09-21 (amended: DeepSeek provider-class assumptions + secret handling, §8;
 pre-approval amendments: central Qualification Gate, cold-start states,
