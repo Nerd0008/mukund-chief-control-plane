@@ -1,0 +1,42 @@
+# --- Secrets and credentials (never commit) ---
+.env
+.env.*
+env.*
+*.pem
+*.key
+*.ppk
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*credential*
+*secret*
+*token*
+*cookie*
+*password*
+authorized_keys
+known_hosts
+
+# --- Hermes databases / session state (raw data stays local) ---
+*.db
+*.sqlite
+*.sqlite3
+*.session
+*session*
+hermes/
+conversations/raw/
+
+# --- Caches / temp files ---
+__pycache__/
+.cache/
+cache/
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.bak
+Thumbs.db
+.DS_Store
+node_modules/
+.venv/
+venv/
