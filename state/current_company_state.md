@@ -15,4 +15,12 @@
 - >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
 - Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\Users\mukun\DiscordArchive\chief\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
 - Manual fallback: python C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py
+- Executive Brain: E1 ACTIVE (rolled out 2026-09-21 ~22:00 UTC)
+  - Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\eb.py
+  - Skill: %LOCALAPPDATA%\hermes\skills\operations\executive-brain-e1
+  - Schema version: 1 (SQLite, append-only, hash-chained floors)
+  - Test result: 32/32 passed (rev-3 matrix); audit --verify PASS
+  - Discipline: classify → decompose → freeze → route; no routing before freeze
+  - E2+ (provider routing, Governor telemetry, exhaustion, reserves,
+    performance learning, handovers) NOT started
 - Next phase: Phase 2B (other channels) — not started

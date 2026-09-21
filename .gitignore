@@ -40,3 +40,5 @@ Thumbs.db
 node_modules/
 .venv/
 venv/
+exec_brain.db
+chain-head.json
