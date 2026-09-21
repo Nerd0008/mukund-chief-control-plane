@@ -1,6 +1,6 @@
 # Executive Brain E1 — Implementation Plan (Plan Only)
 
-Status: PLAN — not implemented
+Status: PLAN (rev 2, pre-implementation corrections applied) — not implemented
 Baseline: approved-architecture/executive-brain-v2.md (commit 545b59a)
 Author: Chief of Staff (Hermes)
 Date: 2026-09-21
@@ -70,8 +70,13 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
 ## 3. Schema plan (SQLite DDL)
 
     -- append-only: rows are never UPDATEd or DELETEd by the app
+    -- lineage: a changed understanding NEVER edits this row; it creates a
+    -- new TaskRecord with supersedes_task_id pointing here.
     CREATE TABLE task_record (
       task_id        TEXT PRIMARY KEY,          -- eb-<yyyymmdd>-<shortuuid>
+      supersedes_task_id TEXT REFERENCES task_record(task_id),
+                                             -- NULL = original lineage
+      reclassification_reason TEXT,            -- required when supersedes is set
       created_at     TEXT NOT NULL,             -- ISO-8601 UTC
       request_text   TEXT NOT NULL,             -- verbatim owner words
       task_type      TEXT NOT NULL,             -- enum §3
@@ -105,6 +110,7 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       task_id        TEXT NOT NULL REFERENCES task_record(task_id),
       subtask_id     TEXT REFERENCES subtask_record(subtask_id),
       frozen_at      TEXT NOT NULL,
+      seq            INTEGER NOT NULL UNIQUE,   -- deterministic chain order
       min_reasoning_depth INTEGER NOT NULL,
       required_roles TEXT NOT NULL,             -- JSON {role: state}
       min_verification TEXT NOT NULL,
@@ -113,7 +119,10 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       strategy_constraints TEXT,
       record_sha256  TEXT NOT NULL,             -- hash of canonical fields
       prev_sha256    TEXT,                      -- hash-chain link
-      schema_version INTEGER NOT NULL DEFAULT 1
+      schema_version INTEGER NOT NULL DEFAULT 1,
+      UNIQUE(task_id, subtask_id)               -- ONE floor per classification;
+                                             -- second freeze on the same
+                                             -- task/subtask is REFUSED
     );
 
     CREATE TABLE strategy_decision (
@@ -123,6 +132,17 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
       strategy       TEXT NOT NULL,             -- 1..7 per §1
       chosen_class   TEXT,                      -- specialist class (manual)
       chosen_worker  TEXT,                      -- model/workflow (manual)
+      -- proposed execution properties: what the E1 gate can mechanically
+      -- compare against the frozen floor (see §4a)
+      proposed_reasoning_depth INTEGER NOT NULL,
+      proposed_verification   TEXT NOT NULL,    -- V0..V3 + plan summary
+      execution_scope TEXT NOT NULL,            -- local | external
+      proposed_egress TEXT NOT NULL,            -- egress behaviour of route
+      claimed_roles  TEXT NOT NULL,             -- JSON array
+      qualification_evidence TEXT NOT NULL,     -- JSON: cited evidence or
+                                             -- the literal string "UNPROVEN"
+      risk_approval  TEXT,                      -- owner approval reference
+                                             -- when floor requires it
       ranked_candidates TEXT,                   -- JSON §5b ranking evidence
       gate_result    TEXT NOT NULL,             -- accept|reject
       gate_reasons   TEXT,
@@ -144,36 +164,101 @@ Nothing else changes. No gateway files, no hooks, no cron, no provider code.
     CREATE TABLE audit_log (
       audit_id       INTEGER PRIMARY KEY AUTOINCREMENT,
       ts             TEXT NOT NULL,
+      seq            INTEGER NOT NULL UNIQUE,   -- deterministic chain order
       event          TEXT NOT NULL,             -- classify|decompose|freeze|
                                                  -- route|override|reject
       task_id        TEXT, floor_id TEXT, decision_id TEXT,
       detail         TEXT NOT NULL,             -- no secrets, no full content
+      record_sha256  TEXT NOT NULL,             -- audit chain hash
+      prev_sha256    TEXT,                      -- audit chain link
       schema_version INTEGER NOT NULL DEFAULT 1
     );
 
+    -- Database-level immutability: triggers reject UPDATE/DELETE on frozen
+    -- records. PRAGMA foreign_keys = ON is set on EVERY connection.
+    CREATE TRIGGER trg_task_record_no_update BEFORE UPDATE ON task_record
+      BEGIN SELECT RAISE(ABORT, 'task_record is append-only'); END;
+    CREATE TRIGGER trg_task_record_no_delete BEFORE DELETE ON task_record
+      BEGIN SELECT RAISE(ABORT, 'task_record is append-only'); END;
+    CREATE TRIGGER trg_quality_floor_no_update BEFORE UPDATE ON quality_floor
+      BEGIN SELECT RAISE(ABORT, 'quality_floor is immutable'); END;
+    CREATE TRIGGER trg_quality_floor_no_delete BEFORE DELETE ON quality_floor
+      BEGIN SELECT RAISE(ABORT, 'quality_floor is immutable'); END;
+    CREATE TRIGGER trg_override_no_update BEFORE UPDATE ON override_record
+      BEGIN SELECT RAISE(ABORT, 'override_record is append-only'); END;
+    CREATE TRIGGER trg_override_no_delete BEFORE DELETE ON override_record
+      BEGIN SELECT RAISE(ABORT, 'override_record is append-only'); END;
+    CREATE TRIGGER trg_audit_no_update BEFORE UPDATE ON audit_log
+      BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;
+    CREATE TRIGGER trg_audit_no_delete BEFORE DELETE ON audit_log
+      BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END;
+
 ## 4. Immutable floor-freeze — technical enforcement
 
-Three layers, all deterministic:
+Four layers, all deterministic:
 
-1. Schema-level: quality_floor has no UPDATE/DELETE path in the CLI. The
-   sqlite connection opens with `PRAGMA query_only` for reads; the writer
-   code path contains exactly one INSERT into quality_floor (code review
-   gate: any PR raising a second one is rejected).
-2. Hash chain: each floor's canonical field set is SHA-256 hashed
-   (record_sha256); each row stores the previous floor's hash
-   (prev_sha256, genesis = NULL). `eb audit --verify` recomputes the chain;
-   any tampering (row edited/deleted/reordered) breaks the chain and is
-   reported. This makes silent floor mutation detectable, not just forbidden.
-3. Order enforcement: the ONLY function that can create a StrategyDecision
-   first checks `SELECT 1 FROM quality_floor WHERE task_id=? / subtask_id=?`.
-   No floor → the route command exits non-zero with
-   "FLOOR REQUIRED BEFORE ROUTING" and writes a `reject` audit row. The
-   Governor/telemetry does not exist in E1, so nothing CAN be consulted
-   before freeze — the invariant is enforced by construction.
+1. Database-level (primary): the triggers above ABORT any UPDATE/DELETE on
+   task_record, quality_floor, override_record, and audit_log — including
+   direct SQL attempts through any connection that has the schema loaded.
+   `PRAGMA foreign_keys = ON` on every connection also rejects orphaned
+   references (e.g. a route pointing at a nonexistent floor).
+2. Application-level: the CLI contains no UPDATE/DELETE code path for these
+   tables; the writer opens one transaction per command (single INSERT).
+3. One-floor-per-classification: UNIQUE(task_id, subtask_id) on quality_floor
+   makes a second freeze of the same classification a constraint violation.
+   A changed understanding REQUIRES a new TaskRecord (supersedes_task_id +
+   reclassification_reason) and a new floor. There are no floor "revisions" —
+   only new lineages. The previous task/floor rows remain immutable forever.
+4. Hash chain: each floor's canonical fields are SHA-256 hashed
+   (record_sha256); each row stores the previous floor's hash (prev_sha256).
+   A monotonic `seq` column gives deterministic chain order — verification
+   never depends on ambiguous row ordering (rowid, timestamps, or ids).
+   `eb audit --verify` recomputes the chain in seq order and reports any
+   break. The audit_log carries its own parallel chain (seq + hashes).
 
-Floor revision: not an UPDATE. A changed understanding creates a NEW
-TaskRecord + new floor (per §2 rule), linked via audit trail. The old floor
-stays forever.
+Chain-head anchor: after every verified `eb audit --verify`, the latest
+chain head (floor seq + hash, audit seq + hash — small, non-sensitive) is
+written to exec-brain\chain-head.json (local) and included in the curated
+GitHub summary. Deleting the FINAL tail row of a chain is otherwise not
+detectable by the chain alone; the external head anchor closes that gap.
+No cryptographic signing in E1 — SHA-256 chaining + anchors is enough.
+
+Detectable-but-not-preventable (residual): someone editing the SQLite file
+with an external tool that drops/recreates the triggers, or rewriting the
+whole file, can mutate rows. The hash chain + external head anchor makes
+this DETECTABLE (recomputation fails), not impossible. Fully preventing
+file-owner tampering is out of scope for E1 (and for any local DB).
+
+### 4a. Route validation (E1 scope) — structural floor compliance
+
+`eb route` records the proposed execution properties (strategy_decision
+columns above) and the gate deterministically rejects:
+
+- proposed_reasoning_depth < floor.min_reasoning_depth
+- proposed_verification below floor.min_verification
+- LOCAL_ONLY / egress_constraints violated by an external execution_scope
+  or incompatible proposed_egress
+- strategy violating floor.strategy_constraints
+- a floor-required capability role missing from claimed_roles
+- floor risk_constraints requiring owner approval when risk_approval is absent
+- no floor for the task/subtask (ordering violation)
+- classification_confidence = low (see below)
+
+What E1 does NOT validate: worker QUALITY. qualification_evidence is
+recorded (cited evidence or the literal "UNPROVEN") but E1 has no
+performance-history store, so it cannot prove a model is good — that is E3
+(Qualification Gate) work. E1 enforces STRUCTURAL/FLOOR COMPLIANCE only;
+provider-quality qualification is explicitly out of scope and never claimed.
+
+### 4b. Classification-confidence gate
+
+If classification_confidence = low:
+- the floor MAY be stored (audit value)
+- `eb route` is BLOCKED for that task until either (a) a reclassification
+  (new TaskRecord via supersedes, with reason) raises confidence, or
+  (b) an explicit owner OverrideRecord is filed per §7
+- normal route execution from a low-confidence classification is impossible
+  by construction (the gate checks confidence before every accept)
 
 ## 5. Exact execution order (state flow)
 
@@ -236,11 +321,25 @@ stays forever.
 - Full rollback: delete exec-brain\ directory, delete skill folder, revert
   the two repo files (git revert of the rollout commit). No data migration
   was performed, so nothing else needs recovery.
-- DB corruption: exec_brain.db is rebuildable for audit purposes from the
-  control-plane curated summaries (floors/decisions published there);
-  worst case, history is lost but operation is unaffected (E1 keeps no
-  runtime dependencies on old rows except the freeze-before-route check,
-  which only needs the current task's floor).
+- Deterministic local recovery (exec_brain.db is the system of record):
+  1. `eb audit --verify` runs SQLite `PRAGMA integrity_check` plus hash-chain
+     recomputation; reports corruption or chain break precisely.
+  2. Local backup: `eb backup` copies exec_brain.db (+ chain-head.json) to
+     exec-brain\backups\<timestamp>\ via SQLite's backup API (online, safe);
+     kept N most recent (default 10). Deterministic, stdlib-only.
+  3. Schema is versioned (schema_version column + user_version pragma);
+     future migrations are additive and tested forward-only.
+  4. Optional periodic backup outside the repo (e.g. a second local disk
+     path or the existing machine backup routine) — configured, not built
+     into E1 automation.
+- Curated GitHub records are RECOVERY AIDS, not a guaranteed complete
+  reconstruction: raw/local state intentionally contains information
+  (verbatim request_text, P2/P3 task details) that must NOT be pushed to
+  GitHub merely for recoverability. No secrets or raw sensitive task text
+  ever leave the machine for backup reasons.
+- Worst case (db lost + no backup): E1 keeps no runtime dependency on old
+  rows except the freeze-before-route check for CURRENT tasks; history is
+  lost, operation resumes with fresh classifications.
 
 ## 11. Test matrix
 
@@ -250,17 +349,29 @@ stays forever.
 | T2 | eb classify with invalid enum/task_type | refused, exit != 0, no row |
 | T3 | eb decompose before classify | refused (no task) |
 | T4 | eb freeze after classify | floor written, hash chain extends, audit |
-| T5 | eb freeze twice on same subtask | second floor allowed ONLY as new revision (new floor_id, old intact) |
+| T5 | eb freeze twice on the SAME task/subtask | REFUSED (UNIQUE constraint violation); no "revision" path exists |
+| T5a | reclassification after changed understanding | new TaskRecord with supersedes_task_id + reason; new subtasks; new floor; old rows untouched |
 | T6 | eb route WITHOUT freeze | refused: FLOOR REQUIRED BEFORE ROUTING, reject audit row |
 | T7 | eb route after freeze, floor-consistent | StrategyDecision written, gate accept |
 | T8 | eb route sub-floor WITHOUT override | refused |
 | T9 | eb override with empty warning/confirmation | refused |
 | T10 | eb override with warning+confirmation, then sub-floor route | accepted, OverrideRecord linked |
-| T11 | tamper a floor row directly in SQLite | eb audit --verify reports chain break |
+| T11 | tamper a floor row directly in SQLite (UPDATE) | trigger ABORTs; row unchanged |
+| T11a | tamper a floor row by direct DELETE | trigger ABORTs; row unchanged |
+| T11b | tamper task_record / override_record / audit_log by UPDATE/DELETE | triggers ABORT all |
+| T11c | delete final chain-tail floor row with triggers dropped externally | chain alone OK but head anchor mismatch reported |
 | T12 | concurrent classify x2 (two processes) | one succeeds, other retries/clean-fails; no corruption |
 | T13 | Discord gateway + scheduled ChiefDiscordSync still work after install | unchanged (no gateway files touched) |
 | T14 | curated summary generation | only allowed fields, no request_text of P2/P3 tasks, no secrets |
 | T15 | full pipeline dry-run on a real small task | classify→decompose→freeze→route in order, audit shows sequence |
+| T16 | route with proposed_reasoning_depth below floor | refused with reason |
+| T17 | route with proposed_verification below floor | refused with reason |
+| T18 | LOCAL_ONLY task routed with execution_scope=external | refused with reason |
+| T19 | low-confidence classification, normal route attempt | blocked; only reclassification or owner override unblocks |
+| T20 | route referencing nonexistent floor_id (FK violation) | rejected by PRAGMA foreign_keys |
+| T21 | eb backup + restore into fresh dir; integrity_check + chain verify | backup restores, verification passes |
+| T22 | strategy violating strategy_constraints | refused with reason |
+| T23 | floor-required role missing from claimed_roles | refused with reason |
 
 ## 12. Migration impact on existing Chief
 
@@ -272,11 +383,12 @@ discipline (skill enforces habit; audit trail verifies). Existing workflows
 
 ## 13. Complexity estimate
 
-- eb.py (CLI + 6 tables + hash chain + audit): ~450–600 lines, stdlib only
-- tests: ~250–350 lines, 15 cases
+- eb.py (CLI + 6 tables + triggers + hash chain + audit + backup): ~600–750
+  lines, stdlib only
+- tests: ~350–450 lines, 23 cases
 - SKILL.md: ~80 lines
 - repo docs: small
-- Total: roughly one focused implementation session; LOW–MEDIUM complexity;
+- Total: one to two focused implementation sessions; MEDIUM complexity;
   deterministic, no external deps, no network. Main risk is discipline
   adoption (human/process), not code.
 
@@ -284,13 +396,19 @@ discipline (skill enforces habit; audit trail verifies). Existing workflows
 
 1. Discipline bypass (Chief routes without running freeze) — mitigated by
    skill + audit visibility; cannot be fully prevented in E1 by code alone.
-2. Hash chain adds ~no cost but audit --verify must be run to be useful —
-   add to weekly review habit.
-3. SQLite single-writer contention if two Chief turns run EB simultaneously —
+2. Residual tamper window: an external editor that drops triggers can mutate
+   rows; detectable via chain + head anchor, not preventable (§4).
+3. Hash chain adds ~no cost but audit --verify must be run to be useful —
+   add to weekly review habit; chain-head anchor written on every verify.
+4. SQLite single-writer contention if two Chief turns run EB simultaneously —
    rare; busy_timeout + clean failure.
-4. Over-classification noise for trivial tasks — skill includes a
+5. Over-classification noise for trivial tasks — skill includes a
    de-minimis rule (R0/V0/P0 one-step tasks may be logged in a single
    lightweight classify+freeze combined call).
+6. E1 route gate checks STRUCTURE only; a route can be structurally
+   compliant yet executed poorly — worker-quality validation is E3, and E1
+   records qualification_evidence honestly (often "UNPROVEN") instead of
+   pretending otherwise.
 
 ## Recommended implementation order
 
