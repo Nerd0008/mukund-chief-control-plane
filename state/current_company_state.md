@@ -11,5 +11,7 @@
 - Local archive: active (C:\Users\mukun\DiscordArchive\chief, daily JSONL, append-only)
 - GitHub conversation sync: tested — live Chief thread capture verified (inbound + outbound), dedupe verified, credential-like content rejected
 - Chief threads: supported (parent resolved from state.db sessions.origin_json parent_chat_id; channel_directory.json fallback)
+- Capture quality (Phase 2A.1): full content from state.db (no 500-char truncation), wrapper-free outbound replies, clean inbound bodies, message_id populated from platform_message_id
+- >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
 - Automatic periodic sync: not yet enabled
 - Next phase: Phase 2B (other channels) — not started
