@@ -1,9 +1,9 @@
-# Executive Brain E2 — Implementation Plan (Plan Only)
+# Executive Brain E2 — Implementation Plan (APPROVED)
 
-Status: PLAN (rev 1) — NOT IMPLEMENTED
+Status: APPROVED — owner decisions incorporated (2026-09-22)
 Baseline: approved-architecture/executive-brain-v2.md (E1 active)
 Author: Chief of Staff (Hermes)
-Date: 2026-09-22
+Date: 2026-09-22 (approved: 2026-09-22)
 Scope: E2 only — deterministic provider telemetry adapters, normalized
 multidimensional telemetry ledger, deterministic Daily Resource Brief,
 curated resource-status publication to the GitHub control plane. No worker
@@ -13,10 +13,66 @@ qualification/performance gating (E3), no predictive exhaustion enforcement
 
 ---
 
-## 1. Local environment reconnaissance — actual findings
+## Owner decisions (approved 2026-09-22)
 
-Before designing adapters, the local installed environment was inspected to
-determine what telemetry is ACTUALLY obtainable for each target provider.
+### D1 — Separate governor.db: APPROVED
+Keep Resource Governor telemetry physically separate from exec_brain.db.
+E1 is stable/audited and must not be put at risk by high-frequency telemetry,
+retention cleanup, or future adapter changes. E1 IDs such as
+task_id/floor_id may be referenced logically where required, but E1 schema
+is NOT modified for E2.
+
+### D2 — DeepSeek credential: APPROVED WITH CHANGE
+Windows Credential Manager is the CANONICAL DeepSeek credential store.
+
+Before migration, perform a safe presence/location check only:
+- check whether DEEPSEEK_API_KEY env var exists WITHOUT printing its value
+- check whether a Windows Credential Manager entry already exists
+- check whether existing Hermes config refers to a credential location
+
+Report ONLY: "env var present: yes/no", "Credential Manager entry present:
+yes/no", "config reference present: yes/no".
+
+If the key is not already securely stored, STOP and ask the owner to
+enter/store it locally. Never request the API key in Discord, ChatGPT,
+GitHub, logs, or source. `DEEPSEEK_API_KEY` env var may be supported as a
+temporary/local fallback but must never be persisted to GitHub or logs.
+
+### D3 — Codex/Antigravity routability: APPROVED WITH CHANGE
+Ship observed-only adapters now, but separate TELEMETRY from ROUTABILITY.
+
+If no reliable programmatic API/CLI exists: adapter exists, operational
+observations recorded where deterministically observable, unavailable
+capacity fields = UNKNOWN, telemetry confidence reflects the source,
+`routable = false`. Do NOT pretend "installed desktop app" means Chief can
+automatically route work to it. When a verified CLI/API/automation path
+exists later, routability can be enabled without redesigning the E2 schema.
+
+### D4 — Burn trend: APPROVED
+Initial burn trend = rolling recent 24h compared with preceding 24h, using
+±20% as the material-change threshold. Render: rising | stable | falling |
+UNKNOWN (when insufficient history exists). This is telemetry/trend reporting
+ONLY — NOT E4 predictive exhaustion logic. Persist enough raw/aggregate
+history so a 7-day baseline can be added later without schema redesign.
+
+### D5 — Retention: APPROVED WITH ADDITION
+- telemetry snapshots: 90 days
+- detailed request/usage events: 30 days
+- Daily Resource Briefs: 365 days
+- daily aggregated provider usage: 365 days
+
+Retention cleanup must be deterministic and auditable. Detailed
+high-frequency events can expire while long-term daily aggregates remain
+available for later E3/E4 learning and trend analysis.
+
+### State timestamp discipline: APPROVED
+current_company_state.md Timestamp must be regenerated from the actual final
+state and updated as the LAST state-writing step immediately before the
+rollout commit. Never copy a cached timestamp from an earlier run.
+
+---
+
+## 1. Local environment reconnaissance — actual findings
 
 ### 1.1 Nous / LongCat (active provider)
 
@@ -28,161 +84,85 @@ Evidence:
 - `provider_models_cache.json`: full model catalog with pricing (prompt,
   completion, cache_read per-token) and context lengths
 - `context_length_cache.yaml`: `meituan/longcat-2.0:free` = 1048576 tokens
-- Portal at `https://portal.nousresearch.com` — Next.js app with
-  `balanceUsd` in client data, but NO public usage/quota API (all `/api/*`
-  paths return 404 or redirect to login)
+- Portal at `https://portal.nousresearch.com` — NO public usage/quota API
 
-Obtainable:
-- Auth token expiry timestamp (HIGH confidence, local read)
-- Local request count (HIGH confidence, local counter in credential_pool)
-- Inference endpoint reachability (HIGH confidence, TCP/HTTP ping)
-- Model catalog + pricing + context lengths (MEDIUM confidence, cached file)
-- Token expiry remaining estimate (MEDIUM, inferred from expires_at)
-
-NOT obtainable:
-- Quota remaining / quota window (no API) → UNKNOWN
-- Quota reset time → UNKNOWN
-- Account balance / monetary (portal requires auth, no API) → UNKNOWN
-- Rate limit state (not exposed) → UNKNOWN
-- Short-window vs weekly vs monthly allowance semantics → UNKNOWN
+Obtainable: auth token expiry, local request count, inference endpoint
+reachability, model catalog + pricing.
+NOT obtainable: quota, reset, balance, rate limits → UNKNOWN.
 
 ### 1.2 DeepSeek (metered API, owner has key)
 
-Evidence:
-- No local DeepSeek config files found in user profile
-- `openai` Python package v2.24.0 installed in hermes-agent venv (DeepSeek
-  API is OpenAI-compatible)
-- `openai` CLI available at `%LOCALAPPDATA%\hermes\hermes-agent\venv\Scripts\openai`
-- DeepSeek models also routable via Nous (`~deepseek/deepseek-flash-latest`,
-  `deepseek/deepseek-v4.1-flash`, etc.) but E2 targets the DIRECT DeepSeek
-  API using the owner's own key
-- DeepSeek API base: `https://api.deepseek.com` (standard)
+Evidence: No local DeepSeek config files. `openai` Python v2.24.0 in
+hermes-agent venv. DeepSeek API base: `https://api.deepseek.com`.
+Credential stored in Windows Credential Manager (canonical) with
+DEEPSEEK_API_KEY as temporary fallback.
 
-Obtainable:
-- API availability (HIGH confidence, ping `/models` or similar)
-- Observed input/output tokens per request (HIGH confidence, from response
-  `usage` field)
-- Calculated monetary spend (MEDIUM confidence: observed tokens × DeepSeek
-  published pricing)
-- Rate limit headers if present in responses (MEDIUM confidence)
-- Configured owner spending budget (HIGH confidence, local config file)
+Obtainable: API availability, observed tokens per request, calculated
+spend (tokens × DeepSeek published pricing), rate limit headers if present.
+NOT obtainable: billing balance, rate limit ceilings → UNKNOWN.
 
-NOT obtainable:
-- Account billing balance (DeepSeek does not expose a free billing API
-  without authenticated dashboard) → UNKNOWN
-- Quota window / allowance (metered, not quota-based) → N/A
-- Rate limit ceilings (headers may not expose limits) → UNKNOWN
+### 1.3 Codex (desktop app only)
 
-### 1.3 Codex (OpenAI Codex desktop app)
+Evidence: `OpenAI.Codex_26.915.4065.0` MSIX installed. Desktop app at
+`%LOCALAPPDATA%\Microsoft\WindowsApps\OpenAI.Codex_*`. NO CLI on PATH.
 
-Evidence:
-- `OpenAI.Codex_26.915.4065.0` MSIX package installed via winget
-- Desktop app at `C:\Users\mukun\AppData\Local\Microsoft\WindowsApps\OpenAI.Codex_*`
-- Local data at `C:\Users\mukun\AppData\Local\OpenAI\Codex\` (bin/, runtimes/,
-  chrome-native-hosts-v2.json)
-- NO `codex` CLI on PATH — the architecture's assumed "Codex CLI" is not
-  installed; only the desktop app exists
+Obtainable: installed version, process running state.
+NOT obtainable: all capacity dimensions → UNKNOWN. routable = false.
 
-Obtainable:
-- Installed version (HIGH confidence, read from app manifest/package)
-- Process running state (HIGH confidence, OS process check)
-- Local app data presence (HIGH confidence, filesystem check)
+### 1.4 Antigravity (desktop app only)
 
-NOT obtainable:
-- Quota / token usage / allowance (desktop app, no API) → UNKNOWN
-- Monetary spend → UNKNOWN
-- Rate limits → UNKNOWN
-- Model availability (internal to app) → UNKNOWN
+Evidence: `Google.Antigravity` v2.15.1 installed. Electron app at
+`%LOCALAPPDATA%\Programs\antigravity\Antigravity.exe`. Credential in
+Windows Credential Manager (`LegacyGeneric:target=gemini:antigravity`).
 
-### 1.4 Antigravity (Google Gemini desktop app)
+Obtainable: installed version, process state, credential presence.
+NOT obtainable: all capacity dimensions → UNKNOWN. routable = false.
 
-Evidence:
-- `Google.Antigravity` v2.15.1 installed via winget
-- Electron desktop app at `C:\Users\mukun\AppData\Local\Programs\antigravity\Antigravity.exe`
-- Credential stored in Windows Credential Manager as
-  `LegacyGeneric:target=gemini:antigravity`
-- NO CLI on PATH — desktop app only
+### 1.5 Summary
 
-Obtainable:
-- Installed version (HIGH confidence, read from app manifest)
-- Process running state (HIGH confidence, OS process check)
-- Credential presence in Windows Credential Manager (HIGH confidence)
-
-NOT obtainable:
-- Quota / token usage / allowance (desktop app, no API) → UNKNOWN
-- Monetary spend → UNKNOWN
-- Rate limits → UNKNOWN
-- Model availability → UNKNOWN
-
-### 1.5 Summary of obtainability
-
-| Provider      | Availability | Token Usage | Monetary  | Quota     | Rate Limits | Reset   |
-|---------------|-------------|-------------|-----------|-----------|-------------|---------|
-| Nous/LongCat  | YES (ping)  | LOCAL COUNT | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN |
-| DeepSeek      | YES (ping)  | YES (obs)   | CALCULATED| N/A       | UNKNOWN     | N/A     |
-| Codex         | YES (proc)  | UNKNOWN     | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN |
-| Antigravity   | YES (proc)  | UNKNOWN     | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN |
-
-This table drives the adapter design: every adapter exposes the SAME
-normalized interface, but returns UNKNOWN for dimensions it cannot observe.
-No adapter fabricates a value where none exists.
+| Provider      | Availability | Token Usage | Monetary  | Quota     | Rate Limits | Reset   | Routable |
+|---------------|-------------|-------------|-----------|-----------|-------------|---------|----------|
+| Nous/LongCat  | YES (ping)  | LOCAL COUNT | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN | true     |
+| DeepSeek      | YES (ping)  | YES (obs)   | CALCULATED| N/A       | UNKNOWN     | N/A     | true     |
+| Codex         | YES (proc)  | UNKNOWN     | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN | false    |
+| Antigravity   | YES (proc)  | UNKNOWN     | UNKNOWN   | UNKNOWN   | UNKNOWN     | UNKNOWN | false    |
 
 ---
 
 ## 2. Proposed architecture
 
 E2 extends the local exec-brain package with a Governor subsystem. It does
-NOT modify E1's schemas, E1's CLI commands, or E1's skill. E2 adds new
-commands to the existing `eb` CLI and a new SQLite database for telemetry.
+NOT modify E1's schemas, E1's CLI commands, or E1's skill.
 
-    ┌─ E1 (unchanged) ──────────────────────────────────────────┐
-    │  exec_brain.db  task_record | subtask_record | quality_floor │
-    │               strategy_decision | override_record | audit_log │
-    └────────────────────────────────────────────────────────────┘
-                       │ read-only future integration (E3+)
-                       ▼
-    ┌─ E2 (new) ────────────────────────────────────────────────┐
-    │  governor.db    provider_snapshot | capacity_dimension      │
-    │                 observed_request | daily_brief_log           │
-    │                                                             │
-    │  eb telemetry  → poll all adapters → write snapshot         │
-    │  eb brief      → read ledger → render text report (no LLM)  │
-    │  eb publish    → render curated summary → write to repo     │
-    └────────────────────────────────────────────────────────────┘
-                       │ curated summary only
-                       ▼
-    ┌─ GitHub control plane ────────────────────────────────────┐
-    │  resource-status/daily-brief-<YYYY-MM-DD>.md               │
-    │  resource-status/latest-brief.md  (symlink/copy)           │
-    │  resource-status/provider-state.json  (non-sensitive)       │
-    └────────────────────────────────────────────────────────────┘
+    E1 (unchanged)                                     E2 (new)
+    exec_brain.db                                      governor.db
+    task_record              (logical reference        provider_snapshot
+    subtask_record            only in E3+)             capacity_dimension
+    quality_floor                                     observed_request
+    strategy_decision                                 daily_brief_log
+    override_record                                   daily_aggregate
+    audit_log
 
-### 2.1 E1 integration boundary
+    CLI: eb classify/decompose/freeze/                 CLI: eb telemetry/brief/
+         route/override/audit/backup/                      record-request/
+         restore/summary                                   gov-status/gov-verify
 
-E2 does NOT write to E1's exec_brain.db. E2 reads nothing from E1 in this
-phase. The integration boundary is:
+### 2.1 Adapter interface
 
-- E2 records which providers are available and their capacity state
-- In E3+, E1's `eb route` will consult E2's governor.db before finalizing
-  a route (Governor check per §2 of the architecture)
-- For E2, the two systems run independently; the only shared artifact is
-  the `exec-brain/` directory on disk
-
-### 2.2 Adapter interface (abstract)
-
-All adapters implement one interface:
+All adapters implement:
 
 ```python
 class ProviderAdapter:
     provider_id: str          # "nous" | "deepseek" | "codex" | "antigravity"
+    routable: bool            # false for desktop-app-only providers
     def probe(self) -> TelemetrySnapshot
 ```
 
-`TelemetrySnapshot` is a dataclass:
-
+`TelemetrySnapshot`:
     provider: str
     captured_at: str           # ISO-8601 UTC
     operational: str           # up | degraded | down | unknown
+    routable: bool             # D3: separate telemetry from routability
     available_models: list     # [{id, roles, pricing, context_length}] | []
     dimensions: list           # [CapacityDimension]
     rate_limit_state: str      # ok | throttled | cooldown-until | unknown
@@ -193,28 +173,21 @@ class ProviderAdapter:
     errors: list               # [str] non-fatal errors during probe
 
 `CapacityDimension`:
-
-    dimension_kind: str        # request_window | token_window |
-                               # daily_allowance | weekly_allowance |
-                               # monthly_allowance | monetary_balance |
-                               # concurrency | rate_limit | provider_credit
+    dimension_kind: str
     remaining: str             # "<value> <unit>" | "unknown"
-    unit: str                  # "tokens" | "requests" | "USD" | "credits" | "concurrent"
-    reserve: str               # "NOT_ENFORCED" (E4 placeholder)
-    effective_usable: str      # "NOT_ENFORCED" (E4 placeholder)
-    reset_renewal: str         # ISO-8601 timestamp | "unknown"
+    unit: str                  # tokens | requests | USD | credits | concurrent
+    reserve: str               # "NOT_ENFORCED"
+    effective_usable: str      # "NOT_ENFORCED"
+    reset_renewal: str         # ISO-8601 | "unknown"
     source: str                # provider-api | observed | inferred
     confidence: str            # high | medium | low
 
 Rules:
-- If a provider does NOT expose a dimension, the adapter OMITS it from the
-  dimensions list entirely (no placeholder, no zero, no "unlimited")
-- `remaining` is a STRING carrying both value and unit, e.g. "1500 tokens",
-  "27 requests", "unknown". Never a bare numeric that loses its unit.
-- `reserve` and `effective_usable` are ALWAYS the literal string
-  "NOT_ENFORCED" in E2. E4 will replace these with real values.
-- `confidence` reflects the source: provider-api=high, observed=medium,
-  inferred=low
+- If a provider does NOT expose a dimension, the adapter OMITS it (no
+  placeholder, no zero, no "unlimited")
+- `remaining` is a STRING carrying value + unit, e.g. "1500 tokens", "unknown"
+- `reserve` and `effective_usable` are ALWAYS "NOT_ENFORCED" in E2
+- `confidence` reflects the source
 
 ---
 
@@ -222,192 +195,151 @@ Rules:
 
 ### 3.1 NousAdapter
 
-Source type: mixed (local config + ping + cached catalog)
+Source: mixed (local config + ping + cached catalog)
+Routable: true
 
-Probe sequence:
-1. Read `auth.json` credential_pool.nous[0]:
-   - `expires_at` → auth_token_expiry dimension (monetary_balance equivalent:
-     token-validity window, unit="seconds-remaining")
-   - `request_count` → local_request_count dimension (observed, unit="requests")
-2. Ping `https://inference-api.nousresearch.com/v1/models` (or `/`):
-   - 200 → operational=up
-   - 5xx → operational=degraded
-   - timeout/conn-refused → operational=down
-3. Read `provider_models_cache.json` for model catalog:
-   - available_models list with pricing and context_lengths
+Probe:
+1. Read `auth.json` credential_pool.nous[0]: `expires_at`,
+   `request_count`
+2. Ping `https://inference-api.nousresearch.com/v1/models`
+3. Read `provider_models_cache.json` for model catalog
 4. Read `context_length_cache.yaml` for active model context length
 
-Dimensions emitted:
-- `provider_credit` (token validity): remaining=<seconds-until-expiry>,
-  reset_renewal=<expires_at>, source=local-observation, confidence=high
-- `request_window` (local counter): remaining=<request_count>,
-  source=observed, confidence=high, quota_semantics="local counter only; provider quota unknown"
-
-All other dimensions: OMITTED (unknown).
-
-Error handling:
-- auth.json unreadable → operational=unknown, error logged, continue
-- Ping fails → operational=down, dimensions still emitted from local data
-- Cache file missing → available_models=[], confidence=low
+Dimensions: `provider_credit` (token validity, seconds), `request_window`
+(local counter). All others OMITTED.
 
 ### 3.2 DeepSeekAdapter
 
-Source type: provider-api (with local secret reference)
+Source: provider-api (local secret reference)
+Routable: true
 
-Probe sequence:
-1. Resolve API key from local secret storage by REFERENCE (never by value):
-   - Check env var `DEEPSEEK_API_KEY`
-   - If absent, check Windows Credential Manager target `deepseek:api`
-   - If absent → operational=unknown, error="api-key-not-configured", return
-2. Ping `https://api.deepseek.com/v1/models` with key:
-   - 200 → operational=up, parse model list
-   - 401 → operational=degraded (key invalid)
-   - 429 → rate_limit_state=throttled, operational=degraded
-   - 5xx → operational=degraded
-   - timeout → operational=down
-3. Read configured spending budget from local config file
-   (`exec-brain/deepseek-config.json`, field `spending_budget_usd`)
-4. Read observed token usage and calculated spend from local ledger
-   (DeepSeek does not expose a usage API, so we track what WE send)
+Probe:
+1. Resolve API key by REFERENCE (never value):
+   a. env var DEEPSEEK_API_KEY (presence check only — D2)
+   b. Windows Credential Manager target `deepseek:api`
+   c. If neither → operational=unknown, error="api-key-not-configured"
+2. Ping `https://api.deepseek.com/v1/models`
+3. Read configured spending budget from `deepseek-config.json`
+4. Read observed token usage + calculated spend from local ledger
 
-Dimensions emitted:
-- `monetary_balance`: remaining=<budget - calculated_spend> USD,
-  source=observed, confidence=medium,
-  quota_semantics="owner-configured budget; spend calculated from observed requests"
-- `rate_limit_state`: from last response headers if present, else "unknown",
-  source=provider-api or "unknown"
-- `token_window`: remaining=unknown (DeepSeek is metered, not token-windowed),
-  source=provider-api, confidence=high, quota_semantics="metered provider; no token quota"
+Dimensions: `monetary_balance` (budget - calculated spend), `rate_limit_state`
+(from headers), `token_window` (metered; no token quota).
 
-Error handling:
-- Key not found → operational=unknown, single error, no dimensions
-- API unreachable → operational=down, error logged
-- Budget not configured → monetary_balance remaining="unknown",
-  error="spending-budget-not-configured"
-
-Secret handling:
-- The key is read by the adapter at probe time, used in the HTTP request,
-  and NEVER stored in the telemetry ledger, logs, brief, or GitHub
-- `deepseek-config.json` contains only the budget (a number), never the key
-- If the key is in Windows Credential Manager, the adapter reads it via
-  `cmdkey /list` + PowerShell interop or a small credential-reading helper;
-  the key value is never printed or logged
+Secret handling: key never stored in ledger, logs, brief, or GitHub.
+`deepseek-config.json` contains only the budget (a number).
 
 ### 3.3 CodexAdapter
 
-Source type: observed-only (desktop app, no API)
+Source: observed-only
+Routable: false (desktop app, no API/CLI)
 
-Probe sequence:
-1. Check if `OpenAI.Codex` package is registered (winget list or MSIX query)
-2. Check if any `Codex.exe` / `OpenAI.Codex.exe` process is running
-   (via `tasklist` or `ps`)
-3. Read installed version from app manifest if accessible
+Probe:
+1. Check if `OpenAI.Codex` package is registered
+2. Check if `Codex.exe` process is running
+3. Read installed version from app manifest
 
-Dimensions emitted:
-- `concurrency`: remaining="unknown", source=observed, confidence=low,
-  quota_semantics="desktop app; no programmatic telemetry"
+Dimensions: `concurrency` only (remaining="unknown", confidence=low,
+note="desktop app; no programmatic telemetry"). All others OMITTED.
 
-All other dimensions: OMITTED.
-
-operational:
-- process running → up
-- installed but not running → degraded
-- not installed → down
-- check failed → unknown
+operational: up (running) | degraded (installed, not running) |
+down (not installed) | unknown.
 
 ### 3.4 AntigravityAdapter
 
-Source type: observed-only (desktop app, no API)
+Source: observed-only
+Routable: false (desktop app, no API/CLI)
 
-Probe sequence:
+Probe:
 1. Check if `Google.Antigravity` package is registered
 2. Check if `Antigravity.exe` process is running
-3. Check Windows Credential Manager for `LegacyGeneric:target=gemini:antigravity`
-4. Read installed version from app manifest if accessible
+3. Check Windows Credential Manager for `gemini:antigravity` presence only
+4. Read installed version from app manifest
 
-Dimensions emitted:
-- `concurrency`: remaining="unknown", source=observed, confidence=low,
-  quota_semantics="desktop app; no programmatic telemetry"
+Dimensions: `concurrency` only (remaining="unknown", confidence=low).
 
-All other dimensions: OMITTED.
-
-operational:
-- process running + credential present → up
-- process running, no credential → degraded
-- installed, not running → degraded
-- not installed → down
+operational: up (running + credential present) | degraded (running no
+credential, or installed not running) | down | unknown.
 
 ---
 
 ## 4. Normalized telemetry ledger — SQLite schema
 
-New database: `%LOCALAPPDATA%\hermes\exec-brain\governor.db`
-
-Rationale for separate DB: telemetry is high-frequency (polls every 30 min)
-while E1 task records are low-frequency (per task). Separate DBs allow
-independent retention, backup, and pruning.
+Database: `%LOCALAPPDATA%\hermes\exec-brain\governor.db`
+Schema version: 1 (PRAGMA user_version = 1)
 
 ```sql
--- Schema version tracked via PRAGMA user_version
--- governor.db schema_version = 1
-
 CREATE TABLE IF NOT EXISTS provider_snapshot (
-  snapshot_id    TEXT PRIMARY KEY,            -- gov-<YYYYMMDD>-<shortuuid>
-  provider       TEXT NOT NULL,               -- nous | deepseek | codex | antigravity
-  captured_at    TEXT NOT NULL,               -- ISO-8601 UTC
-  operational    TEXT NOT NULL,               -- up | degraded | down | unknown
-  rate_limit_state TEXT NOT NULL,             -- ok | throttled | cooldown-until | unknown
-  last_success_at TEXT,                       -- ISO-8601 UTC or NULL
-  telemetry_source TEXT NOT NULL,             -- provider-api | observed-only | mixed
-  telemetry_confidence TEXT NOT NULL,         -- high | medium | low
-  quota_semantics TEXT NOT NULL,              -- provider-specific note
-  available_models TEXT NOT NULL DEFAULT '[]', -- JSON array
-  errors TEXT NOT NULL DEFAULT '[]',          -- JSON array of error strings
-  seq            INTEGER NOT NULL UNIQUE,     -- deterministic chain order
-  record_sha256  TEXT NOT NULL,               -- hash of canonical fields
-  prev_sha256    TEXT,                        -- hash-chain link
+  snapshot_id    TEXT PRIMARY KEY,
+  provider       TEXT NOT NULL,
+  captured_at    TEXT NOT NULL,
+  operational    TEXT NOT NULL,
+  routable       INTEGER NOT NULL DEFAULT 0,    -- D3: telemetry ≠ routability
+  rate_limit_state TEXT NOT NULL,
+  last_success_at TEXT,
+  telemetry_source TEXT NOT NULL,
+  telemetry_confidence TEXT NOT NULL,
+  quota_semantics TEXT NOT NULL,
+  available_models TEXT NOT NULL DEFAULT '[]',   -- JSON array
+  errors TEXT NOT NULL DEFAULT '[]',              -- JSON array
+  seq            INTEGER NOT NULL UNIQUE,
+  record_sha256  TEXT NOT NULL,
+  prev_sha256    TEXT,
   schema_version INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS capacity_dimension (
-  dimension_id   TEXT PRIMARY KEY,            -- cd-<shortuuid>
+  dimension_id   TEXT PRIMARY KEY,
   snapshot_id    TEXT NOT NULL REFERENCES provider_snapshot(snapshot_id),
   provider       TEXT NOT NULL,
-  dimension_kind TEXT NOT NULL,               -- request_window | token_window | ...
-  remaining      TEXT NOT NULL,               -- "<value> <unit>" | "unknown"
-  unit           TEXT NOT NULL,               -- tokens | requests | USD | credits | concurrent
-  reserve        TEXT NOT NULL DEFAULT 'NOT_ENFORCED',  -- E4 placeholder
-  effective_usable TEXT NOT NULL DEFAULT 'NOT_ENFORCED', -- E4 placeholder
-  reset_renewal  TEXT NOT NULL,               -- ISO-8601 | "unknown"
-  source         TEXT NOT NULL,               -- provider-api | observed | inferred
-  confidence     TEXT NOT NULL,               -- high | medium | low
+  dimension_kind TEXT NOT NULL,
+  remaining      TEXT NOT NULL,
+  unit           TEXT NOT NULL,
+  reserve        TEXT NOT NULL DEFAULT 'NOT_ENFORCED',
+  effective_usable TEXT NOT NULL DEFAULT 'NOT_ENFORCED',
+  reset_renewal  TEXT NOT NULL,
+  source         TEXT NOT NULL,
+  confidence     TEXT NOT NULL,
   schema_version INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS observed_request (
-  request_id     TEXT PRIMARY KEY,            -- obs-<YYYYMMDD>-<shortuuid>
+  request_id     TEXT PRIMARY KEY,
   provider       TEXT NOT NULL,
   model          TEXT,
-  requested_at   TEXT NOT NULL,               -- ISO-8601 UTC
+  requested_at   TEXT NOT NULL,
   input_tokens   INTEGER,
   output_tokens  INTEGER,
   total_tokens   INTEGER,
-  monetary_cost  TEXT,                        -- "<value> USD" | "unknown"
-  status         TEXT NOT NULL,               -- success | error | timeout
+  monetary_cost  TEXT,
+  status         TEXT NOT NULL,
   error_code     TEXT,
   latency_ms     INTEGER,
   schema_version INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS daily_brief_log (
-  brief_id       TEXT PRIMARY KEY,            -- brief-<YYYYMMDD>
-  generated_at   TEXT NOT NULL,               -- ISO-8601 UTC
-  rendered_text  TEXT NOT NULL,               -- full brief text (local only)
-  published_to_github INTEGER NOT NULL DEFAULT 0,  -- 0/1
+  brief_id       TEXT PRIMARY KEY,
+  generated_at   TEXT NOT NULL,
+  rendered_text  TEXT NOT NULL,
+  published_to_github INTEGER NOT NULL DEFAULT 0,
   schema_version INTEGER NOT NULL DEFAULT 1
 );
 
--- Append-only enforcement: no UPDATE/DELETE on historical tables
+CREATE TABLE IF NOT EXISTS daily_aggregate (
+  aggregate_id   TEXT PRIMARY KEY,               -- da-<YYYYMMDD>-<provider>
+  provider       TEXT NOT NULL,
+  aggregate_date TEXT NOT NULL,                  -- YYYY-MM-DD
+  request_count  INTEGER NOT NULL DEFAULT 0,
+  total_input_tokens INTEGER NOT NULL DEFAULT 0,
+  total_output_tokens INTEGER NOT NULL DEFAULT 0,
+  total_tokens   INTEGER NOT NULL DEFAULT 0,
+  total_spend_usd TEXT NOT NULL DEFAULT '0.00',
+  error_count    INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(provider, aggregate_date),
+  schema_version INTEGER NOT NULL DEFAULT 1
+);
+
+-- Append-only triggers
 CREATE TRIGGER IF NOT EXISTS trg_snapshot_no_update BEFORE UPDATE ON provider_snapshot
   BEGIN SELECT RAISE(ABORT, 'provider_snapshot is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS trg_snapshot_no_delete BEFORE DELETE ON provider_snapshot
@@ -428,7 +360,7 @@ CREATE TRIGGER IF NOT EXISTS trg_brief_no_delete BEFORE DELETE ON daily_brief_lo
 
 ### 4.1 Chain-head anchor
 
-`exec-brain/gov-chain-head.json` — mirrors E1's chain-head pattern:
+`exec-brain/gov-chain-head.json`:
 
 ```json
 {
@@ -437,32 +369,32 @@ CREATE TRIGGER IF NOT EXISTS trg_brief_no_delete BEFORE DELETE ON daily_brief_lo
 }
 ```
 
-(observed_request and daily_brief_log are high-frequency/low-audit and are
-NOT hash-chained; they are append-only via triggers only.)
+observed_request, daily_brief_log, and daily_aggregate are append-only via
+triggers only (not hash-chained).
 
-### 4.2 Retention policy
+### 4.2 Retention policy (D5)
 
-| Table               | Retention        | Rationale                                  |
-|---------------------|------------------|--------------------------------------------|
-| provider_snapshot   | 90 days          | Burn trend analysis, daily brief history   |
-| capacity_dimension  | 90 days          | Bound to snapshots                         |
-| observed_request    | 30 days          | High volume; 30d sufficient for burn rate  |
-| daily_brief_log     | 365 days         | Historical brief archive                   |
+| Table               | Retention        |
+|---------------------|------------------|
+| provider_snapshot   | 90 days          |
+| capacity_dimension  | 90 days          |
+| observed_request    | 30 days          |
+| daily_brief_log     | 365 days         |
+| daily_aggregate     | 365 days         |
 
-Pruning: `eb telemetry --prune` deletes rows older than retention. Pruning
-is a HARD DELETE (the only permitted DELETE) and is logged to the prune log
-file. Chain-head anchor is updated to the new tail after prune.
+Pruning: `eb telemetry --prune` hard-deletes rows older than retention.
+The only permitted DELETE path. Logs to `exec-brain/prune.log`. Updates
+chain-head anchor after prune.
 
-### 4.3 Append-only / audit behavior
+daily_aggregate is UPSERTed (idempotent) — re-aggregating a day overwrites
+the aggregate row. Aggregates are NOT pruned until 365d.
 
-- All four tables are append-only via triggers (UPDATE/DELETE rejected)
-- The ONLY delete path is the prune command, which:
-  1. Runs outside a transaction (DELETEs fire no triggers on some SQLite
-     configs — verified at test time)
-  2. Logs the prune event (table, rows_deleted, timestamp) to
-     `exec-brain/prune.log`
-  3. Updates `gov-chain-head.json` to the new chain tail
-- Direct SQL UPDATE/DELETE through any tool is rejected by triggers
+### 4.3 Aggregation
+
+After each `eb telemetry` run (or via `eb telemetry --aggregate`), the
+previous day's observed_request rows are aggregated into daily_aggregate
+(request_count, tokens, spend, errors). Once aggregated, detailed rows
+are eligible for 30d pruning while the aggregate persists for 365d.
 
 ---
 
@@ -472,13 +404,8 @@ file. Chain-head anchor is updated to the new tail after prune.
 
 Command: `eb brief [--date YYYY-MM-DD] [--no-publish]`
 
-The brief is generated by deterministic Python code that:
-1. Queries governor.db for the most recent snapshot per provider
-2. Queries yesterday's snapshots for comparison
-3. Queries observed_request for the trailing 24h burn calculation
-4. Renders a fixed text template
-
-No LLM is called. The output is fully determined by the ledger contents.
+Deterministic Python: queries ledger → renders fixed text template.
+No LLM called.
 
 ### 5.2 Brief format
 
@@ -488,7 +415,7 @@ No LLM is called. The output is fully determined by the ledger contents.
   Executive Brain E2 — DETERMINISTIC (no LLM)
 ================================================================================
 
-PROVIDER: <provider_id>    [<operational>]
+PROVIDER: <provider_id>    [<operational>]    [routable: yes/no]
   Telemetry source: <source>  Confidence: <confidence>
   Last success: <timestamp | "never">
 
@@ -502,12 +429,11 @@ PROVIDER: <provider_id>    [<operational>]
     Requests observed: <n>
     Tokens (in/out/total): <n>/<n>/<n>
     Calculated spend: <amount> USD | unknown
-    Burn trend: <increasing | decreasing | stable | unknown>
+    Burn trend: rising | stable | falling | unknown
 
-  Reset/renewal: <next known reset | unknown"
+  Reset/renewal: <next known reset | unknown>
 
-  ---
-  (repeated per provider)
+  --- (per provider)
 
 ================================================================================
   SUMMARY
@@ -515,286 +441,106 @@ PROVIDER: <provider_id>    [<operational>]
   Providers up:     <n>/<n>
   Providers unknown: <n>/<n>
   Providers down:   <n>/<n>
+  Routable:         <list of routable provider ids>
 
-  Highest-confidence provider: <id> (<confidence>)
+  Highest-confidence routable: <id> (<confidence>)
   Most constrained dimension: <provider>:<kind> (<remaining> <unit>)
 
   NOT_ENFORCED (E4): reserve, effective_usable, projected_exhaustion,
-                     checkpoint_handover, protected_reserve
+                     checkpoint_handover, protected_reserve,
+                     expected_today_demand
   UNKNOWN: all dimensions not explicitly listed above
 
   Generated by: eb brief (deterministic)
   Ledger: governor.db  Schema: 1
-  Chain head: provider_snapshot=<seq>:<sha12> capacity_dimension=<seq>:<sha12>
 ================================================================================
 ```
 
-### 5.3 Yesterday's observed usage
+### 5.3 Burn trend (D4)
 
-Computed from `observed_request` WHERE `requested_at` BETWEEN
-`now - 48h` AND `now - 24h`. If no rows exist, renders "No observed
-requests in the preceding 24h window."
+Trailing 24h vs preceding 24h, ±20% threshold:
+- trailing > preceding × 1.2 → rising
+- trailing < preceding × 0.8 → falling
+- otherwise → stable
+- insufficient data → unknown
 
-### 5.4 Burn trend
+Persisted in daily_aggregate so 7-day baseline can be added later.
 
-Computed from two windows: trailing 24h vs preceding 24h.
-- If both windows have 0 requests → "stable (no activity)"
-- If only trailing has requests → "increasing (from zero)"
-- If trailing > preceding by >20% → "increasing"
-- If trailing < preceding by >20% → "decreasing"
-- Otherwise → "stable"
-- If insufficient data → "unknown"
+### 5.4 E4 placeholders
 
-### 5.5 Expected today demand
-
-NOT COMPUTED in E2. Renders: "expected_today_demand: NOT_ENFORCED (E4)".
-
-### 5.6 Projected exhaustion risk
-
-NOT COMPUTED in E2. Renders: "projected_exhaustion: NOT_ENFORCED (E4)".
+- expected_today_demand: NOT_ENFORCED (E4)
+- projected_exhaustion: NOT_ENFORCED (E4)
+- reserve / effective_usable: NOT_ENFORCED
 
 ---
 
 ## 6. Curated resource-status publication to GitHub
 
-### 6.1 What gets published
-
 Command: `eb publish-brief` (or `eb brief --publish`)
 
-Writes to the local control-plane repo (NOT directly to GitHub — push
-follows existing sync discipline):
+Writes to local control-plane repo (push follows existing sync discipline):
 
-    mukund-chief-control-plane/
-      resource-status/
-        daily-brief-<YYYY-MM-DD>.md     full brief text, dated
-        latest-brief.md                 copy of most recent brief
-        provider-state.json             machine-readable non-sensitive state
+    resource-status/
+      daily-brief-<YYYY-MM-DD>.md
+      latest-brief.md
+      provider-state.json
 
-### 6.2 What does NOT get published
+Does NOT publish: raw governor.db, observed_request rows, secrets, internal
+paths. Redacts patterns: `sk-*`, `Bearer `, `api[_-]?key`, `token`, `password`.
+If redaction triggers → ABORT write.
 
-- Raw governor.db (local only)
-- observed_request rows (local only)
-- Any API key, token, credential, or secret
-- Any error message that might contain internal paths or config details
-- Internal chain-head SHA values (the chain head IS published for
-  verification, but not individual record SHAs)
-
-### 6.3 provider-state.json format
-
-```json
-{
-  "generated_at": "2026-09-22T08:00:00Z",
-  "schema_version": 1,
-  "deterministic": true,
-  "providers": {
-    "nous": {
-      "operational": "up",
-      "captured_at": "2026-09-22T07:30:00Z",
-      "telemetry_source": "mixed",
-      "telemetry_confidence": "medium",
-      "dimensions": [
-        {
-          "dimension_kind": "provider_credit",
-          "remaining": "3599 seconds",
-          "unit": "seconds",
-          "reserve": "NOT_ENFORCED",
-          "effective_usable": "NOT_ENFORCED",
-          "reset_renewal": "2026-09-22T09:04:05Z",
-          "source": "local-observation",
-          "confidence": "high"
-        }
-      ]
-    },
-    "deepseek": {
-      "operational": "up",
-      "captured_at": "2026-09-22T07:30:00Z",
-      "telemetry_source": "provider-api",
-      "telemetry_confidence": "medium",
-      "dimensions": [
-        {
-          "dimension_kind": "monetary_balance",
-          "remaining": "47.32 USD",
-          "unit": "USD",
-          "reserve": "NOT_ENFORCED",
-          "effective_usable": "NOT_ENFORCED",
-          "reset_renewal": "unknown",
-          "source": "observed",
-          "confidence": "medium"
-        }
-      ]
-    },
-    "codex": {
-      "operational": "degraded",
-      "captured_at": "2026-09-22T07:30:00Z",
-      "telemetry_source": "observed-only",
-      "telemetry_confidence": "low",
-      "dimensions": [],
-      "note": "desktop app; no programmatic telemetry"
-    },
-    "antigravity": {
-      "operational": "up",
-      "captured_at": "2026-09-22T07:30:00Z",
-      "telemetry_source": "observed-only",
-      "telemetry_confidence": "low",
-      "dimensions": [],
-      "note": "desktop app; no programmatic telemetry"
-    }
-  },
-  "not_enforced": ["reserve", "effective_usable", "projected_exhaustion",
-                   "checkpoint_handover", "protected_reserve",
-                   "expected_today_demand"],
-  "unknown_dimensions": "see per-provider dimensions[]; omitted = unknown"
-}
-```
-
-### 6.4 Publication safety rules
-
-- `eb publish-brief` writes to the local repo working directory only
-- It does NOT commit or push — that follows existing sync discipline
-  (ChiefDiscordSync scheduled task or manual `git push`)
-- Before writing, it redacts any string matching known secret patterns
-  (regex: `sk-*`, `Bearer `, `key=`, `token=`, `password=`)
-- If redaction triggers, the write is ABORTED and an error is raised
-- `latest-brief.md` is a full copy (not a symlink) for portability
+provider-state.json: machine-readable per-provider state with `routable`
+flag, dimensions, NOT_ENFORCED markers, UNKNOWN for omitted dimensions.
 
 ---
 
 ## 7. CLI commands
 
-All E2 commands are added to the existing `eb` CLI (same `eb.py` file,
-new subcommands). Stdlib-only, consistent with E1.
+All added to existing `eb` CLI. Stdlib-only.
 
-| Command                | Purpose                                              |
-|------------------------|------------------------------------------------------|
-| `eb telemetry`         | Poll all adapters, write snapshot to governor.db     |
-| `eb telemetry --prune` | Prune rows older than retention policy               |
-| `eb brief`             | Generate Daily Resource Brief (no LLM)               |
-| `eb brief --publish`   | Generate brief + write to local control-plane repo   |
-| `eb record-request`    | Log an observed request (tokens, cost, status)       |
-| `eb gov-status`        | Show governor.db status (row counts, chain head)     |
-| `eb gov-verify`        | Verify governor.db integrity + chain                 |
+| Command                | Purpose                                          |
+|------------------------|--------------------------------------------------|
+| `eb telemetry`         | Poll all adapters, write snapshot                |
+| `eb telemetry --prune` | Prune rows older than retention                  |
+| `eb telemetry --aggregate` | Aggregate yesterday into daily_aggregate     |
+| `eb brief`             | Generate Daily Resource Brief (no LLM)           |
+| `eb brief --publish`   | Generate brief + write to local control-plane    |
+| `eb record-request`    | Log an observed request                          |
+| `eb gov-status`        | Show governor.db status (row counts, chain head) |
+| `eb gov-verify`        | Verify governor.db integrity + chain             |
 
-### 7.1 eb telemetry
-
-```
-eb telemetry [--provider <id>] [--dry-run]
-```
-
-- Polls all adapters (or one if `--provider` given)
-- Writes one provider_snapshot + N capacity_dimension rows
-- `--dry-run` prints the snapshot without writing
-- Exit code: 0 = all adapters polled, 1 = partial failure, 2 = total failure
-- Logs to `exec-brain/telemetry.log` (not the DB audit log)
-
-### 7.2 eb brief
-
-```
-eb brief [--date YYYY-MM-DD] [--no-publish] [--output <path>]
-```
-
-- Generates the Daily Resource Brief
-- `--date` generates for a specific date (defaults to today)
-- `--no-publish` skips writing to the control-plane repo
-- `--output` writes to a file instead of stdout
-- Renders with NO LLM — pure Python string formatting
-
-### 7.3 eb record-request
-
-```
-eb record-request --provider <id> [--model <m>] [--input-tokens <n>]
-                   [--output-tokens <n>] [--cost <amount>]
-                   [--status success|error|timeout] [--error-code <c>]
-                   [--latency-ms <n>]
-```
-
-- Records an observed API request for burn tracking
-- Called by the Chief (or future E3 router) after each provider call
-- Monetary cost is a STRING ("0.0023 USD" or "unknown")
-
-### 7.4 eb gov-verify
-
-```
-eb gov-verify [--repair]
-```
-
-- Runs `PRAGMA integrity_check`
-- Verifies hash chains on provider_snapshot and capacity_dimension
-- Verifies gov-chain-head.json anchor
-- `--repair` updates chain-head if it's a valid prefix (same as E1 audit)
-- Prints verify: PASS / FAIL
+Exit codes: 0 = success, 1 = partial, 2 = total failure.
 
 ---
 
 ## 8. Polling cadence
 
-### 8.1 Scheduled polling
-
-A Windows Scheduled Task (consistent with existing ChiefDiscordSync pattern):
-
-- Task name: `ExecBrainTelemetry`
-- Trigger: every 30 minutes, survives logon/reboot
-- Action: `python %LOCALAPPDATA%\hermes\exec-brain\eb.py telemetry`
-- Lock file: `exec-brain/telemetry.lock` (prevents concurrent runs)
+Windows Scheduled Task: `ExecBrainTelemetry`
+- Trigger: every 30 min, survives logon/reboot
+- Lock file: `exec-brain/telemetry.lock`
 - Log: `exec-brain/telemetry.log`
-- On failure: logs error, does NOT retry (next scheduled run handles it)
-
-### 8.2 Manual polling
-
-`eb telemetry` can be run on demand. The lock file prevents overlap with
-the scheduled task.
-
-### 8.3 Failure handling
-
-| Failure mode                  | Behavior                                           |
-|-------------------------------|----------------------------------------------------|
-| Single adapter throws         | Log error, mark provider down/unknown, continue    |
-| All adapters fail             | Exit code 2, log critical, no snapshot written     |
-| DB write fails                | Exit code 1, log error, snapshot lost              |
-| Lock file exists              | Exit code 0 (silent — another poll is running)     |
-| Stale lock (>10 min)          | Break lock, proceed, log warning                   |
-| Prune during scheduled poll   | Skip prune (prune only via explicit --prune)       |
+- Stale lock (>10 min): break + warn
 
 ---
 
-## 9. Secret / redaction rules
+## 9. Secret / redaction rules (D2)
 
-1. **DeepSeek API key** is NEVER:
-   - Printed to stdout or stderr
-   - Logged to telemetry.log or any other log
-   - Stored in governor.db
-   - Included in the Daily Resource Brief
-   - Written to provider-state.md or provider-state.json
-   - Committed to GitHub
-   - Passed as a CLI argument (read from env or credential store by name)
-
-2. **Key resolution order** (DeepSeek):
-   a. Environment variable `DEEPSEEK_API_KEY`
-   b. Windows Credential Manager target `deepseek:api`
-   c. If neither → adapter returns operational=unknown with error
-      "api-key-not-configured" (no crash, no partial state)
-
-3. **Redaction in publish-brief**:
-   - Before writing any file to the control-plane repo, scan for patterns:
-     `sk-[a-zA-Z0-9]{20,}`, `Bearer\s+\S+`, `api[_-]?key\s*[:=]\s*\S+`,
-     `token\s*[:=]\s*\S+`, `password\s*[:=]\s*\S+`
-   - If any match → ABORT write, raise error, do NOT commit
-
-4. **Nous token** (OAuth access_token in auth.json):
-   - The adapter reads `expires_at` and `request_count` only
-   - The token value itself is never read by the adapter
-   - (The token is managed by Hermes's existing auth system, not by E2)
-
-5. **Windows Credential Manager** (Antigravity credential):
-   - The adapter checks for PRESENCE only (does not read the credential value)
-   - Presence is reported as a dimension note, not the value
+1. DeepSeek key NEVER printed, logged, stored in DB, or committed
+2. Resolution order: env var `DEEPSEEK_API_KEY` (presence check only) →
+   Windows Credential Manager `deepseek:api`
+3. If neither found → STOP, ask owner to store securely
+4. `deepseek-config.json`: budget only, no key
+5. Nous token: read `expires_at`/`request_count` only, never token value
+6. Antigravity credential: presence check only (yes/no), never read value
+7. publish-brief: scan output for secret patterns → ABORT if match
 
 ---
 
-## 10. Storage paths summary
+## 10. Storage paths
 
 ```
 %LOCALAPPDATA%\hermes\exec-brain\
-  eb.py                        E1 CLI (extended with E2 commands)
+  eb.py                        E1 + E2 CLI
   exec_brain.db                E1 database (unchanged)
   chain-head.json              E1 chain anchor (unchanged)
   governor.db                  E2 telemetry ledger (NEW)
@@ -803,263 +549,115 @@ the scheduled task.
   telemetry.lock               E2 polling lock (NEW)
   prune.log                    E2 prune audit log (NEW)
   deepseek-config.json         E2 DeepSeek budget config (NEW, no secrets)
-  backups\                     E1 backups (unchanged)
-  tests\
-    test_eb.py                 E1 tests (unchanged)
-    test_governor.py           E2 tests (NEW)
+  tests\test_governor.py       E2 tests (NEW)
 ```
 
 ---
 
-## 11. Schema versioning and forward-compatibility
+## 11. Forward-compatibility
 
-### 11.1 E2 → E3 migration path
-
-E3 adds: WorkerCapability, QualificationDecision, PerformanceRow,
-CheckpointRecord, HandoverRecord. These are NEW tables in governor.db (or
-exec_brain.db — TBD in E3 plan). E2's schema is forward-compatible because:
-- `provider_snapshot.provider` is a stable string id
-- `capacity_dimension.dimension_kind` uses the §9a enum (extensible)
-- `reserve` and `effective_usable` columns exist as NOT_ENFORCED placeholders
-- E3 can add a `qualification_state` column to provider_snapshot if needed
-
-### 11.2 E2 → E4 migration path
-
-E4 adds: enforced reserves, predictive exhaustion, checkpoint enforcement.
-E4 will:
-- Replace `reserve` NOT_ENFORCED with real values
-- Replace `effective_usable` NOT_ENFORCED with real values
-- Add exhaustion projection columns to provider_snapshot
-- Add a `reserve_policy` config table
-
-E2's schema supports this because the columns exist; E4 only changes their
-content and adds enforcement logic.
-
-### 11.3 Schema version bumps
-
-- governor.db `schema_version` starts at 1
-- Each migration increments by 1
-- `eb gov-verify` checks schema_version and warns if running older code
-  against newer DB
+E3/E4 add new tables or columns. E2 schema supports this:
+- `routable` flag ready for E3 Qualification Gate
+- `reserve`/`effective_usable` columns exist as NOT_ENFORCED
+- `daily_aggregate` persists 365d for E3/E4 learning
+- `provider` string id is stable
+- `dimension_kind` uses §9a enum (extensible)
 
 ---
 
-## 12. State timestamp discipline correction
-
-`state/current_company_state.md` has a stale top Timestamp (19:00 UTC while
-containing ~22:00 E1 rollout data). This is a control-plane hygiene issue.
-
-Correction in E2 rollout:
-- The E2 rollout decision record MUST use the actual commit/rollout timestamp
-- `current_company_state.md` Timestamp MUST be updated to the time of the
-  edit, not a cached earlier value
-- Future rollouts: the Timestamp field is updated as the LAST step of the
-  rollout, immediately before committing
-
-This is included in the E2 rollout procedure (§14) but is not a separate
-cleanup task.
-
----
-
-## 13. Complete deterministic test matrix
+## 12. Test matrix — 45 tests
 
 All tests are stdlib `unittest`, no external dependencies. Run via:
 `python -m unittest tests.test_governor -v`
 
-### 13.1 Adapter unit tests (mocked)
+| #  | Test                                              | Category      |
+|----|---------------------------------------------------|---------------|
+| T1 | NousAdapter: reads auth.json, emits dimensions    | adapter       |
+| T2 | NousAdapter: ping success → operational=up        | adapter       |
+| T3 | NousAdapter: ping timeout → operational=down      | adapter       |
+| T4 | NousAdapter: missing auth.json → error, continues | adapter       |
+| T5 | DeepSeekAdapter: key from CM, pings API           | adapter       |
+| T6 | DeepSeekAdapter: missing key → unknown, no crash  | adapter       |
+| T7 | DeepSeekAdapter: 429 response → throttled         | adapter       |
+| T8 | DeepSeekAdapter: spend calculated from observed   | adapter       |
+| T9 | CodexAdapter: installed+running → up              | adapter       |
+| T10| CodexAdapter: installed, not running → degraded   | adapter       |
+| T11| CodexAdapter: not installed → down                | adapter       |
+| T12| CodexAdapter: routable=false                      | adapter       |
+| T13| AntigravityAdapter: credential present → up       | adapter       |
+| T14| AntigravityAdapter: no credential → degraded      | adapter       |
+| T15| AntigravityAdapter: routable=false                | adapter       |
+| T16| governor.db init creates all tables + triggers    | ledger        |
+| T17| provider_snapshot append-only (UPDATE rejected)   | ledger        |
+| T18| provider_snapshot append-only (DELETE rejected)   | ledger        |
+| T19| capacity_dimension append-only (UPDATE rejected)  | ledger        |
+| T20| capacity_dimension append-only (DELETE rejected)  | ledger        |
+| T21| observed_request append-only (UPDATE rejected)    | ledger        |
+| T22| daily_brief_log append-only (DELETE rejected)     | ledger        |
+| T23| Hash chain: seq order + sha256 links valid        | ledger        |
+| T24| Chain-head anchor: prefix verification            | ledger        |
+| T25| Prune: rows deleted, prune.log written, anchor ok | ledger        |
+| T26| daily_aggregate: idempotent UPSERT                | ledger        |
+| T27| daily_aggregate: correct rollup from observed     | ledger        |
+| T28| `eb telemetry --dry-run` prints, no write         | cli           |
+| T29| `eb telemetry` writes snapshot + dimensions       | cli           |
+| T30| `eb brief` renders without LLM, shows UNKNOWN     | cli           |
+| T31| `eb brief --date` renders historical brief        | cli           |
+| T32| `eb record-request` writes observed_request row   | cli           |
+| T33| `eb gov-verify` PASS on fresh DB                  | cli           |
+| T34| `eb gov-verify` FAIL on chain break               | cli           |
+| T35| Brief: UNKNOWN for unobservable dims              | brief         |
+| T36| Brief: NOT_ENFORCED for E4 fields                 | brief         |
+| T37| Brief: yesterday usage from observed_request      | brief         |
+| T38| Brief: burn trend rising/stable/falling/unknown   | brief         |
+| T39| Brief: routable flag shown correctly              | brief         |
+| T40| publish-brief: writes 3 files to repo             | publication   |
+| T41| publish-brief: redacts secrets, aborts            | publication   |
+| T42| publish-brief: provider-state.json valid schema   | publication   |
+| T43| Full cycle: telemetry → brief → publish            | integration   |
+| T44| Concurrent telemetry: lock prevents overlap       | integration   |
+| T45| Stale lock: broken after timeout, warning logged  | integration   |
 
-| #  | Test                                              | Provider     |
-|----|---------------------------------------------------|--------------|
-| T1 | NousAdapter: reads auth.json, emits dimensions   | nous         |
-| T2 | NousAdapter: ping success → operational=up        | nous         |
-| T3 | NousAdapter: ping timeout → operational=down      | nous         |
-| T4 | NousAdapter: missing auth.json → error, continues | nous         |
-| T5 | DeepSeekAdapter: reads key from env, pings API    | deepseek     |
-| T6 | DeepSeekAdapter: missing key → unknown, no crash  | deepseek     |
-| T7 | DeepSeekAdapter: 429 response → throttled         | deepseek     |
-| T8 | DeepSeekAdapter: spend calculated from observed   | deepseek     |
-| T9 | CodexAdapter: installed+running → up              | codex        |
-| T10| CodexAdapter: installed, not running → degraded   | codex        |
-| T11| CodexAdapter: not installed → down                | codex        |
-| T12| AntigravityAdapter: credential present → up       | antigravity  |
-| T13| AntigravityAdapter: no credential → degraded      | antigravity  |
-
-### 13.2 Ledger / DB tests
-
-| #  | Test                                              |
-|----|---------------------------------------------------|
-| T14| governor.db init creates all tables + triggers    |
-| T15| provider_snapshot append-only (UPDATE rejected)   |
-| T16| provider_snapshot append-only (DELETE rejected)   |
-| T17| capacity_dimension append-only (UPDATE rejected)  |
-| T18| capacity_dimension append-only (DELETE rejected)  |
-| T19| Hash chain: seq order + sha256 links valid        |
-| T20| Chain-head anchor: prefix verification            |
-| T21| Prune: rows deleted, prune.log written, anchor updated |
-
-### 13.3 CLI command tests
-
-| #  | Test                                              |
-|----|---------------------------------------------------|
-| T22| `eb telemetry --dry-run` prints, does not write   |
-| T23| `eb telemetry` writes snapshot + dimensions       |
-| T24| `eb brief` renders without LLM, contains UNKNOWN  |
-| T25| `eb brief --date` renders historical brief        |
-| T26| `eb record-request` writes observed_request row   |
-| T27| `eb gov-verify` PASS on fresh DB                  |
-| T28| `eb gov-verify` FAIL on chain break               |
-
-### 13.4 Brief generation tests
-
-| #  | Test                                              |
-|----|---------------------------------------------------|
-| T29| Brief: UNKNOWN rendered for unobservable dims     |
-| T30| Brief: NOT_ENFORCED rendered for E4 fields        |
-| T31| Brief: yesterday usage from observed_request      |
-| T32| Brief: burn trend increasing/decreasing/stable    |
-
-### 13.5 Publication tests
-
-| #  | Test                                              |
-|----|---------------------------------------------------|
-| T33| publish-brief: writes daily-brief + latest + json |
-| T34| publish-brief: redacts secret patterns, aborts    |
-| T35| publish-brief: provider-state.json valid schema   |
-
-### 13.6 Integration tests
-
-| #  | Test                                              |
-|----|---------------------------------------------------|
-| T36| Full cycle: telemetry → brief → publish            |
-| T37| Concurrent telemetry: lock file prevents overlap  |
-| T38| Stale lock: broken after timeout, warning logged  |
-
-**Total: 38 tests**
+**Total: 45 tests** (expanded from 38 due to D3 routable, D5 aggregate)
 
 ---
 
-## 14. Rollout procedure
+## 13. Rollout procedure
 
-### 14.1 Pre-rollout
+1. This plan committed (PLAN ONLY) — DONE
+2. Owner decisions approved — DONE
+3. Create `exec-brain/e2` branch
+4. Implement: eb.py extensions, test_governor.py, deepseek-config.json template
+5. Run 45/45 tests on feature branch
+6. Update current_company_state.md (Timestamp = last step)
+7. Create decisions/exec-brain-e2-rollout.md
+8. Merge to main
+9. Enable ExecBrainTelemetry scheduled task
+10. Run `eb telemetry` manually (first snapshot)
+11. Run `eb brief --publish` (first brief + sync)
+12. Verify: gov-verify PASS, brief renders, no secrets in repo
 
-1. E1 is ACTIVE and verified (done — 32/32 tests, audit PASS)
-2. Review and approve this E2 plan
-3. Create feature branch `exec-brain/e2` from main
-4. Implement E2 (NOT YET — plan only)
-
-### 14.2 Rollout steps
-
-1. **Merge plan** to main (this commit — plan only, no code)
-2. **Implement** on `exec-brain/e2` branch:
-   - Extend `eb.py` with E2 commands
-   - Create `tests/test_governor.py` (38 tests)
-   - Create `deepseek-config.json` template (budget only, no key)
-3. **Test**: run full matrix on feature branch
-4. **Update** `current_company_state.md`:
-   - Fix Timestamp to actual edit time
-   - Add "Executive Brain: E2 IMPLEMENTED (provider telemetry + daily brief)"
-5. **Update** `decisions/exec-brain-e2-rollout.md` (new decision record)
-6. **Merge** to main
-7. **Enable** scheduled task `ExecBrainTelemetry` (30-min cadence)
-8. **Run** `eb telemetry` manually to verify first snapshot
-9. **Run** `eb brief --publish` to verify first brief + GitHub sync
-10. **Verify**: `eb gov-verify` PASS, brief renders, no secrets in repo
-
-### 14.3 Rollback procedure
-
-If E2 causes issues:
-1. Disable `ExecBrainTelemetry` scheduled task
-2. Delete/rename `governor.db` (telemetry data is disposable)
-3. Revert `eb.py` to E1 version (git revert)
-4. Re-run E1 test matrix to confirm E1 still works (32/32)
-5. Update `current_company_state.md` Timestamp + E2 status
-6. Commit rollback
-
-E1 is unaffected by E2 rollback because:
-- E2 uses a separate governor.db
-- E2 adds new commands but does not modify E1 commands
-- E2 does not alter E1's exec_brain.db schema
+Rollback: disable task, delete governor.db, revert eb.py, re-verify E1 32/32.
 
 ---
 
-## 15. Acceptance criteria
+## 14. Acceptance criteria
 
-E2 is accepted when:
-
-1. **38/38 tests pass** on the rev-1 test matrix
-2. **`eb gov-verify` PASS** on a fresh governor.db after one poll cycle
-3. **`eb brief` renders** for all four providers with:
-   - UNKNOWN for all unobservable dimensions
-   - NOT_ENFORCED for reserve/effective_usable/exhaustion fields
-   - No synthetic "overall capacity %"
-4. **`eb brief --publish`** writes three files to the control-plane repo
-   with NO secrets, NO raw DB content, NO internal paths
-5. **DeepSeek key** is never printed, logged, or committed (verified by
-   grep of all output files + git diff)
-6. **E1 regression**: `eb audit --verify` still PASS, E1 test matrix 32/32
-   still green
-7. **Scheduled task** `ExecBrainTelemetry` runs every 30 min, survives
-   reboot, logs cleanly
-8. **`current_company_state.md` Timestamp** is correct (time of edit)
-9. **Chain verification**: provider_snapshot and capacity_dimension hash
-   chains are valid after 7 days of polling
-10. **Prune**: `eb telemetry --prune` removes rows older than retention,
-    writes prune.log, updates chain-head
+1. 45/45 tests pass
+2. `eb gov-verify` PASS after one poll cycle
+3. `eb brief` renders: UNKNOWN for unobservable, NOT_ENFORCED for E4,
+   no synthetic overall capacity %
+4. `eb brief --publish` writes 3 files, no secrets, no internal paths
+5. DeepSeek key never printed/logged/committed
+6. E1 regression: 32/32 green, audit PASS
+7. Scheduled task runs every 30 min, survives reboot
+8. current_company_state.md Timestamp correct
+9. Chain valid after 7 days of polling
+10. Prune deterministic + auditable
 
 ---
 
-## 16. Design decisions needing owner approval
-
-The following decisions in this plan should be confirmed by the owner
-before implementation:
-
-### D1. Separate governor.db vs. extending exec_brain.db
-
-**Proposed**: Separate `governor.db` for telemetry (high-frequency,
-independent retention). E1's `exec_brain.db` is unchanged.
-
-**Alternative**: Add E2 tables to `exec_brain.db` (single DB, single backup).
-
-**Tradeoff**: Separate = cleaner retention, independent pruning, no risk to
-E1 data. Unified = single backup/restore story, simpler deployment.
-
-### D2. DeepSeek key storage location
-
-**Proposed**: Read from env var `DEEPSEEK_API_KEY` first, then Windows
-Credential Manager target `deepseek:api`.
-
-**Question**: Where is the owner's DeepSeek API key currently stored? The
-plan must match the actual storage location. If it's in a different
-credential store or file, the adapter's resolution order must be updated.
-
-### D3. Codex and Antigravity — desktop apps with no API
-
-**Proposed**: Adapters check process state + installed version only. Most
-dimensions are UNKNOWN.
-
-**Question**: Is this sufficient for E2, or should Codex/Antigravity be
-deferred until a CLI/API becomes available? The architecture assumes CLIs
-exist, but only desktop apps are installed. Options:
-- (a) Ship "observed-only" adapters now (process check + UNKNOWN)
-- (b) Defer Codex/Antigravity to a later phase when CLIs are available
-- (c) Mark Codex/Antigravity as "not yet routable" in the brief
-
-### D4. Burn trend calculation window
-
-**Proposed**: Trailing 24h vs preceding 24h, with >20% threshold for
-"increasing"/"decreasing".
-
-**Alternative**: 7-day trailing window for smoother trends.
-
-### D5. Retention periods
-
-**Proposed**: snapshots 90d, requests 30d, briefs 365d.
-
-**Question**: Acceptable, or should the owner prefer different periods?
-
----
-
-## 17. Out of scope (confirmed NOT implemented in E2)
+## 15. Out of scope (E2 only)
 
 - Worker qualification / performance gating (E3)
 - Central Qualification Gate (E3)
@@ -1069,60 +667,15 @@ exist, but only desktop apps are installed. Options:
 - Safe mode / owner override UX (E5)
 - Provider/model quality claims
 - Automatic model selection
-- Provider API routing (the actual sending of requests to providers)
-- Real-time exhaustion alerts
-- Reserve policy configuration UI
-- Multi-model staged execution
+- Provider API routing (sending requests)
 
-Schema columns for these (reserve, effective_usable) exist as
-NOT_ENFORCED placeholders but are not computed or enforced.
+Schema columns for these exist as NOT_ENFORCED placeholders only.
 
 ---
 
-## 18. File plan summary
+## 16. Amendment history
 
-New files (local, outside repo — raw/high-frequency state stays local):
-
-    %LOCALAPPDATA%\hermes\exec-brain\
-      governor.db                created on first `eb telemetry` run
-      gov-chain-head.json        created on first `eb telemetry` run
-      telemetry.log              created on first `eb telemetry` run
-      telemetry.lock             created during poll, removed after
-      prune.log                  created on first prune
-      deepseek-config.json       created by owner (budget template)
-      tests\test_governor.py     38-test stdlib unittest suite
-
-Modified files:
-
-    %LOCALAPPDATA%\hermes\exec-brain\
-      eb.py                      extended with E2 subcommands (telemetry,
-                                 brief, record-request, gov-status,
-                                 gov-verify, publish-brief)
-
-New files (control-plane repo — curated summaries only):
-
-    mukund-chief-control-plane\
-      resource-status\
-        daily-brief-<YYYY-MM-DD>.md    dated brief (generated)
-        latest-brief.md                copy of latest (generated)
-        provider-state.json            machine-readable state (generated)
-      decisions\
-        exec-brain-e2-rollout.md       rollout decision record (new)
-      architecture-proposals\
-        executive-brain-e2-implementation-plan.md  (this file)
-      proposals\
-        executive-brain-e2-implementation-plan.md  (unchanged review copy)
-
-Modified files (control-plane repo):
-
-    mukund-chief-control-plane\
-      state\current_company_state.md   Timestamp fix + E2 status
-
----
-
-## 19. Amendment history
-
-- rev 1 (2026-09-22): Initial plan. Based on local reconnaissance of
-  installed providers. Codex and Antigravity are desktop apps (no CLI);
-  Nous and DeepSeek are API-accessible. 38-test matrix. 5 owner decisions
-  identified (D1–D5).
+- rev 1 (2026-09-22): Initial plan.
+- rev 2 (2026-09-22): Owner decisions D1–D5 incorporated. Added routable
+  flag (D3), daily_aggregate table (D5), CM credential handling (D2),
+  burn trend states (D4). Test matrix expanded 38→45. Status → APPROVED.
