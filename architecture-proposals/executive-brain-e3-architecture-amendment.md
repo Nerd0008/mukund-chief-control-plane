@@ -86,6 +86,7 @@ The AI proposes. The deterministic Qualification Gate decides.
 | 26 | Structured escalation / ask-owner | **new** | — |
 | 27 | Logical convergence / loop prevention (risk-sensitive) | **new** | — |
 | 28 | Event-sourced governance state | **new** | — |
+| 29 | Decision rationale / reasoning audit log | **new** | — |
 
 ### 3.3 What E3 does NOT absorb (phase boundaries preserved)
 
@@ -525,6 +526,70 @@ Store:
 - Candidate comparison metadata
 
 No secrets. No provider credentials. No raw sensitive prompts in GitHub. Apply local privacy/retention constraints to orchestration.db.
+
+### A8 — DECISION RATIONALE / REASONING AUDIT LOG
+
+E3 must maintain a reviewable rationale trail for consequential AI decisions.
+
+This is NOT raw hidden chain-of-thought or unrestricted model scratchpad.
+Every important AI decision must emit a structured Decision Rationale Record
+explaining the decision at an auditable level.
+
+**Required for at least:**
+- task decomposition
+- decomposition rejection/revision
+- router/team selection
+- worker selection
+- integrator decisions
+- conflict resolution
+- targeted rework
+- replanning
+- critic/verifier conclusions
+- escalation decisions
+
+**Decision Rationale Record fields:**
+- decision_id, task_id, plan_id, node_id (where applicable)
+- decision_type, decision_actor / worker identity
+- provider + model identity, timestamp
+- objective: what decision was being made
+- chosen_action: what the model proposed/selected
+- alternatives_considered: other realistic options considered
+- alternative_rejections: structured explanation for why each major alternative was not selected
+- decisive_factors: task capability requirements, E1 quality floor, historical evidence, similar-task outcomes, E2 provider/resource state, tool/context constraints, cost/latency where relevant, privacy/egress constraints, verification requirements
+- evidence_references: capability registry entries, performance evidence IDs, provider-state snapshot IDs, task/floor IDs, external/provider evidence references where relevant
+- assumptions: important assumptions the decision depends upon
+- uncertainties: unknown or weakly supported factors
+- confidence: HIGH | MEDIUM | LOW with concise justification
+- expected_tradeoffs: quality, latency, resource use, cost, independence / verification strength
+- gate_result: ACCEPT | REJECT | EVALUATION_ONLY | OWNER_APPROVAL_REQUIRED | other approved gate state
+- next_verification: how the decision/result will be checked
+
+**After-the-fact Outcome Review (separate linked append-only record):**
+- actual_outcome, first_pass_success, verification_result
+- corrections_required, failure_attribution if any
+- decision_quality: SUPPORTED | PARTIALLY_SUPPORTED | POOR
+- lessons: concise structured summary of what future routing/planning should learn
+
+This allows E3 to compare: "What did I believe when I made the decision?" with "What actually happened?"
+
+**Storage:**
+- Append-only `decision_rationale_event` table
+- Do not overwrite previous rationales after outcome is known
+- Original rationale must remain intact so hindsight cannot rewrite why the decision was originally made
+- Outcome review is a separate linked append-only record
+
+**Privacy / Security:**
+- DO NOT store raw private chain-of-thought, hidden model scratchpads, secrets, credentials, unrestricted raw prompts, unnecessary personal information
+- Store concise, deliberate, reviewable decision explanations and evidence references
+- Raw rationale remains local in orchestration.db
+- Only sanitized/curated summaries may be published to GitHub
+
+**Fail-closed rule:**
+For consequential E3 decisions, if the AI cannot provide a sufficiently clear structured rationale:
+- lower decision confidence
+- request another router/critic where appropriate
+- or escalate to owner
+- Do not allow "model chose X" to be the only explanation
 
 ---
 

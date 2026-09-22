@@ -674,6 +674,87 @@ Track attempts per defect, not merely total calls.
 
 ---
 
+### 5.28 Decision Rationale / Reasoning Audit Log (A8)
+
+**Purpose:** Maintain a reviewable rationale trail for consequential AI decisions.
+This is NOT raw hidden chain-of-thought — it is a structured, auditable
+explanation of why each important decision was made.
+
+**Required for at least:**
+- task decomposition
+- decomposition rejection/revision
+- router/team selection
+- worker selection
+- integrator decisions
+- conflict resolution
+- targeted rework
+- replanning
+- critic/verifier conclusions
+- escalation decisions
+
+**Decision Rationale Record fields:**
+- decision_id, task_id, plan_id, node_id (where applicable)
+- decision_type, decision_actor / worker identity
+- provider + model identity, timestamp
+- objective: what decision was being made
+- chosen_action: what the model proposed/selected
+- alternatives_considered: other realistic options
+- alternative_rejections: structured explanation for each major alternative not selected
+- decisive_factors: floor, evidence, E2 state, constraints
+- evidence_references: capability registry entries, performance evidence IDs, etc.
+- assumptions, uncertainties
+- confidence: HIGH | MEDIUM | LOW with justification
+- expected_tradeoffs: quality, latency, cost, independence
+- gate_result: ACCEPT | REJECT | EVALUATION_ONLY | OWNER_APPROVAL_REQUIRED
+- next_verification: how the result will be checked
+
+**After-the-fact Outcome Review (separate linked append-only record):**
+- actual_outcome, first_pass_success, verification_result
+- corrections_required, failure_attribution
+- decision_quality: SUPPORTED | PARTIALLY_SUPPORTED | POOR
+- lessons: concise structured summary for future learning
+
+**Storage:**
+- Append-only `decision_rationale_event` table
+- Do not overwrite previous rationales after outcome is known
+- Original rationale must remain intact (hindsight cannot rewrite history)
+- Outcome review is a separate linked append-only record
+
+**Privacy / Security:**
+- DO NOT store raw private chain-of-thought, hidden model scratchpads, secrets,
+  credentials, unrestricted raw prompts, unnecessary personal information
+- Store concise, deliberate, reviewable decision explanations
+- Raw rationale remains local in orchestration.db
+- Only sanitized/curated summaries may be published to GitHub
+
+**Fail-closed rule:**
+For consequential E3 decisions, if the AI cannot provide a sufficiently
+clear structured rationale:
+- lower decision confidence
+- request another router/critic where appropriate
+- or escalate to owner
+- Do not allow "model chose X" to be the only explanation
+
+**CLI views:**
+- `eb e3-rationale <decision_id>` — show Decision Rationale Record
+- `eb e3-trace <task_id>` — reconstruct high-level decision history
+- `eb e3-why <node_id>` — show why a node was routed/assigned/decided
+
+The `e3-trace` command reconstructs:
+```
+Task received
+→ planner chose decomposition because ...
+→ decomposition critic approved because ...
+→ router considered A/B/C
+→ selected B because ...
+→ Qualification Gate accepted because ...
+→ critic found defect ...
+→ rework assigned because ...
+→ final verification passed
+```
+
+---
+
 ## 6. Storage design
 
 ### 6.1 Recommendation: separate `orchestration.db` (D-AI-1 APPROVED)
@@ -862,6 +943,51 @@ CREATE TABLE dag_state_event (
     verification_reference TEXT,     -- performance_evidence_id
     timestamp TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Decision rationale / reasoning audit log (A8, append-only)
+CREATE TABLE decision_rationale_event (
+    rationale_id TEXT PRIMARY KEY,
+    task_id TEXT NOT NULL,
+    plan_id TEXT NOT NULL,
+    node_id TEXT,
+    decision_type TEXT NOT NULL,     -- decomposition, worker_selection, integration, etc.
+    decision_actor TEXT NOT NULL,    -- worker id that made the decision
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    model_identity TEXT,             -- provider+model+version snapshot
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    objective TEXT NOT NULL,
+    chosen_action TEXT NOT NULL,
+    alternatives_considered TEXT,    -- JSON list
+    alternative_rejections TEXT,     -- JSON list of {alternative, reason}
+    decisive_factors TEXT NOT NULL,  -- JSON: floor, evidence, E2 state, constraints
+    evidence_references TEXT,        -- JSON list of evidence IDs
+    assumptions TEXT,                -- JSON list
+    uncertainties TEXT,              -- JSON list
+    confidence TEXT NOT NULL,        -- HIGH | MEDIUM | LOW
+    confidence_justification TEXT NOT NULL,
+    expected_tradeoffs TEXT,         -- JSON: quality, latency, cost, independence
+    gate_result TEXT NOT NULL,       -- ACCEPT | REJECT | EVALUATION_ONLY | OWNER_APPROVAL_REQUIRED
+    next_verification TEXT NOT NULL, -- how the result will be checked
+    rationale_codes TEXT NOT NULL,   -- structured machine-readable codes (A7)
+    concise_rationale TEXT NOT NULL  -- concise human-readable non-sensitive rationale (A7)
+);
+
+-- Decision outcome review (A8, append-only, linked to rationale)
+CREATE TABLE decision_outcome_review (
+    review_id TEXT PRIMARY KEY,
+    rationale_id TEXT NOT NULL,      -- links to decision_rationale_event
+    plan_id TEXT NOT NULL,
+    node_id TEXT,
+    actual_outcome TEXT NOT NULL,    -- SUCCESS | FAILURE | REWORK | ESCALATED
+    first_pass_success INTEGER,
+    verification_result TEXT,
+    corrections_required INTEGER DEFAULT 0,
+    failure_attribution TEXT,
+    decision_quality TEXT NOT NULL,  -- SUPPORTED | PARTIALLY_SUPPORTED | POOR
+    lessons TEXT NOT NULL,           -- concise structured summary for future learning
+    timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+);
 ```
 
 ### 6.5 Append-only / audit tables
@@ -873,6 +999,8 @@ Append-only tables (never UPDATE/DELETE):
 - plan_version
 - worker_capability_event
 - dag_state_event
+- decision_rationale_event (A8)
+- decision_outcome_review (A8)
 
 Mutable tables (current-state, rebuildable from events):
 - dag_node (state transitions are updates)
@@ -899,6 +1027,8 @@ Hash-chained tables: performance_evidence, router_decision
 | Plan versions | 365 days |
 | worker_capability_event | 365 days (qualification transitions preserved permanently per A6) |
 | dag_state_event | 90 days |
+| decision_rationale_event | 365 days (summary preserved permanently per A6) |
+| decision_outcome_review | 365 days (summary preserved permanently per A6) |
 
 **Long-term evidence (A6):** Detailed artifacts may expire, but verified
 learning is preserved as a compact permanent evidence summary:
@@ -982,6 +1112,9 @@ Extend `eb.py` with E3 subcommands:
 | `eb e3-workers` | Show worker capability registry |
 | `eb e3-evidence` | Show performance evidence summary |
 | `eb e3-escalate` | Structured escalation |
+| `eb e3-rationale <decision_id>` | Show Decision Rationale Record for a decision |
+| `eb e3-trace <task_id>` | Reconstruct high-level decision history for a task |
+| `eb e3-why <node_id>` | Show why a node was routed/assigned/decided a certain way |
 | `eb e3-verify-db` | Verify orchestration.db integrity |
 | `eb e3-init` | Initialize orchestration.db |
 
@@ -1145,7 +1278,11 @@ orchestration-status/
 | T-P2 | Shadow evaluation (disabled by default, R0/R1 only) | 2 |
 | T-P3 | Exploration policy (D-AI-5 conservative limits) | 2 |
 | T-P4 | Data privacy (A7: no raw CoT in router_decision) | 2 |
-| | **Total** | **~95** |
+| T-Q1 | Decision rationale record creation (A8: all 10 decision types) | 4 |
+| T-Q2 | Decision rationale fail-closed (A8: unclear → lower confidence/escalate) | 2 |
+| T-Q3 | Outcome review linked to rationale (A8: hindsight doesn't rewrite) | 2 |
+| T-Q4 | e3-rationale / e3-trace / e3-why CLI views | 3 |
+| | **Total** | **~108** |
 
 ---
 
@@ -1240,6 +1377,7 @@ E1/E2 rollback independent of E3 rollback.
 - `C:\Users\mukun\AppData\Local\hermes\exec-brain\e3_replan.py`
 - `C:\Users\mukun\AppData\Local\hermes\exec-brain\e3_escalate.py`
 - `C:\Users\mukun\AppData\Local\hermes\exec-brain\e3_evidence.py`
+- `C:\Users\mukun\AppData\Local\hermes\exec-brain\e3_rationale.py`
 - `C:\Users\mukun\AppData\Local\hermes\exec-brain\tests\test_e3.py`
 
 ### Create (control-plane repo)
