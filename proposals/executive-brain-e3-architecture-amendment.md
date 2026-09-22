@@ -1,6 +1,6 @@
 # Executive Brain E3 — Architecture Amendment Proposal
 
-Status: PROPOSED — not yet approved
+Status: PROPOSED — revised per owner decisions D-AI-1 through D-AI-7 and corrections A1–A7
 Date: 2026-09-22
 Author: Chief of Staff (Hermes)
 Supersedes: approved-architecture/executive-brain-v2.md §19 E3 description (narrow)
@@ -59,7 +59,7 @@ The AI proposes. The deterministic Qualification Gate decides.
 | # | Responsibility | New in E3 | Previously in v2 |
 |---|---|---|---|
 | 1 | Task planner / decomposer | **new** | E1 had mechanics only |
-| 2 | Decomposition quality gate | **new** | — |
+| 2 | Decomposition quality gate (hybrid) | **new** | — |
 | 3 | Execution DAG engine | **new** | — |
 | 4 | Worker contract builder | **new** | — |
 | 5 | Capability registry | **new** | — |
@@ -73,7 +73,7 @@ The AI proposes. The deterministic Qualification Gate decides.
 | 13 | Permission compiler | **new** | — |
 | 14 | Multi-worker execution engine | **new** | — |
 | 15 | Conflict detection / resolution | **new** | — |
-| 16 | Integrator role | **new** | — |
+| 16 | Integrator role (separate capability) | **new** | — |
 | 17 | Independent verification path | **new** | — |
 | 18 | Targeted rework | **new** | — |
 | 19 | Intelligent replanning (logical) | **new** | — |
@@ -81,9 +81,11 @@ The AI proposes. The deterministic Qualification Gate decides.
 | 21 | Performance learning + evidence storage | kept | §13 |
 | 22 | Model identity / version drift handling | **new** | — |
 | 23 | Exploration vs exploitation policy | **new** | — |
-| 24 | Router self-evaluation | **new** | — |
-| 25 | Structured escalation / ask-owner | **new** | — |
-| 26 | Logical convergence / loop prevention | **new** | — |
+| 24 | Shadow evaluation (E3, not E4) | **new** | — |
+| 25 | Router self-evaluation | **new** | — |
+| 26 | Structured escalation / ask-owner | **new** | — |
+| 27 | Logical convergence / loop prevention (risk-sensitive) | **new** | — |
+| 28 | Event-sourced governance state | **new** | — |
 
 ### 3.3 What E3 does NOT absorb (phase boundaries preserved)
 
@@ -107,13 +109,20 @@ E3 AI Planner: should this decompose?
     ├─ No  → single-node execution
     └─ Yes → propose subtask decomposition
               ↓
-         Decomposition Quality Gate (deterministic review)
+         Decomposition Quality Gate (HYBRID)
+         ├─ Deterministic structural checks (DAG acyclic, deps valid, floors exist, fields exist,
+         │  no illegal transitions, no unsafe shared-write parallelism, integration node exists,
+         │  verification node exists)
+         └─ Semantic decomposition review (AI critic): missing deliverables, unnecessary
+            decomposition, semantic duplication, floor-dodging, bad capability separation,
+            incorrect conceptual dependency
               ↓
          Build Execution DAG (nodes + dependencies)
               ↓
          For each node:
            - compute task fingerprint
            - retrieve historical similar executions
+           - Deterministic meta-selector chooses router worker
            - AI Router proposes MULTIPLE candidate teams (advisory)
            - Central Qualification Gate validates each proposal (deterministic)
            - Context + Permission compilers package inputs
@@ -129,7 +138,7 @@ E3 AI Planner: should this decompose?
               ↓
          Independent critic / deterministic verification
               ↓
-         Targeted rework if defect found
+         Targeted rework if defect found (risk-sensitive convergence)
               ↓
          Final verified deliverable
               ↓
@@ -167,6 +176,7 @@ Critical rules:
 - "LOCKED" = included in initial pool, **not** qualified for any role
 - No worker receives production capability qualification merely by roster inclusion
 - Qualification remains evidence-based per (worker × task-family × capability-role)
+- **Stage 2 clarification:** Any UNPROVEN worker executing Stage 2 work runs as **EVALUATION_ONLY** under cold-start rules. It does not become production-qualified simply because it belongs to the LOCKED roster.
 
 ---
 
@@ -188,6 +198,7 @@ Stable roles (machine-readable, extensible):
 - vision
 - data-analyst
 - context-compressor
+- **router** (itself a capability role — D-AI-2)
 
 Qualification key shape: `worker × task-family/fingerprint × capability-role`
 
@@ -223,7 +234,7 @@ not scalar scores.
 
 ## 8. Storage recommendation — separate orchestration database
 
-### 8.1 Recommendation: **separate `orchestration.db`**
+### 8.1 Recommendation: **separate `orchestration.db`** (D-AI-1 APPROVED)
 
 ### 8.2 Analysis
 
@@ -275,7 +286,249 @@ The Central Qualification Gate is the Brain-owned authority.
 
 ---
 
-## 10. Boundaries — E3 must NOT implement
+## 10. Owner decisions incorporated
+
+### D-AI-1 — APPROVED: Separate orchestration.db
+
+E1 exec_brain.db remains authoritative and protected.
+E2 governor.db remains separate.
+E3 orchestration/evidence state belongs in orchestration.db with logical references to E1 IDs.
+
+### D-AI-2 — ROUTER AI: NO PERMANENT MODEL
+
+"Router" is itself a capability role.
+
+Architecture:
+```
+Deterministic meta-selector
+    ↓
+chooses an eligible router worker
+    ↓
+Router AI reasons about team assembly
+    ↓
+Qualification Gate checks its proposals
+```
+
+Avoid recursive "AI chooses the AI that chooses the AI".
+
+For cold start / Stage 1:
+- The currently operational Hermes inference worker may act as the BOOTSTRAP router
+- It remains UNPROVEN for the router/planner capability
+- Stage 1 is shadow-only, so it cannot authorize production execution
+- Its routing decisions are reviewed and become evidence
+
+Once qualified routing workers exist, the deterministic meta-selector chooses among them using:
+- qualification evidence
+- task requirements
+- model/provider constraints
+- E2 state
+- uncertainty
+
+The bootstrap worker must remain configurable; it is not permanent architecture.
+
+### D-AI-3 — PLANNER AND ROUTER ARE SEPARATE LOGICAL ROLES
+
+Planner and router are separate capabilities. A worker may perform both if independently qualified for both.
+
+For high-complexity/high-risk decomposition: the decomposition reviewer/critic should be independent of the planner where a qualified alternative exists.
+
+### D-AI-4 — SHADOW EVALUATION BELONGS TO E3
+
+Shadow evaluation is worker qualification/learning and therefore belongs to E3 (not E4).
+
+Implement support in E3 v1, but:
+- Disabled by default
+- Only usable for R0/R1 tasks
+- Only where independent/deterministic verification exists
+- Shadow output must never become authoritative production output merely because it exists
+- Activation can be manual/owner-policy controlled during Stage 2
+
+### D-AI-5 — EXPLORATION POLICY: CONSERVATIVE, POLICY-BASED
+
+Do not hardcode an arbitrary exploration percentage.
+
+Eligibility:
+- R0/R1 only
+- Objectively verifiable
+- Failure has no material consequence
+- Adequate E2 resource/cost state
+- No secret/privacy violation
+
+Default v1 limit:
+- At most one experimental/shadow worker per eligible production task
+- No exploration on R2/R3 production work
+- Owner may tighten/disable exploration
+
+Record exploration cost and outcome.
+
+### D-AI-6 — CONVERGENCE / RETRY POLICY: RISK-SENSITIVE
+
+Do not use a universal "N=3 reworks" rule. Use risk-sensitive convergence.
+
+| Risk | Initial attempt | Recovery | Escalation |
+|---|---|---|---|
+| R0/R1 | 1 | Up to 2 targeted recovery attempts | Then stronger worker / REPLAN / ESCALATE |
+| R2 | 1 | Maximum 1 autonomous targeted repair | Subsequent verified failure → stronger qualified route or ASK OWNER |
+| R3 | 1 | No repeated autonomous repair loop after material verified failure | ASK OWNER / replan under owner-approved path |
+
+The same defect surviving repeated attempts must cause escalation/replanning rather than prompt-looping.
+
+Track attempts per defect, not merely total calls.
+
+### D-AI-7 — INTEGRATOR IS A SEPARATE CAPABILITY ROLE
+
+Do not hardcode the integrator model. Select integrators dynamically from workers qualified for the integrator role.
+
+The same worker MAY be router/planner/integrator if independently qualified, but architecture must not assume this.
+
+The integrator MUST NOT be the sole verifier of its own output.
+
+For V3 / high-risk work, use an independent verifier/critic, preferably a different worker and where practical a different provider/model family.
+
+---
+
+## 11. Required architecture corrections
+
+### A1 — DECOMPOSITION GATE MUST BE HYBRID
+
+The decomposition gate is split into two layers:
+
+**Layer 1: Deterministic structural checks**
+- DAG acyclic
+- Dependencies valid
+- Referenced floors exist
+- Required node fields exist
+- No illegal state transitions
+- No unsafe declared shared-write parallelism
+- Integration node exists when multiple outputs require assembly
+- Verification node/method exists where floor requires it
+
+**Layer 2: Semantic decomposition review (AI critic)**
+- Missing deliverables
+- Unnecessary decomposition
+- Semantic duplication
+- Floor-dodging by artificial splitting
+- Bad capability separation
+- Incorrect conceptual dependency
+
+The deterministic Brain still makes the final allow/reject decision based on the structured review result.
+
+### A2 — E2 TELEMETRY ADAPTERS ≠ E3 EXECUTION ADAPTERS
+
+Do NOT treat DeepSeek/Nous E2 telemetry adapters as already capable of dispatch.
+
+E2 rollout explicitly did NOT implement provider API request routing.
+
+Create a distinct E3 execution adapter interface for ALL workers.
+
+Shared provider credential/config/client utilities may be reused, but dispatch capability must be independently implemented and tested.
+
+Required interface includes at minimum:
+- dispatch
+- result retrieval
+- timeout
+- cancellation where supported
+- structured error mapping
+- observed usage
+- provider/model identity
+- execution metadata
+- idempotency/retry semantics
+- tool/permission enforcement where applicable
+
+A provider becomes E3 routable only after its EXECUTION adapter passes qualification/smoke tests.
+
+### A3 — E1/E2 PUBLIC INTERFACE BOUNDARY
+
+"E3 never writes E1/E2 DB" means: E3 must not perform direct SQL writes to those databases.
+
+But E3 MUST invoke the owning subsystem when required:
+
+- For new/replanned subtasks: E3 → E1 public interface → classify/decompose/freeze. E1 remains sole writer to exec_brain.db.
+- For every actual AI/provider execution: E3 execution adapter → E2 public record-request interface. E2 remains sole writer to governor.db.
+
+This keeps E2 usage telemetry accurate.
+
+### A4 — EVENT-SOURCED GOVERNANCE-CRITICAL STATE
+
+Do not rely solely on mutable capability_registry rows and dag_node.state.
+
+Add append-only event history:
+
+**worker_capability_event**
+- UNPROVEN → EVALUATING → QUALIFIED → SUSPENDED transitions
+- Reason
+- Evidence references
+- Actor
+- Timestamp
+- Model identity
+
+**dag_state_event**
+- Node
+- Previous state
+- New state
+- Cause
+- Dispatch/verification reference
+- Timestamp
+
+Current-state tables/views may exist for fast reads but must be rebuildable from authoritative event history.
+
+No silent rewriting of qualification history.
+
+### A5 — UNKNOWN E2 CAPACITY SEMANTICS
+
+Do NOT automatically reject a worker only because capacity is UNKNOWN.
+
+UNKNOWN means unknown. Gate behaviour must consider:
+- Risk
+- Expected duration
+- Task value
+- Telemetry confidence
+- Recent observed success/failure
+- Alternative qualified routes
+
+Possible outcomes:
+- ACCEPT_WITH_LOW_RESOURCE_CONFIDENCE
+- REJECT
+- PAUSE
+- OWNER_APPROVAL_REQUIRED
+
+depending on policy.
+
+Never reinterpret UNKNOWN as zero, unlimited, or healthy.
+
+### A6 — LONG-TERM EVIDENCE RETENTION
+
+Detailed execution artifacts may expire according to retention policy.
+
+But do not discard the system's verified learning after 365 days.
+
+Preserve indefinitely, or as a compact permanent evidence summary:
+- Qualification transitions
+- Serious failures
+- Model identity/version
+- Aggregate verified outcomes
+- First-pass history
+- Correction severity history
+- Suspension/requalification events
+
+Recency may reduce ROUTING WEIGHT without deleting historical provenance.
+
+### A7 — ROUTER / PERFORMANCE DATA PRIVACY
+
+Do not store raw chain-of-thought or unrestricted task content in router_decision.reasoning.
+
+Store:
+- Structured rationale codes
+- Evidence references
+- Concise non-sensitive rationale
+- Confidence
+- Candidate comparison metadata
+
+No secrets. No provider credentials. No raw sensitive prompts in GitHub. Apply local privacy/retention constraints to orchestration.db.
+
+---
+
+## 12. Boundaries — E3 must NOT implement
 
 - Worker qualification bypass
 - Predictive exhaustion enforcement (E4)
@@ -286,105 +539,101 @@ The Central Qualification Gate is the Brain-owned authority.
 - Permanent model-role mapping
 - Universal model score / leaderboard
 - Provider marketing as qualification evidence
+- Shadow evaluation as production authority
 
 Forward-compatibility with E4/E5 schemas is acceptable. Implementing their
 behavior is not.
 
 ---
 
-## 11. Unresolved owner decisions
+## 13. Conflicts discovered with E1/E2
 
-These need explicit owner approval before implementation:
-
-| # | Decision |
-|---|---|
-| D-AI-1 | Separate `orchestration.db` approved? (recommended: yes) |
-| D-AI-2 | Router AI model: which model class performs team assembly reasoning? (candidate: a strong reasoning model, not necessarily premium) |
-| D-AI-3 | Planner AI model: same as router, or separate? |
-| D-AI-4 | Shadow evaluation in E3 v1, or deferred to E4? |
-| D-AI-5 | Exploration rate for cold-start evaluation: how aggressive? |
-| D-AI-6 | Convergence retry limits: what are the justified numbers? |
-| D-AI-7 | Integrator model: same model class as router, or separate role-specific model? |
-
----
-
-## 12. Conflicts discovered with E1/E2
-
-### 12.1 With E1
-- **No conflicts.** E1 schema remains authoritative. E3 reads E1 data,
-  never writes. Decomposition in E3 uses E1's decomposition records/floor
-  discipline as its foundation. E3 does not mutate E1 history or frozen floors.
+### 13.1 With E1
+- **No conflicts.** E1 schema remains authoritative. E3 reads E1 data via E1 public interface, never writes directly. Decomposition in E3 uses E1's decomposition records/floor discipline as its foundation. E3 does not mutate E1 history or frozen floors.
 - New/replanned subtasks go through the E1 floor process before worker routing.
 
-### 12.2 With E2
-- **No conflicts.** E2 telemetry is consumed by E3 as routing evidence.
-  Resource scarcity may change WHICH qualified worker is selected, but NEVER
-  lowers the E1 quality floor. This is already enforced by the No-Degradation
-  Invariant.
-- Codex and Antigravity are observed-only / non-routable in E2. E3 must handle
-  this truthfully — do not dispatch to a provider with no automation path.
-- E2 UNKNOWN telemetry must not be interpreted as routable/unroutable by itself.
-  E3 uses its own capability registry + qualification evidence for routing.
+### 13.2 With E2
+- **No conflicts.** E2 telemetry is consumed by E3 as routing evidence via E2 public interface. Resource scarcity may change WHICH qualified worker is selected, but NEVER lowers the E1 quality floor. This is already enforced by the No-Degradation Invariant.
+- Codex and Antigravity are observed-only / non-routable in E2. E3 must handle this truthfully — do not dispatch to a provider with no automation path.
+- E2 UNKNOWN telemetry must not be interpreted as routable/unroutable by itself. E3 uses its own capability registry + qualification evidence for routing, with UNKNOWN handled per A5.
 
 ---
 
-## 13. Provider execution adapters required
+## 14. Provider execution adapters required
 
-For the 10-worker roster to be dispatchable, E3 requires:
+For the 10-worker roster to be dispatchable, E3 requires a distinct execution adapter interface (per A2):
 
-| Worker | Interface | Adapter status in E2 | E3 requirement |
+| Worker | Interface | E2 telemetry adapter | E3 execution adapter |
 |---|---|---|---|
-| Codex CLI | CLI spawn | observed-only | CLI automation adapter |
-| Mistral Small 4 | API (OpenAI-compatible) | — | API adapter |
-| Google Nano Banana 2 | API (Google) | — | API adapter |
-| DeepSeek V4.1 Flash | API (DeepSeek) | routable | existing E2 adapter reuse |
-| GLM-5.3 Flash | API (OpenAI-compatible) | — | API adapter |
-| Qwen3.8-27B | API | — | API adapter |
-| LongCat 2.0 | API (Nous) | routable | existing E2 adapter reuse |
-| MiniMax M3 | API | — | API adapter |
-| Step 3.7 Flash | API | — | API adapter |
-| Tencent Hunyuan Hy3 | API | — | API adapter |
+| Codex CLI | CLI | observed-only | CLI automation adapter (new) |
+| Mistral Small 4 | API (OpenAI-compatible) | — | API adapter (new) |
+| Google Nano Banana 2 | API (Google) | — | API adapter (new) |
+| DeepSeek V4.1 Flash | API (DeepSeek) | routable | Execution adapter (new, may reuse credential/config utilities) |
+| GLM-5.3 Flash | API (OpenAI-compatible) | — | API adapter (new) |
+| Qwen3.8-27B | API | — | API adapter (new) |
+| LongCat 2.0 | API (Nous) | routable | Execution adapter (new, may reuse credential/config utilities) |
+| MiniMax M3 | API | — | API adapter (new) |
+| Step 3.7 Flash | API | — | API adapter (new) |
+| Tencent Hunyuan Hy3 | API | — | API adapter (new) |
 
-Key insight: E2 already has DeepSeek and Nous adapters. Codex/Antigravity need
-CLI/API enablement before they become routable. The remaining 6 require new
-adapters.
+Key insight: E2 adapters provide telemetry, not dispatch. Each worker needs an independent E3 execution adapter that passes qualification/smoke tests before becoming routable.
 
 ---
 
-## 14. Amendment acceptance criteria
+## 15. Amendment acceptance criteria
 
 This amendment is approved when the owner confirms:
 
 1. E3 = Intelligent Multi-Model Orchestration + Dynamic Team Assembly + Worker Qualification
-2. Separate `orchestration.db` (not extending exec_brain.db)
-3. All 26 E3 responsibilities listed above
-4. E4/E5 boundaries preserved
-5. E1/E2 integration rules preserved
-6. Provider adapter roster and interface strategy accepted
-7. All D-AI-* decisions resolved
+2. Separate `orchestration.db` (D-AI-1)
+3. All 28 E3 responsibilities listed above
+4. Router AI has no permanent model; bootstrap router is configurable (D-AI-2)
+5. Planner and router are separate logical roles (D-AI-3)
+6. Shadow evaluation belongs to E3, disabled by default (D-AI-4)
+7. Exploration policy is conservative, policy-based (D-AI-5)
+8. Convergence is risk-sensitive, not universal N=3 (D-AI-6)
+9. Integrator is a separate capability role (D-AI-7)
+10. Decomposition gate is hybrid (A1)
+11. E2 telemetry adapters ≠ E3 execution adapters (A2)
+12. E3 invokes E1/E2 public interfaces, never writes directly (A3)
+13. Event-sourced governance state for capability and DAG transitions (A4)
+14. UNKNOWN capacity handled per policy, not auto-rejected (A5)
+15. Long-term evidence retention preserves learning (A6)
+16. Router/performance data privacy enforced (A7)
+17. E4/E5 boundaries preserved
+18. E1/E2 integration rules preserved
+19. Provider adapter roster and interface strategy accepted
 
 Once approved, the amendment is applied to `approved-architecture/executive-brain-v2.md`
 and the E3 implementation plan is written.
 
 ---
 
-## 15. Summary of architecture changes proposed
+## 16. Summary of architecture changes proposed
 
 | Area | Current v2 | Proposed E3 |
 |---|---|---|
 | E3 scope | Narrow (history + gating + handover records) | Full orchestration + team assembly + qualification |
 | Storage | Not specified | Separate orchestration.db |
 | AI role | Not specified | AI proposes, deterministic gate decides |
-| Planner | Not present | First-class AI task planner |
-| DAG | Not present | Full DAG state machine |
+| Router | Not specified | Capability role, no permanent model, bootstrap configurable |
+| Planner | Not present | First-class AI task planner, separate from router |
+| DAG | Not present | Full DAG state machine with event-sourced transitions |
 | Context compiler | Not present | Minimum sufficient context packaging |
 | Permission compiler | Not present | Per-role permission scoping |
-| Integrator | Not present | First-class capability role |
+| Integrator | Not present | First-class capability role, dynamically selected |
 | Verification | V-level in floor | Independent critic + deterministic checks |
 | Replan | Not present | Versioned logical replanning |
-| Escalation | §14 partial | Structured ask-owner with loop prevention |
-| Router self-eval | Not present | Routing decision evidence |
-| Model identity drift | Not present | Bounded evidence to model identity |
+| Escalation | §14 partial | Structured ask-owner with risk-sensitive loop prevention |
+| Router self-eval | Not specified | Routing decision evidence |
+| Model identity drift | Not specified | Bounded evidence to model identity |
+| Shadow evaluation | Not present | E3-owned, disabled by default |
+| Decomposition gate | Not specified | Hybrid: deterministic structural + AI semantic review |
+| E1/E2 boundary | Not specified | Public interface invocation, no direct writes |
+| Governance state | Not specified | Event-sourced append-only history |
+| UNKNOWN handling | Not specified | Policy-based, not auto-reject |
+| Evidence retention | Not specified | Long-term permanent evidence summary |
+| Data privacy | Not specified | Structured rationale only, no raw CoT |
 
 ---
 

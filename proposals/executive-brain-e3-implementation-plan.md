@@ -1,6 +1,6 @@
 # Executive Brain E3 — Implementation Plan
 
-Status: PROPOSED — not yet approved
+Status: PROPOSED — revised per owner decisions D-AI-1 through D-AI-7 and corrections A1–A7
 Date: 2026-09-22
 Author: Chief of Staff (Hermes)
 Requires: E3 architecture amendment approval first
@@ -35,8 +35,12 @@ E3 = **Intelligent Multi-Model Orchestration + Dynamic Team Assembly + Worker Qu
 
 - AI proposes teams, plans decompositions, builds contracts
 - Deterministic Qualification Gate decides what is allowed
-- E1 floors are never lowered by resource pressure or router opinion
-- E2 telemetry informs but never overrides qualification
+- Router is itself a capability role; no permanent router model (D-AI-2)
+- Planner and router are separate logical roles (D-AI-3)
+- Shadow evaluation belongs to E3, disabled by default (D-AI-4)
+- Exploration is conservative, policy-based (D-AI-5)
+- Convergence is risk-sensitive, not universal N=3 (D-AI-6)
+- Integrator is a separate capability role (D-AI-7)
 
 ---
 
@@ -57,6 +61,11 @@ From: `handovers/2026-09-22-e3-model-roster-handover.md` (authority)
 | 9 | Step 3.7 Flash | BENCHMARK | API |
 | 10 | Tencent Hunyuan Hy3 | BENCHMARK | API |
 
+**Stage 2 clarification:** LOCKED means "included in pool", NOT QUALIFIED.
+Therefore any UNPROVEN worker executing Stage 2 work must run as
+EVALUATION_ONLY under the cold-start rules. It does not become
+production-qualified simply because it belongs to the LOCKED roster.
+
 ---
 
 ## 5. E3 components — full design
@@ -76,27 +85,37 @@ Determines whether the task should remain whole or decompose.
 - If task is simple / mechanical / single-role → single-node execution
 - If task is complex / multi-role / parallelizable → propose decomposition
 - Uses AI reasoning (planner model)
-- Planner may be same or different from router model (owner decision D-AI-3)
+- Planner is separate from router (D-AI-3); may be same or different worker
 
 **Output:** Single-node plan OR proposed decomposition
 
 ---
 
-### 5.2 Decomposition Quality Gate
+### 5.2 Decomposition Quality Gate (HYBRID — A1)
 
-**Purpose:** Deterministic review of a proposed decomposition BEFORE execution.
+**Purpose:** Review a proposed decomposition BEFORE execution.
 
-**Checks:**
+**Layer 1 — Deterministic structural checks:**
+- DAG acyclic (no cycles)
+- Dependencies valid (all referenced nodes exist)
+- Referenced floors exist in E1
+- Required node fields present
+- No illegal state transitions
+- No unsafe declared shared-write parallelism
+- Integration node exists when multiple outputs require assembly
+- Verification node/method exists where floor requires it
+
+**Layer 2 — Semantic decomposition review (AI critic):**
 - Missing deliverables vs original objective
-- Incorrect dependencies (circular, invalid order)
-- Invalid parallelism (shared mutable state across parallel nodes)
 - Unnecessary decomposition (could be one node)
-- Floor-dodging decomposition (split to route around a floor)
-- Missing integration step
-- Missing verification step
-- Duplicated work across nodes
+- Semantic duplication across nodes
+- Floor-dodging by artificial splitting
+- Bad capability separation
+- Incorrect conceptual dependency order
 
-**For high-complexity / high-risk plans:** support independent review (secondary critic)
+**For high-complexity/high-risk plans:** support independent review (secondary critic, independent of planner per D-AI-3)
+
+**Final decision:** The deterministic Brain makes the final allow/reject based on structured review result.
 
 **Output:** APPROVED / REJECTED with reasons
 
@@ -111,6 +130,7 @@ Determines whether the task should remain whole or decompose.
 | Field | Type | Description |
 |---|---|---|
 | node_id | string | Stable node identifier |
+| plan_id | string | Parent plan |
 | task_subtask_id | string | Logical reference to E1 task/subtask |
 | objective | string | Exact objective for this node |
 | capability_roles | list | Required roles (builder, critic, etc.) |
@@ -125,6 +145,7 @@ Determines whether the task should remain whole or decompose.
 | fallback_candidates | list | Alternative workers |
 | state | enum | PLANNED/BLOCKED/READY/RUNNING/VERIFYING/REWORK/COMPLETE/FAILED/PAUSED/CANCELLED |
 | attempts | int | Number of execution attempts |
+| defect_attempts | json | Attempts per defect category (for convergence) |
 
 **State transitions:**
 - PLANNED → BLOCKED (dependencies not met)
@@ -164,7 +185,7 @@ Determines whether the task should remain whole or decompose.
 **Key shape:** `worker × task-family/fingerprint × capability-role`
 
 **Initial role vocabulary:**
-planner, researcher, scout, architect, builder, debugger, critic, verifier, integrator, writer, classifier, vision, data-analyst, context-compressor
+planner, researcher, scout, architect, builder, debugger, critic, verifier, integrator, writer, classifier, vision, data-analyst, context-compressor, router
 
 **Fields per entry:**
 - worker_id
@@ -190,17 +211,17 @@ planner, researcher, scout, architect, builder, debugger, critic, verifier, inte
 - domain: string
 - language: string
 - artifact_type: enum (code, doc, config, analysis, etc.)
-| repository_size: enum (none, small, medium, large)
-| context_size: enum (small, medium, large)
-| reasoning_depth: 0–4
-| ambiguity: low | medium | high
-| tool_intensity: none | light | heavy
-| required_roles: list
-| security_privacy_class: P0–P3
-| risk_class: R0–R3
-| verification_type: deterministic | critic | owner
-| research_freshness: stale-tolerant | current-required
-| integration_complexity: none | low | medium | high
+- repository_size: enum (none, small, medium, large)
+- context_size: enum (small, medium, large)
+- reasoning_depth: 0–4
+- ambiguity: low | medium | high
+- tool_intensity: none | light | heavy
+- required_roles: list
+- security_privacy_class: P0–P3
+- risk_class: R0–R3
+- verification_type: deterministic | critic | owner
+- research_freshness: stale-tolerant | current-required
+- integration_complexity: none | low | medium | high
 
 Categorical, not scalar. Avoid false precision.
 
@@ -246,12 +267,23 @@ Rules:
 
 ---
 
-### 5.9 AI Routing / Team Assembly
+### 5.9 Deterministic Meta-Selector + AI Router
 
 **Purpose:** Given a task fingerprint + required roles + constraints,
 propose candidate workers.
 
-**Inputs:**
+**Architecture (D-AI-2):**
+```
+Deterministic meta-selector
+    ↓
+chooses an eligible router worker
+    ↓
+Router AI reasons about team assembly
+    ↓
+Qualification Gate checks its proposals
+```
+
+**Inputs to meta-selector:**
 - Task fingerprint
 - Required roles
 - E1 frozen floor
@@ -268,7 +300,7 @@ candidate A: confidence HIGH
   - worker: DeepSeek V4.1 Flash
   - role: builder
   - why: strong evidence on similar tasks, E2 provider healthy, cost low
-  
+
 candidate B: confidence MEDIUM
   - worker: GLM-5.3 Flash
   - role: builder
@@ -280,7 +312,14 @@ candidate C: confidence LOW / evaluation
   - why: benchmark candidate, no production evidence yet
 ```
 
-Router is **advisory.** The Qualification Gate decides.
+**Bootstrap router (Stage 1):**
+- Currently operational Hermes inference worker acts as BOOTSTRAP router
+- Remains UNPROVEN for router/planner capability
+- Stage 1 is shadow-only → cannot authorize production execution
+- Routing decisions are reviewed and become evidence
+- Bootstrap worker is configurable, not permanent architecture
+
+**Router is advisory.** The Qualification Gate decides.
 
 ---
 
@@ -299,9 +338,9 @@ router proposal is allowed.
 - Tool support requirements
 - Context constraints
 - Model identity (provider + model id + version)
-- Provider state from E2
+- Provider state from E2 (per A5: UNKNOWN does not auto-reject)
 
-**Outputs:** ACCEPT | REJECT | EVALUATION_ONLY | OWNER_APPROVAL_REQUIRED
+**Outputs:** ACCEPT | ACCEPT_WITH_LOW_RESOURCE_CONFIDENCE (A5) | REJECT | EVALUATION_ONLY | OWNER_APPROVAL_REQUIRED
 
 **Rejection reasons (machine-readable):**
 - FLOOR_REASONING_TOO_LOW
@@ -324,7 +363,7 @@ router proposal is allowed.
 | UNPROVEN | No verified evidence | Evaluation only (R0/R1 + independent verification) |
 | EVALUATING | Running controlled evaluation | Evaluation only |
 | QUALIFIED | Task-specific verified evidence meets threshold | Production work within qualified scope |
-| SUSPENDED | Serified verified failure | Excluded from routing |
+| SUSPENDED | Verified verified failure | Excluded from routing |
 
 Qualification is task/role specific:
 - Worker X: large-Python/builder → QUALIFIED
@@ -406,9 +445,9 @@ Conflicts must be surfaced.
 
 ---
 
-### 5.16 Integrator Role
+### 5.16 Integrator Role (separate capability per D-AI-7)
 
-**Responsibilities:**
+**Responsibilities (first-class capability role):**
 - Combine specialist outputs
 - Reconcile interfaces
 - Remove duplication
@@ -417,10 +456,11 @@ Conflicts must be surfaced.
 - Detect contradictions
 - Request targeted rework
 
-**Critical rule:** Integrator cannot self-certify the final result.
-Independent verification is required.
-
-**Integrator is itself a capability role** with accumulated evidence.
+**Critical rules:**
+- Integrator is itself a capability role with accumulated evidence
+- Integrator cannot self-certify the final result
+- Independent verification is required
+- For V3 / high-risk work: use independent verifier/critic, preferably different worker and different provider/model family
 
 ---
 
@@ -542,19 +582,50 @@ reset affected evidence toward UNPROVEN.
 
 ---
 
-### 5.23 Exploration vs Exploitation
+### 5.23 Exploration vs Exploitation (D-AI-5: conservative, policy-based)
 
 | Risk | Policy |
 |---|---|
 | High-risk / critical | Prefer strong proven evidence |
 | Low-risk objectively verifiable | Allow controlled evaluation of promising workers |
 
-Future shadow evaluation support (production + shadow workers) designed
-into schema but NOT enabled for E3 v1 (owner decision D-AI-4).
+Eligibility for exploration:
+- R0/R1 only
+- Objectively verifiable
+- Failure has no material consequence
+- Adequate E2 resource/cost state
+- No secret/privacy violation
+
+Default v1 limit:
+- At most one experimental/shadow worker per eligible production task
+- No exploration on R2/R3 production work
+- Owner may tighten/disable exploration
+
+Record exploration cost and outcome.
 
 ---
 
-### 5.24 Router Self-Evaluation
+### 5.24 Shadow Evaluation (D-AI-4: E3-owned, disabled by default)
+
+**Purpose:** Evaluate workers without risking production output.
+
+**Design:**
+- Production worker → proven model
+- Shadow worker → promising new model
+- Only production output is used
+- Shadow output is verified afterwards
+- Result contributes evidence
+
+**Constraints:**
+- Disabled by default
+- Only R0/R1 tasks
+- Only where independent/deterministic verification exists
+- Shadow output must never become authoritative production output merely because it exists
+- Activation is manual/owner-policy controlled during Stage 2
+
+---
+
+### 5.25 Router Self-Evaluation
 
 **Record:** Did the routing decision itself prove good?
 
@@ -565,7 +636,7 @@ Allows future improvement of management logic.
 
 ---
 
-### 5.25 Structured Escalation
+### 5.26 Structured Escalation
 
 **Trigger when E3:**
 - Gets stuck
@@ -586,27 +657,28 @@ Escalation is a first-class state: `ESCALATED → owner responds → continue/re
 
 ---
 
-### 5.26 Logical Convergence Rules
+### 5.27 Logical Convergence Rules (D-AI-6: risk-sensitive)
 
 | Condition | Action |
 |---|---|
 | Verification PASS | → COMPLETE |
-| Specific defect found | → TARGETED REWORK |
-| Same defect survives N attempts | → stronger worker or REPLAN |
+| Specific defect found | → TARGETED REWORK (track attempts per defect) |
+| R0/R1: same defect survives 2 targeted recovery attempts | → stronger worker / REPLAN / ESCALATE |
+| R2: subsequent verified failure after 1 repair | → stronger qualified route or ASK OWNER |
+| R3: material verified failure | → no repeated autonomous repair loop; ASK OWNER |
 | Fundamental assumption invalid | → REPLAN |
 | No qualified route exists | → PAUSE |
 | Owner-decidable ambiguity | → ASK OWNER |
 
-Retry limits: justified, not arbitrary. N=3 default for REWORK attempts
-before escalation (owner decision D-AI-6).
+Track attempts per defect, not merely total calls.
 
 ---
 
 ## 6. Storage design
 
-### 6.1 Recommendation: separate `orchestration.db`
+### 6.1 Recommendation: separate `orchestration.db` (D-AI-1 APPROVED)
 
-See architecture amendment §8 for analysis. Approved by owner decision D-AI-1.
+See architecture amendment §8 for analysis.
 
 ### 6.2 Local paths
 
@@ -658,6 +730,7 @@ CREATE TABLE dag_node (
     fallback_candidates TEXT,        -- JSON list
     state TEXT NOT NULL DEFAULT 'PLANNED',
     attempts INTEGER NOT NULL DEFAULT 0,
+    defect_attempts TEXT,            -- JSON: attempts per defect category
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -677,7 +750,7 @@ CREATE TABLE capability_registry (
     PRIMARY KEY (worker_id, task_family, capability_role)
 );
 
--- Performance evidence rows
+-- Performance evidence rows (append-only, hash-chained)
 CREATE TABLE performance_evidence (
     evidence_id TEXT PRIMARY KEY,
     worker_id TEXT NOT NULL,
@@ -701,10 +774,13 @@ CREATE TABLE performance_evidence (
     monetary_cost REAL,
     floor_id TEXT,                   -- references E1 floor
     dag_node_id TEXT,                -- references dag_node
-    timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    record_sha256 TEXT NOT NULL,
+    prev_sha256 TEXT
 );
 
--- Historical task similarity cache (deterministic matching metadata)
+-- Historical task similarity cache
 CREATE TABLE task_fingerprint_index (
     fingerprint_id TEXT PRIMARY KEY,
     task_family TEXT NOT NULL,
@@ -716,7 +792,7 @@ CREATE TABLE task_fingerprint_index (
     timestamp TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Router decisions (for self-evaluation)
+-- Router decisions (append-only, hash-chained)
 CREATE TABLE router_decision (
     decision_id TEXT PRIMARY KEY,
     plan_id TEXT NOT NULL,
@@ -724,15 +800,20 @@ CREATE TABLE router_decision (
     proposed_worker TEXT NOT NULL,
     proposed_role TEXT NOT NULL,
     confidence TEXT NOT NULL,        -- HIGH / MEDIUM / LOW
-    reasoning TEXT,
-    gate_decision TEXT NOT NULL,     -- ACCEPT / REJECT / EVALUATION_ONLY / OWNER_APPROVAL_REQUIRED
+    reasoning_codes TEXT,            -- structured rationale codes (A7)
+    evidence_references TEXT,        -- JSON list
+    concise_rationale TEXT,          -- non-sensitive concise rationale (A7)
+    gate_decision TEXT NOT NULL,     -- ACCEPT / ACCEPT_WITH_LOW_CONFIDENCE / REJECT / EVALUATION_ONLY / OWNER_APPROVAL_REQUIRED
     gate_reasons TEXT,               -- JSON list of rejection codes
     actual_outcome TEXT,             -- SUCCESS / FAILURE / REWORK / ESCALATED
     outcome_matches_proposal INTEGER, -- did router get it right?
-    timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    record_sha256 TEXT NOT NULL,
+    prev_sha256 TEXT
 );
 
--- Conflict records
+-- Conflict records (append-only)
 CREATE TABLE conflict_record (
     conflict_id TEXT PRIMARY KEY,
     plan_id TEXT NOT NULL,
@@ -744,7 +825,7 @@ CREATE TABLE conflict_record (
     timestamp TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Plan versions (for replanning)
+-- Plan versions (append-only)
 CREATE TABLE plan_version (
     plan_id TEXT PRIMARY KEY,
     version INTEGER NOT NULL DEFAULT 1,
@@ -752,6 +833,34 @@ CREATE TABLE plan_version (
     trigger TEXT,                    -- why replanned
     dag_nodes TEXT NOT NULL,         -- JSON: current node set
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Event-sourced governance state (A4)
+
+CREATE TABLE worker_capability_event (
+    event_id TEXT PRIMARY KEY,
+    worker_id TEXT NOT NULL,
+    task_family TEXT NOT NULL,
+    capability_role TEXT NOT NULL,
+    previous_state TEXT NOT NULL,
+    new_state TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    evidence_references TEXT,        -- JSON list
+    actor TEXT NOT NULL,             -- system/owner/verification
+    model_identity TEXT,             -- provider+model+version snapshot
+    timestamp TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE dag_state_event (
+    event_id TEXT PRIMARY KEY,
+    node_id TEXT NOT NULL,
+    plan_id TEXT NOT NULL,
+    previous_state TEXT,
+    new_state TEXT NOT NULL,
+    cause TEXT NOT NULL,             -- dispatch/verification/rework/replan
+    dispatch_reference TEXT,         -- router_decision_id
+    verification_reference TEXT,     -- performance_evidence_id
+    timestamp TEXT NOT NULL DEFAULT (datetime('now'))
 );
 ```
 
@@ -762,8 +871,10 @@ Append-only tables (never UPDATE/DELETE):
 - router_decision
 - conflict_record
 - plan_version
+- worker_capability_event
+- dag_state_event
 
-Mutable tables:
+Mutable tables (current-state, rebuildable from events):
 - dag_node (state transitions are updates)
 - capability_registry (state transitions are updates)
 
@@ -781,51 +892,74 @@ Hash-chained tables: performance_evidence, router_decision
 |---|---|
 | DAG node records | 90 days |
 | Capability registry | indefinite (mutable, small) |
-| Performance evidence | 365 days |
+| Performance evidence | 365 days (summary preserved permanently per A6) |
 | Task fingerprint index | 365 days |
-| Router decisions | 365 days |
+| Router decisions | 365 days (summary preserved permanently per A6) |
 | Conflict records | 365 days |
 | Plan versions | 365 days |
+| worker_capability_event | 365 days (qualification transitions preserved permanently per A6) |
+| dag_state_event | 90 days |
+
+**Long-term evidence (A6):** Detailed artifacts may expire, but verified
+learning is preserved as a compact permanent evidence summary:
+- Qualification transitions
+- Serious failures
+- Model identity/version
+- Aggregate verified outcomes
+- First-pass history
+- Correction severity history
+- Suspension/requalification events
 
 ---
 
-## 7. Provider execution adapters
+## 7. Provider execution adapters (A2: distinct from E2 telemetry adapters)
 
 ### 7.1 Adapter interface
 
-Each adapter must implement:
+Each E3 execution adapter must implement:
 
 ```python
-class ProviderAdapter:
+class ExecutionAdapter:
     def dispatch(contract: WorkerContract) -> DispatchResult
+    def retrieve(dispatch_id: str) -> ExecutionResult
     def cancel(dispatch_id: str) -> bool
     def check_health() -> HealthStatus
     def get_capabilities() -> CapabilityProfile
+    def get_identity() -> ModelIdentity
+    def estimate_usage(contract: WorkerContract) -> UsageEstimate
 ```
 
-### 7.2 Adapter requirements per worker
+### 7.2 Required interface minimum
 
-| Worker | Adapter type | E2 status | E3 requirement |
+- dispatch — send work to provider
+- result retrieval — poll/fetch result
+- timeout — configurable per-dispatch
+- cancellation where supported — attempt to cancel
+- structured error mapping — error codes → failure categories
+- observed usage — tokens/cost from provider response
+- provider/model identity — exact model id + version where exposed
+- execution metadata — latency, timestamps, reasoning profile
+- idempotency/retry semantics — safe to retry? idempotency keys?
+- tool/permission enforcement — where provider supports it
+
+### 7.3 Adapter requirements per worker
+
+| Worker | Interface | E2 telemetry adapter | E3 execution adapter |
 |---|---|---|---|
-| Codex CLI | CLI | observed-only | CLI automation adapter |
-| Mistral Small 4 | API (OpenAI-compatible) | — | New API adapter |
-| Google Nano Banana 2 | API (Google) | — | New API adapter |
-| DeepSeek V4.1 Flash | API | routable | Reuse E2 adapter |
-| GLM-5.3 Flash | API (OpenAI-compatible) | — | New API adapter |
-| Qwen3.8-27B | API | — | New API adapter |
-| LongCat 2.0 | API (Nous) | routable | Reuse E2 adapter |
-| MiniMax M3 | API | — | New API adapter |
-| Step 3.7 Flash | API | — | New API adapter |
-| Tencent Hunyuan Hy3 | API | — | New API adapter |
+| Codex CLI | CLI | observed-only | CLI automation adapter (new) |
+| Mistral Small 4 | API (OpenAI-compatible) | — | API adapter (new) |
+| Google Nano Banana 2 | API (Google) | — | API adapter (new) |
+| DeepSeek V4.1 Flash | API (DeepSeek) | routable | Execution adapter (new; may reuse credential/config utilities) |
+| GLM-5.3 Flash | API (OpenAI-compatible) | — | API adapter (new) |
+| Qwen3.8-27B | API | — | API adapter (new) |
+| LongCat 2.0 | API (Nous) | routable | Execution adapter (new; may reuse credential/config utilities) |
+| MiniMax M3 | API | — | API adapter (new) |
+| Step 3.7 Flash | API | — | API adapter (new) |
+| Tencent Hunyuan Hy3 | API | — | API adapter (new) |
 
-### 7.3 Adapter interface for unknown providers
-
-For providers where no automation path exists:
-- Adapter exists as stub
-- `dispatch()` returns NOT_IMPLEMENTED
-- `check_health()` returns UNKNOWN
-- `routable = false`
-- No pretense of dispatch capability
+**Key insight:** E2 adapters provide telemetry, not dispatch. Each worker
+needs an independent E3 execution adapter that passes qualification/smoke
+tests before becoming routable.
 
 ---
 
@@ -872,27 +1006,32 @@ Owner can respond: CONTINUE | REPLAN | CANCEL | OVERRIDE
 
 ---
 
-## 10. E1 / E2 integration
+## 10. E1 / E2 integration (A3: public interface boundary)
 
 ### 10.1 E1 integration boundary
 
-E3 READS E1 data (exec_brain.db):
+E3 READS E1 data via E1 public interface (never direct SQL):
 - Classification records
 - Quality floors
 - Override records
 - Decomposition records
 
-E3 NEVER WRITES to E1 database. Any new/replanned subtask goes through
-the E1 floor process before worker routing.
+E3 NEVER WRITES to E1 database. Any new/replanned subtask invokes
+E1 public interface → classify/decompose/freeze.
+
+E1 remains sole writer to exec_brain.db.
 
 ### 10.2 E2 integration boundary
 
-E3 CONSUMES E2 telemetry:
+E3 CONSUMES E2 telemetry via E2 public interface (never direct SQL):
 - Provider operational state
 - Capacity dimensions
 - Rate-limit state
 
-E3 NEVER WRITES to E2 database.
+E3 NEVER WRITES to E2 database. Every actual AI/provider execution
+invokes E2 public record-request interface.
+
+E2 remains sole writer to governor.db. This keeps usage telemetry accurate.
 
 Resource scarcity may change WHICH qualified worker is selected,
 but NEVER lowers the E1 quality floor (No-Degradation Invariant).
@@ -918,6 +1057,7 @@ orchestration-status/
 
 - Published by `eb e3-status --publish` command
 - Contains no raw task text, no secrets, no provider credentials
+- Structured rationale codes only (no raw CoT per A7)
 - Append-only log format for team-assembly-log
 - Curated summary refresh on demand
 
@@ -931,15 +1071,17 @@ orchestration-status/
 - Proposals are generated but NOT executed
 - Human reviews every proposal
 - Purpose: validate planner + router logic
+- Bootstrap router = currently operational Hermes inference worker (D-AI-2)
 - No workers are dispatched
-- Gate can be in permissive mode (log-only)
+- Gate in permissive mode (log-only)
 
 ### Stage 2: Low-risk R0/R1 objectively verifiable execution
 
 - Single-worker execution only (no multi-worker DAG)
-- Workers: LOCKED pool only
+- Workers: LOCKED pool only, running as EVALUATION_ONLY (Stage 2 clarification)
 - Only tasks with deterministic verification
-- Shadow evaluation of BENCHMARK workers allowed
+- Shadow evaluation of BENCHMARK workers allowed (D-AI-4, disabled by default)
+- Exploration conservative, policy-based (D-AI-5)
 - Gate enforces E1 floors
 - All outcomes recorded as evidence
 
@@ -956,7 +1098,7 @@ orchestration-status/
 - All E3 features active
 - Exploration/exploitation policies active
 - Router self-evaluation feeding back
-- Future shadow evaluation (if owner approves D-AI-4)
+- Shadow evaluation enabled (if owner approves)
 
 ---
 
@@ -967,19 +1109,21 @@ orchestration-status/
 | # | Category | Test count |
 |---|---|---|
 | T-A1 | Decomposition logic | 4 |
-| T-A2 | Decomposition review (floor-dodging rejection) | 3 |
+| T-A2 | Decomposition review — structural (deterministic) | 3 |
+| T-A3 | Decomposition review — semantic (floor-dodging, etc.) | 3 |
 | T-B1 | DAG dependency resolution | 4 |
 | T-B2 | Parallel-safe execution | 3 |
 | T-C1 | Candidate generation (multiple proposals) | 3 |
 | T-C2 | Router proposal validation | 3 |
-| T-D1 | Qualification Gate (all outcomes) | 5 |
+| T-D1 | Qualification Gate (all outcomes + ACCEPT_WITH_LOW_CONFIDENCE) | 6 |
 | T-D2 | Worker states (UNPROVEN/EVALUATING/QUALIFIED/SUSPENDED) | 4 |
 | T-D3 | Cold-start evaluation rules | 3 |
+| T-D4 | EVALUATION_ONLY for Stage 2 UNPROVEN workers | 2 |
 | T-E1 | Privacy / egress enforcement | 3 |
 | T-E2 | Context scoping | 2 |
 | T-E3 | Permission enforcement | 3 |
 | T-F1 | Provider unroutable state handling | 2 |
-| T-F2 | E2 UNKNOWN telemetry handling | 3 |
+| T-F2 | E2 UNKNOWN telemetry handling (A5: policy-based, not auto-reject) | 3 |
 | T-G1 | Multi-worker execution (sequential + parallel) | 4 |
 | T-G2 | Integration logic | 3 |
 | T-G3 | Conflict detection | 2 |
@@ -990,14 +1134,18 @@ orchestration-status/
 | T-J1 | Performance evidence recording | 3 |
 | T-J2 | Model identity drift detection | 2 |
 | T-K1 | Router self-evaluation | 2 |
-| T-K2 | Convergence / loop prevention | 3 |
+| T-K2 | Convergence / loop prevention (risk-sensitive per D-AI-6) | 4 |
 | T-L1 | Owner escalation | 3 |
 | T-M1 | Secret leakage prevention | 2 |
 | T-M2 | Audit integrity | 3 |
-| T-N1 | E1 regression (no mutation) | 4 |
-| T-N2 | E2 regression (no mutation) | 3 |
+| T-N1 | E1 regression (no mutation, public interface use) | 4 |
+| T-N2 | E2 regression (no mutation, public interface use) | 3 |
 | T-O1 | Rollback (DB restore) | 2 |
-| | **Total** | **~85** |
+| T-P1 | Event-sourced governance state (A4) | 3 |
+| T-P2 | Shadow evaluation (disabled by default, R0/R1 only) | 2 |
+| T-P3 | Exploration policy (D-AI-5 conservative limits) | 2 |
+| T-P4 | Data privacy (A7: no raw CoT in router_decision) | 2 |
+| | **Total** | **~95** |
 
 ---
 
@@ -1008,15 +1156,17 @@ orchestration-status/
 - `eb audit --verify` still PASS (32/32 existing tests)
 - exec_brain.db schema UNCHANGED
 - E1 CLI commands UNCHANGED
-- No new writes to exec_brain.db
+- No direct SQL writes to exec_brain.db from E3
 - E1 frozen floors remain immutable
+- E3 invokes E1 public interface for new/replanned subtasks
 
 ### 14.2 E2 regression
 
 - `eb gov-verify` still PASS (45/45 existing tests)
 - governor.db schema UNCHANGED
 - E2 CLI commands UNCHANGED
-- No new writes to governor.db
+- No direct SQL writes to governor.db from E3
+- E3 invokes E2 public record-request interface for every execution
 - E2 adapters unchanged
 
 ---
@@ -1038,26 +1188,29 @@ E1/E2 rollback independent of E3 rollback.
 ### Stage 1 acceptance
 - `eb e3-plan` produces valid decomposition for 5 diverse test tasks
 - `eb e3-route` produces ≥2 candidate proposals per task
-- Router logs reasoning for each proposal
+- Router logs structured rationale codes (A7)
+- Bootstrap router is configurable (D-AI-2)
 - Zero executions dispatched
 - Human confirms proposals are reasonable
 
 ### Stage 2 acceptance
 - 10 low-risk R0/R1 tasks executed with deterministic verification
+- UNPROVEN workers run as EVALUATION_ONLY (Stage 2 clarification)
+- Shadow evaluation disabled by default (D-AI-4)
 - All outcomes recorded as evidence
 - E1/E2 regression: 100% pass
 - No worker dispatched above its qualification state
-- Shadow evaluation data collected for BENCHMARK workers
 
 ### Stage 3 acceptance
 - 3 multi-worker DAG executions completed
 - Integrator + critic path working
 - Replan triggered at least once correctly
-- Evidence accumulation functional
+- Event-sourced governance state verified (A4)
 
 ### Stage 4 acceptance
-- All test categories passing (~85 tests)
+- All test categories passing (~95 tests)
 - Router self-evaluation logging active
+- UNKNOWN capacity handled per A5 (policy-based)
 - Full audit trail verified
 - Owner sign-off
 
@@ -1095,7 +1248,7 @@ E1/E2 rollback independent of E3 rollback.
 
 ### Modify (local)
 - `eb.py` — extend with E3 subcommands
-- `adapters.py` — add new provider adapters
+- `adapters.py` — add new provider execution adapters (A2)
 
 ### Modify (control-plane repo)
 - `state/current_company_state.md` — update with E3 status
@@ -1104,25 +1257,27 @@ E1/E2 rollback independent of E3 rollback.
 
 ## 19. Unresolved owner decisions
 
-| # | Decision | Options |
+**All D-AI-* decisions resolved by owner.** No unresolved decisions remain.
+
+| # | Decision | Status |
 |---|---|---|
-| D-AI-1 | Separate orchestration.db | **Recommended: yes** |
-| D-AI-2 | Router AI model class | Strong reasoning model (which one?) |
-| D-AI-3 | Planner model = router model? | Same or separate |
-| D-AI-4 | Shadow evaluation in E3 v1? | Defer to E4 |
-| D-AI-5 | Exploration rate for cold-start | Conservative / moderate / aggressive |
-| D-AI-6 | Convergence retry limits | Default 3, or other |
-| D-AI-7 | Integrator model class | Same as router or separate |
+| D-AI-1 | Separate orchestration.db | **APPROVED** |
+| D-AI-2 | Router AI: no permanent model | **APPROVED — router is capability role** |
+| D-AI-3 | Planner and router separate logical roles | **APPROVED** |
+| D-AI-4 | Shadow evaluation belongs to E3 | **APPROVED — disabled by default** |
+| D-AI-5 | Exploration policy conservative | **APPROVED** |
+| D-AI-6 | Convergence risk-sensitive | **APPROVED** |
+| D-AI-7 | Integrator separate capability role | **APPROVED** |
 
 ---
 
 ## 20. Conflicts with E1/E2
 
-**None discovered.** See architecture amendment §12 for detailed analysis.
+**None discovered.** See architecture amendment §13 for detailed analysis.
 
-E1 schema is not modified. E2 schema is not modified. E3 reads both,
-writes neither. E1 floors remain authoritative. E2 telemetry informs
-but never overrides qualification.
+E1 schema is not modified. E2 schema is not modified. E3 reads both via
+public interfaces, writes neither. E1 floors remain authoritative. E2
+telemetry informs but never overrides qualification.
 
 ---
 
@@ -1144,4 +1299,4 @@ Schema may be forward-compatible but behaviors remain disabled.
 ---
 
 This document does not modify any running system. It is a plan awaiting
-owner approval of the architecture amendment first.
+owner approval of the architecture amendment.
