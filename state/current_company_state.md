@@ -1,6 +1,6 @@
 # Current Company State
 
-- Timestamp: 2026-09-21 19:00 UTC
+- Timestamp: 2026-09-22 10:00 UTC
 - Shared Control Plane status: Phase 2A
 - Hermes: running
 - Discord: connected
@@ -15,12 +15,19 @@
 - >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
 - Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\Users\mukun\DiscordArchive\chief\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
 - Manual fallback: python C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py
-- Executive Brain: E1 ACTIVE (rolled out 2026-09-21 ~22:00 UTC)
-  - Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\eb.py
+- Executive Brain: E2 ACTIVE (rolled out 2026-09-22 ~10:00 UTC)
+  - Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\eb.py (E1 + E2 commands)
+  - Governor DB: governor.db (separate from E1 exec_brain.db)
   - Skill: %LOCALAPPDATA%\hermes\skills\operations\executive-brain-e1
-  - Schema version: 1 (SQLite, append-only, hash-chained floors)
-  - Test result: 32/32 passed (rev-3 matrix); audit --verify PASS
+  - E1 Schema version: 1 (SQLite, append-only, hash-chained floors)
+  - E2 Schema version: 1 (governor.db, append-only, hash-chained snapshots)
+  - E1 Test result: 32/32 passed; audit --verify PASS
+  - E2 Test result: 45/45 passed; gov-verify PASS
+  - E2 Providers: Nous (routable), DeepSeek (routable), Codex (observed-only), Antigravity (observed-only)
+  - E2 D3: routable flag separates telemetry from routability
+  - E2 D5: snapshots 90d, requests 30d, briefs 365d, aggregates 365d
+  - E2 Burn trend: 24h vs 24h, ±20% threshold (D4)
+  - E2 Secret handling: DeepSeek key by reference only, never printed/logged (D2)
   - Discipline: classify → decompose → freeze → route; no routing before freeze
-  - E2+ (provider routing, Governor telemetry, exhaustion, reserves,
-    performance learning, handovers) NOT started
+  - E3+ (worker qualification, Qualification Gate, predictive exhaustion, reserves, checkpoints, handovers, safe mode) NOT started
 - Next phase: Phase 2B (other channels) — not started
