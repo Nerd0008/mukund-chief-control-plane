@@ -606,8 +606,9 @@ resource-status/, decisions/) — consistent with the existing local/GitHub spli
 - Phase E1: schemas + floor-freeze ordering + manual routing discipline
   (Brain procedure documented; Governor as manual checklist)
 - Phase E2: provider adapters + telemetry ledger + daily brief (deterministic)
-- Phase E3: performance history + worker-state gating (UNPROVEN/EVALUATING/
-  QUALIFIED/SUSPENDED) + Qualification Gate + handover records
+- Phase E3: Intelligent Multi-Model Orchestration + Dynamic Team Assembly +
+  Worker Qualification (see architecture-proposals/executive-brain-e3-architecture-amendment.md
+  and architecture-proposals/executive-brain-e3-implementation-plan.md for full details)
 - Phase E4: predictive exhaustion + reserves (enforced, not advisory)
 - Phase E5: safe mode + failure-mode drills + owner override UX
 
@@ -618,3 +619,42 @@ invariant; a phase that cannot enforce it ships disabled by default.
 
 Owner decision requested: approve as baseline, amend, or reject. Nothing in
 this document changes the running system.
+
+---
+
+## Amendment History
+
+### 2026-09-22 — E3 Architecture Expansion (APPROVED)
+
+The owner approved expanding Phase E3 from its original narrow definition
+("performance history + worker-state gating + Qualification Gate + handover records")
+to the full expanded architecture:
+
+**E3 = Intelligent Multi-Model Orchestration + Dynamic Team Assembly + Worker Qualification**
+
+This amendment:
+- Replaces the narrow E3 description in §19 with a reference to the approved
+  architecture amendment and implementation plan documents
+- Confirms 29 E3 responsibilities (see architecture amendment §3.2)
+- Confirms owner decisions D-AI-1 through D-AI-7
+- Confirms architecture corrections A1 through A8
+- Confirms separate orchestration.db (not extending exec_brain.db)
+- Confirms dynamic AI planner/router roles with deterministic meta-selector
+- Confirms hybrid decomposition quality gate (deterministic + AI semantic review)
+- Confirms execution DAG with event-sourced governance state
+- Confirms dynamic team assembly with task-specific worker qualification
+- Confirms context compiler, permission compiler, independent E3 execution adapters
+- Confirms integrator as a first-class capability role
+- Confirms independent verification path and targeted rework
+- Confirms intelligent logical replanning (distinct from E4 resource-driven handover)
+- Confirms failure attribution, model identity drift handling
+- Confirms conservative exploration and shadow evaluation support (E3-owned, disabled by default)
+- Confirms router self-evaluation infrastructure
+- Confirms structured owner escalation with risk-sensitive convergence controls
+- Confirms append-only decision rationale / outcome audit trail (A8)
+- Confirms owner-facing CLI: e3-rationale, e3-trace, e3-why
+- Confirms E1/E2 boundaries (public interface invocation, no direct SQL writes)
+- Confirms E4/E5 boundaries (predictive exhaustion, reserves, safe mode remain future phases)
+
+Full details: architecture-proposals/executive-brain-e3-architecture-amendment.md
+Implementation plan: architecture-proposals/executive-brain-e3-implementation-plan.md
