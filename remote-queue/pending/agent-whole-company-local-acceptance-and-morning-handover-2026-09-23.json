@@ -7,7 +7,9 @@
   "requires_owner_approval": false,
   "status": "pending",
   "prerequisites": [
-    "All earlier engineering queue tasks should be terminal or explicitly blocked with truthful evidence."
+    "All earlier engineering queue tasks should be terminal or explicitly blocked with truthful evidence.",
+    "agent-company-watch-recovery-final-pass-2026-09-24 must be in a truthful terminal state",
+    "agent-blocked-work-final-reconciliation-2026-09-24 must be in a truthful terminal state and no unresolved non-owner recoverable blocker may remain"
   ],
   "allowed_scope": [
     "Read state/v1-agent-roster.md and account for every roster item: PASS, READY_NEEDS_OWNER_CONFIG, BLOCKED_EXTERNAL, or superseded with evidence. No UNKNOWN omission.",
@@ -24,5 +26,5 @@
     "No deployment cutover.",
     "No hidden unresolved agent/workflow."
   ],
-  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work."
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work. Owner directive 2026-09-24: run final blocked-work recovery/reconciliation before whole-company acceptance so historical execution_error records are either superseded by evidence, recovered, or truthfully left owner/external-gated. Do not declare acceptance while a recoverable non-owner gap remains."
 }
