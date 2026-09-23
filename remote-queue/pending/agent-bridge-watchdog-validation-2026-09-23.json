@@ -1,0 +1,28 @@
+{
+  "task_id": "agent-bridge-watchdog-validation-2026-09-23",
+  "created_at": "2026-09-23T20:58:00Z",
+  "objective": "Validate the newly hardened Hermes remote bridge before overnight autonomous continuation, then hand off back to the E3 local production rehearsal. This is a bounded bridge reliability check, not project feature work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "allowed_scope": [
+    "Pull latest main and inspect commits 617fd47c and b83c9ad.",
+    "Compile/import remote_queue/visible_worker.py and remote_queue/hermes_dispatch.py and run the isolated remote_queue test suite.",
+    "Verify the visible worker has a bounded no-stream-event watchdog (default 300s, configurable by HERMES_REMOTE_IDLE_TIMEOUT) and targeted child-tree termination only.",
+    "Verify dispatch has a bounded hard task timeout (default 1200s, configurable by HERMES_REMOTE_TASK_TIMEOUT).",
+    "Verify watchdog exit code 124 is surfaced truthfully as execution_error rather than completion.",
+    "Verify the generated Hermes prompt treats remote-queue/running/<task_id>.json as immutable and respects recorded standing conditional approvals instead of inventing a fresh owner gate.",
+    "Do not intentionally wait 300 seconds. Use unit/static checks or a short isolated fake process with a test-specific short timeout; do not touch the live queue from tests.",
+    "If any bridge defect is found, fix it minimally, rerun isolated tests, commit/push, and record evidence.",
+    "Before exit, ensure a fresh E3 local production rehearsal retry is pending unless an equivalent E3 rehearsal is already pending/running with a healthy worker."
+  ],
+  "stop_conditions": [
+    "Do not mutate the currently running E3 task contract.",
+    "Do not kill unrelated processes.",
+    "Do not fabricate pass evidence.",
+    "Do not enable Stage 2 in this bridge-validation task.",
+    "No secrets or raw chain-of-thought."
+  ],
+  "notes": "Current open E3 worker predates the watchdog patch and may require a one-time manual Ctrl+C. New launches must use the hardened bridge. This validation task should run before the next E3 retry if the current worker is interrupted."
+}
