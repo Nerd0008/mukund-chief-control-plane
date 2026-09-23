@@ -20,7 +20,7 @@ class CapabilityRegistry:
         self.con = con
 
     def register_worker(self, worker_id, provider, model,
-                        roles=None, state='UNPROVEN'):
+                        roles=None, state='UNPROVEN', task_family='general'):
         """Register a worker in the capability registry."""
         ts = datetime.utcnow().isoformat()
         if roles is None:
@@ -30,8 +30,9 @@ class CapabilityRegistry:
                 """INSERT OR REPLACE INTO capability_registry
                    (worker_id, task_family, capability_role, state,
                     last_qualified_at)
-                   VALUES (?, 'general', ?, ?, ?)""",
-                (worker_id, role, state, ts if state == 'QUALIFIED' else None)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (worker_id, task_family, role, state,
+                 ts if state == 'QUALIFIED' else None)
             )
         self.con.commit()
 

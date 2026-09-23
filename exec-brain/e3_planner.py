@@ -19,6 +19,27 @@ class E3Planner:
     MULTI_ROLE_THRESHOLD = 2       # >= 2 required roles triggers decomposition
     INTEGRATION_COMPLEXITY_THRESHOLD = "medium"  # integration complexity triggers integrator node
 
+    # TaskFingerprint.verification_type ('deterministic', 'critic', 'owner') is
+    # not the node-level verification_method vocabulary
+    # ('test', 'schema', 'comparison', 'critic', 'owner'). Map it explicitly so
+    # a deterministic-verification task does not fail decomposition review.
+    VERIFICATION_TYPE_TO_METHOD = {
+        "deterministic": "test",
+        "critic": "critic",
+        "owner": "owner",
+        "test": "test",
+        "schema": "schema",
+        "comparison": "comparison",
+    }
+
+    @classmethod
+    def verification_method_for(cls, fp: TaskFingerprint) -> str:
+        """Node-level verification method for a fingerprint's verification type."""
+        vt = getattr(fp, "verification_type", None)
+        if not vt:
+            return "test"
+        return cls.VERIFICATION_TYPE_TO_METHOD.get(vt, "test")
+
     def __init__(self):
         self.plan_counter = 0
 
@@ -58,16 +79,18 @@ class E3Planner:
     def _single_node_plan(self, objective: str, fp: TaskFingerprint) -> Dict[str, Any]:
         """Create a single-node plan."""
         plan_id = self._next_plan_id()
+        node_id = f"node-{plan_id}-1"
         return {
             "plan_id": plan_id,
             "decomposition": False,
             "reason": "Single-node execution",
             "nodes": [
                 {
+                    "node_id": node_id,
                     "objective": objective,
                     "capability_roles": fp.required_roles or ["builder"],
                     "dependencies": [],
-                    "verification_method": fp.verification_type or "test",
+                    "verification_method": self.verification_method_for(fp),
                     "floor_id": None,
                     "allowed_tools": [],
                     "permissions": {},
@@ -89,10 +112,11 @@ class E3Planner:
             node_id = f"node-{plan_id}-{i+1}"
             deps = [prev_node_id] if prev_node_id else []
             node = {
+                "node_id": node_id,
                 "objective": f"[{role.capitalize()}] {objective}",
                 "capability_roles": [role],
                 "dependencies": deps,
-                "verification_method": fp.verification_type or "test",
+                "verification_method": self.verification_method_for(fp),
                 "floor_id": None,
                 "allowed_tools": [],
                 "permissions": {},
@@ -105,10 +129,11 @@ class E3Planner:
         # Add integrator node if multiple outputs require assembly
         if fp.integration_complexity and fp.integration_complexity in ("medium", "high") and len(roles) > 1:
             integrator_node = {
+                "node_id": f"node-{plan_id}-{len(nodes)+1}",
                 "objective": f"[Integrate] Assemble and reconcile outputs for: {objective}",
                 "capability_roles": ["integrator"],
                 "dependencies": [prev_node_id] if prev_node_id else [],
-                "verification_method": fp.verification_type or "test",
+                "verification_method": self.verification_method_for(fp),
                 "floor_id": None,
                 "allowed_tools": [],
                 "permissions": {"read_only": True},
@@ -139,6 +164,7 @@ class E3Planner:
                 floor_id=node_spec.get("floor_id"),
                 allowed_tools=node_spec.get("allowed_tools", []),
                 permissions=node_spec.get("permissions", {}),
+                node_id=node_spec.get("node_id"),
             )
             node.verification_method = node_spec.get("verification_method", "test")
             dag.add_node(node)

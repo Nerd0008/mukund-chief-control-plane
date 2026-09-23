@@ -94,7 +94,7 @@ class E3Integrator:
             for key2, val2 in output_items[i+1:]:
                 if isinstance(val1, dict) and isinstance(val2, dict):
                     common_keys = set(val1.keys()) & set(val2.keys())
-                    for ck in common_keys:
+                    for ck in sorted(common_keys):  # deterministic ordering
                         if val1[ck] != val2[ck]:
                             contradictions.append({
                                 "key": ck,

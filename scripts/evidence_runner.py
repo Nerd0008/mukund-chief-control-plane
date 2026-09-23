@@ -70,6 +70,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E3 production rehearsal (real path, isolation, E1/E2 boundary)",
+        "script": "exec-brain/tests/test_e3_production_rehearsal.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "E4 resource continuity + E5 safe mode (combined suite)",
         "script": "exec-brain/tests/test_e4e5.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],

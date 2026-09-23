@@ -53,6 +53,9 @@ class ShadowRehearsalResult:
         self.permission_packages: Dict[str, Dict[str, Any]] = {}
         self.team_assembly: Optional[TeamAssembly] = None
         self.verification_results: Dict[str, Any] = {}
+        self.verification_attempts: List[Dict[str, Any]] = []
+        self.verifier_rejections: List[Dict[str, Any]] = []
+        self.repair_history: List[Dict[str, Any]] = []
         self.conflicts_detected: List[Dict[str, Any]] = []
         self.evidence_records: List[str] = []
         self.escalations: List[str] = []
@@ -76,6 +79,10 @@ class ShadowRehearsalResult:
             "team_complete": self.team_assembly.complete if self.team_assembly else False,
             "team_issues": self.team_assembly.issues if self.team_assembly else [],
             "verification_count": len(self.verification_results),
+            "verification_results": self.verification_results,
+            "verification_attempts": len(self.verification_attempts),
+            "verifier_rejections": len(self.verifier_rejections),
+            "repair_attempts": len(self.repair_history),
             "conflicts_detected": len(self.conflicts_detected),
             "evidence_recorded": len(self.evidence_records),
             "escalations": len(self.escalations),
@@ -131,7 +138,11 @@ class E3ShadowOrchestrator:
             self.con.row_factory = sqlite3.Row
 
     def rehearse(self, objective: str, fingerprint: TaskFingerprint,
-                 simulate_outputs: Optional[Dict[str, Any]] = None) -> ShadowRehearsalResult:
+                 simulate_outputs: Optional[Dict[str, Any]] = None,
+                 verification_test_cases: Optional[List[Dict[str, Any]]] = None,
+                 repair: Optional[Any] = None,
+                 max_repair_attempts: int = 1,
+                 plan: Optional[Dict[str, Any]] = None) -> ShadowRehearsalResult:
         """Run a shadow rehearsal for the given task.
 
         Composes: planner → decomposition review → router → context compiler
@@ -139,12 +150,20 @@ class E3ShadowOrchestrator:
         → conflict handler → evidence manager → escalator.
 
         All steps are advisory. No production dispatch occurs.
+
+        ``verification_test_cases`` (optional) turns the independent verifier
+        into a deterministic test verifier: each case is a mapping with
+        ``name``/``field``/``expected``. ``repair`` (optional) is a callable
+        ``repair(specialist_outputs, verification_result) -> corrected_outputs``
+        invoked only on a genuine verifier rejection, enabling a targeted
+        rework + re-verification cycle on the real orchestration path. ``plan``
+        (optional) supplies a pre-built plan for deterministic rehearsal input.
         """
         rehearsal_id = generate_id("rehearsal")
         result = ShadowRehearsalResult(rehearsal_id, objective)
 
         # Step 1: Plan
-        plan = self.planner.plan(objective, fingerprint)
+        plan = plan if plan is not None else self.planner.plan(objective, fingerprint)
         result.plan = plan
 
         # Step 2: Build DAG
@@ -166,7 +185,7 @@ class E3ShadowOrchestrator:
         # Step 4: Route — propose candidates for each node
         if self.router:
             for node in plan["nodes"]:
-                node_id = node.get("node_id", f"node-{plan['nodes'].index(node)}")
+                node_id = node["node_id"]
                 candidates = self.router.propose_candidates(
                     node, fingerprint.task_family, fingerprint
                 )
@@ -175,13 +194,13 @@ class E3ShadowOrchestrator:
         # Step 5: Compile context packages
         contract = WorkerContract(
             objective=objective,
-            verification_method=fingerprint.verification_type or "test",
+            verification_method=self.planner.verification_method_for(fingerprint),
         )
         for i, node in enumerate(plan["nodes"]):
-            node_id = node.get("node_id", f"node-{i+1}")
+            node_id = node["node_id"]
             upstream = None
             if i > 0:
-                prev_node_id = plan["nodes"][i-1].get("node_id", f"node-{i}")
+                prev_node_id = plan["nodes"][i-1]["node_id"]
                 upstream = {prev_node_id: {"artifact": f"output-{prev_node_id}"}}
 
             ctx = self.context_compiler.compile(
@@ -194,7 +213,7 @@ class E3ShadowOrchestrator:
 
         # Step 6: Compile permission packages
         for i, node in enumerate(plan["nodes"]):
-            node_id = node.get("node_id", f"node-{i+1}")
+            node_id = node["node_id"]
             roles = node.get("capability_roles", ["builder"])
             perms = self.permission_compiler.compile_permissions(roles)
             result.permission_packages[node_id] = perms
@@ -238,9 +257,59 @@ class E3ShadowOrchestrator:
         else:
             method = VerificationMethod.TEST
 
-        verification = self.verifier.verify(
+        verifier = self.verifier
+        if verification_test_cases is not None:
+            verifier = IndependentVerifier(test_cases=list(verification_test_cases))
+
+        def _record_attempt(attempt_no: int, vr) -> None:
+            result.verification_attempts.append({
+                "attempt": attempt_no,
+                "method": vr.method.value,
+                "outcome": vr.outcome.value,
+                "passed": vr.passed,
+                "issues": list(vr.issues),
+            })
+
+        verification = verifier.verify(
             integration_result.integrated_output or {},
             method=method,
+        )
+        _record_attempt(1, verification)
+
+        # Step 10b: targeted repair + re-verification on a genuine rejection
+        while (not verification.passed and repair is not None
+               and len(result.repair_history) < max_repair_attempts):
+            result.verifier_rejections.append({
+                "attempt": len(result.verification_attempts),
+                "outcome": verification.outcome.value,
+                "issues": list(verification.issues),
+            })
+            repaired = repair(dict(simulated), verification)
+            if not isinstance(repaired, dict) or not repaired:
+                result.warnings.append(
+                    "Repair returned no usable output; abandoning repair loop"
+                )
+                break
+            simulated = repaired
+            integration_result = self.integrator.integrate(
+                objective,
+                simulated,
+                original_requirements={"expected_outputs": {"status": "", "artifact": ""}},
+            )
+            verification = verifier.verify(
+                integration_result.integrated_output or {},
+                method=method,
+            )
+            _record_attempt(len(result.verification_attempts) + 1, verification)
+            result.repair_history.append({
+                "attempt": len(result.verification_attempts),
+                "outcome": verification.outcome.value,
+                "passed": verification.passed,
+            })
+
+        first_attempt_passed = (
+            result.verification_attempts[0]["passed"]
+            if result.verification_attempts else False
         )
         result.verification_results["integration"] = {
             "method": verification.method.value,
@@ -248,6 +317,9 @@ class E3ShadowOrchestrator:
             "issues": verification.issues,
             "passed": verification.passed,
         }
+        if result.repair_history:
+            result.verification_results["integration"]["first_attempt_passed"] = first_attempt_passed
+            result.verification_results["integration"]["repaired"] = verification.passed
 
         # Step 11: Conflict detection
         simulated_items = list(simulated.items())
@@ -267,7 +339,7 @@ class E3ShadowOrchestrator:
 
         # Step 12: Evidence recording
         for i, node in enumerate(plan["nodes"]):
-            node_id = node.get("node_id", f"node-{i+1}")
+            node_id = node["node_id"]
             roles = node.get("capability_roles", ["builder"])
             worker_id = "unassigned"
             if result.team_assembly:
@@ -283,9 +355,11 @@ class E3ShadowOrchestrator:
                 provider="shadow",
                 model="shadow-rehearsal",
             )
-            evidence.first_pass_success = verification.passed
+            evidence.first_pass_success = first_attempt_passed
             evidence.final_success = verification.passed
             evidence.verification_outcome = verification.outcome.value
+            evidence.retries = len(result.repair_history)
+            evidence.corrections = len(result.repair_history)
             evidence_id = self.evidence_manager.record_evidence(evidence)
             result.evidence_records.append(evidence_id)
 

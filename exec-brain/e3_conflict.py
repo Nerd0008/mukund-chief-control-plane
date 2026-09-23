@@ -47,7 +47,10 @@ class ConflictHandler:
                         node_b_id: str, output_b: Any) -> Optional[ConflictRecord]:
         if isinstance(output_a, dict) and isinstance(output_b, dict):
             common_keys = set(output_a.keys()) & set(output_b.keys())
-            for key in common_keys:
+            # Deterministic: iterate in sorted key order. Set iteration order is
+            # not stable across processes, which made conflict evidence
+            # non-reproducible (the reported disputed key changed run to run).
+            for key in sorted(common_keys):
                 if output_a[key] != output_b[key]:
                     return ConflictRecord(
                         conflict_type=ConflictType.FACTUAL_DISAGREEMENT.value,
