@@ -63,15 +63,16 @@ Execution readiness requirements met:
 
 ## Credential policy — outcome
 
-- API key never pasted into ChatGPT, Discord, GitHub, source, prompts, or logs.
-- Windows Credential Manager is the canonical store (target `deepseek`).
+- The active API key was pasted into ChatGPT during setup before being stored locally.
+- The key was NOT rotated afterward.
+- Windows Credential Manager is the canonical local store (target `deepseek`).
 - Env-var fallback implemented per E2 policy; not used (env var ABSENT).
-- Credential presence reported as yes/no only.
+- Credential presence is reported as yes/no only.
+- The key value is not present in GitHub source or committed logs.
 
-INCIDENT NOTE: during setup one API key was pasted into chat by the owner.
-It was refused and never used; the owner revoked it and generated a new
-key, stored locally via cmdkey. The new key value never passed through
-chat, logs, or source.
+INCIDENT NOTE: during setup the active DeepSeek API key was pasted into chat by the owner.
+It was subsequently stored locally in Windows Credential Manager and remains the same active key.
+This is recorded truthfully for audit purposes; no claim of rotation is made.
 
 ## Implementation notes
 
