@@ -123,3 +123,20 @@ error: pathspec ':
 [2026-09-23T15:55:03.905542Z] git pull: success (with stash/restore)
 [2026-09-23T15:57:03.970580Z] Another poller running — exiting
 [2026-09-23T15:58:49.396152Z] git pull: success (with stash/restore)
+[2026-09-23T15:59:01.696399Z] Poller starting
+[2026-09-23T15:59:05.175323Z] git pull: success (with stash/restore)
+[2026-09-23T16:01:05.237613Z] Another poller running — exiting
+[2026-09-23T16:03:01.704916Z] Poller starting
+[2026-09-23T16:03:04.105339Z] git pull: success (with stash/restore)
+[2026-09-23T16:05:04.170947Z] Another poller running — exiting
+[2026-09-23T16:07:01.654777Z] Poller starting
+[2026-09-23T16:07:03.735403Z] git pull: success (with stash/restore)
+[2026-09-23T16:09:03.796066Z] Another poller running — exiting
+[2026-09-23T16:11:01.689177Z] Poller starting
+[2026-09-23T16:11:06.738478Z] git pull: success (with stash/restore)
+[2026-09-23T16:13:06.800015Z] Another poller running — exiting
+[2026-09-23T16:15:01.680124Z] Poller starting
+[2026-09-23T16:15:04.638364Z] git pull: success (with stash/restore)
+[2026-09-23T16:17:04.699393Z] Another poller running — exiting
+[2026-09-23T16:19:01.719513Z] Poller starting
+[2026-09-23T16:19:03.931535Z] git pull: success (with stash/restore)
