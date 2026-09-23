@@ -1,8 +1,8 @@
 # Current Company State
 
 - Timestamp: 2026-09-23T20:42:00Z
-- Latest evidence run: 2026-09-23T20:38:25Z at code SHA `54ae1444a87a9fa98baa7afc09c3599380e2e831` plus this task's working tree
-- Evidence file: `audits/evidence/2026-09-23T20-38-25Z-codex-reset-revalidation/evidence.json` (+ `.md`, `codex-smoke.json`)
+- Latest evidence run: 2026-09-23T20:40:53Z at pushed code SHA `a999f6f` (origin/main)
+- Evidence file: `audits/evidence/2026-09-23T20-40-53Z-codex-reset-revalidation/evidence.json` (+ `.md`, `codex-smoke.json`)
 - Shared Control Plane status: Phase 2A
 - Hermes: running on DeepSeek direct API (`deepseek-flash`); the GitHub remote bridge dispatches `agent-*` tasks through it
 - Discord: connected
@@ -15,7 +15,7 @@
 
 ## Executive Brain — measured test state
 
-All numbers below come from one isolated run at 2026-09-23T20:38:25Z recorded by
+All numbers below come from one isolated run at 2026-09-23T20:40:53Z recorded by
 `scripts/evidence_runner.py`. Each suite is one real subprocess with a declared import root;
 counts are per suite and are not extrapolated.
 
