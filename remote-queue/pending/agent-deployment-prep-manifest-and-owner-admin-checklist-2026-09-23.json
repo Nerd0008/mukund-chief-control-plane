@@ -1,0 +1,27 @@
+{
+  "task_id": "agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23",
+  "created_at": "2026-09-23T21:38:00Z",
+  "objective": "Prepare the system so Mukund's afternoon session is only manual/admin configuration and the evening can be deployment/acceptance: produce a complete deployment manifest, secret/account checklist, backup/restore plan, service definitions, dependency inventory and cutover runbook without choosing or performing the final architecture/cutover.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Use the latest local engineering state; do not block earlier build tasks."
+  ],
+  "allowed_scope": [
+    "Inventory runtime versions, packages, scheduled/background jobs, DB/state paths, secrets by name only, service dependencies and ports/network requirements.",
+    "Prepare laptop-primary and VPS-watchdog/failover-compatible deployment artifacts only where architecture-independent; mark topology-specific steps as pending owner decision.",
+    "Consolidate every required manual key/OAuth/account/admin action into the owner-action TODO in exact order.",
+    "Prepare backup/restore verification, service restart, log rotation/retention, health checks and acceptance commands.",
+    "Prepare cutover rollback criteria and a no-go checklist.",
+    "Do not perform deployment/cutover or expose credentials."
+  ],
+  "stop_conditions": [
+    "No architecture finalization.",
+    "No VPS login/cutover.",
+    "No secrets.",
+    "No irreversible service changes."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work."
+}
