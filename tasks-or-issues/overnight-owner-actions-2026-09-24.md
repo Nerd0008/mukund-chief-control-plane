@@ -1,7 +1,7 @@
 # Overnight Owner-Action TODO — 2026-09-24
 
 **Owner:** Mukund  
-**Mode:** Maximum-effort overnight completion sprint  
+**Mode:** Maximum-effort continuous completion run — continue until deployment-ready  
 **Rule:** Owner-only blockers go here. They must not stop unrelated work.
 
 ## Operating protocol
@@ -56,6 +56,8 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
   `obs-20260923-d42e34a5`, routable=true, qualification UNPROVEN. The CLI requested no login,
   account, subscription, or billing action — no owner action outstanding for Codex.
 
-## Morning target
+## Owner manual-work target
 
-By Mukund's return, the system should be as close as safely possible to the authoritative definition of done, with any remaining owner-only blockers concentrated in this file rather than scattered across stalled tasks.
+Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.
+
+Do not assign ordinary engineering, scripting, testing, scheduling, integration, documentation, acceptance preparation, or deployment preparation to Mukund. If an unforeseen external service genuinely requires owner interaction that cannot be completed safely by the system, record the exact reason and minimum action here, then continue all independent work.
