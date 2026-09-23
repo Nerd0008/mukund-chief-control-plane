@@ -105,3 +105,6 @@ error: pathspec ':
 [2026-09-23T15:48:27.591065Z] git pull: success (with stash/restore)
 [2026-09-23T15:48:30.301743Z] Claimed task: remote-e2e-test-001
 [2026-09-23T15:48:30.302741Z] Handling task: remote-e2e-test-001
+[2026-09-23T15:49:01.603270Z] Poller starting
+[2026-09-23T15:49:03.565264Z] git pull: success (with stash/restore)
+[2026-09-23T15:49:34.994116Z] git pull: success (with stash/restore)
