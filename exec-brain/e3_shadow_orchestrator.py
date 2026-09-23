@@ -431,6 +431,139 @@ class E3ShadowOrchestrator:
             }
         return outputs
 
+    # ── production execution leg ────────────────────────────────────
+    def orchestrate_and_execute(
+            self,
+            objective: str,
+            fingerprint: TaskFingerprint,
+            verification_test_cases_by_node: Optional[Dict[str, List[Dict[str, Any]]]] = None,
+            max_repair_attempts: int = 1,
+            dispatch_timeout: int = 120,
+            plan: Optional[Dict[str, Any]] = None,
+            adapter_registry: Optional[Any] = None,
+            repair_objective_builder: Optional[Any] = None,
+            role_by_node: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, Any]:
+        """Run the full E3 pipeline *including* the production execution leg.
+
+        plan → decomposition review → route → context/permission compile →
+        team assembly → **dispatch every ready node to its assigned worker's
+        real ``ExecutionAdapter``** → integrate real outputs → deterministic
+        per-node verification (COMPLETE only on PASS) → persist schema-v2 DAG
+        state + performance evidence → replan/escalate on an incomplete run.
+
+        Only truthfully routable workers are ever dispatched; a node with no
+        assignment or a non-routable worker is recorded BLOCKED, never
+        dispatched and never fabricated.
+        """
+        from e3_execution import E3ProductionExecutor, ExecutionAdapterRegistry, OrchestrationStore
+
+        if self.db_path is None:
+            raise ValueError("orchestrate_and_execute requires a bound orchestration db_path")
+        self._connect()
+
+        out: Dict[str, Any] = {
+            "objective": objective,
+            "task_fingerprint": fingerprint.compute_hash() if hasattr(fingerprint, "compute_hash") else None,
+            "warnings": [],
+        }
+
+        plan = plan if plan is not None else self.planner.plan(objective, fingerprint)
+        out["plan_id"] = plan.get("plan_id")
+        out["plan"] = plan
+        dag = self.planner.build_dag(plan)
+        out["dag_nodes"] = list(dag.nodes.keys())
+
+        review = self.decomposition_reviewer.review(plan, dag)
+        out["decomposition_review"] = {"approved": review.approved,
+                                       "structural_issues": review.structural_issues}
+        if not review.approved:
+            out["outcome"] = "REJECTED_DECOMPOSITION"
+            return out
+
+        candidates_by_node: Dict[str, List[RouterCandidate]] = {}
+        if self.router:
+            for node in plan["nodes"]:
+                candidates_by_node[node["node_id"]] = self.router.propose_candidates(
+                    node, fingerprint.task_family, fingerprint)
+        out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
+
+        if self.capability_registry:
+            assembler = TeamAssembler(self.capability_registry, self.router)
+            assembly = assembler.assemble_team(plan, candidates_by_node=candidates_by_node,
+                                               require_all_nodes=True)
+        else:
+            assembly = None
+        out["team_complete"] = assembly.complete if assembly else False
+        out["team_assignments"] = (
+            [{"node": a.node_id, "worker": a.worker_id, "role": a.role}
+             for a in assembly.assignments] if assembly else []
+        )
+        out["team_issues"] = (assembly.issues if assembly else ["capability registry unavailable"])
+
+        if assembly is None or not assembly.complete:
+            rec = self.escalator.escalate(
+                trigger="no_qualified_worker",
+                context=f"team assembly incomplete for plan {plan.get('plan_id')}",
+                proposals_considered=["route_to_available_workers"],
+                why_each_failed=list(out["team_issues"]),
+                owner_decision_needed="provision/qualify a worker",
+                recommended_action="escalate to owner",
+            )
+            out["escalation"] = {"escalation_id": rec.escalation_id, "trigger": rec.trigger}
+            out["outcome"] = "TEAM_INCOMPLETE"
+            return out
+
+        registry = adapter_registry or ExecutionAdapterRegistry()
+        store = OrchestrationStore(self.db_path)
+        try:
+            executor = E3ProductionExecutor(store, registry,
+                                            repair_objective_builder=repair_objective_builder)
+            execution = executor.execute_plan(
+                plan, dag, assembly, fingerprint, objective,
+                verification_test_cases_by_node=verification_test_cases_by_node,
+                max_repair_attempts=max_repair_attempts,
+                dispatch_timeout=dispatch_timeout,
+                role_by_node=role_by_node,
+            )
+        finally:
+            store.close()
+        out["execution"] = execution
+
+        node_outputs = {n["node_id"]: (n.get("output") or {})
+                        for n in execution["nodes"]}
+        integration = self.integrator.integrate(
+            objective, {k: v for k, v in node_outputs.items() if v},
+            original_requirements={},
+        )
+        out["integration"] = {
+            "complete": integration.complete,
+            "integrated_keys": sorted((integration.integrated_output or {}).keys()),
+            "blocking_issues": [i.description for i in integration.issues if i.severity == "high"],
+            "contradictions": len(integration.contradictions),
+        }
+
+        if execution["outcome"] != "EXECUTION_COMPLETE":
+            rec = self.escalator.escalate(
+                trigger="repeated_failure",
+                context=f"execution outcome {execution['outcome']} for plan {plan.get('plan_id')}",
+                proposals_considered=["targeted_repair", "replan"],
+                why_each_failed=[n.get("blocking_reason") or "verification_failed"
+                                 for n in execution["nodes"] if n["state"] != "COMPLETE"],
+                owner_decision_needed="manual review",
+                recommended_action="escalate to owner",
+            )
+            out["escalation"] = {"escalation_id": rec.escalation_id, "trigger": rec.trigger}
+            if self.replanner.can_replan():
+                replan_record = self.replanner.replan(
+                    dag, ReplanTrigger.ASSUMPTION_INVALIDATED,
+                    f"execution outcome {execution['outcome']}")
+                if replan_record:
+                    out["replan"] = replan_record.record_id
+
+        out["outcome"] = execution["outcome"]
+        return out
+
     def get_readiness_report(self) -> Dict[str, Any]:
         """Get a readiness report for all workers."""
         workers = self.worker_registry.get_all_workers()
