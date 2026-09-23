@@ -13,7 +13,20 @@
     "VPS preparation and deployment work that does not require missing owner credentials or explicit approval"
   ],
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "running",
+  "completed_items": [
+    "E3 shadow orchestrator composed from all E3 components (planner, decomposition review, router, context compiler, permission compiler, team assembly, integrator, verifier, conflict handler, evidence manager, escalator, exploration/shadow rules, qualification harness, replanner) — 13/13 tests pass",
+    "Full local regression verified: 207 tests pass (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 13 E3 shadow + 37 E4/E5 + 15 queue)",
+    "State file corrected: timestamp, test counts, E3 shadow orchestrator suite added, E4/E5 combined (not per-suite) count clarified, provider truth preserved (LongCat/Nous not replaced)",
+    "E4/E5 suites remain at 37/37 combined (not 37 each — corrected in state file)"
+  ],
+  "exact_remaining_blockers": [
+    "E3 Stage 2 production enablement — requires explicit Mukund approval",
+    "Seven provider credentials/account readiness — owner/provider dependent (Mistral, GLM, Qwen, LongCat/Nous, MiniMax, Step, Tencent Hunyuan)",
+    "Codex CLI usage-limit reset — external",
+    "VPS access/details and deployment architecture decision — unresolved",
+    "Live provider execution evidence for 7 workers — blocked on credentials"
+  ],
   "stop_conditions": [
     "owner credentials or account action required",
     "explicit Stage 2 production approval required",
