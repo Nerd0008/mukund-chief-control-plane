@@ -1,0 +1,30 @@
+{
+  "task_id": "agent-live-queue-recovery-deepseek-2026-09-23",
+  "created_at": "2026-09-23T20:08:00Z",
+  "objective": "Continue the bounded queue/test-isolation and evidence-recovery work now that Hermes has been reconfigured to DeepSeek direct API and a manual AUTH_OK smoke on deepseek-flash exited 0. Finish isolation of remote_queue/tests/test_queue.py, reconcile stale queue lifecycle truth, produce reproducible per-suite evidence, and update project state accurately. Preserve all hard gates. Return strict terminal JSON.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "Inspect latest main, blocked/running queue records, scheduler/worker state and worktree before editing. Treat the prior agent-live-queue-recovery task as blocked by observed Nous auth failure, not as an implementation failure.",
+    "Confirm Hermes current provider/model from runtime evidence; do not expose the DeepSeek API key or any secret.",
+    "Isolate remote_queue/tests/test_queue.py from the live repository, live queue, scheduler, mutex, kill switch, Git pushes and real dispatcher using disposable roots and mocked boundaries.",
+    "Do not run the previously unsafe queue tests against the live checkout until isolation is implemented.",
+    "Reproduce and minimally fix any remaining queue lifecycle, claim/publication, failed-push, lock or dispatch defect under isolated tests only.",
+    "Reconcile stale/orphaned running records truthfully from evidence. Preserve E3 implementation commit 617e69cb6bca66ff613b242adcf5502527b9d7e8; do not infer task completion merely because code exists.",
+    "Create or finish a reproducible evidence runner recording UTC timestamp, code SHA, exact command, runtime/import root, collected/passed/failed/error/skipped counts and exit code. Keep historical E1/E2 evidence separate if not rerun.",
+    "Update state/current_company_state.md and the full-build tracker only with verified facts. Do not claim unsupported 207 or 252 global totals.",
+    "Record Codex CLI re-validation as the next bounded task because Mukund reports its allowance has reset. Do not spend Codex tokens in this recovery task.",
+    "Make small recoverable commits and push origin/main. Return ONLY the bridge's structured terminal JSON."
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "E3 Stage 2 production remains NOT APPROVED.",
+    "Deployment architecture remains unresolved; do not choose or perform cutover/deployment/reboot/firewall/service changes.",
+    "No credentials/secrets, private runtime DBs, raw model output or chain-of-thought in GitHub.",
+    "No destructive reset/clean/force push or broad process termination.",
+    "If a conflicting active worker is genuinely present, stop conflicting edits and report dependency.",
+    "If DeepSeek authentication/provider access fails, report exact observed failure and preserve completed work."
+  ],
+  "notes": "Owner-visible smoke at approximately 21:06 local time showed Hermes model deepseek-flash, AUTH_OK, exit_code 0. Reasoning effort is low to conserve cost. Nous Portal remains rate-limited (HTTP 429) and should not be retried during this task. The hidden poller scheduler update exists in commits 5f723091 and ab130fb; actual Hermes Remote Worker windows must remain visible."
+}
