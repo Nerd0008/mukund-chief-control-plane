@@ -1,0 +1,66 @@
+{
+  "task_id": "agent-bridge-watchdog-validation-2026-09-23",
+  "created_at": "2026-09-23T20:58:00Z",
+  "objective": "Validate the newly hardened Hermes remote bridge before overnight autonomous continuation, then hand off back to the E3 local production rehearsal. This is a bounded bridge reliability check, not project feature work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "allowed_scope": [
+    "Pull latest main and inspect commits 617fd47c and b83c9ad.",
+    "Compile/import remote_queue/visible_worker.py and remote_queue/hermes_dispatch.py and run the isolated remote_queue test suite.",
+    "Verify the visible worker has a bounded no-stream-event watchdog (default 300s, configurable by HERMES_REMOTE_IDLE_TIMEOUT) and targeted child-tree termination only.",
+    "Verify dispatch has a bounded hard task timeout (default 1200s, configurable by HERMES_REMOTE_TASK_TIMEOUT).",
+    "Verify watchdog exit code 124 is surfaced truthfully as execution_error rather than completion.",
+    "Verify the generated Hermes prompt treats remote-queue/running/<task_id>.json as immutable and respects recorded standing conditional approvals instead of inventing a fresh owner gate.",
+    "Do not intentionally wait 300 seconds. Use unit/static checks or a short isolated fake process with a test-specific short timeout; do not touch the live queue from tests.",
+    "If any bridge defect is found, fix it minimally, rerun isolated tests, commit/push, and record evidence.",
+    "Before exit, ensure a fresh E3 local production rehearsal retry is pending unless an equivalent E3 rehearsal is already pending/running with a healthy worker."
+  ],
+  "stop_conditions": [
+    "Do not mutate the currently running E3 task contract.",
+    "Do not kill unrelated processes.",
+    "Do not fabricate pass evidence.",
+    "Do not enable Stage 2 in this bridge-validation task.",
+    "No secrets or raw chain-of-thought."
+  ],
+  "notes": "Current open E3 worker predates the watchdog patch and may require a one-time manual Ctrl+C. New launches must use the hardened bridge. This validation task should run before the next E3 retry if the current worker is interrupted.",
+  "completed_at": "2026-09-23T21:22:04.521873Z",
+  "result": {
+    "status": "completed",
+    "summary": "Validated the hardened Hermes remote bridge against commits 617fd47c (visible-worker watchdog) and b83c9ad (dispatch bounds + frozen running contracts). All required properties were verified with executed tests, not inspection alone: the visible worker fails closed after HERMES_REMOTE_IDLE_TIMEOUT (default 300s) of no stream event, terminates only its own Hermes child tree (taskkill /PID <child> /T /F, no /IM anywhere), and forces exit code 124 which hermes_dispatch surfaces as status=blocked / blocker_category=execution_error with a 'no-progress watchdog' summary and never as completion (output file stays empty, worker prints Status: FAILED); dispatch bounds each task at HERMES_REMOTE_TASK_TIMEOUT (default 1200s, kills the helper tree on expiry) and passes the idle bound through to the worker; the generated prompt carries both required rules verbatim (running/<task_id>.json frozen as immutable input, and standing conditional approvals honoured only after their recorded objective conditions are verified). No bridge defect was found in the validated path, so no production code was changed; 12 new isolated tests were added (fake Hermes children / fake process objects in temp dirs, 2s test-only watchdog bound, no live-queue access, no real Hermes launch). Full baseline re-run: 11 suites, 335/335 passed, exit 0 (previously 323/323 across 10 suites; delta is exactly the 12 new tests). Handoff satisfied: no E3 rehearsal was pending or running with a healthy worker, so exactly one bounded successor was staged (remote-queue/pending/agent-e3-local-production-rehearsal-retry-2026-09-23.json), scoped not to race or duplicate the already-pending image-diagnosis/multi-worker task. Stage 2 was not enabled, no criterion was weakened, and no process was killed; a new owner directive that landed mid-run (a58549c/2d5f332/d7e718c) deferring local Stage 2 until provider keys are configured on 2026-09-24 was read and both pending E3 contracts were aligned to it.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "42044f2 - bridge: add isolated watchdog/timeout validation suite and evidence (remote_queue/tests/test_bridge_watchdog.py, scripts/evidence_runner.py, audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/)",
+      "3344e24 - queue: stage E3 local production rehearsal retry successor",
+      "7e64ed0 - state: record the bridge watchdog validation and the staged E3 rehearsal retry",
+      "acfb5ef - queue: align staged E3 rehearsal retry with the late-evening owner Stage 2 deferral",
+      "e1ad315 - evidence: note the owner Stage 2 deferral in the bridge validation record"
+    ],
+    "tests": [
+      "python -m py_compile remote_queue/visible_worker.py remote_queue/hermes_dispatch.py remote_queue/poller.py remote_queue/tests/test_queue.py -> COMPILE_OK",
+      "python -m unittest remote_queue.tests.test_bridge_watchdog -v -> 12 collected / 12 passed / exit 0 (watchdog 124 + targeted termination, healthy-stream completion, bound 0 disables, PID-scoping static check, 124->execution_error, 1200 default + 137 override, idle bound 300/45 passthrough, hard-timeout expiry blocked, prompt immutability + standing-approval text)",
+      "python -m unittest remote_queue.tests.test_bridge_watchdog remote_queue.tests.test_queue -> 42 collected / 42 passed / exit 0 (queue isolation guards still hold)",
+      "python scripts/evidence_runner.py --label bridge-watchdog-validation -> 11 suites / 335 collected / 335 passed / 0 failed / 0 errors / exit 0"
+    ],
+    "changed_files": [
+      "remote_queue/tests/test_bridge_watchdog.py",
+      "scripts/evidence_runner.py",
+      "audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/bridge_checks.json",
+      "audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/bridge_validation.md",
+      "audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/evidence.json",
+      "audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/evidence.md",
+      "remote-queue/pending/agent-e3-local-production-rehearsal-retry-2026-09-23.json",
+      "remote-queue/logs/queue.log",
+      "state/current_company_state.md"
+    ],
+    "remaining": [
+      "The E3 rehearsal retry is pending but has not run: pending/agent-e3-local-production-rehearsal-retry-2026-09-23.json sorts ahead of the image-diagnosis task, so the poller will claim it first; both are critical and run one per poll cycle.",
+      "No new launch should use a pre-patch bridge: verify the scheduled poller picks up remote_queue/visible_worker.py from this (now-pushed) main before the next E3 launch.",
+      "Recorded but deliberately not changed (out of the validated path): poller.handle_task routes task ids containing 'operational'/'bridge-validation'/'e2e' to hardcoded stub handlers that return fabricated 'completed' payloads with no execution evidence; the validated task id matched none of them and was correctly dispatched through dispatch_task.",
+      "Recorded but deliberately not changed: visible_worker._terminate_child_tree returns after taskkill without checking its return code, so its terminate()/kill() fallback is only reachable if taskkill raises; the once-per-second watchdog retry and the 1200s hard bound are the backstops.",
+      "Owner-deferred work unchanged by this task: local Stage 2 completion after all remaining provider credentials are configured on 2026-09-24, and the seven provider credential provisioning steps."
+    ]
+  }
+}
