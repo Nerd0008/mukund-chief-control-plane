@@ -1,6 +1,6 @@
 # Current Company State
 
-- Timestamp: 2026-09-22 10:00 UTC
+- Timestamp: 2026-09-22 14:00 UTC
 - Shared Control Plane status: Phase 2A
 - Hermes: running
 - Discord: connected
@@ -15,19 +15,34 @@
 - >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
 - Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\Users\mukun\DiscordArchive\chief\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
 - Manual fallback: python C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py
-- Executive Brain: E2 ACTIVE (rolled out 2026-09-22 ~10:00 UTC)
-  - Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\eb.py (E1 + E2 commands)
-  - Governor DB: governor.db (separate from E1 exec_brain.db)
-  - Skill: %LOCALAPPDATA%\hermes\skills\operations\executive-brain-e1
-  - E1 Schema version: 1 (SQLite, append-only, hash-chained floors)
-  - E2 Schema version: 1 (governor.db, append-only, hash-chained snapshots)
-  - E1 Test result: 32/32 passed; audit --verify PASS
-  - E2 Test result: 45/45 passed; gov-verify PASS
-  - E2 Providers: Nous (routable), DeepSeek (routable), Codex (observed-only), Antigravity (observed-only)
-  - E2 D3: routable flag separates telemetry from routability
-  - E2 D5: snapshots 90d, requests 30d, briefs 365d, aggregates 365d
-  - E2 Burn trend: 24h vs 24h, ±20% threshold (D4)
-  - E2 Secret handling: DeepSeek key by reference only, never printed/logged (D2)
-  - Discipline: classify → decompose → freeze → route; no routing before freeze
-  - E3+ (worker qualification, Qualification Gate, predictive exhaustion, reserves, checkpoints, handovers, safe mode) NOT started
+- Executive Brain: E3 STAGE 1 ACTIVE / SHADOW ONLY (implemented 2026-09-22)
+  - E1: ACTIVE, verified (32/32 tests PASS, audit --verify PASS)
+  - E2: ACTIVE, verified (45/45 tests PASS, gov-verify PASS)
+  - E3 Stage 1: SHADOW ONLY — no production dispatch enabled
+  - E3 Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\ (orchestration_db.py, capability_registry.py, task_fingerprint.py, decision_rationale.py, execution_dag.py, worker_contract.py, worker_registry.py, qualification_gate.py, e3_commands.py)
+  - E3 Orchestration DB: orchestration.db (schema v1, 11 tables, separate from E1 exec_brain.db and E2 governor.db)
+  - E3 Test result: 40/40 passed
+  - Combined test result: 117/117 passed (E1 32 + E2 45 + E3 40)
+  - 10-worker registry loaded from handovers/2026-09-22-e3-model-roster-handover.md
+  - All workers currently UNPROVEN (LOCKED = included in pool, NOT qualified)
+  - Worker pool status:
+    - LOCKED (6): codex-cli, mistral-small-4, google-nano-banana-2, deepseek-v41-flash, glm-53-flash, qwen38-27b
+    - EVALUATE (1): longcat-2.0
+    - BENCHMARK (3): minimax-m3, step-37-flash, tencent-hunyuan-hy3
+  - routable states: codex-cli NOT routable (CLI automation TBD); all others routable
+  - Stage 1 capabilities: task fingerprinting, decomposition planning, DAG construction, candidate generation, Qualification Gate validation, decision rationale audit log (A8), e3-rationale / e3-trace / e3-why CLI views
+  - No production worker dispatch enabled
+  - No execution adapters implemented yet
+  - Stage 2 NOT APPROVED
+  - Provider/API/CLI setup still required before Stage 2
+  - Architecture: FROZEN per approved amendment (D-AI-1..7, A1..A8)
+  - Decision rationale: append-only audit trail active (decision_rationale_event, decision_outcome_review tables)
+  - Event-sourced governance: worker_capability_event, dag_state_event tables active
+  - E1 schema version: 1 (unchanged)
+  - E2 Schema version: 1 (unchanged)
+  - E3 Schema version: 1 (orchestration.db)
+  - E3 owner decisions: D-AI-1..7 all incorporated
+  - E3 architecture corrections: A1..A8 all incorporated
+- Next phase: E3 Stage 2 (production execution) — NOT STARTED
+  - Requires: provider access, CLI config, execution adapter implementation, smoke tests, cold-start qualification, owner approval
 - Next phase: Phase 2B (other channels) — not started
