@@ -1,10 +1,11 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T22:38:00Z
-- Latest evidence run: 2026-09-23T22:37:29Z — E3 Stage 2 readiness gate re-run
-  (`audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
-  its regression input (`audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/`,
-  code SHA `56d923b`). Previous run: 2026-09-23T21:53:37Z at code SHA `4da92eb`.
+- Timestamp: 2026-09-23T22:44:00Z
+- Latest evidence run: 2026-09-23T22:41:57Z — E3 Stage 2 readiness gate re-run (credential-triggered
+  continuation, task `agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24`)
+  (`audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
+  its regression input (`audits/evidence/2026-09-23T22-40-55Z-e3-stage2-readiness-gate-rerun/`,
+  code SHA `88af27a`). Previous run: 2026-09-23T22:37:29Z at code SHA `56d923b`.
 - Evidence files (this run):
   - `audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/evidence.json` (+ `.md`)
     — **12 suites, 364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0**
@@ -545,9 +546,56 @@ Verified facts (all machine-checked this run):
 E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain **gated
 behind Stage 2** and were not run.
 
+## E3 Stage 2 readiness gate re-run — credential-triggered continuation (2026-09-23T22:41Z)
+
+Task `agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24`. This is the credential-triggered
+continuation of the 22:37Z gate re-run. Its first step is a **presence-only credential probe**; the
+probe found the seven provider credentials **still absent**, so per the contract the gate remains
+disabled and the exact owner action is recorded. The gate made **0 real provider calls** and read no
+credential value.
+
+Evidence:
+- `audits/evidence/2026-09-23T22-40-55Z-e3-stage2-readiness-gate-rerun/` — full regression via
+  `python scripts/evidence_runner.py --label e3-stage2-readiness-gate-rerun`.
+- `audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/` — the gate verdict
+  (`python scripts/e3_stage2_readiness_gate.py`; deterministic, 0 provider calls).
+
+Verified facts (all machine-checked this run, code SHA `88af27a`):
+
+- **Credentials (presence only — no value read or logged): still 0/7.** All seven remain absent from
+  both Windows Credential Manager and environment: `mistral-small-4`, `glm-53-flash`, `qwen38-27b`,
+  `longcat-2.0`, `minimax-m3`, `step-37-flash`, `tencent-hunyuan-hy3`. `newly_configured_workers = []`,
+  so no provider onboarding or smoke test was warranted or run.
+- Regressions: 12 suites, **364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite
+  exit 0**.
+- Real-path production rehearsal: **consumed, not repeated** (0 failed checks; `google_image_complete`
+  = `None`, i.e. unrun — never counted as a pass); isolation fail-closed, stores byte-identical
+  including `-wal`/`-shm`, E1/E2 boundary clean; qualification evidence-driven
+  (`qualified_rows_without_evidence = 0`); rollback available (deploy `--restore`, backups with
+  manifests, schema v2).
+
+**Verdict: Stage 2 NOT ENABLED** (unchanged from 22:37Z). All three enablement conditions still fail:
+
+1. (a) credentials confirmed configured — **FAIL (0/7)**.
+2. (b) every readiness criterion objectively satisfied by this run's evidence — **FAIL**: the Google
+   image worker's real-dispatch intermittency is unresolved. Every other criterion is MET.
+3. (c) explicit owner authorization for enablement at this point — **NOT SATISFIED**: the owner's
+   standing conditional authorization applies only once the provider credentials are confirmed
+   configured, which they are not.
+
+E4 checkpoint/failover and E5 convergence/safe-mode drills remain **gated behind Stage 2** and were
+not run.
+
+**Exact owner action required:** on 2026-09-24, configure the seven provider credentials locally
+(Windows Credential Manager targets `mistral`, `glm`, `qwen`, `nous`, `minimax`, `stepfun`,
+`hunyuan`, or the env vars `MISTRAL_API_KEY`, `GLM_API_KEY`, `DASHSCOPE_API_KEY`, `NOUS_API_KEY`,
+`MINIMAX_API_KEY`, `STEP_API_KEY`, `HUNYUAN_API_KEY`). Once present, the successor gate task re-runs
+`scripts/e3_stage2_readiness_gate.py` and enables LOCAL Stage 2 only if all three conditions hold.
+
 ## Current blockers / owner dependencies
 
-- E3 Stage 2 local enablement: **blocked — gate re-run 2026-09-23T22:37Z: Stage 2 NOT ENABLED.**
+- E3 Stage 2 local enablement: **blocked — gate re-run 2026-09-23T22:41Z (credential-triggered):
+  Stage 2 NOT ENABLED.**
   The readiness gate now runs deterministically (`scripts/e3_stage2_readiness_gate.py`); the only
   unmet readiness criterion is the Google image worker's intermittency, and the blocking conditions
   are (a) 0/7 provider credentials configured and (c) owner authorization that is conditional on
@@ -574,9 +622,9 @@ behind Stage 2** and were not run.
    Stage 2 readiness gate (`scripts/e3_stage2_readiness_gate.py` + `scripts/evidence_runner.py`) and,
    only if all three conditions hold (credentials confirmed configured; every readiness criterion
    satisfied; explicit owner authorization for that step), enable local Stage 2. The gate was already
-   re-run once on 2026-09-23T22:37Z and returned NOT ENABLED (0/7 credentials); that verdict is
-   recorded in the section above. Owner action required first: configure the seven provider
-   credentials.
+   re-run twice on 2026-09-23 (22:37Z and 22:41Z) and returned NOT ENABLED both times (0/7
+   credentials); both verdicts are recorded in the sections above. Owner action required first:
+   configure the seven provider credentials.
 3. Extend qualification evidence for the remaining roles/workers as real execution evidence arrives;
    the harness and the bar are now in place, so this is evidence collection, not new engineering.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths

@@ -2,17 +2,17 @@
 
 Status: ACTIVE. Authority: `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`.
 
-Evidence source for every test figure below (supersedes the 21:53:37Z run):
-`audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/evidence.json`
-(run 2026-09-23T22:35:32Z, code SHA `56d923b`, 12 suites, 364 collected, 364 passed,
+Evidence source for every test figure below (supersedes the 22:35:32Z run):
+`audits/evidence/2026-09-23T22-40-55Z-e3-stage2-readiness-gate-rerun/evidence.json`
+(run 2026-09-23T22:40:55Z, code SHA `88af27a`, 12 suites, 364 collected, 364 passed,
 0 failed, 0 errors, 0 skipped, every suite exit 0). Prior source:
-`audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/evidence.json`.
+`audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/evidence.json`.
 
-E3 Stage 2 readiness gate verdict (2026-09-23T22:37:29Z, 0 provider calls):
-`audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/` — Stage 2 **NOT ENABLED**
-(credentials 0/7 configured; Google image worker intermittency unresolved; owner authorization
-conditional on the credentials). Superseded gate intermediates preserved under
-`audits/evidence/superseded/`.
+E3 Stage 2 readiness gate verdict (2026-09-23T22:41:57Z, credential-triggered continuation, 0
+provider calls): `audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/` — Stage 2
+**NOT ENABLED** (credentials still 0/7 configured; Google image worker intermittency unresolved;
+owner authorization conditional on the credentials). Previous verdict: 2026-09-23T22:37:29Z.
+Superseded gate intermediates preserved under `audits/evidence/superseded/`.
 
 Diagnosis + qualification evidence from the same task:
 `audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/` (bounded Google image diagnosis,
@@ -61,7 +61,7 @@ Stage-1 shadow-rehearsal evidence (unchanged, still valid):
 | E3 | Google image worker real dispatch | **INTERMITTENT (diagnosed, not settled)** | earlier call returned no image part (17 prompt / 0 output tokens); the bounded 21:49Z re-dispatch of the **identical** request returned a decodable 1024×1024 JPEG (finishReason STOP, inlineData:image/jpeg, 434365 bytes, candidate tokens 1383) with the deterministic verifier PASS. Trigger unknown; a bounded repeat series is required. Prompt-stated size (64×64) was not honoured |
 | E3 | Real dispatch on a decomposed multi-worker plan | **EVIDENCED** | scenario F (21:32:41Z re-run): 2 nodes → 2 distinct routable workers, per-node deterministic verification, dependency gate ordered from the persisted log |
 | E3 | Worker qualification evidence | **PARTIAL (evidence-backed)** | `EvidenceBackedBenchmark` + `scripts/e3_qualification_from_evidence.py`, 0 provider calls: codex-cli builder QUALIFIED (3/3/3), codex-cli integrator QUALIFIED (2/2/2), deepseek-v41-flash builder QUALIFIED (8/8/3), google-nano-banana-2 vision EVALUATING (2 recorded, 1 pass). `qualified_rows_without_evidence = 0`; the registry refuses a QUALIFIED row with zero evidence; the fixture harness can never produce a qualification |
-| E3 | Stage 2 local production enablement | **NOT ENABLED (gate re-run 2026-09-23T22:37Z)** | deterministic readiness gate `scripts/e3_stage2_readiness_gate.py` (0 provider calls): regressions 12 suites/364 pass, real-path rehearsal consumed (0 failed checks), isolation+boundary+rollback MET, qualification evidence-driven — but (a) **0/7 provider credentials configured**, (b) Google image worker intermittency unresolved, (c) owner authorization conditional on (a). Exact remaining conditions recorded in `audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/` |
+| E3 | Stage 2 local production enablement | **NOT ENABLED (gate re-run 2026-09-23T22:41Z, credential-triggered continuation)** | deterministic readiness gate `scripts/e3_stage2_readiness_gate.py` (0 provider calls): regressions 12 suites/364 pass, real-path rehearsal consumed (0 failed checks), isolation+boundary+rollback MET, qualification evidence-driven — but (a) **0/7 provider credentials configured (presence-only probe; `newly_configured_workers=[]`)**, (b) Google image worker intermittency unresolved, (c) owner authorization conditional on (a). Exact remaining conditions recorded in `audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/` |
 | E3 | Truth defects found and fixed | 8 FIXED | gemini output-token mapping; `e3_commands` hardcoded schema version; rehearsal CLI-binding detector; `build_dag` positional dependency wiring; executor DAG-state sync; `e3-status`/`e3-verify-db` reading the oldest schema row; an unrequested optional rehearsal scenario reported as passing; (2026-09-23T21:53Z) the always-PASS synthetic cold-start benchmark, now structurally unable to produce a qualification |
 | E4 | Resource continuity implementation | PRESENT, unit-tested | included in the 37/37 combined suite |
 | E4 | Checkpoint/failover drill evidence on real execution paths | OPEN | gated: the contract asks for this only if Stage 2 is enabled, which it is not |
@@ -79,11 +79,12 @@ Stage-1 shadow-rehearsal evidence (unchanged, still valid):
 ## Owner gates (must not be bypassed)
 
 1. E3 Stage 2 **local** production enablement — **NOT ENABLED** (deterministic gate re-run
-   2026-09-23T22:37Z). The gate fails all three conditions: (a) 0/7 provider credentials configured,
-   (b) Google image worker intermittency unresolved, (c) owner authorization conditional on (a).
-   Owner's late-evening directive (`a58549c`/`2d5f332`/`d7e718c`): complete local Stage 2 only after
-   the remaining provider credentials are configured on 2026-09-24 and the full readiness gates are
-   re-run. The older standing conditional approval is not exercised.
+   2026-09-23T22:41Z, credential-triggered continuation; previous verdict 22:37Z). The gate fails all
+   three conditions: (a) 0/7 provider credentials configured (presence-only probe; no new credential
+   appeared), (b) Google image worker intermittency unresolved, (c) owner authorization conditional
+   on (a). Owner's late-evening directive (`a58549c`/`2d5f332`/`d7e718c`): complete local Stage 2 only
+   after the remaining provider credentials are configured on 2026-09-24 and the full readiness gates
+   are re-run. The older standing conditional approval is not exercised.
 2. Deployment architecture choice and VPS cutover — deferred by owner until the local system is
    proven; the recorded laptop-primary preference is not a decision and cutover is not authorized.
 3. Seven provider credentials provisioned locally (never via GitHub/queue/logs).
@@ -154,13 +155,15 @@ deterministic, read-only). Evidence:
 ## Next bounded task
 
 Staged in `remote-queue/pending/` by
-`agent-e3-stage2-readiness-gate-rerun-2026-09-24` (this task):
-`agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24` — the credential-triggered
-continuation. Its first step is a presence-only credential probe; if the seven provider credentials
-are still missing it records the exact owner action and stops without enabling anything. If they are
-configured it re-runs the existing deterministic gate (`scripts/e3_stage2_readiness_gate.py`) and
-enables **LOCAL** Stage 2 only if all three conditions hold (credentials confirmed configured; every
-readiness criterion objectively satisfied; explicit owner authorization for that step).
+`agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24` (this task):
+`agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24` — the credential-triggered
+continuation (retry). Its first step is a presence-only credential probe; if the seven provider
+credentials are still missing it records the exact owner action and stops without enabling anything.
+If any are configured it onboards each newly configured provider (bounded identity/model discovery,
+one harmless smoke test, E2 linkage via `governor.record_request()`, `routable=true` only from that
+evidence), re-runs the existing deterministic gate (`scripts/e3_stage2_readiness_gate.py`) and enables
+**LOCAL** Stage 2 only if all three conditions hold (credentials confirmed configured; every readiness
+criterion objectively satisfied; explicit owner authorization for that step).
 
 Already pending and NOT duplicated or replaced:
 
@@ -173,6 +176,7 @@ Already pending and NOT duplicated or replaced:
 - `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23` — final acceptance sweep and
   handover narrative.
 
-The gate-rerun contract `agent-e3-stage2-readiness-gate-rerun-2026-09-24` is now **executed**
-(verdict 2026-09-23T22:37Z: Stage 2 NOT ENABLED). No pending task was found equivalent to the
-credential-triggered successor, so exactly one new task was staged.
+Both gate contracts are now **executed** — `agent-e3-stage2-readiness-gate-rerun-2026-09-24` (verdict
+2026-09-23T22:37Z) and `agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24` (verdict
+2026-09-23T22:41:57Z) — both returned Stage 2 NOT ENABLED (0/7 credentials). No pending task was found
+equivalent to the credential-triggered successor, so exactly one new task was staged.

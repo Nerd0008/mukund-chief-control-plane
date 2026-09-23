@@ -1,0 +1,38 @@
+{
+  "task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24",
+  "created_at": "2026-09-23T22:45:00Z",
+  "objective": "Credential-triggered continuation (retry) of agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24. First step is a presence-only credential probe for the seven credential-missing providers; if they are still missing, record the exact owner action and stop without enabling anything. If any are newly configured, run bounded identity/model discovery plus one harmless smoke test per new provider, wire E2 linkage through governor.record_request() only, set routable=true only from that evidence, then re-run scripts/e3_stage2_readiness_gate.py and enable LOCAL Stage 2 / production dispatch ONLY if all three contract conditions hold (credentials confirmed configured; every readiness criterion objectively satisfied by recorded evidence; explicit owner authorization for that step). Do not perform VPS cutover or finalize deployment architecture.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24 has reached a terminal state (it is the running contract that produced the 2026-09-23T22:41:57Z verdict; its findings are inputs here, not repeated work).",
+    "agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23 (pending) owns the Google image repeat-series; consume its result rather than repeating it.",
+    "The owner has configured the remaining provider credentials locally on 2026-09-24 (Mistral, GLM, Qwen, LongCat/Nous, MiniMax, Step, Tencent Hunyuan), or the task records truthfully that they are still missing."
+  ],
+  "allowed_scope": [
+    "Reuse scripts/e3_stage2_readiness_gate.py (deterministic, 0 provider calls) and scripts/evidence_runner.py rather than rebuilding the gate.",
+    "Determine, presence-only and without reading or logging any secret value, which of the seven credential-missing providers now have locally configured credentials; if any remain missing, record the exact owner action and leave Stage 2 disabled.",
+    "For each newly configured provider: run a bounded live identity/model discovery (/models) plus one harmless smoke test, capture provider-returned usage where exposed, wire E2 linkage through governor.record_request() only, and set routable=true only from that evidence — never from a credential being present alone.",
+    "Re-run the full local Stage 2 readiness gate with executable evidence: regression suites through scripts/evidence_runner.py (exact commands, per-suite counts, exit codes); the real-path production rehearsal evidence (consume the 2026-09-23T21:32:41Z decomposed multi-worker evidence unless a fresh bounded real-path rehearsal is genuinely required); the Google image worker status; worker qualification status; rehearsal-evidence isolation (before/after hashes) and the E1/E2 public-interface boundary; and rollback/recovery availability.",
+    "Enable LOCAL E3 Stage 2 / production dispatch ONLY if all three hold: credentials are confirmed configured; every readiness criterion is objectively satisfied by recorded evidence from that run; and the authority records explicit owner authorization for enablement at that point. Otherwise leave it disabled and record exactly why.",
+    "If Stage 2 is enabled, run the E4/E5 real-path drills (checkpoint/failover, convergence/safe mode) using the harness owned by agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23 (consume, do not rebuild) and record evidence; preserve rollback. If it stays disabled, record that the drills remain gated by the contract.",
+    "Route only to workers whose registry entry says routable=true; never route to credential-missing workers; keep real provider usage bounded and justified (state the call budget up front and prefer deterministic single-shot prompts).",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only; preserve superseded intermediate artifacts rather than overwriting them.",
+    "Commit and push small recoverable changes and return a strict terminal JSON result.",
+    "Before returning a terminal result, create exactly one successor agent-* task in remote-queue/pending/ so the local poller can continue; do not create a duplicate if an equivalent pending or running task already exists."
+  ],
+  "stop_conditions": [
+    "Do not fabricate provider, model, usage, credential, qualification, deployment or rehearsal evidence.",
+    "Do not enable E3 Stage 2 or production dispatch on approval text alone: enablement requires confirmed configured credentials AND an objectively satisfied readiness gate AND recorded explicit owner authorization for this step. When in doubt, leave it disabled and record the exact remaining condition.",
+    "Do not weaken or skip a readiness criterion to reach enablement.",
+    "Do not mark a worker QUALIFIED without recorded qualification evidence, and do not set routable=true without execution readiness.",
+    "Do not mutate any other task's running contract or any preserved blocked/ record.",
+    "Do not expose secrets, credential values, raw chain-of-thought, or private runtime database content; never commit a credential or a token.",
+    "Do not perform VPS cutover or finalize deployment architecture.",
+    "Do not run unbounded or exploratory provider calls.",
+    "If a real execution requires owner credentials or account action that is still missing, record the exact owner action and continue non-dependent work instead of stopping."
+  ],
+  "notes": "Staged by agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24 immediately before exit, per the owner standing directive to hand off to exactly one next bounded task. Verified state at staging (2026-09-23T22:41:57Z, evidence audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/): Stage 2 NOT ENABLED. Enablement conditions: (a) FAIL - 0/7 provider credentials configured (presence-only probe; mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3 all still absent from Windows Credential Manager targets mistral/glm/qwen/nous/minimax/stepfun/hunyuan and from env vars MISTRAL_API_KEY/GLM_API_KEY/DASHSCOPE_API_KEY/NOUS_API_KEY/MINIMAX_API_KEY/STEP_API_KEY/HUNYUAN_API_KEY); (b) FAIL only because the Google image worker's real-dispatch intermittency is unresolved (all other criteria MET: 12 suites/364 tests exit 0 at SHA 88af27a; real-path rehearsal consumed with 0 failed checks; isolation fail-closed + stores byte-identical incl. WAL/SHM sidecars; E1/E2 boundary clean; qualification evidence-driven with qualified_rows_without_evidence=0); (c) NOT SATISFIED - the owner's standing conditional authorization applies only once the provider credentials are confirmed configured (authority commits a58549c/2d5f332/d7e718c). Division of work: do NOT duplicate agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23 (image repeat-series), agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23 (E4/E5 harnesses - consume), or agent-whole-company-local-acceptance-and-morning-handover-2026-09-23 (final acceptance sweep). The gate script scripts/e3_stage2_readiness_gate.py already exists and is deterministic; reuse it. Owner standing directive: keep working locally, keep commits small and recoverable, keep Stage 2 disabled unless the three conditions are all met, and hand off to exactly one next bounded task before exit."
+}
