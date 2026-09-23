@@ -79,3 +79,6 @@ error: pathspec ':
 [2026-09-23T15:40:41.452590Z] Claimed task: hardened-sync-test
 [2026-09-23T15:40:41.453589Z] Handling task: hardened-sync-test
 [2026-09-23T15:40:41.454593Z] Task hardened-sync-test failed: No handler for task: hardened-sync-test
+[2026-09-23T15:40:43.713389Z] CRITICAL: git commit failed: 
+[2026-09-23T15:41:01.544090Z] Poller starting
+[2026-09-23T15:41:03.811102Z] git pull: success (with stash/restore)
