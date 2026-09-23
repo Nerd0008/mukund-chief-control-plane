@@ -278,3 +278,5 @@ error: Please commit or stash them.
 [2026-09-23T23:20:07.338552Z] Claimed task: agent-visible-worker-console-quickedit-hardening-2026-09-23
 [2026-09-23T23:20:07.339538Z] Handling task: agent-visible-worker-console-quickedit-hardening-2026-09-23
 [2026-09-23T23:30:04.064847Z] git pull: success (with stash/restore)
+[2026-09-23T23:30:06.472427Z] Claimed task: agent-cv-cover-letter-linkedin-workflows-2026-09-23
+[2026-09-23T23:30:06.481430Z] Handling task: agent-cv-cover-letter-linkedin-workflows-2026-09-23 (attempt 1)

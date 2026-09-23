@@ -1,0 +1,79 @@
+{
+  "task_id": "agent-cv-cover-letter-linkedin-workflows-2026-09-23",
+  "created_at": "2026-09-23T21:26:00Z",
+  "objective": "Connect the existing CV/cover-letter workflow and implement the minimal LinkedIn workflow required for Chief OS v1, using Career Ops/Company Watch as the source of job/company state. Keep external actions draft/read-only unless explicitly owner-authorized, and prepare the whole-company acceptance handoff.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Career Ops/tracker automation should be in a truthful terminal state",
+    "Company Watch/job-search integration should be in a truthful terminal state or its independent interfaces should be stable"
+  ],
+  "allowed_scope": [
+    "Inspect and reuse the existing CV customizer/workflows rather than recreating them.",
+    "Wire job-description input from Career Ops into CV and cover-letter draft generation with provenance and no invented experience/metrics/certifications/visa status.",
+    "Implement a minimal LinkedIn workflow for job/discovery signal intake, profile/post drafting assistance and handoff into Career Ops/company tracking.",
+    "Deduplicate LinkedIn-sourced jobs/companies against Career Ops and Company Watch before tracker writes.",
+    "Keep LinkedIn activity draft/read-only: do not post, message, connect, apply or mutate the owner's account without explicit owner authorization.",
+    "Produce local tests/evidence for a representative job -> tailored CV/cover-letter draft -> LinkedIn draft/read-only signal -> tracker/Chief summary path using safe fixtures or owner-owned local data.",
+    "Update state/full_build_tracker truthfully and commit/push recoverably.",
+    "Before terminal result, create exactly one successor agent-* task for the whole-company local acceptance test unless an equivalent task already exists."
+  ],
+  "stop_conditions": [
+    "No fabricated CV facts or job eligibility.",
+    "No external LinkedIn posting/messaging/connections/applications.",
+    "No destructive changes to existing CV assets or trackers.",
+    "No secrets or personal sensitive source content committed to GitHub."
+  ],
+  "notes": "Minimal LinkedIn integration is a v1 requirement from the Sep 21 handover. External social/account mutations remain owner-gated; implementation and draft/read-only acceptance can proceed overnight.",
+  "completed_at": "2026-09-23T23:45:10.981453Z",
+  "result": {
+    "status": "completed",
+    "summary": "Both remaining v1 company-workflow lanes are implemented, evidenced and pushed. (1) CV/cover-letter workflow connected to Career Ops job state: career-ops/cv_workflow.py + cv_workflow_config.json + cv_render_cover.mjs resolve a job from the canonical regional workbook, data/pipeline.md or a handed-over signal record and produce a tailored CV draft plus cover-letter payload/HTML, reusing the existing v1.29.0 install instead of rebuilding it (its verify-cv-facts.mjs is the fact gate, its generate-cover-letter.mjs buildHtml is the renderer). Tailoring is deterministic reordering only: no canonical line is rewritten/merged/added, cv_draft_provenance.json maps every draft line to its cv.md line, and posting terms with no canonical evidence are reported as owner_input_required rather than claimed; a draft that fails the gate produces no HTML. (2) Minimal LinkedIn workflow: career-ops/linkedin_workflow.py + linkedin_workflow.json do read-only intake of owner-exported local files, dedupe against Career Ops AND Company Watch (canonical workbook, cross-month ledger, registry names, handoff manifests, same-batch merge), produce unsent profile/post/outreach drafts, and hand off to Career Ops tracking on a dated copy. No LinkedIn login/API/scraping/browser/network exists in the module (asserted by test); guard refuses and logs every external action; manifests write only under runtime/linkedin/ and carry no application state. End-to-end local acceptance passes 23/23 checks (job -> tailored CV/cover-letter draft with gate pass -> LinkedIn read-only signal -> dedupe -> tracker handoff on a copy with hash-verified backup, append and rollback, canonical workbooks hash-unchanged -> Chief summary), 0 provider calls, 0 LinkedIn mutations, 0 applications. No new successor task staged because an equivalent one already exists (agent-whole-company-local-acceptance-and-morning-handover-2026-09-23, pending, whose scope explicitly lists the LinkedIn draft/read-only path and the CV/cover-letter path). Recorded limitations: the acceptance job description is an explicitly labelled synthetic fixture (no live vacancy claimed), PDF cover letters are not produced (headless Chromium, owner-gated), the openai-tailor LLM path is wired as an unexecuted request record (sends cv.md off-machine, owner-gated), and the live LinkedIn account surface is owner-gated and therefore untested against the real account.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "42a2bec career: connect CV/cover-letter drafts and add the minimal LinkedIn workflow",
+      "f8349be evidence: re-run CV/LinkedIn acceptance on the final code revision (23/23 checks, exit 0)",
+      "90cacf2 state: point the CV/LinkedIn records at the final-code acceptance run",
+      "all pushed to origin/main (rebased over b95b326/226efae/843dc7d; in sync, no ahead/behind)"
+    ],
+    "tests": [
+      "python career-ops/run_cv_linkedin_acceptance.py -> ok=true, 23/23 checks passed, 0 critical failures, exit 0; evidence audits/evidence/20260923T234310Z-cv-linkedin-workflows/",
+      "career-ops/tests/test_cv_workflow.py -> 21 passed",
+      "career-ops/tests/test_linkedin_workflow.py -> 34 passed",
+      "python -m pytest career-ops/tests company-watch/tests -> 119 passed (88 + 31)",
+      "python scripts/evidence_runner.py --label cv-linkedin-workflows -> 14/14 suites, 400 collected / 400 passed, 0 failed, 0 errors, 0 skipped; evidence audits/evidence/2026-09-23T23-40-25Z-cv-linkedin-workflows/",
+      "negative-control tests: fabricated metric (94772 users) and disavowed employer (Apollo Clinic) both blocked by the fact gate; guard refuses external LinkedIn actions; module imports no network/browser library; AI-fabricated link without URL is reported unclassified, never published"
+    ],
+    "changed_files": [
+      "career-ops/cv_workflow.py",
+      "career-ops/cv_workflow_config.json",
+      "career-ops/cv_render_cover.mjs",
+      "career-ops/linkedin_workflow.py",
+      "career-ops/linkedin_workflow.json",
+      "career-ops/run_cv_linkedin_acceptance.py",
+      "career-ops/tests/test_cv_workflow.py",
+      "career-ops/tests/test_linkedin_workflow.py",
+      "career-ops/tests/fixtures/jd-information-security-analyst.txt",
+      "career-ops/tests/fixtures/linkedin/saved_jobs.json",
+      "career-ops/tests/fixtures/linkedin/alerts.md",
+      "career-ops/tests/fixtures/linkedin/companies.csv",
+      "career-ops/README.md",
+      ".gitignore",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "audits/evidence/20260923T234310Z-cv-linkedin-workflows/{acceptance.json,acceptance.md}",
+      "audits/evidence/20260923T234013Z-cv-linkedin-workflows/{acceptance.json,acceptance.md}",
+      "audits/evidence/2026-09-23T23-40-25Z-cv-linkedin-workflows/{evidence.json,evidence.md}",
+      "company-watch/ (module + tests, previously untracked dependency of the LinkedIn workflow)"
+    ],
+    "remaining": [
+      "Owner-gated (no action needed for this task): live LinkedIn account actions (post/message/connect/apply) and profile publishing are not enabled and remain unusable without explicit per-action owner authorization.",
+      "Owner-gated: PDF cover-letter rendering (headless Chromium) and the openai-tailor LLM request path (sends cv.md off-machine) are wired but intentionally not executed.",
+      "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23 (pending) must run the whole-company acceptance, including the LinkedIn draft/read-only path and CV/cover-letter path, after agent-company-watch-recovery-final-pass-2026-09-24 and agent-blocked-work-final-reconciliation-2026-09-24 reach truthful terminal states.",
+      "Live LinkedIn/API signal intake remains unimplemented by design (no account access exists); intake currently consumes owner-exported local files only."
+    ]
+  }
+}
