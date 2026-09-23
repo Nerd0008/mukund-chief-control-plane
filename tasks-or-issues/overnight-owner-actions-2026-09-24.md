@@ -18,18 +18,18 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 
 ## Current owner actions
 
-### 1. Remaining provider credentials
-**Status:** PENDING  
-**Blocks:** live onboarding/verification of the remaining seven E3 provider workers.  
+### 1. Configure all remaining provider credentials
+**Status:** PENDING — OWNER PLANS TO DO THIS ON 2026-09-24  
+**Blocks:** live onboarding/verification of the remaining seven E3 provider workers and, by direct owner instruction, final local Stage 2 completion.  
 **Action:** provision credentials locally for Mistral, GLM, Qwen, LongCat, MiniMax, Step, and Tencent Hunyuan using approved local secret storage. Never paste keys into ChatGPT, Discord, GitHub, source files, queue jobs, or logs.  
-**Continue without owner:** qualification harness, orchestration, E4/E5 integration, tests, evidence, bridge hardening, deployment preparation.
+**Continue without owner:** qualification harness, orchestration, Google-image diagnosis, multi-worker execution evidence, E4/E5 integration, tests, evidence, bridge hardening, deployment preparation.
 
-### 2. E3 Stage 2 production approval
-**Status:** STANDING CONDITIONAL APPROVAL GRANTED 2026-09-23  
-**Blocks:** nothing, provided the local readiness gates are objectively satisfied.  
-**Owner directive:** Mukund explicitly authorizes Stage 2 local production enablement while he is asleep or at work if the system is judged ready from evidence. Do not pause solely for another approval prompt.  
-**Readiness conditions before enabling:** local E1/E2/E3/E4/E5 regressions pass; production rehearsal passes; no unresolved critical integrity/privacy/safety defect; worker routing is evidence-based; rollback/recovery path exists; current state/evidence is updated truthfully.  
-**Scope:** this standing approval covers local Stage 2 enablement only. It does not authorize VPS cutover or a final deployment-architecture choice.
+### 2. Complete E3 Stage 2 after all provider keys are configured
+**Status:** DEFERRED BY OWNER UNTIL AFTER KEY CONFIGURATION ON 2026-09-24  
+**Blocks:** final local Stage 2 enablement only; independent engineering and evidence work must continue.  
+**Owner directive:** Mukund will complete local Stage 2 after he configures all remaining provider keys tomorrow. Do not enable Stage 2 overnight before those keys are configured. Once the keys are configured, re-run the full readiness checks and then complete local Stage 2 if all objective gates pass.  
+**Readiness conditions before enabling:** all intended provider credentials configured and truthfully verified; local E1/E2/E3/E4/E5 regressions pass; production rehearsal passes; no unresolved critical integrity/privacy/safety defect; worker routing/qualification state remains evidence-driven; rollback/recovery exists; state/evidence is updated truthfully.  
+**Scope:** local Stage 2 only. This does not authorize VPS cutover or a final deployment-architecture choice.
 
 ### 3. Deployment architecture decision
 **Status:** DEFERRED UNTIL LOCAL SYSTEM IS PROVEN  
