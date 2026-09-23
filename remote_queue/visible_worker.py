@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
-"""Visible console wrapper for a remotely-dispatched Hermes task.
+"""Visible console wrapper for remotely-dispatched Hermes tasks.
 
-Runs in its own Windows console, streams Hermes output when available, emits a
-heartbeat during quiet periods, and writes the raw final output to a local temp
-file for the parent dispatcher to parse. Nothing here is committed to Git.
+The worker uses Hermes stream-json mode so Mukund can see real execution
+progress (model/session, tool starts/completions, failures) in a dedicated
+Windows console while the parent bridge still receives only the final response
+text for strict JSON parsing. Raw tool output is not committed to Git.
 """
 
 import argparse
+import json
 import os
 import queue
 import subprocess
-import sys
 import threading
 import time
 from datetime import datetime
 from pathlib import Path
+
+
+def _stamp() -> str:
+    return datetime.now().strftime("%H:%M:%S")
+
+
+def _safe_text(value, limit=220) -> str:
+    text = str(value or "").replace("\r", " ").replace("\n", " ").strip()
+    return text[:limit]
 
 
 def main() -> int:
@@ -34,13 +44,30 @@ def main() -> int:
     except Exception:
         pass
 
-    print("=" * 72, flush=True)
-    print("HERMES REMOTE WORKER", flush=True)
+    print("=" * 78, flush=True)
+    print("HERMES REMOTE WORKER - LIVE EXECUTION", flush=True)
     print(f"Task: {task_id}", flush=True)
     print(f"Started: {datetime.now().isoformat(timespec='seconds')}", flush=True)
-    print("Status: RUNNING", flush=True)
-    print("This window is separate from your manual Hermes session.", flush=True)
-    print("=" * 72, flush=True)
+    print(f"Hermes executable: {args.hermes}", flush=True)
+    print(f"Working directory: {args.cwd}", flush=True)
+    print("Mode: stream-json (live tool activity; final response captured separately)", flush=True)
+    print("=" * 78, flush=True)
+
+    # Show installed Hermes version without mutating state.
+    try:
+        version = subprocess.run(
+            [args.hermes, "--version"],
+            cwd=args.cwd,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            env=os.environ.copy(),
+        )
+        version_text = (version.stdout or version.stderr or "").strip()
+        if version_text:
+            print(f"[{_stamp()}] Hermes version: {_safe_text(version_text)}", flush=True)
+    except Exception as exc:
+        print(f"[{_stamp()}] Hermes version check unavailable: {type(exc).__name__}", flush=True)
 
     prompt = Path(args.prompt_file).read_text(encoding="utf-8")
     output_path = Path(args.output_file)
@@ -49,9 +76,13 @@ def main() -> int:
 
     q: queue.Queue[str] = queue.Queue()
 
+    # stream-json is intentionally used instead of -z.  -z suppresses tool
+    # previews and makes a healthy long-running task look idle to the owner.
+    command = [args.hermes, "chat", "-q", prompt, "--format", "stream-json"]
+
     try:
         proc = subprocess.Popen(
-            [args.hermes, "-z", prompt],
+            command,
             cwd=args.cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -64,7 +95,8 @@ def main() -> int:
         print(msg, flush=True)
         output_path.write_text(msg, encoding="utf-8")
         exit_path.write_text("127", encoding="utf-8")
-        time.sleep(5)
+        print("Window remains open for 90 seconds for diagnosis.", flush=True)
+        time.sleep(90)
         return 127
 
     def reader():
@@ -78,58 +110,137 @@ def main() -> int:
     thread = threading.Thread(target=reader, daemon=True)
     thread.start()
 
-    last_output = time.monotonic()
+    last_activity = time.monotonic()
     last_heartbeat = time.monotonic()
     finished_stream = False
+    final_text = ""
+    text_chunks = []
+    result_exit_code = None
+    saw_result = False
 
-    with output_path.open("w", encoding="utf-8", errors="replace") as out:
-        while proc.poll() is None or not finished_stream:
+    while proc.poll() is None or not finished_stream:
+        try:
+            item = q.get(timeout=1.0)
+            if item == "":
+                finished_stream = True
+                continue
+
+            last_activity = time.monotonic()
+            line = item.strip()
+            if not line:
+                continue
+
             try:
-                item = q.get(timeout=1.0)
-                if item == "":
-                    finished_stream = True
-                else:
-                    print(item, end="", flush=True)
-                    out.write(item)
-                    out.flush()
-                    last_output = time.monotonic()
-            except queue.Empty:
-                pass
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                # Diagnostics remain local to the visible console.
+                print(f"[{_stamp()}] CLI: {_safe_text(line, 500)}", flush=True)
+                continue
 
-            now = time.monotonic()
-            if proc.poll() is None and now - last_heartbeat >= 5:
-                quiet_for = int(now - last_output)
+            etype = event.get("type")
+
+            if etype == "system":
+                model = event.get("model") or "UNKNOWN"
+                sid = event.get("session_id") or "UNKNOWN"
+                print(f"[{_stamp()}] SESSION START  model={model}  session={sid}", flush=True)
+
+            elif etype == "tool_use":
+                name = event.get("name") or "unknown"
+                print(f"[{_stamp()}] >>> TOOL START: {name}", flush=True)
+
+            elif etype == "tool_result":
+                name = event.get("name") or "unknown"
+                duration = event.get("duration_ms")
+                status = "ERROR" if event.get("is_error") else "OK"
+                dur_text = f"  {duration}ms" if duration is not None else ""
+                print(f"[{_stamp()}] <<< TOOL {status}: {name}{dur_text}", flush=True)
+
+            elif etype == "text":
+                # Do not stream arbitrary model prose; tool activity is enough
+                # for live observability and avoids accidental sensitive text.
+                chunk = event.get("text")
+                if isinstance(chunk, str):
+                    text_chunks.append(chunk)
+
+            elif etype == "result":
+                saw_result = True
+                final_text = event.get("text") or ""
+                result_exit_code = event.get("exit_code")
+                duration = event.get("duration_ms")
+                tokens = event.get("tokens") or {}
+                err = event.get("error")
                 print(
-                    f"[{datetime.now().strftime('%H:%M:%S')}] Hermes is working..."
-                    f" ({quiet_for}s since last output)",
+                    f"[{_stamp()}] RESULT  exit={result_exit_code}  "
+                    f"duration_ms={duration}  tokens={tokens.get('total', 'UNKNOWN')}",
                     flush=True,
                 )
-                last_heartbeat = now
+                if err:
+                    print(f"[{_stamp()}] RESULT ERROR: {_safe_text(err, 500)}", flush=True)
 
-            if proc.poll() is not None and finished_stream:
-                break
+            else:
+                print(f"[{_stamp()}] EVENT: {etype or 'unknown'}", flush=True)
 
-        # Drain anything queued at process exit.
-        while True:
-            try:
-                item = q.get_nowait()
-            except queue.Empty:
-                break
-            if item:
-                print(item, end="", flush=True)
-                out.write(item)
+        except queue.Empty:
+            pass
+
+        now = time.monotonic()
+        if proc.poll() is None and now - last_heartbeat >= 5:
+            quiet_for = int(now - last_activity)
+            print(f"[{_stamp()}] Hermes is working... ({quiet_for}s since last event)", flush=True)
+            last_heartbeat = now
+
+        if proc.poll() is not None and finished_stream:
+            break
+
+    # Drain any final queued events.
+    while True:
+        try:
+            item = q.get_nowait()
+        except queue.Empty:
+            break
+        if not item.strip():
+            continue
+        try:
+            event = json.loads(item)
+        except Exception:
+            print(f"[{_stamp()}] CLI: {_safe_text(item, 500)}", flush=True)
+            continue
+        if event.get("type") == "result":
+            saw_result = True
+            final_text = event.get("text") or final_text
+            result_exit_code = event.get("exit_code")
+        elif event.get("type") == "text" and isinstance(event.get("text"), str):
+            text_chunks.append(event["text"])
 
     rc = proc.wait()
+    if result_exit_code is not None:
+        try:
+            rc = int(result_exit_code)
+        except Exception:
+            pass
+
+    # Some Hermes versions may omit result.text but emit text deltas.
+    if not final_text and text_chunks:
+        final_text = "".join(text_chunks)
+
+    output_path.write_text(final_text, encoding="utf-8", errors="replace")
     exit_path.write_text(str(rc), encoding="utf-8")
 
     print("", flush=True)
-    print("=" * 72, flush=True)
+    print("=" * 78, flush=True)
     print(f"Status: {'COMPLETED' if rc == 0 else 'FAILED'}", flush=True)
     print(f"Exit code: {rc}", flush=True)
+    print(f"Result event observed: {saw_result}", flush=True)
+    print(f"Final response bytes: {len(final_text.encode('utf-8', errors='replace'))}", flush=True)
     print(f"Finished: {datetime.now().isoformat(timespec='seconds')}", flush=True)
-    print("Window will close in 5 seconds.", flush=True)
-    print("=" * 72, flush=True)
-    time.sleep(5)
+    if rc == 0:
+        print("Window will close in 15 seconds.", flush=True)
+        hold = 15
+    else:
+        print("FAILED: window will remain open for 90 seconds so the error is visible.", flush=True)
+        hold = 90
+    print("=" * 78, flush=True)
+    time.sleep(hold)
     return rc
 
 
