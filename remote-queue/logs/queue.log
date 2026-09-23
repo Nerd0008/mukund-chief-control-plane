@@ -231,3 +231,10 @@ error: Please commit or stash them.
 [2026-09-23T22:00:06.073059Z] Claimed task: agent-career-ops-integration-and-tracker-automation-2026-09-23
 [2026-09-23T22:00:06.074048Z] Handling task: agent-career-ops-integration-and-tracker-automation-2026-09-23
 [2026-09-23T22:22:04.004299Z] git pull: success (with stash/restore)
+[2026-09-23T22:22:06.471953Z] CRITICAL: git push failed: To https://github.com/Nerd0008/mukund-chief-control-plane.git
+ ! [remote rejected] main -> main (cannot lock ref 'refs/heads/main': is at 5873f3d1d0f0e703f490cdc6f34d4c6dd6bfcec1 but expected 7463215e1338a62392a74f70bfb095c0e9910a95)
+error: failed to push some refs to 'https://github.com/Nerd0008/mu
+[2026-09-23T22:22:06.550547Z] CRITICAL: push recovery rebase failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[2026-09-23T22:22:06.551545Z] Claimed task: agent-company-registry-gap-audit-and-runtime-services-2026-09-23
+[2026-09-23T22:22:06.552548Z] Handling task: agent-company-registry-gap-audit-and-runtime-services-2026-09-23

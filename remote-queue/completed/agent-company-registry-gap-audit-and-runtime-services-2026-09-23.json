@@ -1,0 +1,85 @@
+{
+  "task_id": "agent-company-registry-gap-audit-and-runtime-services-2026-09-23",
+  "created_at": "2026-09-23T21:30:00Z",
+  "objective": "Perform the completeness audit Mukund requested: inspect the actual local Company Registry, scheduled tasks, installed Hermes skills/workflows, legacy donor systems, career systems and control-plane runtime; reconcile them against state/v1-agent-roster.md; queue or record every missing v1 worker/service. In the same bounded task, validate the non-E3 operational services that are prerequisites for unattended overnight work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Do not interrupt the currently running E3 task; inspect only after normal handoff if file overlap would occur."
+  ],
+  "allowed_scope": [
+    "Read state/v1-agent-roster.md and the Sep 21/23 handovers first.",
+    "Inspect the local Company Registry and installed Hermes skills/workflows, Windows scheduled tasks, Career Ops directories, Discord sync, current control-plane repo, and legacy July/Mukund OS/New Custom Chief systems as donors/status sources. Do not revive obsolete systems merely because they exist.",
+    "Produce a reconciled inventory: active, build/integrate, owner-only, superseded/retired, unknown. Every locally discovered owner-relevant workflow must map to the master roster or be explicitly recorded as out-of-scope/superseded with evidence.",
+    "Validate Hermes Chief, Discord gateway/archive sync, remote queue poller, Company Registry access, scheduled-task health, and restart/boot expectations without destructive changes.",
+    "Add any genuinely missing v1 worker/service to state/v1-agent-roster.md and stage exactly the missing bounded queue task(s); do not duplicate equivalent pending/running tasks.",
+    "Record exact owner-only dependencies in tasks-or-issues/overnight-owner-actions-2026-09-24.md.",
+    "Update state/current_company_state.md and full_build_tracker.md with verified facts only.",
+    "Commit/push recoverably and run relevant isolated regressions."
+  ],
+  "stop_conditions": [
+    "No destructive cleanup of legacy systems.",
+    "Do not expose secrets/private raw databases.",
+    "Do not rewrite any running queue contract.",
+    "Do not enable Stage 2 or perform deployment cutover."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-23T22:32:20.632216Z",
+  "result": {
+    "status": "completed",
+    "summary": "Completeness audit done against state/v1-agent-roster.md. New deterministic worker scripts/company_inventory.py (roster A20, read-only) reconciles the real machine organisation with the roster: 50/50 roster items accounted for, 0 unmapped, 7/7 owned Windows scheduled tasks mapped, 0 roster entries missing \u2014 so no roster addition was required and no locally discovered owner-relevant workflow was left unaccounted for. Non-E3 prerequisites for unattended work validated: Hermes gateway live (Discord connected), ChiefDiscordSync green (last 8 runs ok, 8 published/0 rejected), HermesRemoteQueuePoller working (2-min cadence; it claimed this task at 22:22:06Z), Company Registry skill readable, E1 audit --verify PASS, E2 gov-verify PASS, E3 e3-verify-db PASS (schema v2), A04 eb brief works deterministically. Real defect found and fixed: ChiefCareerScan-UK reported failure (Last Result 1) after a scan that had actually succeeded (ok:true, exit 0, 2861 jobs) because career_ops_cli.emit() hit UnicodeEncodeError printing non-Latin job titles to the cp1252 redirected stdout; emit() now encodes to the real stdout encoding with an ASCII-escaped fallback and run_scheduled_scan.cmd sets PYTHONIOENCODING/PYTHONUTF8, covered by a new 5-test regression. Live-confirmed through the real Task Scheduler path at 2026-09-23T22:28:39Z: Last Result 0, valid JSON stdout, no traceback, 89.0s bounded dry-run, 0 tracker writes. The Career Ops <-> Chief interface (career-ops/, 33 tests) that existed only in the unpushed working tree was preserved by committing it. One real coverage gap closed by staging exactly one successor (roster B09 Monthly Rollover owned by no task). No destructive change, no legacy decommission, no reboot, no Stage 2 enablement, no secrets committed.",
+    "owner_action_required": "(1) Pre-existing: configure the seven remaining provider credentials locally (Mistral, GLM, Qwen, LongCat, MiniMax, Step, Tencent Hunyuan) \u2014 never via GitHub/chat/logs. (2) New from this audit: keep the laptop powered, signed in and not sleeping \u2014 every Chief scheduled task runs under the interactive user token ('Interactive only'); no engineering change can make them run for a signed-out user. (3) New: after the next owner-initiated reboot, confirm HermesRemoteQueuePoller and ChiefDiscordSync resume (they have no logon/boot trigger and no StartWhenAvailable; Hermes_Gateway does); post-reboot persistence is UNVERIFIED because a reboot was prohibited here. (4) New: decide the disposition of the superseded legacy 'Mukund Chief of Staff' logon task (last result -1073741510, starts the old Telegram/API/tunnel stack) \u2014 it was left untouched.",
+    "blocker_category": null,
+    "commits": [
+      "70dd715 state+registry: company-registry gap audit, non-E3 runtime validation, career-ops interface preserved (pushed to origin/main)",
+      "d02c0fc evidence: live-confirm the scheduled career-scan fix through the real Task Scheduler path (pushed to origin/main)"
+    ],
+    "tests": [
+      "career-ops/tests/ (test_tracker_writer.py + new test_emit_encoding.py): 33 passed, 0 failed",
+      "remote_queue/tests/ (isolated queue/bridge suite): 42 passed, 0 failed",
+      "eb.py audit --verify (E1): PASS (integrity_check ok, chains ok)",
+      "eb.py gov-verify (E2): PASS",
+      "eb.py e3-verify-db (E3): PASS, schema version 2",
+      "eb.py brief (A04 Daily Resource Brief): works, deterministic, unknown provider dimensions still reported UNKNOWN",
+      "scripts/company_inventory.py (A20): exit 0 \u2014 50 roster items, 0 unmapped roster ids, 7 owned tasks, 0 unmapped tasks, queue 13/2/9/12",
+      "End-to-end encoding probe under PYTHONIOENCODING=cp1252 with redirected stdout: exit 0, valid JSON, no traceback",
+      "Live scheduled-path re-run of ChiefCareerScan-UK (schtasks): Last Result 0 (was 1), 89.0s bounded dry-run, valid JSON run record, 0 tracker writes"
+    ],
+    "changed_files": [
+      "scripts/company_inventory.py",
+      "audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/evidence.md",
+      "audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/inventory.json",
+      "career-ops/career_ops_cli.py",
+      "career-ops/run_scheduled_scan.cmd",
+      "career-ops/tests/test_emit_encoding.py",
+      "career-ops/README.md",
+      "career-ops/tracker_writer.py",
+      "career-ops/install_schedules.py",
+      "career-ops/run_acceptance.py",
+      "career-ops/regional_profiles.json",
+      "career-ops/regional_schedules.json",
+      "career-ops/tests/test_tracker_writer.py",
+      "career-ops/evidence/acceptance-20260923T221009Z.json",
+      "career-ops/evidence/acceptance-20260923T221208Z.json",
+      "career-ops/evidence/acceptance-20260923T221247Z.json",
+      "runtime/career-ops/.gitignore",
+      "runtime/career-ops/scan-runs/scan-uk-20260923T222839Z.json",
+      "runtime/career-ops/scan-runs/uk-last-stdout.json",
+      "remote-queue/pending/agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23.json",
+      "state/v1-agent-roster.md",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md"
+    ],
+    "remaining": [
+      "After the owner configures the seven provider credentials: verify each truthfully, then run agent-e3-stage2-readiness-gate-rerun-2026-09-24 (Stage 2 remains NOT ENABLED).",
+      "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23 (newly staged, pending): commit-grade the Career Ops interface, build roster B09 monthly rollover/archive worker, record department run-health; it explicitly excludes the regional-lanes and Company Watch tasks that already own their scope.",
+      "Already-pending, not duplicated: regional job-search agents/schedulers, Company Watch integration, CV/cover-letter + LinkedIn workflows, job intelligence/application pack, application inbox monitor, career daily brief, E4/E5 real-path drills, operational brief/health/backup persistence, deployment prep manifest, whole-company acceptance + morning handover.",
+      "Unresolved without an owner-initiated action: post-reboot resumption of HermesRemoteQueuePoller and ChiefDiscordSync (no logon/boot trigger, no StartWhenAvailable); disposition of the superseded legacy 'Mukund Chief of Staff' logon task.",
+      "Recorded without interpretation: HermesRemoteQueuePoller last result 0x800710E0 while status Running \u2014 meaning not resolved; its observable behaviour (2-min cadence, queue-log pickups, claim of this task) is healthy.",
+      "The Dubai/Japan/Singapore scheduled scans fail safe by design (no lane config in the Career Ops install, ready:false) until agent-regional-job-search-agents-and-schedulers-2026-09-23 creates those lanes."
+    ]
+  }
+}
