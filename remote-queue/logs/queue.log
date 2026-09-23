@@ -18,3 +18,6 @@ error: Please commit or stash them.
 [2026-09-23T15:23:47.559921Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
 error: Please commit or stash them.
 
+[2026-09-23T15:23:50.218324Z] Claimed task: remote-e2e-test-001
+[2026-09-23T15:23:50.219327Z] Handling task: remote-e2e-test-001
+[2026-09-23T15:23:50.220325Z] Task remote-e2e-test-001 failed: No handler for task: remote-e2e-test-001

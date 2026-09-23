@@ -4,7 +4,15 @@
   "objective": "Verify remote queue poller: canonical path, git-tracked, commit/push transitions",
   "authority": "tasks-or-issues/hermes-github-remote-queue.md",
   "priority": "medium",
-  "allowed_scope": ["remote e2e test"],
+  "allowed_scope": [
+    "remote e2e test"
+  ],
   "requires_owner_approval": false,
-  "status": "pending"
+  "status": "blocked",
+  "blocked_at": "2026-09-23T15:23:50.229836Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "No handler for task: remote-e2e-test-001",
+    "continue_without": "Other tasks continue"
+  }
 }
