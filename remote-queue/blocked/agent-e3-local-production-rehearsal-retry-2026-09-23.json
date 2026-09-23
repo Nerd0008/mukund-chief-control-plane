@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "prerequisites": [
     "agent-e3-local-production-rehearsal-2026-09-23 is in blocked/ (terminal, execution_error) and must stay there unmodified as evidence",
     "agent-e3-production-execution-leg-2026-09-23 is in completed/ with truthful terminal evidence (real dispatch leg built, deployed to the local runtime root, and exercised with real workers)",
@@ -36,5 +36,11 @@
     "Do not run unbounded or exploratory provider calls; every real execution must be bounded and justified.",
     "If a real execution requires owner credentials or account action, record the exact owner action and continue non-dependent work."
   ],
-  "notes": "Staged by the agent-bridge-watchdog-validation-2026-09-23 run, whose contract required a fresh E3 local production rehearsal retry to be pending before exit. The blocked rehearsal died on execution_error with dispatcher exit code 3221225786 (0xC000013A, STATUS_CONTROL_C_EXIT) - a manual interrupt of a worker that predated the watchdog patch, not an engineering defect in the rehearsal itself. The hardened bridge now in main bounds new launches: visible_worker.py fails closed after HERMES_REMOTE_IDLE_TIMEOUT (default 300s) with no stream event, terminates only its own Hermes child tree, and reports exit code 124 truthfully as blocker_category execution_error; hermes_dispatch.py bounds each task at HERMES_REMOTE_TASK_TIMEOUT (default 1200s) and passes remote-queue/running/<task_id>.json to the agent as immutable execution input. Owner standing directive for continuity: keep working locally, keep commits small and recoverable, and hand off to exactly one next bounded task before exit. Stage 2 remains disabled. Latest direct owner instruction (authority, 'Owner directive update — 2026-09-23 late evening', commits a58549c / 2d5f332 / d7e718c): continue all independent local engineering, diagnosis, qualification, multi-worker execution, E4/E5, regression, evidence and deployment-preparation work overnight, do NOT enable local E3 Stage 2 overnight, and complete local Stage 2 only after Mukund configures all remaining provider credentials on 2026-09-24 and the full readiness gates are re-run. That timing change supersedes the earlier automatic-enablement text and does not weaken any readiness criterion."
+  "notes": "Staged by the agent-bridge-watchdog-validation-2026-09-23 run, whose contract required a fresh E3 local production rehearsal retry to be pending before exit. The blocked rehearsal died on execution_error with dispatcher exit code 3221225786 (0xC000013A, STATUS_CONTROL_C_EXIT) - a manual interrupt of a worker that predated the watchdog patch, not an engineering defect in the rehearsal itself. The hardened bridge now in main bounds new launches: visible_worker.py fails closed after HERMES_REMOTE_IDLE_TIMEOUT (default 300s) with no stream event, terminates only its own Hermes child tree, and reports exit code 124 truthfully as blocker_category execution_error; hermes_dispatch.py bounds each task at HERMES_REMOTE_TASK_TIMEOUT (default 1200s) and passes remote-queue/running/<task_id>.json to the agent as immutable execution input. Owner standing directive for continuity: keep working locally, keep commits small and recoverable, and hand off to exactly one next bounded task before exit. Stage 2 remains disabled. Latest direct owner instruction (authority, 'Owner directive update \u2014 2026-09-23 late evening', commits a58549c / 2d5f332 / d7e718c): continue all independent local engineering, diagnosis, qualification, multi-worker execution, E4/E5, regression, evidence and deployment-preparation work overnight, do NOT enable local E3 Stage 2 overnight, and complete local Stage 2 only after Mukund configures all remaining provider credentials on 2026-09-24 and the full readiness gates are re-run. That timing change supersedes the earlier automatic-enablement text and does not weaken any readiness criterion.",
+  "blocked_at": "2026-09-23T21:44:05.725696Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes dispatch exceeded 1200 seconds.",
+    "continue_without": "Independent safe work may continue"
+  }
 }
