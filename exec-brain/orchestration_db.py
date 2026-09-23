@@ -3,7 +3,7 @@
 
 import sqlite3
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 DDL = """
 CREATE TABLE IF NOT EXISTS schema_version (
@@ -187,17 +187,93 @@ CREATE TABLE IF NOT EXISTS decision_outcome_review (
     lessons TEXT NOT NULL,
     timestamp TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- E4 Resource Continuity tables
+CREATE TABLE IF NOT EXISTS resource_checkpoint (
+    checkpoint_id TEXT PRIMARY KEY,
+    task_id TEXT NOT NULL,
+    node_id TEXT NOT NULL,
+    state_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS resource_snapshot (
+    snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    input_tokens_24h INTEGER,
+    output_tokens_24h INTEGER,
+    request_count_24h INTEGER,
+    avg_latency_ms REAL,
+    runway_hours REAL,
+    status TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- E5 Safe Mode tables
+CREATE TABLE IF NOT EXISTS safe_mode_event (
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trigger_type TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    description TEXT NOT NULL,
+    affected_workers TEXT,
+    auto_resolved BOOLEAN DEFAULT 0,
+    resolved_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS failure_drill_log (
+    drill_id TEXT PRIMARY KEY,
+    scenario TEXT NOT NULL,
+    injected_failure TEXT NOT NULL,
+    detection_time_ms INTEGER,
+    recovery_time_ms INTEGER,
+    safe_mode_triggered BOOLEAN,
+    success BOOLEAN NOT NULL,
+    details TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS convergence_event (
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    worker_id TEXT NOT NULL,
+    task_family TEXT NOT NULL,
+    failure_count INTEGER NOT NULL,
+    action_taken TEXT NOT NULL,
+    escalated BOOLEAN DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_dag_node_state ON dag_node(state);
+CREATE INDEX IF NOT EXISTS idx_dag_node_plan ON dag_node(plan_id);
+CREATE INDEX IF NOT EXISTS idx_capability_state ON capability_registry(state);
+CREATE INDEX IF NOT EXISTS idx_performance_worker ON performance_evidence(worker_id, task_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_checkpoint_task ON resource_checkpoint(task_id);
+CREATE INDEX IF NOT EXISTS idx_snapshot_provider ON resource_snapshot(provider, model);
+CREATE INDEX IF NOT EXISTS idx_safemode_severity ON safe_mode_event(severity);
+CREATE INDEX IF NOT EXISTS idx_convergence_worker ON convergence_event(worker_id);
 """
+
 
 def init_db(path):
     """Create and initialize the orchestration database."""
     con = sqlite3.connect(str(path))
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA foreign_keys=ON")
-    con.executescript(DDL)
-    con.execute(
-        "INSERT OR REPLACE INTO schema_version (version) VALUES (?)",
-        (SCHEMA_VERSION,)
-    )
-    con.commit()
+
+    # Check current version
+    try:
+        row = con.execute("SELECT MAX(version) FROM schema_version").fetchone()
+        current_version = row[0] if row[0] else 0
+    except Exception:
+        current_version = 0
+
+    if current_version < SCHEMA_VERSION:
+        con.executescript(DDL)
+        con.execute(
+            "INSERT OR REPLACE INTO schema_version (version) VALUES (?)",
+            (SCHEMA_VERSION,)
+        )
+        con.commit()
+
     return con
