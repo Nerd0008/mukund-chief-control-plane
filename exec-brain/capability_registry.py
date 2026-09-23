@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """E3 Capability Registry — worker capability state management."""
 
+import json
 import sqlite3
+import uuid
 from datetime import datetime
+
+
+def generate_event_id() -> str:
+    return f"capev-{uuid.uuid4().hex[:12]}"
+
 
 CAPABILITY_ROLES = [
     'planner', 'researcher', 'scout', 'architect', 'builder',
@@ -116,3 +123,54 @@ class CapabilityRegistry:
         params = (task_family, capability_role) + states
         rows = self.con.execute(query, params).fetchall()
         return [{'worker_id': r[0], 'state': r[1]} for r in rows]
+
+    def record_qualification(self, worker_id, task_family, capability_role,
+                             state, evidence_count, first_pass_successes,
+                             first_pass_attempts, reason,
+                             evidence_references=None, actor='e3',
+                             model_identity=None, previous_state=None):
+        """Record an evidence-backed capability decision plus its audit event.
+
+        Unlike :meth:`register_worker` this does not reset the recorded evidence
+        counters: the row is written with the exact counts the decision was
+        derived from, and a QUALIFIED row can never be written with zero
+        evidence.
+        """
+        if state == 'QUALIFIED' and not evidence_count:
+            raise ValueError(
+                "refusing to record QUALIFIED with zero evidence: qualification "
+                "must be derived from recorded execution evidence")
+        ts = datetime.utcnow().isoformat()
+        existing = self.con.execute(
+            """SELECT state FROM capability_registry
+               WHERE worker_id=? AND task_family=? AND capability_role=?""",
+            (worker_id, task_family, capability_role)).fetchone()
+        prior = previous_state if previous_state is not None else (
+            existing[0] if existing else 'UNPROVEN')
+
+        self.con.execute(
+            """INSERT OR REPLACE INTO capability_registry
+               (worker_id, task_family, capability_role, state, evidence_count,
+                first_pass_successes, first_pass_attempts, last_qualified_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (worker_id, task_family, capability_role, state, evidence_count,
+             first_pass_successes, first_pass_attempts,
+             ts if state == 'QUALIFIED' else None))
+
+        self.con.execute(
+            """INSERT INTO worker_capability_event
+               (event_id, worker_id, task_family, capability_role,
+                previous_state, new_state, reason, evidence_references, actor,
+                model_identity)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (generate_event_id(), worker_id, task_family, capability_role,
+             prior, state, reason,
+             json.dumps(list(evidence_references or [])), actor,
+             model_identity))
+        self.con.commit()
+        return {'worker_id': worker_id, 'task_family': task_family,
+                'capability_role': capability_role, 'previous_state': prior,
+                'new_state': state, 'evidence_count': evidence_count,
+                'first_pass_successes': first_pass_successes,
+                'first_pass_attempts': first_pass_attempts,
+                'recorded_at': ts}

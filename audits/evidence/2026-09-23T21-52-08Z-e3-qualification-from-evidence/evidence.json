@@ -1,0 +1,474 @@
+{
+  "label": "e3-qualification-from-evidence",
+  "run_started_utc": "2026-09-23T21:52:08+00:00",
+  "run_finished_utc": "2026-09-23T21:52:08+00:00",
+  "stage": "Evidence-backed worker capability qualification from recorded real executions. No provider call is spent. Stage 2 NOT enabled by this run.",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+  "harness": "exec-brain/e3_qualification_benchmark.py::EvidenceBackedBenchmark",
+  "qualification_bar": {
+    "min_recorded_executions": 2,
+    "min_recorded_passes": 2,
+    "min_first_pass_passes": 1,
+    "why": "a single observation cannot distinguish a capability from a lucky first attempt, and a worker that has since recovered must not be permanently blocked by an earlier failed attempt"
+  },
+  "real_provider_calls_spent": 0,
+  "dry_run": false,
+  "scopes_evaluated": 4,
+  "evidence_accounting_note": "One performance_evidence row is one recorded execution outcome (including a dispatch sequence that needed a repair). Rehearsal plans reuse node ids, and dag_node is upserted, so several evidence rows can share a dag_node_id; the row count is therefore the number of recorded execution outcomes, not a count of distinct DAG nodes. Both figures are reported so the strength of the evidence is not overstated.",
+  "evaluations": [
+    {
+      "worker_id": "codex-cli",
+      "role": "builder",
+      "task_family": "code",
+      "worker_routable": true,
+      "provider": "openai",
+      "model": "codex-cli",
+      "evidence_backed": true,
+      "overall_state": "pass",
+      "registry_state_justified": "QUALIFIED",
+      "evidence_counts": {
+        "recorded_executions": 3,
+        "recorded_passes": 3,
+        "recorded_first_pass_passes": 3,
+        "rejected_then_repaired_passes": 0,
+        "recorded_failures": 0,
+        "dag_node_ids": [
+          "node-execleg-C_codex_cli_dispatch-1",
+          "node-execleg-C_codex_cli_dispatch-1",
+          "node-execleg-C_codex_cli_dispatch-1"
+        ],
+        "task_fingerprints": [
+          "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9"
+        ]
+      },
+      "evidence_references": [
+        "evidence-791966050006",
+        "evidence-162513079ebb",
+        "evidence-f530f9ca759b"
+      ],
+      "checks": [
+        {
+          "test_name": "recorded-real-execution",
+          "state": "pass",
+          "passed": true,
+          "details": "3 recorded row(s); 0 without a real provider / DAG node reference",
+          "error": ""
+        },
+        {
+          "test_name": "deterministic-verification-gating",
+          "state": "pass",
+          "passed": true,
+          "details": "0 row(s) with no recorded deterministic verdict",
+          "error": ""
+        },
+        {
+          "test_name": "dag-state-corroborated",
+          "state": "pass",
+          "passed": true,
+          "details": "0 verified pass(es) not corroborated by COMPLETE in dag_node",
+          "error": ""
+        },
+        {
+          "test_name": "capability-demonstrated",
+          "state": "pass",
+          "passed": true,
+          "details": "3 verified COMPLETE execution(s) recorded",
+          "error": ""
+        },
+        {
+          "test_name": "repeatability",
+          "state": "pass",
+          "passed": true,
+          "details": "3 verified pass(es) over 3 recorded execution(s); bar is >= 2 passes over >= 2 executions with >= 1 first-pass pass(es)",
+          "error": ""
+        },
+        {
+          "test_name": "latest-execution-not-failing",
+          "state": "pass",
+          "passed": true,
+          "details": "latest recorded execution evidence-f530f9ca759b -> final_success=1, verification=PASS",
+          "error": ""
+        }
+      ],
+      "empty_counts": false,
+      "notes": "evidence-backed qualification from recorded real executions; smoke readiness is not qualification"
+    },
+    {
+      "worker_id": "codex-cli",
+      "role": "integrator",
+      "task_family": "code",
+      "worker_routable": true,
+      "provider": "openai",
+      "model": "codex-cli",
+      "evidence_backed": true,
+      "overall_state": "pass",
+      "registry_state_justified": "QUALIFIED",
+      "evidence_counts": {
+        "recorded_executions": 2,
+        "recorded_passes": 2,
+        "recorded_first_pass_passes": 2,
+        "rejected_then_repaired_passes": 0,
+        "recorded_failures": 0,
+        "dag_node_ids": [
+          "node-plan-0001-2",
+          "node-plan-0001-2"
+        ],
+        "task_fingerprints": [
+          "b151f74d5c30419593a6a0241d7dec58435b207818894c888b295383564f1ea1"
+        ]
+      },
+      "evidence_references": [
+        "evidence-f00a495bef1f",
+        "evidence-947fe76eafdd"
+      ],
+      "checks": [
+        {
+          "test_name": "recorded-real-execution",
+          "state": "pass",
+          "passed": true,
+          "details": "2 recorded row(s); 0 without a real provider / DAG node reference",
+          "error": ""
+        },
+        {
+          "test_name": "deterministic-verification-gating",
+          "state": "pass",
+          "passed": true,
+          "details": "0 row(s) with no recorded deterministic verdict",
+          "error": ""
+        },
+        {
+          "test_name": "dag-state-corroborated",
+          "state": "pass",
+          "passed": true,
+          "details": "0 verified pass(es) not corroborated by COMPLETE in dag_node",
+          "error": ""
+        },
+        {
+          "test_name": "capability-demonstrated",
+          "state": "pass",
+          "passed": true,
+          "details": "2 verified COMPLETE execution(s) recorded",
+          "error": ""
+        },
+        {
+          "test_name": "repeatability",
+          "state": "pass",
+          "passed": true,
+          "details": "2 verified pass(es) over 2 recorded execution(s); bar is >= 2 passes over >= 2 executions with >= 1 first-pass pass(es)",
+          "error": ""
+        },
+        {
+          "test_name": "latest-execution-not-failing",
+          "state": "pass",
+          "passed": true,
+          "details": "latest recorded execution evidence-947fe76eafdd -> final_success=1, verification=PASS",
+          "error": ""
+        }
+      ],
+      "empty_counts": false,
+      "notes": "evidence-backed qualification from recorded real executions; smoke readiness is not qualification"
+    },
+    {
+      "worker_id": "deepseek-v41-flash",
+      "role": "builder",
+      "task_family": "code",
+      "worker_routable": true,
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "evidence_backed": true,
+      "overall_state": "pass",
+      "registry_state_justified": "QUALIFIED",
+      "evidence_counts": {
+        "recorded_executions": 8,
+        "recorded_passes": 8,
+        "recorded_first_pass_passes": 3,
+        "rejected_then_repaired_passes": 5,
+        "recorded_failures": 0,
+        "dag_node_ids": [
+          "node-execleg-A_repair_cycle_deepseek-1",
+          "node-execleg-B_first_pass_deepseek-1",
+          "node-execleg-A_repair_cycle_deepseek-1",
+          "node-execleg-B_first_pass_deepseek-1",
+          "node-plan-0001-1",
+          "node-execleg-A_repair_cycle_deepseek-1",
+          "node-execleg-B_first_pass_deepseek-1",
+          "node-plan-0001-1"
+        ],
+        "task_fingerprints": [
+          "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9",
+          "b151f74d5c30419593a6a0241d7dec58435b207818894c888b295383564f1ea1"
+        ]
+      },
+      "evidence_references": [
+        "evidence-cefec061aec2",
+        "evidence-dccac639b86e",
+        "evidence-1a52c94c3b35",
+        "evidence-98267aa0b374",
+        "evidence-f7fc508c1fc3",
+        "evidence-96631a0f9975",
+        "evidence-3819ff902042",
+        "evidence-100f9ed4e648"
+      ],
+      "checks": [
+        {
+          "test_name": "recorded-real-execution",
+          "state": "pass",
+          "passed": true,
+          "details": "8 recorded row(s); 0 without a real provider / DAG node reference",
+          "error": ""
+        },
+        {
+          "test_name": "deterministic-verification-gating",
+          "state": "pass",
+          "passed": true,
+          "details": "0 row(s) with no recorded deterministic verdict",
+          "error": ""
+        },
+        {
+          "test_name": "dag-state-corroborated",
+          "state": "pass",
+          "passed": true,
+          "details": "0 verified pass(es) not corroborated by COMPLETE in dag_node",
+          "error": ""
+        },
+        {
+          "test_name": "capability-demonstrated",
+          "state": "pass",
+          "passed": true,
+          "details": "8 verified COMPLETE execution(s) recorded",
+          "error": ""
+        },
+        {
+          "test_name": "repeatability",
+          "state": "pass",
+          "passed": true,
+          "details": "8 verified pass(es) over 8 recorded execution(s); bar is >= 2 passes over >= 2 executions with >= 1 first-pass pass(es)",
+          "error": ""
+        },
+        {
+          "test_name": "latest-execution-not-failing",
+          "state": "pass",
+          "passed": true,
+          "details": "latest recorded execution evidence-100f9ed4e648 -> final_success=1, verification=PASS",
+          "error": ""
+        }
+      ],
+      "empty_counts": false,
+      "notes": "evidence-backed qualification from recorded real executions; smoke readiness is not qualification"
+    },
+    {
+      "worker_id": "google-nano-banana-2",
+      "role": "vision",
+      "task_family": "code",
+      "worker_routable": true,
+      "provider": "google",
+      "model": "gemini-3.1-flash-image",
+      "evidence_backed": true,
+      "overall_state": "inconclusive",
+      "registry_state_justified": "EVALUATING",
+      "evidence_counts": {
+        "recorded_executions": 2,
+        "recorded_passes": 1,
+        "recorded_first_pass_passes": 1,
+        "rejected_then_repaired_passes": 0,
+        "recorded_failures": 1,
+        "dag_node_ids": [
+          "node-execleg-D_google_image_dispatch-1",
+          "node-execleg-D_google_image_dispatch-1"
+        ],
+        "task_fingerprints": [
+          "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9"
+        ]
+      },
+      "evidence_references": [
+        "evidence-53374aa1dde4",
+        "evidence-7a719e3b4623"
+      ],
+      "checks": [
+        {
+          "test_name": "recorded-real-execution",
+          "state": "pass",
+          "passed": true,
+          "details": "2 recorded row(s); 0 without a real provider / DAG node reference",
+          "error": ""
+        },
+        {
+          "test_name": "deterministic-verification-gating",
+          "state": "pass",
+          "passed": true,
+          "details": "0 row(s) with no recorded deterministic verdict",
+          "error": ""
+        },
+        {
+          "test_name": "dag-state-corroborated",
+          "state": "pass",
+          "passed": true,
+          "details": "0 verified pass(es) not corroborated by COMPLETE in dag_node",
+          "error": ""
+        },
+        {
+          "test_name": "capability-demonstrated",
+          "state": "pass",
+          "passed": true,
+          "details": "1 verified COMPLETE execution(s) recorded",
+          "error": ""
+        },
+        {
+          "test_name": "repeatability",
+          "state": "inconclusive",
+          "passed": null,
+          "details": "1 verified pass(es) over 2 recorded execution(s); bar is >= 2 passes over >= 2 executions with >= 1 first-pass pass(es)",
+          "error": ""
+        },
+        {
+          "test_name": "latest-execution-not-failing",
+          "state": "pass",
+          "passed": true,
+          "details": "latest recorded execution evidence-7a719e3b4623 -> final_success=1, verification=PASS",
+          "error": ""
+        }
+      ],
+      "empty_counts": false,
+      "notes": "evidence-backed qualification from recorded real executions; smoke readiness is not qualification"
+    }
+  ],
+  "decisions": [
+    {
+      "worker_id": "codex-cli",
+      "task_family": "code",
+      "capability_role": "builder",
+      "previous_state": "UNPROVEN",
+      "new_state": "QUALIFIED",
+      "evidence_count": 3,
+      "first_pass_successes": 3,
+      "first_pass_attempts": 3,
+      "recorded_at": "2026-09-23T21:52:08.733388",
+      "written": true,
+      "worker_routable": true
+    },
+    {
+      "worker_id": "codex-cli",
+      "task_family": "code",
+      "capability_role": "integrator",
+      "previous_state": "UNPROVEN",
+      "new_state": "QUALIFIED",
+      "evidence_count": 2,
+      "first_pass_successes": 2,
+      "first_pass_attempts": 2,
+      "recorded_at": "2026-09-23T21:52:08.740896",
+      "written": true,
+      "worker_routable": true
+    },
+    {
+      "worker_id": "deepseek-v41-flash",
+      "task_family": "code",
+      "capability_role": "builder",
+      "previous_state": "UNPROVEN",
+      "new_state": "QUALIFIED",
+      "evidence_count": 8,
+      "first_pass_successes": 3,
+      "first_pass_attempts": 8,
+      "recorded_at": "2026-09-23T21:52:08.743900",
+      "written": true,
+      "worker_routable": true
+    },
+    {
+      "worker_id": "google-nano-banana-2",
+      "task_family": "code",
+      "capability_role": "vision",
+      "previous_state": "UNPROVEN",
+      "new_state": "EVALUATING",
+      "evidence_count": 2,
+      "first_pass_successes": 1,
+      "first_pass_attempts": 2,
+      "recorded_at": "2026-09-23T21:52:08.746895",
+      "written": true,
+      "worker_routable": true
+    }
+  ],
+  "store_state_after": {
+    "capability_registry": [
+      {
+        "worker_id": "codex-cli",
+        "task_family": "code",
+        "capability_role": "builder",
+        "state": "QUALIFIED",
+        "evidence_count": 3,
+        "first_pass_successes": 3,
+        "first_pass_attempts": 3,
+        "last_qualified_at": "2026-09-23T21:52:08.733388"
+      },
+      {
+        "worker_id": "codex-cli",
+        "task_family": "code",
+        "capability_role": "integrator",
+        "state": "QUALIFIED",
+        "evidence_count": 2,
+        "first_pass_successes": 2,
+        "first_pass_attempts": 2,
+        "last_qualified_at": "2026-09-23T21:52:08.740896"
+      },
+      {
+        "worker_id": "deepseek-v41-flash",
+        "task_family": "code",
+        "capability_role": "builder",
+        "state": "QUALIFIED",
+        "evidence_count": 8,
+        "first_pass_successes": 3,
+        "first_pass_attempts": 8,
+        "last_qualified_at": "2026-09-23T21:52:08.743900"
+      },
+      {
+        "worker_id": "google-nano-banana-2",
+        "task_family": "code",
+        "capability_role": "vision",
+        "state": "EVALUATING",
+        "evidence_count": 2,
+        "first_pass_successes": 1,
+        "first_pass_attempts": 2,
+        "last_qualified_at": null
+      }
+    ],
+    "worker_capability_event": [
+      {
+        "event_id": "capev-3f65e7084e84",
+        "worker_id": "codex-cli",
+        "capability_role": "builder",
+        "previous_state": "UNPROVEN",
+        "new_state": "QUALIFIED",
+        "actor": "e3-qualification-from-evidence",
+        "timestamp": "2026-09-23 21:52:08"
+      },
+      {
+        "event_id": "capev-198177118ee7",
+        "worker_id": "codex-cli",
+        "capability_role": "integrator",
+        "previous_state": "UNPROVEN",
+        "new_state": "QUALIFIED",
+        "actor": "e3-qualification-from-evidence",
+        "timestamp": "2026-09-23 21:52:08"
+      },
+      {
+        "event_id": "capev-ab724f262295",
+        "worker_id": "deepseek-v41-flash",
+        "capability_role": "builder",
+        "previous_state": "UNPROVEN",
+        "new_state": "QUALIFIED",
+        "actor": "e3-qualification-from-evidence",
+        "timestamp": "2026-09-23 21:52:08"
+      },
+      {
+        "event_id": "capev-a35a50a21c23",
+        "worker_id": "google-nano-banana-2",
+        "capability_role": "vision",
+        "previous_state": "UNPROVEN",
+        "new_state": "EVALUATING",
+        "actor": "e3-qualification-from-evidence",
+        "timestamp": "2026-09-23 21:52:08"
+      }
+    ],
+    "qualified_rows_without_evidence": 0,
+    "evidence_rows_missing_provider_or_role": 0
+  }
+}

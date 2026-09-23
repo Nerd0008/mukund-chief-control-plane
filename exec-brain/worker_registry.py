@@ -17,7 +17,13 @@ WORKER_ROSTER = [
         'adapter_file': 'codex_adapter.py',
         'smoke_test': 'PASS',
         'e2_usage_linkage': 'VERIFIED',  # obs-20260923-d42e34a5 (tokens null: see notes)
-        'qualification': 'UNPROVEN',  # smoke readiness != capability qualification
+        'qualification': 'UNPROVEN',  # static roster default; see qualification_source
+        'qualification_source': (
+            'Recorded evidence-backed state of record lives in the E3 capability_registry '
+            '(orchestration.db), written by scripts/e3_qualification_from_evidence.py. '
+            '2026-09-23: role "builder" QUALIFIED (3 recorded executions / 3 verified '
+            'passes / 3 first-pass) and role "integrator" QUALIFIED (2 / 2 / 2) for '
+            'task_family "code". This static field is not updated by the harness.'),
         'cli_version': '0.155.0-alpha.16.3',
         'cli_path_configured': True,  # stable resolver: override -> PATH -> validated bin dirs
         'identity': {
@@ -70,7 +76,13 @@ WORKER_ROSTER = [
         'adapter_file': 'gemini_adapter.py',
         'smoke_test': 'PASS',
         'e2_usage_linkage': 'VERIFIED',  # obs-20260923-d44f030a
-        'qualification': 'UNPROVEN',  # smoke test readiness != capability qualification
+        'qualification': 'UNPROVEN',  # static roster default; see qualification_source
+        'qualification_source': (
+            'Recorded evidence-backed state of record lives in the E3 capability_registry '
+            '(orchestration.db). 2026-09-23: role "vision" EVALUATING — 2 recorded '
+            'executions, 1 verified pass (a real 1024x1024 JPEG that decoded cleanly), '
+            '1 recorded failure (the earlier no-image response). Not qualified: the bar '
+            'needs >=2 verified passes and the earlier failure remains on record.'),
         'notes': 'api_model_id confirmed live via /models (59 models observed) and owner confirmation. Image worker only: gemini-3.6-flash NOT configured as image worker (no image-output evidence).'
     },
     {
@@ -90,7 +102,12 @@ WORKER_ROSTER = [
         'adapter_file': 'deepseek_adapter.py',
         'smoke_test': 'PASS',
         'e2_usage_linkage': 'VERIFIED',  # obs-20260923-44da95cd
-        'qualification': 'UNPROVEN',  # smoke test readiness != capability qualification
+        'qualification': 'UNPROVEN',  # static roster default; see qualification_source
+        'qualification_source': (
+            'Recorded evidence-backed state of record lives in the E3 capability_registry '
+            '(orchestration.db). 2026-09-23: role "builder" QUALIFIED (8 recorded '
+            'executions / 8 verified passes / 3 first-pass, 0 recorded failures) for '
+            'task_family "code". This static field is not updated by the harness.'),
         'notes': 'Identity observed from provider /models. Old registry string deepseek-v4.1-flash is not an API model ID.'
     },
     {

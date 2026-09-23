@@ -1,0 +1,260 @@
+{
+  "label": "e3-google-image-diagnosis",
+  "run_started_utc": "2026-09-23T21:49:21+00:00",
+  "run_finished_utc": "2026-09-23T21:49:29+00:00",
+  "stage": "Bounded diagnosis of the Google image worker's real-dispatch failure (scenario D). Stage 2 NOT enabled by this run.",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+  "objective": "Generate a small solid white square image, 64 by 64 pixels.",
+  "objective_note": "objective hash only in the adapter metadata; the objective text is the same deterministic single-shot prompt the failing run used",
+  "usage_plan": {
+    "real_google_image_calls": 1,
+    "why": "the failing response captured no finish_reason / prompt_feedback / part shape, so exactly one additional call on the identical request is the minimum that can resolve the failure without guessing"
+  },
+  "bounded_usage": {
+    "real_google_image_calls": 1
+  },
+  "scenario": {
+    "scenario": "D_google_image_dispatch",
+    "notes": "One bounded image call. Verification is the real decoded-image check (inline image part present and header-decodable).",
+    "plan_id": "execleg-D_google_image_dispatch",
+    "node_id": "node-execleg-D_google_image_dispatch-1",
+    "objective": "Generate a small solid white square image, 64 by 64 pixels.",
+    "assigned_worker": "google-nano-banana-2",
+    "role": "vision",
+    "real_worker_required": true,
+    "worker_routable": true,
+    "expected_exact_content": null,
+    "verification_test_cases": [
+      {
+        "name": "dispatch completed",
+        "field": "status",
+        "expected": "COMPLETED"
+      },
+      {
+        "name": "image decoded",
+        "field": "image_decode_ok",
+        "expected": true
+      }
+    ],
+    "max_repair_attempts": 0,
+    "run_outcome": "EXECUTION_COMPLETE",
+    "node_state": "COMPLETE",
+    "dispatch_attempts": [
+      {
+        "attempt": 1,
+        "dispatch_id": "gem-2a656cbf22c2",
+        "status": "COMPLETED",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "error": null,
+        "runtime_s": 7.595419645309448,
+        "usage": {
+          "promptTokenCount": 17,
+          "candidatesTokenCount": 1383,
+          "totalTokenCount": 1400,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 17
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "IMAGE",
+              "tokenCount": 1120
+            }
+          ],
+          "serviceTier": "standard"
+        },
+        "usage_exposed": true,
+        "objective_hash": "c2e948d48a63",
+        "e2_request_id": "obs-20260923-40a19c78",
+        "content_present": false,
+        "finish_reason": "STOP",
+        "image_mime": "image/jpeg",
+        "image_dims": [
+          1024,
+          1024
+        ],
+        "image_size_bytes": 434365,
+        "image_decode_ok": true,
+        "prompt_feedback": null,
+        "requested_model": "gemini-3.1-flash-image",
+        "candidate_count": 1,
+        "candidate_finish_reasons": [
+          "STOP"
+        ],
+        "response_part_kinds": [
+          "inlineData:image/jpeg"
+        ],
+        "response_text_chars": null,
+        "response_text_excerpt": null
+      }
+    ],
+    "verification_attempts": [
+      {
+        "attempt": 1,
+        "method": "test",
+        "outcome": "PASS",
+        "passed": true,
+        "issues": []
+      }
+    ],
+    "rejections": [],
+    "repairs": [],
+    "final_verification": "PASS",
+    "blocking_reason": null,
+    "failure_attribution": null,
+    "e2_request_ids": [
+      "obs-20260923-40a19c78"
+    ],
+    "evidence_id": "evidence-7a719e3b4623",
+    "persisted_node_state": "COMPLETE",
+    "persisted_assigned_worker": "google-nano-banana-2",
+    "persisted_state_events": [
+      {
+        "previous": "PLANNED",
+        "new": "READY",
+        "cause": "dependencies_satisfied"
+      },
+      {
+        "previous": "READY",
+        "new": "RUNNING",
+        "cause": "dispatch_attempt_1"
+      },
+      {
+        "previous": "RUNNING",
+        "new": "VERIFYING",
+        "cause": "verify_attempt_1"
+      },
+      {
+        "previous": "VERIFYING",
+        "new": "FAILED",
+        "cause": "verification_failed_no_repair_budget_attempt_1"
+      },
+      {
+        "previous": "PLANNED",
+        "new": "READY",
+        "cause": "dependencies_satisfied"
+      },
+      {
+        "previous": "READY",
+        "new": "RUNNING",
+        "cause": "dispatch_attempt_1"
+      },
+      {
+        "previous": "RUNNING",
+        "new": "VERIFYING",
+        "cause": "verify_attempt_1"
+      },
+      {
+        "previous": "VERIFYING",
+        "new": "COMPLETE",
+        "cause": "verified_pass_attempt_1"
+      }
+    ],
+    "persisted_evidence": [
+      {
+        "evidence_id": "evidence-53374aa1dde4",
+        "first_pass_success": 0,
+        "final_success": 0,
+        "verification_outcome": "FAIL",
+        "retries": 0,
+        "corrections": 0,
+        "failure_attribution": "verification_fail"
+      },
+      {
+        "evidence_id": "evidence-7a719e3b4623",
+        "first_pass_success": 1,
+        "final_success": 1,
+        "verification_outcome": "PASS",
+        "retries": 0,
+        "corrections": 0,
+        "failure_attribution": null
+      }
+    ]
+  },
+  "prior_failing_attempt_reference": {
+    "evidence": "audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/evidence.json",
+    "dispatch_id": "gem-d8c43b8cb447",
+    "error": "no_image_part_in_response",
+    "usage": {
+      "promptTokenCount": 17,
+      "totalTokenCount": 17
+    }
+  },
+  "diagnosis": {
+    "provider_call_spent": 1,
+    "verdict": "IMAGE_PART_PRESENT_AND_DECODED",
+    "deterministic_factors": [
+      "status=COMPLETED",
+      "error=None",
+      "finish_reason=STOP",
+      "candidate_count=1",
+      "response_part_kinds=['inlineData:image/jpeg']",
+      "image_decode_ok=True",
+      "prompt_feedback=None"
+    ],
+    "remaining_unknown": "the earlier no-image response did NOT reproduce on the identical request: the same objective and the same adapter request path now returned a decodable inline image with a normal STOP finish and provider-reported candidate tokens. The cause of the single earlier 'no_image_part_in_response' response (17 prompt tokens, 0 output tokens, no image part) is therefore intermittent and is NOT explained by the request shape. Remaining unknown: the trigger of that intermittent provider response; one observation cannot distinguish provider-side variability from a transient capacity or content-moderation condition. Resolving it needs a bounded repeat series, not an assumption.",
+    "failure_reproduced": false
+  },
+  "orchestration_db_after": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 7,
+      "dag_state_event": 78,
+      "performance_evidence": 15,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  },
+  "e2_linkage": {
+    "available": true,
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+    "requested_ids": [
+      "obs-20260923-40a19c78"
+    ],
+    "rows_read_back": [
+      {
+        "request_id": "obs-20260923-40a19c78",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1383,
+        "status": "success"
+      }
+    ],
+    "all_found": true
+  },
+  "live_store_contamination": {
+    "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "performance_evidence_by_execution_profile": {
+      "production-execution-leg": 15
+    },
+    "performance_evidence_by_provider": {
+      "deepseek": 8,
+      "google": 2,
+      "openai": 5
+    },
+    "simulated_or_shadow_evidence_rows": 0,
+    "qualified_rows_without_evidence": 0,
+    "capability_state_counts": {},
+    "dag_node_state_counts": {
+      "BLOCKED": 1,
+      "COMPLETE": 6
+    },
+    "dag_state_event_count": 78,
+    "performance_evidence_count": 15,
+    "simulated_evidence_absent": true,
+    "no_unearned_qualification": true
+  },
+  "rederived": {
+    "from_evidence": "C:/Users/mukun/Documents/mukund-chief-control-plane/audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/evidence.json",
+    "rederived_at_utc": "2026-09-23T21:50:19+00:00",
+    "extra_provider_calls_spent": 0,
+    "note": "diagnosis re-derived from the provider response already captured in that artifact; no additional provider call, no new execution"
+  }
+}

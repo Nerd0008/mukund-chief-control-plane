@@ -171,6 +171,14 @@ class GeminiImageExecutionAdapter:
         finish_reason = None
         error = None
         prompt_feedback = None
+        # Sanitized response-shape diagnostics. Collected from the provider
+        # response only, so a failure is diagnosable from the adapter result
+        # alone (without spending a second provider call).
+        candidate_count = None
+        candidate_finish_reasons = []
+        response_part_kinds = []
+        response_text_chars = None
+        response_text_excerpt = None
 
         if status == 200:
             try:
@@ -192,6 +200,26 @@ class GeminiImageExecutionAdapter:
                             break
                     if image_b64:
                         break
+                # Sanitized response-shape diagnostics: how many candidates came
+                # back, why each stopped, what parts each candidate carried, and
+                # a bounded excerpt of any text part. No image data, no secrets.
+                candidate_count = len(candidates)
+                candidate_finish_reasons = [c.get("finishReason")
+                                            for c in candidates]
+                for cand in candidates:
+                    for part in (cand.get("content", {}) or {}).get("parts", []):
+                        ib = part.get("inlineData") or part.get("inline_data")
+                        if ib:
+                            response_part_kinds.append(
+                                f"inlineData:{ib.get('mimeType') or ib.get('mime_type')}")
+                        elif "text" in part:
+                            response_part_kinds.append("text")
+                            t = part.get("text") or ""
+                            response_text_chars = (response_text_chars or 0) + len(t)
+                            if response_text_excerpt is None and t.strip():
+                                response_text_excerpt = t.strip()[:240]
+                        else:
+                            response_part_kinds.append("other")
                 if image_b64 is None and not candidates:
                     error = "no_candidates_returned"
                 elif image_b64 is None:
@@ -242,6 +270,11 @@ class GeminiImageExecutionAdapter:
             "image_dims": image_dims,
             "image_decode_ok": image_decode_ok,
             "finish_reason": finish_reason,
+            "candidate_count": candidate_count,
+            "candidate_finish_reasons": candidate_finish_reasons,
+            "response_part_kinds": response_part_kinds,
+            "response_text_chars": response_text_chars,
+            "response_text_excerpt": response_text_excerpt,
             "usage": usage,
             "prompt_feedback": prompt_feedback,
             "error": error,
@@ -295,6 +328,11 @@ class GeminiImageExecutionAdapter:
             "image_dims": None,
             "image_decode_ok": False,
             "finish_reason": None,
+            "candidate_count": None,
+            "candidate_finish_reasons": [],
+            "response_part_kinds": [],
+            "response_text_chars": None,
+            "response_text_excerpt": None,
             "usage": None,
             "error": reason,
             "exit_code": -1,

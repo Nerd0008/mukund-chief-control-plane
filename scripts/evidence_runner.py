@@ -88,6 +88,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E3 evidence-backed qualification (recorded-evidence harness, isolated db)",
+        "script": "exec-brain/tests/test_e3_qualification_evidence.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "E4 resource continuity + E5 safe mode (combined suite)",
         "script": "exec-brain/tests/test_e4e5.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],

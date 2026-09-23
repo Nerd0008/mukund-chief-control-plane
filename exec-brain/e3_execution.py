@@ -668,6 +668,15 @@ class E3ProductionExecutor:
                 "image_size_bytes": output.get("image_size_bytes"),
                 "image_decode_ok": output.get("image_decode_ok"),
                 "prompt_feedback": output.get("prompt_feedback"),
+                # Sanitized response-shape diagnostics (provider-returned only).
+                # Present so a failed dispatch is diagnosable from evidence
+                # without spending another provider call.
+                "requested_model": dispatch_result.get("requested_model"),
+                "candidate_count": dispatch_result.get("candidate_count"),
+                "candidate_finish_reasons": dispatch_result.get("candidate_finish_reasons"),
+                "response_part_kinds": dispatch_result.get("response_part_kinds"),
+                "response_text_chars": dispatch_result.get("response_text_chars"),
+                "response_text_excerpt": dispatch_result.get("response_text_excerpt"),
             })
 
             self._transition(dag, node_id, plan_id, "VERIFYING",
