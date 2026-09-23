@@ -92,6 +92,8 @@ def handle_task(task: dict) -> dict:
         return handle_bridge_validation(task)
     if "e2e-test" in task_id:
         return handle_e2e_test(task)
+    if "e2e-final" in task_id:
+        return handle_e2e_test(task)
 
     raise ValueError(f"No handler for task: {task_id}")
 
