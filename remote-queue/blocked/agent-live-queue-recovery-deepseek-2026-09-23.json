@@ -17,7 +17,7 @@
     "Make small recoverable commits and push origin/main. Return ONLY the bridge's structured terminal JSON."
   ],
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "stop_conditions": [
     "E3 Stage 2 production remains NOT APPROVED.",
     "Deployment architecture remains unresolved; do not choose or perform cutover/deployment/reboot/firewall/service changes.",
@@ -26,5 +26,11 @@
     "If a conflicting active worker is genuinely present, stop conflicting edits and report dependency.",
     "If DeepSeek authentication/provider access fails, report exact observed failure and preserve completed work."
   ],
-  "notes": "Owner-visible smoke at approximately 21:06 local time showed Hermes model deepseek-flash, AUTH_OK, exit_code 0. Reasoning effort is low to conserve cost. Nous Portal remains rate-limited (HTTP 429) and should not be retried during this task. The hidden poller scheduler update exists in commits 5f723091 and ab130fb; actual Hermes Remote Worker windows must remain visible."
+  "notes": "Owner-visible smoke at approximately 21:06 local time showed Hermes model deepseek-flash, AUTH_OK, exit_code 0. Reasoning effort is low to conserve cost. Nous Portal remains rate-limited (HTTP 429) and should not be retried during this task. The hidden poller scheduler update exists in commits 5f723091 and ab130fb; actual Hermes Remote Worker windows must remain visible.",
+  "blocked_at": "2026-09-23T20:13:58.348836Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes CLI exited with code 3221225786 (output_bytes=0).",
+    "continue_without": "Independent safe work may continue"
+  }
 }
