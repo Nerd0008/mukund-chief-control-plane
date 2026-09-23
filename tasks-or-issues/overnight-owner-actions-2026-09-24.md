@@ -97,6 +97,48 @@ sign-in (`…\ChatGPT\CV customizer\mukund-chief-of-staff\…\scr…`), last res
 donor. Engineering will not change it without that decision.
 
 
+### 8. After the provider keys are configured — run the exact post-key verification sequence (owner + engineering)
+
+**Status:** OWNER-GATED — cannot be run before the seven credentials exist and Stage 2 is enabled.
+**Blocks:** the *only* remaining E4/E5 item — a drill on the **live provider** path (a real provider
+failure actually failing a node, and real provider-health re-verification before leaving safe mode).
+Everything that can be proven without a real provider is already done and evidenced.
+
+**Why owner-only:** it needs (a) the provider credentials from item 1, which only Mukund can
+provision, and (b) Stage 2 enablement, which the owner deferred until those keys exist.
+
+**Exact sequence (run in this order, from the repository root):**
+
+1. `python scripts/e3_credential_presence_probe.py` — must show the seven workers as configured.
+2. `python scripts/e3_stage2_readiness_gate.py` — must report the readiness conditions MET and the
+   Stage 2 verdict; record its output directory.
+3. `python scripts/evidence_runner.py --label post-keys-regression` — must be **438 collected /
+   438 passed / 0 failed / 0 errors / 0 skipped, every suite exit 0** (15 suites; the figure to beat
+   as of 2026-09-24T23:55Z). Any suite failure blocks Stage 2.
+4. `python exec-brain/e3_execution_rehearsal.py` — the bounded **real-provider** execution rehearsal.
+   This is the only driver that spends real provider calls; keep it bounded (its default is ~7 calls).
+5. `python exec-brain/e4e5_drill_harness.py` — re-run the E4/E5 drills on the enabled system and
+   confirm 33/33 checks with `real_provider_calls = 0` and `live_stores_changed = []`.
+6. Only then complete local Stage 2 (item 2 above).
+
+**Truthful gap to close before claiming live failover coverage (engineering, small, not owner work):**
+`e4e5_drill_harness.py` has **no live-provider mode** — it always stubs provider transport, by design.
+So a *real* provider outage → real equivalent-worker failover has **not** been exercised and must not
+be claimed. Closing it needs two small changes that are deliberately **not** part of this task's
+scope (they touch the live execution path and depend on the credentials/Stage 2 state):
+
+- add a bounded `--live` drill mode that dispatches to real routable workers and injects the failure
+  through a provider-level mechanism (e.g. an invalid model id / revoked test call), not by stubbing;
+- wire a real provider-health probe into `SafeModeRecovery` recovery (today the drill's probe is a
+  labelled local stub, and `provider_health_verified` is recorded as `false`).
+
+**Decision needed from Mukund (acceptance question, not an engineering question):** is the
+stubbed-failure drill (33/33 checks) plus the existing real-path execution rehearsal sufficient
+E4/E5 evidence for v1 acceptance, or is a live-provider failover drill required before cutover? The
+recorded state does not assume an answer either way.
+
+
+
 ## Owner manual-work target
 
 Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.

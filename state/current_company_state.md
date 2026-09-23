@@ -666,6 +666,10 @@ and were not run; the harness owned by
 `agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23` was not consumed because the contract
 gates those drills behind enablement.
 
+*(Superseded 2026-09-24T23:55Z: those drills have now been built and evidenced with injected
+provider failures on an isolated database — see §E4/E5 real-path drill harness below. Only the
+live-provider variant still waits on Stage 2 and the credentials.)*
+
 **Exact owner action required:** configure the seven provider credentials locally (Windows Credential
 Manager targets `mistral`, `glm`, `qwen`, `nous`, `minimax`, `stepfun`, `hunyuan`, or the env vars
 `MISTRAL_API_KEY`, `GLM_API_KEY`, `DASHSCOPE_API_KEY`, `NOUS_API_KEY`, `MINIMAX_API_KEY`,
@@ -673,6 +677,82 @@ Manager targets `mistral`, `glm`, `qwen`, `nous`, `minimax`, `stepfun`, `hunyuan
 newly configured provider (bounded `/models` identity discovery + one harmless smoke test + E2 linkage
 through `governor.record_request()`), then re-runs the gate and enables LOCAL Stage 2 only if all three
 conditions hold.
+
+## E4/E5 real-path drill harness (2026-09-24T23:55Z)
+
+Task `agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23`. Evidence bundles:
+
+- `audits/evidence/2026-09-23T23-55-06Z-e4e5-real-path-drill-harness/` (`evidence.json` + `evidence.md`)
+  — the drill run itself: **33/33 checks, `real_provider_calls = 0`, `stub_dispatches = 10`,
+  live-store SHA-256 unchanged, 0 live E2 rows**.
+- `audits/evidence/2026-09-23T23-55-09Z-e4e5-real-path-drills/` — the whole-repo regression:
+  **15 suites, 438 collected / 438 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0**
+  (code SHA `bd0a7aa`).
+
+New worker: `exec-brain/e4e5_drill_harness.py` (drill driver) plus
+`exec-brain/tests/test_e4e5_drills.py` (38 tests, registered in `scripts/evidence_runner.py`).
+New E5 capability in `exec-brain/safe_mode.py`: `OWNER_ONLY_TRIGGERS`, `record_owner_override`,
+`SafeModeRecovery`.
+
+The harness drives the **real** execution abstractions (`E3ProductionExecutor`,
+`ExecutionAdapterRegistry`, `OrchestrationStore` schema v2, `CapabilityRegistry`, `EquivalentFailover`,
+`CheckpointManager`, `SafeModeManager`, `ConvergenceEnforcer`, `MalformedOutputHandler`,
+`SafeModeRecovery`) against a disposable isolated database, with provider transport replaced by a
+recorded in-process stub. Six drills, all PASS:
+
+1. **D1 checkpoint → equivalent failover → state handover.** Checkpoint created and restored
+   byte-identical; `deepseek-v41-flash` FAILED with the injected transport outage recorded verbatim;
+   `EquivalentFailover` selected `codex-cli` from the drill registry — and the artifact also records
+   the **live** registry rows read through a snapshot copy (`codex-cli` builder QUALIFIED 3/3/3,
+   `deepseek-v41-flash` builder QUALIFIED 8 recorded/3 first-pass); the replacement was dispatched
+   with the restored checkpoint embedded in its objective (proven by objective hash) and reached
+   COMPLETE only after a deterministic verification PASS; the persisted state log shows the failed
+   cycle then the replacement cycle on the same node.
+2. **D2 no equivalent worker → owner escalation.** The registry is asked a real question for role
+   `verifier` and truthfully answers `None`; an owner escalation is recorded
+   (`no_qualified_worker`, `OWNER_APPROVAL_REQUIRED`) in `decision_rationale_event`; the **quality
+   floor is not lowered**.
+3. **D3 provider outage.** Both a provider-reported error (HTTP 503) and a raised transport error
+   leave the node FAILED with the error verbatim, with the evidence row written; no node reaches
+   COMPLETE; **no failover is claimed** for a pure outage.
+4. **D4 malformed output.** The shallow structural pre-check flags None/empty/missing-field output and
+   is explicitly recorded as *not* the authority (it passes a non-empty garbage string); the
+   independent deterministic verifier rejects the malformed output; with a repair budget the node
+   converges to a verified COMPLETE via `REWORK`.
+5. **D5 repeated-failure convergence cap.** The loop terminates exactly at the cap (3 dispatches, no
+   4th) with a single stop marker; convergence events escalate to `quarantine_worker`; the system
+   enters DEGRADED then SAFE_MODE.
+6. **D6 safe-mode entry, owner-override audit and recovery.** Safe-mode event persisted; recovery is
+   **refused** while an owner-only trigger is active without an override, and **refused** when the
+   health probe is unhealthy; `record_owner_override` writes both the safe-mode event and a
+   `decision_actor='owner'` rationale row; recovery then succeeds → NORMAL with 0 active events, and
+   owner-only triggers are resolved with `auto_resolved = 0` (an owner authorisation, not an
+   automatic one).
+
+Truth boundaries recorded in the artifact (not glossed over): the evidence kind is
+`stubbed_provider_failure` and **no real external provider evidence is claimed**; the failover
+equivalence rows are a labelled fixture written only into the disposable drill DB
+(`capability_fixture.kind = "drill_fixture_not_qualification_evidence"`); the recovery health probe is
+a labelled local stub recorded as `provider_health_verified = false`; Stage 2 is **not** enabled and
+nothing was deployed.
+
+Two real defects were found and fixed on the way:
+
+- `OrchestrationStore.connect()` discarded the connection `init_db()` returned, leaking one SQLite
+  file handle per store connect and keeping the store DB locked on Windows after `close()`
+  (`exec-brain/e3_execution.py`).
+- The first revision of the drill harness opened the **live** runtime `orchestration.db` read-only,
+  which created stray `orchestration.db-shm` / `-wal` sidecars in the deployed runtime directory and
+  broke the E1 `test_t13_no_gateway_modification` directory-hygiene assertion. The harness now reads a
+  scratch **snapshot copy** and never opens the live file; the stray sidecars were removed (the live
+  store's own mtime was unchanged) and the suite passes again. The intermediate regression bundle is
+  preserved with its reason under
+  `audits/evidence/superseded/2026-09-23T23-51-09Z-e4e5-real-path-drills-superseded-by-final-drill-run/`.
+
+Still owner-gated: the **live-provider** variant (a real provider failure actually failing a node,
+and real provider-health re-verification before leaving safe mode). The harness has **no live-provider
+mode** by design, so that is not claimed. The exact post-key sequence and the acceptance decision
+needed from Mukund are recorded in `tasks-or-issues/overnight-owner-actions-2026-09-24.md` §8.
 
 ## Current blockers / owner dependencies
 
@@ -746,7 +826,9 @@ path and the CV/cover-letter path, so a new task would duplicate it.
 3. Extend qualification evidence for the remaining roles/workers as real execution evidence arrives;
    the harness and the bar are now in place, so this is evidence collection, not new engineering.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths
-   (currently gated: the contract only asks for these if Stage 2 is enabled, which it is not).
+   (**done at the stubbed-failure level** — see §E4/E5 real-path drill harness; the remaining item is
+   a *live-provider* drill, which stays gated behind Stage 2 + the provider credentials and is
+   recorded as an exact checklist in `tasks-or-issues/overnight-owner-actions-2026-09-24.md` §8).
 5. Provider onboarding resumes immediately when owner-local credentials are supplied.
 6. Local-first completion work (owner direction: prove local operation before any deployment
    architecture choice).
