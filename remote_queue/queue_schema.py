@@ -17,10 +17,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-REPO_ROOT = Path(__file__).parent.parent
+# Repository root used for git publication. Recovery tooling and the isolated
+# test-suite set HERMES_REPO_ROOT / HERMES_QUEUE_ROOT to a disposable root so
+# queue helpers can never commit, push, or mutate the live checkout.
+REPO_ROOT = Path(os.environ.get("HERMES_REPO_ROOT") or Path(__file__).parent.parent)
 
 # Canonical data directories (must match spec and GitHub-tracked paths)
-QUEUE_DIR = REPO_ROOT / "remote-queue"
+QUEUE_DIR = Path(os.environ.get("HERMES_QUEUE_ROOT") or (REPO_ROOT / "remote-queue"))
 PENDING_DIR = QUEUE_DIR / "pending"
 RUNNING_DIR = QUEUE_DIR / "running"
 COMPLETED_DIR = QUEUE_DIR / "completed"
@@ -111,7 +114,10 @@ def find_pending_tasks() -> List[Path]:
 
     def sort_key(path: Path):
         try:
-            with open(path, 'r') as f:
+            # Explicit UTF-8: task files are authored in UTF-8, and the
+            # platform default (cp1252 on Windows) raises UnicodeDecodeError
+            # on non-ASCII objectives, silently demoting valid tasks to last.
+            with open(path, 'r', encoding='utf-8') as f:
                 task = json.load(f)
             pri = task.get("priority", "low")
             return (priority_order.get(pri, 99), task.get("created_at", ""), path.name)
@@ -126,14 +132,15 @@ def claim_task(task_path: Path) -> bool:
     task_id = task_path.stem
     dest = RUNNING_DIR / f"{task_id}.json"
 
-    try:
-        if dest.exists():
-            return False
+    if dest.exists():
+        return False
 
+    # Copy into running/ first and only remove the pending file once the
+    # running copy exists. The previous ordering unlinked pending/ before
+    # publishing and then deleted the running copy if publication raised,
+    # which silently destroyed the task (present in neither state).
+    try:
         shutil.copy2(str(task_path), str(dest))
-        task_path.unlink()
-        _git_commit_and_push(f"queue: claim {task_id}")
-        return True
     except Exception:
         if dest.exists():
             try:
@@ -141,6 +148,22 @@ def claim_task(task_path: Path) -> bool:
             except Exception:
                 pass
         return False
+
+    # A failed publish must not lose the task: the running copy is already
+    # authoritative, so the pending file is retired and the publish failure is
+    # logged by _git_commit_and_push for the poller's pull/rebase recovery.
+    try:
+        task_path.unlink()
+    except Exception:
+        pass
+
+    try:
+        _git_commit_and_push(f"queue: claim {task_id}")
+    except Exception as exc:
+        log_event(f"CRITICAL: claim publish raised for {task_id}: {type(exc).__name__}: {exc}")
+        return False
+
+    return True
 
 
 def complete_task(task_id: str, result: Dict[str, Any]):
@@ -191,6 +214,21 @@ def block_task(task_id: str, blocker_category: str, owner_action: str, continue_
     _git_commit_and_push(f"queue: block {task_id} ({blocker_category})")
 
 
+def _is_non_fast_forward(stderr: str) -> bool:
+    """True when a push was rejected because origin advanced independently."""
+    lowered = (stderr or "").lower()
+    return any(
+        marker in lowered
+        for marker in (
+            "non-fast-forward",
+            "fetch first",
+            "updates were rejected",
+            "failed to push some refs",
+            "remote rejected",
+        )
+    )
+
+
 def _git_commit_and_push(message: str) -> bool:
     """Commit queue changes and push. Returns True on success, logs truthfully."""
     # Stage only queue changes
@@ -212,6 +250,21 @@ def _git_commit_and_push(message: str) -> bool:
     rc, _, stderr = _git(["push", "origin", "main"])
     if rc != 0:
         log_event(f"CRITICAL: git push failed: {stderr[:300]}")
+        if _is_non_fast_forward(stderr):
+            # The scheduled poller and an interactive session can publish at the
+            # same time, so a rejected push is a normal race rather than a
+            # failure. Rebase onto the advanced origin and retry exactly once so
+            # queue state is not silently left unpublished.
+            rc2, _, err2 = _git(["pull", "--rebase"])
+            if rc2 == 0:
+                rc3, _, err3 = _git(["push", "origin", "main"])
+                if rc3 == 0:
+                    log_event(f"queue push recovered after rebase retry: {message}")
+                    return True
+                log_event(f"CRITICAL: git push retry failed: {err3[:300]}")
+            else:
+                _git(["rebase", "--abort"])
+                log_event(f"CRITICAL: push recovery rebase failed: {err2[:300]}")
         return False
 
     return True
@@ -241,7 +294,7 @@ def get_running_tasks() -> List[Dict[str, Any]]:
     tasks = []
     for path in RUNNING_DIR.glob("*.json"):
         try:
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 tasks.append(json.load(f))
         except Exception:
             pass

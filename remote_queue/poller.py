@@ -4,24 +4,31 @@
 import datetime
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(REPO_ROOT))
+REPO_ROOT = Path(os.environ.get("HERMES_REPO_ROOT") or Path(__file__).parent.parent)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from remote_queue.queue_schema import (
     ensure_dirs, find_pending_tasks, claim_task, load_task_file,
     validate_task, complete_task, block_task, log_event,
     is_task_running, is_task_completed, is_task_blocked,
     PENDING_DIR, RUNNING_DIR, COMPLETED_DIR, BLOCKED_DIR,
+    _git_commit_and_push,
 )
 from remote_queue.hermes_dispatch import dispatch_task
 
-LOCK_FILE = REPO_ROOT / "remote-queue" / ".poller.lock"
-KILL_SWITCH_FILE = REPO_ROOT / "remote-queue" / ".poller.kill"
+# Disposable-root and mutex isolation for recovery runs and the isolated test
+# suite: HERMES_REPO_ROOT / HERMES_QUEUE_ROOT redirect all paths, and
+# HERMES_POLLER_MUTEX avoids contending with the live scheduled poller.
+QUEUE_ROOT = Path(os.environ.get("HERMES_QUEUE_ROOT") or (REPO_ROOT / "remote-queue"))
+LOCK_FILE = QUEUE_ROOT / ".poller.lock"
+KILL_SWITCH_FILE = QUEUE_ROOT / ".poller.kill"
+MUTEX_NAME = os.environ.get("HERMES_POLLER_MUTEX") or "HermesRemoteQueuePoller"
 _MUTEX_HANDLE = None
 
 
@@ -120,35 +127,12 @@ def git_pull_safely() -> bool:
     return True
 
 
-def _git_commit_and_push(message: str) -> bool:
-    """Commit queue changes and push. Returns True on success, logs truthfully."""
-    rc, _, stderr = _git(["add", "remote-queue/"])
-    if rc != 0:
-        log_event(f"CRITICAL: git add failed: {stderr[:200]}")
-        return False
-
-    rc, stdout, stderr = _git(["commit", "-m", message, "--", "remote-queue/"])
-    if rc != 0:
-        if "nothing to commit" in stdout.lower() or "nothing to commit" in stderr.lower():
-            return True
-        log_event(f"CRITICAL: git commit failed: {stderr[:200]}")
-        return False
-
-    rc, _, stderr = _git(["push", "origin", "main"])
-    if rc != 0:
-        log_event(f"CRITICAL: git push failed: {stderr[:300]}")
-        return False
-
-    log_event(f"queue commit/push success: {message}")
-    return True
-
-
 def acquire_lock() -> bool:
     global _MUTEX_HANDLE
     try:
         import ctypes
         kernel32 = ctypes.windll.kernel32
-        handle = kernel32.CreateMutexW(None, False, "HermesRemoteQueuePoller")
+        handle = kernel32.CreateMutexW(None, False, MUTEX_NAME)
         if handle == 0:
             return False
         if kernel32.GetLastError() != 0:
@@ -303,11 +287,16 @@ def run_poll_cycle():
         if errors:
             log_event(f"Invalid task {task_id}: {errors}")
             try:
-                block_task(task_id, "validation_failed", "Schema validation failed", "Other tasks continue")
+                # A pending task is not in running/, so block_task() legitimately
+                # raises QueueError here. The blocked/ copy must still be written:
+                # previously the raise skipped it and the invalid task stayed in
+                # pending/, failing validation on every later poll cycle forever.
+                if is_task_running(task_id):
+                    block_task(task_id, "validation_failed", "Schema validation failed", "Other tasks continue")
                 dest = BLOCKED_DIR / f"{task_id}.json"
                 if not dest.exists():
-                    import shutil
                     shutil.copy2(str(task_path), str(dest))
+                if task_path.exists():
                     task_path.unlink()
             except Exception as e:
                 log_event(f"Failed to block: {e}")
