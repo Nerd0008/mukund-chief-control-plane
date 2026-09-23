@@ -1,0 +1,72 @@
+{
+  "task_id": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
+  "created_at": "2026-09-23T21:31:00Z",
+  "objective": "Finish the overnight engineering for E4/E5 despite Stage 2 being owner-deferred: build and validate real-path drill harnesses for checkpoint/failover, provider outage, malformed output, convergence, safe/degraded mode, recovery and owner escalation using isolated/staged execution where production enablement is not required.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Latest E3 execution interfaces must be stable enough to exercise without enabling local Stage 2."
+  ],
+  "allowed_scope": [
+    "Inspect existing E4/E5 implementations/tests before changing anything.",
+    "Create reproducible drill harnesses that exercise the real execution abstractions with fake/stubbed provider failures where necessary; use real providers only when already authorized and bounded.",
+    "Evidence checkpoint creation, state handover, equivalent-worker failover, no-equivalent escalation, provider outage, malformed output, repeated-failure convergence cap, safe-mode entry, owner override audit, and safe-mode recovery.",
+    "Do not silently lower quality floors or mark simulated provider failure as real external evidence.",
+    "Run E1-E5 + queue regressions after changes and record exact counts/exits.",
+    "Update state/tracker and leave any owner-only/live-production verification step as an exact afternoon checklist item."
+  ],
+  "stop_conditions": [
+    "Do not enable Stage 2.",
+    "Do not spend unbounded provider quota.",
+    "Do not fabricate failover success.",
+    "No VPS cutover."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-23T23:59:28.399528Z",
+  "result": {
+    "status": "completed",
+    "summary": "E4/E5 real-path drill harnesses built, validated and evidenced without enabling Stage 2. exec-brain/e4e5_drill_harness.py drives the real execution abstractions (E3ProductionExecutor, ExecutionAdapterRegistry, OrchestrationStore schema v2, CapabilityRegistry, EquivalentFailover, CheckpointManager, SafeModeManager, ConvergenceEnforcer, MalformedOutputHandler, SafeModeRecovery) against a disposable isolated schema-v2 DB with provider transport replaced by a recorded in-process stub: D1 checkpoint create/restore + equivalent-worker failover (deepseek-v41-flash -> codex-cli, both QUALIFIED in the live registry read via snapshot copy) with the restored checkpoint delivered to the replacement, which reached COMPLETE only after a verification PASS; D2 no-equivalent -> owner escalation, quality floor NOT lowered; D3 provider outage (reported HTTP 503 and raised transport error) both leave the node FAILED with the error verbatim and no failover claimed; D4 malformed output rejected by the deterministic verifier with a repair path to a verified COMPLETE; D5 convergence cap bounded at exactly 3 dispatches (no 4th), quarantine + escalated convergence event, DEGRADED->SAFE_MODE entry; D6 safe-mode entry, owner-override audit (owner-only trigger not auto-resolved) and recovery refused without an override or when the probe is unhealthy, then succeeding to NORMAL with 0 active events. 33/33 checks, real_provider_calls=0, stub_dispatches=10, live orchestration.db/governor.db/exec_brain.db SHA-256 unchanged, 0 live E2 rows, artifact labelled stubbed_provider_failure (never presented as real external provider evidence). Added the E5 owner-override/recovery capability to safe_mode.py. Two real defects found and fixed: OrchestrationStore.connect() leaked the init_db connection (locking the store DB on Windows after close), and the harness's first revision created stray orchestration.db-shm/-wal sidecars in the deployed runtime dir by opening the live WAL store (now reads a snapshot copy; sidecars removed; the intermediate failed 14/15 regression bundle preserved under audits/evidence/superseded/ with its reason). All 15 regressions pass. Stage 2 NOT ENABLED, nothing deployed, no VPS action. Both background evidence runs are accounted for and the tree is in sync with origin/main at b949db5.",
+    "owner_action_required": "After configuring the seven provider credentials, run the exact afternoon sequence in tasks-or-issues/overnight-owner-actions-2026-09-24.md \u00a78: (1) python scripts/e3_credential_presence_probe.py, (2) python scripts/e3_stage2_readiness_gate.py, (3) python scripts/evidence_runner.py --label post-keys-regression (must be 15 suites / 438 collected / 438 passed / 0 failed / every suite exit 0), (4) python exec-brain/e3_execution_rehearsal.py (bounded real-provider calls), (5) python exec-brain/e4e5_drill_harness.py (expect 33/33, real_provider_calls=0, live_stores_changed=[]), then complete local Stage 2 if all gates pass. Also decide: is the stubbed-failure drill (33/33) plus the existing real-path execution rehearsal sufficient E4/E5 evidence for v1, or is a live-provider failover drill required before cutover? The harness has no live-provider mode by design, so real provider outage -> real failover has NOT been exercised and is not claimed.",
+    "blocker_category": null,
+    "commits": [
+      "15bb049 e4/e5: real-path drill harness (checkpoint/failover, outage, malformed output, convergence, safe mode, owner override, recovery)",
+      "bd0a7aa e4/e5 drills: record the code SHA in the drill evidence artifact",
+      "b949db5 e4/e5 drills: evidence bundles, tracker/state update, owner-gated live-drill checklist",
+      "pushed: ebc9853..b949db5 main -> origin/main (HEAD in sync, nothing ahead/behind)"
+    ],
+    "tests": [
+      "python scripts/evidence_runner.py --label e4e5-real-path-drills -> 15 suites, 438 collected / 438 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0 (code SHA bd0a7aa, process exit 0); audits/evidence/2026-09-23T23-55-09Z-e4e5-real-path-drills/",
+      "superseded intermediate run of the same command -> 15 suites / 14 passed / 1 failed (E1 test_t13_no_gateway_modification), 437 collected / 436 passed; root-caused to the harness opening the live WAL store, fixed, preserved at audits/evidence/superseded/2026-09-23T23-51-09Z-e4e5-real-path-drills-superseded-by-final-drill-run/",
+      "E4/E5 real-path drill harness suite (new): exec-brain/tests/test_e4e5_drills.py -> 38 / 38 / exit 0",
+      "E4 resource continuity + E5 safe mode combined suite: exec-brain/tests/test_e4e5.py -> 37 / 37 / exit 0",
+      "E1 executive brain runtime matrix: 32 / 32 / exit 0 (verified standalone after the fix)",
+      "E2 governor / provider adapters 45/45; E3 baseline 54/54; E3 extended 60/60; E3 shadow orchestrator 13/13; E3 production rehearsal 24/24; E3 production execution leg 22/22; E3 execution rehearsal driver 22/22; E3 evidence-backed qualification 13/13 - all exit 0",
+      "Remote queue 30/30; bridge watchdog 12/12; console QuickEdit 12/12; worker retry 24/24 - all exit 0",
+      "python exec-brain/e4e5_drill_harness.py -> 33/33 checks PASS, real_provider_calls=0, stub_dispatches=10, live_stores_changed=[], 0 live E2 rows; audits/evidence/2026-09-23T23-55-06Z-e4e5-real-path-drill-harness/",
+      "python scripts/company_inventory.py -> 50 roster items, 0 unmapped roster ids, 7 owned scheduled tasks, 0 unmapped"
+    ],
+    "changed_files": [
+      "exec-brain/e4e5_drill_harness.py (new)",
+      "exec-brain/tests/test_e4e5_drills.py (new)",
+      "exec-brain/safe_mode.py",
+      "exec-brain/e3_execution.py",
+      "scripts/evidence_runner.py",
+      "scripts/company_inventory.py",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/2026-09-23T23-55-06Z-e4e5-real-path-drill-harness/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-23T23-55-09Z-e4e5-real-path-drills/{evidence.json,evidence.md}",
+      "audits/evidence/superseded/2026-09-23T23-51-09Z-e4e5-real-path-drills-superseded-by-final-drill-run/{evidence.json,evidence.md,SUPERSEDED.md}",
+      "audits/evidence/superseded/2026-09-23T23-54-30Z-e4e5-real-path-drills-superseded-by-final-drill-run/{evidence.json,evidence.md,SUPERSEDED.md}"
+    ],
+    "remaining": [
+      "Owner-gated live-provider drill: a real provider failure actually failing a node, and real provider-health re-verification before leaving safe mode - requires the seven provider credentials plus Stage 2 enablement; exact sequence in tasks-or-issues/overnight-owner-actions-2026-09-24.md \u00a78.",
+      "Owner acceptance decision: whether the stubbed-failure drill plus the existing real-path execution rehearsal is sufficient E4/E5 evidence for v1, or whether a live-provider failover drill is required before cutover.",
+      "Engineering follow-up deliberately out of this task's scope (touches the live execution path): add a bounded --live drill mode to e4e5_drill_harness.py and wire a real provider-health probe into SafeModeRecovery (provider_health_verified is currently recorded false).",
+      "Unchanged external/owner blockers from the authority file: 0/7 provider credentials configured, Stage 2 NOT ENABLED, Google image worker intermittency unresolved, VPS details/architecture deferred. No successor agent-e4e5 task was staged, because staging one would duplicate this work."
+    ]
+  }
+}
