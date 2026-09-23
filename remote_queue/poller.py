@@ -33,11 +33,21 @@ _MUTEX_HANDLE = None
 
 
 def _git(cmd, timeout=60):
-    """Run a git command, return (returncode, stdout, stderr)."""
+    """Run git non-interactively so scheduled Hermes work can never block on Vim/auth prompts."""
+    git_env = os.environ.copy()
+    git_env["GIT_EDITOR"] = "true"
+    git_env["GIT_SEQUENCE_EDITOR"] = "true"
+    git_env["GIT_MERGE_AUTOEDIT"] = "no"
+    git_env["GIT_TERMINAL_PROMPT"] = "0"
     result = subprocess.run(
         ["git"] + cmd,
         cwd=str(REPO_ROOT),
-        capture_output=True, text=True, timeout=timeout
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout,
+        env=git_env,
     )
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
