@@ -230,3 +230,14 @@ Before local Stage 2 enablement:
 - state/evidence must be updated truthfully
 
 Deployment architecture is intentionally deferred until local operation is proven. Current owner preference is laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, but this is not yet a final architecture decision or authorization for VPS cutover.
+
+
+## Owner directive update — 2026-09-23 late evening
+
+Mukund has superseded the earlier automatic local Stage 2 timing instruction.
+
+- Continue all independent local engineering, diagnosis, qualification, multi-worker execution, E4/E5, regression, evidence, and deployment-preparation work overnight.
+- **Do not enable local E3 Stage 2 overnight.**
+- Mukund plans to configure all remaining provider credentials on **2026-09-24**.
+- After those credentials are configured and truthfully verified, re-run the complete local Stage 2 readiness gates and complete local Stage 2 if they pass.
+- This timing change does not weaken any readiness criterion and does not authorize VPS cutover or finalize deployment architecture.
