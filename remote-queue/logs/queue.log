@@ -111,3 +111,4 @@ error: pathspec ':
 [2026-09-23T15:49:37.273444Z] Claimed task: hardened-final-e2e
 [2026-09-23T15:49:37.274445Z] Handling task: hardened-final-e2e
 [2026-09-23T15:49:37.274445Z] Task hardened-final-e2e failed: No handler for task: hardened-final-e2e
+[2026-09-23T15:50:05.088606Z] git pull: success (with stash/restore)
