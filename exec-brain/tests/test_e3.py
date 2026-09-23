@@ -460,5 +460,98 @@ class TestE2Regression(unittest.TestCase):
             con.close()
 
 
+class TestGenericOpenAIAdapter(unittest.TestCase):
+    """Test generic OpenAI-compatible adapter."""
+
+    def test_imports(self):
+        """Adapter imports without errors."""
+        from generic_openai_adapter import GenericOpenAIAdapter, PROVIDER_CONFIGS
+        self.assertIsNotNone(GenericOpenAIAdapter)
+        self.assertIsNotNone(PROVIDER_CONFIGS)
+
+    def test_provider_configs_complete(self):
+        """All 7 generic-adapter providers are configured."""
+        from generic_openai_adapter import PROVIDER_CONFIGS
+        expected = {"mistral", "glm", "minimax", "stepfun", "qwen", "hunyuan", "longcat"}
+        self.assertEqual(set(PROVIDER_CONFIGS.keys()), expected)
+
+    def test_adapter_creation_all_providers(self):
+        """Can create adapter for every configured provider."""
+        from generic_openai_adapter import GenericOpenAIAdapter, PROVIDER_CONFIGS
+        for key in PROVIDER_CONFIGS:
+            adapter = GenericOpenAIAdapter(key)
+            self.assertEqual(adapter.provider_key, key)
+            self.assertEqual(adapter.model, PROVIDER_CONFIGS[key]["api_model_id"])
+
+    def test_adapter_unknown_provider_raises(self):
+        """Unknown provider raises ValueError."""
+        from generic_openai_adapter import GenericOpenAIAdapter
+        with self.assertRaises(ValueError):
+            GenericOpenAIAdapter("nonexistent")
+
+    def test_health_without_credentials(self):
+        """Without credentials, health check reports unhealthy."""
+        from generic_openai_adapter import GenericOpenAIAdapter
+        adapter = GenericOpenAIAdapter("mistral")
+        health = adapter.check_health()
+        self.assertEqual(health["status"], "unhealthy")
+        self.assertEqual(health["reason"], "credential_absent")
+
+    def test_dispatch_without_credentials(self):
+        """Dispatch without credentials returns FAILED."""
+        from generic_openai_adapter import GenericOpenAIAdapter
+        adapter = GenericOpenAIAdapter("mistral")
+        contract = {
+            "contract_id": "test-1",
+            "objective": "Test objective",
+        }
+        result = adapter.dispatch(contract)
+        self.assertEqual(result["status"], "FAILED")
+        self.assertEqual(result["error"], "credential_absent")
+        self.assertEqual(result["provider"], "mistral")
+
+    def test_all_workers_have_adapters(self):
+        """All 10 workers have adapter_implemented=True."""
+        from worker_registry import WORKER_ROSTER
+        for w in WORKER_ROSTER:
+            self.assertTrue(w.get("adapter_implemented", False),
+                            f"{w['worker_id']} missing adapter")
+
+    def test_adapter_files_referenced(self):
+        """All workers reference an existing adapter file."""
+        from worker_registry import WORKER_ROSTER
+        import os
+        # Adapter files live in the parent dir (exec-brain/), tests in tests/
+        adapter_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        for w in WORKER_ROSTER:
+            adapter_file = w.get("adapter_file")
+            if adapter_file:
+                full_path = os.path.join(adapter_dir, adapter_file)
+                self.assertTrue(os.path.exists(full_path),
+                                f"Adapter file not found: {full_path}")
+
+
+class TestCodexAdapter(unittest.TestCase):
+    """Codex adapter specific tests."""
+
+    def test_codex_smoke_blocked(self):
+        """Codex smoke test is blocked by usage limit."""
+        from codex_adapter import run_smoke_test
+        result = run_smoke_test()
+        # Codex is blocked, but the function should return a dict
+        self.assertIsInstance(result, dict)
+        self.assertIn("routable", result)
+        self.assertFalse(result["routable"])
+
+    def test_codex_cli_version(self):
+        """Codex CLI version is captured."""
+        from codex_adapter import CodexExecutionAdapter
+        adapter = CodexExecutionAdapter()
+        version = adapter._get_version()
+        # Version should be non-empty string (could be "unknown")
+        self.assertIsInstance(version, str)
+        self.assertTrue(len(version) > 0)
+
+
 if __name__ == '__main__':
     unittest.main()

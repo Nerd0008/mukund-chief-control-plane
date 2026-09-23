@@ -34,7 +34,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'coding', 'instruction-following', 'agents'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet — adapter exists but auth not configured
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (mistral)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting Mistral API key to enable smoke test.'
     },
     {
         'worker_id': 'google-nano-banana-2',
@@ -83,7 +90,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'tool-use', 'agents', 'high-volume'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (glm)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting GLM API key to enable smoke test.'
     },
     {
         'worker_id': 'qwen38-27b',
@@ -92,7 +106,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['vision', 'multimodal', 'gui-understanding', 'screenshots'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (qwen)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting Qwen API key to enable smoke test.'
     },
     {
         'worker_id': 'longcat-2.0',
@@ -101,7 +122,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'EVALUATE',
         'capability_hints': ['reasoning', 'coding'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: auth unresolved yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (longcat/nous)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting Nous API key (not OAuth) to enable smoke test.'
     },
     {
         'worker_id': 'minimax-m3',
@@ -110,7 +138,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'agents'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (minimax)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting MiniMax API key to enable smoke test.'
     },
     {
         'worker_id': 'step-37-flash',
@@ -119,7 +154,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'fast'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (stepfun)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting Step API key to enable smoke test.'
     },
     {
         'worker_id': 'tencent-hunyuan-hy3',
@@ -128,7 +170,14 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'tool-use'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': False,  # Issue #1: No credentials yet
+        'auth_configured': False,
+        'auth_source': 'none',
+        'exec_interface': 'generic_openai_adapter (hunyuan)',
+        'adapter_implemented': True,
+        'adapter_file': 'generic_openai_adapter.py',
+        'smoke_test': 'NOT_RUN',
+        'notes': 'Generic OpenAI adapter implemented. Awaiting Hunyuan API key to enable smoke test.'
     }
 ]
 

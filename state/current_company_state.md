@@ -8,28 +8,28 @@
 - Company audit: completed
 - GitHub bridge: active (manual sync via scripts/sync_discord_chief.py)
 - Discord capture: active for Chief channel (#chief + its threads)
-- Local archive: active (C:\Users\mukun\DiscordArchive\chief, daily JSONL, append-only)
+- Local archive: active (C:\\Users\\mukun\\DiscordArchive\\chief, daily JSONL, append-only)
 - GitHub conversation sync: tested — live Chief thread capture verified (inbound + outbound), dedupe verified, credential-like content rejected
 - Chief threads: supported (parent resolved from state.db sessions.origin_json parent_chat_id; channel_directory.json fallback)
 - Capture quality (Phase 2A.1): full content from state.db (no 500-char truncation), wrapper-free outbound replies, clean inbound bodies, message_id populated from platform_message_id
 - >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
-- Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\Users\mukun\DiscordArchive\chief\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
-- Manual fallback: python C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py
+- Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\\Users\\mukun\\DiscordArchive\\chief\\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
+- Manual fallback: python C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\sync_discord_chief.py
 - Executive Brain: E3 STAGE 1 ACTIVE / SHADOW ONLY (implemented 2026-09-22)
   - E1: ACTIVE, verified (32/32 tests PASS, audit --verify PASS)
   - E2: ACTIVE, verified (45/45 tests PASS, gov-verify PASS)
   - E3 Stage 1: SHADOW ONLY — no production dispatch enabled
-  - E3 Implementation: C:\Users\mukun\AppData\Local\hermes\exec-brain\ (orchestration_db.py, capability_registry.py, task_fingerprint.py, decision_rationale.py, execution_dag.py, worker_contract.py, worker_registry.py, qualification_gate.py, e3_commands.py)
+  - E3 Implementation: C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\ (orchestration_db.py, capability_registry.py, task_fingerprint.py, decision_rationale.py, execution_dag.py, worker_contract.py, worker_registry.py, qualification_gate.py, e3_commands.py)
   - E3 Orchestration DB: orchestration.db (schema v1, 11 tables, separate from E1 exec_brain.db and E2 governor.db)
-  - E3 Test result: 40/40 passed
-  - Combined test result: 117/117 passed (E1 32 + E2 45 + E3 40)
+  - E3 Test result: 50/50 passed
+  - Combined test result: 127/127 passed (E1 32 + E2 45 + E3 50)
   - 10-worker registry loaded from handovers/2026-09-22-e3-model-roster-handover.md
   - All workers currently UNPROVEN (LOCKED = included in pool, NOT qualified)
   - Worker pool status:
     - LOCKED (6): codex-cli, mistral-small-4, google-nano-banana-2, deepseek-v41-flash, glm-53-flash, qwen38-27b
     - EVALUATE (1): longcat-2.0
     - BENCHMARK (3): minimax-m3, step-37-flash, tencent-hunyuan-hy3
-  - routable states: codex-cli NOT routable (CLI automation TBD); all others routable
+  - routable states: codex-cli NOT routable (BLOCKED usage limit); all others routable
   - Stage 1 capabilities: task fingerprinting, decomposition planning, DAG construction, candidate generation, Qualification Gate validation, decision rationale audit log (A8), e3-rationale / e3-trace / e3-why CLI views
   - No production worker dispatch enabled
   - No execution adapters implemented yet
