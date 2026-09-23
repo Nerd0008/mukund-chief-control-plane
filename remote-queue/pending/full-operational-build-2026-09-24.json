@@ -1,0 +1,24 @@
+{
+  "task_id": "full-operational-build-2026-09-24",
+  "created_at": "2026-09-23",
+  "objective": "Continue the full operational build and VPS cutover plan autonomously while Mukund is away. Progress all non-blocked provider, E3, E4, E5, verification, and VPS-preparation work. Ask/block only where owner credentials, explicit approval, irreversible action, or an architectural/safety decision is required.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "provider onboarding for the approved 10-worker roster",
+    "E3 implementation and qualification",
+    "E4 resource continuity",
+    "E5 safe mode/resilience",
+    "tests, audits, documentation required for truth/recovery/deployment",
+    "VPS preparation and deployment work that does not require missing owner credentials or explicit approval"
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "owner credentials or account action required",
+    "explicit Stage 2 production approval required",
+    "irreversible or destructive action requires owner approval",
+    "architecture or safety blocker requires owner decision",
+    "VPS access details missing"
+  ]
+}
