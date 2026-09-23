@@ -191,6 +191,10 @@ def handle_task(task: dict) -> dict:
         return handle_e2e_test(task)
     if "hardened-sync-test" in task_id:
         return handle_e2e_test(task)
+    if "hardened-regression" in task_id:
+        return handle_e2e_test(task)
+    if "remote-e2e" in task_id:
+        return handle_e2e_test(task)
 
     raise ValueError(f"No handler for task: {task_id}")
 
