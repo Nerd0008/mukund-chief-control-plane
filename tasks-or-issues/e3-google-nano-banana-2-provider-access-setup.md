@@ -1,6 +1,6 @@
 # Task — Configure Google Nano Banana 2 for E3 execution
 
-Status: ACTIVE
+Status: ACTIVE — AUTH + MODEL DISCOVERY COMPLETE
 Created: 2026-09-23
 Owner: Mukund / Executive Brain E3
 Worker: Google Nano Banana 2
@@ -14,15 +14,41 @@ Human/roster label:
 Current official Gemini API model ID:
 - `gemini-3.1-flash-image`
 
-This ID must still be confirmed live from the provider before being treated as authoritative runtime identity.
+Live provider discovery on 2026-09-23 confirmed `gemini-3.1-flash-image` is available to this account and supports `generateContent`. This is now the selected backing model for the Google image-generation worker.
+
+
+## Live discovery result — 2026-09-23
+
+Credential/authentication:
+- Windows Credential Manager target `gemini-api`: PRESENT
+- Environment fallback: ABSENT / unused
+- Existing `gemini:antigravity` desktop-app credential remains separate and untouched
+- Authentication: PASS
+- `GET https://generativelanguage.googleapis.com/v1beta/models` → HTTP 200
+- 59 live models visible to this account
+
+Relevant observed models:
+- `gemini-3.6-flash` — AVAILABLE; methods observed: generateContent, countTokens, createCachedContent, batchGenerateContent
+- `gemini-3.1-flash-image` — AVAILABLE; methods observed: generateContent, countTokens, batchGenerateContent
+- `gemini-3.1-flash-image-preview`
+- `gemini-3.1-flash-lite-image`
+- `gemini-3-pro-image` / `gemini-3-pro-image-preview`
+- `nano-banana-pro-preview`
+- `gemini-2.5-flash-image`
+
+Selection:
+- E3 Google image-generation worker backing model: `gemini-3.1-flash-image`
+- `gemini-3.6-flash` is NOT assigned to image generation. Provider model-list metadata did not provide evidence of image output for it. It remains a separate candidate for future text/multimodal worker evaluation.
+- Do not infer unsupported output modalities from naming alone.
+
 
 ## Readiness checklist
 
-- [ ] Local Google/Gemini API credential presence checked without exposing value
-- [ ] Credential stored in approved local secret store
-- [ ] API authentication verified
-- [ ] Live model discovery/availability check succeeds
-- [ ] Exact API model ID confirmed
+- [x] Local Google/Gemini API credential presence checked without exposing value
+- [x] Credential stored in approved local secret store
+- [x] API authentication verified (GET generativelanguage.googleapis.com/v1beta/models → HTTP 200)
+- [x] Live model discovery/availability check succeeds (59 models visible)
+- [x] Exact API model ID confirmed: `gemini-3.1-flash-image`
 - [ ] E3 Google image ExecutionAdapter implemented
 - [ ] Minimal harmless image-generation smoke test PASS
 - [ ] Returned provider/model identity recorded
