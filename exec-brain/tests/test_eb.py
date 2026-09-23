@@ -322,6 +322,7 @@ class TestMatrix(EBTest):
                    "orchestration_db.py", "test_e3.py",
                    "codex_adapter.py", "exec_adapters.py",
                    "deepseek_adapter.py", "deepseek_keyaccess.py",
+                   "gemini_adapter.py", "gemini_keyaccess.py",
                    "orchestration.db",
                    "__pycache__")
         for f in eb_dir.iterdir():

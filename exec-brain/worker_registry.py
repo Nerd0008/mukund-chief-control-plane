@@ -39,11 +39,22 @@ WORKER_ROSTER = [
     {
         'worker_id': 'google-nano-banana-2',
         'provider': 'google',
-        'model': 'nano-banana-2',
+        'display_name': 'Google Nano Banana 2',
+        'model': 'gemini-3.1-flash-image',  # CONFIRMED by owner after live /models discovery 2026-09-23
+        'api_model_id': 'gemini-3.1-flash-image',
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['image-generation', 'image-editing', 'vision'],
-        'routable': False  # Issue #1: No execution adapter, no smoke test
+        'routable': True,  # smoke test PASS + E2 linkage VERIFIED + no security blocker
+        'auth_configured': True,
+        'auth_source': 'credential_manager',
+        'exec_interface': 'generativelanguage.googleapis.com/v1beta generateContent (IMAGE modality)',
+        'adapter_implemented': True,
+        'adapter_file': 'gemini_adapter.py',
+        'smoke_test': 'PASS',
+        'e2_usage_linkage': 'VERIFIED',  # obs-20260923-d44f030a
+        'qualification': 'UNPROVEN',  # smoke test readiness != capability qualification
+        'notes': 'api_model_id confirmed live via /models (59 models observed) and owner confirmation. Image worker only: gemini-3.6-flash NOT configured as image worker (no image-output evidence).'
     },
     {
         'worker_id': 'deepseek-v41-flash',
