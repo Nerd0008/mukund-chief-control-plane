@@ -1,0 +1,31 @@
+{
+  "task_id": "agent-company-watch-recovery-final-pass-2026-09-24",
+  "created_at": "2026-09-23T23:35:14Z",
+  "objective": "Recover the blocked Company Watch/job-search integration near the end of the remaining build, preserving any partial local/landed work and completing only the unfinished scope. The previous Company Watch worker hit the old 1200-second execution ceiling before the new bounded retry hardening was installed. Re-inspect current main and local worktree first, then resume in small checkpointed units so the task can finish under the hardened queue without rebuilding successful work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "All currently queued high-priority independent v1 engineering tasks should be allowed to run first.",
+    "Career Ops tracker-writer/monthly-rollover should be in a truthful terminal state or expose a stable deterministic interface.",
+    "Do not race another active Company Watch worker."
+  ],
+  "allowed_scope": [
+    "Inspect blocked/agent-company-watch-job-search-integration-2026-09-23.json, current main, local worktree, queue logs, and relevant Career Ops/Company Watch files before editing. Preserve any unpushed partial work if it is attributable and safe; do not assume it exists.",
+    "Use the hardened retry system now in main (initial attempt + at most two recoverable retries). Do not create manual retry loops.",
+    "Break the original broad scope into bounded phases with checkpoint commits/evidence between phases: source/inventory reconciliation, structured ATS/career endpoint watcher, canonical dedupe handoff, regional tracker handoff, and bounded acceptance evidence.",
+    "Prefer structured ATS/career endpoints and bounded batches. Avoid a single long-running terminal command that can consume the entire 1200-second task budget without a checkpoint.",
+    "Reuse the Career Ops <-> Chief interface and deterministic tracker writer already present/pending. Do not rebuild Career Ops or duplicate canonical application state.",
+    "Treat historical employer/recruiter/application counts as historical until reverified from source evidence. Do not fabricate organizations, jobs, applications, eligibility, or provenance.",
+    "Run bounded evidence for watch -> finding -> dedupe -> Career Ops handoff -> tracker update using safe/test data or owner-owned local data. Keep external application/recruiter/contact actions disabled.",
+    "Update state/tracker truthfully, commit/push recoverably, and return strict terminal JSON."
+  ],
+  "stop_conditions": [
+    "No external applications, recruiter/company messages, LinkedIn/account mutations, or irreversible actions.",
+    "No secrets or raw sensitive email content in GitHub.",
+    "Do not overwrite canonical application history or trackers without backup/verification.",
+    "If the only remaining gap requires owner login/account action, record it and stop only that substep; do not invent a workaround."
+  ],
+  "notes": "Research/recovery diagnosis before queueing: the original Company Watch task was claimed at 2026-09-23T22:58:06Z and hard-blocked at 2026-09-23T23:18:06Z because Hermes dispatch exceeded 1200 seconds. No substantive Company Watch commit is visible on origin/main between claim and block, so completion must not be inferred. The queue itself recovered and later installed commit 7439acd3/85f604aa: per-process QuickEdit disable, independent watchdog thread, persisted attempt state, and bounded initial+2 retry handling. The likely fix is therefore not 'rerun the same 20-minute monolith'; it is to inspect for partial local work first and resume the smallest unfinished units with checkpoint commits and bounded scans/tests. Medium priority intentionally places this after the remaining high-priority v1 work and after the older medium deployment-prep task, but before the low-priority whole-company acceptance."
+}
