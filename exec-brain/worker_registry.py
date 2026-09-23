@@ -9,7 +9,22 @@ WORKER_ROSTER = [
         'interface': 'cli',
         'pool_status': 'LOCKED',
         'capability_hints': ['coding', 'repository', 'debugging', 'implementation'],
-        'routable': False  # E2 observed-only; CLI automation TBD
+        'routable': True,  # Verified: CLI installed, auth configured, exec adapter implemented
+        'auth_configured': True,
+        'auth_mode': 'chatgpt',
+        'exec_interface': 'codex exec --json',
+        'adapter_implemented': True,
+        'adapter_file': 'codex_adapter.py',
+        'smoke_test': 'BLOCKED — ChatGPT usage limit reached (retry after 18:27 UTC)',
+        'cli_version': '0.155.0-alpha.9.2',
+        'cli_path': 'C:/Users/mukun/AppData/Local/OpenAI/Codex/bin/247581e40ee272fb/codex.exe',
+        'identity': {
+            'provider': 'openai',
+            'model': 'gpt-6-astra (default)',
+            'auth_mode': 'chatgpt',
+            'supports_websockets': True,
+            'supports_jsonl': True
+        }
     },
     {
         'worker_id': 'mistral-small-4',
