@@ -37,3 +37,6 @@ error: Please commit or stash them.
 [2026-09-23T15:28:23.869688Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
 error: Please commit or stash them.
 
+[2026-09-23T15:28:59.293467Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+

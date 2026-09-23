@@ -1,0 +1,10 @@
+{
+  "task_id": "remote-e2e-final-verification",
+  "created_at": "2026-09-23",
+  "objective": "Final clean E2E verification: new task created on canonical path, polled, claimed, completed, pushed to GitHub",
+  "authority": "tasks-or-issues/hermes-github-remote-queue.md",
+  "priority": "high",
+  "allowed_scope": ["final verification"],
+  "requires_owner_approval": false,
+  "status": "pending"
+}
