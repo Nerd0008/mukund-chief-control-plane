@@ -1,9 +1,9 @@
 # Chief OS v1 — Master Agent / Worker Roster
 
 **Owner:** Mukund  
-**Engineering cutoff:** morning 2026-09-24  
-**Owner/admin configuration:** afternoon 2026-09-24  
-**Deployment target:** evening 2026-09-24  
+**Morning target:** major progress / ideally engineering-complete; NOT a stop condition  
+**Owner manual configuration:** remaining provider keys only  
+**Deployment:** as soon as complete, keys verified, acceptance passed, and deployment-ready  
 
 This roster is the completeness checklist for v1. "Agent" means a managed worker/service under Chief; deterministic tooling is preferred where it is safer and more reliable than an LLM.
 
