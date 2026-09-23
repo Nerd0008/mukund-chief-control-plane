@@ -21,7 +21,7 @@
     "Verify E1/E2 integration remains through public interfaces only; no direct SQL writes from E3.",
     "Run relevant E1/E2/E3 regressions after any code changes and record exact commands/counts/exit codes.",
     "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only.",
-    "If every standing local Stage 2 readiness precondition is objectively satisfied, enable local Stage 2 under the recorded standing conditional owner approval, with rollback/recovery preserved and evidence recorded.",
+    "Evaluate every standing local Stage 2 readiness precondition and record evidence. Even if all are satisfied, do not enable Stage 2 or production dispatch; leave Stage 2 disabled and report the readiness evidence for a separate owner-directed decision.",
     "If readiness is not satisfied, leave Stage 2 disabled, record the exact missing condition, and continue preparing the next non-blocked E4/E5 drill task rather than waiting for the owner.",
     "Commit/push small recoverable changes and return strict terminal JSON.",
     "Before returning a terminal result, create exactly one successor agent-* task in remote-queue/pending/ so the local poller can continue without waiting for Mukund or the hourly supervisor. If local Stage 2 was enabled successfully, the successor must run E4/E5 real-path drills plus local acceptance testing. If Stage 2 was not enabled because a readiness condition remains unmet, the successor must target that exact unmet condition first, then continue to E4/E5. Do not create duplicate successor tasks if an equivalent pending/running task already exists."
@@ -32,7 +32,8 @@
     "Do not expose secrets, raw chain-of-thought, or private runtime DB content.",
     "Do not finalize deployment architecture or perform VPS cutover.",
     "Do not weaken readiness criteria merely to enable Stage 2.",
-    "If Codex re-validation is still actively running, do not race it."
+    "If Codex re-validation is still actively running, do not race it.",
+    "Do not enable E3 Stage 2 or production dispatch in this task, regardless of conditional approval text elsewhere."
   ],
   "notes": "This task is intentionally pre-staged so the local poller can continue immediately after Codex re-validation without waiting for the hourly supervisor. Current owner direction: make local operation excellent first; architecture decision comes later. Overnight continuity rule: this task must hand off to exactly one next bounded task before exit. The hourly supervisor is fallback only, not the primary continuation mechanism."
 }
