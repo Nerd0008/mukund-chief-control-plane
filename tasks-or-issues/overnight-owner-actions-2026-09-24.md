@@ -44,6 +44,15 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 **Action:** provide/access VPS host/account details locally when architecture is chosen. Do not place credentials in GitHub/chat/logs.  
 **Continue without owner:** all non-destructive deployment preparation and local validation.
 
+
+### 5. Owner-attended laptop security audit after the overnight build
+**Status:** DEFERRED — DO WITH MUKUND PRESENT  
+**Reason:** Two unexplained visible local UI events occurred while Hermes was running: (1) Microsoft Edge opened/searched `events near me` even though Mukund does not normally use Edge for browsing, and (2) a blank terminal window opened. These observations do not prove compromise, but they require attribution before treating the laptop as a trusted production host.
+**Preserve now:** do not clear Edge history, shell history, Windows Event Logs, Task Scheduler history, Defender history, Hermes/queue logs, or browser/process artifacts.
+**Audit scope when Mukund is present:** correlate timestamps across Hermes/remote-queue logs, Windows process-creation/event records where available, Task Scheduler, PowerShell/terminal history, startup/autorun entries, Defender detections/exclusions, Edge history/extensions/background startup, recent installs, listening/network connections, and Hermes child-process launch paths. Establish whether the UI events came from Hermes/a child process, Windows/Edge background behavior, another automation, or an unknown process.
+**Blocks:** trust decision for using the laptop as the final production host; does not block safe non-GUI engineering overnight.
+**Safety:** no destructive cleanup or evidence deletion before attribution.
+
 ## Resolved / no longer owner-blocking
 
 - Hermes primary execution brain: restored via DeepSeek direct API.
