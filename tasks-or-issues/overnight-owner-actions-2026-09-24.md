@@ -65,6 +65,38 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
   `obs-20260923-d42e34a5`, routable=true, qualification UNPROVEN. The CLI requested no login,
   account, subscription, or billing action — no owner action outstanding for Codex.
 
+### 5. Laptop availability during unattended overnight work
+**Status:** OWNER-SIDE PRECONDITION (found by the 2026-09-23 Company Registry gap audit)
+**Blocks:** every scheduled service (queue poller, Discord sync, regional scans) and any unattended
+overnight execution.
+**Why owner-only:** all four Chief tasks plus the queue poller run under the interactive user token
+(`Logon Mode: Interactive only`), so they only run while Mukund is signed in; no engineering change
+can make them run for a signed-out user without an owner-approved credential/service change.
+**Action:** keep the laptop powered, signed in and configured not to sleep/ hibernate during the
+build window (as recorded in `handovers/2026-09-21-chief-os-sprint-handover.md`).
+
+### 6. Confirm task persistence after a reboot (owner-gated verification)
+**Status:** UNVERIFIED — requires an action this contract prohibits
+**Blocks:** the v1 "service survives restart/reboot" acceptance criterion only.
+**Exact facts:** `Hermes_Gateway` has an at-logon trigger, restart-on-failure and
+`StartWhenAvailable: true` (expected to survive a reboot). `HermesRemoteQueuePoller` and
+`ChiefDiscordSync` have a one-time time trigger with unlimited repetition and **no** logon/boot
+trigger and no `StartWhenAvailable`; whether they resume after a reboot is therefore **not verified**.
+Rebooting was prohibited by this task's stop conditions, so no claim is made either way.
+**Action:** after the next owner-initiated reboot, confirm both tasks return to `Ready`/`Running`
+with advancing `Next Run Time`; if either does not, add a logon trigger (engineering, small,
+reversible) — this is the minimum action the owner needs to unlock.
+
+### 7. Decide the disposition of the legacy `Mukund Chief of Staff` logon task
+**Status:** PENDING OWNER DECISION (recorded, not changed — no destructive cleanup was performed)
+**Blocks:** nothing immediately; it is an operational-hygiene and conflict risk.
+**Exact facts:** the task still starts the superseded new-custom-Chief Telegram/API/tunnel stack at
+sign-in (`…\ChatGPT\CV customizer\mukund-chief-of-staff\…\scr…`), last result `-1073741510`
+(terminated). Hermes is the Chief layer now.
+**Action:** confirm whether the legacy task should be disabled/removed, or deliberately kept as a
+donor. Engineering will not change it without that decision.
+
+
 ## Owner manual-work target
 
 Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.

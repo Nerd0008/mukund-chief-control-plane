@@ -1,0 +1,30 @@
+{
+  "task_id": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23",
+  "created_at": "2026-09-23T22:35:00Z",
+  "objective": "Close the one real coverage gap found by the company-registry gap audit: preserve the deterministic Career Ops <-> Chief tracker interface that exists only in the unpushed working tree, and build the missing Monthly Tracker Rollover / archive worker (roster B09). Do not re-do the regional lanes or Company Watch, which other pending tasks already own.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-career-ops-integration-and-tracker-automation-2026-09-23 ended execution_error (dispatch timeout) at 2026-09-23T22:20:06Z; agent-regional-job-search-agents-and-schedulers-2026-09-23 and agent-company-watch-job-search-integration-2026-09-23 are already pending and own the regional lanes and Company Watch. Do not duplicate them."
+  ],
+  "allowed_scope": [
+    "Inspect career-ops/ (tracker_writer.py, career_ops_cli.py, regional_profiles.json, tests/) before changing anything; preserve the canonical workbook structure, formulas, validations, status metadata and cross-month dedupe rules.",
+    "Confirm the deterministic interface and its test suite still pass; extend tests where new behaviour is added. Never write to a canonical tracker without the existing hash-verified backup + temp-write/verify/atomic-replace path.",
+    "Implement the Monthly Tracker Rollover / archive worker (roster B09): rotate a month of records into an archive workbook per region while preserving schema/formulas/validations, keeping the canonical workbook authoritative, and feeding every rotated row into the cross-month dedupe index so a posting already seen in a previous month cannot be appended again.",
+    "Prove rollover on safe copies/test workbooks with a reversible acceptance run; the canonical workbooks must be opened read-only by tests.",
+    "Record department run-health metadata for the tracker writer and the rollover worker (last run, result, row counts) in a deterministic Chief-readable form; keep Excel authoritative for operational records and Chief state orchestration-only.",
+    "Record the interface in the company registry skill references where it changes the operating map, and reconcile the B07/B08/B09 rows in state/full_build_tracker.md truthfully.",
+    "Do not submit applications, send messages, contact employers, or mutate application status; keep owner columns untouched.",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only and commit/push recoverably."
+  ],
+  "stop_conditions": [
+    "No fabricated jobs, employers, applications or eligibility claims.",
+    "No destructive tracker mutation; every canonical-workbook write must be backed up and verified first.",
+    "Do not initialise, restructure, or commit the Career Ops installation git repository.",
+    "No external submissions, messages, account actions or owner credentials.",
+    "No secrets or private workbook contents in GitHub."
+  ],
+  "notes": "Staged by agent-company-registry-gap-audit-and-runtime-services-2026-09-23 (audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/). Exactly one successor was staged because B09 is owned by no other task and the B07/B08 interface was uncommitted. The same audit fixed the scheduled-scan UnicodeEncodeError in career_ops_cli.emit() and run_scheduled_scan.cmd; do not revert it."
+}

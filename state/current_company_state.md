@@ -435,6 +435,53 @@ recorded). The previously listed item *"Google image worker real dispatch fails 
 undetermined"* is now **partially** resolved: the diagnosis was made and the failure did not
 reproduce, so the recorded state is "intermittent, trigger unknown" rather than "fails".
 
+## Company Registry gap audit + non-E3 runtime validation (2026-09-23T22:35Z)
+
+Task `agent-company-registry-gap-audit-and-runtime-services-2026-09-23`. Evidence:
+`audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/` (`inventory.json` + `evidence.md`).
+New deterministic worker: `scripts/company_inventory.py` (roster A20; read-only; `--json` output).
+
+Verified facts (all machine-checked in this run, no provider calls):
+
+- Roster reconciliation: **50/50 roster items accounted for, 0 unmapped**; 7 owned Windows
+  scheduled tasks found and **all mapped** to A18/A19/B02–B05.
+- Hermes Chief live: gateway `running`, Discord `connected`, updated 2026-09-23T22:23:02Z.
+- `ChiefDiscordSync` green (last 8 runs `result: ok`; last publish 21:06:04Z, 8 published,
+  0 rejected); archive checkpoint advancing.
+- `HermesRemoteQueuePoller` working (2-min cadence, queue-log pickups, claimed this task at
+  22:22:06Z). It reports last result `0x800710E0` while `Running` — **recorded, meaning unresolved**,
+  not interpreted.
+- E1 `audit --verify` **PASS**; E2 `gov-verify` **PASS**; E3 `e3-verify-db` **PASS** (schema v2);
+  `eb brief` (A04) works deterministically and still reports unknown provider dimensions as UNKNOWN.
+- Legacy donor systems (Career Ops install, July Chief, Mukund OS, new custom Chief) all still exist;
+  none was revived, restructured or deleted.
+- Boot persistence: `Hermes_Gateway` survives logon (logon trigger + restart-on-failure +
+  `StartWhenAvailable`); `HermesRemoteQueuePoller` and `ChiefDiscordSync` have **no** logon/boot
+  trigger and no `StartWhenAvailable`, so post-reboot resumption is **UNVERIFIED** (a reboot is
+  prohibited by this contract). All Chief tasks are `Interactive only`, so unattended operation
+  requires the laptop to stay signed in and awake — recorded as an owner-side precondition.
+
+Defect found and fixed (non-E3 scheduled service):
+
+- `ChiefCareerScan-UK` reported last result **1** while its scan had actually succeeded
+  (`ok: true`, exit 0, 2861 jobs, 86.6 s). `career_ops_cli.emit()` raised `UnicodeEncodeError` because
+  the scheduled run redirects stdout to a file in the local ANSI code page (cp1252) and the payload
+  contained non-Latin job titles. `emit()` now encodes to the real stdout encoding and falls back to
+  ASCII-escaped JSON (still exactly one JSON object); `run_scheduled_scan.cmd` also sets
+  `PYTHONIOENCODING=utf-8` / `PYTHONUTF8=1`. New regression suite
+  `career-ops/tests/test_emit_encoding.py` (5 tests, cp1252/ascii/utf-8); career-ops suite 33/33.
+  Not claimed: the next 23:45 scheduled fire is the live confirmation.
+
+Coverage gap closed:
+
+- B09 Monthly Tracker Rollover / archive worker was owned by no task, and the B07/B08 Career Ops
+  interface produced by the `execution_error` task existed only in the unpushed working tree
+  (now committed). Exactly **one** successor task was staged:
+  `remote-queue/pending/agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23.json`,
+  explicitly excluding the scope already owned by the regional-lanes and Company Watch tasks.
+
+No roster entry needed to be added: the audit found no missing owner-relevant workflow.
+
 ## Current blockers / owner dependencies
 
 - E3 Stage 2 local enablement: **blocked by explicit current owner instruction** (not an engineering

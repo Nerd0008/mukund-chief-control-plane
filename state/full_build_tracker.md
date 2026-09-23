@@ -123,6 +123,27 @@ Stage-1 shadow-rehearsal evidence (unchanged, still valid):
   (e.g. codex-cli builder: 3 rows, 1 distinct DAG node). Both figures are reported in the artifact so
   the strength of the evidence is visible.
 
+## Non-E3 runtime services + Company Registry audit (2026-09-23T22:35Z)
+
+New worker: `scripts/company_inventory.py` (roster A20 — Company Registry / system inventory,
+deterministic, read-only). Evidence:
+`audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/`.
+
+| Lane | Item | Status | Evidence |
+|---|---|---|---|
+| Registry | Roster reconciliation | **DONE — 0 gaps** | 50/50 roster items mapped; 7/7 owned scheduled tasks mapped; `inventory.json` |
+| Registry | Company Registry access | VERIFIED | skill `personal/mukund-company-registry` + 6 references readable |
+| Registry | Legacy donor systems | RECORDED, NOT TOUCHED | July Chief / Mukund OS / new custom Chief / Career Ops install all exist; superseded task `Mukund Chief of Staff` recorded as donor |
+| Ops | Hermes Chief / gateway | LIVE | `gateway_state.json`: running, discord connected, 22:23:02Z |
+| Ops | Discord archive sync | GREEN | `sync.log` last 8 runs `ok`; last publish 21:06:04Z (8 published, 0 rejected) |
+| Ops | Remote queue poller | WORKING | 2-min cadence, queue-log pickups, claimed this task 22:22:06Z; last result `0x800710E0` recorded, meaning unresolved |
+| Ops | E1 / E2 / E3 integrity gates | PASS | `audit --verify`, `gov-verify`, `e3-verify-db` (schema v2) |
+| Ops | A04 Daily Resource Brief | WORKS | `eb brief` deterministic; unknown dimensions stay UNKNOWN |
+| Ops | Boot persistence | PARTIAL / UNVERIFIED | gateway at logon + restart-on-failure; poller + sync sync have no logon/boot trigger and no `StartWhenAvailable` — post-reboot resumption unverified (reboot prohibited) |
+| Career | Scheduled regional scan defect | **FOUND + FIXED** | `ChiefCareerScan-UK` exited 1 after a successful scan (`UnicodeEncodeError` on cp1252 stdout); `emit()` hardened + `run_scheduled_scan.cmd` sets UTF-8; `career-ops/tests/test_emit_encoding.py` 5 tests; suite 33/33 |
+| Career | B07/B08 tracker interface | **PRESERVED** | `career-ops/` (CLI + writer + 33 tests) was untracked; now committed |
+| Career | B09 Monthly rollover worker | **MISSING → STAGED** | `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23` (pending); owned by no other task |
+
 ## Next bounded task
 
 Staged in `remote-queue/pending/` by

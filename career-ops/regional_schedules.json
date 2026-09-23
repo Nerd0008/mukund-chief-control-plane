@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "description": "Regional automated job-search schedules for Chief's Career department. Schedules run BOUNDED DRY-RUN scans only: they never write to a tracker and never submit anything. Tracker writes stay an explicit, backed-up, approval-gated step (career_ops_cli.py write --apply).",
+  "updated": "2026-09-23",
+  "interpreter": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
+  "control_plane": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "run_log_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs",
+  "overlap_policy": "Tasks are staggered and each writes a distinct run-health file, so overlapping runs cannot duplicate rows: dry-run scans never mutate state at all.",
+  "regions": {
+    "uk": {
+      "task_name": "ChiefCareerScan-UK",
+      "time": "23:45",
+      "ready": true,
+      "career_ops_env": {
+        "CAREER_OPS_PORTALS": "portals.yml",
+        "CAREER_OPS_PROFILE": "config/profile.yml",
+        "CAREER_OPS_PIPELINE": "data/pipeline.md",
+        "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+      },
+      "notes": "Wires the existing UK lane (portals.yml + data/pipeline.md + data/scan-history.tsv). Matches the historical ~23:48 local run window recorded in data/scan-runs.tsv."
+    },
+    "dubai": {
+      "task_name": "ChiefCareerScan-Dubai",
+      "time": "23:50",
+      "ready": false,
+      "career_ops_env": {
+        "CAREER_OPS_PORTALS": "portals.dubai.yml",
+        "CAREER_OPS_PROFILE": "config/profile.yml",
+        "CAREER_OPS_PIPELINE": "data/pipeline.dubai.md",
+        "CAREER_OPS_SCAN_HISTORY": "data/scan-history.dubai.tsv"
+      },
+      "notes": "Dubai lane config is NOT present in the Career Ops install (only the UK portals.yml exists and data/dubai-shortlist-history.md is the Dubai ledger). The runner refuses to execute rather than scanning UK portals under a Dubai label, and records the dependency. Owned by the pending regional-job-search task."
+    },
+    "japan": {
+      "task_name": "ChiefCareerScan-Japan",
+      "time": "23:55",
+      "ready": false,
+      "career_ops_env": {
+        "CAREER_OPS_PORTALS": "portals.japan.yml",
+        "CAREER_OPS_PROFILE": "config/profile.yml",
+        "CAREER_OPS_PIPELINE": "data/pipeline.japan.md",
+        "CAREER_OPS_SCAN_HISTORY": "data/scan-history.japan.tsv"
+      },
+      "notes": "Japan lane config missing; same fail-safe as Dubai. Ledger: data/japan-shortlist-history.md."
+    },
+    "singapore": {
+      "task_name": "ChiefCareerScan-Singapore",
+      "time": "00:00",
+      "ready": false,
+      "career_ops_env": {
+        "CAREER_OPS_PORTALS": "portals.singapore.yml",
+        "CAREER_OPS_PROFILE": "config/profile.yml",
+        "CAREER_OPS_PIPELINE": "data/pipeline.singapore.md",
+        "CAREER_OPS_SCAN_HISTORY": "data/scan-history.singapore.tsv"
+      },
+      "notes": "Singapore lane config missing; same fail-safe as Dubai. Ledger: data/singapore-shortlist-history.md."
+    }
+  }
+}

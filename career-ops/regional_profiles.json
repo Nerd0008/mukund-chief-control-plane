@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "description": "Deterministic regional workbook profiles for the Chief <-> Career Ops tracker writer. Column letters and structural facts were derived by inspecting the canonical workbooks on 2026-09-23; they are the integration contract. Do not change a profile without re-running career-ops/tests/test_tracker_writer.py against a copy.",
+  "career_ops_root": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "canonical_dir": "C:\\Users\\mukun\\Downloads\\codex",
+  "backup_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups",
+  "archive_glob": "{region}_Cybersecurity_Job_Tracker*.xlsx",
+  "regions": {
+    "uk": {
+      "display_name": "United Kingdom",
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sheet": "Jobs",
+      "table": "JobsTable",
+      "header_row": 9,
+      "first_data_row": 10,
+      "last_data_row": 43,
+      "expected_sheets": ["Jobs", "Summary", "How to use", "UK graduate and internship"],
+      "license_free_rows": 500,
+      "id": {"column": "A", "style": "sequential", "prefix": "J", "start": 1},
+      "dedupe": {"url_column": "O", "company_column": "C", "title_column": "D"},
+      "date_type": {"date_found": "date"},
+      "field_map": {
+        "date_found": "B",
+        "company": "C",
+        "title": "D",
+        "location": "E",
+        "salary": "F",
+        "posted_date": "G",
+        "fit_score": "H",
+        "live_status": "I",
+        "clearance_check": "L",
+        "work_authorisation_risk": "M",
+        "key_gap": "N",
+        "url": "O",
+        "recommendation": "P",
+        "discovery": "Q",
+        "prior_company_signal": "R"
+      },
+      "owner_columns": ["J", "K", "S", "T", "U", "V"],
+      "refreshable_columns": ["I", "M", "N", "P", "Q", "R", "G"],
+      "defaults": {
+        "live_status": "Live",
+        "application_status": "To Review",
+        "priority": "Medium",
+        "clearance_check": "Pass — no clearance stated"
+      },
+      "status_columns": {"application_status": "J", "priority": "K"},
+      "number_formats": {"B": "yyyy-mm-dd", "G": "yyyy-mm-dd", "H": "0.0"},
+      "validations": {
+        "J": {"type": "list", "formula1": "\"To Review,Selected,CV Tailored,Applied,Interview,Rejected,Offer,Hired,Not Applying\"", "extend_from": 10, "extend_to": 500},
+        "K": {"type": "list", "formula1": "\"High,Medium,Low\"", "extend_from": 10, "extend_to": 500}
+      },
+      "dedupe_ledger": {
+        "kind": "scan-history-tsv",
+        "path": "data/scan-history.tsv",
+        "url_col": 0,
+        "company_col": 4,
+        "title_col": 3
+      }
+    },
+    "dubai": {
+      "display_name": "Dubai / UAE",
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sheet": "Job Tracker",
+      "table": "DubaiJobTrackerTable",
+      "header_row": 1,
+      "first_data_row": 2,
+      "last_data_row": 22,
+      "expected_sheets": ["Job Tracker"],
+      "license_free_rows": 1000,
+      "id": {"column": "Y", "style": "regional-dated", "prefix": "DUBAI", "date_format": "%Y-%m-%d", "separator": "-"},
+      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
+      "date_type": {"date_found": "date", "posted_date": "date", "deadline": "date", "last_checked": "date"},
+      "field_map": {
+        "date_found": "A",
+        "company": "B",
+        "title": "C",
+        "location": "D",
+        "url": "E",
+        "posted_date": "F",
+        "deadline": "G",
+        "visa_pathway": "H",
+        "fit_score": "I",
+        "experience_required": "K",
+        "salary": "L",
+        "work_model": "M",
+        "job_type": "N",
+        "key_requirements": "O",
+        "why_it_fits": "P",
+        "main_gap": "Q",
+        "last_checked": "W",
+        "source": "X",
+        "notes": "Z"
+      },
+      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Priority\",IF(I{row}>=4,\"Strong\",IF(I{row}>=3.5,\"Near Match\",\"Low\"))))"}},
+      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
+      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "defaults": {
+        "application_status": "New",
+        "selected": "No",
+        "cv_status": "Not Started",
+        "cover_letter_status": "Not Started",
+        "visa_pathway": "Visa unknown"
+      },
+      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
+      "number_formats": {"A": "yyyy-mm-dd", "F": "yyyy-mm-dd", "G": "yyyy-mm-dd", "I": "0.0", "L": "0", "W": "yyyy-mm-dd"},
+      "validations": {
+        "H": {"type": "list", "formula1": "\"Explicit visa assistance,Visa unknown,No visa pathway\"", "extend_from": 2, "extend_to": 1000},
+        "R": {"type": "list", "formula1": "\"New,Reviewed,Selected,Preparing Documents,Ready to Apply,Application Started,Submitted,Interview,Rejected,Closed\"", "extend_from": 2, "extend_to": 1000},
+        "S": {"type": "list", "formula1": "\"No,Yes\"", "extend_from": 2, "extend_to": 1000},
+        "T": {"type": "list", "formula1": "\"Not Started,Drafted,Tailored,Final\"", "extend_from": 2, "extend_to": 1000},
+        "U": {"type": "list", "formula1": "\"Not Started,Drafted,Tailored,Final\"", "extend_from": 2, "extend_to": 1000}
+      },
+      "dedupe_ledger": {
+        "kind": "shortlist-history-md",
+        "path": "data/dubai-shortlist-history.md"
+      }
+    },
+    "japan": {
+      "display_name": "Japan",
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sheet": "Job Tracker",
+      "table": "JapanJobsTable",
+      "header_row": 1,
+      "first_data_row": 2,
+      "last_data_row": 42,
+      "expected_sheets": ["Job Tracker"],
+      "license_free_rows": 501,
+      "id": {"column": "Y", "style": "regional-dated", "prefix": "JP", "date_format": "%Y%m%d", "separator": "-"},
+      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
+      "date_type": {"date_found": "iso_string", "posted_date": "iso_string", "deadline": "iso_string", "last_checked": "iso_string"},
+      "field_map": {
+        "date_found": "A",
+        "company": "B",
+        "title": "C",
+        "location": "D",
+        "url": "E",
+        "deadline": "F",
+        "posted_date": "G",
+        "visa_pathway": "H",
+        "fit_score": "I",
+        "entry_requirements": "K",
+        "salary": "L",
+        "relocation_support": "M",
+        "contract_type": "N",
+        "key_responsibilities": "O",
+        "why_it_fits": "P",
+        "cautions": "Q",
+        "last_checked": "W",
+        "source": "X",
+        "notes": "Z"
+      },
+      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"}},
+      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
+      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "defaults": {
+        "application_status": "Pending",
+        "selected": "No",
+        "cv_status": "Not started",
+        "cover_letter_status": "Not started",
+        "visa_pathway": "JAPAN WORK VISA UNKNOWN"
+      },
+      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
+      "number_formats": {"A": "@", "I": "0.0", "W": "@"},
+      "validations": {
+        "R": {"type": "list", "formula1": "\"Pending,Selected,CV Tailored,Applied,Closed,Discarded\"", "extend_from": 2, "extend_to": 501},
+        "S": {"type": "list", "formula1": "\"Yes,No\"", "extend_from": 2, "extend_to": 501},
+        "T": {"type": "list", "formula1": "\"Not started,Drafted,Ready,Uploaded,N/A\"", "extend_from": 2, "extend_to": 501}
+      },
+      "dedupe_ledger": {
+        "kind": "shortlist-history-md",
+        "path": "data/japan-shortlist-history.md"
+      }
+    },
+    "singapore": {
+      "display_name": "Singapore",
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sheet": "Job Tracker",
+      "table": "SingaporeJobsTable",
+      "header_row": 1,
+      "first_data_row": 2,
+      "last_data_row": 23,
+      "expected_sheets": ["Job Tracker"],
+      "license_free_rows": 503,
+      "id": {"column": "Y", "style": "regional-dated", "prefix": "SG", "date_format": "%Y%m%d", "separator": "-"},
+      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
+      "date_type": {"date_found": "date", "posted_date": "date", "deadline": "date", "last_checked": "date"},
+      "field_map": {
+        "date_found": "A",
+        "company": "B",
+        "title": "C",
+        "location": "D",
+        "url": "E",
+        "posted_date": "F",
+        "deadline": "G",
+        "visa_pathway": "H",
+        "fit_score": "I",
+        "experience_required": "K",
+        "salary": "L",
+        "work_model": "M",
+        "job_type": "N",
+        "key_requirements": "O",
+        "why_it_fits": "P",
+        "main_gap": "Q",
+        "last_checked": "W",
+        "source": "X",
+        "notes": "Z"
+      },
+      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"}},
+      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
+      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "defaults": {
+        "application_status": "Pending",
+        "selected": "No",
+        "cv_status": "Not Started",
+        "cover_letter_status": "Not Started",
+        "visa_pathway": "WORK PASS UNKNOWN"
+      },
+      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
+      "number_formats": {"A": "yyyy-mm-dd", "F": "yyyy-mm-dd", "G": "yyyy-mm-dd", "I": "0.0", "W": "yyyy-mm-dd"},
+      "validations": {
+        "R": {"type": "list", "formula1": "\"Pending,Applied,Interview,Offer,Rejected,Withdrawn,Closed\"", "extend_from": 2, "extend_to": 501},
+        "S": {"type": "list", "formula1": "\",Yes,No\"", "extend_from": 2, "extend_to": 501},
+        "T": {"type": "list", "formula1": "\"Not Started,Drafted,Ready,Submitted,Not Needed\"", "extend_from": 2, "extend_to": 501}
+      },
+      "dedupe_ledger": {
+        "kind": "shortlist-history-md",
+        "path": "data/singapore-shortlist-history.md"
+      }
+    }
+  }
+}

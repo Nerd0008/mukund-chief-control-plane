@@ -1,0 +1,20 @@
+@echo off
+rem Chief Career Ops regional scan launcher (called by Windows Task Scheduler).
+rem Usage: run_scheduled_scan.cmd <region>
+rem
+rem Bounded DRY-RUN scan only. Never writes a tracker, never submits anything.
+rem NOTE: this file must keep CRLF line endings; cmd.exe mis-parses LF-only batches.
+setlocal
+rem Force UTF-8 for the redirected stdout: the scheduled run writes to a file
+rem whose default ANSI code page cannot encode non-Latin job titles, which used
+rem to abort an already-successful scan (UnicodeEncodeError, exit code 1).
+set PYTHONIOENCODING=utf-8
+set PYTHONUTF8=1
+set REGION=%~1
+set CP=C:\Users\mukun\Documents\mukund-chief-control-plane
+set PY=C:\Users\mukun\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe
+set LOGDIR=%CP%\runtime\career-ops\scan-runs
+if not exist "%LOGDIR%" mkdir "%LOGDIR%"
+"%PY%" "%CP%\career-ops\career_ops_cli.py" scan --region %REGION% --timeout 1800 --record "%LOGDIR%" > "%LOGDIR%\%REGION%-last-stdout.json" 2>&1
+set RC=%ERRORLEVEL%
+exit /b %RC%

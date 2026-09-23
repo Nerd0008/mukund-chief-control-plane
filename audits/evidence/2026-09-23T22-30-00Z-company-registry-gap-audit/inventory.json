@@ -1,0 +1,785 @@
+{
+  "generated_at": "2026-09-23T22:26:26+00:00",
+  "repo": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "roster": {
+    "items": [
+      {
+        "id": "A01",
+        "worker": "Hermes Chief of Staff / owner interface",
+        "mode": "AI coordinator"
+      },
+      {
+        "id": "A02",
+        "worker": "E1 Intake, classification and immutable quality-floor controller",
+        "mode": "deterministic + AI assist"
+      },
+      {
+        "id": "A03",
+        "worker": "E2 Resource Governor / provider telemetry",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A04",
+        "worker": "Daily Resource Brief generator",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A05",
+        "worker": "E3 Planner / decomposer",
+        "mode": "AI + deterministic DAG"
+      },
+      {
+        "id": "A06",
+        "worker": "E3 Router / meta-selector / Qualification Gate",
+        "mode": "AI proposal + deterministic gate"
+      },
+      {
+        "id": "A07",
+        "worker": "E3 Context Compiler",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A08",
+        "worker": "E3 Permission Compiler",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A09",
+        "worker": "E3 Dynamic Team Assembler",
+        "mode": "deterministic policy + evidence"
+      },
+      {
+        "id": "A10",
+        "worker": "E3 Worker Execution Manager",
+        "mode": "deterministic orchestration"
+      },
+      {
+        "id": "A11",
+        "worker": "E3 Integrator",
+        "mode": "AI role under verification"
+      },
+      {
+        "id": "A12",
+        "worker": "E3 Independent Critic / Verifier",
+        "mode": "independent AI/deterministic verifier"
+      },
+      {
+        "id": "A13",
+        "worker": "E3 Conflict / targeted-rework / replanning / escalation manager",
+        "mode": "hybrid"
+      },
+      {
+        "id": "A14",
+        "worker": "E3 Capability Learning / benchmark / qualification manager",
+        "mode": "deterministic evidence + tests"
+      },
+      {
+        "id": "A15",
+        "worker": "E4 Resource Continuity / checkpoint / failover manager",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A16",
+        "worker": "E5 Safe Mode / failure-drill / convergence manager",
+        "mode": "deterministic + owner escalation"
+      },
+      {
+        "id": "A17",
+        "worker": "Audit / decision-journal / evidence-state reconciler",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A18",
+        "worker": "Remote Queue Scheduler / watchdog / recovery supervisor",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A19",
+        "worker": "Discord Chief Gateway + archive/sync worker",
+        "mode": "deterministic bridge"
+      },
+      {
+        "id": "A20",
+        "worker": "Company Registry / system inventory worker",
+        "mode": "deterministic inventory"
+      },
+      {
+        "id": "A21",
+        "worker": "Local health / backup / restore / boot-persistence worker",
+        "mode": "deterministic"
+      },
+      {
+        "id": "A22",
+        "worker": "Morning Chief Brief aggregator",
+        "mode": "deterministic aggregation with Chief summary"
+      },
+      {
+        "id": "B01",
+        "worker": "Career Ops Manager / Chief integration",
+        "mode": "workflow manager"
+      },
+      {
+        "id": "B02",
+        "worker": "UK Job Search Agent",
+        "mode": "deterministic scanner + policy filter"
+      },
+      {
+        "id": "B03",
+        "worker": "Dubai Job Search Agent",
+        "mode": "deterministic scanner + policy filter"
+      },
+      {
+        "id": "B04",
+        "worker": "Japan Job Search Agent",
+        "mode": "deterministic scanner + policy filter"
+      },
+      {
+        "id": "B05",
+        "worker": "Singapore Job Search Agent",
+        "mode": "deterministic scanner + policy filter"
+      },
+      {
+        "id": "B06",
+        "worker": "Job Eligibility / role-policy filter",
+        "mode": "deterministic rules + optional AI classifier"
+      },
+      {
+        "id": "B07",
+        "worker": "Job/Company/Application dedupe-state manager",
+        "mode": "deterministic"
+      },
+      {
+        "id": "B08",
+        "worker": "Excel Tracker Writer",
+        "mode": "deterministic Python/openpyxl preferred"
+      },
+      {
+        "id": "B09",
+        "worker": "Monthly Tracker Rollover / archive worker",
+        "mode": "deterministic"
+      },
+      {
+        "id": "B10",
+        "worker": "Company Watch Agent",
+        "mode": "structured ATS/career watcher"
+      },
+      {
+        "id": "B11",
+        "worker": "Recruiter / intermediary Watch Agent",
+        "mode": "read-only discovery"
+      },
+      {
+        "id": "B12",
+        "worker": "Application Inbox / Status Monitor",
+        "mode": "read-only email/status ingestion"
+      },
+      {
+        "id": "B13",
+        "worker": "Job Description Analyzer / requirement extractor",
+        "mode": "AI + deterministic schema"
+      },
+      {
+        "id": "B14",
+        "worker": "Company / Role Research Brief Agent",
+        "mode": "research worker with provenance"
+      },
+      {
+        "id": "B15",
+        "worker": "CV Tailor Agent",
+        "mode": "AI drafting under source-truth constraints"
+      },
+      {
+        "id": "B16",
+        "worker": "Cover Letter Agent",
+        "mode": "AI drafting under source-truth constraints"
+      },
+      {
+        "id": "B17",
+        "worker": "Application Pack Reviewer / truth & completeness gate",
+        "mode": "independent verifier"
+      },
+      {
+        "id": "B18",
+        "worker": "Submission Gate / owner-approval handoff",
+        "mode": "deterministic gate"
+      },
+      {
+        "id": "B19",
+        "worker": "LinkedIn Job Discovery Agent",
+        "mode": "read-only discovery"
+      },
+      {
+        "id": "B20",
+        "worker": "LinkedIn Profile / Post Draft Agent",
+        "mode": "AI drafting only"
+      },
+      {
+        "id": "B21",
+        "worker": "Networking / Recruiter Outreach Draft Agent",
+        "mode": "AI drafting only"
+      },
+      {
+        "id": "B22",
+        "worker": "Interview Prep Agent",
+        "mode": "AI using job/company/application context"
+      },
+      {
+        "id": "B23",
+        "worker": "Career Daily Brief / Pipeline Prioritizer",
+        "mode": "deterministic ranking + Chief summary"
+      },
+      {
+        "id": "B24",
+        "worker": "Regional Scheduler / run-health monitor",
+        "mode": "deterministic scheduled-task manager"
+      },
+      {
+        "id": "C01",
+        "worker": "Whole-company Local Acceptance Runner",
+        "mode": "deterministic scenario runner"
+      },
+      {
+        "id": "C02",
+        "worker": "Owner-Action Consolidator",
+        "mode": "deterministic checklist"
+      },
+      {
+        "id": "C03",
+        "worker": "Deployment Prep / Manifest / Restore Agent",
+        "mode": "deterministic deployment tooling"
+      },
+      {
+        "id": "C04",
+        "worker": "Final Morning Handover Generator",
+        "mode": "deterministic evidence synthesis"
+      }
+    ],
+    "count": 50,
+    "unmapped_ids": [],
+    "coverage": {
+      "A01": {
+        "state": "active",
+        "evidence": "Hermes gateway + Discord live (gateway_state.json)"
+      },
+      "A02": {
+        "state": "active",
+        "evidence": "eb.py audit --verify PASS"
+      },
+      "A03": {
+        "state": "active",
+        "evidence": "eb.py gov-verify PASS"
+      },
+      "A04": {
+        "state": "active",
+        "evidence": "eb.py brief (deterministic daily resource brief)"
+      },
+      "A05": {
+        "state": "built+evidenced",
+        "evidence": "e3_planner.py; 21:32:41Z rehearsal"
+      },
+      "A06": {
+        "state": "built+evidenced",
+        "evidence": "e3_router.py + qualification_gate.py"
+      },
+      "A07": {
+        "state": "built+tested",
+        "evidence": "e3_context.py"
+      },
+      "A08": {
+        "state": "built+tested",
+        "evidence": "e3_permissions.py"
+      },
+      "A09": {
+        "state": "built+evidenced",
+        "evidence": "e3_team_assembly.py; multi-worker rehearsal"
+      },
+      "A10": {
+        "state": "built+evidenced",
+        "evidence": "e3_execution.py E3ProductionExecutor"
+      },
+      "A11": {
+        "state": "built+evidenced",
+        "evidence": "e3_integrator.py"
+      },
+      "A12": {
+        "state": "built+evidenced",
+        "evidence": "e3_verifier.py (independent critic)"
+      },
+      "A13": {
+        "state": "built+tested",
+        "evidence": "e3_conflict.py / e3_replan.py / e3_escalate.py"
+      },
+      "A14": {
+        "state": "built+partially qualified",
+        "evidence": "e3_qualification_benchmark.py EvidenceBackedBenchmark"
+      },
+      "A15": {
+        "state": "built, drill open",
+        "task": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23"
+      },
+      "A16": {
+        "state": "built, drill open",
+        "task": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23"
+      },
+      "A17": {
+        "state": "built",
+        "evidence": "decision_rationale.py + eb.py audit + e3 evidence views"
+      },
+      "A18": {
+        "state": "active",
+        "evidence": "HermesRemoteQueuePoller (2-min cadence, task Running)"
+      },
+      "A19": {
+        "state": "active",
+        "evidence": "Hermes_Gateway (at logon) + ChiefDiscordSync (30 min) + hook discord-chief-archive"
+      },
+      "A20": {
+        "state": "built",
+        "evidence": "scripts/company_inventory.py (this worker)"
+      },
+      "A21": {
+        "state": "pending task",
+        "task": "agent-operational-brief-health-backup-persistence-2026-09-23"
+      },
+      "A22": {
+        "state": "pending task",
+        "task": "agent-operational-brief-health-backup-persistence-2026-09-23"
+      },
+      "B01": {
+        "state": "partially built, successor required",
+        "task": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23"
+      },
+      "B02": {
+        "state": "pending task",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "B03": {
+        "state": "pending task",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "B04": {
+        "state": "pending task",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "B05": {
+        "state": "pending task",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "B06": {
+        "state": "pending task",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "B07": {
+        "state": "pending task",
+        "task": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23"
+      },
+      "B08": {
+        "state": "built (uncommitted before this task)",
+        "evidence": "career-ops/tracker_writer.py + tests"
+      },
+      "B09": {
+        "state": "missing",
+        "task": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23"
+      },
+      "B10": {
+        "state": "pending task",
+        "task": "agent-company-watch-job-search-integration-2026-09-23"
+      },
+      "B11": {
+        "state": "pending task",
+        "task": "agent-company-watch-job-search-integration-2026-09-23"
+      },
+      "B12": {
+        "state": "pending task",
+        "task": "agent-application-inbox-status-monitor-2026-09-23"
+      },
+      "B13": {
+        "state": "pending task",
+        "task": "agent-job-intelligence-and-application-pack-2026-09-23"
+      },
+      "B14": {
+        "state": "pending task",
+        "task": "agent-job-intelligence-and-application-pack-2026-09-23"
+      },
+      "B15": {
+        "state": "pending task",
+        "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"
+      },
+      "B16": {
+        "state": "pending task",
+        "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"
+      },
+      "B17": {
+        "state": "pending task",
+        "task": "agent-job-intelligence-and-application-pack-2026-09-23"
+      },
+      "B18": {
+        "state": "pending task",
+        "task": "agent-job-intelligence-and-application-pack-2026-09-23"
+      },
+      "B19": {
+        "state": "pending task",
+        "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"
+      },
+      "B20": {
+        "state": "pending task",
+        "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"
+      },
+      "B21": {
+        "state": "pending task",
+        "task": "agent-linkedin-networking-interview-support-2026-09-23"
+      },
+      "B22": {
+        "state": "pending task",
+        "task": "agent-linkedin-networking-interview-support-2026-09-23"
+      },
+      "B23": {
+        "state": "pending task",
+        "task": "agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23"
+      },
+      "B24": {
+        "state": "partially built",
+        "task": "agent-regional-job-search-agents-and-schedulers-2026-09-23"
+      },
+      "C01": {
+        "state": "pending task",
+        "task": "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23"
+      },
+      "C02": {
+        "state": "active",
+        "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md"
+      },
+      "C03": {
+        "state": "pending task",
+        "task": "agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23"
+      },
+      "C04": {
+        "state": "pending task",
+        "task": "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23"
+      }
+    },
+    "coverage_entries_without_roster_item": []
+  },
+  "scheduled_tasks": [
+    {
+      "task_name": "ChiefCareerScan-Dubai",
+      "status": "Ready",
+      "last_run": "30-11-1999 00:00:00",
+      "last_result": "267011",
+      "next_run": "23-09-2026 23:50:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "Daily",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\" dubai\""
+    },
+    {
+      "task_name": "ChiefCareerScan-Japan",
+      "status": "Ready",
+      "last_run": "30-11-1999 00:00:00",
+      "last_result": "267011",
+      "next_run": "23-09-2026 23:55:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "Daily",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\" japan\""
+    },
+    {
+      "task_name": "ChiefCareerScan-Singapore",
+      "status": "Ready",
+      "last_run": "30-11-1999 00:00:00",
+      "last_result": "267011",
+      "next_run": "24-09-2026 00:00:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "Daily",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\" singapore\""
+    },
+    {
+      "task_name": "ChiefCareerScan-UK",
+      "status": "Ready",
+      "last_run": "23-09-2026 23:18:11",
+      "last_result": "1",
+      "next_run": "23-09-2026 23:45:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "Daily",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\" uk\""
+    },
+    {
+      "task_name": "ChiefDiscordSync",
+      "status": "Ready",
+      "last_run": "23-09-2026 23:06:01",
+      "last_result": "0",
+      "next_run": "23-09-2026 23:36:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "One Time Only, Minute",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" \"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\scheduled_sync_chief.py\"\""
+    },
+    {
+      "task_name": "HermesRemoteQueuePoller",
+      "status": "Running",
+      "last_run": "23-09-2026 23:26:01",
+      "last_result": "-2147020576",
+      "next_run": "23-09-2026 23:28:00",
+      "logon_mode": "Interactive only",
+      "schedule_type": "One Time Only, Minute",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "C:\\WINDOWS\\System32\\wscript.exe\" //B \"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\..\\remote_queue\\run_poller_hidden.vbs\"\""
+    },
+    {
+      "task_name": "Hermes_Gateway",
+      "status": "Ready",
+      "last_run": "21-09-2026 17:59:42",
+      "last_result": "0",
+      "next_run": "N/A",
+      "logon_mode": "Interactive only",
+      "schedule_type": "At logon time",
+      "scheduled_task_state": "Enabled",
+      "task_to_run": "wscript.exe //B //Nologo C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-service\\Hermes_Gateway.vbs\"\""
+    }
+  ],
+  "scheduled_task_mapping": {
+    "ChiefCareerScan-Dubai": {
+      "roster": "B03",
+      "state": "registered-refuses-no-lane-config",
+      "kind": "windows_task"
+    },
+    "ChiefCareerScan-Japan": {
+      "roster": "B04",
+      "state": "registered-refuses-no-lane-config",
+      "kind": "windows_task"
+    },
+    "ChiefCareerScan-Singapore": {
+      "roster": "B05",
+      "state": "registered-refuses-no-lane-config",
+      "kind": "windows_task"
+    },
+    "ChiefCareerScan-UK": {
+      "roster": "B02",
+      "state": "active-registered",
+      "kind": "windows_task"
+    },
+    "ChiefDiscordSync": {
+      "roster": "A19",
+      "state": "active",
+      "kind": "windows_task"
+    },
+    "HermesRemoteQueuePoller": {
+      "roster": "A18",
+      "state": "active",
+      "kind": "windows_task"
+    },
+    "Hermes_Gateway": {
+      "roster": "A19",
+      "state": "active",
+      "kind": "windows_task"
+    }
+  },
+  "unmapped_owned_tasks": [],
+  "hermes_surface": {
+    "skills": [
+      "ai-worker-onboarding",
+      "apple/apple-notes",
+      "apple/apple-reminders",
+      "apple/findmy",
+      "apple/imessage",
+      "autonomous-ai-agents/claude-code",
+      "autonomous-ai-agents/codex",
+      "autonomous-ai-agents/computer-use",
+      "autonomous-ai-agents/hermes-agent",
+      "autonomous-ai-agents/opencode",
+      "creative/architecture-diagram",
+      "creative/ascii-video",
+      "creative/baoyu-infographic",
+      "creative/claude-design",
+      "creative/design-md",
+      "creative/humanizer",
+      "creative/manim-video",
+      "creative/p5js",
+      "creative/popular-web-designs",
+      "creative/songwriting-and-ai-music",
+      "devops/sdlc-review",
+      "email/email-inbox-triage",
+      "email/himalaya",
+      "media/gif-search",
+      "media/songsee",
+      "media/youtube-content",
+      "note-taking/obsidian",
+      "operations/executive-brain-e1",
+      "operations/executive-brain-planning",
+      "operations/hermes-gateway-capture",
+      "personal/mukund-company-registry",
+      "personal/mukund-owner-context",
+      "productivity/airtable",
+      "productivity/box",
+      "productivity/document-to-action-items",
+      "productivity/docx",
+      "productivity/google-workspace",
+      "productivity/maps",
+      "productivity/meeting-action-items",
+      "productivity/notion",
+      "productivity/pdf",
+      "productivity/powerpoint",
+      "productivity/product-price-monitor",
+      "productivity/teams-meeting-pipeline",
+      "productivity/weekly-review-planning",
+      "productivity/xlsx",
+      "research/arxiv",
+      "research/competitor-news-monitor",
+      "research/grounded-citations",
+      "research/llm-wiki",
+      "social-media/xurl",
+      "software-development/codebase-inspection",
+      "software-development/dogfood",
+      "software-development/github",
+      "software-development/hermes-agent-skill-authoring",
+      "software-development/inspecting-hermes-desktop-dom",
+      "software-development/node-inspect-debugger",
+      "software-development/python-debugpy",
+      "software-development/requesting-code-review",
+      "software-development/simplify-code",
+      "software-development/spike",
+      "software-development/systematic-debugging",
+      "software-development/test-driven-development",
+      "web/blocked-page-recovery"
+    ],
+    "skill_count": 64,
+    "hooks": [
+      "discord-chief-archive"
+    ],
+    "cron_job_files": []
+  },
+  "hermes_gateway_state": {
+    "present": true,
+    "pid": 6528,
+    "gateway_state": "running",
+    "platforms": {
+      "discord": "connected"
+    },
+    "updated_at": "2026-09-23T22:26:02.721424+00:00",
+    "code_version": "0.21.4"
+  },
+  "remote_queue": {
+    "pending": [
+      "agent-application-inbox-status-monitor-2026-09-23",
+      "agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23",
+      "agent-company-watch-job-search-integration-2026-09-23",
+      "agent-cv-cover-letter-linkedin-workflows-2026-09-23",
+      "agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23",
+      "agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23",
+      "agent-e3-stage2-readiness-gate-rerun-2026-09-24",
+      "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
+      "agent-job-intelligence-and-application-pack-2026-09-23",
+      "agent-linkedin-networking-interview-support-2026-09-23",
+      "agent-operational-brief-health-backup-persistence-2026-09-23",
+      "agent-regional-job-search-agents-and-schedulers-2026-09-23",
+      "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23"
+    ],
+    "running": [
+      "agent-company-registry-gap-audit-and-runtime-services-2026-09-23",
+      "full-operational-build-2026-09-24"
+    ],
+    "blocked": [
+      "agent-autonomous-nonblocked-continuation-2026-09-23",
+      "agent-career-ops-integration-and-tracker-automation-2026-09-23",
+      "agent-e3-integration-and-truth-reconciliation-2026-09-23",
+      "agent-e3-local-production-rehearsal-2026-09-23",
+      "agent-e3-local-production-rehearsal-retry-2026-09-23",
+      "agent-live-queue-recovery-2026-09-23",
+      "agent-live-queue-recovery-deepseek-2026-09-23",
+      "agent-queue-isolation-and-evidence-recovery-2026-09-23",
+      "agent-queue-isolation-and-evidence-recovery-retry-2026-09-23"
+    ],
+    "completed": [
+      "agent-bridge-watchdog-validation-2026-09-23",
+      "agent-codex-reset-revalidation-2026-09-23",
+      "agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23",
+      "agent-e3-production-execution-leg-2026-09-23",
+      "agent-live-queue-recovery-deepseek-utf8-2026-09-23",
+      "bridge-validation-and-autonomous-continuation",
+      "hardened-final-e2e",
+      "hardened-regression",
+      "remote-e2e-final-verification",
+      "remote-e2e-final-verification-v2",
+      "remote-e2e-test-001",
+      "remote-e2e-test-002"
+    ],
+    "counts": {
+      "pending": 13,
+      "running": 2,
+      "blocked": 9,
+      "completed": 12
+    }
+  },
+  "legacy_donor_systems": {
+    "career_ops_install": {
+      "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-09-16T00:12:03",
+      "entries": 235
+    },
+    "july_chief": {
+      "path": "C:\\Users\\mukun\\Documents\\Codex\\2026-07-27\\okay-this-is-my-current-project\\outputs\\mukund-chief-of-staff",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-08-02T16:00:24",
+      "entries": 16
+    },
+    "mukund_os": {
+      "path": "C:\\Users\\mukun\\Documents\\Chief of staff",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-08-21T21:57:01",
+      "entries": 17
+    },
+    "custom_new_chief": {
+      "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\mukund-chief-of-staff",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-09-19T21:18:45",
+      "entries": 8
+    }
+  },
+  "canonical_resources": {
+    "uk_tracker": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "exists": true,
+      "is_dir": false,
+      "mtime": "2026-09-13T12:33:38"
+    },
+    "dubai_tracker": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "exists": true,
+      "is_dir": false,
+      "mtime": "2026-09-17T00:08:36"
+    },
+    "japan_tracker": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "exists": true,
+      "is_dir": false,
+      "mtime": "2026-09-15T01:48:34"
+    },
+    "singapore_tracker": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "exists": true,
+      "is_dir": false,
+      "mtime": "2026-09-16T23:43:25"
+    },
+    "discord_archive_dir": {
+      "path": "C:\\Users\\mukun\\DiscordArchive\\chief",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-09-23T23:06:02",
+      "entries": 5
+    },
+    "hermes_home": {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes",
+      "exists": true,
+      "is_dir": true,
+      "mtime": "2026-09-23T23:26:23",
+      "entries": 62
+    }
+  }
+}

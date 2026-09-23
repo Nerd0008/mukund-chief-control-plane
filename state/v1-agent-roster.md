@@ -90,3 +90,30 @@ Before the morning handover, the local Company Registry and existing machine wor
 3. be recorded as an owner-only/external blocker.
 
 No silent omissions.
+
+## Reconciliation record — 2026-09-23 (Company Registry / system-inventory audit)
+
+Executed by task `agent-company-registry-gap-audit-and-runtime-services-2026-09-23` against
+`state/v1-agent-roster.md` (method and raw facts:
+`audits/evidence/2026-09-23T22-30-00Z-company-registry-gap-audit/`). Deterministic worker:
+`scripts/company_inventory.py` (read-only; `--json` output).
+
+Result: **all 50 roster items (A01–A22, B01–B24, C01–C04) were accounted for; no roster entry had
+to be added and no locally discovered owner-relevant workflow was left unmapped.**
+
+- Owned Windows scheduled tasks discovered: 7 (`Hermes_Gateway`, `ChiefDiscordSync`,
+  `HermesRemoteQueuePoller`, `ChiefCareerScan-UK|-Dubai|-Japan|-Singapore`) — all map to
+  A18/A19/B02–B05.
+- `Mukund Chief of Staff` (legacy new-custom-Chief logon task) is **superseded by Hermes** and is
+  recorded here as a donor, with evidence, rather than deleted. It is not an active v1 service.
+- Legacy donors (Career Ops install, July Chief, Mukund OS, new custom Chief) all still exist and
+  were inspected as status sources only; none was revived or restructured.
+- Real coverage gap found and closed by staging exactly one successor task:
+  `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23` (B09 Monthly Tracker Rollover was
+  owned by no task, and the B07/B08 interface produced by the `execution_error` task existed only in
+  the unpushed working tree). It explicitly excludes the scope already owned by
+  `agent-regional-job-search-agents-and-schedulers-2026-09-23` and
+  `agent-company-watch-job-search-integration-2026-09-23`.
+- Owner-only dependencies discovered by the audit are recorded in
+  `tasks-or-issues/overnight-owner-actions-2026-09-24.md`.
+

@@ -1,0 +1,8 @@
+# Runtime state for the Career Ops integration.
+# Workbooks (backups and acceptance test copies) are never committed.
+*.xlsx
+*.xlsm
+*
+!.gitignore
+!scan-runs/
+!scan-runs/*.json

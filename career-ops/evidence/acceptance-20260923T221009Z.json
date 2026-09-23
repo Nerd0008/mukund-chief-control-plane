@@ -1,0 +1,491 @@
+{
+  "acceptance_run": "20260923T221009Z",
+  "generated_at": "2026-09-23T22:10:09+00:00",
+  "canonical_trackers_touched": false,
+  "applications_submitted": 0,
+  "external_messages_sent": 0,
+  "note": "Pre-screen only. Live vacancy verification not performed in this run.",
+  "stage_1_scan": {
+    "run_health_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\scan-uk-20260923T220750Z.json",
+    "region": "uk",
+    "dry_run": true,
+    "exit_code": 0,
+    "ok": null,
+    "duration_s": 86.3,
+    "stdout_tail_last_lines": [
+      "",
+      "",
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "Portal Scan — 2026-09-23",
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "Companies scanned:     0",
+      "Job boards scanned:    12",
+      "Total jobs found:      2861",
+      "Filtered by title:     2726 removed",
+      "Filtered by location:  130 removed",
+      "Filtered by age:       3 removed",
+      "Filtered by salary:    0 removed",
+      "Duplicates:            1 skipped",
+      "Recheck eligible:      0 old scan-history URL(s)",
+      "New offers added:      1",
+      "Trust validation:      0 high, 1 medium, 0 low",
+      "Trust flags:           company_domain_mismatch: 1",
+      "",
+      "New offers:",
+      "  + Celonis | Technology & Management Consulting Intern (Value Engineering - UKI Market) | London, United Kingdom [Trust: 85/100 — company_domain_mismatch]",
+      "",
+      "(dry run — run without --dry-run to save results)",
+      "",
+      "→ Run /career-ops pipeline to evaluate new offers.",
+      "→ Share results and get help: https://discord.gg/8pRpHETxa4"
+    ],
+    "jobs_reported_scanned": 2861,
+    "new_offers_added_reported": 1,
+    "duplicates_reported": 1,
+    "errors_reported": null
+  },
+  "stage_2_eligible_pre_screen": {
+    "source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+    "pipeline_entries_parsed": 87,
+    "scored_eligible": 21,
+    "unscored_eligible_needs_evaluation": 29,
+    "dropped": 37,
+    "records_built": 50,
+    "policy": {
+      "min_score": 3.5,
+      "negative_title_tokens": [
+        "senior",
+        "principal",
+        "lead ",
+        "manager",
+        "director",
+        "head of",
+        "vice president",
+        "vp ",
+        "staff security"
+      ],
+      "uk_location_signals": [
+        "united kingdom",
+        "uk",
+        "london",
+        "england",
+        "scotland",
+        "wales",
+        "northern ireland",
+        "remote"
+      ]
+    },
+    "scored_sample": [
+      {
+        "company": "Crown Agents Bank",
+        "title": "Information Security Analyst",
+        "score": 4.9
+      },
+      {
+        "company": "One Big Circle",
+        "title": "IT & Security Analyst",
+        "score": 4.8
+      },
+      {
+        "company": "Alpha FMC",
+        "title": "Junior IT Support Engineer",
+        "score": 4.6
+      },
+      {
+        "company": "City IT / CEF",
+        "title": "IT Service Desk Analyst",
+        "score": 4.6
+      }
+    ],
+    "unscored_sample": [
+      {
+        "company": "Ada",
+        "title": "Technical Support Advisor"
+      },
+      {
+        "company": "cisecurity",
+        "title": "Associate Information Security Auditor - Remote"
+      },
+      {
+        "company": "immersivelabs",
+        "title": "Cyber Security Engineer - Red Team - Remote within UK"
+      },
+      {
+        "company": "blackrock",
+        "title": "Identity Security Engineer - SailPoint, Associate"
+      },
+      {
+        "company": "bakerhughes",
+        "title": "Technical Support Engineer Stimulation"
+      },
+      {
+        "company": "carrier",
+        "title": "Technical Support Specialist"
+      }
+    ],
+    "dropped_sample": [
+      {
+        "company": "capitalone",
+        "reasons": [
+          "location '2 Locations' not in the UK allow-list"
+        ]
+      },
+      {
+        "company": "capita",
+        "reasons": [
+          "location 'Belfast' not in the UK allow-list"
+        ]
+      },
+      {
+        "company": "bnh",
+        "reasons": [
+          "location 'posted: 2026-08-27' not in the UK allow-list"
+        ]
+      },
+      {
+        "company": "cambridgemobiletelematics",
+        "reasons": [
+          "location 'Cambridge, MA' not in the UK allow-list"
+        ]
+      }
+    ],
+    "live_verification_performed": false
+  },
+  "stage_3_dedupe": {
+    "canonical_tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+    "canonical_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "counts": {
+      "input": 50,
+      "appended": 0,
+      "duplicates": 50,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "cross_month_index_sources": {
+      "uk-cyber-job-tracker.xlsx": 34,
+      "ledger:data/scan-history.tsv": 146
+    },
+    "cross_month_index_keys": 154,
+    "decisions_sample": [
+      {
+        "company": "Crown Agents Bank",
+        "title": "Information Security Analyst",
+        "url": "https://jobs.smartrecruiters.com/CrownAgentsBank/744000126513120-information-security-analyst",
+        "decision": "duplicate",
+        "reason": "same company+title already present (posting URL may have moved)",
+        "existing_row": 22
+      },
+      {
+        "company": "One Big Circle",
+        "title": "IT & Security Analyst",
+        "url": "https://onebigcircle.co.uk/careers/it-security-analyst/",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 23
+      },
+      {
+        "company": "Alpha FMC",
+        "title": "Junior IT Support Engineer",
+        "url": "https://job-boards.greenhouse.io/alphafmc/jobs/7859436002",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 10
+      },
+      {
+        "company": "City IT / CEF",
+        "title": "IT Service Desk Analyst",
+        "url": "https://jobs.lever.co/cef/89fc740a-5a57-479a-ae47-80c38e5948a7",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 11
+      },
+      {
+        "company": "Scottish Government",
+        "title": "IT Service Desk Analyst (4456)",
+        "url": "https://www.jobsgopublic.com/job/it-service-desk-analyst-4456-80991",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 12
+      },
+      {
+        "company": "The Pensions Regulator",
+        "title": "Service Desk Analyst",
+        "url": "https://www.jobsgopublic.com/jobs/it-support?jobId=74109",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Vp plc",
+        "title": "IT Service Desk Analyst (1st Line)",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a72ec728426b08f481f1c06",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 14
+      },
+      {
+        "company": "Mid Yorkshire Teaching NHS Trust",
+        "title": "Service Desk Analyst",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a850091de4d32c2a34366fa",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 15
+      }
+    ]
+  },
+  "stage_4_workbook_write_test_copy": {
+    "test_copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\acceptance\\20260923T221009Z\\uk-cyber-job-tracker.xlsx",
+    "test_copy_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "test_copy_sha256_after": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "backup": null,
+    "backup_exists": false,
+    "applied": false,
+    "counts": {
+      "input": 50,
+      "appended": 0,
+      "duplicates": 50,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "planned_ids": [],
+    "verification": null,
+    "error": null,
+    "canonical_untouched": true
+  },
+  "stage_5_chief_summary": {
+    "exit_code": 0,
+    "regions": {
+      "uk": {
+        "available": true,
+        "display_name": "United Kingdom",
+        "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+        "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "data_rows": 34,
+        "last_id": "J34",
+        "status_counts": {
+          "To Review": 29,
+          "Not Applying": 5
+        },
+        "actionable_ids": [
+          "J1",
+          "J2",
+          "J4",
+          "J5",
+          "J8",
+          "J10",
+          "J11",
+          "J13",
+          "J14",
+          "J15",
+          "J16",
+          "J17",
+          "J18",
+          "J19",
+          "J20",
+          "J21",
+          "J22",
+          "J23",
+          "J24",
+          "J25",
+          "J26",
+          "J27",
+          "J28",
+          "J29",
+          "J30"
+        ],
+        "owner_columns_untouched_by_automation": [
+          "J",
+          "K",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "excel_is_source_of_truth": true
+      },
+      "dubai": {
+        "available": true,
+        "display_name": "Dubai / UAE",
+        "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+        "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "data_rows": 21,
+        "last_id": "DUBAI-2026-09-12-01",
+        "status_counts": {
+          "New": 13,
+          "Closed": 8
+        },
+        "actionable_ids": [
+          "2026-09-01 12:00:00",
+          "2026-09-01 12:00:00",
+          "2026-09-01 12:00:00",
+          "2026-09-01 12:00:00",
+          "2026-09-01 12:00:00",
+          "2026-09-02 12:00:00",
+          "2026-09-06 12:00:00",
+          "2026-09-06 12:00:00",
+          "2026-09-06 12:00:00",
+          "2026-09-06 12:00:00",
+          "2026-09-06 12:00:00",
+          "2026-09-07 12:00:00",
+          "2026-09-12 12:00:00"
+        ],
+        "owner_columns_untouched_by_automation": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "Z"
+        ],
+        "excel_is_source_of_truth": true
+      },
+      "japan": {
+        "available": true,
+        "display_name": "Japan",
+        "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+        "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "data_rows": 41,
+        "last_id": "JP-20260915-10",
+        "status_counts": {
+          "Pending": 41
+        },
+        "actionable_ids": [
+          "2026-09-11",
+          "2026-09-11",
+          "2026-09-11",
+          "2026-09-11",
+          "2026-09-11",
+          "2026-09-12",
+          "2026-09-12",
+          "2026-09-12",
+          "2026-09-12",
+          "2026-09-12",
+          "2026-09-12",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-13",
+          "2026-09-14",
+          "2026-09-14",
+          "2026-09-14",
+          "2026-09-14"
+        ],
+        "owner_columns_untouched_by_automation": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "Z"
+        ],
+        "excel_is_source_of_truth": true
+      },
+      "singapore": {
+        "available": true,
+        "display_name": "Singapore",
+        "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+        "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1",
+        "data_rows": 22,
+        "last_id": "SG-ENTRY-260916-01",
+        "status_counts": {
+          "Pending": 18,
+          "Closed": 4
+        },
+        "actionable_ids": [
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-09 00:00:00",
+          "2026-09-10 00:00:00",
+          "2026-09-10 00:00:00",
+          "2026-09-10 00:00:00",
+          "2026-09-10 00:00:00",
+          "2026-09-11 00:00:00",
+          "2026-09-11 00:00:00",
+          "2026-09-13 00:00:00",
+          "2026-09-14 00:00:00",
+          "2026-09-16 00:00:00",
+          "2026-09-16 00:00:00"
+        ],
+        "owner_columns_untouched_by_automation": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "Z"
+        ],
+        "excel_is_source_of_truth": true
+      }
+    }
+  },
+  "stage_7_regional_cross_month_dedupe": {
+    "dubai": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "cross_month_keys": 26,
+      "keys_in_workbook": 21,
+      "keys_from_ledger_or_archive_only": 5,
+      "sources": {
+        "Dubai_Cybersecurity_Job_Tracker.xlsx": 21,
+        "ledger:data/dubai-shortlist-history.md": 26
+      },
+      "lane_status": false,
+      "lane_missing": [
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\portals.dubai.yml",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.dubai.md",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\scan-history.dubai.tsv"
+      ]
+    },
+    "japan": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "cross_month_keys": 41,
+      "keys_in_workbook": 41,
+      "keys_from_ledger_or_archive_only": 0,
+      "sources": {
+        "Japan_Cybersecurity_Job_Tracker.backup-20260913-115953.xlsx": 11,
+        "Japan_Cybersecurity_Job_Tracker.backup-20260914-014303.xlsx": 10,
+        "Japan_Cybersecurity_Job_Tracker.backup-20260915-014902.xlsx": 10,
+        "Japan_Cybersecurity_Job_Tracker.xlsx": 10,
+        "ledger:data/japan-shortlist-history.md": 41
+      },
+      "lane_status": false,
+      "lane_missing": [
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\portals.japan.yml",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.japan.md",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\scan-history.japan.tsv"
+      ]
+    },
+    "singapore": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "cross_month_keys": 22,
+      "keys_in_workbook": 22,
+      "keys_from_ledger_or_archive_only": 0,
+      "sources": {
+        "Singapore_Cybersecurity_Job_Tracker.pre-20260913.xlsx": 17,
+        "Singapore_Cybersecurity_Job_Tracker.xlsx": 5,
+        "ledger:data/singapore-shortlist-history.md": 22
+      },
+      "lane_status": false,
+      "lane_missing": [
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\portals.singapore.yml",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.singapore.md",
+        "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\scan-history.singapore.tsv"
+      ]
+    }
+  },
+  "final_canonical_hashes": {
+    "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+    "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+    "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+  }
+}
