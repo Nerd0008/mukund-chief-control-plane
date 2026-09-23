@@ -1,0 +1,740 @@
+{
+  "label": "e3-stage2-readiness-gate-rerun",
+  "run_started_utc": "2026-09-23T22:37:09+00:00",
+  "run_finished_utc": "2026-09-23T22:37:09+00:00",
+  "stage": "Local E3 Stage 2 readiness gate re-run \u2014 evaluates the enablement rule with executable evidence; makes NO provider call and does NOT enable Stage 2 itself",
+  "real_provider_calls_spent": 0,
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+  "checks": {
+    "credentials": {
+      "note": "presence only \u2014 no credential value is read into a printed variable, logged or stored; auth source is the store name, never the secret",
+      "credential_missing_workers": [
+        {
+          "worker_id": "mistral-small-4",
+          "provider": "mistral",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "glm-53-flash",
+          "provider": "glm",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "qwen38-27b",
+          "provider": "qwen",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "longcat-2.0",
+          "provider": "nous",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "minimax-m3",
+          "provider": "minimax",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "step-37-flash",
+          "provider": "step",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "tencent-hunyuan-hy3",
+          "provider": "tencent",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        }
+      ],
+      "still_missing_count": 7,
+      "still_missing_workers": [
+        "mistral-small-4",
+        "glm-53-flash",
+        "qwen38-27b",
+        "longcat-2.0",
+        "minimax-m3",
+        "step-37-flash",
+        "tencent-hunyuan-hy3"
+      ],
+      "newly_configured_workers": [],
+      "previously_configured_workers": [
+        {
+          "worker_id": "codex-cli",
+          "provider": "openai",
+          "credential_present": true,
+          "auth_source": "chatgpt",
+          "probe": "cli_login_state_from_registry"
+        },
+        {
+          "worker_id": "google-nano-banana-2",
+          "provider": "google",
+          "routable": true,
+          "credential_present": true,
+          "auth_source": "credential_manager",
+          "probe": "presence_only"
+        },
+        {
+          "worker_id": "deepseek-v41-flash",
+          "provider": "deepseek",
+          "routable": true,
+          "credential_present": true,
+          "auth_source": "credential_manager",
+          "probe": "presence_only"
+        }
+      ],
+      "all_seven_configured": false
+    },
+    "regression_suites": {
+      "found": true,
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-23T22-36-36Z-e3-stage2-readiness-gate-rerun\\evidence.json",
+      "evidence_sha256": "cb3aecb3dacc72e81d20a6f2877ff863ce7ad48b2fe148c7f7ac79831696ed66",
+      "code_sha": null,
+      "run_started_utc": "2026-09-23T22:36:36+00:00",
+      "python_version": null,
+      "suites_run": null,
+      "suites_passed": null,
+      "suites_failed": null,
+      "suites_unavailable": null,
+      "tests_collected": null,
+      "tests_passed": null,
+      "suites": [],
+      "failing_suites": [],
+      "suites_without_counts": [],
+      "all_suites_pass": false
+    },
+    "production_rehearsal_evidence": {
+      "found": true,
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-23T21-32-41Z-e3-production-execution-rehearsal\\evidence.json",
+      "evidence_sha256": "88212b7056478e7dc203cb6e70ddd65d3f92411c674e10745edc844ef9c8970e",
+      "run_started_utc": "2026-09-23T21:32:41+00:00",
+      "run_finished_utc": "2026-09-23T21:33:01+00:00",
+      "stage_note": "E3 production execution leg rehearsal \u2014 real worker execution on the local orchestration path; Stage 2 NOT enabled by this run",
+      "usage_plan_total_calls": 7,
+      "bounded_usage": {
+        "real_provider_calls": 7,
+        "planned_calls": 7,
+        "calls_by_provider": {
+          "deepseek": 5,
+          "openai": 2
+        },
+        "usage_exposed_calls": 5,
+        "usage_missing_calls": 2,
+        "note": "Minimum deterministic calls needed to evidence the path, stated up front in usage_plan. Usage is recorded only when the provider returned it."
+      },
+      "usage_plan": [
+        {
+          "scenario": "A_repair_cycle_deepseek",
+          "worker": "deepseek-v41-flash",
+          "calls": 2,
+          "why": "1 deliberately under-specified dispatch (deterministic verifier must reject it) + 1 targeted repair re-dispatch that must pass."
+        },
+        {
+          "scenario": "B_first_pass_deepseek",
+          "worker": "deepseek-v41-flash",
+          "calls": 1,
+          "why": "single bounded call; deterministic first-pass PASS."
+        },
+        {
+          "scenario": "C_codex_cli_dispatch",
+          "worker": "codex-cli",
+          "calls": 1,
+          "why": "single non-interactive CLI dispatch in a scratch dir."
+        },
+        {
+          "scenario": "F_decomposed_multi_worker",
+          "worker": "deepseek-v41-flash + codex-cli",
+          "calls": 3,
+          "why": "2-node decomposed plan: node 1 (builder/deepseek) needs a rejected first attempt plus its targeted repair, node 2 (integrator/codex-cli) is a single first-pass dispatch. This is the minimum that exercises per-node deterministic verification on a multi-worker real plan."
+        },
+        {
+          "scenario": "E_non_routable_refusal",
+          "worker": "mistral-small-4",
+          "calls": 0,
+          "why": "credential-missing worker must be refused pre-dispatch."
+        }
+      ],
+      "isolation": {
+        "production_stores": {
+          "orchestration": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+          "governor": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+          "exec_brain": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db"
+        },
+        "before_sha256": {
+          "orchestration": "d3e306f1ae69853409e4043d6ada351967c658c0fe1eaaa0e4d1c6baebfc25c0",
+          "governor": "5b4dc372ff0479accb00504fc2ab2df4dfeb011d158522c6ae1eba71526bdc2b",
+          "exec_brain": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34"
+        },
+        "after_sha256": {
+          "orchestration": "d3e306f1ae69853409e4043d6ada351967c658c0fe1eaaa0e4d1c6baebfc25c0",
+          "governor": "5b4dc372ff0479accb00504fc2ab2df4dfeb011d158522c6ae1eba71526bdc2b",
+          "exec_brain": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34"
+        },
+        "stores_unchanged": true,
+        "diffs": [],
+        "before_sha256_including_wal_sidecars": {
+          "orchestration": {
+            "main": "d3e306f1ae69853409e4043d6ada351967c658c0fe1eaaa0e4d1c6baebfc25c0",
+            "-wal": null,
+            "-shm": null
+          },
+          "governor": {
+            "main": "5b4dc372ff0479accb00504fc2ab2df4dfeb011d158522c6ae1eba71526bdc2b",
+            "-wal": null,
+            "-shm": null
+          },
+          "exec_brain": {
+            "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+            "-wal": null,
+            "-shm": null
+          }
+        },
+        "after_sha256_including_wal_sidecars": {
+          "orchestration": {
+            "main": "d3e306f1ae69853409e4043d6ada351967c658c0fe1eaaa0e4d1c6baebfc25c0",
+            "-wal": null,
+            "-shm": null
+          },
+          "governor": {
+            "main": "5b4dc372ff0479accb00504fc2ab2df4dfeb011d158522c6ae1eba71526bdc2b",
+            "-wal": null,
+            "-shm": null
+          },
+          "exec_brain": {
+            "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+            "-wal": null,
+            "-shm": null
+          }
+        },
+        "stores_unchanged_including_wal_sidecars": true,
+        "rehearsal_write_refusals": [
+          {
+            "store": "orchestration",
+            "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+            "refused": true,
+            "error": "RehearsalIsolationError"
+          },
+          {
+            "store": "governor",
+            "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+            "refused": true,
+            "error": "RehearsalIsolationError"
+          },
+          {
+            "store": "exec_brain",
+            "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+            "refused": true,
+            "error": "RehearsalIsolationError"
+          }
+        ],
+        "all_production_writes_refused": true,
+        "isolated_rehearsal_store": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-exec-rehearsal-wzbslgep\\rehearsal_evidence_isolation\\rehearsal_evidence.json",
+        "isolated_store_outside_production": true,
+        "boundary_scan": {
+          "module_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+          "direct_sql_violations": [],
+          "e2_public_interface_modules": [
+            "codex_adapter.py",
+            "deepseek_adapter.py",
+            "e3_execution.py",
+            "e3_execution_rehearsal.py",
+            "e3_production_rehearsal.py",
+            "eb.py",
+            "gemini_adapter.py",
+            "generic_openai_adapter.py"
+          ],
+          "clean": true
+        }
+      },
+      "live_store_contamination": {
+        "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+        "performance_evidence_by_execution_profile": {
+          "production-execution-leg": 14
+        },
+        "performance_evidence_by_provider": {
+          "deepseek": 8,
+          "google": 1,
+          "openai": 5
+        },
+        "simulated_or_shadow_evidence_rows": 0,
+        "qualified_rows_without_evidence": 0,
+        "capability_state_counts": {},
+        "dag_node_state_counts": {
+          "BLOCKED": 1,
+          "COMPLETE": 5,
+          "FAILED": 1
+        },
+        "dag_state_event_count": 74,
+        "performance_evidence_count": 14,
+        "simulated_evidence_absent": true,
+        "no_unearned_qualification": true
+      },
+      "e2_linkage": {
+        "available": true,
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+        "requested_ids": [
+          "obs-20260923-77aad954",
+          "obs-20260923-c56cfa2d",
+          "obs-20260923-f57b0075",
+          "obs-20260923-1de63b23",
+          "obs-20260923-afce82de",
+          "obs-20260923-8682b033",
+          "obs-20260923-00f3e415"
+        ],
+        "rows_read_back": [
+          {
+            "request_id": "obs-20260923-77aad954",
+            "provider": "deepseek",
+            "model": "deepseek-flash",
+            "input_tokens": 51,
+            "output_tokens": 211,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-c56cfa2d",
+            "provider": "deepseek",
+            "model": "deepseek-flash",
+            "input_tokens": 120,
+            "output_tokens": 21,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-f57b0075",
+            "provider": "deepseek",
+            "model": "deepseek-flash",
+            "input_tokens": 51,
+            "output_tokens": 21,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-1de63b23",
+            "provider": "openai-codex-cli",
+            "model": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-afce82de",
+            "provider": "deepseek",
+            "model": "deepseek-flash",
+            "input_tokens": 59,
+            "output_tokens": 205,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-8682b033",
+            "provider": "deepseek",
+            "model": "deepseek-flash",
+            "input_tokens": 131,
+            "output_tokens": 21,
+            "status": "success"
+          },
+          {
+            "request_id": "obs-20260923-00f3e415",
+            "provider": "openai-codex-cli",
+            "model": null,
+            "input_tokens": null,
+            "output_tokens": null,
+            "status": "success"
+          }
+        ],
+        "all_found": true
+      },
+      "unresolved_recorded_by_that_run": [
+        {
+          "scenario": "E_non_routable_refusal",
+          "node": "node-execleg-E_non_routable_refusal-1",
+          "worker": "mistral-small-4",
+          "node_state": "BLOCKED",
+          "blocking_reason": "worker_not_routable:mistral-small-4",
+          "failure_attribution": null,
+          "provider_errors": [],
+          "expected_block": true
+        }
+      ],
+      "scenarios_requested": {
+        "codex_cli": true,
+        "multi_node": true,
+        "google_image": false
+      },
+      "checks": {
+        "repair_cycle_rejected_then_repaired": true,
+        "first_pass_complete": true,
+        "codex_cli_complete": true,
+        "multi_node_plan_is_decomposed": true,
+        "multi_node_all_nodes_complete": true,
+        "multi_worker_two_distinct_routable_workers": true,
+        "multi_node_per_node_deterministic_verification": true,
+        "multi_node_rejection_then_repair": true,
+        "multi_node_dependency_gate_observed": true,
+        "multi_node_dag_state_and_evidence_persisted": true,
+        "google_image_complete": null,
+        "non_routable_refused_without_dispatch": true,
+        "complete_requires_verification": true,
+        "dag_state_and_evidence_persisted": true,
+        "e2_linkage_recorded": true,
+        "rehearsal_evidence_isolated_from_production_stores": true,
+        "no_simulated_evidence_in_live_stores": true,
+        "e1_e2_boundary_clean": true,
+        "runtime_modules_deployed": true,
+        "orchestration_db_is_schema_v2": true
+      },
+      "checks_failed": [],
+      "checks_not_evaluated": [
+        "google_image_complete"
+      ],
+      "consumed_not_repeated": true,
+      "note": "consumed per the task contract ('do not repeat the multi-worker rehearsal already evidenced by the retry task'); no real provider call was spent by this gate run"
+    },
+    "google_image_worker": {
+      "found": true,
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-23T21-49-21Z-e3-google-image-diagnosis\\evidence.json",
+      "evidence_sha256": "e3dc62036ecd19a17d102304cb35e78d3a39aca3aec8b6a28966fc70fbfd6cdf",
+      "diagnosis": {
+        "verdict": null,
+        "reproduced": null,
+        "established": null,
+        "remaining_unknown": "the earlier no-image response did NOT reproduce on the identical request: the same objective and the same adapter request path now returned a decodable inline image with a normal STOP finish and provider-reported candidate tokens. The cause of the single earlier 'no_image_part_in_response' response (17 prompt tokens, 0 output tokens, no image part) is therefore intermittent and is NOT explained by the request shape. Remaining unknown: the trigger of that intermittent provider response; one observation cannot distinguish provider-side variability from a transient capacity or content-moderation condition. Resolving it needs a bounded repeat series, not an assumption."
+      },
+      "worker_id": "google-nano-banana-2",
+      "routable": true,
+      "smoke_test": "PASS",
+      "declared_state": "INTERMITTENT_NOT_SETTLED",
+      "note": "the earlier real-dispatch failure did not reproduce on the identical request but the trigger is an open unknown; the vision role is qualified only from recorded evidence"
+    },
+    "worker_qualification": {
+      "bar": {
+        "min_recorded_executions": 2,
+        "min_recorded_passes": 2,
+        "min_first_pass_passes": 1
+      },
+      "scopes_evaluated": 4,
+      "evaluations": [
+        {
+          "worker_id": "codex-cli",
+          "role": "builder",
+          "overall_state": "pass",
+          "registry_state": "QUALIFIED",
+          "evidence_backed": true,
+          "counts": {
+            "recorded_executions": 3,
+            "recorded_passes": 3,
+            "recorded_first_pass_passes": 3,
+            "rejected_then_repaired_passes": 0,
+            "recorded_failures": 0,
+            "dag_node_ids": [
+              "node-execleg-C_codex_cli_dispatch-1",
+              "node-execleg-C_codex_cli_dispatch-1",
+              "node-execleg-C_codex_cli_dispatch-1"
+            ],
+            "distinct_dag_node_ids": [
+              "node-execleg-C_codex_cli_dispatch-1"
+            ],
+            "recorded_runs_by_timestamp": [
+              "2026-09-23 21:07:42",
+              "2026-09-23 21:31:20",
+              "2026-09-23 21:32:52"
+            ],
+            "task_fingerprints": [
+              "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9"
+            ]
+          }
+        },
+        {
+          "worker_id": "codex-cli",
+          "role": "integrator",
+          "overall_state": "pass",
+          "registry_state": "QUALIFIED",
+          "evidence_backed": true,
+          "counts": {
+            "recorded_executions": 2,
+            "recorded_passes": 2,
+            "recorded_first_pass_passes": 2,
+            "rejected_then_repaired_passes": 0,
+            "recorded_failures": 0,
+            "dag_node_ids": [
+              "node-plan-0001-2",
+              "node-plan-0001-2"
+            ],
+            "distinct_dag_node_ids": [
+              "node-plan-0001-2"
+            ],
+            "recorded_runs_by_timestamp": [
+              "2026-09-23 21:31:28",
+              "2026-09-23 21:33:01"
+            ],
+            "task_fingerprints": [
+              "b151f74d5c30419593a6a0241d7dec58435b207818894c888b295383564f1ea1"
+            ]
+          }
+        },
+        {
+          "worker_id": "deepseek-v41-flash",
+          "role": "builder",
+          "overall_state": "pass",
+          "registry_state": "QUALIFIED",
+          "evidence_backed": true,
+          "counts": {
+            "recorded_executions": 8,
+            "recorded_passes": 8,
+            "recorded_first_pass_passes": 3,
+            "rejected_then_repaired_passes": 5,
+            "recorded_failures": 0,
+            "dag_node_ids": [
+              "node-execleg-A_repair_cycle_deepseek-1",
+              "node-execleg-B_first_pass_deepseek-1",
+              "node-execleg-A_repair_cycle_deepseek-1",
+              "node-execleg-B_first_pass_deepseek-1",
+              "node-plan-0001-1",
+              "node-execleg-A_repair_cycle_deepseek-1",
+              "node-execleg-B_first_pass_deepseek-1",
+              "node-plan-0001-1"
+            ],
+            "distinct_dag_node_ids": [
+              "node-execleg-A_repair_cycle_deepseek-1",
+              "node-execleg-B_first_pass_deepseek-1",
+              "node-plan-0001-1"
+            ],
+            "recorded_runs_by_timestamp": [
+              "2026-09-23 21:07:35",
+              "2026-09-23 21:07:37",
+              "2026-09-23 21:31:12",
+              "2026-09-23 21:31:13",
+              "2026-09-23 21:31:23",
+              "2026-09-23 21:32:44",
+              "2026-09-23 21:32:45",
+              "2026-09-23 21:32:54"
+            ],
+            "task_fingerprints": [
+              "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9",
+              "b151f74d5c30419593a6a0241d7dec58435b207818894c888b295383564f1ea1"
+            ]
+          }
+        },
+        {
+          "worker_id": "google-nano-banana-2",
+          "role": "vision",
+          "overall_state": "inconclusive",
+          "registry_state": "EVALUATING",
+          "evidence_backed": true,
+          "counts": {
+            "recorded_executions": 2,
+            "recorded_passes": 1,
+            "recorded_first_pass_passes": 1,
+            "rejected_then_repaired_passes": 0,
+            "recorded_failures": 1,
+            "dag_node_ids": [
+              "node-execleg-D_google_image_dispatch-1",
+              "node-execleg-D_google_image_dispatch-1"
+            ],
+            "distinct_dag_node_ids": [
+              "node-execleg-D_google_image_dispatch-1"
+            ],
+            "recorded_runs_by_timestamp": [
+              "2026-09-23 21:07:48",
+              "2026-09-23 21:49:29"
+            ],
+            "task_fingerprints": [
+              "940018441fd2ac02260e52dcffae3246d7ae34b177d0df0582264727efe17ed9"
+            ]
+          }
+        }
+      ],
+      "capability_registry_rows": [
+        {
+          "worker_id": "codex-cli",
+          "task_family": "code",
+          "capability_role": "builder",
+          "state": "QUALIFIED",
+          "evidence_count": 3,
+          "first_pass_successes": 3,
+          "first_pass_attempts": 3
+        },
+        {
+          "worker_id": "codex-cli",
+          "task_family": "code",
+          "capability_role": "integrator",
+          "state": "QUALIFIED",
+          "evidence_count": 2,
+          "first_pass_successes": 2,
+          "first_pass_attempts": 2
+        },
+        {
+          "worker_id": "deepseek-v41-flash",
+          "task_family": "code",
+          "capability_role": "builder",
+          "state": "QUALIFIED",
+          "evidence_count": 8,
+          "first_pass_successes": 3,
+          "first_pass_attempts": 8
+        },
+        {
+          "worker_id": "google-nano-banana-2",
+          "task_family": "code",
+          "capability_role": "vision",
+          "state": "EVALUATING",
+          "evidence_count": 2,
+          "first_pass_successes": 1,
+          "first_pass_attempts": 2
+        }
+      ],
+      "worker_capability_event_rows": 8,
+      "performance_evidence_rows": 15,
+      "qualified_rows_without_evidence": 0,
+      "every_qualified_row_has_evidence": true,
+      "provider_calls_spent": 0
+    },
+    "rehearsal_evidence_isolation_and_boundary": {
+      "production_stores": {
+        "orchestration": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+        "governor": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+        "exec_brain": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db"
+      },
+      "before_hashes": {
+        "orchestration": {
+          "main": "bcff7447a80fca3fe8fcb86a20db653dd821a2f37d9e766e8fc8f6c0100fd27b",
+          "wal": null,
+          "shm": null
+        },
+        "governor": {
+          "main": "5ca074721c64ca72b66bbe49250c0bd92e9c7cf8f79127f2e289ff01f9cd34b1",
+          "wal": null,
+          "shm": null
+        },
+        "exec_brain": {
+          "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+          "wal": null,
+          "shm": null
+        }
+      },
+      "after_hashes": {
+        "orchestration": {
+          "main": "bcff7447a80fca3fe8fcb86a20db653dd821a2f37d9e766e8fc8f6c0100fd27b",
+          "wal": null,
+          "shm": null
+        },
+        "governor": {
+          "main": "5ca074721c64ca72b66bbe49250c0bd92e9c7cf8f79127f2e289ff01f9cd34b1",
+          "wal": null,
+          "shm": null
+        },
+        "exec_brain": {
+          "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+          "wal": null,
+          "shm": null
+        }
+      },
+      "stores_unchanged_including_wal_sidecars": true,
+      "unchanged_detail": {
+        "orchestration": true,
+        "governor": true,
+        "exec_brain": true
+      },
+      "all_production_writes_refused": true,
+      "production_write_refusals": {
+        "orchestration": true,
+        "governor": true,
+        "exec_brain": true
+      },
+      "assert_rehearsal_store_refused_on_production_path": true,
+      "isolated_store_outside_production": true,
+      "isolated_sink_written": true,
+      "e1_e2_boundary": {
+        "module_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain",
+        "direct_sql_violations": [],
+        "e2_public_interface_modules": [
+          "codex_adapter.py",
+          "deepseek_adapter.py",
+          "e3_execution.py",
+          "e3_execution_rehearsal.py",
+          "e3_production_rehearsal.py",
+          "gemini_adapter.py",
+          "generic_openai_adapter.py"
+        ],
+        "clean": true
+      },
+      "e2_public_interface_via_governor_record_request_only": true
+    },
+    "rollback_and_recovery": {
+      "deploy_script": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\deploy_e3_runtime.py",
+      "deploy_script_has_restore": true,
+      "deploy_script_has_sha256_manifest": true,
+      "backup_dirs": [
+        "20260921T215907Z",
+        "e3-deploy-20260923T210547Z",
+        "e3-deploy-20260923T210600Z",
+        "e3-deploy-20260923T210852Z",
+        "e3-deploy-20260923T210951Z",
+        "e3-deploy-20260923T211103Z",
+        "e3-deploy-20260923T213011Z",
+        "e3-deploy-20260923T213040Z",
+        "e3-deploy-20260923T213104Z",
+        "e3-deploy-20260923T213238Z",
+        "e3-deploy-20260923T213850Z",
+        "e3-deploy-20260923T214919Z",
+        "e3-deploy-20260923T215200Z",
+        "e3-deploy-20260923T215301Z",
+        "e3-deploy-20260923T215329Z"
+      ],
+      "backup_dirs_with_manifest": [
+        "e3-deploy-20260923T210547Z",
+        "e3-deploy-20260923T210600Z",
+        "e3-deploy-20260923T210852Z",
+        "e3-deploy-20260923T210951Z",
+        "e3-deploy-20260923T211103Z",
+        "e3-deploy-20260923T213011Z",
+        "e3-deploy-20260923T213040Z",
+        "e3-deploy-20260923T213104Z",
+        "e3-deploy-20260923T213238Z",
+        "e3-deploy-20260923T213850Z",
+        "e3-deploy-20260923T214919Z",
+        "e3-deploy-20260923T215200Z",
+        "e3-deploy-20260923T215301Z",
+        "e3-deploy-20260923T215329Z"
+      ],
+      "backup_available": true,
+      "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+      "e3_modules_required": 34,
+      "e3_modules_missing": [],
+      "runtime_modules_deployed": true,
+      "orchestration_schema_version": 2,
+      "orchestration_db_is_schema_v2": true,
+      "rollback_available": true
+    }
+  },
+  "enablement_rule": {
+    "condition_a_credentials_configured": false,
+    "condition_b_all_readiness_criteria_satisfied": false,
+    "condition_c_explicit_owner_authorization_for_this_step": false,
+    "condition_c_note": "explicit owner authorization to enable at this point is recorded only conditional on the provider credentials being confirmed configured; the authority defers local Stage 2 completion until after the remaining provider credentials are configured on 2026-09-24 and the gates are re-run. Since none of the seven provider credentials is configured, the authorization does not yet apply and the condition is NOT satisfied",
+    "criteria": {
+      "E1/E2/E3/E4/E5 + queue/bridge regressions pass": false,
+      "real-path production rehearsal evidenced (multi-worker, consumed)": true,
+      "Google image worker real-dispatch failure resolved (not intermittent)": false,
+      "no unresolved critical integrity/privacy/safety defect": true,
+      "worker routing/qualification evidence-driven": true,
+      "rollback/recovery available": true
+    }
+  },
+  "stage2_enabled": false,
+  "stage2_state": "NOT ENABLED",
+  "remaining_conditions": [
+    "condition (a) failed: 7/7 provider credentials still NOT configured: mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3",
+    "condition (b) failed: unmet readiness criteria: E1/E2/E3/E4/E5 + queue/bridge regressions pass; Google image worker real-dispatch failure resolved (not intermittent)",
+    "condition (c) not satisfied: explicit owner authorization to enable at this point is recorded only conditional on the provider credentials being confirmed configured; the authority defers local Stage 2 completion until after the remaining provider credentials are configured on 2026-09-24 and the gates are re-run. Since none of the seven provider credentials is configured, the authorization does not yet apply and the condition is NOT satisfied"
+  ]
+}

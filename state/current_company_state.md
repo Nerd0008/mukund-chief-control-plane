@@ -1,7 +1,10 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T21:55:00Z
-- Latest evidence run: 2026-09-23T21:53:37Z at code SHA `4da92eb` (this run's code commit)
+- Timestamp: 2026-09-23T22:38:00Z
+- Latest evidence run: 2026-09-23T22:37:29Z — E3 Stage 2 readiness gate re-run
+  (`audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
+  its regression input (`audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/`,
+  code SHA `56d923b`). Previous run: 2026-09-23T21:53:37Z at code SHA `4da92eb`.
 - Evidence files (this run):
   - `audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/evidence.json` (+ `.md`)
     — **12 suites, 364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0**
@@ -486,14 +489,75 @@ Coverage gap closed:
 
 No roster entry needed to be added: the audit found no missing owner-relevant workflow.
 
+## E3 Stage 2 readiness gate re-run (2026-09-23T22:35Z–22:37Z)
+
+Task `agent-e3-stage2-readiness-gate-rerun-2026-09-24`. This is the gate re-run the owner's
+late-evening directive asks for **after** the remaining provider credentials are configured. It was
+executed now against current state; the credentials are **not yet configured**, so the gate correctly
+leaves Stage 2 disabled. The gate itself made **0 real provider calls** and read no credential value.
+
+Evidence:
+- `audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/` — full regression via
+  `scripts/evidence_runner.py --label e3-stage2-readiness-gate-rerun`.
+- `audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/` — the gate verdict
+  (`scripts/e3_stage2_readiness_gate.py`, new; deterministic, 0 provider calls).
+- Two earlier gate-run intermediates are preserved (not overwritten) under
+  `audits/evidence/superseded/*-e3-stage2-readiness-gate-rerun-superseded-by-gate-verdict/`; they
+  were produced by an early build of the gate script that mis-selected its regression input.
+
+Verified facts (all machine-checked this run):
+
+- **Credentials (presence only — no value read or logged): 0/7 of the credential-missing providers
+  have locally configured credentials.** Still missing: `mistral-small-4`, `glm-53-flash`,
+  `qwen38-27b`, `longcat-2.0`, `minimax-m3`, `step-37-flash`, `tencent-hunyuan-hy3`. The three
+  already-configured workers verified present: `codex-cli` (chatgpt login),
+  `google-nano-banana-2` (credential_manager), `deepseek-v41-flash` (credential_manager).
+- Regressions: 12 suites, **364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite
+  exit 0**, code SHA `56d923b`.
+- Real-path production rehearsal: **consumed, not repeated** (the contract forbids repeating it).
+  Re-derived from `audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/evidence.json`
+  (sha256 `88212b70…`): 0 failed checks, 7 bounded real calls, every multi-node / dependency-gate /
+  isolation / E1-E2-boundary check `True`; `google_image_complete` = `None` (unrun — not counted as a
+  pass).
+- Google image worker: **still INTERMITTENT / not settled** — routable `true`, vision role
+  `EVALUATING`, 2 recorded executions / 1 verified pass. Consumed from the recorded diagnosis.
+- Qualification (evidence-derived, read-only, 0 calls): codex-cli builder QUALIFIED (3/3/3),
+  codex-cli integrator QUALIFIED (2/2/2), deepseek-v41-flash builder QUALIFIED (8/8/3),
+  google-nano-banana-2 vision EVALUATING. `qualified_rows_without_evidence = 0`.
+- Isolation + boundary (fresh, in-run): all production writes refused fail-closed; all three stores
+  byte-identical before/after **including `-wal`/`-shm` sidecars**; isolated sink written outside the
+  production root; E1/E2 static scan `clean: true`, 0 direct SQL violations, E2 reached only via
+  `governor.record_request()`.
+- Rollback: deploy-script `--restore` path present, 14 backup dirs with manifests, 0 runtime E3
+  modules missing, orchestration schema v2.
+
+**Verdict: Stage 2 NOT ENABLED.** Enablement requires all three conditions; all three currently fail:
+
+1. (a) credentials confirmed configured — **FAIL (0/7)**.
+2. (b) every readiness criterion objectively satisfied by this run's evidence — **FAIL**: the Google
+   image worker's real-dispatch intermittency is unresolved. Every other criterion is MET
+   (regressions, real-path rehearsal, integrity/privacy/safety, evidence-driven qualification,
+   rollback).
+3. (c) explicit owner authorization for enablement at this point — **NOT SATISFIED**: the owner's
+   authorization is conditional on the provider credentials being confirmed configured, which they
+   are not (authority directive update 2026-09-23 late evening, commits `a58549c`/`2d5f332`/`d7e718c`).
+
+E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain **gated
+behind Stage 2** and were not run.
+
 ## Current blockers / owner dependencies
 
-- E3 Stage 2 local enablement: **blocked by explicit current owner instruction** (not an engineering
-  gap any more — the execution leg now exists and is evidenced).
+- E3 Stage 2 local enablement: **blocked — gate re-run 2026-09-23T22:37Z: Stage 2 NOT ENABLED.**
+  The readiness gate now runs deterministically (`scripts/e3_stage2_readiness_gate.py`); the only
+  unmet readiness criterion is the Google image worker's intermittency, and the blocking conditions
+  are (a) 0/7 provider credentials configured and (c) owner authorization that is conditional on
+  those credentials being configured.
 - Google image worker real dispatch: **intermittent** — the identical request failed once (no image
   part) and succeeded on the bounded re-dispatch. The trigger is unknown; a bounded repeat series is
   required. Engineering, not owner action.
-- Seven provider credentials / account readiness steps remain owner/provider dependent
+- Seven provider credentials / account readiness steps remain owner/provider dependent —
+  **confirmed 0/7 configured as of 2026-09-23T22:36Z** (presence-only probe; never via
+  GitHub/queue/logs)
 - Deployment architecture: intentionally deferred by owner until local operation is proven. The
   authority records laptop-primary + GitHub control plane + VPS watchdog/failover as the current
   owner *preference*, explicitly not a final decision and not authorization for VPS cutover.
@@ -506,10 +570,13 @@ No roster entry needed to be added: the audit found no missing owner-relevant wo
    repeat series to measure how often the no-image response recurs, a controlled comparison of the
    image request shape, and the truth about whether a requested image size can be honoured. Then
    re-run the evidence-backed qualification for the vision role.
-2. After Mukund configures the remaining provider credentials on 2026-09-24: re-run the full local
-   Stage 2 readiness gate and record the result (owned by the pending
-   `agent-e3-stage2-readiness-gate-rerun-2026-09-24`, which consumes this run's diagnosis and
-   qualification results rather than repeating them).
+2. **After Mukund configures the remaining provider credentials on 2026-09-24:** re-run the local
+   Stage 2 readiness gate (`scripts/e3_stage2_readiness_gate.py` + `scripts/evidence_runner.py`) and,
+   only if all three conditions hold (credentials confirmed configured; every readiness criterion
+   satisfied; explicit owner authorization for that step), enable local Stage 2. The gate was already
+   re-run once on 2026-09-23T22:37Z and returned NOT ENABLED (0/7 credentials); that verdict is
+   recorded in the section above. Owner action required first: configure the seven provider
+   credentials.
 3. Extend qualification evidence for the remaining roles/workers as real execution evidence arrives;
    the harness and the bar are now in place, so this is evidence collection, not new engineering.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths
