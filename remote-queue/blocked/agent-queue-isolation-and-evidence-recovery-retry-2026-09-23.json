@@ -14,7 +14,7 @@
     "Commit/push small recoverable changes. End with only the bridge's strict JSON response; let the poller transition this successor to a terminal queue state."
   ],
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "stop_conditions": [
     "E3 Stage 2 production remains NOT APPROVED; no production enablement or live production dispatch.",
     "Deployment architecture is unresolved; do not deploy, cut over, migrate, install services, reboot, alter firewall, or choose an architecture.",
@@ -23,5 +23,11 @@
     "If another recovery worker is actually active or a file conflict exists, stop conflicting edits and record dependency; do not dispatch duplicate work.",
     "If verified CLI failure requires Mukund login/account/provider action, identify exact owner action and continue independent authorized work."
   ],
-  "notes": "Coordinator verified at 2026-09-23T19:13:45Z: predecessor was in running/ without a corresponding poller.py, visible_worker.py, hermes_dispatch or new Hermes CLI process. Scheduler reports Ready with successful recurring runs and queue.log records pulls through 19:12Z; the sole Hermes process predates the task. Predecessor moved to blocked/ with execution_error and evidence, not completed. Unique retry is safe. Preserve E3 Stage 2 and unresolved VPS architecture gates."
+  "notes": "Coordinator verified at 2026-09-23T19:13:45Z: predecessor was in running/ without a corresponding poller.py, visible_worker.py, hermes_dispatch or new Hermes CLI process. Scheduler reports Ready with successful recurring runs and queue.log records pulls through 19:12Z; the sole Hermes process predates the task. Predecessor moved to blocked/ with execution_error and evidence, not completed. Unique retry is safe. Preserve E3 Stage 2 and unresolved VPS architecture gates.",
+  "blocked_at": "2026-09-23T19:16:45.887631Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes CLI exited with code 1 (output_bytes=54).",
+    "continue_without": "Independent safe work may continue"
+  }
 }
