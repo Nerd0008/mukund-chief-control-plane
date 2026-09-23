@@ -349,3 +349,18 @@ While credential presence is still 0/7:
 - only re-stage the post-key readiness gate after a verified credential-state change or explicit owner instruction that keys have been configured.
 
 This rule exists to prevent a critical-priority credential-gated task from starving Career Ops, Company Watch, regional agents, E4/E5 harness work, operational services, deployment preparation, and whole-company acceptance preparation.
+
+
+## Worker failure retry policy — owner directive 2026-09-24
+
+For a **recoverable execution failure** (for example: transient CLI/tool error, no-progress watchdog timeout, or bounded task-wrapper execution failure), the queue must attempt the **same task up to two additional times** before finally marking it blocked and advancing.
+
+Policy:
+- initial attempt + maximum **2 retries**,
+- preserve already-landed commits/evidence and resume from the smallest unfinished unit instead of blindly repeating successful work,
+- record retry count/audit state deterministically,
+- after the second retry fails, mark the task blocked and continue to the next independent task,
+- **do not retry deterministic owner/external blockers** such as missing provider credentials, required owner approval, architecture/safety decisions, irreversible actions, or an unchanged external-provider blocker; park those immediately until the blocking state changes,
+- this retry policy must never create an infinite loop.
+
+The Stage-2 missing-key gate remains subject to the anti-loop directive above: 0/7 keys is a deterministic blocker, not a retryable execution failure.
