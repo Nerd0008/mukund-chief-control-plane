@@ -1,0 +1,104 @@
+{
+  "label": "bridge-watchdog-validation",
+  "task_id": "agent-bridge-watchdog-validation-2026-09-23",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "run_utc": "2026-09-23T21:18:00Z",
+  "code_sha_before": "07dd4a1",
+  "inspected_commits": {
+    "617fd47c": "bridge: add no-progress watchdog to visible worker (remote_queue/visible_worker.py, +60/-10)",
+    "b83c9ad": "bridge: bound Hermes tasks and freeze running contracts (remote_queue/hermes_dispatch.py, +14/-4)"
+  },
+  "verified_claims": [
+    {
+      "claim": "Visible worker has a bounded no-stream-event watchdog, default 300s, configurable by HERMES_REMOTE_IDLE_TIMEOUT",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/visible_worker.py:38-43 --idle-timeout-seconds defaults to int(os.environ.get(\"HERMES_REMOTE_IDLE_TIMEOUT\", \"300\"))",
+        "remote_queue/visible_worker.py:248-266 watchdog fires only while proc.poll() is None and args.idle_timeout_seconds > 0 and quiet_for >= args.idle_timeout_seconds",
+        "isolated test test_silent_child_trips_watchdog_with_124_and_targeted_termination: 2s test-only bound against a silent fake child -> observed 'WATCHDOG TIMEOUT' in worker output",
+        "isolated test test_a_non_positive_bound_disables_the_watchdog: bound 0 against a 2s-silent healthy child -> no watchdog, exit 0"
+      ]
+    },
+    {
+      "claim": "Watchdog termination is targeted at the worker's own child tree only",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/visible_worker.py:123-147 _terminate_child_tree uses taskkill /PID <child pid> /T /F, falling back to proc.terminate()/proc.kill()",
+        "static check asserts the literal ['taskkill', '/PID', str(proc.pid), '/T', '/F'] form and asserts '/IM' never appears in the module",
+        "isolated test asserts the spawned fake child has exited and asserts the worker prints 'Terminating only this Hermes child tree'"
+      ]
+    },
+    {
+      "claim": "Dispatch has a bounded hard task timeout, default 1200s, configurable by HERMES_REMOTE_TASK_TIMEOUT",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/hermes_dispatch.py:169-173 timeout_seconds defaults to int(os.environ.get(\"HERMES_REMOTE_TASK_TIMEOUT\", \"1200\")) when None",
+        "remote_queue/hermes_dispatch.py:226 proc.wait(timeout=timeout_seconds); :229-234 taskkill /T /F on the helper tree on expiry",
+        "isolated test test_hard_task_timeout_defaults_to_1200_and_is_configurable: observed timeout=1200 with no override, timeout=137 with HERMES_REMOTE_TASK_TIMEOUT=137",
+        "isolated test test_hard_timeout_expiry_blocks_with_execution_error: TimeoutExpired -> status blocked, blocker_category execution_error, summary contains '9 seconds'"
+      ]
+    },
+    {
+      "claim": "Watchdog exit code 124 is surfaced truthfully as execution_error, never as completion",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/visible_worker.py:295-302 watchdog_fired forces rc = 124 and exit file content '124'",
+        "remote_queue/hermes_dispatch.py:252-267 hermes_rc == 124 produces summary 'Hermes worker hit the <N>s no-progress watchdog', status blocked, blocker_category execution_error",
+        "isolated test test_silent_child_trips_watchdog_with_124_and_targeted_termination: exit file reads '124', output file is empty (no fabricated final response), worker prints 'Status: FAILED'",
+        "isolated test test_watchdog_exit_code_124_is_execution_error_not_completion: dispatch result status 'blocked', blocker_category 'execution_error', summary contains 'watchdog'"
+      ]
+    },
+    {
+      "claim": "Generated Hermes prompt treats remote-queue/running/<task_id>.json as immutable and respects recorded standing conditional approvals instead of inventing a fresh owner gate",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/hermes_dispatch.py:80 emits 'Treat your own remote-queue/running/<interpolated task_id>.json as immutable execution input; do not rewrite or reinterpret the running task contract while executing it.'",
+        "remote_queue/hermes_dispatch.py:79 emits 'Respect unresolved owner approval gates. If the authority records a standing conditional approval, apply it only after its recorded objective conditions are verified.'",
+        "isolated test test_running_task_record_is_immutable_and_task_id_is_interpolated asserts the task_id is interpolated and that no '{task.get(' placeholder leaks into the prompt",
+        "the live contract received by this run contained both sentences verbatim; this run treated remote-queue/running/agent-bridge-watchdog-validation-2026-09-23.json as immutable input and did not rewrite it"
+      ]
+    },
+    {
+      "claim": "Compile/import of the bridge modules",
+      "status": "VERIFIED",
+      "evidence": [
+        "python -m py_compile remote_queue/visible_worker.py remote_queue/hermes_dispatch.py remote_queue/poller.py remote_queue/tests/test_queue.py -> COMPILE_OK",
+        "remote_queue.tests.test_bridge_watchdog imports both modules via the package path and exercises their real entry points"
+      ]
+    },
+    {
+      "claim": "Isolated suite isolation held (no live-queue mutation)",
+      "status": "VERIFIED",
+      "evidence": [
+        "remote_queue/tests/test_queue.py TestIsolationGuards + tearDownModule live-queue snapshot guard passed (30/30)",
+        "the new bridge module runs entirely in per-test temp dirs and never touches remote-queue/; no real Hermes process was launched (the 'Hermes' child is a throwaway local python script or a fake process object)"
+      ]
+    }
+  ],
+  "defects_found_in_the_hardened_bridge": [],
+  "defect_note": "No bridge defect was found within the validation scope, so no production code was modified. Two pre-existing, out-of-scope observations were recorded rather than changed: (1) remote_queue/poller.py:197-212 routes task ids containing 'bridge-validation'/'operational'/'e2e' to hardcoded stub handlers that return fabricated 'completed' payloads with no execution evidence (already recorded as a deliberately unfixed defect in state/current_company_state.md:170-172); the validated task id does not match any of those patterns and was correctly dispatched to dispatch_task. (2) _terminate_child_tree returns after taskkill without checking its return code, so its documented terminate()/kill() fallback is only reachable when taskkill raises; the watchdog retries once per second and the 1200s hard bound is the outer backstop.",
+  "test_evidence": {
+    "new_suite": "remote_queue/tests/test_bridge_watchdog.py -- 12 collected / 12 passed / exit 0",
+    "isolated_queue_suite": "remote_queue/tests/test_queue.py -- 30 collected / 30 passed / exit 0",
+    "full_runner": "scripts/evidence_runner.py --label bridge-watchdog-validation -- 11 suites / 335 collected / 335 passed / 0 failed / exit 0",
+    "baseline_delta": "323 -> 335 tests, delta is exactly the 12 new bridge tests"
+  },
+  "reported_bounds_are_product_defaults": {
+    "HERMES_REMOTE_IDLE_TIMEOUT": "300",
+    "HERMES_REMOTE_TASK_TIMEOUT": "1200",
+    "test_only_bounds_used": "2s and 3s idle bounds against fake children; the 300s production bound was never waited on"
+  },
+  "handoff": {
+    "e3_rehearsal_retry_pending": "remote-queue/pending/agent-e3-local-production-rehearsal-retry-2026-09-23.json",
+    "reason": "the blocked rehearsal's recorded unmet condition (no orchestrator-to-adapter dispatch leg) was built and evidenced by agent-e3-production-execution-leg-2026-09-23; no E3 rehearsal was pending or running at exit time",
+    "other_pending": "remote-queue/pending/agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23.json (already staged by the predecessor; unchanged)",
+    "stage_2": "disabled; not enabled, not weakened, and not enabled by this task"
+  },
+  "stop_conditions_respected": {
+    "e3_task_contract_mutated": false,
+    "unrelated_processes_killed": false,
+    "pass_evidence_fabricated": false,
+    "stage_2_enabled": false,
+    "secrets_or_chain_of_thought_exposed": false
+  }
+}

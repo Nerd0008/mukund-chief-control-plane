@@ -99,6 +99,12 @@ SUITES = [
         "pythonpath": [],
         "guard": None,
     },
+    {
+        "name": "Remote bridge watchdog/timeout hardening (isolated: fake Hermes child, no live queue)",
+        "script": "remote_queue/tests/test_bridge_watchdog.py",
+        "pythonpath": [],
+        "guard": None,
+    },
 ]
 
 
