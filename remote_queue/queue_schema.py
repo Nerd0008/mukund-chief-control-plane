@@ -17,6 +17,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from remote_queue import retry_policy
+
 # Repository root used for git publication. Recovery tooling and the isolated
 # test-suite set HERMES_REPO_ROOT / HERMES_QUEUE_ROOT to a disposable root so
 # queue helpers can never commit, push, or mutate the live checkout.
@@ -212,6 +214,70 @@ def block_task(task_id: str, blocker_category: str, owner_action: str, continue_
 
     src.unlink()
     _git_commit_and_push(f"queue: block {task_id} ({blocker_category})")
+
+
+def _read_running_task(task_id: str) -> Dict[str, Any]:
+    src = RUNNING_DIR / f"{task_id}.json"
+    if not src.exists():
+        return {}
+    with open(src, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def read_retry_state(task_id: str) -> Dict[str, Any]:
+    """Return the persisted bounded-retry state for a running task.
+
+    Returns ``{}`` when the task is not running or has never recorded an attempt,
+    so a restarted poller resumes from a deterministic, auditable count instead
+    of restarting the retry loop from scratch.
+    """
+    task = _read_running_task(task_id)
+    state = task.get("retry_state")
+    return state if isinstance(state, dict) else {}
+
+
+def record_execution_attempt(task_id: str, attempt: int, result: Dict[str, Any],
+                             will_retry: bool, reason: str = "") -> Dict[str, Any]:
+    """Persist one execution attempt on the running task record.
+
+    The record is the auditable runtime state for bounded recovery: the attempt
+    number, the outcome, and the bounded-retry decision are written (and
+    published like every other queue transition) *before* the next attempt, so
+    retries can never loop unnoticed or uncounted.
+    """
+    ensure_dirs()
+    src = RUNNING_DIR / f"{task_id}.json"
+    if not src.exists():
+        raise QueueError(f"Task not in running: {task_id}")
+
+    task = _read_running_task(task_id)
+    result = result or {}
+    state = retry_policy.retry_state(attempt, result, will_retry, reason)
+
+    attempts = task.get("execution_attempts")
+    if not isinstance(attempts, list):
+        attempts = []
+    attempts.append({
+        "attempt": int(attempt),
+        "recorded_at": datetime.utcnow().isoformat() + "Z",
+        "status": result.get("status"),
+        "blocker_category": result.get("blocker_category"),
+        "summary": result.get("summary"),
+        "will_retry": bool(will_retry),
+        "reason": reason,
+    })
+
+    task["execution_attempts"] = attempts
+    task["retry_state"] = state
+
+    with open(src, 'w', encoding='utf-8') as f:
+        json.dump(task, f, indent=2)
+
+    _git_commit_and_push(
+        f"queue: attempt {int(attempt)}/{state['max_attempts']} {task_id} "
+        f"({'retry' if will_retry else 'park'})"
+    )
+    return state
 
 
 def _is_non_fast_forward(stderr: str) -> bool:

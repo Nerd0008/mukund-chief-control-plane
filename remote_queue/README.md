@@ -73,10 +73,34 @@ Optional:
 - Schema validation failed → blocked, continue other tasks
 - Authority not approved → blocked
 - Owner approval required → blocked
-- Execution error → blocked with details
+- Recoverable execution failure (transient CLI/tool error, hard-timeout expiry,
+  or no-progress watchdog kill) → the same task is retried automatically, at
+  most **two** times after the initial attempt (`remote_queue/retry_policy.py`,
+  `MAX_RETRIES = 2`). Every attempt is recorded on the running task record
+  (`execution_attempts` / `retry_state`) and published, so the count is
+  deterministic and a restart resumes it instead of restarting the loop.
+- Deterministic blockers (missing credentials, required owner approval,
+  architecture/safety/irreversible-action decisions, unchanged external
+  provider blockers) are **not** retried: they park immediately so independent
+  work continues. The Stage-2 missing-key gate is one of these, so it still
+  cannot self-requeue.
+- After the second failed retry → blocked with the last blocker category, and
+  the poller advances to the next task. There is no path to an unbounded loop.
+
+## Worker console (Windows)
+
+Visible workers run in their own console so progress is observable. Before the
+first progress line, `remote_queue/visible_worker.py` clears
+`ENABLE_QUICK_EDIT_MODE` for **that console only** (via `SetConsoleMode` on a
+`CONIN$` handle it opens itself), so a stray click/drag can no longer put the
+console into select/mark mode and suspend the worker. Console output also goes
+through a bounded writer thread and the no-progress watchdog runs in its own
+thread, so a jammed console can never stall the watchdog or the exit path. No
+global/registry console preference is read or written; if the mode cannot be
+changed the exact limitation is printed and the worker continues.
 
 ## Tests
 
 ```bash
-python -m unittest remote_queue.tests.test_queue -v
+python -m unittest discover -s remote_queue/tests -v
 ```

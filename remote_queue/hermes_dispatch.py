@@ -16,6 +16,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from remote_queue.retry_policy import MAX_ATTEMPTS
+
 REPO_ROOT = Path(__file__).parent.parent
 
 
@@ -46,10 +48,28 @@ def _find_hermes_cli() -> Optional[str]:
     return None
 
 
-def _task_prompt(task: Dict[str, Any]) -> str:
+def _task_prompt(task: Dict[str, Any], attempt: int = 1) -> str:
     allowed_scope = "\n".join(f"- {item}" for item in task.get("allowed_scope", []))
     stop_conditions = "\n".join(f"- {item}" for item in task.get("stop_conditions", []))
     notes = task.get("notes") or "(none)"
+
+    retry_context = ""
+    if int(attempt or 1) > 1:
+        retry_context = f"""
+RETRY CONTEXT (attempt {attempt} of {MAX_ATTEMPTS})
+An earlier attempt of this same task ended in a recoverable execution failure.
+The repository may already contain work that earlier attempt landed.
+- Inspect current repository and queue state before changing anything. Commits,
+  evidence directories and files produced by earlier attempts are preserved and
+  must not be recreated, reverted, duplicated, or redone.
+- Resume from the smallest unfinished unit and complete only what is still
+  outstanding.
+- Do not repeat already-completed work or re-open settled decisions.
+- If this failure was in fact a deterministic blocker (missing credential,
+  required owner approval, architecture/safety/irreversible-action decision, or
+  an unchanged external provider state), report that blocker truthfully instead
+  of retrying the same action.
+"""
 
     return f"""You are Hermes, receiving a structured task from Mukund's GitHub control plane.
 
@@ -70,6 +90,7 @@ STOP CONDITIONS
 
 NOTES
 {notes}
+{retry_context}
 
 EXECUTION RULES
 - Treat the authority file and repository state as source of truth.
@@ -166,8 +187,18 @@ def _parse_response(raw: str) -> Dict[str, Any]:
     return result
 
 
-def dispatch_task(task: Dict[str, Any], timeout_seconds: Optional[int] = None) -> Dict[str, Any]:
+# ``attempt`` is the 1-based execution attempt used by the bounded
+# recoverable-failure retry policy (initial attempt + at most MAX_RETRIES).
+# It never mutates the task contract: it only labels the attempt in the visible
+# console and adds resume guidance to the generated prompt so work already
+# landed by an earlier attempt is preserved instead of redone.
+def dispatch_task(
+    task: Dict[str, Any],
+    timeout_seconds: Optional[int] = None,
+    attempt: int = 1,
+) -> Dict[str, Any]:
     """Invoke Hermes with bounded hard and no-progress timeouts."""
+    attempt = max(1, int(attempt or 1))
     if timeout_seconds is None:
         timeout_seconds = int(os.environ.get("HERMES_REMOTE_TASK_TIMEOUT", "1200"))
     idle_timeout_seconds = int(os.environ.get("HERMES_REMOTE_IDLE_TIMEOUT", "300"))
@@ -184,7 +215,7 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: Optional[int] = None) -
             "remaining": ["Restore CLI dispatch path and retry"],
         }
 
-    prompt = _task_prompt(task)
+    prompt = _task_prompt(task, attempt=attempt)
 
     # On Mukund's Windows workstation, remote agent tasks are intentionally
     # visible in their own console. The helper streams Hermes output when
@@ -215,6 +246,7 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: Optional[int] = None) -
                         "--exit-file", str(exit_file),
                         "--task-id", task_id,
                         "--cwd", str(REPO_ROOT),
+                        "--attempt", str(attempt),
                         "--idle-timeout-seconds", str(idle_timeout_seconds),
                     ],
                     cwd=str(REPO_ROOT),

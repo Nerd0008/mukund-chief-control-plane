@@ -17,10 +17,14 @@ from remote_queue.queue_schema import (
     ensure_dirs, find_pending_tasks, claim_task, load_task_file,
     validate_task, complete_task, block_task, log_event,
     is_task_running, is_task_completed, is_task_blocked,
+    read_retry_state, record_execution_attempt,
     PENDING_DIR, RUNNING_DIR, COMPLETED_DIR, BLOCKED_DIR,
     _git_commit_and_push,
 )
 from remote_queue.hermes_dispatch import dispatch_task
+from remote_queue.retry_policy import (
+    MAX_ATTEMPTS, MAX_RETRIES, next_attempt_number, plan_retry,
+)
 
 # Disposable-root and mutex isolation for recovery runs and the isolated test
 # suite: HERMES_REPO_ROOT / HERMES_QUEUE_ROOT redirect all paths, and
@@ -190,9 +194,9 @@ def check_kill_switch() -> bool:
     return KILL_SWITCH_FILE.exists()
 
 
-def handle_task(task: dict) -> dict:
+def handle_task(task: dict, attempt: int = 1) -> dict:
     task_id = task["task_id"]
-    log_event(f"Handling task: {task_id}")
+    log_event(f"Handling task: {task_id} (attempt {attempt})")
 
     if "full-operational-build" in task_id or "operational" in task_id.lower():
         return handle_operational_build(task)
@@ -214,9 +218,94 @@ def handle_task(task: dict) -> dict:
     # Real agent-to-agent execution path. Only explicitly prefixed agent tasks
     # reach Hermes; arbitrary unknown queue objects still fail closed.
     if task_id.startswith("agent-"):
-        return dispatch_task(task)
+        return dispatch_task(task, attempt=attempt)
 
     raise ValueError(f"No handler for task: {task_id}")
+
+
+def _execute_once(task: dict, attempt: int) -> dict:
+    """Run exactly one execution attempt, converting crashes to a blocked result."""
+    try:
+        return handle_task(task, attempt=attempt)
+    except Exception as exc:
+        log_event(f"Task {task.get('task_id')} attempt {attempt} raised: {exc}")
+        return {
+            "status": "blocked",
+            "summary": f"Task handler raised {type(exc).__name__}: {exc}",
+            "owner_action_required": None,
+            "blocker_category": "execution_error",
+            "commits": [],
+            "tests": [],
+            "changed_files": [],
+            "remaining": ["Inspect the queue log and retry"],
+        }
+
+
+def _run_task_with_bounded_retry(task_id: str, task: dict) -> None:
+    """Execute a claimed task with the owner-approved bounded retry policy.
+
+    Initial attempt plus at most ``MAX_RETRIES`` (2) automatic retries of the
+    *same* task. Every attempt is recorded on the running task record before the
+    next one starts, so the count is deterministic and auditable, and a restart
+    resumes the same bounded count. Deterministic blockers (credentials, owner
+    approval, architecture/safety/irreversible-action decisions, external
+    provider state) park immediately: retrying cannot change them.
+    """
+    state = read_retry_state(task_id)
+    attempt = next_attempt_number(state)
+
+    if attempt > MAX_ATTEMPTS:
+        # Defensive: a previously exhausted budget must never be re-run.
+        log_event(
+            f"Task {task_id}: retry budget already exhausted "
+            f"({attempt - 1}/{MAX_ATTEMPTS} attempts recorded); parking without re-running."
+        )
+        block_task(
+            task_id,
+            (state.get("last_blocker_category") or "execution_error"),
+            (state.get("last_summary")
+             or f"Recoverable failures exhausted the retry budget ({MAX_RETRIES} retries)."),
+            "Independent safe work may continue",
+        )
+        return
+
+    while True:
+        result = _execute_once(task, attempt)
+        status = result.get("status")
+
+        if status == "completed":
+            complete_task(task_id, result)
+            return
+
+        if status == "in_progress":
+            log_event(f"Task {task_id} in progress (attempt {attempt})")
+            return
+
+        if status != "blocked":
+            result = dict(result or {})
+            result["status"] = "blocked"
+            result["blocker_category"] = "execution_error"
+            result.setdefault("owner_action_required", None)
+            result.setdefault("summary", "Handler returned an invalid task status")
+
+        should_retry, reason = plan_retry(attempt, result)
+        record_execution_attempt(task_id, attempt, result, should_retry, reason)
+        log_event(
+            f"Task {task_id} attempt {attempt}/{MAX_ATTEMPTS}: "
+            f"{'retry' if should_retry else 'park'} ({reason})"
+        )
+
+        if should_retry:
+            attempt += 1
+            continue
+
+        block_task(
+            task_id,
+            result.get("blocker_category") or "execution_error",
+            result.get("owner_action_required") or result.get("summary") or "Hermes reported a blocker",
+            "Independent safe work may continue",
+        )
+        return
 
 
 def handle_bridge_validation(task: dict) -> dict:
@@ -328,32 +417,7 @@ def run_poll_cycle():
 
         if claim_task(task_path):
             log_event(f"Claimed task: {task_id}")
-            try:
-                result = handle_task(task)
-                if result.get("status") == "completed":
-                    complete_task(task_id, result)
-                elif result.get("status") == "blocked":
-                    block_task(
-                        task_id,
-                        result.get("blocker_category") or "execution_error",
-                        result.get("owner_action_required") or result.get("summary") or "Hermes reported a blocker",
-                        "Independent safe work may continue",
-                    )
-                elif result.get("status") == "in_progress":
-                    log_event(f"Task {task_id} in progress")
-                else:
-                    block_task(
-                        task_id,
-                        "execution_error",
-                        "Handler returned an invalid task status",
-                        "Independent safe work may continue",
-                    )
-            except Exception as e:
-                log_event(f"Task {task_id} failed: {e}")
-                try:
-                    block_task(task_id, "execution_error", str(e), "Other tasks continue")
-                except Exception as e2:
-                    log_event(f"Failed to block: {e2}")
+            _run_task_with_bounded_retry(task_id, task or {})
             return
 
 

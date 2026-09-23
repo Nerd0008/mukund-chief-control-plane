@@ -111,6 +111,18 @@ SUITES = [
         "pythonpath": [],
         "guard": None,
     },
+    {
+        "name": "Windows console QuickEdit/Select hardening (isolated: injected console api, fake Hermes child)",
+        "script": "remote_queue/tests/test_console_quickedit.py",
+        "pythonpath": [],
+        "guard": None,
+    },
+    {
+        "name": "Bounded recoverable-failure retry, initial + 2 (isolated: disposable queue root, fake handler)",
+        "script": "remote_queue/tests/test_worker_retry.py",
+        "pythonpath": [],
+        "guard": None,
+    },
 ]
 
 
