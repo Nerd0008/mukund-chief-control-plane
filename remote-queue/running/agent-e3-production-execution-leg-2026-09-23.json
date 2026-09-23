@@ -19,7 +19,7 @@
     "Deploy the E3 orchestration modules and e3-* CLI bindings to the local runtime root %LOCALAPPDATA%\\hermes\\exec-brain without committing secrets.",
     "Bound real provider usage: the minimum number of harmless, deterministic execution calls needed to evidence the path; capture provider-returned usage only if exposed and never fabricate it.",
     "Re-run the production rehearsal with real worker execution and record executable evidence, including at least one verifier rejection followed by targeted repair/replan and successful re-verification on the real path.",
-    "Re-evaluate every recorded local Stage 2 readiness precondition with evidence. Enable LOCAL Stage 2 only if all are objectively satisfied under the standing conditional approval; otherwise leave it disabled and record the exact remaining condition.",
+    "Re-evaluate every recorded local Stage 2 readiness precondition with evidence. Regardless of outcome, do not enable LOCAL Stage 2 or production dispatch; leave it disabled and record the exact remaining conditions for a separate owner-directed decision.",
     "If Stage 2 is enabled, run E4/E5 real-path drills (checkpoint/failover, convergence/safe mode) plus local acceptance testing and record evidence.",
     "Preserve rollback/recovery for every change; keep commits small and recoverable.",
     "Run the full E1/E2/E3/E4/E5 plus queue regression suites after changes and record exact commands, counts and exit codes.",
@@ -32,7 +32,8 @@
     "Do not expose secrets, raw chain-of-thought, or private runtime DB content.",
     "Do not perform VPS cutover or finalize deployment architecture.",
     "Do not run unbounded or exploratory provider calls; every real execution must be bounded and justified.",
-    "If a real execution requires owner credentials/account action, record the exact owner action and continue non-dependent work."
+    "If a real execution requires owner credentials/account action, record the exact owner action and continue non-dependent work.",
+    "Current owner instruction: do not enable E3 Stage 2 or production dispatch in this task, regardless of conditional approval text elsewhere."
   ],
-  "notes": "Staged by agent-e3-local-production-rehearsal-2026-09-23 because Stage 2 readiness was found unmet: the E3 orchestrator composes planning/routing/assembly/integration/verification but has no dispatch step to a worker ExecutionAdapter, and the E3 orchestration modules plus e3-* CLI are not deployed to the local runtime root. This task targets that exact condition first, then continues to E4/E5 and local acceptance testing. Owner standing directive: do not pause for a fresh approval if the local Stage 2 readiness criteria pass; LOCAL Stage 2 only. Overnight continuity: hand off to exactly one next bounded task before exit."
+  "notes": "Staged by agent-e3-local-production-rehearsal-2026-09-23 because Stage 2 readiness was found unmet: the E3 orchestrator composes planning/routing/assembly/integration/verification but has no dispatch step to a worker ExecutionAdapter, and the E3 orchestration modules plus e3-* CLI are not deployed to the local runtime root. This task targets that exact condition first, then continues to E4/E5 and local acceptance testing. Owner standing directive: do not pause for a fresh approval if the local Stage 2 readiness criteria pass; LOCAL Stage 2 only. Overnight continuity: hand off to exactly one next bounded task before exit. Current direct owner instruction for this coordinator run: implement and rehearse only; do not enable E3 Stage 2."
 }
