@@ -335,3 +335,17 @@ Effective immediately:
 - Preserve logs/evidence needed to determine whether Hermes or a child process launched the unexpected Edge search. Do not delete browser history, task logs, shell history, or queue evidence during diagnosis.
 
 This directive does not stop non-GUI engineering work and does not authorize destructive forensic actions.
+
+
+## Stage-2 credential gate anti-loop directive — 2026-09-23 23:57 BST
+
+The post-key E3 Stage-2 readiness task must **not self-requeue or stage another same-family retry while the seven owner-local provider credentials remain absent**.
+
+While credential presence is still 0/7:
+- record the owner dependency once,
+- leave Stage 2 disabled,
+- do not create another `agent-e3-stage2-readiness-gate-after-provider-keys*` successor,
+- hand off to the highest-value independent engineering task instead,
+- only re-stage the post-key readiness gate after a verified credential-state change or explicit owner instruction that keys have been configured.
+
+This rule exists to prevent a critical-priority credential-gated task from starving Career Ops, Company Watch, regional agents, E4/E5 harness work, operational services, deployment preparation, and whole-company acceptance preparation.
