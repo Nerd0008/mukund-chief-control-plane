@@ -1,0 +1,29 @@
+Information Security Analyst — Crown Agents Bank (fixture posting text)
+
+About the role
+We are looking for an Information Security Analyst to join our London security team.
+You will support the monitoring, triage and investigation of security events and
+contribute to the bank's cyber risk and assurance activities.
+
+Key responsibilities
+- Monitor security alerts and support incident response triage.
+- Investigate phishing reports and map observed behaviour to MITRE ATT&CK.
+- Support vulnerability management and remediation tracking.
+- Help maintain security policies, standards and control documentation.
+- Produce clear written reporting for technical and non-technical readers.
+
+Essential requirements
+- A degree in information security, cyber security or a related discipline.
+- Understanding of phishing analysis, endpoint assessment and network security.
+- Scripting or automation ability in Python or PowerShell.
+- Familiarity with regular expressions and log analysis.
+- Strong written communication and attention to detail.
+
+Desirable
+- Experience with Splunk or another SIEM platform.
+- Experience working in a Security Operations Centre (SOC).
+- Knowledge of ISO 27001 and GDPR.
+- CompTIA Security+ or equivalent certification.
+
+Location: London, United Kingdom (hybrid).
+Right to work: applicants must already hold the right to work in the United Kingdom.

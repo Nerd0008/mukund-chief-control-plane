@@ -1,0 +1,50 @@
+{
+  "_fixture": "Safe, synthetic LinkedIn saved-job export. Reserved example.com/.invalid domains only. No real posting, no real candidate data.",
+  "exported_at": "2026-09-23T21:00:00Z",
+  "signals": [
+    {
+      "kind": "job",
+      "company": "Example Analytics Ltd",
+      "title": "Cyber Security Intern",
+      "location": "London, United Kingdom",
+      "url": "https://job-boards.greenhouse.io/exampleanalytics/jobs/999000111",
+      "posted_at": "2026-09-20",
+      "source": "linkedin-saved-job-feed",
+      "source_detail": "LinkedIn saved-job alert (owner export)"
+    },
+    {
+      "kind": "job",
+      "company": "Example Analytics Ltd",
+      "title": "Cyber Security Intern",
+      "location": "London, United Kingdom",
+      "url": "https://job-boards.greenhouse.io/exampleanalytics/jobs/999000111?utm_source=linkedin",
+      "posted_at": "2026-09-21",
+      "source": "linkedin-saved-job-feed",
+      "source_detail": "Same posting re-shared with a tracking parameter (dedupe case)"
+    },
+    {
+      "kind": "job",
+      "company": "Placeholder Systems Ltd",
+      "title": "IT Support Analyst",
+      "location": "Manchester, United Kingdom",
+      "url": "https://example.com/careers/it-support-analyst-4711",
+      "posted_at": "2026-09-19",
+      "source": "linkedin-saved-job-feed"
+    },
+    {
+      "kind": "job",
+      "company": "Nowhere Security Inc",
+      "title": "Senior Principal Security Architect",
+      "location": "Austin, United States",
+      "url": "https://example.invalid/jobs/9999",
+      "posted_at": "2026-09-18",
+      "source": "linkedin-saved-job-feed"
+    },
+    {
+      "kind": "company",
+      "company": "Fixture Holdings plc",
+      "source": "linkedin-company-follow",
+      "source_detail": "Company followed; no posting attached"
+    }
+  ]
+}

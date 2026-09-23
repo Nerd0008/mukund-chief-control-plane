@@ -42,3 +42,25 @@ node_modules/
 venv/
 exec_brain.db
 chain-head.json
+
+# --- Company Watch: owner-private company-level job-search data ---
+# The full company registry and per-posting findings name Mukund's historical
+# application history. They stay local; only aggregate counts/evidence are
+# committed to the shared control plane.
+runtime/company-watch/
+
+# --- CV / cover-letter drafts and LinkedIn runtime (owner-private) ---
+# Generated CV/cover-letter drafts and LinkedIn signal intake carry the owner's
+# own contact details, posting links and unsent draft text. Only aggregate
+# evidence (audits/evidence/) is committed.
+runtime/career-ops/cv-drafts/
+runtime/linkedin/
+
+# --- Owner-private evidence artifacts (never committed) ---
+# Raw tracker backups, raw ATS findings and raw resolution dumps name Mukund's
+# companies, postings and application history. Committed evidence stays
+# aggregate (counts, hashes, verification results).
+audits/evidence/**/backups/*.xlsx
+audits/evidence/**/findings.json
+audits/evidence/**/resolution.json
+audits/evidence/**/manifest-*.json

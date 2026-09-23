@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "description": "Company Watch (Career) configuration. Company Watch watches the organisations already recorded in Mukund's historical application/CV evidence against their public structured ATS/career endpoints, and hands eligible findings to the existing Career Ops tracker writer. It never submits applications, never contacts companies/recruiters, never holds application state, and never writes a tracker outside career-ops/tracker_writer.py.",
+  "career_ops_root": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "career_ops_dir": "career-ops",
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "registry_source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\uk_application_company_history_18_months.md",
+  "runtime_dir": "runtime/company-watch",
+  "workbook_dir": "C:\\Users\\mukun\\Downloads\\codex\\company-watch",
+  "default_region": "uk",
+  "probe": {
+    "max_companies_per_run": 40,
+    "vendors": ["greenhouse", "ashby", "lever", "workable", "smartrecruiters"],
+    "budget_s": 240,
+    "request_timeout_s": 20,
+    "request_retries": 1,
+    "verify_derived_urls": true,
+    "verify_derived_urls_note": "A URL constructed from a documented vendor pattern is not vendor evidence; it is fetched once and only accepted if it resolves with HTTP 200."
+  },
+  "eligibility": {
+    "require_attribution_confidence": "high",
+    "owner_filters_source": "career-ops install portals.yml (UK lane only; other regions have no lane config yet)",
+    "title_matching": "standalone-token (word boundary) so 'Intern' cannot match 'Internal Audit'",
+    "location_matching": "standalone-token against location_filter.allow/always_allow with location_filter.block applied",
+    "unknown_posted_date": "not eligible (a finding with no verifiable posting date cannot satisfy the owner's max_posting_age_days rule)"
+  },
+  "region_routing": {
+    "dubai": {
+      "terms": ["dubai", "abu dhabi", "sharjah", "uae", "united arab emirates"]
+    },
+    "singapore": {
+      "terms": ["singapore"]
+    },
+    "japan": {
+      "terms": ["japan", "tokyo", "osaka", "yokohama", "nagoya"]
+    },
+    "uk": {
+      "terms": ["united kingdom", "uk", "england", "scotland", "wales", "northern ireland",
+                "london", "manchester", "birmingham", "leeds", "bristol", "edinburgh",
+                "glasgow", "cardiff", "belfast", "durham", "reading", "sheffield",
+                "nottingham", "cambridge", "oxford"],
+      "block_terms": ["united states", "usa", "canada", "india", "australia"]
+    }
+  },
+  "workbook": {
+    "filename_template": "Company_Watch_{month}.xlsx",
+    "purpose": "monthly Company Watch operational record only; never application state, never fed back into Career Ops dedupe"
+  },
+  "regional_lane_dependency": {
+    "note": "Regional scan/schedule lanes (Dubai/Japan/Singapore portals.yml lanes) are owned by agent-regional-job-search-agents-and-schedulers-2026-09-23. Company Watch records a non-UK finding's region_route but does not hand it off unless that region is explicitly requested."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-23T23:03:41+00:00",
+  "source_path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\uk_application_company_history_18_months.md",
+  "source_sha256": "2fb46ce8e1da0508327940e6f7518f328810338ac3d2abc47027ada29d8dc663",
+  "source_period": "28 February 2025 to 26 August 2026",
+  "counts": {
+    "parsed_total_rows": 229,
+    "parsed_employers": 203,
+    "parsed_recruiters": 18,
+    "parsed_other_applications": 4,
+    "parsed_unverified_candidates": 4,
+    "parsed_organizations_with_application_or_cv_evidence": 221,
+    "parsed_by_class": {
+      "employer": 203,
+      "recruiter": 18,
+      "other_application": 4,
+      "unverified_candidate": 4
+    },
+    "declared_in_source": {
+      "Confirmed or strongly evidenced employers": 203,
+      "Recruiters / intermediaries that received applications or CVs": 18,
+      "Total job-search organisations with application/CV evidence": 221,
+      "Other non-employment applications": 4,
+      "Possible applications needing verification": 4
+    },
+    "declared_vs_parsed": {
+      "confirmed_employers": {
+        "declared": 203,
+        "parsed": 203
+      },
+      "recruiters": {
+        "declared": 18,
+        "parsed": 18
+      },
+      "other_applications": {
+        "declared": 4,
+        "parsed": 4
+      },
+      "unverified_candidates": {
+        "declared": 4,
+        "parsed": 4
+      },
+      "organizations_with_application_or_cv_evidence": {
+        "declared": 221,
+        "parsed": 221
+      }
+    },
+    "count_mismatch": {}
+  }
+}

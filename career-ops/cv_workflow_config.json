@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "description": "Configuration for the Chief <-> Career Ops CV / cover-letter draft workflow. The workflow REUSES the existing Career Ops install: cv.md/profile.yml/cv-facts.json are read as canonical source truth, verify-cv-facts.mjs is the authoritative fact gate, and generate-cover-letter.mjs buildHtml is the authoritative cover-letter renderer. Nothing here rewrites, adds or infers a candidate fact, and nothing here submits an application.",
+  "career_ops_root": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "sources": {
+    "cv_md": "cv.md",
+    "profile": "config/profile.yml",
+    "cv_facts": "config/cv-facts.json",
+    "cover_template": "templates/cover-letter-template.html",
+    "cover_script": "generate-cover-letter.mjs",
+    "tailor_script": "openai-tailor.mjs",
+    "pipeline": "data/pipeline.md"
+  },
+  "runtime_dir": "runtime/career-ops/cv-drafts",
+  "renderer": {
+    "node": "node",
+    "script": "career-ops/cv_render_cover.mjs",
+    "timeout_s": 180,
+    "note": "Renders the cover-letter payload with the install's own buildHtml and runs the install's own verify-cv-facts.mjs. HTML only: it does not import generate-pdf.mjs, so no headless browser is ever launched."
+  },
+  "tailoring": {
+    "mode": "deterministic-selection-only",
+    "note": "Bullets are REORDERED by job-description relevance. No line of the canonical CV is rewritten, summarised, merged or added. Anything the posting asks for that the canonical sources do not evidence is reported as owner_input_required, never written as a claim.",
+    "max_reported_unmatched_terms": 25,
+    "generic_terms": ["and", "the", "for", "with", "you", "your", "our", "are", "will", "have", "has", "that", "this", "from", "all", "any", "can", "who", "not", "but", "job", "role", "work", "team", "teams", "about", "into", "more", "than", "must", "should", "would", "their", "they", "them", "his", "her", "its", "also", "able", "using", "use", "used", "new", "well", "other", "such", "when", "what", "which", "where", "while", "been", "were", "was", "does", "doing", "each", "some", "most", "over", "under", "within", "across", "including", "include", "includes", "support", "supporting", "help", "helping", "ensure", "ensuring", "provide", "providing", "assist", "assisting", "join", "looking", "opportunity", "candidate", "candidates", "applicant", "applicants", "company", "business", "organisation", "organization", "environment", "experience", "skills", "knowledge", "understanding", "ability", "strong", "good", "excellent", "ideal", "desirable", "essential", "required", "requirements", "responsibilities", "duties", "you'll", "we're", "we", "us", "please", "apply", "application", "applications", "position", "job", "opportunities", "line", "per", "day", "week", "month", "year", "years", "full", "part", "time", "level", "grade", "salary", "benefits", "hybrid", "remote", "onsite", "office", "location", "london", "united", "kingdom", "uk"]
+  },
+  "not_performed": [
+    "PDF rendering (the install's generate-pdf.mjs launches headless Chromium; not run by this workflow)",
+    "LLM CV tailoring via openai-tailor.mjs (sends cv.md + the job description to a third-party endpoint; owner-gated and requires a provider key)",
+    "Application submission, employer/recruiter contact, or any external message"
+  ]
+}

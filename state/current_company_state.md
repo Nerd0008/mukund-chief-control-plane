@@ -1,12 +1,29 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T22:44:00Z
-- Latest evidence run: 2026-09-23T22:41:57Z — E3 Stage 2 readiness gate re-run (credential-triggered
-  continuation, task `agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24`)
-  (`audits/evidence/2026-09-23T22-41-57Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
-  its regression input (`audits/evidence/2026-09-23T22-40-55Z-e3-stage2-readiness-gate-rerun/`,
-  code SHA `88af27a`). Previous run: 2026-09-23T22:37:29Z at code SHA `56d923b`.
+- Timestamp: 2026-09-23T23:45:00Z
+- Latest evidence run: 2026-09-23T23:40:13Z — **CV/cover-letter workflow connected + minimal LinkedIn
+  workflow implemented** (task `agent-cv-cover-letter-linkedin-workflows-2026-09-23`),
+  `audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) —
+  **23/23 critical checks pass**: representative path Career Ops job → tailored CV/cover-letter draft
+  (install fact gate **pass**) → LinkedIn read-only intake + unsent drafts → dedupe against Career Ops +
+  Company Watch → tracker handoff on a dated copy with verified backup/rollback, **canonical workbooks
+  hash-unchanged**. New suites: `career-ops/tests/test_cv_workflow.py` 21 passed,
+  `career-ops/tests/test_linkedin_workflow.py` 34 passed. 0 provider calls, 0 LinkedIn mutations,
+  0 applications.
+- Previous evidence run: 2026-09-23T22:53:53Z — E3 Stage 2 readiness gate re-run (credential-triggered
+  retry, task `agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24`)
+  (`audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
+  its regression input (`audits/evidence/2026-09-23T22-52-48Z-e3-stage2-readiness-gate-rerun/`,
+  code SHA `342ee66`). Before that: 2026-09-23T22:41:57Z at code SHA `88af27a`; then
+  2026-09-23T22:37:29Z at code SHA `56d923b`.
 - Evidence files (this run):
+  - `audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — CV/cover-letter
+    workflow + minimal LinkedIn workflow acceptance: **23/23 critical checks pass** (see the section at
+    the end of this file).
+  - `audits/evidence/2026-09-23T23-40-25Z-cv-linkedin-workflows/evidence.json` (+ `.md`) — whole-repo
+    regression via `python scripts/evidence_runner.py --label cv-linkedin-workflows`:
+    **14/14 suites pass, 400 collected / 400 passed, 0 failed, 0 errors, 0 skipped**, every suite exit 0,
+    code SHA `b2ed978`. 0 provider calls.
   - `audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/evidence.json` (+ `.md`)
     — **12 suites, 364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0**
   - `audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/evidence.json` (+ `.md`) —
@@ -592,10 +609,75 @@ not run.
 `MINIMAX_API_KEY`, `STEP_API_KEY`, `HUNYUAN_API_KEY`). Once present, the successor gate task re-runs
 `scripts/e3_stage2_readiness_gate.py` and enables LOCAL Stage 2 only if all three conditions hold.
 
+## E3 Stage 2 readiness gate re-run — credential-triggered retry (2026-09-23T22:52Z–22:54Z)
+
+Task `agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24`. This retry exists only to
+re-check the credential condition after the owner's planned key configuration window. The
+**presence-only** credential probe (no secret value read, logged or committed; no network call) was run
+first and found **0/7** of the credential-missing providers configured:
+
+- Windows Credential Manager targets present on this machine: `gemini:antigravity`, `deepseek`,
+  `gemini-api`, plus git/GitHub/Microsoft/Outlook/DriveFS entries. **None** of `mistral`, `glm`,
+  `qwen`, `nous`, `minimax`, `stepfun`, `hunyuan` is present.
+- env vars `MISTRAL_API_KEY`, `GLM_API_KEY`, `DASHSCOPE_API_KEY`, `NOUS_API_KEY`, `MINIMAX_API_KEY`,
+  `STEP_API_KEY`, `HUNYUAN_API_KEY`: all **absent**.
+- Probe path: `generic_openai_adapter.get_adapter(<worker>)._resolve_auth()` (Credential Manager →
+  env), reporting presence + auth-source name only. `newly_configured_workers = []`.
+
+Because no provider was newly configured, the contract's identity/model discovery, smoke test,
+`governor.record_request()` linkage and `routable=true` steps **do not apply to this run** and were not
+performed: no worker was marked routable, no smoke test was claimed, and **no provider call was spent**
+by this task (0 real provider calls).
+
+Evidence produced this run (executable, no provider calls):
+
+- `audits/evidence/2026-09-23T22-52-48Z-e3-stage2-readiness-gate-rerun/` — full regression via
+  `python scripts/evidence_runner.py --label e3-stage2-readiness-gate-rerun`; script
+  `scripts/evidence_runner.py`; **12/12 suites pass, 364 collected / 364 passed, 0 failed, 0 errors,
+  0 skipped, every applicable suite exit 0**, code SHA `342ee66b6ca67b03dd6c384702cb496fadaf31d8`,
+  python 3.11.16. Per-suite counts and exact commands are in the bundle's `evidence.md`.
+- `audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/` — the gate verdict from
+  `python scripts/e3_stage2_readiness_gate.py` (deterministic, 0 provider calls, never enables
+  anything itself). All earlier verdict bundles (22:37:29Z, 22:41:57Z) are preserved; nothing was
+  overwritten.
+
+**Verdict: Stage 2 NOT ENABLED** (third consecutive gate re-run with the same result). All three
+enablement conditions fail:
+
+- **(a) credentials configured — FALSE.** 7/7 still missing (listed above).
+- **(b) every readiness criterion objectively satisfied — FALSE.** Five of six criteria are MET with
+  fresh evidence: regressions 12/12 suites / 364 tests; real-path production rehearsal **consumed, not
+  repeated** (`audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/`, 0 failed
+  checks, 7 bounded real provider calls recorded in that prior run); rehearsal-evidence isolation
+  fail-closed with production stores byte-identical **including WAL/SHM sidecars**; E1/E2 boundary
+  clean with E2 reached only via `governor.record_request()`; qualification evidence-driven
+  (`qualified_rows_without_evidence = 0`; codex-cli builder/integrator and deepseek-v41-flash builder
+  QUALIFIED, google-nano-banana-2 vision EVALUATING); rollback available (restore path present, 14
+  backup dirs with manifest, all E3 modules deployed, orchestration schema v2). The **only** unmet
+  criterion remains the Google image worker's real-dispatch intermittency (owner task
+  `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23`),
+  declared `INTERMITTENT_NOT_SETTLED` with an open trigger.
+- **(c) explicit owner authorization for enablement at this point — NOT SATISFIED.** The owner's
+  standing conditional authorization (`a58549c` / `2d5f332` / `d7e718c`) applies only once the provider
+  credentials are confirmed configured; they are not, so the authorization does not yet apply.
+
+E4 checkpoint/failover and E5 convergence/safe-mode real-path drills remain **gated behind Stage 2**
+and were not run; the harness owned by
+`agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23` was not consumed because the contract
+gates those drills behind enablement.
+
+**Exact owner action required:** configure the seven provider credentials locally (Windows Credential
+Manager targets `mistral`, `glm`, `qwen`, `nous`, `minimax`, `stepfun`, `hunyuan`, or the env vars
+`MISTRAL_API_KEY`, `GLM_API_KEY`, `DASHSCOPE_API_KEY`, `NOUS_API_KEY`, `MINIMAX_API_KEY`,
+`STEP_API_KEY`, `HUNYUAN_API_KEY`). The successor staged by this run re-probes presence, verifies each
+newly configured provider (bounded `/models` identity discovery + one harmless smoke test + E2 linkage
+through `governor.record_request()`), then re-runs the gate and enables LOCAL Stage 2 only if all three
+conditions hold.
+
 ## Current blockers / owner dependencies
 
-- E3 Stage 2 local enablement: **blocked — gate re-run 2026-09-23T22:41Z (credential-triggered):
-  Stage 2 NOT ENABLED.**
+- E3 Stage 2 local enablement: **blocked — gate re-run 2026-09-23T22:53Z (credential-triggered
+  retry): Stage 2 NOT ENABLED.**
   The readiness gate now runs deterministically (`scripts/e3_stage2_readiness_gate.py`); the only
   unmet readiness criterion is the Google image worker's intermittency, and the blocking conditions
   are (a) 0/7 provider credentials configured and (c) owner authorization that is conditional on
@@ -604,12 +686,48 @@ not run.
   part) and succeeded on the bounded re-dispatch. The trigger is unknown; a bounded repeat series is
   required. Engineering, not owner action.
 - Seven provider credentials / account readiness steps remain owner/provider dependent —
-  **confirmed 0/7 configured as of 2026-09-23T22:36Z** (presence-only probe; never via
-  GitHub/queue/logs)
+  **re-confirmed 0/7 configured as of 2026-09-23T22:52Z** by two independent presence-only probes
+  (Windows Credential Manager target listing and `generic_openai_adapter` auth resolution; all seven
+  env vars absent). Secrets are never read into a printed variable and never touch GitHub/queue/logs.
 - Deployment architecture: intentionally deferred by owner until local operation is proven. The
   authority records laptop-primary + GitHub control plane + VPS watchdog/failover as the current
   owner *preference*, explicitly not a final decision and not authorization for VPS cutover.
 - VPS access/details required before any real deployment/cutover; cutover is not authorized
+
+## CV/cover-letter workflow connected + minimal LinkedIn workflow (2026-09-24T23:40Z)
+
+Task `agent-cv-cover-letter-linkedin-workflows-2026-09-23` (authority: the 2026-09-24 cutover file,
+§ CV + cover-letter workflow / § LinkedIn workflow). Evidence:
+`audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — **23/23 critical
+checks pass**, 0 provider calls, 0 external LinkedIn actions, 0 applications.
+
+Reused, not rebuilt: the Career Ops install's `cv.md` / `config/profile.yml` / `config/cv-facts.json`
+as canonical source truth; its own `verify-cv-facts.mjs` as the fact gate; its own
+`generate-cover-letter.mjs` `buildHtml` as the cover-letter renderer; and Company Watch's
+`build_shared_dedupe` / `dedupe_decision` plus `career-ops/tracker_writer.py` for every dedupe key and
+workbook write.
+
+- New: `career-ops/cv_workflow.py` (+ `cv_workflow_config.json`, `cv_render_cover.mjs`) — job context
+  from Career Ops state → tailored CV draft + cover-letter payload/HTML. Tailoring is **deterministic
+  reordering only**: no canonical line is rewritten, summarised, merged or added, every draft line is
+  mapped back to its `cv.md` line in `cv_draft_provenance.json`, and posting terms with no canonical
+  evidence are reported as `owner_input_required` instead of being claimed.
+- New: `career-ops/linkedin_workflow.py` (+ `linkedin_workflow.json`) — read-only signal intake from
+  owner-exported local files, dedupe against Career Ops **and** Company Watch, unsent profile/post/
+  outreach drafts, and career-ops handoff. **No LinkedIn login, API, scraping, browser or network I/O
+  exists in the module** (asserted by test), and `guard` refuses and logs every external action.
+- New: `career-ops/run_cv_linkedin_acceptance.py` — representative end-to-end local acceptance.
+- Tests: `career-ops/tests/test_cv_workflow.py` 21 passed, `career-ops/tests/test_linkedin_workflow.py`
+  34 passed, whole `career-ops/tests/` 88 passed.
+
+Recorded limitations: the acceptance job description is an explicitly labelled **synthetic fixture**
+(not a live vacancy, no liveness claimed); PDF cover letters are not produced (headless Chromium, owner
+-gated); the live LinkedIn account surface is **owner-gated** and therefore untested against the real
+account — only the local read-only/draft interface is proven.
+
+Successor task: **none staged** — `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`
+(pending) already covers the whole-company local acceptance test, including the LinkedIn draft/read-only
+path and the CV/cover-letter path, so a new task would duplicate it.
 
 ## Next non-blocked priority
 
@@ -621,10 +739,10 @@ not run.
 2. **After Mukund configures the remaining provider credentials on 2026-09-24:** re-run the local
    Stage 2 readiness gate (`scripts/e3_stage2_readiness_gate.py` + `scripts/evidence_runner.py`) and,
    only if all three conditions hold (credentials confirmed configured; every readiness criterion
-   satisfied; explicit owner authorization for that step), enable local Stage 2. The gate was already
-   re-run twice on 2026-09-23 (22:37Z and 22:41Z) and returned NOT ENABLED both times (0/7
-   credentials); both verdicts are recorded in the sections above. Owner action required first:
-   configure the seven provider credentials.
+   satisfied; explicit owner authorization for that step), enable local Stage 2. The gate has already
+   been re-run three times on 2026-09-23 (22:37Z, 22:41Z and 22:53Z) and returned NOT ENABLED every
+   time (0/7 credentials); all three verdicts are recorded in the sections above. Owner action
+   required first: configure the seven provider credentials.
 3. Extend qualification evidence for the remaining roles/workers as real execution evidence arrives;
    the harness and the bar are now in place, so this is evidence collection, not new engineering.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths

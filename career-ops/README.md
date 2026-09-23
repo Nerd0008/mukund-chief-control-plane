@@ -132,6 +132,124 @@ append→verify→backup→rollback acceptance for all four regions, and idempot
 a repeated run. Tests only ever write to copies; the canonical workbooks are
 opened read-only by the suite.
 
+## CV + cover-letter draft workflow (2026-09-24)
+
+`career-ops/cv_workflow.py` wires a job record that already exists in Career Ops
+state into a **tailored draft** of the CV and the cover letter. It reuses the
+existing Career Ops installation rather than recreating it:
+
+* canonical source of candidate truth, read-only: `cv.md`, `config/profile.yml`,
+  `config/cv-facts.json` in the Career Ops install;
+* authoritative fact gate: the install's own `verify-cv-facts.mjs` (invoked as a
+  subprocess, JSON verdict);
+* authoritative cover-letter renderer: the install's own
+  `generate-cover-letter.mjs` `buildHtml`, driven by
+  `career-ops/cv_render_cover.mjs`;
+* the existing LLM tailoring path (`openai-tailor.mjs`) is recorded as an
+  unexecuted request record — it sends `cv.md` and the job description to a
+  third-party endpoint, so it stays owner-gated.
+
+| Subcommand | Purpose | Writes? |
+|---|---|---|
+| `sources` | canonical source paths/hashes + fact-gate availability | no |
+| `job-context --region R (--id\|--url\|--row\|--pipeline-index\|--record)` | resolve one job record from Career Ops state, with provenance | no (optional `--record`) |
+| `draft ... [--jd-file F]` | build the tailored CV draft + cover-letter payload/HTML | only under `runtime/career-ops/cv-drafts/` (git-ignored) |
+
+    python career-ops/cv_workflow.py sources
+    python career-ops/cv_workflow.py job-context --region uk --id J21
+    python career-ops/cv_workflow.py draft --region uk --pipeline-index 0 --jd-file jd.txt
+
+**Tailoring model — deterministic selection only.** Bullets are **re-ordered** by
+job-description relevance; no canonical line is rewritten, summarised, merged or
+added. `cv_draft_provenance.json` maps every draft line back to its `cv.md` line
+number, section, relevance score and matched terms. Posting terms that nothing in
+the canonical sources evidences are reported as `owner_input_required` and never
+written as a claim. A draft that fails the fact gate is marked `blocked_fact_gate`
+and its HTML is not produced.
+
+**Not performed:** PDF rendering (the install's `generate-pdf.mjs` launches
+headless Chromium), LLM tailoring, and any application submission or contact.
+
+## LinkedIn workflow (2026-09-24)
+
+`career-ops/linkedin_workflow.py` is the v1 LinkedIn surface. LinkedIn is treated
+as exactly two things: a **read-only signal source** (an owner-exported local file
+of saved jobs / job alerts / followed companies) and a **draft surface**.
+
+**There is no LinkedIn login, no session reuse, no API call, no scraping, no
+browser and no network I/O at all.** A test asserts the module imports no network
+or browser library. `guard` is a permanent, recorded refusal: posting, messaging,
+connecting, following, reacting, editing the profile and applying are owner-gated
+and no code path performs them.
+
+| Subcommand | Purpose | Writes? |
+|---|---|---|
+| `intake --inbox DIR [--record FILE]` | parse local read-only signal files into job/company signals | no |
+| `dedupe --region R --inbox DIR` | dedupe signals against Career Ops + Company Watch | no |
+| `draft [--out DIR]` | profile/post/outreach drafts from canonical facts, fact-gated, `draft_unsent` | only under `runtime/linkedin/drafts/` (git-ignored) |
+| `handoff --region R [--apply]` | hand eligible new signals to the Career Ops writer | dry-run unless `--apply` |
+| `guard --action NAME` | refuse an external LinkedIn action, and log the refusal | log only |
+| `status` | configuration + last-run summary | no |
+| `run` (see the acceptance runner) | end-to-end acceptance path | evidence only |
+
+Accepted inbox formats: `.json`, `.jsonl`, `.csv`, `.md`/`.txt`. A text line
+carrying no URL is reported as `unclassified` rather than guessed into a company
+or a posting. Every signal carries file + sha256 + line provenance.
+
+**Dedupe is shared, never reimplemented.** `company_watch.build_shared_dedupe` /
+`dedupe_decision` are imported, so a LinkedIn signal cannot create a row Career
+Ops would consider new state. In addition the workflow dedupes against:
+
+* the Company Watch company registry (name + variant keys — a **review signal**,
+  never a company-wide block);
+* Company Watch handoff manifests (a posting Company Watch already handed over is
+  `duplicate-company-watch`);
+* the same intake batch (one posting re-shared with a tracking parameter is one
+  posting; the richer copy's detail is **merged into** the kept record and
+  eligibility is recomputed, so a detailed copy arriving second is not lost).
+
+LinkedIn handoff manifests are written inside `runtime/linkedin/handoffs/`, never
+in Company Watch's runtime directory — Company Watch reads its own handoff
+manifests as "already handed off", so writing there would make LinkedIn's signals
+look like Company Watch duplicates.
+
+`owner_filter_eligible` uses the owner's own configured filters, read live from the
+Career Ops install's `portals.yml` (the same file the UK scan lane uses). A signal
+whose location, title or freshness cannot satisfy those filters is **not** eligible,
+and only region-routed eligible signals are handed off. A manifest never carries
+application status (and the writer would ignore it).
+
+## Acceptance runner
+
+    python career-ops/run_cv_linkedin_acceptance.py [--region uk] [--stamp S]
+
+Exercises the representative path end to end with fixtures:
+
+    Career Ops job record -> tailored CV draft + cover-letter draft (+ install fact gate)
+                          -> LinkedIn read-only intake + drafts (unsent)
+                          -> dedupe against Career Ops + Company Watch
+                          -> tracker handoff (dry-run, then a dated COPY)
+                          -> Chief summary
+
+It writes `audits/evidence/<stamp>-cv-linkedin-workflows/acceptance.json` + `.md`
+and fails unless every critical check holds. Encoded guarantees: every CV draft
+line is verbatim `cv.md` text; the fact gate did not block; the cover letter was
+rendered by the install's own renderer (with no browser launched); the read-only
+contract holds (`network_used=false`, `urls_fetched=0`, `browser_launched=false`,
+`account_mutations=0`); every external LinkedIn action is refused; the canonical
+workbooks are hash-identical before and after; the append happened on a copy with a
+hash-verified backup and a verified rollback; and a replayed LinkedIn posting is
+deduped.
+
+## Tests
+
+    python -m pytest career-ops/tests/ -q                      # 88 passed
+    python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
+    python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 34 passed
+
+Offline and non-destructive: the canonical CV assets and the canonical workbooks
+are only ever read, and every write in a test goes to `tmp_path`.
+
 ## Explicit non-goals / gates
 
 * No application submission, no employer or recruiter contact, no external

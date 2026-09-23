@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "description": "Minimal LinkedIn workflow for Chief OS v1: read-only job/discovery signal intake, profile/post/outreach DRAFT generation, dedupe against Career Ops + Company Watch, and handoff into the existing Career Ops tracker writer. LinkedIn is treated strictly as a READ-ONLY signal source and a DRAFT surface. Nothing in this workflow posts, messages, connects, follows, reacts, applies or mutates any account, and nothing here opens a network connection or a browser.",
+  "career_ops_dir": "career-ops",
+  "company_watch_config": "company-watch/company_watch_config.json",
+  "company_watch_dir": "company-watch",
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "inbox_dir": "runtime/linkedin/inbox",
+  "runtime_dir": "runtime/linkedin",
+  "drafts_subdir": "drafts",
+  "evidence_dir": "audits/evidence",
+  "fact_gate": {
+    "node": "node",
+    "timeout_s": 180,
+    "module": "verify-cv-facts.mjs",
+    "source_rel": ["cv.md", "config/profile.yml"],
+    "config_rel": "config/cv-facts.json"
+  },
+  "voice_sources": ["voice-dna.md", "modes/_writing.md"],
+  "max_drafts_per_kind": 4,
+  "supported_inbox_extensions": [".json", ".jsonl", ".csv", ".md", ".txt"],
+  "blocked_actions": [
+    "post", "comment", "reaction", "follow", "connection_request", "message",
+    "inmail", "apply", "easy_apply", "profile_update", "headline_update",
+    "about_update", "account_settings", "delete_account", "job_save"
+  ],
+  "external_action_policy": "External LinkedIn posting, messaging, connection requests, reactions, follows, profile edits and application submission are OWNER-GATED. This workflow refuses them and records the refusal; it implements no path that performs them.",
+  "not_performed": [
+    "Any LinkedIn login, session use, API call or scraping",
+    "Any browser launch or GUI interaction",
+    "Any posting, messaging, connection request, reaction or profile mutation",
+    "Any application submission or employer/recruiter contact"
+  ]
+}
