@@ -87,3 +87,6 @@ error: pathspec ':
 [2026-09-23T15:45:01.582416Z] Poller starting
 [2026-09-23T15:45:03.928194Z] git pull: success (with stash/restore)
 [2026-09-23T15:46:42.365157Z] git pull: success (with stash/restore)
+[2026-09-23T15:46:45.439407Z] Claimed task: hardened-regression
+[2026-09-23T15:46:45.440450Z] Handling task: hardened-regression
+[2026-09-23T15:46:45.442414Z] Task hardened-regression failed: No handler for task: hardened-regression
