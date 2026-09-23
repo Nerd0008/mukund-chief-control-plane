@@ -3,16 +3,28 @@
 
 import json
 import sqlite3
+import sys
 from datetime import datetime
 from pathlib import Path
 
-from .orchestration_db import init_db
-from .capability_registry import CapabilityRegistry, CAPABILITY_ROLES, WORKER_STATES
-from .worker_registry import WorkerRegistry
-from .task_fingerprint import TaskFingerprint, compute_similarity
-from .decision_rationale import DecisionRationale, DecisionOutcomeReview, DECISION_TYPES, CONFIDENCE_LEVELS, GATE_RESULTS
-from .execution_dag import ExecutionDAG, DAGNode, NODE_STATES
-from .worker_contract import WorkerContract
+# Support both package import (eb.py dispatch) and direct script execution
+try:
+    from .orchestration_db import init_db
+    from .capability_registry import CapabilityRegistry, CAPABILITY_ROLES, WORKER_STATES
+    from .worker_registry import WorkerRegistry
+    from .task_fingerprint import TaskFingerprint, compute_similarity
+    from .decision_rationale import DecisionRationale, DecisionOutcomeReview, DECISION_TYPES, CONFIDENCE_LEVELS, GATE_RESULTS
+    from .execution_dag import ExecutionDAG, DAGNode, NODE_STATES
+    from .worker_contract import WorkerContract
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from orchestration_db import init_db
+    from capability_registry import CapabilityRegistry, CAPABILITY_ROLES, WORKER_STATES
+    from worker_registry import WorkerRegistry
+    from task_fingerprint import TaskFingerprint, compute_similarity
+    from decision_rationale import DecisionRationale, DecisionOutcomeReview, DECISION_TYPES, CONFIDENCE_LEVELS, GATE_RESULTS
+    from execution_dag import ExecutionDAG, DAGNode, NODE_STATES
+    from worker_contract import WorkerContract
 
 
 class E3Commands:

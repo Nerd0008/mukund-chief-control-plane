@@ -48,11 +48,22 @@ WORKER_ROSTER = [
     {
         'worker_id': 'deepseek-v41-flash',
         'provider': 'deepseek',
-        'model': 'deepseek-v4.1-flash',
+        'display_name': 'DeepSeek V4.1 Flash',
+        'model': 'deepseek-flash',  # OBSERVED from /models endpoint 2026-09-23
+        'api_model_id': 'deepseek-flash',
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'coding', 'long-context', 'agents'],
-        'routable': False  # Issue #1: E2 telemetry adapter exists, but E3 execution adapter not implemented
+        'routable': True,  # smoke test PASS + E2 linkage VERIFIED + no security issue
+        'auth_configured': True,
+        'auth_source': 'credential_manager',
+        'exec_interface': 'https://api.deepseek.com/chat/completions',
+        'adapter_implemented': True,
+        'adapter_file': 'deepseek_adapter.py',
+        'smoke_test': 'PASS',
+        'e2_usage_linkage': 'VERIFIED',  # obs-20260923-44da95cd
+        'qualification': 'UNPROVEN',  # smoke test readiness != capability qualification
+        'notes': 'Identity observed from provider /models. Old registry string deepseek-v4.1-flash is not an API model ID.'
     },
     {
         'worker_id': 'glm-53-flash',

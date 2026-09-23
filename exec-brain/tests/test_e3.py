@@ -170,14 +170,22 @@ class TestWorkerRegistry(unittest.TestCase):
         self.assertNotIn('codex-cli', routable)
 
     def test_deepseek_is_routable(self):
-        """DeepSeek is NOT routable — no E3 execution adapter, no smoke test.
+        """DeepSeek IS routable — smoke test PASS + E2 linkage VERIFIED.
 
-        Issue #1 correction: roster inclusion never implies routability.
-        DeepSeek has an E2 telemetry adapter only; that is not execution access.
+        E3 DeepSeek setup 2026-09-23: adapter implemented, auth via
+        Credential Manager (D2), smoke test passed with observed
+        provider telemetry, usage recorded through E2 record-request.
+        Routability = execution readiness only; qualification remains
+        UNPROVEN.
         """
         registry = WorkerRegistry()
         routable = registry.get_routable_workers()
-        self.assertNotIn('deepseek-v41-flash', routable)
+        worker = registry.get_worker('deepseek-v41-flash')
+        self.assertIn('deepseek-v41-flash', routable)
+        self.assertEqual(worker['api_model_id'], 'deepseek-flash')  # observed
+        self.assertEqual(worker['smoke_test'], 'PASS')
+        self.assertEqual(worker['e2_usage_linkage'], 'VERIFIED')
+        self.assertEqual(worker['qualification'], 'UNPROVEN')
 
 
 class TestTaskFingerprint(unittest.TestCase):
