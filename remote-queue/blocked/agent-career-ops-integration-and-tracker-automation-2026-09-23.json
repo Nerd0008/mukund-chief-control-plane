@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "allowed_scope": [
     "Inspect the existing Career Ops installation at C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0 and the canonical regional trackers under C:\\Users\\mukun\\Downloads\\codex. Do not initialize, reinitialize, or restructure its git repository.",
     "Inventory the existing scanner, filters, dedupe, pipeline.md output, tracker-writing path, schedules and failure points before modifying anything.",
@@ -26,5 +26,11 @@
     "No secrets in GitHub/chat/logs.",
     "If a task requires owner login/account action, record the dependency and continue independent work."
   ],
-  "notes": "This is restored original v1 scope from handovers/2026-09-21-chief-os-sprint-handover.md. It must coexist with the E3 key/Stage2 deferral: continue independent career-system work overnight. Prefer deterministic Python/openpyxl for workbook mutation."
+  "notes": "This is restored original v1 scope from handovers/2026-09-21-chief-os-sprint-handover.md. It must coexist with the E3 key/Stage2 deferral: continue independent career-system work overnight. Prefer deterministic Python/openpyxl for workbook mutation.",
+  "blocked_at": "2026-09-23T22:20:06.359532Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes dispatch exceeded 1200 seconds.",
+    "continue_without": "Independent safe work may continue"
+  }
 }
