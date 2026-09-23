@@ -75,3 +75,4 @@ error: pathspec ':
 error: pathspec ':(prefix:0)exec-brain/resource_monitor.py' did not match any file(s) known to git
 error: pathspec ':
 [2026-09-23T15:39:01.624098Z] Skipping poll cycle: git pull failed
+[2026-09-23T15:40:39.017272Z] git pull: success (with stash/restore)
