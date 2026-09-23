@@ -25,6 +25,7 @@ Evidence source for every test figure below:
 | E1 | Runtime + test matrix | VERIFIED | 32/32 pass, exit 0 |
 | E2 | Governor + provider adapters | VERIFIED | 45/45 pass, exit 0 (runtime import root `%LOCALAPPDATA%\hermes\exec-brain`) |
 | E3 | Baseline suite | 48/50 PASS | 2 errors: Codex CLI binary not installed; exit 1 |
+| E3 | Baseline Codex test identities | ENVIRONMENTAL | `TestCodexAdapter.test_codex_cli_version`, `TestCodexAdapter.test_codex_smoke_blocked` — `RuntimeError: Codex CLI not found: checked configured path and PATH` (`exec-brain/codex_adapter.py:28`) |
 | E3 | Extended suite | VERIFIED | 60/60 pass, exit 0 |
 | E3 | Shadow orchestrator composition | VERIFIED | 13/13 pass, exit 0 |
 | E3 | Stage 1 shadow implementation set | PRESENT | component list in state file; commits `617e69cb`, `aae7d036` preserved |

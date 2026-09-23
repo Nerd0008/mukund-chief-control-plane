@@ -67,6 +67,11 @@ Smoke readiness is not qualification; qualification is evidence-driven.
   VERIFIED; routable=true; qualification UNPROVEN
 - Codex CLI: adapter implemented; usage limit reported reset by owner (2026-09-23) — this is a
   claim to re-test, not execution evidence; routable=false; qualification UNPROVEN
+  - Observed on this machine 2026-09-23T20:24Z: the two E3 baseline Codex tests
+    (`TestCodexAdapter.test_codex_cli_version`, `TestCodexAdapter.test_codex_smoke_blocked`)
+    error with `RuntimeError: Codex CLI not found: checked configured path and PATH`
+    (`exec-brain/codex_adapter.py:28`). Recorded as evidence for the re-validation task; the
+    CLI was not installed or located by this recovery, and no Codex allowance was spent.
 - Remaining seven generic API workers (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0,
   MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3): adapters exist; owner-local credentials and
   live readiness evidence outstanding; routable=false
