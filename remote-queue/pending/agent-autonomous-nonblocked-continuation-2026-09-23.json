@@ -1,0 +1,28 @@
+{
+  "task_id": "agent-autonomous-nonblocked-continuation-2026-09-23",
+  "created_at": "2026-09-23T16:10:00+01:00",
+  "objective": "Continue Mukund's full-scope Chief Control Plane build autonomously while he is away. First reconcile repository truth after the completed E4/E5 work, then audit the E3 definition-of-done against current implementation and implement the highest-value non-credential-dependent missing E3 orchestration/qualification components. Keep making concrete, tested, recoverable progress and push truthful commits. Do not wait for Mukund for work that is already authorized and non-destructive.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "update state/current_company_state.md and full-build truth to reflect verified E4/E5 completion",
+    "audit E3 implementation against the authority definition-of-done",
+    "implement non-credential-dependent E3 qualification harness mechanics and offline/synthetic fixtures without fabricating provider evidence",
+    "implement or finish planner, router/meta-selector, decomposition review, context compiler, permission compiler, temporary team assembly, integrator, independent critic/verifier, conflict handling, targeted rework, logical replanning, failure attribution/outcome learning, and exploration/shadow rules where missing",
+    "integrate E4/E5 mechanics with existing E3 abstractions where this does not enable Stage 2 production",
+    "run relevant E1/E2/E3/E4/E5/queue tests and integrity checks",
+    "make small recoverable commits and push verified changes",
+    "record exact external blockers and continue independent work"
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "explicit E3 Stage 2 production approval required",
+    "provider/API credentials, billing, or account access required",
+    "VPS access or a deployment architecture decision required",
+    "irreversible or destructive action requires owner approval",
+    "architecture or safety decision not already covered by approved authority",
+    "work would require fabricating model identity, usage, qualification evidence, quota, or deployment state"
+  ],
+  "notes": "Mukund is away. Do not contact him unless a stop condition is genuinely reached. The current deployment architecture decision (full VPS cutover versus laptop-primary with optional VPS watchdog/failover) is unresolved; do not silently choose one. E4/E5 were just implemented and pushed, so preserve them and build from current main. Stage 2 remains NOT APPROVED."
+}
