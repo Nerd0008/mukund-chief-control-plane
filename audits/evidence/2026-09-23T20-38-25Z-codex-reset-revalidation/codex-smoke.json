@@ -1,0 +1,80 @@
+{
+  "task": "agent-codex-reset-revalidation-2026-09-23",
+  "captured_at_utc": "2026-09-23T20:39:54Z",
+  "execution": {
+    "passed": true,
+    "dispatch_id": "codex-6804b0af38bf",
+    "exit_code": 0,
+    "final_message": "READY",
+    "codex_thread_id": "01a0cffb-4ca1-7052-babc-3db7a233ddac",
+    "dispatch_metadata": {
+      "dispatch_time": "2026-09-23T20:35:47Z",
+      "elapsed_seconds": 6.0204291343688965,
+      "objective_hash": "fe5c81b99f68",
+      "objective_summary": "Respond with exactly the single word READY and not...",
+      "cli_flags": [
+        "--json",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write"
+      ],
+      "working_directory": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\codex_smoke",
+      "execution_profile": "safe",
+      "timeout": 180,
+      "contract_id": "codex-readiness-smoke",
+      "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\OpenAI\\Codex\\bin\\80f78947ad880e6e\\codex.exe",
+      "resolved_version": "0.155.0-alpha.16.3"
+    }
+  },
+  "identity": {
+    "provider": "openai",
+    "model": "unknown",
+    "auth_mode": "chatgpt",
+    "version": "0.155.0-alpha.16.3",
+    "interface": "Codex CLI",
+    "cancellation_support": "UNSUPPORTED",
+    "e2_usage_linkage": "NOT_VERIFIED",
+    "supports_websockets": true,
+    "supports_jsonl": true,
+    "auth_configured": true,
+    "auth_storage_mode": "File",
+    "stored_api_key": false,
+    "configured_model": "gpt-6-astra",
+    "websocket_reachable": true,
+    "server_model_present": false,
+    "cli_version": "0.155.0-alpha.16.3",
+    "resolved_executable_name": "codex.exe",
+    "resolved_executable_dir": "80f78947ad880e6e"
+  },
+  "usage": {
+    "exposed_on_exec_stdout": false,
+    "exec_stdout_events": [
+      "thread.started",
+      "turn.started",
+      "item.completed",
+      "turn.completed"
+    ],
+    "provider_reported_usage_this_request": {
+      "input_tokens": 16207,
+      "cached_input_tokens": 13184,
+      "output_tokens": 5,
+      "reasoning_output_tokens": 0,
+      "source": "codex exec stdout turn.completed.usage + local session rollout token_usage_record"
+    },
+    "note": "usage IS exposed by the CLI on turn.completed; the E2 row written by this smoke predates the extractor fix and therefore has null token columns"
+  },
+  "e2_linkage": {
+    "request_id": "obs-20260923-d42e34a5",
+    "status": "VERIFIED",
+    "interface_used": "governor.record_request() (E2 public function)"
+  },
+  "routable": true,
+  "qualification": "UNPROVEN",
+  "provider_plan_exposed_by_cli": {
+    "plan_type": "plus",
+    "rate_limit_primary_used_percent": 29.0,
+    "rate_limit_primary_window_minutes": 300,
+    "rate_limit_secondary_used_percent": 5.0,
+    "rate_limit_secondary_window_minutes": 10080
+  }
+}

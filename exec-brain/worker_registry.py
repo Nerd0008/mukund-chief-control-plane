@@ -9,23 +9,33 @@ WORKER_ROSTER = [
         'interface': 'cli',
         'pool_status': 'LOCKED',
         'capability_hints': ['coding', 'repository', 'debugging', 'implementation'],
-        'routable': False,  # Issue #1: smoke test BLOCKED, not passed
+        'routable': True,  # 2026-09-23: smoke PASS + E2 linkage VERIFIED (obs-20260923-d42e34a5)
         'auth_configured': True,
         'auth_mode': 'chatgpt',
         'exec_interface': 'codex exec --json',
         'adapter_implemented': True,
         'adapter_file': 'codex_adapter.py',
-        'smoke_test': 'BLOCKED_USAGE_LIMIT',
-        'cli_version': '0.155.0-alpha.9.2',
-        'cli_path_configured': True,  # Issue #5: configurable path, not hardcoded
+        'smoke_test': 'PASS',
+        'e2_usage_linkage': 'VERIFIED',  # obs-20260923-d42e34a5 (tokens null: see notes)
+        'qualification': 'UNPROVEN',  # smoke readiness != capability qualification
+        'cli_version': '0.155.0-alpha.16.3',
+        'cli_path_configured': True,  # stable resolver: override -> PATH -> validated bin dirs
         'identity': {
-            'provider': 'openai',
-            'model': 'unknown',  # Issue #2: UNKNOWN until observed from execution
+            'provider': 'openai',        # reported by `codex doctor --json`
+            'model': 'unknown',          # served model not exposed by CLI/runtime
+            'configured_model': 'gpt-6-astra',  # config declaration, NOT execution evidence
             'auth_mode': 'chatgpt',
             'cancellation_support': 'UNSUPPORTED',  # Issue #7
-            'e2_usage_linkage': 'NOT_VERIFIED'     # Issue #6
+            'e2_usage_linkage': 'VERIFIED'          # Issue #6
         },
-        'notes': 'Smoke test blocked by ChatGPT usage limit. Rerun after reset.'
+        'notes': ('2026-09-23 re-validation: usage-limit blocker cleared. Hash-specific resolver '
+                  'replaced (stale bin/247581e40ee272fb removed by a Codex update); CLI resolved at '
+                  'bin/80f78947ad880e6e/codex.exe v0.155.0-alpha.16.3. One harmless non-interactive '
+                  'smoke returned READY (exit 0). Provider usage IS exposed on turn.completed '
+                  '(16207 in / 5 out); the recorded E2 row has null tokens because the extractor ran '
+                  'before that fix, so no second request was spent to correct it. Serviced model '
+                  'identity remains UNKNOWN.')
+
     },
     {
         'worker_id': 'mistral-small-4',

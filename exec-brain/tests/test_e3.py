@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """E3 Tests — deterministic test suite for Stage 1."""
 
+import json
 import os
 import sqlite3
 import tempfile
@@ -164,10 +165,21 @@ class TestWorkerRegistry(unittest.TestCase):
         self.assertIn('BENCHMARK', summary)
 
     def test_routable_workers(self):
-        """Codex CLI is NOT routable (E2 observed-only)."""
+        """Routability is evidence-driven, not aspirational.
+
+        Codex CLI became routable on 2026-09-23 only after a real smoke PASS
+        plus a verified E2 linkage; workers without those stay out.
+        """
         registry = WorkerRegistry()
         routable = registry.get_routable_workers()
-        self.assertNotIn('codex-cli', routable)
+        codex = registry.get_worker('codex-cli')
+        self.assertEqual(codex['smoke_test'], 'PASS')
+        self.assertEqual(codex['e2_usage_linkage'], 'VERIFIED')
+        self.assertIn('codex-cli', routable)
+        self.assertEqual(codex['qualification'], 'UNPROVEN')
+        not_ready = registry.get_worker('mistral-small-4')
+        self.assertFalse(not_ready['routable'])
+        self.assertNotIn('mistral-small-4', routable)
 
     def test_deepseek_is_routable(self):
         """DeepSeek IS routable — smoke test PASS + E2 linkage VERIFIED.
@@ -532,25 +544,115 @@ class TestGenericOpenAIAdapter(unittest.TestCase):
 
 
 class TestCodexAdapter(unittest.TestCase):
-    """Codex adapter specific tests."""
+    """Codex adapter specific tests.
 
-    def test_codex_smoke_blocked(self):
-        """Codex smoke test is blocked by usage limit."""
-        from codex_adapter import run_smoke_test
-        result = run_smoke_test()
-        # Codex is blocked, but the function should return a dict
-        self.assertIsInstance(result, dict)
-        self.assertIn("routable", result)
-        self.assertFalse(result["routable"])
+    None of these tests execute Codex: a readiness smoke spends real provider
+    allowance, so the executable is only probed with `--version` / `doctor`, and
+    execution behaviour is exercised with stub adapters plus the recorded
+    `codex exec --json` fixture captured on 2026-09-23.
+    """
+
+    FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures",
+                           "codex_exec_jsonl_turn_completed.jsonl")
+
+    def _adapter_or_skip(self):
+        from codex_adapter import CodexExecutionAdapter
+        try:
+            return CodexExecutionAdapter()
+        except RuntimeError as exc:
+            self.skipTest(f"Codex CLI unavailable: {exc}")
+
+    def test_codex_executable_resolution_is_hash_agnostic(self):
+        """Resolution no longer depends on the stale hash-specific bin dir."""
+        from codex_adapter import _resolve_codex_executable
+        try:
+            resolved = _resolve_codex_executable()
+        except RuntimeError as exc:
+            self.skipTest(f"Codex CLI unavailable: {exc}")
+        self.assertTrue(os.path.isfile(str(resolved)))
+        self.assertNotIn(
+            "247581e40ee272fb", str(resolved),
+            "resolution must not require the stale hash-specific install dir",
+        )
 
     def test_codex_cli_version(self):
         """Codex CLI version is captured."""
-        from codex_adapter import CodexExecutionAdapter
-        adapter = CodexExecutionAdapter()
+        adapter = self._adapter_or_skip()
         version = adapter._get_version()
-        # Version should be non-empty string (could be "unknown")
         self.assertIsInstance(version, str)
         self.assertTrue(len(version) > 0)
+
+    def test_codex_identity_does_not_hardcode_model(self):
+        """Execution-observed model identity stays UNKNOWN until observed."""
+        adapter = self._adapter_or_skip()
+        identity = adapter.get_identity()
+        self.assertEqual(identity["model"], "unknown")
+        self.assertEqual(identity["provider"], "openai")  # deterministically reported
+        self.assertNotIn("api_key", json.dumps(identity).lower().replace("stored_api_key", ""))
+
+    def test_codex_usage_extraction_matches_recorded_exec_output(self):
+        """Provider-returned usage on turn.completed is parsed (real fixture)."""
+        from codex_adapter import CodexExecutionAdapter
+        events = [
+            json.loads(line)
+            for line in open(self.FIXTURE, encoding="utf-8").read().splitlines()
+            if line.strip()
+        ]
+        adapter = CodexExecutionAdapter.__new__(CodexExecutionAdapter)
+        usage = adapter._extract_usage(events)
+        self.assertEqual(usage["input_tokens"], 16207)
+        self.assertEqual(usage["output_tokens"], 5)
+        self.assertEqual(adapter._extract_thread_id(events),
+                         "01a0cffb-4ca1-7052-babc-3db7a233ddac")
+
+    def test_codex_usage_is_none_when_provider_exposes_nothing(self):
+        """No usage block means None — usage is never fabricated."""
+        from codex_adapter import CodexExecutionAdapter
+        adapter = CodexExecutionAdapter.__new__(CodexExecutionAdapter)
+        self.assertIsNone(adapter._extract_usage([{"type": "turn.completed"}]))
+        self.assertIsNone(adapter._extract_usage([]))
+
+    def test_codex_smoke_requires_execution_and_e2_linkage(self):
+        """routable stays False unless execution succeeds AND E2 linkage exists."""
+        from codex_adapter import run_smoke_test
+
+        class _StubAdapter:
+            def __init__(self, status, final_message, error=None):
+                self._status = status
+                self._final = final_message
+                self._error = error
+                self.executable = "stub"
+
+            def check_health(self):
+                return {"status": "healthy", "version": "stub"}
+
+            def get_identity(self):
+                return {"provider": "openai", "model": "unknown"}
+
+            def dispatch(self, contract):
+                return {
+                    "dispatch_id": "stub-1",
+                    "status": self._status,
+                    "final_message": self._final,
+                    "exit_code": 0,
+                    "error": self._error,
+                    "usage_tokens": None,
+                    "codex_thread_id": "stub-thread",
+                    "runtime_s": 0.0,
+                    "dispatch_metadata": {},
+                }
+
+        failed = run_smoke_test(adapter=_StubAdapter("FAILED", ""))
+        self.assertFalse(failed["passed"])
+        self.assertFalse(failed["routable"])
+
+        completed = run_smoke_test(adapter=_StubAdapter("COMPLETED", "READY"))
+        self.assertTrue(completed["passed"])
+        # E2 runtime is present on this machine, so linkage is verified; when it
+        # is absent routable must stay False. Assert the invariant, not the host.
+        self.assertEqual(completed["routable"], bool(completed["e2_request_id"]))
+        self.assertEqual(completed["qualification"], "UNPROVEN")
+
 
 
 if __name__ == '__main__':

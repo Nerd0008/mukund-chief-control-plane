@@ -1,40 +1,44 @@
 # TODO — Re-run Codex CLI Stage 2 readiness smoke test
 
-Status: PENDING_EXTERNAL_RESET
+Status: CLOSED 2026-09-23 — smoke PASS; readiness re-validated
 Created: 2026-09-23
+Closed: 2026-09-23
 Owner: Mukund / Executive Brain E3
-Blocking: Codex ChatGPT usage limit
+Blocking: (resolved) Codex ChatGPT usage limit
 
-## Current verified state
+## Result (agent-codex-reset-revalidation-2026-09-23)
 
-- Codex CLI installed and authenticated.
-- E3 Codex ExecutionAdapter implemented and hardened.
-- Safe execution profile is the default.
-- Exact underlying model identity remains UNKNOWN until observed deterministically.
-- E2 usage linkage remains NOT_VERIFIED.
-- Qualification remains UNPROVEN.
-- `routable = false`.
-- Previous smoke test result: `BLOCKED_USAGE_LIMIT`.
-- E1/E2/E3 regressions: 117/117 PASS at last verification.
+- Executable: stable resolver replaced the stale hash-specific path. Resolved at
+  `%LOCALAPPDATA%\OpenAI\Codex\bin\80f78947ad880e6e\codex.exe`, version `0.155.0-alpha.16.3`.
+  The old `bin/247581e40ee272fb/codex.exe` no longer exists (Codex update) — hypothesis confirmed.
+- Auth: `codex doctor --json` reports auth configured, auth mode `chatgpt`, storage mode File,
+  stored API key `false`. No credentials or tokens were read, logged, or committed.
+- Smoke: one harmless deterministic non-interactive `codex exec --json` returned `READY`
+  (exit 0, thread `01a0cffb-4ca1-7052-babc-3db7a233ddac`, ~6.0 s, harmless prompt, no tools).
+- Identity: provider `openai` deterministically reported. Served model NOT exposed
+  (`server model present = false`) → execution model identity remains UNKNOWN.
+  Local config declares `gpt-6-astra`; recorded only as `configured_model`, never as evidence.
+- Usage: exposed by the CLI on `turn.completed` (16207 in / 5 out / 13184 cached). The E2 row
+  was written before the extractor fix was verified, so its token columns are null; no second
+  request was spent to correct it — the next real Codex execution will record tokens correctly.
+- E2 linkage: VERIFIED — `obs-20260923-d42e34a5` recorded through the public
+  `governor.record_request()` interface (no direct E3 SQL write into E1/E2 databases).
+- Routable: `true` (execution readiness + linkage only). Qualification: `UNPROVEN`.
+- Regressions: 271 collected / 271 passed / 0 errors across 7 suites
+  (`audits/evidence/2026-09-23T20-38-25Z-codex-reset-revalidation/`).
 
-## Action when usage limit resets
+## Honest residual / limitations
 
-1. Run one harmless deterministic Codex CLI execution smoke test.
-2. Confirm the execution completes successfully.
-3. Capture only supported provider/model identity metadata.
-4. Do not infer or hardcode model identity if it remains unavailable.
-5. Record observed execution usage through the E2 public `record-request` interface where data is available.
-6. Do not fabricate token usage if Codex does not expose it.
-7. Verify sanitized dispatch metadata contains no raw sensitive task content or credentials.
-8. Re-run E3 tests and E1/E2 regressions.
-9. Only after successful smoke test + required linkage checks may Codex execution readiness move toward `routable = true`.
-10. Qualification remains UNPROVEN until cold-start evaluation evidence exists.
+- Exactly two Codex executions were spent, not one: the first proved execution worked but exposed
+  a parser defect in our own adapter (assistant text is emitted as an `item.completed` item of
+  type `agent_message`, not `message`; usage is on `turn.completed`). The fix was then verified
+  against the recorded real stdout, and the second run produced the canonical PASS evidence.
+- Qualification remains UNPROVEN: no cold-start / task-role benchmark evidence exists yet.
+- A stale copy of the pre-fix adapter still exists outside the repo at
+  `%LOCALAPPDATA%\hermes\exec-brain\codex_adapter.py`. Nothing under the E3 test import root
+  imports it; it should be resynced at the next deployment step.
+- E3 Stage 2 remains NOT APPROVED / not enabled.
 
 ## Close condition
 
-Close this TODO only after:
-- smoke test PASS,
-- adapter remains safe,
-- E2 execution linkage is verified or truthfully documented as unavailable,
-- registry status is updated,
-- resulting commit is pushed and verified.
+Met: smoke PASS; adapter safe; E2 linkage verified; registry status updated; commit pushed.

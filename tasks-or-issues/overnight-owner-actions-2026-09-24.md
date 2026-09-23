@@ -50,6 +50,11 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 - Hermes model smoke: `deepseek-flash` returned `AUTH_OK` with exit code 0.
 - Nous Portal: currently rate-limited with HTTP 429; do not keep retrying overnight. This is not an owner-action blocker because Hermes has a working DeepSeek path.
 - Codex allowance: owner reports reset; fresh Codex worker re-validation remains engineering work, not an owner blocker unless login/account action is actually requested by the CLI.
+- Codex CLI worker re-validation: COMPLETED 2026-09-23 (`agent-codex-reset-revalidation-2026-09-23`).
+  CLI resolved at `bin/80f78947ad880e6e/codex.exe` v0.155.0-alpha.16.3 (the hardcoded hash path was
+  stale), auth mode `chatgpt`, one harmless smoke returned `READY`, E2 linkage
+  `obs-20260923-d42e34a5`, routable=true, qualification UNPROVEN. The CLI requested no login,
+  account, subscription, or billing action — no owner action outstanding for Codex.
 
 ## Morning target
 
