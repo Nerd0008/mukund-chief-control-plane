@@ -154,3 +154,5 @@ error: pathspec ':
 [2026-09-23T18:50:04.983742Z] git pull: success
 [2026-09-23T18:52:03.952856Z] git pull: success (with stash/restore)
 [2026-09-23T18:54:04.416397Z] git pull: success (with stash/restore)
+[2026-09-23T18:54:06.930926Z] Claimed task: agent-queue-isolation-and-evidence-recovery-2026-09-23
+[2026-09-23T18:54:06.931927Z] Handling task: agent-queue-isolation-and-evidence-recovery-2026-09-23
