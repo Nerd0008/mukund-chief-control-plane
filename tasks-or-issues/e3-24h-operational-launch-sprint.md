@@ -1,6 +1,6 @@
 # E3 24-Hour Operational Launch Sprint
 
-Status: ACTIVE
+Status: SUPERSEDED — full-scope deadline adopted 2026-09-23
 Created: 2026-09-23
 Owner: Mukund
 Target: operational E3 production capability by 2026-09-24 evening
@@ -142,3 +142,13 @@ E3 is operational when:
 - source-of-truth state is current.
 
 Everything beyond this is expansion, not a launch blocker.
+
+
+## Superseded
+
+Mukund explicitly rejected the reduced-scope/MVP launch strategy on 2026-09-23.
+
+Authoritative replacement:
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`
+
+No workers, E3 qualification, E4, E5, or VPS deployment are intentionally deferred under the replacement plan.
