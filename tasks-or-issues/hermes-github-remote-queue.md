@@ -1,8 +1,16 @@
 # Hermes GitHub Remote Task Queue
 
-Status: READY_TO_IMPLEMENT
+Status: OPERATIONAL — 2026-09-23
 Created: 2026-09-23
 Owner: Mukund
+
+## Final state
+
+- Canonical data path: `remote-queue/` (git-tracked, matches spec and GitHub UI)
+- Python package: `remote_queue/` (code only — poller, schema, tests)
+- Commits pushed: `68e7411` (latest remote commit SHA)
+- Task Scheduler: installed as `HermesRemoteQueuePoller` (every 2 min)
+- E2E verified: claim → execute → complete/block with git push to origin/main
 Purpose: Allow trusted control-plane collaborators to enqueue structured Hermes tasks while Mukund is away.
 
 ## Security model

@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
-"""Hermes GitHub Remote Queue — JSON schema validation and atomic claiming."""
+"""Hermes GitHub Remote Queue — JSON schema validation and atomic claiming.
+
+Canonical data path: remote-queue/ (git-tracked, matches spec and GitHub UI).
+Python package path: remote_queue/ (code only).
+
+After every state transition (claim/complete/block), changes are committed
+and pushed to origin/main so task state is visible remotely on GitHub.
+"""
 
 import json
 import os
 import re
 import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 REPO_ROOT = Path(__file__).parent.parent
-PENDING_DIR = REPO_ROOT / "remote_queue" / "pending"
-RUNNING_DIR = REPO_ROOT / "remote_queue" / "running"
-COMPLETED_DIR = REPO_ROOT / "remote_queue" / "completed"
-BLOCKED_DIR = REPO_ROOT / "remote_queue" / "blocked"
-LOG_DIR = REPO_ROOT / "remote_queue" / "logs"
+
+# Canonical data directories (must match spec and GitHub-tracked paths)
+QUEUE_DIR = REPO_ROOT / "remote-queue"
+PENDING_DIR = QUEUE_DIR / "pending"
+RUNNING_DIR = QUEUE_DIR / "running"
+COMPLETED_DIR = QUEUE_DIR / "completed"
+BLOCKED_DIR = QUEUE_DIR / "blocked"
+LOG_DIR = QUEUE_DIR / "logs"
 
 REQUIRED_FIELDS = ["task_id", "created_at", "objective", "authority", "priority", "allowed_scope", "requires_owner_approval", "status"]
 VALID_PRIORITIES = {"critical", "high", "medium", "low"}
@@ -121,6 +132,7 @@ def claim_task(task_path: Path) -> bool:
 
         shutil.copy2(str(task_path), str(dest))
         task_path.unlink()
+        _git_commit_and_push(f"queue: claim {task_id}")
         return True
     except Exception:
         if dest.exists():
@@ -150,6 +162,7 @@ def complete_task(task_id: str, result: Dict[str, Any]):
         json.dump(task, f, indent=2)
 
     src.unlink()
+    _git_commit_and_push(f"queue: complete {task_id}")
 
 
 def block_task(task_id: str, blocker_category: str, owner_action: str, continue_work: str):
@@ -175,6 +188,29 @@ def block_task(task_id: str, blocker_category: str, owner_action: str, continue_
         json.dump(task, f, indent=2)
 
     src.unlink()
+    _git_commit_and_push(f"queue: block {task_id} ({blocker_category})")
+
+
+def _git_commit_and_push(message: str):
+    """Stage queue changes and push to origin/main."""
+    try:
+        subprocess.run(
+            ["git", "add", "remote-queue/"],
+            cwd=str(REPO_ROOT),
+            capture_output=True, text=True, timeout=30
+        )
+        subprocess.run(
+            ["git", "commit", "-m", message, "--", "remote-queue/"],
+            cwd=str(REPO_ROOT),
+            capture_output=True, text=True, timeout=30
+        )
+        subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=str(REPO_ROOT),
+            capture_output=True, text=True, timeout=60
+        )
+    except Exception as e:
+        log_event(f"git commit/push failed: {e}")
 
 
 def log_event(message: str):
