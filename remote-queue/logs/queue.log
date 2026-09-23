@@ -265,3 +265,5 @@ hint: have locall
 [2026-09-23T22:57:56.602408Z] CRITICAL: push recovery rebase failed: error: cannot pull with rebase: You have unstaged changes.
 error: Please commit or stash them.
 [2026-09-23T22:58:04.387770Z] git pull: success (with stash/restore)
+[2026-09-23T22:58:06.614908Z] Claimed task: agent-company-watch-job-search-integration-2026-09-23
+[2026-09-23T22:58:06.615908Z] Handling task: agent-company-watch-job-search-integration-2026-09-23
