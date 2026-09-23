@@ -74,4 +74,8 @@ was added to `scripts/evidence_runner.py` so the recorded regression baseline st
   or duplicate `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23` (already pending and
   left unchanged).
 - Stage 2 remains disabled; this task did not enable it, weaken a criterion, or treat approval text as
-  evidence.
+  evidence. A new owner directive landed on the authority during this run (`a58549c` / `2d5f332` /
+  `d7e718c`, "Owner directive update — 2026-09-23 late evening"): do not enable local Stage 2
+  overnight; complete it only after Mukund configures all remaining provider credentials on
+  2026-09-24 and the readiness gates are re-run. The staged retry contract was aligned to that
+  directive.

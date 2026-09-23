@@ -190,6 +190,11 @@ Smoke readiness is not qualification; qualification is evidence-driven.
 - That run staged exactly one successor: `agent-e3-local-production-rehearsal-retry-2026-09-23`
   (pending) — the formal production-rehearsal re-run on the now-built execution leg, scoped not to
   race or duplicate the already-pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`.
+- Owner directive `a58549c` / `2d5f332` / `d7e718c` ("Owner directive update — 2026-09-23 late
+  evening") arrived during this run: continue all independent local work overnight, do **not** enable
+  local E3 Stage 2 overnight, and complete it only after Mukund configures all remaining provider
+  credentials on 2026-09-24 and the readiness gates are re-run. Both staged/pending E3 contracts now
+  carry that directive; Stage 2 remains disabled.
 
 ## Stage 2 readiness evaluation (precondition by precondition)
 

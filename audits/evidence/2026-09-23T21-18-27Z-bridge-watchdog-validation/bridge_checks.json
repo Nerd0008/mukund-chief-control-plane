@@ -92,7 +92,7 @@
     "e3_rehearsal_retry_pending": "remote-queue/pending/agent-e3-local-production-rehearsal-retry-2026-09-23.json",
     "reason": "the blocked rehearsal's recorded unmet condition (no orchestrator-to-adapter dispatch leg) was built and evidenced by agent-e3-production-execution-leg-2026-09-23; no E3 rehearsal was pending or running at exit time",
     "other_pending": "remote-queue/pending/agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23.json (already staged by the predecessor; unchanged)",
-    "stage_2": "disabled; not enabled, not weakened, and not enabled by this task"
+    "stage_2": "disabled; not enabled, not weakened, and not enabled by this task. The authority gained a new owner directive during this run (commits a58549c / 2d5f332 / d7e718c, 'Owner directive update - 2026-09-23 late evening'): do not enable local Stage 2 overnight; complete it only after Mukund configures all remaining provider credentials on 2026-09-24 and the readiness gates are re-run. The staged retry contract was aligned to that directive."
   },
   "stop_conditions_respected": {
     "e3_task_contract_mutated": false,
