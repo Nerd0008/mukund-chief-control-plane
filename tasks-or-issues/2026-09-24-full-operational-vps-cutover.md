@@ -292,15 +292,15 @@ After the above lanes and E1-E5 local work are ready, run a local whole-company 
 Do not initialize/restructure the existing Career Ops git repository without owner approval. Reuse existing systems and deterministic tooling first.
 
 
-## Owner execution schedule update — engineering cutoff morning 2026-09-24
+## Owner execution schedule update — continue until deployment-ready
 
 Mukund's current delivery sequence is authoritative:
 
-1. **Overnight through morning 2026-09-24:** finish all engineering, integrations, agents/workflows, tests, evidence, schedules, local deployment preparation, and owner-action checklist that do not require manual credentials/account administration.
-2. **Afternoon 2026-09-24:** Mukund returns and performs remaining owner/admin/manual work, especially provider credentials, account/OAuth steps, and any required approval/configuration.
-3. **After owner setup:** run fresh readiness/acceptance verification and complete local E3 Stage 2 if its gates pass.
-4. **Evening 2026-09-24:** perform the approved deployment/cutover path with backup/restore and acceptance evidence.
+1. **Engineering runs continuously until the full v1 system is complete and ready for deployment.** Morning 2026-09-24 is a progress target, NOT a timeout, cutoff, or stop condition. Do not stop engineering merely because morning has arrived.
+2. **Owner manual work:** Mukund's planned manual contribution is configuring the remaining provider keys locally. Everything else that can be engineered, scripted, tested, validated, documented, or prepared without owner intervention should be completed by Hermes/the build system.
+3. **After provider keys are configured:** verify every newly configured provider truthfully, rerun the full readiness/acceptance suite, and complete local E3 Stage 2 if all gates pass.
+4. **Deployment:** once the system is fully complete, acceptance-ready, backup/restore-ready, and the required owner key configuration is done, perform the approved deployment/cutover path with rollback and acceptance evidence.
 
-The overnight engineering run must not stop merely because E1-E5 are complete. It must also finish the v1 company workflows: Career Ops, regional job-search automation, Company Watch, application-state/tracker automation, CV/cover-letter workflow, LinkedIn draft/read-only workflow, company/role research and application-pack support, career briefing/prioritization, operational daily brief/health services, and whole-company local acceptance preparation.
+Engineering must not stop merely because E1-E5 are complete or because a clock target was reached. It must finish the v1 company workflows: Career Ops, regional job-search automation, Company Watch, application-state/tracker automation, CV/cover-letter workflow, LinkedIn draft/read-only workflow, company/role research and application-pack support, career briefing/prioritization, operational daily brief/health services, deployment preparation, and whole-company local acceptance.
 
-Any true owner-only dependency must be concentrated in `tasks-or-issues/overnight-owner-actions-2026-09-24.md` with exact steps so the afternoon owner session is administrative rather than exploratory.
+Owner-only dependencies should be minimized. The expected owner action is provider-key configuration. If an unforeseen external service absolutely requires owner interaction that cannot be engineered around safely, record it explicitly and continue every independent lane; do not turn ordinary setup or engineering work into owner work.
