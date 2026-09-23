@@ -1,0 +1,101 @@
+{
+  "task_id": "agent-e3-production-execution-leg-2026-09-23",
+  "created_at": "2026-09-23T20:56:30Z",
+  "objective": "Build the missing E3 production execution leg so local Stage 2 readiness can be re-evaluated honestly. Wire the E3 orchestrator to dispatch an assigned DAG node to the real, currently-routable worker's ExecutionAdapter (codex-cli / deepseek-v41-flash / google-nano-banana-2 only), persist schema-v2 DAG state and performance evidence, and enforce deterministic verification before a node is marked COMPLETE. Deploy the E3 orchestration modules and e3-* CLI bindings to the local runtime root. Then re-run the production rehearsal WITH real worker execution, re-evaluate every recorded Stage 2 readiness precondition, and proceed to E4/E5 real-path drills plus local acceptance testing only if readiness is objectively satisfied. Do not weaken readiness criteria, do not perform VPS cutover, and do not finalize deployment architecture.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "agent-e3-local-production-rehearsal-2026-09-23 must be in completed/ or blocked/ with truthful terminal evidence",
+    "latest main must include the rehearsal evidence and defect-fix commits",
+    "standing conditional owner approval for LOCAL Stage 2 remains valid"
+  ],
+  "allowed_scope": [
+    "Inspect the terminal result and evidence from agent-e3-local-production-rehearsal-2026-09-23 before making any readiness claim, especially the recorded unmet condition (no orchestrator-to-adapter production execution leg).",
+    "Implement a real production execution leg in the E3 orchestration path: after a team is assembled, dispatch each ready DAG node to its assigned worker's ExecutionAdapter, persist node state transitions and performance evidence in orchestration.db, and require deterministic verification before a node reaches COMPLETE.",
+    "Route only to workers that are currently truthfully routable (routable=true derived from smoke PASS + E2 linkage); never route to credential-missing workers.",
+    "Keep E1/E2 integration through public interfaces only (governor.record_request); no direct SQL writes from E3 into exec_brain.db or governor.db.",
+    "Deploy the E3 orchestration modules and e3-* CLI bindings to the local runtime root %LOCALAPPDATA%\\hermes\\exec-brain without committing secrets.",
+    "Bound real provider usage: the minimum number of harmless, deterministic execution calls needed to evidence the path; capture provider-returned usage only if exposed and never fabricate it.",
+    "Re-run the production rehearsal with real worker execution and record executable evidence, including at least one verifier rejection followed by targeted repair/replan and successful re-verification on the real path.",
+    "Re-evaluate every recorded local Stage 2 readiness precondition with evidence. Regardless of outcome, do not enable LOCAL Stage 2 or production dispatch; leave it disabled and record the exact remaining conditions for a separate owner-directed decision.",
+    "If Stage 2 is enabled, run E4/E5 real-path drills (checkpoint/failover, convergence/safe mode) plus local acceptance testing and record evidence.",
+    "Preserve rollback/recovery for every change; keep commits small and recoverable.",
+    "Run the full E1/E2/E3/E4/E5 plus queue regression suites after changes and record exact commands, counts and exit codes.",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only, and create exactly one successor agent-* task in remote-queue/pending/ before returning a terminal result."
+  ],
+  "stop_conditions": [
+    "Do not fabricate provider/model/usage/qualification evidence, model identity, or deployment facts.",
+    "Do not use the seven credential-missing workers as if ready.",
+    "Do not enable Stage 2 by weakening or skipping a readiness criterion.",
+    "Do not expose secrets, raw chain-of-thought, or private runtime DB content.",
+    "Do not perform VPS cutover or finalize deployment architecture.",
+    "Do not run unbounded or exploratory provider calls; every real execution must be bounded and justified.",
+    "If a real execution requires owner credentials/account action, record the exact owner action and continue non-dependent work.",
+    "Current owner instruction: do not enable E3 Stage 2 or production dispatch in this task, regardless of conditional approval text elsewhere."
+  ],
+  "notes": "Staged by agent-e3-local-production-rehearsal-2026-09-23 because Stage 2 readiness was found unmet: the E3 orchestrator composes planning/routing/assembly/integration/verification but has no dispatch step to a worker ExecutionAdapter, and the E3 orchestration modules plus e3-* CLI are not deployed to the local runtime root. This task targets that exact condition first, then continues to E4/E5 and local acceptance testing. Owner standing directive: do not pause for a fresh approval if the local Stage 2 readiness criteria pass; LOCAL Stage 2 only. Overnight continuity: hand off to exactly one next bounded task before exit. Current direct owner instruction for this coordinator run: implement and rehearse only; do not enable E3 Stage 2.",
+  "completed_at": "2026-09-23T21:13:50.938692Z",
+  "result": {
+    "status": "completed",
+    "summary": "Built, deployed and really executed the missing E3 production execution leg, then re-evaluated Stage 2 honestly. New `exec-brain/e3_execution.py` adds `ExecutionAdapterRegistry` (dispatch refused with WorkerNotRoutable unless the registry says routable=true), `OrchestrationStore` (schema-v2 dag_node/dag_state_event/performance_evidence persistence) and `E3ProductionExecutor` (READY->RUNNING->VERIFYING->COMPLETE, REWORK + re-dispatch on a genuine verifier rejection), gated so a node reaches COMPLETE only after a deterministic verification PASS; `E3ShadowOrchestrator.orchestrate_and_execute()` wires the dispatch step into the orchestrator; `e3_cli.py` supplies the e3-* bindings. Deployed 29 E3 modules and all 10 e3-* CLI bindings to %LOCALAPPDATA%\\hermes\\exec-brain via scripts/deploy_e3_runtime.py (per-file backup + SHA-256 manifest + --restore; E1/E2 files untouched apart from the one e3-* registration hook in eb.py). Real-path rehearsal (5 bounded provider calls: deepseek 3, codex-cli 1, google 1) recorded: deepseek rejection -> targeted repair -> re-verification PASS, deepseek first-pass PASS, codex-cli COMPLETE, and a credential-missing worker refused with ZERO provider calls; live orchestration.db upgraded to v2 and read back with 5 dag_node / 20 dag_state_event / 4 performance_evidence rows and 5 new governor.db observed_request rows written only through the public governor.record_request() interface. Unresolved: the Google image worker's real dispatch returned no image part (provider reported 17 prompt tokens, 0 output tokens). Stage 2 was NOT enabled - the live running contract (1ba7f43, 2026-09-23T21:04Z) directs that it not be enabled in this task regardless of outcome, so no criterion was weakened and none was treated as satisfied by approval text. Three truth defects found and fixed (gemini output-token mapping; e3_commands hardcoded schema version; rehearsal CLI-binding detector). Regression: 10 suites, 323/323 passed, 0 failed, exit 0 at SHA 6c19a01. Exactly one successor agent-* task staged.",
+    "owner_action_required": "Decide whether to enable LOCAL E3 Stage 2 (production dispatch). It is built and evidenced but left disabled per your 2026-09-23T21:04Z instruction; also note the Google image worker's real dispatch currently fails provider-side. Separate from that, the seven provider credentials (Mistral, GLM, Qwen, LongCat/Nous, MiniMax, Step, Hunyuan) remain owner-local provisioning steps.",
+    "blocker_category": null,
+    "commits": [
+      "e115004 - evidence: preserve E3 production rehearsal run output from the blocked rehearsal task",
+      "890e005 - e3: add the production execution leg (orchestrator -> worker ExecutionAdapter)",
+      "6c19a01 - e3: harden the execution leg, fix two truth defects, cover the rehearsal driver",
+      "8fbe4b0 - state: record the built+evidenced E3 production execution leg; stage one successor"
+    ],
+    "tests": [
+      "E1 executive brain runtime matrix: exec-brain/tests/test_eb.py - 32 collected / 32 passed / exit 0 (T13 allow-list extended for the deployed E3 module set)",
+      "E2 governor + provider adapters: PYTHONPATH=%LOCALAPPDATA%\\hermes\\exec-brain exec-brain/tests/test_governor.py - 45/45 / exit 0",
+      "E3 baseline: exec-brain/tests/test_e3.py - 54/54 / exit 0",
+      "E3 extended: exec-brain/tests/test_e3_extended.py - 60/60 / exit 0",
+      "E3 shadow orchestrator: exec-brain/tests/test_e3_shadow_orchestrator.py - 13/13 / exit 0",
+      "E3 production rehearsal (isolation, E1/E2 boundary): exec-brain/tests/test_e3_production_rehearsal.py - 24/24 / exit 0",
+      "E3 production execution leg: exec-brain/tests/test_e3_execution.py - 18/18 / exit 0 (NEW)",
+      "E3 execution rehearsal driver: exec-brain/tests/test_e3_execution_rehearsal.py - 10/10 / exit 0 (NEW)",
+      "E4+E5 combined: exec-brain/tests/test_e4e5.py - 37/37 / exit 0",
+      "Remote queue (isolated): remote_queue/tests/test_queue.py - 30/30 / exit 0",
+      "Full runner: python scripts/evidence_runner.py --label e3-production-execution-leg-regression - 10 suites, 323 collected, 323 passed, 0 failed, 0 errors, 0 skipped, exit 0 at SHA 6c19a01 (audits/evidence/2026-09-23T21-11-03Z-e3-production-execution-leg-regression/)",
+      "Real-path rehearsal: python e3_execution_rehearsal.py --include-google (run from the deployed runtime root) - checks 9/10 true; google_image_complete false (genuine provider failure); evidence in audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/",
+      "Runtime CLI: eb.py e3-status / e3-plan / e3-verify-db / e3-execute (dry run) all execute against the live store; e3-verify-db reports schema v2 PASS",
+      "Secret scan of the committed evidence/state/successor files: no key/token/Bearer patterns found"
+    ],
+    "changed_files": [
+      "exec-brain/e3_execution.py",
+      "exec-brain/e3_execution_rehearsal.py",
+      "exec-brain/e3_cli.py",
+      "exec-brain/e3_shadow_orchestrator.py",
+      "exec-brain/e3_commands.py",
+      "exec-brain/gemini_adapter.py",
+      "exec-brain/tests/test_e3_execution.py",
+      "exec-brain/tests/test_e3_execution_rehearsal.py",
+      "exec-brain/tests/test_eb.py",
+      "scripts/deploy_e3_runtime.py",
+      "scripts/evidence_runner.py",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "remote-queue/pending/agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23.json",
+      "audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/evidence.json",
+      "audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/evidence.md",
+      "audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/deployment_check.json",
+      "audits/evidence/2026-09-23T21-11-03Z-e3-production-execution-leg-regression/evidence.json",
+      "audits/evidence/2026-09-23T21-11-03Z-e3-production-execution-leg-regression/evidence.md",
+      "audits/evidence/2026-09-23T20-57-42Z-e3-production-rehearsal-run/evidence.json (preserved from the blocked rehearsal task)",
+      "audits/evidence/superseded/2026-09-23T21-08-55Z-e3-production-execution-leg-regression/ (superseded intermediate run)",
+      "audits/evidence/superseded/2026-09-23T21-09-51Z-e3-production-execution-leg-regression/ (superseded intermediate run)"
+    ],
+    "remaining": [
+      "Diagnose the Google image worker real-dispatch failure: provider returned no image part (17 prompt tokens, 0 output tokens); root cause undetermined. The executor now records finish_reason / prompt_feedback / image mime-dims-size so one bounded diagnostic call is enough. NOT diagnosed this run to respect the bounded-usage instruction.",
+      "Exercise the real dispatch path on a decomposed multi-worker plan (only single-node plans were dispatched this run); worker capability registry holds no QUALIFIED worker, so multi-node real execution is unproven.",
+      "Produce evidence toward worker capability qualification with the cold-start benchmark harness - every worker is still UNPROVEN (smoke readiness is not qualification).",
+      "E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain not evidenced; the contract gates them behind Stage 2 enablement, which is currently disabled by owner instruction.",
+      "Stage 2 / production dispatch stays disabled pending a separate explicit owner decision; the four recorded remaining conditions are itemised in state/current_company_state.md.",
+      "Provider onboarding (7 credential-missing workers) resumes when owner-local credentials are supplied; the execution leg correctly refuses them with zero provider calls today.",
+      "Pre-existing truth defect still open and untouched: poller.handle_task routes any task id containing 'operational' to handle_operational_build(), which returns a hardcoded status with no execution evidence."
+    ]
+  }
+}
