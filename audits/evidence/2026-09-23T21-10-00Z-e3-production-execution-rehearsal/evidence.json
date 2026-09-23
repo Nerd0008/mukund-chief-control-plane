@@ -1,0 +1,695 @@
+{
+  "label": "e3-production-execution-rehearsal",
+  "run_started_utc": "2026-09-23T21:07:31+00:00",
+  "run_finished_utc": "2026-09-23T21:07:48+00:00",
+  "stage": "E3 production execution leg rehearsal \u2014 real worker execution on the local orchestration path; Stage 2 NOT enabled by this run",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "scratch_root": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-exec-rehearsal-k39j3ijv",
+  "runtime_deployment": {
+    "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+    "required_modules": {
+      "e3_planner.py": true,
+      "e3_router.py": true,
+      "e3_team_assembly.py": true,
+      "e3_integrator.py": true,
+      "e3_verifier.py": true,
+      "e3_shadow_orchestrator.py": true,
+      "e3_conflict.py": true,
+      "e3_replan.py": true,
+      "e3_escalate.py": true,
+      "e3_evidence.py": true,
+      "e3_context.py": true,
+      "e3_permissions.py": true,
+      "e3_decomposition_review.py": true,
+      "e3_exploration.py": true,
+      "e3_qualification_benchmark.py": true,
+      "e3_execution.py": true,
+      "e3_commands.py": true,
+      "e3_cli.py": true,
+      "execution_dag.py": true,
+      "orchestration_db.py": true,
+      "worker_registry.py": true,
+      "capability_registry.py": true,
+      "task_fingerprint.py": true,
+      "worker_contract.py": true,
+      "decision_rationale.py": true,
+      "codex_adapter.py": true,
+      "deepseek_adapter.py": true,
+      "gemini_adapter.py": true,
+      "generic_openai_adapter.py": true
+    },
+    "missing_modules": [],
+    "e3_cli_bindings_present": []
+  },
+  "orchestration_db_before": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 0,
+      "dag_state_event": 0,
+      "performance_evidence": 0,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  },
+  "orchestration_db_after": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 5,
+      "dag_state_event": 20,
+      "performance_evidence": 4,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "notes": "Attempt 1 is a genuinely under-specified instruction: the real response cannot equal the declared token, so the deterministic verifier rejects it. The targeted repair re-dispatches with the plan's declared exact content.",
+      "plan_id": "execleg-A_repair_cycle_deepseek",
+      "node_id": "node-execleg-A_repair_cycle_deepseek-1",
+      "objective": "Rehearsal (execution leg): in one short sentence, tell the operator what you are.",
+      "assigned_worker": "deepseek-v41-flash",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "READY-7391",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "READY-7391"
+        }
+      ],
+      "max_repair_attempts": 1,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "ds-a26afef1f140",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 2.1132209300994873,
+          "usage": {
+            "prompt_tokens": 51,
+            "completion_tokens": 129,
+            "total_tokens": 180,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 51
+          },
+          "usage_exposed": true,
+          "objective_hash": "73b2a6cabd54",
+          "e2_request_id": "obs-20260923-ce0dc42c"
+        },
+        {
+          "attempt": 2,
+          "dispatch_id": "ds-8b0621850b71",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 1.7339849472045898,
+          "usage": {
+            "prompt_tokens": 122,
+            "completion_tokens": 15,
+            "total_tokens": 137,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 122
+          },
+          "usage_exposed": true,
+          "objective_hash": "d8afb4a63dc7",
+          "e2_request_id": "obs-20260923-83675c19"
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am the AI assistant executing this rehearsal leg, ready to proceed under your direction."
+          ]
+        },
+        {
+          "attempt": 2,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [
+        {
+          "attempt": 1,
+          "outcome": "FAIL",
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am the AI assistant executing this rehearsal leg, ready to proceed under your direction."
+          ]
+        }
+      ],
+      "repairs": [
+        {
+          "attempt": 1,
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am the AI assistant executing this rehearsal leg, ready to proceed under your direction."
+          ]
+        }
+      ],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-ce0dc42c",
+        "obs-20260923-83675c19"
+      ],
+      "evidence_id": "evidence-cefec061aec2",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "deepseek-v41-flash",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "REWORK",
+          "cause": "targeted_repair_after_attempt_1"
+        },
+        {
+          "previous": "REWORK",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_2"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_2"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_2"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-cefec061aec2",
+          "first_pass_success": 0,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 1,
+          "corrections": 1,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "B_first_pass_deepseek",
+      "notes": "One bounded call; deterministic first-pass PASS expected.",
+      "plan_id": "execleg-B_first_pass_deepseek",
+      "node_id": "node-execleg-B_first_pass_deepseek-1",
+      "objective": "Rehearsal (execution leg): reply with exactly ACK-2049 and nothing else.",
+      "assigned_worker": "deepseek-v41-flash",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "ACK-2049",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "ACK-2049"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "ds-2ade7f3f9776",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 1.2870712280273438,
+          "usage": {
+            "prompt_tokens": 51,
+            "completion_tokens": 19,
+            "total_tokens": 70,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 51
+          },
+          "usage_exposed": true,
+          "objective_hash": "18b977875675",
+          "e2_request_id": "obs-20260923-0347c684"
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-0347c684"
+      ],
+      "evidence_id": "evidence-dccac639b86e",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "deepseek-v41-flash",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-dccac639b86e",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "C_codex_cli_dispatch",
+      "notes": "One bounded non-interactive Codex CLI call in a scratch working directory; no repository change requested.",
+      "plan_id": "execleg-C_codex_cli_dispatch",
+      "node_id": "node-execleg-C_codex_cli_dispatch-1",
+      "objective": "Reply with exactly this text and nothing else: CODEX-OK-317",
+      "assigned_worker": "codex-cli",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "CODEX-OK-317",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "CODEX-OK-317"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "codex-28b5ab54db7a",
+          "status": "COMPLETED",
+          "provider": "openai",
+          "model": "unknown",
+          "error": null,
+          "runtime_s": 5.636140584945679,
+          "usage": null,
+          "usage_exposed": false,
+          "objective_hash": "c74e2aa746d9",
+          "e2_request_id": "obs-20260923-cb6aece9"
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-cb6aece9"
+      ],
+      "evidence_id": "evidence-791966050006",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "codex-cli",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-791966050006",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "D_google_image_dispatch",
+      "notes": "One bounded image call. Verification is the real decoded-image check (inline image part present and header-decodable).",
+      "plan_id": "execleg-D_google_image_dispatch",
+      "node_id": "node-execleg-D_google_image_dispatch-1",
+      "objective": "Generate a small solid white square image, 64 by 64 pixels.",
+      "assigned_worker": "google-nano-banana-2",
+      "role": "vision",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": null,
+      "verification_test_cases": [
+        {
+          "name": "dispatch completed",
+          "field": "status",
+          "expected": "COMPLETED"
+        },
+        {
+          "name": "image decoded",
+          "field": "image_decode_ok",
+          "expected": true
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_FAILED",
+      "node_state": "FAILED",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "gem-d8c43b8cb447",
+          "status": "FAILED",
+          "provider": "google",
+          "model": "gemini-3.1-flash-image",
+          "error": "no_image_part_in_response",
+          "runtime_s": 5.951630115509033,
+          "usage": {
+            "promptTokenCount": 17,
+            "totalTokenCount": 17,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 17
+              }
+            ],
+            "serviceTier": "standard"
+          },
+          "usage_exposed": true,
+          "objective_hash": "c2e948d48a63",
+          "e2_request_id": "obs-20260923-f0913024"
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'dispatch completed': expected COMPLETED, got FAILED",
+            "Test 'image decoded': expected True, got False"
+          ]
+        }
+      ],
+      "rejections": [
+        {
+          "attempt": 1,
+          "outcome": "FAIL",
+          "issues": [
+            "Test 'dispatch completed': expected COMPLETED, got FAILED",
+            "Test 'image decoded': expected True, got False"
+          ]
+        }
+      ],
+      "repairs": [],
+      "final_verification": "FAIL",
+      "blocking_reason": null,
+      "failure_attribution": "verification_fail",
+      "e2_request_ids": [
+        "obs-20260923-f0913024"
+      ],
+      "evidence_id": "evidence-53374aa1dde4",
+      "persisted_node_state": "FAILED",
+      "persisted_assigned_worker": "google-nano-banana-2",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "FAILED",
+          "cause": "verification_failed_no_repair_budget_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-53374aa1dde4",
+          "first_pass_success": 0,
+          "final_success": 0,
+          "verification_outcome": "FAIL",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": "verification_fail"
+        }
+      ]
+    },
+    {
+      "scenario": "E_non_routable_refusal",
+      "notes": "Credential-missing worker (routable=false). The node must be recorded BLOCKED and the adapter must never be called.",
+      "plan_id": "execleg-E_non_routable_refusal",
+      "node_id": "node-execleg-E_non_routable_refusal-1",
+      "objective": "Rehearsal (execution leg): this must never be dispatched.",
+      "assigned_worker": "mistral-small-4",
+      "role": "builder",
+      "real_worker_required": false,
+      "worker_routable": false,
+      "expected_exact_content": null,
+      "verification_test_cases": [
+        {
+          "name": "never verified",
+          "field": "content_stripped",
+          "expected": "anything"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_BLOCKED",
+      "node_state": "BLOCKED",
+      "dispatch_attempts": [],
+      "verification_attempts": [],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": null,
+      "blocking_reason": "worker_not_routable:mistral-small-4",
+      "failure_attribution": null,
+      "e2_request_ids": [],
+      "evidence_id": null,
+      "persisted_node_state": "BLOCKED",
+      "persisted_assigned_worker": "mistral-small-4",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "BLOCKED",
+          "cause": "worker_not_routable:mistral-small-4"
+        }
+      ],
+      "persisted_evidence": [],
+      "stub_dispatch_calls": 0,
+      "refusal_honoured": true
+    }
+  ],
+  "real_dispatch_log": [
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-a26afef1f140",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 51,
+        "completion_tokens": 129,
+        "total_tokens": 180,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 51
+      },
+      "e2_request_id": "obs-20260923-ce0dc42c",
+      "objective_hash": "73b2a6cabd54",
+      "runtime_s": 2.1132209300994873
+    },
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-8b0621850b71",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 122,
+        "completion_tokens": 15,
+        "total_tokens": 137,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 122
+      },
+      "e2_request_id": "obs-20260923-83675c19",
+      "objective_hash": "d8afb4a63dc7",
+      "runtime_s": 1.7339849472045898
+    },
+    {
+      "scenario": "B_first_pass_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-2ade7f3f9776",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 51,
+        "completion_tokens": 19,
+        "total_tokens": 70,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 51
+      },
+      "e2_request_id": "obs-20260923-0347c684",
+      "objective_hash": "18b977875675",
+      "runtime_s": 1.2870712280273438
+    },
+    {
+      "scenario": "C_codex_cli_dispatch",
+      "worker_id": "codex-cli",
+      "dispatch_id": "codex-28b5ab54db7a",
+      "status": "COMPLETED",
+      "provider": "openai",
+      "model": "unknown",
+      "usage_exposed": false,
+      "usage": null,
+      "e2_request_id": "obs-20260923-cb6aece9",
+      "objective_hash": "c74e2aa746d9",
+      "runtime_s": 5.636140584945679
+    },
+    {
+      "scenario": "D_google_image_dispatch",
+      "worker_id": "google-nano-banana-2",
+      "dispatch_id": "gem-d8c43b8cb447",
+      "status": "FAILED",
+      "provider": "google",
+      "model": "gemini-3.1-flash-image",
+      "usage_exposed": true,
+      "usage": {
+        "promptTokenCount": 17,
+        "totalTokenCount": 17,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "e2_request_id": "obs-20260923-f0913024",
+      "objective_hash": "c2e948d48a63",
+      "runtime_s": 5.951630115509033
+    }
+  ],
+  "bounded_usage": {
+    "real_provider_calls": 5,
+    "calls_by_provider": {
+      "deepseek": 3,
+      "openai": 1,
+      "google": 1
+    },
+    "usage_exposed_calls": 4,
+    "usage_missing_calls": 1,
+    "note": "Minimum deterministic calls needed to evidence the path. Usage is recorded only when the provider returned it."
+  },
+  "checks": {
+    "repair_cycle_rejected_then_repaired": true,
+    "first_pass_complete": true,
+    "codex_cli_complete": true,
+    "google_image_complete": false,
+    "non_routable_refused_without_dispatch": true,
+    "complete_requires_verification": true,
+    "dag_state_and_evidence_persisted": true,
+    "e2_linkage_recorded": true,
+    "runtime_modules_deployed": true,
+    "orchestration_db_is_schema_v2": true
+  }
+}

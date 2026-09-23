@@ -1,0 +1,65 @@
+{
+  "artifact": "runtime deployment re-check",
+  "checked_at_utc": "2026-09-23T21:09:04+00:00",
+  "provider_calls_spent": 0,
+  "why": "Corrected re-read of the runtime deployment facts; the rehearsal run artifact used a detector that looked for the e3-* command names in eb.py instead of in the deployed e3_cli.py.",
+  "runtime_deployment": {
+    "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+    "required_modules": {
+      "e3_planner.py": true,
+      "e3_router.py": true,
+      "e3_team_assembly.py": true,
+      "e3_integrator.py": true,
+      "e3_verifier.py": true,
+      "e3_shadow_orchestrator.py": true,
+      "e3_conflict.py": true,
+      "e3_replan.py": true,
+      "e3_escalate.py": true,
+      "e3_evidence.py": true,
+      "e3_context.py": true,
+      "e3_permissions.py": true,
+      "e3_decomposition_review.py": true,
+      "e3_exploration.py": true,
+      "e3_qualification_benchmark.py": true,
+      "e3_execution.py": true,
+      "e3_commands.py": true,
+      "e3_cli.py": true,
+      "execution_dag.py": true,
+      "orchestration_db.py": true,
+      "worker_registry.py": true,
+      "capability_registry.py": true,
+      "task_fingerprint.py": true,
+      "worker_contract.py": true,
+      "decision_rationale.py": true,
+      "codex_adapter.py": true,
+      "deepseek_adapter.py": true,
+      "gemini_adapter.py": true,
+      "generic_openai_adapter.py": true
+    },
+    "missing_modules": [],
+    "e3_cli_bindings_present": [
+      "e3-execute",
+      "e3-init",
+      "e3-plan",
+      "e3-rationale",
+      "e3-register-workers",
+      "e3-route",
+      "e3-status",
+      "e3-trace",
+      "e3-verify-db",
+      "e3-why"
+    ]
+  },
+  "orchestration_db": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 5,
+      "dag_state_event": 20,
+      "performance_evidence": 4,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  }
+}
