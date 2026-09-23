@@ -208,7 +208,7 @@ own `generate-cover-letter.mjs` `buildHtml` is the cover-letter renderer, and
 | LinkedIn | Handoff into Career Ops/company tracking | **DONE** | `handoff` → shared writer, dry-run by default, provenance into a non-owner column |
 | LinkedIn | Dedupe vs Career Ops **and** Company Watch | **DONE** | canonical workbook + cross-month ledger + Company Watch registry names + Company Watch handoff manifests + same-batch merge |
 | LinkedIn | Draft/read-only — no post/message/connect/apply | **ENFORCED** | `guard` refuses and logs every external action; module imports no network/browser library (asserted by test); read-only contract `network_used=false`, `urls_fetched=0`, `browser_launched=false`, `account_mutations=0` |
-| Acceptance | Representative end-to-end local path | **PASS 23/23** | `python career-ops/run_cv_linkedin_acceptance.py` → `audits/evidence/20260923T234013Z-cv-linkedin-workflows/` |
+| Acceptance | Representative end-to-end local path | **PASS 23/23** | `python career-ops/run_cv_linkedin_acceptance.py` → `audits/evidence/20260923T234310Z-cv-linkedin-workflows/` (run on the final committed code; the earlier `20260923T234013Z` bundle is preserved as the historical run) |
 | Tests | New suites | **PASS** | `career-ops/tests/test_cv_workflow.py` 21 passed; `career-ops/tests/test_linkedin_workflow.py` 34 passed; whole `career-ops/tests/` 88 passed; `company-watch/tests/` 31 passed |
 | Regression | Whole-repo evidence runner | **PASS** | `python scripts/evidence_runner.py --label cv-linkedin-workflows` → `audits/evidence/2026-09-23T23-40-25Z-cv-linkedin-workflows/` — **14/14 suites pass, 400 collected / 400 passed, 0 failed, 0 errors, 0 skipped**, every suite exit 0, code SHA `b2ed978` |
 

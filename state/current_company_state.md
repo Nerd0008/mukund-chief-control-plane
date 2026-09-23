@@ -1,9 +1,9 @@
 # Current Company State
 
 - Timestamp: 2026-09-23T23:45:00Z
-- Latest evidence run: 2026-09-23T23:40:13Z — **CV/cover-letter workflow connected + minimal LinkedIn
+- Latest evidence run: 2026-09-23T23:43:10Z — **CV/cover-letter workflow connected + minimal LinkedIn
   workflow implemented** (task `agent-cv-cover-letter-linkedin-workflows-2026-09-23`),
-  `audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) —
+  `audits/evidence/20260923T234310Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) —
   **23/23 critical checks pass**: representative path Career Ops job → tailored CV/cover-letter draft
   (install fact gate **pass**) → LinkedIn read-only intake + unsent drafts → dedupe against Career Ops +
   Company Watch → tracker handoff on a dated copy with verified backup/rollback, **canonical workbooks
@@ -17,7 +17,7 @@
   code SHA `342ee66`). Before that: 2026-09-23T22:41:57Z at code SHA `88af27a`; then
   2026-09-23T22:37:29Z at code SHA `56d923b`.
 - Evidence files (this run):
-  - `audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — CV/cover-letter
+  - `audits/evidence/20260923T234310Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — CV/cover-letter
     workflow + minimal LinkedIn workflow acceptance: **23/23 critical checks pass** (see the section at
     the end of this file).
   - `audits/evidence/2026-09-23T23-40-25Z-cv-linkedin-workflows/evidence.json` (+ `.md`) — whole-repo
@@ -698,7 +698,7 @@ conditions hold.
 
 Task `agent-cv-cover-letter-linkedin-workflows-2026-09-23` (authority: the 2026-09-24 cutover file,
 § CV + cover-letter workflow / § LinkedIn workflow). Evidence:
-`audits/evidence/20260923T234013Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — **23/23 critical
+`audits/evidence/20260923T234310Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) — **23/23 critical
 checks pass**, 0 provider calls, 0 external LinkedIn actions, 0 applications.
 
 Reused, not rebuilt: the Career Ops install's `cv.md` / `config/profile.yml` / `config/cv-facts.json`
