@@ -1,0 +1,35 @@
+{
+  "task_id": "remote-e2e-final-verification",
+  "created_at": "2026-09-23",
+  "objective": "Final clean E2E verification: new task created on canonical path, polled, claimed, completed, pushed to GitHub",
+  "authority": "tasks-or-issues/hermes-github-remote-queue.md",
+  "priority": "high",
+  "allowed_scope": [
+    "final verification"
+  ],
+  "requires_owner_approval": false,
+  "status": "completed",
+  "blocked_at": "2026-09-23T15:29:02.030432Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "No handler for task: remote-e2e-final-verification",
+    "continue_without": "Other tasks continue"
+  },
+  "completed_at": "2026-09-23T15:48:16.877241Z",
+  "result": {
+    "status": "completed",
+    "timestamp": "2026-09-23T15:48:16.875239Z",
+    "summary": "Remote E2E test passed. Hardened git sync verified.",
+    "checks": {
+      "canonical_remote_queue_path": true,
+      "git_tracked_transitions": true,
+      "claim_committed_pushed": true,
+      "complete_committed_pushed": true,
+      "block_committed_pushed": true,
+      "dedup_prevents_double_claim": true,
+      "kill_switch_halts_poller": true,
+      "stash_restore_local_changes": true,
+      "return_code_verification": true
+    }
+  }
+}
