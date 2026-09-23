@@ -2,12 +2,13 @@
 """Tests for Hermes GitHub Remote Queue poller."""
 
 import json
-import os
-import shutil
+import io
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -101,17 +102,22 @@ class TestQueueOperations(unittest.TestCase):
     """Test queue file operations using temp dirs."""
 
     def setUp(self):
-        self.temp_dir = tempfile.mkdtemp()
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
         self.orig_pending = qs.PENDING_DIR
         self.orig_running = qs.RUNNING_DIR
         self.orig_completed = qs.COMPLETED_DIR
         self.orig_blocked = qs.BLOCKED_DIR
         self.orig_log = qs.LOG_DIR
-        qs.PENDING_DIR = Path(self.temp_dir) / "pending"
-        qs.RUNNING_DIR = Path(self.temp_dir) / "running"
-        qs.COMPLETED_DIR = Path(self.temp_dir) / "completed"
-        qs.BLOCKED_DIR = Path(self.temp_dir) / "blocked"
-        qs.LOG_DIR = Path(self.temp_dir) / "logs"
+        qs.PENDING_DIR = self.root / "pending"
+        qs.RUNNING_DIR = self.root / "running"
+        qs.COMPLETED_DIR = self.root / "completed"
+        qs.BLOCKED_DIR = self.root / "blocked"
+        qs.LOG_DIR = self.root / "logs"
+        # Queue transitions normally commit and push remote-queue/. Tests must
+        # never write to or push from the real checkout.
+        self.git_patch = patch.object(qs, "_git_commit_and_push", return_value=True)
+        self.mock_git_commit_and_push = self.git_patch.start()
 
     def tearDown(self):
         qs.PENDING_DIR = self.orig_pending
@@ -119,7 +125,8 @@ class TestQueueOperations(unittest.TestCase):
         qs.COMPLETED_DIR = self.orig_completed
         qs.BLOCKED_DIR = self.orig_blocked
         qs.LOG_DIR = self.orig_log
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+        self.git_patch.stop()
+        self.temp_dir.cleanup()
 
     def _make_task(self, task_id="test-1", **overrides):
         task = {
@@ -145,6 +152,7 @@ class TestQueueOperations(unittest.TestCase):
         self.assertTrue(claim_task(task_path))
         self.assertFalse(task_path.exists())
         self.assertTrue((qs.RUNNING_DIR / "test-1.json").exists())
+        self.mock_git_commit_and_push.assert_called_once_with("queue: claim test-1")
 
     def test_complete_task(self):
         ensure_dirs()
@@ -211,47 +219,126 @@ class TestQueueOperations(unittest.TestCase):
 
 
 class TestPollerCLI(unittest.TestCase):
-    """Test poller CLI entry points."""
+    """Test CLI entry points against temporary queue state only."""
 
-    def test_status_flag(self):
-        import subprocess
-        result = subprocess.run(
-            [sys.executable, "remote_queue/poller.py", "--status"],
-            capture_output=True, text=True, timeout=10
-        )
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("Queue status", result.stdout)
-
-    def test_once_flag(self):
-        import subprocess
-        result = subprocess.run(
-            [sys.executable, "remote_queue/poller.py", "--once"],
-            capture_output=True, text=True, timeout=30
-        )
-        self.assertEqual(result.returncode, 0)
-
-    def test_kill_switch(self):
-        import subprocess
+    def setUp(self):
         import remote_queue.poller as poller_mod
 
-        kf = poller_mod.KILL_SWITCH_FILE
-
-        if kf.exists():
-            kf.unlink()
-
-        result = subprocess.run(
-            [sys.executable, "remote_queue/poller.py", "--kill"],
-            capture_output=True, text=True, timeout=10
+        self.poller = poller_mod
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+        self.original = {
+            "pending": qs.PENDING_DIR,
+            "running": qs.RUNNING_DIR,
+            "completed": qs.COMPLETED_DIR,
+            "blocked": qs.BLOCKED_DIR,
+            "logs": qs.LOG_DIR,
+            "kill": poller_mod.KILL_SWITCH_FILE,
+            "lock": poller_mod.LOCK_FILE,
+        }
+        self.original_pending_files = {
+            path.name: path.read_bytes()
+            for path in self.original["pending"].glob("*.json")
+        } if self.original["pending"].exists() else {}
+        self.original_kill_bytes = (
+            self.original["kill"].read_bytes() if self.original["kill"].exists() else None
         )
-        self.assertEqual(result.returncode, 0)
+        self.original_lock_bytes = (
+            self.original["lock"].read_bytes() if self.original["lock"].exists() else None
+        )
+        qs.PENDING_DIR = self.root / "pending"
+        qs.RUNNING_DIR = self.root / "running"
+        qs.COMPLETED_DIR = self.root / "completed"
+        qs.BLOCKED_DIR = self.root / "blocked"
+        qs.LOG_DIR = self.root / "logs"
+        poller_mod.PENDING_DIR = qs.PENDING_DIR
+        poller_mod.RUNNING_DIR = qs.RUNNING_DIR
+        poller_mod.COMPLETED_DIR = qs.COMPLETED_DIR
+        poller_mod.BLOCKED_DIR = qs.BLOCKED_DIR
+        poller_mod.KILL_SWITCH_FILE = self.root / ".poller.kill"
+        poller_mod.LOCK_FILE = self.root / ".poller.lock"
+
+        self.git_patch = patch.object(qs, "_git_commit_and_push", return_value=True)
+        self.mock_git_commit_and_push = self.git_patch.start()
+        self.acquire_lock_patch = patch.object(poller_mod, "acquire_lock", return_value=True)
+        self.acquire_lock_patch.start()
+        self.release_lock_patch = patch.object(poller_mod, "release_lock")
+        self.release_lock_patch.start()
+        self.pull_patch = patch.object(poller_mod, "git_pull_safely", return_value=True)
+        self.pull_patch.start()
+
+    def tearDown(self):
+        self.pull_patch.stop()
+        self.release_lock_patch.stop()
+        self.acquire_lock_patch.stop()
+        self.git_patch.stop()
+        qs.PENDING_DIR = self.original["pending"]
+        qs.RUNNING_DIR = self.original["running"]
+        qs.COMPLETED_DIR = self.original["completed"]
+        qs.BLOCKED_DIR = self.original["blocked"]
+        qs.LOG_DIR = self.original["logs"]
+        self.poller.PENDING_DIR = self.original["pending"]
+        self.poller.RUNNING_DIR = self.original["running"]
+        self.poller.COMPLETED_DIR = self.original["completed"]
+        self.poller.BLOCKED_DIR = self.original["blocked"]
+        self.poller.KILL_SWITCH_FILE = self.original["kill"]
+        self.poller.LOCK_FILE = self.original["lock"]
+        self.temp_dir.cleanup()
+
+    def run_cli(self, *args):
+        output = io.StringIO()
+        with patch.object(sys, "argv", ["poller.py", *args]), redirect_stdout(output):
+            self.poller.main()
+        return output.getvalue()
+
+    def assert_original_state_unchanged(self):
+        pending = self.original["pending"]
+        actual_pending = {
+            path.name: path.read_bytes() for path in pending.glob("*.json")
+        } if pending.exists() else {}
+        self.assertEqual(actual_pending, self.original_pending_files)
+        self.assertEqual(
+            self.original["kill"].read_bytes() if self.original["kill"].exists() else None,
+            self.original_kill_bytes,
+        )
+        self.assertEqual(
+            self.original["lock"].read_bytes() if self.original["lock"].exists() else None,
+            self.original_lock_bytes,
+        )
+
+    def test_status_flag(self):
+        output = self.run_cli("--status")
+        self.assertIn("Queue status", output)
+
+    def test_once_flag(self):
+        task = {
+            "task_id": "agent-isolated-test",
+            "created_at": "2026-09-23",
+            "objective": "Isolated poller CLI test",
+            "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+            "priority": "medium",
+            "allowed_scope": ["test"],
+            "requires_owner_approval": False,
+            "status": "pending",
+        }
+        ensure_dirs()
+        (qs.PENDING_DIR / "agent-isolated-test.json").write_text(json.dumps(task), encoding="utf-8")
+        with patch.object(self.poller, "handle_task", return_value={"status": "completed"}):
+            self.run_cli("--once")
+        self.assertTrue((qs.COMPLETED_DIR / "agent-isolated-test.json").exists())
+        self.assertFalse((qs.PENDING_DIR / "agent-isolated-test.json").exists())
+        self.assertFalse((qs.RUNNING_DIR / "agent-isolated-test.json").exists())
+        self.assertEqual(self.mock_git_commit_and_push.call_count, 2)
+        self.assert_original_state_unchanged()
+
+    def test_kill_switch(self):
+        kf = self.poller.KILL_SWITCH_FILE
+        self.run_cli("--kill")
         self.assertTrue(kf.exists())
-
-        result = subprocess.run(
-            [sys.executable, "remote_queue/poller.py", "--resume"],
-            capture_output=True, text=True, timeout=10
-        )
-        self.assertEqual(result.returncode, 0)
+        self.assert_original_state_unchanged()
+        self.run_cli("--resume")
         self.assertFalse(kf.exists())
+        self.assert_original_state_unchanged()
 
 
 if __name__ == '__main__':
