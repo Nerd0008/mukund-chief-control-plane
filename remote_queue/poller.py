@@ -39,7 +39,7 @@ def git_pull_safely() -> bool:
     """Safely pull latest main, stashing unrelated local changes first.
 
     Strategy:
-    1. Check for uncommitted changes outside remote-queue/
+    1. Check for any uncommitted working-tree changes
     2. Stash tracked changes, then stash untracked files
     3. Pull with rebase
     4. Pop untracked stash, then tracked stash
@@ -50,8 +50,12 @@ def git_pull_safely() -> bool:
         log_event("git status failed")
         return False
 
-    # Filter out remote-queue/ changes (those are queue state, not dev work)
-    lines = [l for l in stdout.split('\n') if l.strip() and 'remote-queue/' not in l]
+    # Every tracked/untracked change matters to git pull --rebase, including
+    # runtime queue telemetry such as remote-queue/logs/queue.log.  Ignoring
+    # queue-path changes here creates a self-poisoning loop: log_event() dirties
+    # queue.log, the poller thinks the tree is clean, and git pull then refuses
+    # to run.  Stash the complete working tree and restore it after the pull.
+    lines = [l for l in stdout.split('\n') if l.strip()]
 
     if not lines:
         # Clean working tree, safe to pull
