@@ -59,8 +59,13 @@ class E3Commands:
         """Initialize orchestration.db."""
         self._connect()
         init_db(self.db_path)
+        try:
+            row = self.con.execute("SELECT MAX(version) FROM schema_version").fetchone()
+            version = row[0] if row and row[0] is not None else "unknown"
+        except Exception:
+            version = "unknown"
         print(f"E3 orchestration.db initialized at {self.db_path}")
-        print("Schema version: 1")
+        print(f"Schema version: {version}")
         print("Tables: dag_node, capability_registry, performance_evidence,")
         print("        task_fingerprint_index, router_decision, conflict_record,")
         print("        plan_version, worker_capability_event, dag_state_event,")

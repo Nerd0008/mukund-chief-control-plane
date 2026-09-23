@@ -329,15 +329,25 @@ class E3ExecutionRehearsal:
         }
 
     def _runtime_cli_bindings(self) -> List[str]:
+        """Report which `e3-*` bindings are actually wired into the runtime.
+
+        The runtime `eb.py` registers the whole `e3-*` set through one hook, so
+        presence is proven by the hook in `eb.py` plus the declared command names
+        in the deployed `e3_cli.py`.
+        """
         eb = self.runtime_root / "eb.py"
-        if not eb.exists():
+        cli = self.runtime_root / "e3_cli.py"
+        if not (eb.exists() and cli.exists()):
             return []
-        text = eb.read_text(encoding="utf-8", errors="replace")
+        if "_register_e3_subcommands" not in eb.read_text(encoding="utf-8",
+                                                          errors="replace"):
+            return []
+        cli_text = cli.read_text(encoding="utf-8", errors="replace")
         return sorted(name for name in
                       ("e3-init", "e3-register-workers", "e3-status", "e3-plan",
                        "e3-route", "e3-rationale", "e3-trace", "e3-why",
                        "e3-verify-db", "e3-execute")
-                      if f'"{name}"' in text)
+                      if f'"{name}"' in cli_text)
 
     def orchestration_db_facts(self) -> Dict[str, Any]:
         if not self.db_path.exists():
@@ -403,6 +413,19 @@ class E3ExecutionRehearsal:
                          "Usage is recorded only when the provider returned it."),
             },
             "checks": self.checks(),
+            "unresolved": [
+                {
+                    "scenario": s["scenario"],
+                    "worker": s["assigned_worker"],
+                    "node_state": s["node_state"],
+                    "blocking_reason": s["blocking_reason"],
+                    "failure_attribution": s["failure_attribution"],
+                    "provider_errors": [a.get("error") for a in s["dispatch_attempts"]
+                                        if a.get("error")],
+                    "expected_block": s["scenario"] == "E_non_routable_refusal",
+                }
+                for s in self.scenarios if s["node_state"] != "COMPLETE"
+            ],
         }
 
     def checks(self) -> Dict[str, Any]:

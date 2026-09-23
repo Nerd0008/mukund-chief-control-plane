@@ -388,7 +388,13 @@ def report_usage_to_e2(result: Dict[str, Any], db_path: Optional[Path] = None):
 
     usage = result.get("usage") or {}
     in_tok = usage.get("promptTokenCount")
-    out_tok = usage.get("candidatesTokenCount") or usage.get("totalTokenCount")
+    # Truth defect fixed 2026-09-23: this previously fell back to
+    # `totalTokenCount` when `candidatesTokenCount` was absent, which reports
+    # prompt+output as if it were output (observed on a failed image response:
+    # 17 prompt tokens recorded as 17 output tokens, obs-20260923-f0913024).
+    # Only the provider's own candidate-token count is a valid output figure;
+    # when it is absent the value is reported as None rather than approximated.
+    out_tok = usage.get("candidatesTokenCount")
     status = "success" if result.get("status") == "COMPLETED" else "error"
     latency_ms = int((result.get("runtime_s") or 0) * 1000)
 

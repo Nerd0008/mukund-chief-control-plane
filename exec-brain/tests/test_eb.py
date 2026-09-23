@@ -306,10 +306,12 @@ class TestMatrix(EBTest):
 
     # T13 regression: live systems untouched (static check)
     # Updated for E2: allows governor.db, adapters.py, governor.py, test_governor.py
+    # Updated for E3: allows the deployed E3 orchestration module set and the
+    # e3-* CLI bindings (deployed by scripts/deploy_e3_runtime.py).
     def test_t13_no_gateway_modification(self):
         hooks = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "hooks"
         self.assertTrue((hooks / "discord-chief-archive" / "handler.py").exists())
-        # E1 + E2 files under exec-brain
+        # E1 + E2 + E3 files under exec-brain
         eb_dir = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "exec-brain"
         allowed = ("eb.py", "exec_brain.db", "tests", "chain-head.json",
                    "backups", "governor.db", "adapters.py", "governor.py",
@@ -323,7 +325,17 @@ class TestMatrix(EBTest):
                    "codex_adapter.py", "exec_adapters.py",
                    "deepseek_adapter.py", "deepseek_keyaccess.py",
                    "gemini_adapter.py", "gemini_keyaccess.py",
+                   "generic_openai_adapter.py",
                    "orchestration.db",
+                   # E3 orchestration modules + CLI bindings (deployed)
+                   "e3_cli.py", "e3_planner.py", "e3_router.py",
+                   "e3_team_assembly.py", "e3_integrator.py", "e3_verifier.py",
+                   "e3_conflict.py", "e3_context.py", "e3_permissions.py",
+                   "e3_decomposition_review.py", "e3_evidence.py",
+                   "e3_escalate.py", "e3_exploration.py", "e3_replan.py",
+                   "e3_qualification_benchmark.py", "e3_shadow_orchestrator.py",
+                   "e3_production_rehearsal.py", "e3_execution.py",
+                   "e3_execution_rehearsal.py",
                    "__pycache__")
         for f in eb_dir.iterdir():
             self.assertIn(f.name, allowed, f"unexpected file {f}")
