@@ -62,5 +62,8 @@ Evidence source for every test figure below:
 
 ## Next bounded task
 
-`agent-codex-reset-revalidation-2026-09-23` (definition committed for the queue to
-pick up after this recovery terminates).
+`agent-codex-reset-revalidation-2026-09-23` — already staged in
+`remote-queue/pending/` by commit `f80eefc8a8375f46af5b528e8d8fd93dab125f04`
+("queue: stage Codex reset revalidation after recovery"), so this recovery did not
+create a duplicate task definition. The singleton poller is expected to pick it up
+only after this recovery task terminates; it must not run concurrently with it.

@@ -109,7 +109,9 @@ Smoke readiness is not qualification; qualification is evidence-driven.
     `617e69cb` and `aae7d036` preserved, completion deliberately not inferred from code existing.
   - `full-operational-build-2026-09-24`: still in `running/` as the umbrella task, annotated with
     the handler-truth finding above.
-- Pending: empty at 2026-09-23T20:22:00Z
+- Pending: `agent-codex-reset-revalidation-2026-09-23`, staged by commit `f80eefc8`
+  (observed on origin/main at 2026-09-23T20:2xZ). `pending/` was empty when this
+  recovery began; this recovery added no queue task of its own.
 
 ## Current blockers / owner dependencies
 
