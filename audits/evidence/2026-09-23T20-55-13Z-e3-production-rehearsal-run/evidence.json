@@ -1,0 +1,376 @@
+{
+  "label": "e3-production-rehearsal",
+  "run_started_utc": "2026-09-23T20:55:13+00:00",
+  "run_finished_utc": "2026-09-23T20:55:13+00:00",
+  "stage": "E3 Stage 1 (shadow/rehearsal) \u2014 Stage 2 NOT enabled by this run",
+  "rehearsal_root": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-rehearsal-ekj5_38i",
+  "rehearsal_orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-rehearsal-ekj5_38i\\rehearsal_orchestration.db",
+  "rehearsal_evidence_store": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-rehearsal-ekj5_38i\\rehearsal_evidence.json",
+  "seeded_workers": [
+    {
+      "worker_id": "codex-cli",
+      "provider": "openai",
+      "model": "codex-cli",
+      "roles": [
+        "builder"
+      ]
+    },
+    {
+      "worker_id": "google-nano-banana-2",
+      "provider": "google",
+      "model": "gemini-3.1-flash-image",
+      "roles": [
+        "vision"
+      ]
+    },
+    {
+      "worker_id": "deepseek-v41-flash",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "roles": [
+        "builder"
+      ]
+    }
+  ],
+  "seed_note": "rehearsal-scoped EVALUATING rows derived from truthful routable=true (smoke PASS + E2 linkage). No worker is marked QUALIFIED; this grants no qualification.",
+  "scenarios": [
+    {
+      "rehearsal_id": "rehearsal-f488dbb17f44",
+      "task_objective": "Rehearsal: deterministic validation task",
+      "plan_id": "plan-0001",
+      "decomposition": false,
+      "node_count": 1,
+      "decomposition_approved": true,
+      "structural_issues": [],
+      "candidates_found": 2,
+      "team_complete": true,
+      "team_issues": [],
+      "verification_count": 1,
+      "verification_results": {
+        "integration": {
+          "method": "test",
+          "outcome": "PASS",
+          "issues": [],
+          "passed": true,
+          "first_attempt_passed": false,
+          "repaired": true
+        }
+      },
+      "verification_attempts": 2,
+      "verifier_rejections": 1,
+      "repair_attempts": 1,
+      "conflicts_detected": 0,
+      "evidence_recorded": 1,
+      "escalations": 0,
+      "warnings": [],
+      "outcome": "REHEARSAL_PASSED",
+      "created_at": "2026-09-23T20:55:13.179256",
+      "completed_at": "2026-09-23T20:55:13.186780",
+      "candidates_by_node": {
+        "node-plan-0001-1": 2
+      },
+      "team_assignments": [
+        {
+          "node": "node-plan-0001-1",
+          "worker": "codex-cli"
+        }
+      ],
+      "verification_attempts_detail": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'output is validated': expected validated, got simulated"
+          ]
+        },
+        {
+          "attempt": 2,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "verifier_rejections_detail": [
+        {
+          "attempt": 1,
+          "outcome": "FAIL",
+          "issues": [
+            "Test 'output is validated': expected validated, got simulated"
+          ]
+        }
+      ],
+      "repair_history_detail": [
+        {
+          "attempt": 2,
+          "outcome": "PASS",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "rehearsal_id": "rehearsal-14fa79458c24",
+      "task_objective": "Rehearsal: unrepaired rejection task",
+      "plan_id": "plan-0001",
+      "decomposition": false,
+      "node_count": 1,
+      "decomposition_approved": true,
+      "structural_issues": [],
+      "candidates_found": 2,
+      "team_complete": true,
+      "team_issues": [],
+      "verification_count": 1,
+      "verification_results": {
+        "integration": {
+          "method": "test",
+          "outcome": "FAIL",
+          "issues": [
+            "Test 'output is validated': expected validated, got simulated"
+          ],
+          "passed": false
+        }
+      },
+      "verification_attempts": 1,
+      "verifier_rejections": 0,
+      "repair_attempts": 0,
+      "conflicts_detected": 0,
+      "evidence_recorded": 1,
+      "escalations": 1,
+      "warnings": [
+        "Replanner suggested a new plan (shadow)"
+      ],
+      "outcome": "REHEARSAL_VERIFICATION_FAILED",
+      "created_at": "2026-09-23T20:55:13.189789",
+      "completed_at": "2026-09-23T20:55:13.190791",
+      "escalation": {
+        "escalation_id": "escalate-34254b4e1777",
+        "trigger": "repeated_failure"
+      },
+      "replan_history": [
+        "replan-fcdb66a251a2"
+      ],
+      "verification_attempts_detail": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'output is validated': expected validated, got simulated"
+          ]
+        }
+      ]
+    },
+    {
+      "rehearsal_id": "rehearsal-0672a3b48d56",
+      "task_objective": "Rehearsal: task family with no seeded worker",
+      "plan_id": "plan-0001",
+      "decomposition": false,
+      "node_count": 1,
+      "decomposition_approved": true,
+      "structural_issues": [],
+      "candidates_found": 0,
+      "team_complete": false,
+      "team_issues": [
+        "No candidate available for node node-plan-0001-1 with roles ['writer']"
+      ],
+      "verification_count": 1,
+      "verification_results": {
+        "integration": {
+          "method": "test",
+          "outcome": "UNCERTAIN",
+          "issues": [
+            "No test cases available for verification"
+          ],
+          "passed": false
+        }
+      },
+      "verification_attempts": 1,
+      "verifier_rejections": 0,
+      "repair_attempts": 0,
+      "conflicts_detected": 0,
+      "evidence_recorded": 1,
+      "escalations": 1,
+      "warnings": [
+        "Team incomplete: [\"No candidate available for node node-plan-0001-1 with roles ['writer']\"]"
+      ],
+      "outcome": "REHEARSAL_VERIFICATION_FAILED",
+      "created_at": "2026-09-23T20:55:13.193789",
+      "completed_at": "2026-09-23T20:55:13.194790",
+      "escalation": {
+        "escalation_id": "escalate-dc6bc3127e63",
+        "trigger": "no_qualified_worker"
+      },
+      "candidates_by_node": {
+        "node-plan-0001-1": 0
+      }
+    },
+    {
+      "rehearsal_id": "rehearsal-01d41c65b99c",
+      "task_objective": "Rehearsal: decomposed multi-node task",
+      "plan_id": "plan-0001",
+      "decomposition": true,
+      "node_count": 3,
+      "decomposition_approved": true,
+      "structural_issues": [],
+      "candidates_found": 3,
+      "team_complete": false,
+      "team_issues": [
+        "No candidate available for node node-plan-0001-3 with roles ['integrator']"
+      ],
+      "verification_count": 1,
+      "verification_results": {
+        "integration": {
+          "method": "test",
+          "outcome": "PASS",
+          "issues": [],
+          "passed": true
+        }
+      },
+      "verification_attempts": 1,
+      "verifier_rejections": 0,
+      "repair_attempts": 0,
+      "conflicts_detected": 0,
+      "evidence_recorded": 3,
+      "escalations": 0,
+      "warnings": [
+        "Team incomplete: [\"No candidate available for node node-plan-0001-3 with roles ['integrator']\"]"
+      ],
+      "outcome": "REHEARSAL_TEAM_INCOMPLETE",
+      "created_at": "2026-09-23T20:55:13.197791",
+      "completed_at": "2026-09-23T20:55:13.198791",
+      "plan_nodes": [
+        {
+          "node_id": "node-plan-0001-1",
+          "roles": [
+            "builder"
+          ]
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "roles": [
+            "vision"
+          ]
+        },
+        {
+          "node_id": "node-plan-0001-3",
+          "roles": [
+            "integrator"
+          ]
+        }
+      ],
+      "integrator_node_present": true,
+      "candidates_by_node": {
+        "node-plan-0001-1": 2,
+        "node-plan-0001-2": 1,
+        "node-plan-0001-3": 0
+      },
+      "team_conflicts": [],
+      "team_assignments": [
+        {
+          "node": "node-plan-0001-1",
+          "worker": "codex-cli",
+          "role": "builder"
+        },
+        {
+          "node": "node-plan-0001-2",
+          "worker": "google-nano-banana-2",
+          "role": "vision"
+        }
+      ]
+    },
+    {
+      "rehearsal_id": "rehearsal-147799949328",
+      "task_objective": "Rehearsal: contradictory multi-node task",
+      "plan_id": "plan-0001",
+      "decomposition": true,
+      "node_count": 3,
+      "decomposition_approved": true,
+      "structural_issues": [],
+      "candidates_found": 3,
+      "team_complete": false,
+      "team_issues": [
+        "No candidate available for node node-plan-0001-3 with roles ['integrator']"
+      ],
+      "verification_count": 1,
+      "verification_results": {
+        "integration": {
+          "method": "test",
+          "outcome": "PASS",
+          "issues": [],
+          "passed": true
+        }
+      },
+      "verification_attempts": 1,
+      "verifier_rejections": 0,
+      "repair_attempts": 0,
+      "conflicts_detected": 2,
+      "evidence_recorded": 3,
+      "escalations": 0,
+      "warnings": [
+        "Team incomplete: [\"No candidate available for node node-plan-0001-3 with roles ['integrator']\"]",
+        "Integration blocking issues: [\"Conflicting values for 'claim': value-A vs value-B\", \"Conflicting values for 'claim': value-A vs value-B\"]"
+      ],
+      "outcome": "REHEARSAL_CONFLICTS",
+      "created_at": "2026-09-23T20:55:13.200788",
+      "completed_at": "2026-09-23T20:55:13.202300",
+      "conflicts_detected_detail": [
+        {
+          "conflict_id": "conflict-3c2056a6a18a",
+          "type": "factual_disagreement",
+          "node_a": "node-plan-0001-1",
+          "node_b": "node-plan-0001-2",
+          "disputed_claim": "Key 'claim': value-A vs value-B"
+        },
+        {
+          "conflict_id": "conflict-bbd21d9135b4",
+          "type": "factual_disagreement",
+          "node_a": "node-plan-0001-1",
+          "node_b": "node-plan-0001-3",
+          "disputed_claim": "Key 'claim': value-A vs value-B"
+        }
+      ]
+    }
+  ],
+  "e2_public_interface": {
+    "available": true,
+    "interface": "governor.record_request",
+    "isolated_store": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-rehearsal-ekj5_38i\\rehearsal_governor.db",
+    "request_id": "obs-20260923-9072dc9d",
+    "row_readback": [
+      "obs-20260923-9072dc9d",
+      "rehearsal",
+      "rehearsal",
+      null
+    ],
+    "note": "Rehearsal-tagged row written to an isolated governor store only. No provider usage/model/qualification is claimed."
+  },
+  "e1_e2_boundary_scan": {
+    "module_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain",
+    "direct_sql_violations": [],
+    "e2_public_interface_modules": [
+      "codex_adapter.py",
+      "deepseek_adapter.py",
+      "e3_production_rehearsal.py",
+      "gemini_adapter.py",
+      "generic_openai_adapter.py"
+    ],
+    "clean": true
+  },
+  "isolation": {
+    "production_stores": {
+      "orchestration": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "governor": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "exec_brain": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db"
+    },
+    "before_sha256": {
+      "orchestration": "a02b7c054c1540d68af89dc0bb01729977684c51d1a76a1c7105e4b559014f06",
+      "governor": "ae114256c549177349ecf32f62178400fb5d1dd10e7a9703f25b5ca6d3a1ff5a",
+      "exec_brain": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34"
+    },
+    "production_stores_unchanged": true,
+    "diffs": []
+  }
+}
