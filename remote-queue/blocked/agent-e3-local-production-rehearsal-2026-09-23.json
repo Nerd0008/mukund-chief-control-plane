@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "prerequisites": [
     "agent-codex-reset-revalidation-2026-09-23 must be in completed/ or blocked/ with truthful terminal evidence",
     "latest main must include the queue-recovery evidence/state commits",
@@ -34,5 +34,11 @@
     "Do not weaken readiness criteria merely to enable Stage 2.",
     "If Codex re-validation is still actively running, do not race it."
   ],
-  "notes": "This task is intentionally pre-staged so the local poller can continue immediately after Codex re-validation without waiting for the hourly supervisor. Current owner direction: make local operation excellent first; architecture decision comes later. Overnight continuity rule: this task must hand off to exactly one next bounded task before exit. The hourly supervisor is fallback only, not the primary continuation mechanism. Owner standing directive reconfirmed: do not pause for a fresh approval if the local Stage 2 readiness criteria pass; this task may enable LOCAL Stage 2 only. VPS/deployment architecture remains out of scope. Authoritative owner instruction: local Stage 2 may be enabled automatically if all objective readiness criteria pass; do not wait for another synchronous approval. This does not authorize VPS cutover or final deployment architecture."
+  "notes": "This task is intentionally pre-staged so the local poller can continue immediately after Codex re-validation without waiting for the hourly supervisor. Current owner direction: make local operation excellent first; architecture decision comes later. Overnight continuity rule: this task must hand off to exactly one next bounded task before exit. The hourly supervisor is fallback only, not the primary continuation mechanism. Owner standing directive reconfirmed: do not pause for a fresh approval if the local Stage 2 readiness criteria pass; this task may enable LOCAL Stage 2 only. VPS/deployment architecture remains out of scope. Authoritative owner instruction: local Stage 2 may be enabled automatically if all objective readiness criteria pass; do not wait for another synchronous approval. This does not authorize VPS cutover or final deployment architecture.",
+  "blocked_at": "2026-09-23T20:58:23.299917Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes CLI exited with code 3221225786 (output_bytes=0).",
+    "continue_without": "Independent safe work may continue"
+  }
 }
