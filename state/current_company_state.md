@@ -1,11 +1,20 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T21:11:52Z
-- Latest evidence run: 2026-09-23T21:11:03Z at code SHA `6c19a01` (this run's commit)
-- Evidence files:
-  - `audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/evidence.json` (+ `.md`,
-    `deployment_check.json`) — **real worker execution** on the local E3 path
-  - `audits/evidence/2026-09-23T21-11-03Z-e3-production-execution-leg-regression/evidence.json` (+ `.md`)
+- Timestamp: 2026-09-23T21:35:00Z
+- Latest evidence run: 2026-09-23T21:33:19Z at code SHA `bf48a2b` (this run's commit)
+- Evidence files (this run):
+  - `audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/evidence.json` (+ `.md`) —
+    **formal production-rehearsal re-run**: decomposed multi-worker real path, rejection → repair →
+    re-verification inside the decomposed plan, dependency-gated dispatch, isolation + contamination
+    proof, E2 read-back. 7 bounded real provider calls.
+  - `audits/evidence/2026-09-23T21-33-19Z-e3-production-rehearsal-retry-regression/evidence.json` (+ `.md`)
+    — 11 suites, 351 collected / 351 passed, exit 0
+  - `audits/evidence/superseded/2026-09-23T21-31-09Z-e3-production-execution-rehearsal/` — superseded
+    first attempt (see its `SUPERSEDED.md`: an unrequested optional scenario was reported as passing)
+- Earlier evidence (still valid):
+  - `audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/` — first real-execution
+    rehearsal on the built execution leg (single-node plans)
+  - `audits/evidence/2026-09-23T21-11-03Z-e3-production-execution-leg-regression/` — 10 suites, 323/323
   - `audits/evidence/2026-09-23T20-55-13Z-e3-production-rehearsal-run/` — Stage-1 shadow rehearsal
     (simulated specialist outputs, isolation proof)
 - Shared Control Plane status: Phase 2A
@@ -36,11 +45,20 @@ declared import root; counts are per suite and are not extrapolated.
 - Remote queue (isolated suite): 30 collected / 30 passed / exit 0
 - Single-run totals: 323 collected, 323 passed, 0 failed, 0 errors, 0 skipped across 10 suites
 
-**Superseding baseline (2026-09-23T21:18:27Z, `scripts/evidence_runner.py --label
+**Superseding baseline (2026-09-23T21:33:19Z, `scripts/evidence_runner.py --label
+e3-production-rehearsal-retry-regression`):** 11 suites, 351 collected / 351 passed / 0 failed /
+0 errors / 0 skipped, every suite exit 0, at code SHA `bf48a2b`. The delta against the
+21:18:27Z run (335) is exactly +16: `tests/test_e3_execution.py` 18 → 22 (+4: dependency-gated
+multi-node execution ×2, DAG dependency wiring ×2) and `tests/test_e3_execution_rehearsal.py`
+10 → 22 (+12: multi-worker plan, isolation proof, contamination, not-requested reporting). Every
+other suite count is unchanged. Evidence:
+`audits/evidence/2026-09-23T21-33-19Z-e3-production-rehearsal-retry-regression/`.
+
+**Earlier baseline (2026-09-23T21:18:27Z, `scripts/evidence_runner.py --label
 bridge-watchdog-validation`):** 11 suites, 335 collected / 335 passed / 0 failed / exit 0. The delta
-is exactly the new isolated bridge suite `remote_queue/tests/test_bridge_watchdog.py` (12 collected /
-12 passed / exit 0), added by the bridge-watchdog validation run below. Every other suite count is
-unchanged. Evidence: `audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/`.
+against the 21:11:03Z run (323) was exactly the new isolated bridge suite
+`remote_queue/tests/test_bridge_watchdog.py` (12/12). Evidence:
+`audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/`.
 
 Supersedes the 8-suite / 295-test figure at SHA `4ac1a22`. The delta is the two new E3 execution
 suites (18 + 10 = 28) plus nothing else. Two intermediate runs of the same runner were executed
@@ -124,6 +142,62 @@ Persistence verified by reading the live store back after the run: 5 `dag_node` 
 written through the public E2 interface. E1/E2 boundary static scan: **0** direct SQL writes to E1/E2
 stores from any `exec-brain/*.py`.
 
+### Formal production-rehearsal re-run on the real path (2026-09-23T21:32:41Z) — NEW
+
+This is the re-run of the blocked `agent-e3-local-production-rehearsal-2026-09-23`. Driver:
+`exec-brain/e3_execution_rehearsal.py`, executed as a real process from the deployed runtime root
+against the live `orchestration.db`. Evidence:
+`audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/`.
+
+Bounded real provider usage: **7 calls, stated up front before the run** (deepseek 5, codex-cli 2 —
+`max_tokens=256`, `temperature=0`, deterministic single-shot prompts; the plan and the reason for
+each scenario's call count are recorded in `usage_plan`). Provider-returned usage was captured on 5
+of them (the Codex CLI exposes none: recorded as null, never estimated). Note the Google image
+scenario was **deliberately not spent here** — its real-dispatch diagnosis is owned by the pending
+`agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`, and the report records it as
+`google_image_complete: null` ("not evaluated", *not* a pass).
+
+| Scenario | Nodes | Workers | Result | Detail |
+|---|---|---|---|---|
+| A — single-node rejection → repair → re-verify | 1 | deepseek-v41-flash | COMPLETE | attempt 1 rejected, REWORK, repaired, attempt 2 PASS |
+| B — single-node first-pass | 1 | deepseek-v41-flash | COMPLETE | one call, PASS |
+| C — Codex CLI dispatch | 1 | codex-cli | COMPLETE | one non-interactive `codex exec --json` call |
+| **F — decomposed multi-worker plan** | **2** | **deepseek-v41-flash + codex-cli** | **COMPLETE** | node 1 `[Builder]` (deepseek): attempt 1 rejected → `REWORK` → targeted repair → PASS; node 2 `[Integrator]` (codex-cli): `READY` only **after** node 1 was persisted `COMPLETE`, then first-pass PASS |
+| E — credential-missing refusal | 1 | mistral-small-4 | BLOCKED (expected) | refused pre-dispatch with `worker_not_routable:mistral-small-4`, **0** provider calls |
+
+Scenario F is the decomposed multi-worker case that was recorded as OPEN in the previous run:
+
+- the plan shape comes from the real planner (multi-role threshold), not from the test: 2 nodes,
+  `node-plan-0001-1` (builder) → `node-plan-0001-2` (integrator, dependency declared);
+- each node has its own deterministic exact-content test case (different literal per node) and is
+  dispatched to its **own** real worker adapter — two distinct routable workers in one plan;
+- the persisted, ordered `dag_state_event` log for the plan reads
+  `n1 PLANNED→READY→RUNNING→VERIFYING→REWORK→RUNNING→VERIFYING→COMPLETE`,
+  then `n2 PLANNED→READY→RUNNING→VERIFYING→COMPLETE` — the dependency gate is proven from the
+  store, not asserted from memory;
+- every node is `COMPLETE` with `final_verification=PASS` and one `performance_evidence` row.
+
+Isolation / boundary re-proof (in-run, recorded in `isolation`):
+
+- a rehearsal-tagged write aimed at each live production store (`orchestration.db`, `governor.db`,
+  `exec_brain.db`) is **refused fail-closed** (`all_production_writes_refused: true`);
+- the simulated-evidence sink is written **outside** the production root
+  (`isolated_store_outside_production: true`), and every live store is byte-identical afterwards —
+  SHA-256 before/after equal for the main database file **and** its `-wal`/`-shm` sidecars
+  (`stores_unchanged_including_wal_sidecars: true`);
+- live-store contamination check: `simulated_or_shadow_evidence_rows: 0`,
+  `qualified_rows_without_evidence: 0`, and the `capability_registry` is still **empty** — no worker
+  was marked QUALIFIED;
+- E1/E2 boundary: static scan `clean: true`, 0 direct SQL writes / 0 direct connections to the E1/E2
+  stores from any `exec-brain/*.py`; independently confirmed with two clean `grep` runs. The run's 7
+  E2 rows were read back **out of the live `governor.db`** through the public
+  `governor.record_request()` interface (5 with provider-returned token counts, 2 codex-cli rows with
+  null tokens because the CLI exposes none).
+
+Runtime deployment was refreshed for the changed modules (`scripts/deploy_e3_runtime.py`, backup
+`backups/e3-deploy-20260923T213238Z`), and the deployed runtime CLI was re-checked:
+`eb.py e3-status` and `eb.py e3-verify-db` both now report **Schema version: 2** (see defect 5 below).
+
 ### Unresolved: Google image worker real dispatch (D)
 
 The Google image worker's real dispatch returned a candidate **without an inline image part**; the
@@ -150,14 +224,37 @@ evidence alone.
    wrongly reported no bindings. Fixed, and re-checked without spending a provider call
    (`deployment_check.json`).
 
+### Defects found and fixed in the 2026-09-23T21:32:41Z re-run
+
+4. `E3Planner.build_dag` wired dependencies **positionally** (`dep_index -> node_id_map[dep_index]`),
+   so on any plan with 3+ nodes every declared dependency mapped to the *first* node: a 3-node chain
+   gave node 3 a dependency on node 1 instead of node 2, i.e. a node could be released before its
+   real dependency. Dependencies declared as node ids are now resolved as ids, an unresolvable
+   dependency is dropped rather than pointed at an arbitrary node, and two tests assert the wiring.
+5. `E3ProductionExecutor` never updated the in-memory DAG node state, so the DAG still reported
+   `PLANNED` for a node the store had persisted `COMPLETE` — a dependent node's dependency gate would
+   then refuse to run (`dependency_incomplete`) even though its dependency had passed verification.
+   Every persisted transition is now mirrored into the DAG, which is what made the decomposed
+   multi-worker run possible; asserted by a dependency-gated multi-node execution test.
+6. `e3-status` / `e3-verify-db` printed the **oldest** `schema_version` row, so a v2 store was
+   reported as `Schema version: 1`. Both now read `MAX(version)`. (The previous run's claim that
+   `e3-verify-db` reported "schema v2" is not reproducible against the pre-fix CLI; the store itself
+   was v2 — the printed value was wrong.)
+7. The rehearsal reported an optional scenario that was **not requested** as passing
+   (`google_image_complete: true` with no Google call spent). An unrun scenario is now reported as
+   `null` ("not evaluated") and a `scenarios_requested` map is written into the report; the first
+   affected artifact is preserved under `audits/evidence/superseded/` with a `SUPERSEDED.md`.
+
 ## Worker / provider state
 
 Smoke readiness is not qualification; qualification is evidence-driven.
 
-- Codex CLI: routable=true; executed on the real path this run (scenario C, COMPLETE); served model
-  identity **UNKNOWN**; usage not exposed by the CLI; E2 linkage VERIFIED; qualification UNPROVEN
-- DeepSeek (`deepseek-flash`): routable=true; executed on the real path this run (scenarios A and B,
-  both COMPLETE); provider-returned usage captured; E2 linkage VERIFIED; qualification UNPROVEN
+- Codex CLI: routable=true; executed on the real path (scenario C and, in the 21:32:41Z re-run,
+  scenario F node 2 under a dependency gate, COMPLETE); served model identity **UNKNOWN**; usage not
+  exposed by the CLI; E2 linkage VERIFIED; qualification UNPROVEN
+- DeepSeek (`deepseek-flash`): routable=true; executed on the real path (scenarios A and B, plus
+  scenario F node 1 — rejected then repaired — COMPLETE); provider-returned usage captured;
+  E2 linkage VERIFIED; qualification UNPROVEN
 - Google image worker (`gemini-3.1-flash-image`): routable=true; **real dispatch failed this run**
   (scenario D, provider error, no image produced); E2 linkage row written (status `error`);
   qualification UNPROVEN
@@ -177,8 +274,12 @@ Smoke readiness is not qualification; qualification is evidence-driven.
   "operational" to `handle_operational_build()`, which returns a hardcoded status with no
   execution evidence. It must not be read as evidence of executed work.
 - `full-operational-build-2026-09-24` remains the umbrella record in `running/` (no worker).
-- This run: `agent-e3-production-execution-leg-2026-09-23` claimed and worked; one successor task
-  staged in `remote-queue/pending/`.
+- This run: `agent-e3-local-production-rehearsal-retry-2026-09-23` claimed and worked the formal
+  production-rehearsal re-run (see the 21:32:41Z section above); the Google image diagnosis and the
+  qualification benchmark were deliberately left to the pre-existing pending task
+  `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`, which was **not** raced and
+  produced no evidence to consume yet (still pending). 7 bounded real provider calls were spent.
+  One successor task was staged in `remote-queue/pending/` before exit.
 - Bridge validation run `agent-bridge-watchdog-validation-2026-09-23` (2026-09-23T21:18Z, base SHA
   `07dd4a1`) verified the hardened bridge commits `617fd47c` and `b83c9ad` and found **no defect in
   the validated path**, so no production code was changed: no-stream watchdog (default 300s,
@@ -204,26 +305,30 @@ instruction irrespective of the results below.
 
 | # | Precondition | Result | Evidence |
 |---|---|---|---|
-| 1 | E1/E2/E3/E4/E5 relevant regressions pass | MET | 10 suites, 323/323, exit 0, SHA `6c19a01` |
-| 2 | Production rehearsal passes | **PARTIALLY MET** | the execution leg now runs real workers end-to-end (A, B, C COMPLETE with persisted DAG state, evidence rows and E2 linkage; refusal path proven); the Google image real dispatch **failed** (see unresolved) and the leg exercises single-node plans, not a multi-worker real plan |
-| 3 | No unresolved critical integrity/privacy/safety defect | MET (in the E3 path) | nodes cannot complete without a verification PASS (18 tests assert this); refusal path spends no provider call; raw objectives are stored only as hashes; no raw provider content in the DAG/state log; E1/E2 boundary scan clean; 3 defects found and fixed |
-| 4 | Worker routing/qualification state evidence-driven | MET | `routable` still derives from smoke PASS + E2 linkage; qualification remains UNPROVEN everywhere; the rehearsal used no QUALIFIED claim |
-| 5 | Rollback/recovery available | MET | `scripts/deploy_e3_runtime.py` backs up every overwritten file with a SHA-256 manifest and a documented `--restore`; the pre-patch `eb.py` is backed up; the E3 store is separate from E1/E2 |
-| 6 | State/evidence truthfully updated | MET | this file + `full_build_tracker.md` + the two evidence artifacts above |
+| 1 | E1/E2/E3/E4/E5 relevant regressions pass | MET | 11 suites, 351/351, 0 failed, exit 0, SHA `bf48a2b` (`…T21-33-19Z-e3-production-rehearsal-retry-regression`) |
+| 2 | Production rehearsal passes | **PARTIALLY MET** | the execution leg now runs real workers end-to-end including a **decomposed multi-worker plan** (scenario F: 2 nodes, 2 distinct workers, per-node deterministic verification, rejection → REWORK → targeted repair → re-verify, dependency-gated dispatch) with persisted DAG state/evidence rows and E2 linkage, plus the refusal path; the **Google image real dispatch remains failed/unresolved** (not re-spent here; owned by the pending image-diagnosis task) |
+| 3 | No unresolved critical integrity/privacy/safety defect | MET (in the E3 path) | nodes cannot complete without a verification PASS (22 tests assert the leg's truth rules, including a dependency-gated multi-node test); refusal path spends no provider call; raw objectives stored only as hashes; simulated evidence provably cannot reach the production stores (fail-closed + hashes incl. WAL); live stores hold no simulated row and no QUALIFIED claim; E1/E2 boundary scan clean. 4 defects found and fixed this run (above) |
+| 4 | Worker routing/qualification state evidence-driven | MET | `routable` still derives from smoke PASS + E2 linkage; the live `capability_registry` is still empty (no QUALIFIED anywhere); the rehearsal consumed no QUALIFIED claim; a not-requested scenario is no longer reported as passing |
+| 5 | Rollback/recovery available | MET | `scripts/deploy_e3_runtime.py` backs up every overwritten file with a SHA-256 manifest and a documented `--restore` (this run: `backups/e3-deploy-20260923T213238Z`); the pre-patch `eb.py` is backed up; the E3 store is separate from E1/E2 |
+| 6 | State/evidence truthfully updated | MET | this file + `full_build_tracker.md` + the run's evidence artifacts, including the superseded artifact and its reason |
 
 **Exact remaining conditions (recorded, not resolved):**
 
 1. **Direct owner instruction (governing):** the live task contract states Stage 2 / production
-   dispatch must not be enabled by this task regardless of outcome. Enabling now requires a
-   separate, explicit owner decision.
+   dispatch must not be enabled by this task regardless of outcome, and the owner's late-evening
+   directive (`a58549c` / `2d5f332` / `d7e718c`) defers local Stage 2 completion until **after
+   Mukund configures all remaining provider credentials on 2026-09-24 and the readiness gates are
+   re-run**. Enabling now requires that separate, explicit owner step.
 2. **Google image worker real dispatch fails** — provider returned no image part; root cause
    undetermined (unresolved, above).
-3. **The real dispatch path has not been exercised on a decomposed multi-worker plan**; only
-   single-node plans were dispatched, and the worker capability registry holds no QUALIFIED worker,
-   so a multi-node real plan would currently assemble only if `EVALUATING` rows exist. No
-   multi-worker real execution has been evidenced.
-4. **Qualification evidence is still absent for every worker** (smoke readiness ≠ qualification), so
-   routing still relies on `EVALUATING` state for low-risk work.
+3. **Qualification evidence is still absent for every worker** (smoke readiness ≠ qualification), so
+   routing still relies on `EVALUATING` state for low-risk work. The cold-start benchmark work is
+   owned by the pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`.
+4. **E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain
+   unevidenced** — the contract gates them behind Stage 2 enablement, which is disabled.
+
+Resolved from the previous list: *"the real dispatch path has not been exercised on a decomposed
+multi-worker plan"* — now evidenced (scenario F above).
 
 ## Current blockers / owner dependencies
 
@@ -238,12 +343,14 @@ instruction irrespective of the results below.
 
 ## Next non-blocked priority
 
-1. Diagnose the Google image real-dispatch failure with one bounded call now that the executor
-   records `finish_reason` / `prompt_feedback` / image metadata.
-2. Exercise the real dispatch path on a **decomposed multi-worker plan** with deterministic
-   verification per node.
-3. Provide evidence toward capability qualification for the routable workers (cold-start benchmark
-   harness) so routing stops depending on `EVALUATING`.
+1. The pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23` owns: the Google
+   image real-dispatch diagnosis (≤1 bounded call) and the cold-start qualification benchmark. It
+   should **consume** this run's decomposed multi-worker evidence (scenario F) rather than repeating
+   it — that scenario is now evidenced on the real path.
+2. After Mukund configures the remaining provider credentials on 2026-09-24: re-run the full local
+   Stage 2 readiness gate and record the result (owned by the successor task staged by this run).
+3. Qualification evidence for the routable workers (cold-start benchmark harness) so routing stops
+   depending on `EVALUATING`.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths
    (currently gated: the contract only asks for these if Stage 2 is enabled, which it is not).
 5. Provider onboarding resumes immediately when owner-local credentials are supplied.

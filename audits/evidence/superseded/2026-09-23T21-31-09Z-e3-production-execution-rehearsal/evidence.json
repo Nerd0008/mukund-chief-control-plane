@@ -1,0 +1,1354 @@
+{
+  "label": "e3-production-execution-rehearsal",
+  "run_started_utc": "2026-09-23T21:31:09+00:00",
+  "run_finished_utc": "2026-09-23T21:31:28+00:00",
+  "stage": "E3 production execution leg rehearsal \u2014 real worker execution on the local orchestration path; Stage 2 NOT enabled by this run",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "scratch_root": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-exec-rehearsal-mypb93of",
+  "runtime_deployment": {
+    "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+    "required_modules": {
+      "e3_planner.py": true,
+      "e3_router.py": true,
+      "e3_team_assembly.py": true,
+      "e3_integrator.py": true,
+      "e3_verifier.py": true,
+      "e3_shadow_orchestrator.py": true,
+      "e3_conflict.py": true,
+      "e3_replan.py": true,
+      "e3_escalate.py": true,
+      "e3_evidence.py": true,
+      "e3_context.py": true,
+      "e3_permissions.py": true,
+      "e3_decomposition_review.py": true,
+      "e3_exploration.py": true,
+      "e3_qualification_benchmark.py": true,
+      "e3_execution.py": true,
+      "e3_commands.py": true,
+      "e3_cli.py": true,
+      "execution_dag.py": true,
+      "orchestration_db.py": true,
+      "worker_registry.py": true,
+      "capability_registry.py": true,
+      "task_fingerprint.py": true,
+      "worker_contract.py": true,
+      "decision_rationale.py": true,
+      "codex_adapter.py": true,
+      "deepseek_adapter.py": true,
+      "gemini_adapter.py": true,
+      "generic_openai_adapter.py": true
+    },
+    "missing_modules": [],
+    "e3_cli_bindings_present": [
+      "e3-execute",
+      "e3-init",
+      "e3-plan",
+      "e3-rationale",
+      "e3-register-workers",
+      "e3-route",
+      "e3-status",
+      "e3-trace",
+      "e3-verify-db",
+      "e3-why"
+    ]
+  },
+  "orchestration_db_before": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 5,
+      "dag_state_event": 20,
+      "performance_evidence": 4,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  },
+  "orchestration_db_after": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 7,
+      "dag_state_event": 47,
+      "performance_evidence": 9,
+      "router_decision": 0,
+      "capability_registry": 0
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "notes": "Attempt 1 is a genuinely under-specified instruction: the real response cannot equal the declared token, so the deterministic verifier rejects it. The targeted repair re-dispatches with the plan's declared exact content.",
+      "plan_id": "execleg-A_repair_cycle_deepseek",
+      "node_id": "node-execleg-A_repair_cycle_deepseek-1",
+      "objective": "Rehearsal (execution leg): in one short sentence, tell the operator what you are.",
+      "assigned_worker": "deepseek-v41-flash",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "READY-7391",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "READY-7391"
+        }
+      ],
+      "max_repair_attempts": 1,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "ds-2a3597c9a446",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 1.2943494319915771,
+          "usage": {
+            "prompt_tokens": 51,
+            "completion_tokens": 146,
+            "total_tokens": 197,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 51
+          },
+          "usage_exposed": true,
+          "objective_hash": "73b2a6cabd54",
+          "e2_request_id": "obs-20260923-1ccaa973",
+          "content_present": true,
+          "finish_reason": "stop",
+          "image_mime": null,
+          "image_dims": null,
+          "image_size_bytes": null,
+          "image_decode_ok": null,
+          "prompt_feedback": null
+        },
+        {
+          "attempt": 2,
+          "dispatch_id": "ds-0591fbaffd40",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 0.9257042407989502,
+          "usage": {
+            "prompt_tokens": 120,
+            "completion_tokens": 16,
+            "total_tokens": 136,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 120
+          },
+          "usage_exposed": true,
+          "objective_hash": "a9b4ace64aa5",
+          "e2_request_id": "obs-20260923-3cf8b848",
+          "content_present": true,
+          "finish_reason": "stop",
+          "image_mime": null,
+          "image_dims": null,
+          "image_size_bytes": null,
+          "image_decode_ok": null,
+          "prompt_feedback": null
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am an AI assistant ready to execute the rehearsal\u2019s execution leg."
+          ]
+        },
+        {
+          "attempt": 2,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [
+        {
+          "attempt": 1,
+          "outcome": "FAIL",
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am an AI assistant ready to execute the rehearsal\u2019s execution leg."
+          ]
+        }
+      ],
+      "repairs": [
+        {
+          "attempt": 1,
+          "issues": [
+            "Test 'exact rehearsal token': expected READY-7391, got I am an AI assistant ready to execute the rehearsal\u2019s execution leg."
+          ]
+        }
+      ],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-1ccaa973",
+        "obs-20260923-3cf8b848"
+      ],
+      "evidence_id": "evidence-1a52c94c3b35",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "deepseek-v41-flash",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "REWORK",
+          "cause": "targeted_repair_after_attempt_1"
+        },
+        {
+          "previous": "REWORK",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_2"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_2"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_2"
+        },
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "REWORK",
+          "cause": "targeted_repair_after_attempt_1"
+        },
+        {
+          "previous": "REWORK",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_2"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_2"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_2"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-cefec061aec2",
+          "first_pass_success": 0,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 1,
+          "corrections": 1,
+          "failure_attribution": null
+        },
+        {
+          "evidence_id": "evidence-1a52c94c3b35",
+          "first_pass_success": 0,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 1,
+          "corrections": 1,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "B_first_pass_deepseek",
+      "notes": "One bounded call; deterministic first-pass PASS expected.",
+      "plan_id": "execleg-B_first_pass_deepseek",
+      "node_id": "node-execleg-B_first_pass_deepseek-1",
+      "objective": "Rehearsal (execution leg): reply with exactly ACK-2049 and nothing else.",
+      "assigned_worker": "deepseek-v41-flash",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "ACK-2049",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "ACK-2049"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "ds-03e39c1087b4",
+          "status": "COMPLETED",
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "error": null,
+          "runtime_s": 0.6880183219909668,
+          "usage": {
+            "prompt_tokens": 51,
+            "completion_tokens": 20,
+            "total_tokens": 71,
+            "reasoning_tokens": null,
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 51
+          },
+          "usage_exposed": true,
+          "objective_hash": "18b977875675",
+          "e2_request_id": "obs-20260923-80ccbe7f",
+          "content_present": true,
+          "finish_reason": "stop",
+          "image_mime": null,
+          "image_dims": null,
+          "image_size_bytes": null,
+          "image_decode_ok": null,
+          "prompt_feedback": null
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-80ccbe7f"
+      ],
+      "evidence_id": "evidence-98267aa0b374",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "deepseek-v41-flash",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        },
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-dccac639b86e",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        },
+        {
+          "evidence_id": "evidence-98267aa0b374",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "C_codex_cli_dispatch",
+      "notes": "One bounded non-interactive Codex CLI call in a scratch working directory; no repository change requested.",
+      "plan_id": "execleg-C_codex_cli_dispatch",
+      "node_id": "node-execleg-C_codex_cli_dispatch-1",
+      "objective": "Reply with exactly this text and nothing else: CODEX-OK-317",
+      "assigned_worker": "codex-cli",
+      "role": "builder",
+      "real_worker_required": true,
+      "worker_routable": true,
+      "expected_exact_content": "CODEX-OK-317",
+      "verification_test_cases": [
+        {
+          "name": "exact rehearsal token",
+          "field": "content_stripped",
+          "expected": "CODEX-OK-317"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_COMPLETE",
+      "node_state": "COMPLETE",
+      "dispatch_attempts": [
+        {
+          "attempt": 1,
+          "dispatch_id": "codex-611263a4dee9",
+          "status": "COMPLETED",
+          "provider": "openai",
+          "model": "unknown",
+          "error": null,
+          "runtime_s": 7.641059398651123,
+          "usage": null,
+          "usage_exposed": false,
+          "objective_hash": "c74e2aa746d9",
+          "e2_request_id": "obs-20260923-3f80fdd6",
+          "content_present": true,
+          "finish_reason": null,
+          "image_mime": null,
+          "image_dims": null,
+          "image_size_bytes": null,
+          "image_decode_ok": null,
+          "prompt_feedback": null
+        }
+      ],
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": "PASS",
+      "blocking_reason": null,
+      "failure_attribution": null,
+      "e2_request_ids": [
+        "obs-20260923-3f80fdd6"
+      ],
+      "evidence_id": "evidence-162513079ebb",
+      "persisted_node_state": "COMPLETE",
+      "persisted_assigned_worker": "codex-cli",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        },
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-791966050006",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        },
+        {
+          "evidence_id": "evidence-162513079ebb",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "scenario": "F_decomposed_multi_worker",
+      "notes": "Decomposed multi-worker plan on the real path: the plan shape comes from E3Planner (multi-role threshold), each node is annotated with a deterministic exact-content contract, and each node is dispatched to its own real worker adapter.",
+      "plan_id": "plan-0001",
+      "objective": "Rehearsal (execution leg): decomposed multi-worker plan",
+      "plan_decomposition": true,
+      "plan_reason": "required_roles=['builder', 'integrator'] (count >= 2)",
+      "node_count": 2,
+      "plan_nodes": [
+        {
+          "node_id": "node-plan-0001-1",
+          "roles": [
+            "builder"
+          ],
+          "dependencies": []
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "roles": [
+            "integrator"
+          ],
+          "dependencies": [
+            "node-plan-0001-1"
+          ]
+        }
+      ],
+      "dag_dependencies": {
+        "node-plan-0001-1": [],
+        "node-plan-0001-2": [
+          "node-plan-0001-1"
+        ]
+      },
+      "assignments": [
+        {
+          "node_id": "node-plan-0001-1",
+          "role": "builder",
+          "worker_id": "deepseek-v41-flash",
+          "worker_routable": true
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "role": "integrator",
+          "worker_id": "codex-cli",
+          "worker_routable": true
+        }
+      ],
+      "distinct_workers_dispatched": [
+        "codex-cli",
+        "deepseek-v41-flash"
+      ],
+      "expected_exact_content_by_node": {
+        "node-plan-0001-1": "BUILD-5510",
+        "node-plan-0001-2": "INTEG-8842"
+      },
+      "verification_test_cases_by_node": {
+        "node-plan-0001-1": [
+          {
+            "name": "node-plan-0001-1 exact token",
+            "field": "content_stripped",
+            "expected": "BUILD-5510"
+          }
+        ],
+        "node-plan-0001-2": [
+          {
+            "name": "node-plan-0001-2 exact token",
+            "field": "content_stripped",
+            "expected": "INTEG-8842"
+          }
+        ]
+      },
+      "run_outcome": "EXECUTION_COMPLETE",
+      "nodes_complete": 2,
+      "nodes": [
+        {
+          "node_id": "node-plan-0001-1",
+          "role": "builder",
+          "worker_id": "deepseek-v41-flash",
+          "state": "COMPLETE",
+          "dispatch_count": 2,
+          "dispatch_attempts": [
+            {
+              "attempt": 1,
+              "dispatch_id": "ds-852664cfc750",
+              "status": "COMPLETED",
+              "provider": "deepseek",
+              "model": "deepseek-flash",
+              "error": null,
+              "runtime_s": 1.2871651649475098,
+              "usage": {
+                "prompt_tokens": 59,
+                "completion_tokens": 221,
+                "total_tokens": 280,
+                "reasoning_tokens": null,
+                "prompt_cache_hit_tokens": 0,
+                "prompt_cache_miss_tokens": 59
+              },
+              "usage_exposed": true,
+              "objective_hash": "fee1245c7079",
+              "e2_request_id": "obs-20260923-24d5d365",
+              "content_present": true,
+              "finish_reason": "stop",
+              "image_mime": null,
+              "image_dims": null,
+              "image_size_bytes": null,
+              "image_decode_ok": null,
+              "prompt_feedback": null
+            },
+            {
+              "attempt": 2,
+              "dispatch_id": "ds-7e2a08bc5200",
+              "status": "COMPLETED",
+              "provider": "deepseek",
+              "model": "deepseek-flash",
+              "error": null,
+              "runtime_s": 0.8990981578826904,
+              "usage": {
+                "prompt_tokens": 131,
+                "completion_tokens": 24,
+                "total_tokens": 155,
+                "reasoning_tokens": null,
+                "prompt_cache_hit_tokens": 0,
+                "prompt_cache_miss_tokens": 131
+              },
+              "usage_exposed": true,
+              "objective_hash": "6871d9c4f1a1",
+              "e2_request_id": "obs-20260923-5689f3c5",
+              "content_present": true,
+              "finish_reason": "stop",
+              "image_mime": null,
+              "image_dims": null,
+              "image_size_bytes": null,
+              "image_decode_ok": null,
+              "prompt_feedback": null
+            }
+          ],
+          "verification_attempts": [
+            {
+              "attempt": 1,
+              "method": "test",
+              "outcome": "FAIL",
+              "passed": false,
+              "issues": [
+                "Test 'node-plan-0001-1 exact token': expected BUILD-5510, got I am the Builder executing the rehearsal leg of a decomposed multi-worker plan."
+              ]
+            },
+            {
+              "attempt": 2,
+              "method": "test",
+              "outcome": "PASS",
+              "passed": true,
+              "issues": []
+            }
+          ],
+          "rejections": [
+            {
+              "attempt": 1,
+              "outcome": "FAIL",
+              "issues": [
+                "Test 'node-plan-0001-1 exact token': expected BUILD-5510, got I am the Builder executing the rehearsal leg of a decomposed multi-worker plan."
+              ]
+            }
+          ],
+          "repairs": [
+            {
+              "attempt": 1,
+              "issues": [
+                "Test 'node-plan-0001-1 exact token': expected BUILD-5510, got I am the Builder executing the rehearsal leg of a decomposed multi-worker plan."
+              ]
+            }
+          ],
+          "final_verification": "PASS",
+          "blocking_reason": null,
+          "failure_attribution": null,
+          "e2_request_ids": [
+            "obs-20260923-24d5d365",
+            "obs-20260923-5689f3c5"
+          ],
+          "evidence_id": "evidence-f7fc508c1fc3",
+          "persisted_node_state": "COMPLETE",
+          "persisted_assigned_worker": "deepseek-v41-flash",
+          "persisted_evidence": [
+            {
+              "evidence_id": "evidence-f7fc508c1fc3",
+              "first_pass_success": 0,
+              "final_success": 1,
+              "verification_outcome": "PASS",
+              "retries": 1,
+              "corrections": 1,
+              "failure_attribution": null
+            }
+          ]
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "role": "integrator",
+          "worker_id": "codex-cli",
+          "state": "COMPLETE",
+          "dispatch_count": 1,
+          "dispatch_attempts": [
+            {
+              "attempt": 1,
+              "dispatch_id": "codex-7cc094734196",
+              "status": "COMPLETED",
+              "provider": "openai",
+              "model": "unknown",
+              "error": null,
+              "runtime_s": 5.6005024909973145,
+              "usage": null,
+              "usage_exposed": false,
+              "objective_hash": "3c58b74a6b39",
+              "e2_request_id": "obs-20260923-ea72b1d1",
+              "content_present": true,
+              "finish_reason": null,
+              "image_mime": null,
+              "image_dims": null,
+              "image_size_bytes": null,
+              "image_decode_ok": null,
+              "prompt_feedback": null
+            }
+          ],
+          "verification_attempts": [
+            {
+              "attempt": 1,
+              "method": "test",
+              "outcome": "PASS",
+              "passed": true,
+              "issues": []
+            }
+          ],
+          "rejections": [],
+          "repairs": [],
+          "final_verification": "PASS",
+          "blocking_reason": null,
+          "failure_attribution": null,
+          "e2_request_ids": [
+            "obs-20260923-ea72b1d1"
+          ],
+          "evidence_id": "evidence-f00a495bef1f",
+          "persisted_node_state": "COMPLETE",
+          "persisted_assigned_worker": "codex-cli",
+          "persisted_evidence": [
+            {
+              "evidence_id": "evidence-f00a495bef1f",
+              "first_pass_success": 1,
+              "final_success": 1,
+              "verification_outcome": "PASS",
+              "retries": 0,
+              "corrections": 0,
+              "failure_attribution": null
+            }
+          ]
+        }
+      ],
+      "persisted_plan_state_log": [
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "PLANNED",
+          "new_state": "READY",
+          "cause": "dependencies_satisfied",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:20"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "READY",
+          "new_state": "RUNNING",
+          "cause": "dispatch_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:20"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "RUNNING",
+          "new_state": "VERIFYING",
+          "cause": "verify_attempt_1",
+          "dispatch_reference": "ds-852664cfc750",
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:22"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "VERIFYING",
+          "new_state": "REWORK",
+          "cause": "targeted_repair_after_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": "verify-node-plan-0001-1-1",
+          "timestamp": "2026-09-23 21:31:22"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "REWORK",
+          "new_state": "RUNNING",
+          "cause": "dispatch_attempt_2",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:22"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "RUNNING",
+          "new_state": "VERIFYING",
+          "cause": "verify_attempt_2",
+          "dispatch_reference": "ds-7e2a08bc5200",
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:23"
+        },
+        {
+          "node_id": "node-plan-0001-1",
+          "previous_state": "VERIFYING",
+          "new_state": "COMPLETE",
+          "cause": "verified_pass_attempt_2",
+          "dispatch_reference": null,
+          "verification_reference": "verify-node-plan-0001-1-2",
+          "timestamp": "2026-09-23 21:31:23"
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "previous_state": "PLANNED",
+          "new_state": "READY",
+          "cause": "dependencies_satisfied",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:23"
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "previous_state": "READY",
+          "new_state": "RUNNING",
+          "cause": "dispatch_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:23"
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "previous_state": "RUNNING",
+          "new_state": "VERIFYING",
+          "cause": "verify_attempt_1",
+          "dispatch_reference": "codex-7cc094734196",
+          "verification_reference": null,
+          "timestamp": "2026-09-23 21:31:28"
+        },
+        {
+          "node_id": "node-plan-0001-2",
+          "previous_state": "VERIFYING",
+          "new_state": "COMPLETE",
+          "cause": "verified_pass_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": "verify-node-plan-0001-2-1",
+          "timestamp": "2026-09-23 21:31:28"
+        }
+      ]
+    },
+    {
+      "scenario": "E_non_routable_refusal",
+      "notes": "Credential-missing worker (routable=false). The node must be recorded BLOCKED and the adapter must never be called.",
+      "plan_id": "execleg-E_non_routable_refusal",
+      "node_id": "node-execleg-E_non_routable_refusal-1",
+      "objective": "Rehearsal (execution leg): this must never be dispatched.",
+      "assigned_worker": "mistral-small-4",
+      "role": "builder",
+      "real_worker_required": false,
+      "worker_routable": false,
+      "expected_exact_content": null,
+      "verification_test_cases": [
+        {
+          "name": "never verified",
+          "field": "content_stripped",
+          "expected": "anything"
+        }
+      ],
+      "max_repair_attempts": 0,
+      "run_outcome": "EXECUTION_BLOCKED",
+      "node_state": "BLOCKED",
+      "dispatch_attempts": [],
+      "verification_attempts": [],
+      "rejections": [],
+      "repairs": [],
+      "final_verification": null,
+      "blocking_reason": "worker_not_routable:mistral-small-4",
+      "failure_attribution": null,
+      "e2_request_ids": [],
+      "evidence_id": null,
+      "persisted_node_state": "BLOCKED",
+      "persisted_assigned_worker": "mistral-small-4",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "BLOCKED",
+          "cause": "worker_not_routable:mistral-small-4"
+        },
+        {
+          "previous": "PLANNED",
+          "new": "BLOCKED",
+          "cause": "worker_not_routable:mistral-small-4"
+        }
+      ],
+      "persisted_evidence": [],
+      "stub_dispatch_calls": 0,
+      "refusal_honoured": true
+    }
+  ],
+  "real_dispatch_log": [
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-2a3597c9a446",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 51,
+        "completion_tokens": 146,
+        "total_tokens": 197,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 51
+      },
+      "e2_request_id": "obs-20260923-1ccaa973",
+      "objective_hash": "73b2a6cabd54",
+      "runtime_s": 1.2943494319915771
+    },
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-0591fbaffd40",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 16,
+        "total_tokens": 136,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 120
+      },
+      "e2_request_id": "obs-20260923-3cf8b848",
+      "objective_hash": "a9b4ace64aa5",
+      "runtime_s": 0.9257042407989502
+    },
+    {
+      "scenario": "B_first_pass_deepseek",
+      "worker_id": "deepseek-v41-flash",
+      "dispatch_id": "ds-03e39c1087b4",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 51,
+        "completion_tokens": 20,
+        "total_tokens": 71,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 51
+      },
+      "e2_request_id": "obs-20260923-80ccbe7f",
+      "objective_hash": "18b977875675",
+      "runtime_s": 0.6880183219909668
+    },
+    {
+      "scenario": "C_codex_cli_dispatch",
+      "worker_id": "codex-cli",
+      "dispatch_id": "codex-611263a4dee9",
+      "status": "COMPLETED",
+      "provider": "openai",
+      "model": "unknown",
+      "usage_exposed": false,
+      "usage": null,
+      "e2_request_id": "obs-20260923-3f80fdd6",
+      "objective_hash": "c74e2aa746d9",
+      "runtime_s": 7.641059398651123
+    },
+    {
+      "scenario": "F_decomposed_multi_worker",
+      "worker_id": "deepseek-v41-flash",
+      "node_id": "node-plan-0001-1",
+      "dispatch_id": "ds-852664cfc750",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 59,
+        "completion_tokens": 221,
+        "total_tokens": 280,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 59
+      },
+      "e2_request_id": "obs-20260923-24d5d365",
+      "objective_hash": "fee1245c7079",
+      "runtime_s": 1.2871651649475098
+    },
+    {
+      "scenario": "F_decomposed_multi_worker",
+      "worker_id": "deepseek-v41-flash",
+      "node_id": "node-plan-0001-1",
+      "dispatch_id": "ds-7e2a08bc5200",
+      "status": "COMPLETED",
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "usage_exposed": true,
+      "usage": {
+        "prompt_tokens": 131,
+        "completion_tokens": 24,
+        "total_tokens": 155,
+        "reasoning_tokens": null,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 131
+      },
+      "e2_request_id": "obs-20260923-5689f3c5",
+      "objective_hash": "6871d9c4f1a1",
+      "runtime_s": 0.8990981578826904
+    },
+    {
+      "scenario": "F_decomposed_multi_worker",
+      "worker_id": "codex-cli",
+      "node_id": "node-plan-0001-2",
+      "dispatch_id": "codex-7cc094734196",
+      "status": "COMPLETED",
+      "provider": "openai",
+      "model": "unknown",
+      "usage_exposed": false,
+      "usage": null,
+      "e2_request_id": "obs-20260923-ea72b1d1",
+      "objective_hash": "3c58b74a6b39",
+      "runtime_s": 5.6005024909973145
+    }
+  ],
+  "usage_plan": [
+    {
+      "scenario": "A_repair_cycle_deepseek",
+      "worker": "deepseek-v41-flash",
+      "calls": 2,
+      "why": "1 deliberately under-specified dispatch (deterministic verifier must reject it) + 1 targeted repair re-dispatch that must pass."
+    },
+    {
+      "scenario": "B_first_pass_deepseek",
+      "worker": "deepseek-v41-flash",
+      "calls": 1,
+      "why": "single bounded call; deterministic first-pass PASS."
+    },
+    {
+      "scenario": "C_codex_cli_dispatch",
+      "worker": "codex-cli",
+      "calls": 1,
+      "why": "single non-interactive CLI dispatch in a scratch dir."
+    },
+    {
+      "scenario": "F_decomposed_multi_worker",
+      "worker": "deepseek-v41-flash + codex-cli",
+      "calls": 3,
+      "why": "2-node decomposed plan: node 1 (builder/deepseek) needs a rejected first attempt plus its targeted repair, node 2 (integrator/codex-cli) is a single first-pass dispatch. This is the minimum that exercises per-node deterministic verification on a multi-worker real plan."
+    },
+    {
+      "scenario": "E_non_routable_refusal",
+      "worker": "mistral-small-4",
+      "calls": 0,
+      "why": "credential-missing worker must be refused pre-dispatch."
+    }
+  ],
+  "usage_plan_total_calls": 7,
+  "bounded_usage": {
+    "real_provider_calls": 7,
+    "planned_calls": 7,
+    "calls_by_provider": {
+      "deepseek": 5,
+      "openai": 2
+    },
+    "usage_exposed_calls": 5,
+    "usage_missing_calls": 2,
+    "note": "Minimum deterministic calls needed to evidence the path, stated up front in usage_plan. Usage is recorded only when the provider returned it."
+  },
+  "isolation": {
+    "production_stores": {
+      "orchestration": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "governor": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "exec_brain": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db"
+    },
+    "before_sha256": {
+      "orchestration": "c2f7caba3a8712d98b5569332897e14dcdc4b279bd45ff0d409163511bea9c4f",
+      "governor": "95af787d2fd1946e99b96d59375c5295234795e08abf31b0df70c9adeab8e5a4",
+      "exec_brain": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34"
+    },
+    "after_sha256": {
+      "orchestration": "c2f7caba3a8712d98b5569332897e14dcdc4b279bd45ff0d409163511bea9c4f",
+      "governor": "95af787d2fd1946e99b96d59375c5295234795e08abf31b0df70c9adeab8e5a4",
+      "exec_brain": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34"
+    },
+    "stores_unchanged": true,
+    "diffs": [],
+    "before_sha256_including_wal_sidecars": {
+      "orchestration": {
+        "main": "c2f7caba3a8712d98b5569332897e14dcdc4b279bd45ff0d409163511bea9c4f",
+        "-wal": null,
+        "-shm": null
+      },
+      "governor": {
+        "main": "95af787d2fd1946e99b96d59375c5295234795e08abf31b0df70c9adeab8e5a4",
+        "-wal": null,
+        "-shm": null
+      },
+      "exec_brain": {
+        "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+        "-wal": null,
+        "-shm": null
+      }
+    },
+    "after_sha256_including_wal_sidecars": {
+      "orchestration": {
+        "main": "c2f7caba3a8712d98b5569332897e14dcdc4b279bd45ff0d409163511bea9c4f",
+        "-wal": null,
+        "-shm": null
+      },
+      "governor": {
+        "main": "95af787d2fd1946e99b96d59375c5295234795e08abf31b0df70c9adeab8e5a4",
+        "-wal": null,
+        "-shm": null
+      },
+      "exec_brain": {
+        "main": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+        "-wal": null,
+        "-shm": null
+      }
+    },
+    "stores_unchanged_including_wal_sidecars": true,
+    "rehearsal_write_refusals": [
+      {
+        "store": "orchestration",
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+        "refused": true,
+        "error": "RehearsalIsolationError"
+      },
+      {
+        "store": "governor",
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+        "refused": true,
+        "error": "RehearsalIsolationError"
+      },
+      {
+        "store": "exec_brain",
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+        "refused": true,
+        "error": "RehearsalIsolationError"
+      }
+    ],
+    "all_production_writes_refused": true,
+    "isolated_rehearsal_store": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e3-exec-rehearsal-mypb93of\\rehearsal_evidence_isolation\\rehearsal_evidence.json",
+    "isolated_store_outside_production": true,
+    "boundary_scan": {
+      "module_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+      "direct_sql_violations": [],
+      "e2_public_interface_modules": [
+        "codex_adapter.py",
+        "deepseek_adapter.py",
+        "e3_execution.py",
+        "e3_execution_rehearsal.py",
+        "e3_production_rehearsal.py",
+        "eb.py",
+        "gemini_adapter.py",
+        "generic_openai_adapter.py"
+      ],
+      "clean": true
+    }
+  },
+  "live_store_contamination": {
+    "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "performance_evidence_by_execution_profile": {
+      "production-execution-leg": 9
+    },
+    "performance_evidence_by_provider": {
+      "deepseek": 5,
+      "google": 1,
+      "openai": 3
+    },
+    "simulated_or_shadow_evidence_rows": 0,
+    "qualified_rows_without_evidence": 0,
+    "capability_state_counts": {},
+    "dag_node_state_counts": {
+      "BLOCKED": 1,
+      "COMPLETE": 5,
+      "FAILED": 1
+    },
+    "dag_state_event_count": 47,
+    "performance_evidence_count": 9,
+    "simulated_evidence_absent": true,
+    "no_unearned_qualification": true
+  },
+  "e2_linkage": {
+    "available": true,
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+    "requested_ids": [
+      "obs-20260923-1ccaa973",
+      "obs-20260923-3cf8b848",
+      "obs-20260923-80ccbe7f",
+      "obs-20260923-3f80fdd6",
+      "obs-20260923-24d5d365",
+      "obs-20260923-5689f3c5",
+      "obs-20260923-ea72b1d1"
+    ],
+    "rows_read_back": [
+      {
+        "request_id": "obs-20260923-1ccaa973",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "input_tokens": 51,
+        "output_tokens": 146,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-3cf8b848",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "input_tokens": 120,
+        "output_tokens": 16,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-80ccbe7f",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "input_tokens": 51,
+        "output_tokens": 20,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-3f80fdd6",
+        "provider": "openai-codex-cli",
+        "model": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-24d5d365",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "input_tokens": 59,
+        "output_tokens": 221,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-5689f3c5",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "input_tokens": 131,
+        "output_tokens": 24,
+        "status": "success"
+      },
+      {
+        "request_id": "obs-20260923-ea72b1d1",
+        "provider": "openai-codex-cli",
+        "model": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "status": "success"
+      }
+    ],
+    "all_found": true
+  },
+  "checks": {
+    "repair_cycle_rejected_then_repaired": true,
+    "first_pass_complete": true,
+    "codex_cli_complete": true,
+    "multi_node_plan_is_decomposed": true,
+    "multi_node_all_nodes_complete": true,
+    "multi_worker_two_distinct_routable_workers": true,
+    "multi_node_per_node_deterministic_verification": true,
+    "multi_node_rejection_then_repair": true,
+    "multi_node_dependency_gate_observed": true,
+    "multi_node_dag_state_and_evidence_persisted": true,
+    "google_image_complete": true,
+    "non_routable_refused_without_dispatch": true,
+    "complete_requires_verification": true,
+    "dag_state_and_evidence_persisted": true,
+    "e2_linkage_recorded": true,
+    "rehearsal_evidence_isolated_from_production_stores": true,
+    "no_simulated_evidence_in_live_stores": true,
+    "e1_e2_boundary_clean": true,
+    "runtime_modules_deployed": true,
+    "orchestration_db_is_schema_v2": true
+  },
+  "unresolved": [
+    {
+      "scenario": "E_non_routable_refusal",
+      "node": "node-execleg-E_non_routable_refusal-1",
+      "worker": "mistral-small-4",
+      "node_state": "BLOCKED",
+      "blocking_reason": "worker_not_routable:mistral-small-4",
+      "failure_attribution": null,
+      "provider_errors": [],
+      "expected_block": true
+    }
+  ]
+}
