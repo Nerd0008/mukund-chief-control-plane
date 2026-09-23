@@ -1,0 +1,40 @@
+{
+  "task_id": "agent-e3-local-production-rehearsal-retry-2026-09-23",
+  "created_at": "2026-09-23T21:17:50Z",
+  "objective": "Formally re-run the E3 local production rehearsal on the now-built real execution leg. Produce executable production-rehearsal evidence on the real local orchestration path (dispatch to a worker ExecutionAdapter, deterministic verification gating, persisted DAG node/state/evidence rows) including at least one verifier rejection followed by targeted repair or replan and successful re-verification, re-prove rehearsal-evidence isolation from the qualification and production evidence stores, and keep E1/E2 integration to public interfaces only. Then re-evaluate every recorded local Stage 2 readiness precondition with evidence and record the exact remaining conditions. This is a re-run of the blocked agent-e3-local-production-rehearsal-2026-09-23, whose recorded unmet condition (no orchestrator-to-adapter production execution leg) has since been built, deployed and evidenced. Do not enable E3 Stage 2 or production dispatch in this task. Do not perform VPS cutover or finalize deployment architecture.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-e3-local-production-rehearsal-2026-09-23 is in blocked/ (terminal, execution_error) and must stay there unmodified as evidence",
+    "agent-e3-production-execution-leg-2026-09-23 is in completed/ with truthful terminal evidence (real dispatch leg built, deployed to the local runtime root, and exercised with real workers)",
+    "latest main includes the bridge-watchdog validation commits and the hardened bridge defaults"
+  ],
+  "allowed_scope": [
+    "Inspect the terminal records in blocked/agent-e3-local-production-rehearsal-2026-09-23.json and completed/agent-e3-production-execution-leg-2026-09-23.json, and the evidence under audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/, before making any rehearsal or readiness claim.",
+    "Check remote-queue/pending/ and remote-queue/running/ for agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23 first and do not race it. This task owns the formal production-rehearsal re-run: the real local path, a decomposed multi-worker plan with deterministic per-node verification, evidence isolation, and the E1/E2 public-interface boundary. Leave the Google image-worker real-dispatch diagnosis and the qualification benchmark to that task, state that division explicitly in your result, and consume any multi-worker evidence it already produced rather than repeating it.",
+    "Re-run the production rehearsal on the real local orchestration path using the deployed execution leg, exercising a decomposed multi-worker plan (2 or more nodes) with deterministic per-node verification, and record executable evidence (exact commands, counts, exit codes) under audits/evidence/.",
+    "Exercise at least one verifier rejection followed by targeted repair or replan and successful re-verification on the real path, where safely reproducible, and record the DAG state transitions.",
+    "Re-prove that simulated or rehearsal evidence cannot contaminate the qualification or production evidence stores (content hashes before and after).",
+    "Verify that E1/E2 integration remains public-interface only via governor.record_request(); no direct SQL writes from E3 into exec_brain.db or governor.db.",
+    "Route only to workers whose registry entry says routable=true; never route to the seven credential-missing workers; never mark a worker QUALIFIED without recorded qualification evidence.",
+    "Bound real provider usage: state up front how many calls each scenario needs and why; prefer deterministic single-shot prompts.",
+    "Re-evaluate every recorded local Stage 2 readiness precondition with evidence and record the exact remaining conditions. Do not enable LOCAL Stage 2 or production dispatch in this task, and do not treat approval text as a substitute for evidence.",
+    "Run the full E1/E2/E3/E4/E5 plus queue and bridge regression suites through scripts/evidence_runner.py after any change and record exact commands, counts and exit codes.",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only.",
+    "Commit and push small recoverable changes and return a strict terminal JSON result.",
+    "Before returning a terminal result, create exactly one successor agent-* task in remote-queue/pending/ so the local poller can continue without waiting for the owner; do not create a duplicate if an equivalent pending or running task already exists."
+  ],
+  "stop_conditions": [
+    "Do not fabricate provider, model, usage, qualification, deployment or rehearsal evidence.",
+    "Do not enable E3 Stage 2 or production dispatch in this task regardless of conditional approval text elsewhere.",
+    "Do not mutate blocked/agent-e3-local-production-rehearsal-2026-09-23.json (it is preserved evidence) and do not mutate any other task's running contract.",
+    "Do not weaken or skip a readiness criterion.",
+    "Do not expose secrets, raw chain-of-thought, or private runtime database content.",
+    "Do not perform VPS cutover or finalize deployment architecture.",
+    "Do not run unbounded or exploratory provider calls; every real execution must be bounded and justified.",
+    "If a real execution requires owner credentials or account action, record the exact owner action and continue non-dependent work."
+  ],
+  "notes": "Staged by the agent-bridge-watchdog-validation-2026-09-23 run, whose contract required a fresh E3 local production rehearsal retry to be pending before exit. The blocked rehearsal died on execution_error with dispatcher exit code 3221225786 (0xC000013A, STATUS_CONTROL_C_EXIT) - a manual interrupt of a worker that predated the watchdog patch, not an engineering defect in the rehearsal itself. The hardened bridge now in main bounds new launches: visible_worker.py fails closed after HERMES_REMOTE_IDLE_TIMEOUT (default 300s) with no stream event, terminates only its own Hermes child tree, and reports exit code 124 truthfully as blocker_category execution_error; hermes_dispatch.py bounds each task at HERMES_REMOTE_TASK_TIMEOUT (default 1200s) and passes remote-queue/running/<task_id>.json to the agent as immutable execution input. Owner standing directive for continuity: keep working locally, keep commits small and recoverable, and hand off to exactly one next bounded task before exit. Stage 2 remains disabled; the most recent contract lineage (agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23, 2026-09-23T21:18Z) requires a separate explicit owner decision before production dispatch is enabled."
+}
