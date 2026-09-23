@@ -1,0 +1,37 @@
+{
+  "task_id": "agent-e3-local-production-rehearsal-2026-09-23",
+  "created_at": "2026-09-23T20:36:00Z",
+  "objective": "After Codex re-validation reaches a truthful terminal state, run the next critical local-first completion phase: produce executable E3 production-rehearsal evidence on the real local orchestration path, including rejection/repair/replan behavior and evidence isolation, while preserving E1/E2 public-interface boundaries. Use only workers that are currently truthfully routable. If the standing local Stage 2 readiness criteria become fully satisfied, prepare the exact enablement evidence and proceed only within the standing conditional owner approval already recorded. Do not perform VPS cutover or finalize deployment architecture.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-codex-reset-revalidation-2026-09-23 must be in completed/ or blocked/ with truthful terminal evidence",
+    "latest main must include the queue-recovery evidence/state commits",
+    "standing conditional owner approval for local Stage 2 remains valid"
+  ],
+  "allowed_scope": [
+    "Inspect the terminal result and evidence from agent-codex-reset-revalidation-2026-09-23 before making any readiness claim.",
+    "Use current verified routable workers only; do not route to credential-missing workers.",
+    "Exercise the real local E3 orchestration path, not only unit/composition tests.",
+    "Produce executable evidence for planner/router/team assembly/integrator/verifier flow.",
+    "Exercise at least one verifier rejection followed by targeted repair/replan and successful re-verification where safely reproducible.",
+    "Prove simulated/rehearsal evidence cannot contaminate qualification/production evidence stores.",
+    "Verify E1/E2 integration remains through public interfaces only; no direct SQL writes from E3.",
+    "Run relevant E1/E2/E3 regressions after any code changes and record exact commands/counts/exit codes.",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only.",
+    "If every standing local Stage 2 readiness precondition is objectively satisfied, enable local Stage 2 under the recorded standing conditional owner approval, with rollback/recovery preserved and evidence recorded.",
+    "If readiness is not satisfied, leave Stage 2 disabled, record the exact missing condition, and continue preparing the next non-blocked E4/E5 drill task rather than waiting for the owner.",
+    "Commit/push small recoverable changes and return strict terminal JSON."
+  ],
+  "stop_conditions": [
+    "Do not fabricate provider/model/usage/qualification evidence.",
+    "Do not use the seven credential-missing workers as if ready.",
+    "Do not expose secrets, raw chain-of-thought, or private runtime DB content.",
+    "Do not finalize deployment architecture or perform VPS cutover.",
+    "Do not weaken readiness criteria merely to enable Stage 2.",
+    "If Codex re-validation is still actively running, do not race it."
+  ],
+  "notes": "This task is intentionally pre-staged so the local poller can continue immediately after Codex re-validation without waiting for the hourly supervisor. Current owner direction: make local operation excellent first; architecture decision comes later."
+}
