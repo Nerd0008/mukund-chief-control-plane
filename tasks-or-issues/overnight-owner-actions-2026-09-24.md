@@ -25,16 +25,18 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 **Continue without owner:** qualification harness, orchestration, E4/E5 integration, tests, evidence, bridge hardening, deployment preparation.
 
 ### 2. E3 Stage 2 production approval
-**Status:** NOT READY / OWNER GATE  
-**Blocks:** enabling production dispatch only.  
-**Action:** when Stage 1 rehearsal and acceptance evidence is complete, review the readiness package and explicitly approve or reject Stage 2.  
-**Continue without owner:** all Stage 1 shadow/rehearsal/qualification/evidence work.
+**Status:** STANDING CONDITIONAL APPROVAL GRANTED 2026-09-23  
+**Blocks:** nothing, provided the local readiness gates are objectively satisfied.  
+**Owner directive:** Mukund explicitly authorizes Stage 2 local production enablement while he is asleep or at work if the system is judged ready from evidence. Do not pause solely for another approval prompt.  
+**Readiness conditions before enabling:** local E1/E2/E3/E4/E5 regressions pass; production rehearsal passes; no unresolved critical integrity/privacy/safety defect; worker routing is evidence-based; rollback/recovery path exists; current state/evidence is updated truthfully.  
+**Scope:** this standing approval covers local Stage 2 enablement only. It does not authorize VPS cutover or a final deployment-architecture choice.
 
 ### 3. Deployment architecture decision
-**Status:** PENDING OWNER DECISION  
-**Blocks:** final real deployment/cutover topology.  
-**Decision required:** choose between the existing full-VPS cutover authority and the discussed laptop-primary + GitHub control plane + optional VPS watchdog/failover alternative.  
-**Continue without owner:** reproducible deployment scripts/manifests, service definitions, backup/restore plan, secret provisioning design, reboot acceptance plan, dry-run preparation.
+**Status:** DEFERRED UNTIL LOCAL SYSTEM IS PROVEN  
+**Blocks:** final real deployment/cutover topology only.  
+**Owner direction:** first make the system run perfectly locally. Do not pause local completion to choose deployment architecture.  
+**Current preference (not final approval):** laptop as primary production node, GitHub as control/collaboration plane, VPS as watchdog/failover.  
+**Continue without owner:** local Stage 2, local production rehearsal, qualification, regressions, evidence, deployment scripts/manifests, service definitions, backup/restore plan, secret provisioning design, reboot acceptance plan, and dry-run preparation.
 
 ### 4. VPS access/details
 **Status:** PENDING IF VPS PATH IS CHOSEN  
