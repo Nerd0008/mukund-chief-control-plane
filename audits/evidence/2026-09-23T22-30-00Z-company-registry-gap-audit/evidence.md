@@ -3,6 +3,9 @@
 - Task: `agent-company-registry-gap-audit-and-runtime-services-2026-09-23` (remote queue, running→completed)
 - Date: 2026-09-23 (local, UTC+01:00)
 - Authority: `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`
+- Execution window: claimed by `HermesRemoteQueuePoller` at 2026-09-23T22:22:06Z; inspection, fixes,
+  tests and the evidence commit completed by ~22:32Z. The `2026-09-23T22-30-00Z-…` directory name is
+  a nominal artifact label, not a claim about the exact second of execution.
 - Method: read `state/v1-agent-roster.md` and the Sep 21/Sep 23 handovers first, then inspect the actual
   machine (Windows scheduled tasks, Hermes skills/hooks/cron, remote-queue state, Career Ops dirs,
   Discord sync/archive, legacy donor systems, canonical trackers) and run the new deterministic
@@ -106,8 +109,17 @@ Canonical trackers present: `uk-cyber-job-tracker.xlsx`, `Dubai_Cybersecurity_Jo
 - Tests: new `career-ops/tests/test_emit_encoding.py` (5 tests) pins the behaviour for cp1252, ASCII
   and UTF-8 consoles. `career-ops` suite: **33/33 pass**. End-to-end probe under
   `PYTHONIOENCODING=cp1252` with redirected stdout: **exit 0**, valid JSON, no traceback.
-- Not claimed: the fix was not validated by waiting for the 23:45 scheduled fire; the next scheduled
-  UK run is the live confirmation.
+- **Live confirmation (not just a unit test):** the scheduled task was re-run through the real
+  Task Scheduler path at 2026-09-23T22:28:39Z (89.0 s, bounded dry-run, no tracker write). Result:
+  `ChiefCareerScan-UK` **Last Result 0** (was 1), `uk-last-stdout.json` now contains **valid JSON**
+  (`ok: true`, `exit_code: 0`) with **no traceback**, and a new run record
+  `scan-uk-20260923T222839Z.json` was written. The scan found 1 new eligible offer (Celonis —
+  Technology & Management Consulting Intern, London, trust 85/100, flagged
+  `company_domain_mismatch`); it was **not** written to any tracker (dry-run only) and is reported
+  here only as the scan's own output.
+- The pre-fix traceback artifact was committed first (commit `70dd715`) and then overwritten by the
+  live re-run, so the defect evidence survives in git history at
+  `runtime/career-ops/scan-runs/uk-last-stdout.json`. The 23:45 daily fire is the routine confirmation.
 
 ## 4. Reconciliation outcome
 

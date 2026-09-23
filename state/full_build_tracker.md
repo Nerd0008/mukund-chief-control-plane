@@ -140,7 +140,7 @@ deterministic, read-only). Evidence:
 | Ops | E1 / E2 / E3 integrity gates | PASS | `audit --verify`, `gov-verify`, `e3-verify-db` (schema v2) |
 | Ops | A04 Daily Resource Brief | WORKS | `eb brief` deterministic; unknown dimensions stay UNKNOWN |
 | Ops | Boot persistence | PARTIAL / UNVERIFIED | gateway at logon + restart-on-failure; poller + sync sync have no logon/boot trigger and no `StartWhenAvailable` — post-reboot resumption unverified (reboot prohibited) |
-| Career | Scheduled regional scan defect | **FOUND + FIXED** | `ChiefCareerScan-UK` exited 1 after a successful scan (`UnicodeEncodeError` on cp1252 stdout); `emit()` hardened + `run_scheduled_scan.cmd` sets UTF-8; `career-ops/tests/test_emit_encoding.py` 5 tests; suite 33/33 |
+| Career | Scheduled regional scan defect | **FOUND + FIXED + LIVE-CONFIRMED** | `ChiefCareerScan-UK` exited 1 after a successful scan (`UnicodeEncodeError` on cp1252 stdout); `emit()` hardened + `run_scheduled_scan.cmd` sets UTF-8; `career-ops/tests/test_emit_encoding.py` 5 tests; suite 33/33; real Task Scheduler re-run 2026-09-23T22:28:39Z → Last Result 0, valid JSON stdout, 89.0 s dry-run, 0 tracker writes |
 | Career | B07/B08 tracker interface | **PRESERVED** | `career-ops/` (CLI + writer + 33 tests) was untracked; now committed |
 | Career | B09 Monthly rollover worker | **MISSING → STAGED** | `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23` (pending); owned by no other task |
 

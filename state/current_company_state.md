@@ -470,7 +470,11 @@ Defect found and fixed (non-E3 scheduled service):
   ASCII-escaped JSON (still exactly one JSON object); `run_scheduled_scan.cmd` also sets
   `PYTHONIOENCODING=utf-8` / `PYTHONUTF8=1`. New regression suite
   `career-ops/tests/test_emit_encoding.py` (5 tests, cp1252/ascii/utf-8); career-ops suite 33/33.
-  Not claimed: the next 23:45 scheduled fire is the live confirmation.
+  **Live confirmation:** the scheduled task was re-run through the real Task Scheduler path at
+  2026-09-23T22:28:39Z (89.0 s bounded dry-run, no tracker write) → `Last Result 0` (was 1),
+  `uk-last-stdout.json` now valid JSON (`ok: true`, `exit_code: 0`, no traceback), new run record
+  `scan-uk-20260923T222839Z.json`; the scan found 1 new eligible offer (Celonis, London,
+  trust 85/100, `company_domain_mismatch` flag) which was **not** written to any tracker.
 
 Coverage gap closed:
 
