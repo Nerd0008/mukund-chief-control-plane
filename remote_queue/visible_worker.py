@@ -55,13 +55,18 @@ def main() -> int:
 
     # Show installed Hermes version without mutating state.
     try:
+        version_env = os.environ.copy()
+        version_env["PYTHONUTF8"] = "1"
+        version_env["PYTHONIOENCODING"] = "utf-8"
         version = subprocess.run(
             [args.hermes, "--version"],
             cwd=args.cwd,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
-            env=os.environ.copy(),
+            env=version_env,
         )
         version_text = (version.stdout or version.stderr or "").strip()
         if version_text:
@@ -81,14 +86,19 @@ def main() -> int:
     command = [args.hermes, "chat", "-q", prompt, "--format", "stream-json"]
 
     try:
+        child_env = os.environ.copy()
+        child_env["PYTHONUTF8"] = "1"
+        child_env["PYTHONIOENCODING"] = "utf-8"
         proc = subprocess.Popen(
             command,
             cwd=args.cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             bufsize=1,
-            env=os.environ.copy(),
+            env=child_env,
         )
     except Exception as exc:
         msg = f"Failed to launch Hermes: {type(exc).__name__}: {exc}"
@@ -99,11 +109,18 @@ def main() -> int:
         time.sleep(90)
         return 127
 
+    reader_errors = []
+
     def reader():
         assert proc.stdout is not None
         try:
             for line in proc.stdout:
                 q.put(line)
+        except Exception as exc:
+            # Never let an output-decoding/pipe problem silently strand the
+            # parent in a heartbeat loop. UTF-8 + errors=replace above should
+            # handle malformed bytes; this is a final fail-closed guard.
+            reader_errors.append(f"{type(exc).__name__}: {exc}")
         finally:
             q.put("")
 
@@ -182,6 +199,21 @@ def main() -> int:
 
         except queue.Empty:
             pass
+
+        if finished_stream and proc.poll() is None and reader_errors:
+            print(
+                f"[{_stamp()}] STREAM READER FAILED: {_safe_text(reader_errors[-1], 500)}",
+                flush=True,
+            )
+            print(f"[{_stamp()}] Terminating Hermes child to avoid an invisible hang.", flush=True)
+            try:
+                proc.terminate()
+                proc.wait(timeout=10)
+            except Exception:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
 
         now = time.monotonic()
         if proc.poll() is None and now - last_heartbeat >= 5:
