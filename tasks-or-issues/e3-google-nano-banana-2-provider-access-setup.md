@@ -1,6 +1,10 @@
 # Task — Configure Google Nano Banana 2 for E3 execution
 
+<<<<<<< HEAD
 Status: COMPLETE
+=======
+Status: ACTIVE — AUTH + MODEL DISCOVERY COMPLETE
+>>>>>>> 6a9034016c2c4399e8e4e565bcecc7e542dd317a
 Created: 2026-09-23
 Completed: 2026-09-23
 Owner: Mukund / Executive Brain E3
@@ -15,16 +19,47 @@ Human/roster label:
 Confirmed live API model ID (owner-confirmed 2026-09-23 after live discovery):
 - `gemini-3.1-flash-image`
 
+<<<<<<< HEAD
 Discovery summary (GET /v1beta/models, HTTP 200, 59 models visible):
 - `gemini-3.1-flash-image` AVAILABLE (generateContent, countTokens, batchGenerateContent) — stable, Flash-tier image model
 - `gemini-3.6-flash` AVAILABLE but general multimodal/text model — NOT configured as image worker (no image-output evidence)
 - Other image-capable models observed: gemini-3.1-flash-image-preview, gemini-3.1-flash-lite-image, gemini-3-pro-image, nano-banana-pro-preview (Pro tier, not this worker), gemini-2.5-flash-image
 - The /models endpoint does not expose structured output-modality metadata; image-output capability is evidenced by model identity/naming, not a modality field
+=======
+Live provider discovery on 2026-09-23 confirmed `gemini-3.1-flash-image` is available to this account and supports `generateContent`. This is now the selected backing model for the Google image-generation worker.
+
+
+## Live discovery result — 2026-09-23
+
+Credential/authentication:
+- Windows Credential Manager target `gemini-api`: PRESENT
+- Environment fallback: ABSENT / unused
+- Existing `gemini:antigravity` desktop-app credential remains separate and untouched
+- Authentication: PASS
+- `GET https://generativelanguage.googleapis.com/v1beta/models` → HTTP 200
+- 59 live models visible to this account
+
+Relevant observed models:
+- `gemini-3.6-flash` — AVAILABLE; methods observed: generateContent, countTokens, createCachedContent, batchGenerateContent
+- `gemini-3.1-flash-image` — AVAILABLE; methods observed: generateContent, countTokens, batchGenerateContent
+- `gemini-3.1-flash-image-preview`
+- `gemini-3.1-flash-lite-image`
+- `gemini-3-pro-image` / `gemini-3-pro-image-preview`
+- `nano-banana-pro-preview`
+- `gemini-2.5-flash-image`
+
+Selection:
+- E3 Google image-generation worker backing model: `gemini-3.1-flash-image`
+- `gemini-3.6-flash` is NOT assigned to image generation. Provider model-list metadata did not provide evidence of image output for it. It remains a separate candidate for future text/multimodal worker evaluation.
+- Do not infer unsupported output modalities from naming alone.
+
+>>>>>>> 6a9034016c2c4399e8e4e565bcecc7e542dd317a
 
 ## Readiness checklist — RESULTS
 
 - [x] Local Google/Gemini API credential presence checked without exposing value
 - [x] Credential stored in approved local secret store
+<<<<<<< HEAD
       (Windows Credential Manager target `gemini-api`, AIza... format, owner-stored)
 - [x] API authentication verified (GET /v1beta/models → HTTP 200)
 - [x] Live model discovery/availability check succeeds (59 models)
@@ -42,6 +77,23 @@ Discovery summary (GET /v1beta/models, HTTP 200, 59 models visible):
 - [x] E2 regression PASS (45/45)
 - [x] E3 regression PASS (40/40)
 - [x] Stage-2 readiness documented
+=======
+- [x] API authentication verified (GET generativelanguage.googleapis.com/v1beta/models → HTTP 200)
+- [x] Live model discovery/availability check succeeds (59 models visible)
+- [x] Exact API model ID confirmed: `gemini-3.1-flash-image`
+- [ ] E3 Google image ExecutionAdapter implemented
+- [ ] Minimal harmless image-generation smoke test PASS
+- [ ] Returned provider/model identity recorded
+- [ ] Provider-returned usage captured where available
+- [ ] E2 `record-request` linkage PASS
+- [ ] Generated smoke-test artifact stored only in temporary/local test path
+- [ ] No credential or raw secret appears in logs/GitHub
+- [ ] Worker registry updated truthfully
+- [ ] E1 regression PASS
+- [ ] E2 regression PASS
+- [ ] E3 regression PASS
+- [ ] Stage-2 readiness documented
+>>>>>>> 6a9034016c2c4399e8e4e565bcecc7e542dd317a
 
 ## Smoke-test data (provider-returned, never estimated)
 
