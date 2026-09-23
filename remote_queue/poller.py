@@ -18,6 +18,7 @@ from remote_queue.queue_schema import (
     is_task_running, is_task_completed, is_task_blocked,
     PENDING_DIR, RUNNING_DIR, COMPLETED_DIR, BLOCKED_DIR,
 )
+from remote_queue.hermes_dispatch import dispatch_task
 
 LOCK_FILE = REPO_ROOT / "remote-queue" / ".poller.lock"
 KILL_SWITCH_FILE = REPO_ROOT / "remote-queue" / ".poller.kill"
@@ -198,6 +199,11 @@ def handle_task(task: dict) -> dict:
     if "remote-e2e" in task_id:
         return handle_e2e_test(task)
 
+    # Real agent-to-agent execution path. Only explicitly prefixed agent tasks
+    # reach Hermes; arbitrary unknown queue objects still fail closed.
+    if task_id.startswith("agent-"):
+        return dispatch_task(task)
+
     raise ValueError(f"No handler for task: {task_id}")
 
 
@@ -309,10 +315,22 @@ def run_poll_cycle():
                 result = handle_task(task)
                 if result.get("status") == "completed":
                     complete_task(task_id, result)
+                elif result.get("status") == "blocked":
+                    block_task(
+                        task_id,
+                        result.get("blocker_category") or "execution_error",
+                        result.get("owner_action_required") or result.get("summary") or "Hermes reported a blocker",
+                        "Independent safe work may continue",
+                    )
                 elif result.get("status") == "in_progress":
                     log_event(f"Task {task_id} in progress")
                 else:
-                    complete_task(task_id, result)
+                    block_task(
+                        task_id,
+                        "execution_error",
+                        "Handler returned an invalid task status",
+                        "Independent safe work may continue",
+                    )
             except Exception as e:
                 log_event(f"Task {task_id} failed: {e}")
                 try:
