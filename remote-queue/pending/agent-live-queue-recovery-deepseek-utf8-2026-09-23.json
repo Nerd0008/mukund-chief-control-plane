@@ -1,0 +1,31 @@
+{
+  "task_id": "agent-live-queue-recovery-deepseek-utf8-2026-09-23",
+  "created_at": "2026-09-23T20:13:00Z",
+  "objective": "Resume the bounded queue/test-isolation and evidence-recovery task after an observed Windows UnicodeDecodeError in the visible worker stream reader. The bridge has been patched in commit e643fd162cf2b627d734b5735e205de3d00387a4 to force UTF-8 with replacement fallback and fail closed on future reader errors. First inspect current worktree and preserve/reconcile any partial changes left by the interrupted predecessor before editing. Then finish queue-test isolation, lifecycle truth reconciliation, reproducible evidence, and state updates. Return strict terminal JSON.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "Inspect latest main, current worktree, running/blocked queue records, scheduler/worker state and any partial predecessor edits before changing files.",
+    "Treat the predecessor agent-live-queue-recovery-deepseek-2026-09-23 as interrupted by bridge stream decoding failure if its terminal queue record confirms that outcome; do not discard useful partial work.",
+    "Confirm Hermes remains on deepseek-flash without exposing secrets.",
+    "Isolate remote_queue/tests/test_queue.py from live repository, queue, scheduler, mutex, kill switch, Git pushes and real dispatch using disposable roots/mocks.",
+    "Do not run the old unsafe queue tests against the live checkout before isolation exists.",
+    "Reproduce and minimally fix any remaining queue lifecycle or dispatch defects only under isolated tests.",
+    "Reconcile stale/orphaned running records truthfully from evidence, preserving valid E3 implementation commits.",
+    "Produce reproducible per-suite evidence with UTC time, code SHA, command, runtime/import root, collected/passed/failed/error/skipped counts and exit code. Keep historical evidence separate when not rerun.",
+    "Update current state and full-build tracker only with verified facts; do not claim unsupported aggregate totals.",
+    "Record Codex CLI re-validation as the next bounded task after this recovery because Mukund reports Codex allowance reset.",
+    "Make small recoverable commits and push origin/main. Return ONLY the bridge's structured terminal JSON."
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "E3 Stage 2 remains NOT APPROVED.",
+    "Do not choose deployment architecture or perform deployment/cutover/reboot/firewall/service changes.",
+    "No secrets, private runtime DBs, raw model output or chain-of-thought in GitHub.",
+    "No destructive reset/clean/force push or broad process termination.",
+    "If an actual conflicting worker is still active, stop conflicting edits and report dependency.",
+    "If DeepSeek provider/auth fails, report exact observed failure and preserve completed work."
+  ],
+  "notes": "Visible worker UTF-8 hardening commit: e643fd162cf2b627d734b5735e205de3d00387a4. The predecessor's console showed UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d, followed by heartbeats with no events. This successor must preserve partial work and continue after the predecessor is terminated/terminally reconciled."
+}
