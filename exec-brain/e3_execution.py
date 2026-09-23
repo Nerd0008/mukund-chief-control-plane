@@ -288,6 +288,21 @@ class OrchestrationStore:
         con.commit()
         return did
 
+    def state_log(self, plan_id: str) -> List[Dict[str, Any]]:
+        """Ordered state-transition log for a whole plan (DAG evidence read-back).
+
+        Ordered by insertion (rowid), so the log shows the real dispatch/verify
+        ordering across nodes — used to prove a dependent node only reached
+        READY after its dependency was persisted COMPLETE.
+        """
+        con = self.connect()
+        rows = con.execute(
+            "SELECT node_id, previous_state, new_state, cause, "
+            "dispatch_reference, verification_reference, timestamp "
+            "FROM dag_state_event WHERE plan_id=? ORDER BY rowid",
+            (plan_id,)).fetchall()
+        return [dict(r) for r in rows]
+
     def read_back(self, node_id: str) -> Dict[str, Any]:
         """Read a node + its transition/evidence rows back out of the store."""
         con = self.connect()
@@ -429,6 +444,30 @@ class E3ProductionExecutor:
         self.repair_objective_builder = (repair_objective_builder
                                          or default_repair_objective)
 
+    # ── state transitions ───────────────────────────────────────────
+    @staticmethod
+    def _sync_dag_state(dag: Any, node_id: str, new_state: str) -> None:
+        """Keep the in-memory DAG node state in step with the persisted store.
+
+        Without this the DAG still reports ``PLANNED`` for a node the store has
+        already recorded ``COMPLETE``, so a dependent node's dependency gate
+        would refuse to run (``dependency_incomplete``) even though its
+        dependency actually passed verification.
+        """
+        if dag is None or not hasattr(dag, "get_node"):
+            return
+        node = dag.get_node(node_id)
+        if node is not None:
+            node.state = new_state
+
+    def _transition(self, dag: Any, node_id: str, plan_id: str, new_state: str,
+                    cause: str, **kwargs: Any) -> Dict[str, Any]:
+        """Persist a node state transition and mirror it into the DAG object."""
+        event = self.store.set_node_state(node_id, plan_id, new_state, cause,
+                                          **kwargs)
+        self._sync_dag_state(dag, node_id, new_state)
+        return event
+
     # ── verification ────────────────────────────────────────────────
     @staticmethod
     def _verification_method(node: Dict[str, Any]) -> VerificationMethod:
@@ -505,23 +544,23 @@ class E3ProductionExecutor:
             self.store.upsert_node(plan_id, node, worker_id)
 
             if assignment is None:
-                self.store.set_node_state(node_id, plan_id, "BLOCKED",
-                                          "no_team_assignment")
+                self._transition(dag, node_id, plan_id, "BLOCKED",
+                                 "no_team_assignment")
                 result.state = "BLOCKED"
                 result.blocking_reason = "no_team_assignment"
                 continue
 
             if not self.registry.is_routable(worker_id):
-                self.store.set_node_state(
-                    node_id, plan_id, "BLOCKED",
+                self._transition(
+                    dag, node_id, plan_id, "BLOCKED",
                     f"worker_not_routable:{worker_id}")
                 result.state = "BLOCKED"
                 result.blocking_reason = f"worker_not_routable:{worker_id}"
                 continue
 
             if not self._reuse_readonly_dependency_check(dag, node):
-                self.store.set_node_state(node_id, plan_id, "BLOCKED",
-                                          "dependency_incomplete")
+                self._transition(dag, node_id, plan_id, "BLOCKED",
+                                 "dependency_incomplete")
                 result.state = "BLOCKED"
                 result.blocking_reason = "dependency_incomplete"
                 continue
@@ -531,18 +570,19 @@ class E3ProductionExecutor:
                 # A node without deterministic verification cases can never be
                 # proven complete. Refuse to spend a provider call on it rather
                 # than dispatch and then fail it.
-                self.store.set_node_state(
-                    node_id, plan_id, "BLOCKED",
+                self._transition(
+                    dag, node_id, plan_id, "BLOCKED",
                     "no_deterministic_verification_configured")
                 result.state = "BLOCKED"
                 result.blocking_reason = "no_deterministic_verification_configured"
                 continue
 
-            self.store.set_node_state(node_id, plan_id, "READY", "dependencies_satisfied")
+            self._transition(dag, node_id, plan_id, "READY",
+                             "dependencies_satisfied")
             self._execute_node(plan_id, node, worker_id, role, result,
                                node_test_cases,
                                max_repair_attempts, dispatch_timeout,
-                               fingerprint)
+                               fingerprint, dag)
 
         complete = all(r.complete for r in results) and bool(results)
         outcome = "EXECUTION_COMPLETE" if complete else "EXECUTION_INCOMPLETE"
@@ -564,7 +604,7 @@ class E3ProductionExecutor:
                       role: str, result: NodeExecutionResult,
                       test_cases: Optional[List[Dict[str, Any]]],
                       max_repair_attempts: int, dispatch_timeout: int,
-                      fingerprint: Any) -> None:
+                      fingerprint: Any, dag: Any = None) -> None:
         node_id = node["node_id"]
         objective = node.get("objective", "")
         attempts = 0
@@ -576,9 +616,9 @@ class E3ProductionExecutor:
         while True:
             attempts += 1
             result.state = "RUNNING"
-            self.store.set_node_state(node_id, plan_id, "RUNNING",
-                                      f"dispatch_attempt_{attempts}",
-                                      attempts=attempts)
+            self._transition(dag, node_id, plan_id, "RUNNING",
+                             f"dispatch_attempt_{attempts}",
+                             attempts=attempts)
 
             if attempts == 1:
                 dispatch_objective = objective
@@ -590,8 +630,8 @@ class E3ProductionExecutor:
                 dispatch_result = self._dispatch(node, worker_id, dispatch_objective,
                                                  dispatch_timeout)
             except WorkerNotRoutable as exc:
-                self.store.set_node_state(node_id, plan_id, "BLOCKED",
-                                          f"dispatch_refused:{exc}")
+                self._transition(dag, node_id, plan_id, "BLOCKED",
+                                 f"dispatch_refused:{exc}")
                 result.state = "BLOCKED"
                 result.blocking_reason = str(exc)
                 return
@@ -630,10 +670,10 @@ class E3ProductionExecutor:
                 "prompt_feedback": output.get("prompt_feedback"),
             })
 
-            self.store.set_node_state(node_id, plan_id, "VERIFYING",
-                                      f"verify_attempt_{attempts}",
-                                      dispatch_reference=dispatch_result.get("dispatch_id"),
-                                      attempts=attempts)
+            self._transition(dag, node_id, plan_id, "VERIFYING",
+                             f"verify_attempt_{attempts}",
+                             dispatch_reference=dispatch_result.get("dispatch_id"),
+                             attempts=attempts)
 
             verification = self._verify(node, output, test_cases)
             verification_outcome = verification.outcome.value
@@ -650,8 +690,8 @@ class E3ProductionExecutor:
                 first_pass_success = verification.passed
 
             if verification.passed:
-                self.store.set_node_state(
-                    node_id, plan_id, "COMPLETE",
+                self._transition(
+                    dag, node_id, plan_id, "COMPLETE",
                     f"verified_pass_attempt_{attempts}",
                     verification_reference=f"verify-{node_id}-{attempts}",
                     attempts=attempts)
@@ -667,8 +707,8 @@ class E3ProductionExecutor:
             })
 
             if len(result.repairs) >= max_repair_attempts:
-                self.store.set_node_state(
-                    node_id, plan_id, "FAILED",
+                self._transition(
+                    dag, node_id, plan_id, "FAILED",
                     f"verification_failed_no_repair_budget_attempt_{attempts}",
                     verification_reference=f"verify-{node_id}-{attempts}",
                     attempts=attempts)
@@ -678,10 +718,10 @@ class E3ProductionExecutor:
 
             corrections += 1
             result.repairs.append({"attempt": attempts, "issues": list(verification.issues)})
-            self.store.set_node_state(node_id, plan_id, "REWORK",
-                                      f"targeted_repair_after_attempt_{attempts}",
-                                      verification_reference=f"verify-{node_id}-{attempts}",
-                                      attempts=attempts)
+            self._transition(dag, node_id, plan_id, "REWORK",
+                             f"targeted_repair_after_attempt_{attempts}",
+                             verification_reference=f"verify-{node_id}-{attempts}",
+                             attempts=attempts)
 
         if not final_success and result.state not in ("FAILED", "BLOCKED"):
             result.state = "FAILED"

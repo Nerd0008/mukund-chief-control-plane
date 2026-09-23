@@ -170,11 +170,25 @@ class E3Planner:
             dag.add_node(node)
             node_id_map[i] = node.node_id
 
-        # Second pass: wire up dependencies
+        # Second pass: wire up dependencies.
+        # Plans declare dependencies as *node ids*. Resolve the declared ids
+        # directly; a legacy positional entry (int index) is still accepted.
+        # An unresolvable dependency is left out of the DAG rather than pointed
+        # at an arbitrary node: inventing an edge would silently let a node run
+        # before its real dependency.
         for i, node_spec in enumerate(plan["nodes"]):
             node = dag.get_node(node_id_map[i])
-            for dep_index in range(len(node_spec.get("dependencies", []))):
-                if dep_index < i:
-                    node.dependencies.append(node_id_map[dep_index])
+            if node is None:
+                continue
+            for dep in node_spec.get("dependencies", []) or []:
+                resolved: Optional[str] = None
+                if isinstance(dep, str) and dep in dag.nodes:
+                    resolved = dep
+                elif isinstance(dep, int) and 0 <= dep < len(node_id_map):
+                    resolved = node_id_map[dep]
+                if resolved is None or resolved == node.node_id:
+                    continue
+                if resolved not in node.dependencies:
+                    node.dependencies.append(resolved)
 
         return dag
