@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -181,6 +182,94 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: int = 3600) -> Dict[str
 
     prompt = _task_prompt(task)
 
+    # On Mukund's Windows workstation, remote agent tasks are intentionally
+    # visible in their own console. The helper streams Hermes output when
+    # available and prints a heartbeat during quiet periods. Set
+    # HERMES_REMOTE_VISIBLE=0 to fall back to background capture.
+    visible = os.name == "nt" and os.environ.get("HERMES_REMOTE_VISIBLE", "1") != "0"
+
+    if visible:
+        helper = REPO_ROOT / "remote_queue" / "visible_worker.py"
+        task_id = str(task.get("task_id", "agent-task"))
+
+        try:
+            with tempfile.TemporaryDirectory(prefix="hermes-remote-") as temp_dir:
+                temp = Path(temp_dir)
+                prompt_file = temp / "prompt.txt"
+                output_file = temp / "output.txt"
+                exit_file = temp / "exit.txt"
+                prompt_file.write_text(prompt, encoding="utf-8")
+
+                flags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
+                proc = subprocess.Popen(
+                    [
+                        sys.executable,
+                        str(helper),
+                        "--hermes", hermes,
+                        "--prompt-file", str(prompt_file),
+                        "--output-file", str(output_file),
+                        "--exit-file", str(exit_file),
+                        "--task-id", task_id,
+                        "--cwd", str(REPO_ROOT),
+                    ],
+                    cwd=str(REPO_ROOT),
+                    creationflags=flags,
+                    env=os.environ.copy(),
+                )
+
+                try:
+                    proc.wait(timeout=timeout_seconds)
+                except subprocess.TimeoutExpired:
+                    # Terminate the helper and its Hermes child as a process tree.
+                    subprocess.run(
+                        ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                    )
+                    return {
+                        "status": "blocked",
+                        "summary": f"Hermes dispatch exceeded {timeout_seconds} seconds.",
+                        "owner_action_required": None,
+                        "blocker_category": "execution_error",
+                        "commits": [],
+                        "tests": [],
+                        "changed_files": [],
+                        "remaining": ["Inspect local Hermes run and retry or decompose the task"],
+                    }
+
+                raw = output_file.read_text(encoding="utf-8", errors="replace") if output_file.exists() else ""
+                try:
+                    hermes_rc = int(exit_file.read_text(encoding="utf-8").strip())
+                except Exception:
+                    hermes_rc = proc.returncode
+
+                if hermes_rc != 0:
+                    return {
+                        "status": "blocked",
+                        "summary": f"Hermes CLI exited with code {hermes_rc} (output_bytes={len(raw.encode('utf-8', errors='replace'))}).",
+                        "owner_action_required": None,
+                        "blocker_category": "execution_error",
+                        "commits": [],
+                        "tests": [],
+                        "changed_files": [],
+                        "remaining": ["Inspect the visible Hermes Remote Worker console and retry"],
+                    }
+
+                return _parse_response(raw)
+
+        except Exception as exc:
+            return {
+                "status": "blocked",
+                "summary": f"Visible Hermes dispatch failed before completion: {type(exc).__name__}.",
+                "owner_action_required": None,
+                "blocker_category": "execution_error",
+                "commits": [],
+                "tests": [],
+                "changed_files": [],
+                "remaining": ["Inspect scheduled-task environment and retry"],
+            }
+
     try:
         proc = subprocess.run(
             [hermes, "-z", prompt],
@@ -214,8 +303,6 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: int = 3600) -> Dict[str
         }
 
     if proc.returncode != 0:
-        # Do not persist stderr/stdout because provider/CLI failures can contain
-        # environment details. Only record return code and lengths.
         return {
             "status": "blocked",
             "summary": f"Hermes CLI exited with code {proc.returncode} (stdout_bytes={len(proc.stdout.encode('utf-8', errors='replace'))}, stderr_bytes={len(proc.stderr.encode('utf-8', errors='replace'))}).",
