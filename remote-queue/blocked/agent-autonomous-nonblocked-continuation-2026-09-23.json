@@ -15,7 +15,7 @@
     "record exact external blockers and continue independent work"
   ],
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "stop_conditions": [
     "explicit E3 Stage 2 production approval required",
     "provider/API credentials, billing, or account access required",
@@ -24,5 +24,11 @@
     "architecture or safety decision not already covered by approved authority",
     "work would require fabricating model identity, usage, qualification evidence, quota, or deployment state"
   ],
-  "notes": "Mukund is away. Do not contact him unless a stop condition is genuinely reached. The current deployment architecture decision (full VPS cutover versus laptop-primary with optional VPS watchdog/failover) is unresolved; do not silently choose one. E4/E5 were just implemented and pushed, so preserve them and build from current main. Stage 2 remains NOT APPROVED."
+  "notes": "Mukund is away. Do not contact him unless a stop condition is genuinely reached. The current deployment architecture decision (full VPS cutover versus laptop-primary with optional VPS watchdog/failover) is unresolved; do not silently choose one. E4/E5 were just implemented and pushed, so preserve them and build from current main. Stage 2 remains NOT APPROVED.",
+  "blocked_at": "2026-09-23T16:38:53.294870Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes returned an unstructured final response (sha256=098beb963e9368ed37f0bba8ac6304476605b5fa1eb0df70148d9d37bfc212e5, bytes=2796). Inspect locally; raw response was not committed.",
+    "continue_without": "Independent safe work may continue"
+  }
 }
