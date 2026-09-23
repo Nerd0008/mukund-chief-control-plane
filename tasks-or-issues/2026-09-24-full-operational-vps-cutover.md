@@ -69,7 +69,7 @@ Codex usage-limit reset is an external blocker if still active; keep testing for
 - no raw chain-of-thought or secrets in rationale/performance logs
 - E1/E2 integration only through public interfaces
 - production rehearsal passes
-- owner explicitly approves Stage 2 before production enablement
+- owner approval for Stage 2 production enablement: STANDING CONDITIONAL APPROVAL granted 2026-09-23 for local enablement once objective local readiness gates pass; no additional approval prompt is required while owner is asleep or at work
 
 ### E4
 Implement the approved resource-continuity scope:
@@ -196,7 +196,7 @@ Deadline pressure does NOT permit:
 - raw chain-of-thought logging
 - silent quality-floor degradation
 - infinite repair/retry loops
-- enabling E3 production before explicit owner approval
+- enabling E3 production before the standing conditional owner approval criteria are satisfied
 - VPS cutover without backup/restore and acceptance verification
 
 ## Final evidence package
@@ -215,3 +215,18 @@ Before declaring completion, produce:
 - commit SHA(s)
 
 Do not declare success from implementation alone. Success requires verified VPS operation.
+
+
+## Owner directive update — 2026-09-23
+
+Mukund explicitly authorized local Stage 2 enablement without waiting for another synchronous approval if the system passes objective readiness evidence. This authorization applies while he is asleep or at work.
+
+Before local Stage 2 enablement:
+- E1/E2/E3/E4/E5 relevant regressions must pass
+- production rehearsal must pass
+- no unresolved critical integrity/privacy/safety defect may remain
+- worker routing/qualification state must remain evidence-driven
+- rollback/recovery must be available
+- state/evidence must be updated truthfully
+
+Deployment architecture is intentionally deferred until local operation is proven. Current owner preference is laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, but this is not yet a final architecture decision or authorization for VPS cutover.
