@@ -108,3 +108,6 @@ error: pathspec ':
 [2026-09-23T15:49:01.603270Z] Poller starting
 [2026-09-23T15:49:03.565264Z] git pull: success (with stash/restore)
 [2026-09-23T15:49:34.994116Z] git pull: success (with stash/restore)
+[2026-09-23T15:49:37.273444Z] Claimed task: hardened-final-e2e
+[2026-09-23T15:49:37.274445Z] Handling task: hardened-final-e2e
+[2026-09-23T15:49:37.274445Z] Task hardened-final-e2e failed: No handler for task: hardened-final-e2e
