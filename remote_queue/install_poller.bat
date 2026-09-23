@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 set "REPO_ROOT=%~dp0.."
-set "PYTHON=%REPO_ROOT%\..\..\..\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe"
+set "PYTHON=%LOCALAPPDATA%\hermes\hermes-agent\venv\Scripts\python.exe"
 set "POLLER=%REPO_ROOT%\remote_queue\poller.py"
 set "TASK_NAME=HermesRemoteQueuePoller"
 
