@@ -1,0 +1,27 @@
+{
+  "task_id": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
+  "created_at": "2026-09-23T21:31:00Z",
+  "objective": "Finish the overnight engineering for E4/E5 despite Stage 2 being owner-deferred: build and validate real-path drill harnesses for checkpoint/failover, provider outage, malformed output, convergence, safe/degraded mode, recovery and owner escalation using isolated/staged execution where production enablement is not required.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Latest E3 execution interfaces must be stable enough to exercise without enabling local Stage 2."
+  ],
+  "allowed_scope": [
+    "Inspect existing E4/E5 implementations/tests before changing anything.",
+    "Create reproducible drill harnesses that exercise the real execution abstractions with fake/stubbed provider failures where necessary; use real providers only when already authorized and bounded.",
+    "Evidence checkpoint creation, state handover, equivalent-worker failover, no-equivalent escalation, provider outage, malformed output, repeated-failure convergence cap, safe-mode entry, owner override audit, and safe-mode recovery.",
+    "Do not silently lower quality floors or mark simulated provider failure as real external evidence.",
+    "Run E1-E5 + queue regressions after changes and record exact counts/exits.",
+    "Update state/tracker and leave any owner-only/live-production verification step as an exact afternoon checklist item."
+  ],
+  "stop_conditions": [
+    "Do not enable Stage 2.",
+    "Do not spend unbounded provider quota.",
+    "Do not fabricate failover success.",
+    "No VPS cutover."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work."
+}
