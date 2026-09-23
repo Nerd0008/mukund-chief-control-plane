@@ -1,0 +1,74 @@
+{
+  "task_id": "agent-visible-worker-console-quickedit-hardening-2026-09-23",
+  "created_at": "2026-09-23T22:49:00Z",
+  "objective": "Harden unattended Hermes worker execution in two ways: (1) prevent Windows QuickEdit/Select mode from pausing a visible worker and its watchdog, while preserving visible streaming; and (2) change recoverable worker-failure handling so the same task is retried automatically up to TWO times before it is finally marked blocked and the queue advances. Add regression/evidence for both behaviors.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "allowed_scope": [
+    "Inspect remote_queue/visible_worker.py, remote_queue/hermes_dispatch.py, remote_queue/poller.py, queue lifecycle helpers, and the Windows console launch path.",
+    "Implement the smallest safe Windows-specific hardening that prevents QuickEdit/Select mode from suspending worker progress while preserving the visible terminal requirement. Prefer disabling ENABLE_QUICK_EDIT_MODE for the worker console process only; do not hide the worker window and do not change the owner's global console preferences.",
+    "Implement bounded automatic retry for recoverable execution failures: initial attempt + at most TWO retries of the same task. Preserve landed commits/evidence between attempts; never redo successful work unnecessarily.",
+    "Do not retry owner-gated states, missing credentials, explicit safety/architecture/irreversible-action blockers, or other deterministic blockers that cannot change without owner/external action. Those should park immediately and allow independent work to continue.",
+    "Track retry count deterministically in queue/task runtime state or equivalent auditable metadata so retries cannot loop forever. After two failed retries, mark the task blocked and move on.",
+    "Keep existing hard task timeout and no-progress watchdog fail-closed behavior; a watchdog/CLI execution error is eligible for bounded retry unless evidence shows it is deterministic/non-recoverable.",
+    "Add isolated tests and record exact verification/evidence.",
+    "Do not mutate any currently running task contract; commit/push recoverably."
+  ],
+  "stop_conditions": [
+    "Do not create infinite retry loops; maximum is two retries after the initial attempt.",
+    "Do not retry missing-key, owner-approval, architecture, safety, irreversible-action, or external-provider blockers unless the relevant state has actually changed.",
+    "Do not kill unrelated processes or modify global console settings destructively.",
+    "Do not expose secrets or weaken watchdog/timeouts.",
+    "If per-process Windows console mode cannot be changed safely, record the exact limitation and leave global settings unchanged."
+  ],
+  "notes": "Triggered by an observed live worker window whose title showed 'Select Administrator: Hermes Remote Worker ...' while output appeared frozen beyond the nominal 300s idle watchdog. In classic Windows console, Select/QuickEdit mode can pause console application progress. The active E3 gate had already landed commit 91a2adc2 while the visible wrapper remained open, consistent with a finalization/console interaction stall. This task should prevent recurrence without sacrificing visible worker output. Owner clarification 2026-09-24: on a recoverable worker failure, retry the SAME task twice before blocking/advancing. This is distinct from the Stage-2 missing-key anti-loop rule: deterministic credential blockers must not be retried while the credential state is unchanged.",
+  "completed_at": "2026-09-23T23:29:45.260074Z",
+  "result": {
+    "status": "completed",
+    "summary": "Both objectives implemented, verified and pushed at 85f604a. (1) QuickEdit/Select hardening: remote_queue/visible_worker.py now clears ENABLE_QUICK_EDIT_MODE for the worker's OWN console before the first progress line (CreateFileW(\"CONIN$\") + SetConsoleMode, ENABLE_EXTENDED_FLAGS ensured, result verified) \u2014 the window stays visible, the CREATE_NEW_CONSOLE launch path and the poller's hidden-launch path are unchanged, no global/registry console preference is read or written, and when the mode cannot be applied the exact limitation is printed and left as-is. Because the live incident also showed the same-thread watchdog could be suspended, console output now goes through a bounded writer thread and the no-progress watchdog runs in its own thread and terminates the Hermes child tree before printing anything; the in-loop watchdog backstop, 300s default, HERMES_REMOTE_IDLE_TIMEOUT, exit 124 and taskid-scoped taskkill semantics are unchanged. Real-console proof: scripts/quickedit_console_probe.py returned applied=true, mode 503 -> 439, quick_edit_before=true, quick_edit_after=false on a live console (0x40 cleared, all other input bits preserved). (2) Bounded recovery: new remote_queue/retry_policy.py encodes the owner directive MAX_RETRIES=2 / MAX_ATTEMPTS=3, retryable category = execution_error only; credentials, owner_approval, architecture, safety, irreversible_action, external_provider park immediately, and an unknown/missing category fails closed. Attempt state (execution_attempts[] + retry_state{attempts_used, retries_used, max_attempts, last_blocker_category, next_action, reason}) is written to remote-queue/running/<task_id>.json before each attempt and published, so a restart resumes the same bounded count; poller._run_task_with_bounded_retry() executes, records, and after the second failed retry blocks the task and advances; it also refuses to re-execute a task whose persisted budget is exhausted, so no input can loop unboundedly. Retries are labelled (console 'Attempt: N', dispatch --attempt) and the generated prompt gains a RETRY CONTEXT block telling the agent to re-inspect state, preserve commits/evidence already landed, resume from the smallest unfinished unit and never redo successful work; the running task contract file is not rewritten. Stage-2 0/7 provider keys is still a deterministic blocker and parks on the first attempt (regression-tested). Full baseline: 14 suites, 400/400 tests passed, 0 failed (evidence_runner label quickedit-and-two-retry-hardening); remote_queue package is 78/78, run three consecutive times with no flakiness in the blocked-console watchdog test. Note: evidence.json records code_sha 2fbe2f4 (HEAD at run time, changes still uncommitted); the change commit is 7439acd and the evidence commit is 85f604a.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "7439acd3910b6d4011d02c0587a6bdd6a0476c23 queue: harden visible worker console against QuickEdit and retry recoverable failures twice",
+      "85f604aaa13eadbf1cc1e0610d8b18e0b1aa03e5 audits: evidence for QuickEdit console hardening and bounded two-retry recovery",
+      "pushed: origin/main 2fbe2f4..85f604a (git ls-remote origin main confirmed 85f604a)"
+    ],
+    "tests": [
+      "py_compile remote_queue/{visible_worker,hermes_dispatch,poller,queue_schema,retry_policy}.py -> COMPILE_OK",
+      "python -m unittest remote_queue.tests.test_console_quickedit -v -> 12/12 passed, exit 0",
+      "python -m unittest remote_queue.tests.test_worker_retry -v -> 24/24 passed, exit 0",
+      "python -m unittest remote_queue.tests.test_bridge_watchdog -v -> 12/12 passed, exit 0 (pre-existing suite unaffected)",
+      "python -m unittest remote_queue.tests.test_queue -v -> 30/30 passed, exit 0",
+      "python -m unittest discover -s remote_queue/tests (x3 consecutive runs) -> 78/78 passed each run, exit 0",
+      "python scripts/evidence_runner.py --label quickedit-and-two-retry-hardening -> 14 suites, 400 collected, 400 passed, 0 failed, exit 0",
+      "python scripts/quickedit_console_probe.py -> applied=true, changed=true, mode 503->439, quick_edit_after=false (real console)",
+      "key regression: with the console sink deliberately blocked, the worker still kills the Hermes child, writes exit 124, writes no fabricated response, returns in <15s",
+      "key regression: recoverable execution_error -> exactly attempts [1,2,3] then blocked with persisted retry_state (retries_used=2, next_action=park); success on attempt 2 completes with no further retries; all 5 non-retryable categories and the Stage-2 credentials gate -> exactly 1 attempt",
+      "key regression: persisted budget of 3 is never re-executed; persisted budget of 1 resumes at attempt 2"
+    ],
+    "changed_files": [
+      "remote_queue/visible_worker.py",
+      "remote_queue/hermes_dispatch.py",
+      "remote_queue/poller.py",
+      "remote_queue/queue_schema.py",
+      "remote_queue/retry_policy.py",
+      "remote_queue/README.md",
+      "remote_queue/tests/test_console_quickedit.py",
+      "remote_queue/tests/test_worker_retry.py",
+      "scripts/evidence_runner.py",
+      "scripts/quickedit_console_probe.py",
+      "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/hardening_report.md",
+      "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/hardening_checks.json",
+      "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/evidence.json",
+      "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/evidence.md"
+    ],
+    "remaining": [
+      "No automated test drives a real console window: the suites inject a fake console API / blocked sink, and the real-console proof is the single probe run recorded above (documented limitation in hardening_checks.json).",
+      "Independent review of the two new suites and the retry bound before VPS cutover.",
+      "state/current_company_state.md and state/full_build_tracker.md carried unrelated uncommitted work from the parent umbrella run and were deliberately not touched; the truthful record of this change lives in the evidence directory, remote_queue/README.md and queue history.",
+      "The umbrella record remote-queue/running/full-operational-build-2026-09-24.json is unchanged by this task and still needs an owner-driven terminal state."
+    ]
+  }
+}
