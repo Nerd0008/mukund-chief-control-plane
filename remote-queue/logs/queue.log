@@ -60,3 +60,13 @@ error: Please commit or stash them.
 [2026-09-23T15:32:18.856326Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
 error: Please commit or stash them.
 
+[2026-09-23T15:33:01.585843Z] Poller starting
+[2026-09-23T15:33:01.641705Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+
+[2026-09-23T15:35:01.702514Z] Another poller running — exiting
+[2026-09-23T15:37:01.519489Z] Poller starting
+[2026-09-23T15:37:01.614318Z] git stash failed: error: pathspec ':(prefix:0).bridge-stash/' did not match any file(s) known to git
+error: pathspec ':(prefix:0)exec-brain/resource_monitor.py' did not match any file(s) known to git
+error: pathspec ':
+[2026-09-23T15:37:01.615317Z] Skipping poll cycle: git pull failed
