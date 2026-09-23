@@ -252,3 +252,5 @@ hint: have locall
 [2026-09-23T22:50:40.820024Z] CRITICAL: push recovery rebase failed: error: cannot pull with rebase: You have unstaged changes.
 error: Please commit or stash them.
 [2026-09-23T22:52:04.337095Z] git pull: success (with stash/restore)
+[2026-09-23T22:52:06.594574Z] Claimed task: agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24
+[2026-09-23T22:52:06.595576Z] Handling task: agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24
