@@ -320,3 +320,18 @@ Priority order for this sprint:
 Do not reduce reasoning depth, skip verification, defer safe work, shorten necessary context, or serialize independent work merely to save tokens. Keep tasks bounded enough to avoid hangs and context failure, but otherwise drive the system at maximum safe throughput until the complete v1 roster is accounted for and deployment readiness is reached.
 
 The owner wants the system finished before he returns from work if physically possible; this is a target, not permission to weaken gates or fabricate completion.
+
+
+## Local UI / browser safety directive — 2026-09-23 late night
+
+An unexpected Microsoft Edge search for `events near me` appeared on the owner's laptop while Hermes was running. No current committed task or repository search justifies that UI action.
+
+Effective immediately:
+- Hermes and all child workers must **not launch or control Microsoft Edge, another interactive browser, Windows Search, Maps, or other visible GUI applications** unless the active immutable task explicitly requires that exact UI action.
+- Prefer CLI/API/HTTP/file-system workflows for research and automation.
+- Do not issue location-derived searches such as `near me` from the owner's machine unless the owner explicitly requested that search.
+- Do not use the owner's browser profile, cookies, signed-in sessions, history, saved credentials, or autofill as an automation surface.
+- If a task genuinely requires browser/UI interaction, stop that sub-step, record the exact need as owner-gated, and continue independent work.
+- Preserve logs/evidence needed to determine whether Hermes or a child process launched the unexpected Edge search. Do not delete browser history, task logs, shell history, or queue evidence during diagnosis.
+
+This directive does not stop non-GUI engineering work and does not authorize destructive forensic actions.
