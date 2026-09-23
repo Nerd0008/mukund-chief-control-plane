@@ -76,7 +76,8 @@ EXECUTION RULES
 - Work only within the allowed scope.
 - Make concrete progress using your normal tools; inspect before modifying.
 - Preserve existing work and avoid destructive/irreversible operations.
-- Do not bypass owner approval gates, including E3 Stage 2 production approval.
+- Respect unresolved owner approval gates. If the authority records a standing conditional approval, apply it only after its recorded objective conditions are verified.
+- Treat your own remote-queue/running/{task.get("task_id", "")}.json as immutable execution input; do not rewrite or reinterpret the running task contract while executing it.
 - Do not invent credentials, provider identities, usage, qualification evidence, or deployment facts.
 - Never expose or commit secrets, credentials, raw chain-of-thought, or private runtime databases.
 - If credentials/account access, explicit owner approval, an irreversible action, or an architecture/safety decision is required, stop that dependency and report it as blocked while preserving completed independent work.
@@ -165,8 +166,11 @@ def _parse_response(raw: str) -> Dict[str, Any]:
     return result
 
 
-def dispatch_task(task: Dict[str, Any], timeout_seconds: int = 3600) -> Dict[str, Any]:
-    """Invoke Hermes in non-interactive final-response-only mode."""
+def dispatch_task(task: Dict[str, Any], timeout_seconds: Optional[int] = None) -> Dict[str, Any]:
+    """Invoke Hermes with bounded hard and no-progress timeouts."""
+    if timeout_seconds is None:
+        timeout_seconds = int(os.environ.get("HERMES_REMOTE_TASK_TIMEOUT", "1200"))
+    idle_timeout_seconds = int(os.environ.get("HERMES_REMOTE_IDLE_TIMEOUT", "300"))
     hermes = _find_hermes_cli()
     if not hermes:
         return {
@@ -211,6 +215,7 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: int = 3600) -> Dict[str
                         "--exit-file", str(exit_file),
                         "--task-id", task_id,
                         "--cwd", str(REPO_ROOT),
+                        "--idle-timeout-seconds", str(idle_timeout_seconds),
                     ],
                     cwd=str(REPO_ROOT),
                     creationflags=flags,
@@ -245,9 +250,14 @@ def dispatch_task(task: Dict[str, Any], timeout_seconds: int = 3600) -> Dict[str
                     hermes_rc = proc.returncode
 
                 if hermes_rc != 0:
+                    timeout_note = (
+                        f"Hermes worker hit the {idle_timeout_seconds}s no-progress watchdog"
+                        if hermes_rc == 124
+                        else f"Hermes CLI exited with code {hermes_rc}"
+                    )
                     return {
                         "status": "blocked",
-                        "summary": f"Hermes CLI exited with code {hermes_rc} (output_bytes={len(raw.encode('utf-8', errors='replace'))}).",
+                        "summary": f"{timeout_note} (output_bytes={len(raw.encode('utf-8', errors='replace'))}).",
                         "owner_action_required": None,
                         "blocker_category": "execution_error",
                         "commits": [],
