@@ -3,6 +3,7 @@ setlocal EnableDelayedExpansion
 set "REPO_ROOT=%~dp0.."
 set "PYTHON=%LOCALAPPDATA%\hermes\hermes-agent\venv\Scripts\python.exe"
 set "POLLER=%REPO_ROOT%\remote_queue\poller.py"
+set "RUNNER=%REPO_ROOT%\remote_queue\run_poller_hidden.vbs"
 set "TASK_NAME=HermesRemoteQueuePoller"
 
 if "%~1"=="" goto :install
@@ -14,8 +15,8 @@ if /i "%~1"=="status" goto :status
 goto :install
 
 :install
-echo Installing %TASK_NAME% as an interactive one-shot task every 2 minutes...
-schtasks /create /tn "%TASK_NAME%" /tr "\"%PYTHON%\" \"%POLLER%\" --once" /sc minute /mo 2 /f /rl highest /it
+echo Installing %TASK_NAME% as a hidden one-shot poller every 2 minutes...
+schtasks /create /tn "%TASK_NAME%" /tr "\"%SystemRoot%\System32\wscript.exe\" //B \"%RUNNER%\"" /sc minute /mo 2 /f /rl highest /it
 if %ERRORLEVEL% neq 0 (
   echo Failed - run this installer from an elevated terminal while logged in.
   exit /b 1
