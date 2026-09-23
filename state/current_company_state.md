@@ -36,6 +36,12 @@ declared import root; counts are per suite and are not extrapolated.
 - Remote queue (isolated suite): 30 collected / 30 passed / exit 0
 - Single-run totals: 323 collected, 323 passed, 0 failed, 0 errors, 0 skipped across 10 suites
 
+**Superseding baseline (2026-09-23T21:18:27Z, `scripts/evidence_runner.py --label
+bridge-watchdog-validation`):** 11 suites, 335 collected / 335 passed / 0 failed / exit 0. The delta
+is exactly the new isolated bridge suite `remote_queue/tests/test_bridge_watchdog.py` (12 collected /
+12 passed / exit 0), added by the bridge-watchdog validation run below. Every other suite count is
+unchanged. Evidence: `audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/`.
+
 Supersedes the 8-suite / 295-test figure at SHA `4ac1a22`. The delta is the two new E3 execution
 suites (18 + 10 = 28) plus nothing else. Two intermediate runs of the same runner were executed
 against uncommitted code while this run's changes were still being edited; they are preserved but
@@ -173,6 +179,17 @@ Smoke readiness is not qualification; qualification is evidence-driven.
 - `full-operational-build-2026-09-24` remains the umbrella record in `running/` (no worker).
 - This run: `agent-e3-production-execution-leg-2026-09-23` claimed and worked; one successor task
   staged in `remote-queue/pending/`.
+- Bridge validation run `agent-bridge-watchdog-validation-2026-09-23` (2026-09-23T21:18Z, base SHA
+  `07dd4a1`) verified the hardened bridge commits `617fd47c` and `b83c9ad` and found **no defect in
+  the validated path**, so no production code was changed: no-stream watchdog (default 300s,
+  `HERMES_REMOTE_IDLE_TIMEOUT`), PID-scoped child-tree termination, dispatch hard bound (default
+  1200s, `HERMES_REMOTE_TASK_TIMEOUT`), watchdog exit code 124 surfaced as `execution_error` and never
+  as completion, and `running/<task_id>.json` frozen as immutable input with standing conditional
+  approvals respected. 12 new isolated bridge tests; 11 suites / 335 passed / exit 0. Evidence:
+  `audits/evidence/2026-09-23T21-18-27Z-bridge-watchdog-validation/`.
+- That run staged exactly one successor: `agent-e3-local-production-rehearsal-retry-2026-09-23`
+  (pending) — the formal production-rehearsal re-run on the now-built execution leg, scoped not to
+  race or duplicate the already-pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`.
 
 ## Stage 2 readiness evaluation (precondition by precondition)
 
