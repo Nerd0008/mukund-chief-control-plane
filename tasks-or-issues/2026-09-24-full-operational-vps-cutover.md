@@ -304,3 +304,19 @@ Mukund's current delivery sequence is authoritative:
 Engineering must not stop merely because E1-E5 are complete or because a clock target was reached. It must finish the v1 company workflows: Career Ops, regional job-search automation, Company Watch, application-state/tracker automation, CV/cover-letter workflow, LinkedIn draft/read-only workflow, company/role research and application-pack support, career briefing/prioritization, operational daily brief/health services, deployment preparation, and whole-company local acceptance.
 
 Owner-only dependencies should be minimized. The expected owner action is provider-key configuration. If an unforeseen external service absolutely requires owner interaction that cannot be engineered around safely, record it explicitly and continue every independent lane; do not turn ordinary setup or engineering work into owner work.
+
+
+## Owner throughput directive — 2026-09-23
+
+For the current completion sprint, **do not optimize engineering for token conservation or provider cost**. DeepSeek is the high-volume workhorse and may be used aggressively where it is the appropriate worker.
+
+Priority order for this sprint:
+1. correctness and truthfulness,
+2. completion / deployment readiness,
+3. execution speed and unattended continuity,
+4. reliability / recoverability,
+5. token efficiency only when it improves speed or reliability.
+
+Do not reduce reasoning depth, skip verification, defer safe work, shorten necessary context, or serialize independent work merely to save tokens. Keep tasks bounded enough to avoid hangs and context failure, but otherwise drive the system at maximum safe throughput until the complete v1 roster is accounted for and deployment readiness is reached.
+
+The owner wants the system finished before he returns from work if physically possible; this is a target, not permission to weaken gates or fabricate completion.
