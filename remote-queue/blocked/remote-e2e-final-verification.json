@@ -4,7 +4,15 @@
   "objective": "Final clean E2E verification: new task created on canonical path, polled, claimed, completed, pushed to GitHub",
   "authority": "tasks-or-issues/hermes-github-remote-queue.md",
   "priority": "high",
-  "allowed_scope": ["final verification"],
+  "allowed_scope": [
+    "final verification"
+  ],
   "requires_owner_approval": false,
-  "status": "pending"
+  "status": "blocked",
+  "blocked_at": "2026-09-23T15:29:02.030432Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "No handler for task: remote-e2e-final-verification",
+    "continue_without": "Other tasks continue"
+  }
 }
