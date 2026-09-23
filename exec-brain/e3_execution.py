@@ -162,7 +162,12 @@ class OrchestrationStore:
     def connect(self) -> sqlite3.Connection:
         if self.con is None:
             from orchestration_db import init_db
-            init_db(self.db_path)
+            # ``init_db`` returns the connection it opened to apply the schema;
+            # close it here rather than discarding it, otherwise every store
+            # connect leaks a file handle (and on Windows keeps the store DB
+            # locked after the store is closed).
+            init_con = init_db(self.db_path)
+            init_con.close()
             self.con = sqlite3.connect(str(self.db_path))
             self.con.row_factory = sqlite3.Row
         return self.con

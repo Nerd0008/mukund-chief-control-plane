@@ -100,6 +100,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E4/E5 real-path drill harness (stubbed providers, isolated db, owner override + recovery)",
+        "script": "exec-brain/tests/test_e4e5_drills.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "Remote queue (isolated: disposable roots, mocked/live-free boundaries)",
         "script": "remote_queue/tests/test_queue.py",
         "pythonpath": [],

@@ -301,6 +301,154 @@ class ConvergenceEnforcer:
         ]
 
 
+# ─── Owner override + recovery path (E5) ────────────────────────────
+#
+# Triggers that may never be resolved automatically: an owner decision, a
+# missing equivalent worker, or an integrity/security defect needs the owner.
+OWNER_ONLY_TRIGGERS = (
+    "no_equivalent_worker",
+    "requires_owner_decision",
+    "integrity_defect",
+    "security_defect",
+)
+
+OWNER_OVERRIDE_TRIGGER = "owner_override"
+
+
+def record_owner_override(con, owner: str, reason: str, scope: str,
+                          subject_task_id: str = "safe-mode-recovery",
+                          evidence_references: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Append an auditable owner-override record.
+
+    Writes two rows so an override is visible both in the safe-mode event stream
+    and in the decision-rationale audit trail:
+
+    * ``safe_mode_event`` (``trigger_type='owner_override'``), and
+    * ``decision_rationale_event`` with ``decision_actor='owner'``.
+
+    The record stores who authorised it, what was authorised, why, and the exact
+    scope. Nothing is inferred: an override is never created by the system for
+    itself.
+    """
+    ts = datetime.utcnow().isoformat()
+    payload = {
+        "owner": owner,
+        "reason": reason,
+        "scope": scope,
+        "evidence_references": list(evidence_references or []),
+    }
+    cur = con.execute(
+        """INSERT INTO safe_mode_event
+           (trigger_type, severity, description, affected_workers, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (OWNER_OVERRIDE_TRIGGER, "info", json.dumps(payload), json.dumps([]), ts),
+    )
+    event_id = cur.lastrowid
+
+    rationale_id = f"rationale-{__import__('uuid').uuid4().hex[:12]}"
+    con.execute(
+        """INSERT INTO decision_rationale_event
+           (rationale_id, task_id, plan_id, node_id, decision_type, decision_actor,
+            provider, model, model_identity, timestamp, objective, chosen_action,
+            alternatives_considered, alternative_rejections, decisive_factors,
+            evidence_references, assumptions, uncertainties, confidence,
+            confidence_justification, expected_tradeoffs, gate_result,
+            next_verification, rationale_codes, concise_rationale)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (rationale_id, subject_task_id, None, None, "escalation", "owner",
+         "owner", "human", owner, ts, f"Owner override for scope {scope}",
+         f"Authorise {scope} under owner override",
+         json.dumps(["wait for automated recovery", "keep safe mode"]),
+         json.dumps({"wait for automated recovery":
+                     "the blocking trigger is owner-only and cannot self-resolve"}),
+         json.dumps({"owner_authority": owner, "reason": reason}),
+         json.dumps(list(evidence_references or [])),
+         json.dumps([]), json.dumps([]), "HIGH",
+         "explicit owner decision supplied with a stated reason and scope",
+         json.dumps({}), "OWNER_APPROVAL_REQUIRED",
+         "re-verify provider/local health then resume normal mode",
+         json.dumps(["owner_override", "safe_mode_recovery"]),
+         f"Owner {owner} authorised {scope}: {reason}"),
+    )
+    con.commit()
+    return {"event_id": event_id, "rationale_id": rationale_id,
+            "owner": owner, "scope": scope, "reason": reason,
+            "recorded_at": ts, "trigger_type": OWNER_OVERRIDE_TRIGGER}
+
+
+class SafeModeRecovery:
+    """Deterministic gate and procedure for leaving DEGRADED / SAFE_MODE.
+
+    Recovery is refused unless BOTH objective conditions hold:
+
+    1. the supplied health check reports healthy (the caller supplies the probe;
+       this class never invents a health signal), and
+    2. every active safe-mode event is auto-resolvable — an active owner-only
+       trigger requires a recorded owner override first.
+
+    On a successful recovery every active event is resolved (owner-only triggers
+    are marked ``auto_resolved=0`` so the audit shows an owner authorisation, not
+    an automatic one) and the manager returns to NORMAL.
+    """
+
+    def __init__(self, manager: SafeModeManager, con):
+        self.manager = manager
+        self.con = con
+
+    def owner_override_events(self) -> List[Dict[str, Any]]:
+        rows = self.con.execute(
+            """SELECT event_id, description, created_at FROM safe_mode_event
+               WHERE trigger_type = ? ORDER BY event_id""",
+            (OWNER_OVERRIDE_TRIGGER,),
+        ).fetchall()
+        return [{"event_id": r[0], "description": r[1], "created_at": r[2]}
+                for r in rows]
+
+    def owner_override_present(self) -> bool:
+        return bool(self.owner_override_events())
+
+    def gate(self, health_check) -> Dict[str, Any]:
+        active = self.manager.get_active_events()
+        owner_only = [e for e in active if e["trigger_type"] in OWNER_ONLY_TRIGGERS]
+        health = health_check()
+        override = self.owner_override_present()
+
+        reasons: List[str] = []
+        if not health.get("healthy"):
+            reasons.append(
+                f"health check not healthy: {health.get('source')} "
+                f"({health.get('detail') or 'no detail'})")
+        if owner_only and not override:
+            reasons.append(
+                "active owner-only safe-mode trigger(s) without a recorded owner "
+                "override: " + ", ".join(e["trigger_type"] for e in owner_only))
+
+        return {
+            "can_recover": not reasons,
+            "refusal_reasons": reasons,
+            "active_event_ids": [e["event_id"] for e in active],
+            "owner_only_event_ids": [e["event_id"] for e in owner_only],
+            "owner_override_present": override,
+            "health": health,
+        }
+
+    def attempt_recovery(self, health_check) -> Dict[str, Any]:
+        gate = self.gate(health_check)
+        if not gate["can_recover"]:
+            return {"recovered": False, "gate": gate, "mode": self.manager.mode.value}
+
+        resolved: List[Dict[str, Any]] = []
+        for event in self.manager.get_active_events():
+            is_owner_only = event["trigger_type"] in OWNER_ONLY_TRIGGERS
+            self.manager.resolve_event(event["event_id"], auto=not is_owner_only)
+            resolved.append({"event_id": event["event_id"],
+                             "trigger_type": event["trigger_type"],
+                             "auto_resolved": not is_owner_only})
+        resumed = self.manager.resume_normal()
+        return {"recovered": True, "gate": gate, "mode": resumed["mode"],
+                "resolved_events": resolved}
+
+
 class MalformedOutputHandler:
     """Handle malformed output from workers."""
 
