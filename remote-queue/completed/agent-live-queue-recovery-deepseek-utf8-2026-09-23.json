@@ -1,0 +1,83 @@
+{
+  "task_id": "agent-live-queue-recovery-deepseek-utf8-2026-09-23",
+  "created_at": "2026-09-23T20:13:00Z",
+  "objective": "Resume the bounded queue/test-isolation and evidence-recovery task after an observed Windows UnicodeDecodeError in the visible worker stream reader. The bridge has been patched in commit e643fd162cf2b627d734b5735e205de3d00387a4 to force UTF-8 with replacement fallback and fail closed on future reader errors. First inspect current worktree and preserve/reconcile any partial changes left by the interrupted predecessor before editing. Then finish queue-test isolation, lifecycle truth reconciliation, reproducible evidence, and state updates. Return strict terminal JSON.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "Inspect latest main, current worktree, running/blocked queue records, scheduler/worker state and any partial predecessor edits before changing files.",
+    "Treat the predecessor agent-live-queue-recovery-deepseek-2026-09-23 as interrupted by bridge stream decoding failure if its terminal queue record confirms that outcome; do not discard useful partial work.",
+    "Confirm Hermes remains on deepseek-flash without exposing secrets.",
+    "Isolate remote_queue/tests/test_queue.py from live repository, queue, scheduler, mutex, kill switch, Git pushes and real dispatch using disposable roots/mocks.",
+    "Do not run the old unsafe queue tests against the live checkout before isolation exists.",
+    "Reproduce and minimally fix any remaining queue lifecycle or dispatch defects only under isolated tests.",
+    "Reconcile stale/orphaned running records truthfully from evidence, preserving valid E3 implementation commits.",
+    "Produce reproducible per-suite evidence with UTC time, code SHA, command, runtime/import root, collected/passed/failed/error/skipped counts and exit code. Keep historical evidence separate when not rerun.",
+    "Update current state and full-build tracker only with verified facts; do not claim unsupported aggregate totals.",
+    "Record Codex CLI re-validation as the next bounded task after this recovery because Mukund reports Codex allowance reset.",
+    "Make small recoverable commits and push origin/main. Return ONLY the bridge's structured terminal JSON."
+  ],
+  "requires_owner_approval": false,
+  "status": "completed",
+  "stop_conditions": [
+    "E3 Stage 2 remains NOT APPROVED.",
+    "Do not choose deployment architecture or perform deployment/cutover/reboot/firewall/service changes.",
+    "No secrets, private runtime DBs, raw model output or chain-of-thought in GitHub.",
+    "No destructive reset/clean/force push or broad process termination.",
+    "If an actual conflicting worker is still active, stop conflicting edits and report dependency.",
+    "If DeepSeek provider/auth fails, report exact observed failure and preserve completed work."
+  ],
+  "notes": "Visible worker UTF-8 hardening commit: e643fd162cf2b627d734b5735e205de3d00387a4. The predecessor's console showed UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d, followed by heartbeats with no events. This successor must preserve partial work and continue after the predecessor is terminated/terminally reconciled.",
+  "completed_at": "2026-09-23T20:31:09.427252Z",
+  "result": {
+    "status": "completed",
+    "summary": "Recovery completed after the predecessor's bridge stream-decoding interruption. Inspected first: latest main (40f8f68), worktree (only remote-queue/logs/queue.log dirty; no partial predecessor source edits), all four queue states, and the HermesRemoteQueuePoller scheduled task (Ready, 2-minute cadence). Predecessor agent-live-queue-recovery-deepseek-2026-09-23 confirmed terminally blocked (exit 3221225786 / 0xC000013A, output_bytes=0) and annotated with the stream-decode verdict plus successor linkage. Hermes confirmed on provider deepseek / model deepseek-flash (config.yaml:3-6); no secret values read or exposed. remote_queue/tests/test_queue.py rewritten to be fully isolated: HERMES_REPO_ROOT / HERMES_QUEUE_ROOT redirect every queue and git path (defaults unchanged), HERMES_POLLER_MUTEX gives an isolated poller its own mutex, publication is mocked or aimed at a throwaway bare origin, and guard tests assert isolation including a whole-suite live-queue live-state check. Four real lifecycle/dispatch defects were reproduced and minimally fixed under isolated tests only: (1) claim_task destroyed a task when publication raised (pending unlinked first, then the running copy deleted); (2) find_pending_tasks/get_running_tasks used the platform default codec so non-ASCII task JSON raised UnicodeDecodeError on Windows; (3) a push rejected because origin advanced (observed live 20:13:59Z) was never retried and left state unpublished; (4) an invalid pending task could never reach a terminal state because block_task raised and skipped the blocked/ copy. A diverged duplicate _git_commit_and_push in poller.py was removed in favour of one implementation. Stale running records reconciled from evidence: the orphaned agent-e3-integration-and-truth-reconciliation-2026-09-23 moved to blocked/ with commits 617e69cb and aae7d036 preserved and completion deliberately not inferred from code existing; the full-operational-build-2026-09-24 umbrella stays running and is annotated with the finding that its poller handler returns a hardcoded status, so it is not evidence of executed work. A reproducible evidence runner was added and run twice (identical results), and the unreproducible 207 aggregate was replaced with per-suite measurements. While this ran, the owner amended the authority (3838c61, baf73d8); state/tracker were corrected to record the standing CONDITIONAL local-only Stage 2 approval and the deferred architecture decision (laptop-primary recorded as a preference, not a decision). Stage 2 was NOT enabled, no deployment/cutover action was taken, and the repo tree is clean and synced with origin/main.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "838f3ec queue: isolate remote-queue tests and fix queue lifecycle defects",
+      "315e647 evidence: reproducible per-suite evidence runner + first isolated run",
+      "29cbcc4 queue/state: reconcile records truthfully and replace unverifiable totals",
+      "44ca97e evidence/state: verify at rebased SHA and record the staged Codex task",
+      "aabe625 state: record observed Codex CLI resolver failure as re-validation evidence",
+      "d110009 state: correct the Stage 2 and architecture claims after the authority update"
+    ],
+    "tests": [
+      "remote_queue/tests/test_queue.py (isolated): 30 collected / 30 passed / exit 0",
+      "E1 exec-brain/tests/test_eb.py: 32/32 passed, exit 0",
+      "E2 exec-brain/tests/test_governor.py (import root LOCALAPPDATA/hermes/exec-brain): 45/45 passed, exit 0",
+      "E3 baseline exec-brain/tests/test_e3.py: 50 collected / 48 passed / 2 errors, exit 1 \u2014 errors are TestCodexAdapter.test_codex_cli_version and test_codex_smoke_blocked, RuntimeError: Codex CLI not found (environmental)",
+      "E3 extended: 60/60 passed, exit 0",
+      "E3 shadow orchestrator: 13/13 passed, exit 0",
+      "E4 resource continuity + E5 safe mode (combined): 37/37 passed, exit 0",
+      "Single isolated run 2026-09-23T20:21:03Z at 40f8f683 and rerun 2026-09-23T20:23:12Z at 29cbcc4: 7 suites, 267 collected, 265 passed, 2 errors, 0 skipped (per-suite only; no cross-suite aggregate claimed beyond this single verified run)"
+    ],
+    "changed_files": [
+      "remote_queue/queue_schema.py",
+      "remote_queue/poller.py",
+      "remote_queue/tests/test_queue.py",
+      "scripts/evidence_runner.py",
+      "audits/evidence/2026-09-23T20-21-03Z-isolated-queue-recovery/evidence.json",
+      "audits/evidence/2026-09-23T20-21-03Z-isolated-queue-recovery/evidence.md",
+      "audits/evidence/2026-09-23T20-23-12Z-post-rebase-verification/evidence.json",
+      "audits/evidence/2026-09-23T20-23-12Z-post-rebase-verification/evidence.md",
+      "remote-queue/blocked/agent-e3-integration-and-truth-reconciliation-2026-09-23.json",
+      "remote-queue/running/agent-e3-integration-and-truth-reconciliation-2026-09-23.json (removed; moved to blocked/)",
+      "remote-queue/blocked/agent-live-queue-recovery-deepseek-2026-09-23.json",
+      "remote-queue/running/full-operational-build-2026-09-24.json",
+      "remote-queue/logs/queue.log",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md"
+    ],
+    "remaining": [
+      "This task's own running record is still in remote-queue/running/; the singleton poller moves it to a terminal state after this process exits.",
+      "agent-codex-reset-revalidation-2026-09-23 is already staged in remote-queue/pending/ by commit f80eefc8 and is the next bounded task; discovery of the real Codex CLI path is required first because codex_adapter.py:28 currently reports 'Codex CLI not found: checked configured path and PATH'.",
+      "E3 production rehearsal with executable rejection/repair evidence is the unmet precondition for the standing conditional Stage 2 approval; composition tests are not rehearsal.",
+      "E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths is not evidenced.",
+      "Seven provider workers (Mistral, GLM, Qwen, LongCat, MiniMax, Step, Tencent Hunyuan) remain blocked on owner-local credentials; none was marked routable.",
+      "poller.handle_task still routes any id containing 'operational' to a hardcoded handler; recorded as a truth defect and deliberately left unchanged to avoid immediately blocking the umbrella.",
+      "Deployment architecture and VPS access remain deferred by owner direction (local-first); no deployment, cutover, reboot, firewall or service change was performed.",
+      "Two poller autostash entries and a tracked .bridge-stash/ directory remain in the local git state; flagged for coordinator/owner decision, not modified."
+    ]
+  }
+}
