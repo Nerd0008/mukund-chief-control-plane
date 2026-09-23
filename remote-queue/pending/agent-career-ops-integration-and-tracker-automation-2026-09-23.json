@@ -1,0 +1,30 @@
+{
+  "task_id": "agent-career-ops-integration-and-tracker-automation-2026-09-23",
+  "created_at": "2026-09-23T21:24:00Z",
+  "objective": "Restore the non-E3 half of the Chief OS v1 by integrating the existing Career Ops/job-search system with Chief and making tracker writes deterministic and automation-ready. Reuse the existing Career Ops installation and canonical regional Excel trackers; do not rebuild or restructure the Career Ops repository unnecessarily. Produce executable evidence and hand off to Company Watch.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "allowed_scope": [
+    "Inspect the existing Career Ops installation at C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0 and the canonical regional trackers under C:\\Users\\mukun\\Downloads\\codex. Do not initialize, reinitialize, or restructure its git repository.",
+    "Inventory the existing scanner, filters, dedupe, pipeline.md output, tracker-writing path, schedules and failure points before modifying anything.",
+    "Preserve the known verified scan capability (~2,861 jobs processed in ~88s, zero failures/cost in the earlier dry run) as historical context only; run fresh bounded evidence before making current claims.",
+    "Replace the save-main-tracker.mjs dependency on @oai/artifact-tool with a deterministic supported workbook writer, preferably Python/openpyxl, preserving workbook structure, formulas, validations, status metadata and cross-month dedupe. Back up workbooks before test writes.",
+    "Wire Career Ops into Chief as an existing employee/workflow with a documented deterministic interface for scan, filter, dedupe, tracker-write and summary. Chief orchestration must not replace the Excel source of truth.",
+    "Restore or define regional automated schedules for the UK and existing Dubai/Japan/Singapore workflows without duplicating applications or writing conflicting state.",
+    "Run a bounded dry-run and then a reversible tracker-write acceptance test against a safe copy or test workbook; prove scan -> eligible jobs -> dedupe -> workbook write -> Chief-readable summary.",
+    "Do not submit applications, send emails/messages, or take irreversible external actions.",
+    "Record exact tests/evidence, update state/current_company_state.md and state/full_build_tracker.md truthfully, commit/push small recoverable changes.",
+    "Before terminal result, create exactly one successor agent-* task for Company Watch + job-search agent integration unless an equivalent pending/running task already exists."
+  ],
+  "stop_conditions": [
+    "No fabricated applications, employers, job availability or eligibility claims.",
+    "Do not alter or destroy the canonical trackers without backup and verification.",
+    "Do not initialize/restructure the Career Ops git repository without owner approval.",
+    "No external application submission or recruiter outreach.",
+    "No secrets in GitHub/chat/logs.",
+    "If a task requires owner login/account action, record the dependency and continue independent work."
+  ],
+  "notes": "This is restored original v1 scope from handovers/2026-09-21-chief-os-sprint-handover.md. It must coexist with the E3 key/Stage2 deferral: continue independent career-system work overnight. Prefer deterministic Python/openpyxl for workbook mutation."
+}
