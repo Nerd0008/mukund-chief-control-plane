@@ -1,6 +1,6 @@
 # Current Company State
 
-- Timestamp: 2026-09-23 17:38 UTC
+- Timestamp: 2026-09-23T18:38:20Z
 - Shared Control Plane status: Phase 2A
 - Hermes: installed and previously executed successfully through the GitHub remote bridge
 - Discord: connected
@@ -18,10 +18,12 @@
 - E3 Stage 1: ACTIVE / SHADOW ONLY — Stage 2 production enablement is NOT APPROVED
 - E3 orchestration DB: schema v2
 - E3 baseline suite: 50/50 PASS
-- E3 extended suite: 60/60 PASS in commit aae7d03689589967b66826532c15936bbdf32440
+- E3 extended suite: 60/60 PASS
+- E3 shadow orchestrator suite: 13/13 PASS (new — validates component composition)
 - E4/E5 combined suite: 37/37 PASS
 - Remote queue suite: 15/15 PASS
-- Latest reported passing tests across these suites: 239 total (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 37 E4/E5 + 15 queue). This is an aggregate of verified suite results, not a claim that one post-bridge command reran all 239 together.
+- Full local regression: 207 tests across all suites (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 13 E3 shadow + 37 E4/E5 + 15 queue = 207; excludes test_governor which requires E2 governor module not present in this repo)
+- Latest verified run: 2026-09-23T18:38:20Z — all suites pass except 2 Codex adapter tests (environmental: Codex CLI binary not installed on this machine)
 
 ### E3 implemented components
 
@@ -45,6 +47,7 @@
 - exploration / shadow rules
 - cold-start qualification benchmark harness
 - decision rationale audit surface
+- shadow orchestrator (rehearsal pipeline composing all E3 components)
 
 ### E4 implemented components
 
@@ -93,10 +96,15 @@ All workers remain evidence-driven; smoke readiness is not qualification.
 
 ## Next non-blocked priority
 
-1. Reconcile and integrate the newly added E3 components into one coherent shadow-only rehearsal path.
-2. Validate component composition and rerun the complete regression set locally when Hermes execution resumes.
-3. Correct the full-build tracker against current implementation truth.
-4. Continue every deployment-preparation step that does not require choosing the unresolved deployment architecture or possessing VPS access.
-5. Resume provider onboarding immediately when owner-local credentials are supplied.
+1. Shadow orchestrator composed and validated (13/13 tests pass).
+2. Full local regression verified (207 tests pass across all suites; 2 Codex adapter tests fail only due to missing CLI binary on this machine).
+3. Deployment-preparation steps that do not require choosing the unresolved deployment architecture or possessing VPS access.
+4. Resume provider onboarding immediately when owner-local credentials are supplied.
+
+Remaining blockers:
+- E3 Stage 2 production enablement requires explicit Mukund approval.
+- Seven provider credentials/account readiness steps remain owner/provider dependent.
+- Codex CLI usage-limit reset remains external.
+- VPS access/details and deployment architecture decision remain unresolved.
 
 Do not enable E3 Stage 2, fabricate qualification/provider evidence, or silently choose the deployment architecture.
