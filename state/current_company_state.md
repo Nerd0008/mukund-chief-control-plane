@@ -1,8 +1,8 @@
 # Current Company State
 
-- Timestamp: 2026-09-22 14:00 UTC
+- Timestamp: 2026-09-23 16:00 UTC
 - Shared Control Plane status: Phase 2A
-- Hermes: running
+- Hermes: running (v0.21.4, updated 2026-09-23)
 - Discord: connected
 - Company Registry: installed
 - Company audit: completed
@@ -12,37 +12,37 @@
 - GitHub conversation sync: tested — live Chief thread capture verified (inbound + outbound), dedupe verified, credential-like content rejected
 - Chief threads: supported (parent resolved from state.db sessions.origin_json parent_chat_id; channel_directory.json fallback)
 - Capture quality (Phase 2A.1): full content from state.db (no 500-char truncation), wrapper-free outbound replies, clean inbound bodies, message_id populated from platform_message_id
-- >500-char inbound capture: UNVERIFIED — Discord client limits Mukund's input to ~250 chars; outbound >500 verified (1902-char reply archived in full)
-- Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (Windows Task Scheduler, every 30 min, survives logon/reboot), runs scripts/scheduled_sync_chief.py with cross-run lock; sync log C:\\Users\\mukun\\DiscordArchive\\chief\\sync.log; checkpoint advances only after successful push; no commit when nothing changed; last successful sync 2026-09-21 20:17 UTC (live test 924 auto-published)
+- Automatic periodic sync: ACTIVE — scheduled task "ChiefDiscordSync" (every 30 min, survives logon/reboot)
 - Manual fallback: python C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\sync_discord_chief.py
 - Executive Brain: E3 STAGE 1 ACTIVE / SHADOW ONLY (implemented 2026-09-22)
-  - E1: ACTIVE, verified (32/32 tests PASS, audit --verify PASS)
-  - E2: ACTIVE, verified (45/45 tests PASS, gov-verify PASS)
+  - E1: ACTIVE, verified (32/32 tests PASS)
+  - E2: ACTIVE, verified (45/45 tests PASS)
   - E3 Stage 1: SHADOW ONLY — no production dispatch enabled
-  - E3 Implementation: C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\ (orchestration_db.py, capability_registry.py, task_fingerprint.py, decision_rationale.py, execution_dag.py, worker_contract.py, worker_registry.py, qualification_gate.py, e3_commands.py)
-  - E3 Orchestration DB: orchestration.db (schema v1, 11 tables, separate from E1 exec_brain.db and E2 governor.db)
+  - E3 Implementation: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\
+  - E3 Orchestration DB: orchestration.db (schema v1, 11 tables)
   - E3 Test result: 50/50 passed
   - Combined test result: 127/127 passed (E1 32 + E2 45 + E3 50)
   - 10-worker registry loaded from handovers/2026-09-22-e3-model-roster-handover.md
-  - All workers currently UNPROVEN (LOCKED = included in pool, NOT qualified)
-  - Worker pool status:
-    - LOCKED (6): codex-cli, mistral-small-4, google-nano-banana-2, deepseek-v41-flash, glm-53-flash, qwen38-27b
-    - EVALUATE (1): longcat-2.0
-    - BENCHMARK (3): minimax-m3, step-37-flash, tencent-hunyuan-hy3
-  - routable states: codex-cli NOT routable (BLOCKED usage limit); all others routable
-  - Stage 1 capabilities: task fingerprinting, decomposition planning, DAG construction, candidate generation, Qualification Gate validation, decision rationale audit log (A8), e3-rationale / e3-trace / e3-why CLI views
-  - No production worker dispatch enabled
-  - No execution adapters implemented yet
+  - All workers currently UNPROVEN (LOCKED/EVALUATE/BENCHMARK = included, not qualified)
+  - Adapters:
+    - DeepSeek: deepseek_adapter.py (smoke PASS, E2 VERIFIED, routable)
+    - Gemini: gemini_adapter.py (smoke PASS, E2 VERIFIED, routable)
+    - Codex CLI: codex_adapter.py (BLOCKED: usage limit)
+    - Generic OpenAI: generic_openai_adapter.py (7 workers: Mistral/GLM/Qwen/MiniMax/Step/Hunyuan/LongCat — awaiting API keys)
+  - routable states: deepseek-v41-flash ✅, google-nano-banana-2 ✅, All others ❌
+  - Stage 1 capabilities: task fingerprinting, decomposition planning, DAG construction, candidate generation, Qualification Gate validation, decision rationale audit log (A8)
+  - E4: NOT STARTED
+  - E5: NOT STARTED
   - Stage 2 NOT APPROVED
-  - Provider/API/CLI setup still required before Stage 2
   - Architecture: FROZEN per approved amendment (D-AI-1..7, A1..A8)
-  - Decision rationale: append-only audit trail active (decision_rationale_event, decision_outcome_review tables)
-  - Event-sourced governance: worker_capability_event, dag_state_event tables active
-  - E1 schema version: 1 (unchanged)
-  - E2 Schema version: 1 (unchanged)
-  - E3 Schema version: 1 (orchestration.db)
-  - E3 owner decisions: D-AI-1..7 all incorporated
-  - E3 architecture corrections: A1..A8 all incorporated
-- Next phase: E3 Stage 2 (production execution) — NOT STARTED
-  - Requires: provider access, CLI config, execution adapter implementation, smoke tests, cold-start qualification, owner approval
-- Next phase: Phase 2B (other channels) — not started
+  - E1 schema version: 1, E2 schema version: 1, E3 schema version: 1
+- Remote Task Queue:
+  - Status: ACTIVE — poller implemented and tested (2026-09-23)
+  - Location: remote_queue/ (poller.py, queue_schema.py, tests)
+  - Tests: 15/15 passed
+  - Kill switch: .poller.kill (file-based)
+  - Single-instance: named mutex "HermesRemoteQueuePoller"
+  - Tasks: full-operational-build-2026-09-24 in running/
+  - Awaiting Task Scheduler install for persistence
+- Next phase: E4 resource continuity, E5 safe mode (no credentials/approval needed)
+- Blocked: 7 API provider keys (Mistral, GLM, Qwen, MiniMax, Step, Hunyuan, Nous)
