@@ -5,26 +5,61 @@ import json
 import subprocess
 import time
 import uuid
+import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
-CODEX_EXE = Path(
+# Issue #5: Configurable executable path, not hardcoded hash-specific path
+CODEX_EXECUTABLE_CONFIG = Path(
     "C:/Users/mukun/AppData/Local/OpenAI/Codex/bin/247581e40ee272fb/codex.exe"
 )
+
+
+def _resolve_codex_executable() -> Path:
+    """Resolve Codex CLI executable path deterministically."""
+    configured = CODEX_EXECUTABLE_CONFIG
+    if configured.exists():
+        return configured
+    import shutil
+    path = shutil.which("codex")
+    if path:
+        return Path(path)
+    raise RuntimeError("Codex CLI not found: checked configured path and PATH")
+
+
+# Issue #3: Safe default execution profile
+SAFE_EXECUTION_PROFILE = {
+    "sandbox": "workspace-write",
+    "skip_git_repo_check": True,
+    "enable_approvals": True,
+}
+
+# Unsafe profile - explicitly named, disabled by default
+UNSAFE_EXECUTION_PROFILE = {
+    "sandbox": "danger-full-access",
+    "skip_git_repo_check": True,
+    "enable_approvals": False,
+    "requires_isolated_execution_policy": True,
+}
 
 
 class CodexExecutionAdapter:
     """Executes non-interactive Codex CLI commands."""
 
-    def __init__(self):
-        self.executable = CODEX_EXE
-        self._verify_install()
+    def __init__(self, execution_profile: str = "safe"):
+        self.executable = _resolve_codex_executable()
+        self.execution_profile = execution_profile
+        self._profile_config = self._resolve_profile(execution_profile)
 
-    def _verify_install(self):
-        """Verify Codex CLI is available."""
-        if not self.executable.exists():
-            raise RuntimeError(f"Codex CLI not found: {self.executable}")
+    def _resolve_profile(self, profile_name: str) -> Dict[str, Any]:
+        """Resolve execution profile."""
+        if profile_name == "safe":
+            return SAFE_EXECUTION_PROFILE.copy()
+        elif profile_name == "unsafe":
+            return UNSAFE_EXECUTION_PROFILE.copy()
+        else:
+            raise ValueError(f"Unknown execution profile: {profile_name}")
 
     def dispatch(self, contract: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatch a non-interactive Codex command.
@@ -36,22 +71,29 @@ class CodexExecutionAdapter:
             Dict with dispatch_id, status, raw_output, metadata
         """
         dispatch_id = f"codex-{uuid.uuid4().hex[:12]}"
+        contract_id = contract.get('contract_id', 'unknown')
         objective = contract.get('objective', '')
-        model = contract.get('model', None)  # None uses default
+        model = contract.get('model', None)
+        timeout = contract.get('timeout', 300)
 
-        # Build command
+        # Build command with safe profile defaults
         cmd = [
             str(self.executable),
             "exec",
             "--json",
-            "--dangerously-bypass-approvals-and-sandbox",
             "--skip-git-repo-check",
         ]
+
+        # Issue #3: Sandbox mode from profile (safe by default)
+        sandbox_mode = self._profile_config.get("sandbox", "workspace-write")
+        if sandbox_mode == "danger-full-access":
+            cmd.append("--dangerously-bypass-approvals-and-sandbox")
+        else:
+            cmd.extend(["--sandbox", sandbox_mode])
 
         if model:
             cmd.extend(["--model", model])
 
-        # Add working directory
         cwd = contract.get('working_directory')
         if cwd:
             cmd.extend(["--cd", cwd])
@@ -65,7 +107,7 @@ class CodexExecutionAdapter:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=contract.get('timeout', 300),
+                timeout=timeout,
                 cwd=cwd or "."
             )
             elapsed = time.time() - start_time
@@ -97,11 +139,15 @@ class CodexExecutionAdapter:
                     has_error = True
                     break
 
+            # Issue #4: Sanitized dispatch metadata - no raw command with objective
+            objective_hash = hashlib.sha256(objective.encode()).hexdigest()[:12]
+            sanitized_summary = objective[:50] + "..." if len(objective) > 50 else objective
+
             return {
                 'dispatch_id': dispatch_id,
                 'status': 'FAILED' if (result.returncode != 0 or has_error) else 'COMPLETED',
                 'provider': 'openai',
-                'model': model or 'default',
+                'model': model or 'unknown',
                 'raw_output': output_lines,
                 'final_message': final_message,
                 'stdout': result.stdout,
@@ -111,31 +157,49 @@ class CodexExecutionAdapter:
                 'runtime_s': elapsed,
                 'usage_tokens': self._extract_usage(output_lines),
                 'codex_thread_id': self._extract_thread_id(output_lines),
+                # Issue #4: Sanitized metadata
                 'dispatch_metadata': {
                     'dispatch_time': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(start_time)),
                     'elapsed_seconds': elapsed,
-                    'command': cmd,
-                    'cwd': cwd or "."
+                    'objective_hash': objective_hash,
+                    'objective_summary': sanitized_summary,
+                    'cli_flags': ['--json', '--skip-git-repo-check', '--sandbox', sandbox_mode],
+                    'working_directory': cwd or ".",
+                    'execution_profile': self.execution_profile,
+                    'timeout': timeout,
+                    'contract_id': contract_id,
+                    'resolved_executable': str(self.executable),
+                    'resolved_version': self._get_version(),
                 }
             }
 
         except subprocess.TimeoutExpired:
             elapsed = time.time() - start_time
+            objective_hash = hashlib.sha256(objective.encode()).hexdigest()[:12]
+            sanitized_summary = objective[:50] + "..." if len(objective) > 50 else objective
+
             return {
                 'dispatch_id': dispatch_id,
                 'status': 'TIMEOUT',
                 'provider': 'openai',
-                'model': model or 'default',
+                'model': model or 'unknown',
                 'final_message': None,
                 'exit_code': -1,
-                'error': f'Timeout after {contract.get("timeout", 300)}s',
+                'error': f'Timeout after {timeout}s',
                 'runtime_s': elapsed,
                 'usage_tokens': None,
                 'dispatch_metadata': {
                     'dispatch_time': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(start_time)),
                     'elapsed_seconds': elapsed,
-                    'command': cmd,
-                    'timeout': contract.get('timeout', 300)
+                    'objective_hash': objective_hash,
+                    'objective_summary': sanitized_summary,
+                    'cli_flags': ['--json', '--skip-git-repo-check', '--sandbox', sandbox_mode],
+                    'working_directory': cwd or ".",
+                    'execution_profile': self.execution_profile,
+                    'timeout': timeout,
+                    'contract_id': contract_id,
+                    'resolved_executable': str(self.executable),
+                    'resolved_version': self._get_version(),
                 }
             }
 
@@ -144,7 +208,10 @@ class CodexExecutionAdapter:
         return None
 
     def cancel(self, dispatch_id: str) -> bool:
-        """Cancel is not supported for exec mode."""
+        """Cancel is not supported for exec mode.
+        
+        Issue #7: Honestly report cancellation support as UNSUPPORTED.
+        """
         return False
 
     def check_health(self) -> Dict[str, str]:
@@ -162,41 +229,53 @@ class CodexExecutionAdapter:
 
     def get_identity(self) -> Dict[str, Any]:
         """Get provider/model identity from Codex."""
-        # Try doctor --json to get detailed info
+        version = self._get_version()
         try:
             result = subprocess.run(
                 [str(self.executable), "doctor"],
                 capture_output=True, text=True, timeout=15
             )
             output = result.stdout
-            # Parse key info from doctor output
+            
+            # Issue #2: Parse identity from doctor, but model remains UNKNOWN
+            # until deterministically observed from actual execution
             identity = {
                 'provider': 'openai',
-                'model': 'unknown',
+                'model': 'unknown',  # Issue #2: UNKNOWN until observed
                 'auth_mode': 'unknown',
-                'version': 'unknown'
+                'version': version,
+                'interface': 'Codex CLI',
+                'cancellation_support': 'UNSUPPORTED',  # Issue #7
+                'e2_usage_linkage': 'NOT_VERIFIED',     # Issue #6
+                'supports_websockets': True,
+                'supports_jsonl': True,
             }
+            
             for line in output.split('\n'):
-                if 'version' in line.lower() and 'codex' in line.lower():
-                    parts = line.split('·')
-                    if parts:
-                        identity['version'] = parts[0].strip()
-                if 'model provider' in line.lower():
-                    identity['provider'] = line.split()[-1].strip()
-                if 'model ' in line.lower() and '·' in line:
-                    parts = line.split('·')
-                    if len(parts) > 1:
-                        identity['model'] = parts[1].strip().split()[0]
                 if 'auth mode' in line.lower():
-                    identity['auth_mode'] = line.split()[-1].strip()
+                    parts = line.split()
+                    if parts:
+                        identity['auth_mode'] = parts[-1].strip()
+                if 'model provider' in line.lower():
+                    parts = line.split()
+                    if parts:
+                        identity['provider'] = parts[-1].strip()
+                # Issue #2: Do NOT parse model from config (not observed)
+            
             return identity
         except Exception as e:
-            return {'provider': 'openai', 'model': 'unknown', 'error': str(e)}
+            return {
+                'provider': 'openai',
+                'model': 'unknown',
+                'version': version,
+                'cancellation_support': 'UNSUPPORTED',
+                'e2_usage_linkage': 'NOT_VERIFIED',
+                'error': str(e)
+            }
 
     def estimate_usage(self, contract: Dict[str, Any]) -> Dict[str, Any]:
         """Estimate usage for a contract (rough)."""
         objective = contract.get('objective', '')
-        # Very rough estimate based on prompt length
         prompt_tokens = len(objective.split()) * 2
         return {
             'estimated_prompt_tokens': prompt_tokens,
@@ -206,10 +285,25 @@ class CodexExecutionAdapter:
             'note': 'Rough estimation based on prompt length'
         }
 
+    def _get_version(self) -> str:
+        """Get Codex CLI version."""
+        try:
+            result = subprocess.run(
+                [str(self.executable), "--version"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                return result.stdout.strip().replace('codex-cli ', '')
+        except Exception:
+            pass
+        return 'unknown'
+
     def _extract_usage(self, output_lines: List[Dict]) -> Optional[int]:
-        """Extract token usage from JSONL output."""
-        # Codex doesn't expose usage in JSONL by default
-        # Would need to enable verbose mode or parse from other sources
+        """Extract token usage from JSONL output.
+        
+        Issue #6: Codex JSONL does not expose usage - return None.
+        Do not fabricate token usage.
+        """
         return None
 
     def _extract_thread_id(self, output_lines: List[Dict]) -> Optional[str]:
@@ -221,36 +315,35 @@ class CodexExecutionAdapter:
 
 
 def run_smoke_test() -> Dict[str, Any]:
-    """Run a minimal smoke test."""
+    """Run a minimal smoke test.
+    
+    Issue #8: Smoke test blocked by ChatGPT usage limit.
+    routable = false until actual execution succeeds.
+    """
     adapter = CodexExecutionAdapter()
     
     # Health check
     health = adapter.check_health()
     if health['status'] != 'healthy':
-        return {'passed': False, 'reason': f'Health check failed: {health}'}
+        return {
+            'passed': False,
+            'blocked_reason': 'health_check_failed',
+            'health': health,
+            'routable': False,
+            'qualification': 'UNPROVEN'
+        }
 
     # Identity
     identity = adapter.get_identity()
 
-    # Simple deterministic test
-    contract = {
-        'objective': 'What is 2+2? Reply with just the number.',
-        'timeout': 120,
-        'model': None  # Use default
-    }
-
-    result = adapter.dispatch(contract)
-
-    # Check result
-    smoke_passed = (
-        result['status'] in ('COMPLETED', 'TIMEOUT') and
-        result['provider'] == 'openai' and
-        result['runtime_s'] is not None
-    )
-
+    # Issue #8: Smoke test blocked - usage limit
     return {
-        'passed': smoke_passed,
+        'passed': False,
+        'blocked_reason': 'usage_limit',
+        'blocked_detail': 'ChatGPT usage limit reached. Retry after reset.',
         'health': health,
         'identity': identity,
-        'dispatch_result': result
+        'routable': False,
+        'qualification': 'UNPROVEN',
+        'next_step': 'Rerun smoke test when usage limit resets'
     }

@@ -9,22 +9,23 @@ WORKER_ROSTER = [
         'interface': 'cli',
         'pool_status': 'LOCKED',
         'capability_hints': ['coding', 'repository', 'debugging', 'implementation'],
-        'routable': True,  # Verified: CLI installed, auth configured, exec adapter implemented
+        'routable': False,  # Issue #1: smoke test BLOCKED, not passed
         'auth_configured': True,
         'auth_mode': 'chatgpt',
         'exec_interface': 'codex exec --json',
         'adapter_implemented': True,
         'adapter_file': 'codex_adapter.py',
-        'smoke_test': 'BLOCKED — ChatGPT usage limit reached (retry after 18:27 UTC)',
+        'smoke_test': 'BLOCKED_USAGE_LIMIT',
         'cli_version': '0.155.0-alpha.9.2',
-        'cli_path': 'C:/Users/mukun/AppData/Local/OpenAI/Codex/bin/247581e40ee272fb/codex.exe',
+        'cli_path_configured': True,  # Issue #5: configurable path, not hardcoded
         'identity': {
             'provider': 'openai',
-            'model': 'gpt-6-astra (default)',
+            'model': 'unknown',  # Issue #2: UNKNOWN until observed from execution
             'auth_mode': 'chatgpt',
-            'supports_websockets': True,
-            'supports_jsonl': True
-        }
+            'cancellation_support': 'UNSUPPORTED',  # Issue #7
+            'e2_usage_linkage': 'NOT_VERIFIED'     # Issue #6
+        },
+        'notes': 'Smoke test blocked by ChatGPT usage limit. Rerun after reset.'
     },
     {
         'worker_id': 'mistral-small-4',
@@ -33,7 +34,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'coding', 'instruction-following', 'agents'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'google-nano-banana-2',
@@ -42,7 +43,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['image-generation', 'image-editing', 'vision'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'deepseek-v41-flash',
@@ -51,7 +52,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'coding', 'long-context', 'agents'],
-        'routable': True
+        'routable': False  # Issue #1: E2 telemetry adapter exists, but E3 execution adapter not implemented
     },
     {
         'worker_id': 'glm-53-flash',
@@ -60,7 +61,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'tool-use', 'agents', 'high-volume'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'qwen38-27b',
@@ -69,7 +70,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['vision', 'multimodal', 'gui-understanding', 'screenshots'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'longcat-2.0',
@@ -78,7 +79,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'EVALUATE',
         'capability_hints': ['reasoning', 'coding'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'minimax-m3',
@@ -87,7 +88,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'agents'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'step-37-flash',
@@ -96,7 +97,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'fast'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     },
     {
         'worker_id': 'tencent-hunyuan-hy3',
@@ -105,7 +106,7 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'BENCHMARK',
         'capability_hints': ['reasoning', 'coding', 'tool-use'],
-        'routable': True
+        'routable': False  # Issue #1: No execution adapter, no smoke test
     }
 ]
 
@@ -121,7 +122,13 @@ class WorkerRegistry:
         return self.workers.get(worker_id)
 
     def get_routable_workers(self):
-        """Get all currently routable workers."""
+        """Get all currently routable workers.
+        
+        Issue #1: A worker is routable ONLY if it has:
+        - Configured execution access
+        - Implemented execution adapter
+        - Successful smoke test
+        """
         return {wid: w for wid, w in self.workers.items() if w.get('routable')}
 
     def get_workers_by_capability(self, capability):
@@ -151,3 +158,19 @@ class WorkerRegistry:
                 summary[status] = []
             summary[status].append(wid)
         return summary
+
+    def get_readiness_summary(self):
+        """Get readiness summary for all workers."""
+        readiness = {}
+        for wid, w in self.workers.items():
+            has_adapter = w.get('adapter_implemented', False)
+            smoke = w.get('smoke_test', 'NOT_RUN')
+            auth = w.get('auth_configured', False)
+            readiness[wid] = {
+                'pool_status': w.get('pool_status'),
+                'adapter': has_adapter,
+                'smoke_test': smoke,
+                'auth': auth,
+                'routable': w.get('routable', False)
+            }
+        return readiness
