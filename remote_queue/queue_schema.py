@@ -191,26 +191,40 @@ def block_task(task_id: str, blocker_category: str, owner_action: str, continue_
     _git_commit_and_push(f"queue: block {task_id} ({blocker_category})")
 
 
-def _git_commit_and_push(message: str):
-    """Stage queue changes and push to origin/main."""
-    try:
-        subprocess.run(
-            ["git", "add", "remote-queue/"],
-            cwd=str(REPO_ROOT),
-            capture_output=True, text=True, timeout=30
-        )
-        subprocess.run(
-            ["git", "commit", "-m", message, "--", "remote-queue/"],
-            cwd=str(REPO_ROOT),
-            capture_output=True, text=True, timeout=30
-        )
-        subprocess.run(
-            ["git", "push", "origin", "main"],
-            cwd=str(REPO_ROOT),
-            capture_output=True, text=True, timeout=60
-        )
-    except Exception as e:
-        log_event(f"git commit/push failed: {e}")
+def _git_commit_and_push(message: str) -> bool:
+    """Commit queue changes and push. Returns True on success, logs truthfully."""
+    # Stage only queue changes
+    rc, _, stderr = _git(["add", "remote-queue/"])
+    if rc != 0:
+        log_event(f"CRITICAL: git add failed: {stderr[:200]}")
+        return False
+
+    # Commit
+    rc, stdout, stderr = _git(["commit", "-m", message, "--", "remote-queue/"])
+    if rc != 0:
+        # Nothing to commit is OK (idempotent)
+        if "nothing to commit" in stdout.lower() or "nothing to commit" in stderr.lower():
+            return True
+        log_event(f"CRITICAL: git commit failed: {stderr[:200]}")
+        return False
+
+    # Push
+    rc, _, stderr = _git(["push", "origin", "main"])
+    if rc != 0:
+        log_event(f"CRITICAL: git push failed: {stderr[:300]}")
+        return False
+
+    return True
+
+
+def _git(cmd, timeout=60):
+    """Run a git command, return (returncode, stdout, stderr)."""
+    result = subprocess.run(
+        ["git"] + cmd,
+        cwd=str(REPO_ROOT),
+        capture_output=True, text=True, timeout=timeout
+    )
+    return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
 def log_event(message: str):
