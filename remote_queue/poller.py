@@ -22,6 +22,7 @@ from remote_queue.hermes_dispatch import dispatch_task
 
 LOCK_FILE = REPO_ROOT / "remote-queue" / ".poller.lock"
 KILL_SWITCH_FILE = REPO_ROOT / "remote-queue" / ".poller.kill"
+_MUTEX_HANDLE = None
 
 
 def _git(cmd, timeout=60):
@@ -139,13 +140,18 @@ def _git_commit_and_push(message: str) -> bool:
 
 
 def acquire_lock() -> bool:
+    global _MUTEX_HANDLE
     try:
         import ctypes
         kernel32 = ctypes.windll.kernel32
-        mutex = kernel32.CreateMutexW(None, False, "HermesRemoteQueuePoller")
-        if mutex == 0:
+        handle = kernel32.CreateMutexW(None, False, "HermesRemoteQueuePoller")
+        if handle == 0:
             return False
-        return kernel32.GetLastError() == 0
+        if kernel32.GetLastError() != 0:
+            kernel32.CloseHandle(handle)
+            return False
+        _MUTEX_HANDLE = handle
+        return True
     except Exception:
         try:
             if LOCK_FILE.exists():
@@ -167,6 +173,14 @@ def acquire_lock() -> bool:
 
 
 def release_lock():
+    global _MUTEX_HANDLE
+    if _MUTEX_HANDLE:
+        try:
+            import ctypes
+            ctypes.windll.kernel32.CloseHandle(_MUTEX_HANDLE)
+        except Exception:
+            pass
+        _MUTEX_HANDLE = None
     try:
         if LOCK_FILE.exists():
             LOCK_FILE.unlink()
