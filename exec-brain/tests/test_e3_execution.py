@@ -378,6 +378,130 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
         self.assertEqual(self.adapter.calls, [])
 
 
+class TestDependencyOrderedMultiNodeExecution(unittest.TestCase):
+    """A decomposed plan must run in dependency order on the real executor.
+
+    The DAG object and the persisted store must agree on node state, otherwise
+    a dependent node's dependency gate would refuse to run even though its
+    dependency actually passed verification.
+    """
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="e3-exec-multinode-"))
+        self.db = self.tmp / "orchestration.db"
+        init_db(self.db)
+        self.store = OrchestrationStore(self.db)
+
+    def tearDown(self):
+        self.store.close()
+
+    def test_dependency_gate_orders_a_two_node_plan(self):
+        from e3_team_assembly import TeamAssignment
+        fp, plan, dag = _plan_and_dag(
+            required_roles=["builder", "integrator"])
+        self.assertTrue(plan["decomposition"])
+        self.assertEqual(len(plan["nodes"]), 2)
+        first, second = plan["nodes"][0]["node_id"], plan["nodes"][1]["node_id"]
+
+        # The planner declares node 2's dependency as node 1's id; the DAG must
+        # resolve that id (not a positional guess).
+        self.assertEqual(list(dag.get_node(second).dependencies), [first])
+
+        adapter = FakeAdapter(["builder-out", "integrator-out"])
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(first, "deepseek-v41-flash",
+                                               "builder", "HIGH", "unit-test"))
+        assembly.add_assignment(TeamAssignment(second, "deepseek-v41-flash",
+                                               "integrator", "HIGH", "unit-test"))
+        assembly.complete = True
+
+        execu = E3ProductionExecutor(self.store, _registry(adapter))
+        run = execu.execute_plan(
+            plan, dag, assembly, fp, "task",
+            verification_test_cases_by_node={
+                first: [{"name": "c", "field": "content", "expected": "builder-out"}],
+                second: [{"name": "c", "field": "content", "expected": "integrator-out"}],
+            },
+            max_repair_attempts=0,
+            role_by_node={first: "builder", second: "integrator"},
+        )
+        self.assertEqual(run["outcome"], "EXECUTION_COMPLETE")
+        self.assertEqual([n["state"] for n in run["nodes"]], ["COMPLETE", "COMPLETE"])
+        self.assertEqual(len(adapter.calls), 2)
+        # dependency order: the builder node was dispatched first
+        self.assertTrue(adapter.calls[0]["objective"].startswith("[Builder]"),
+                        msg=adapter.calls[0]["objective"])
+
+        log = self.store.state_log(plan["plan_id"])
+        order = {(e["node_id"], e["new_state"]): i for i, e in enumerate(log)}
+        self.assertLess(order[(first, "COMPLETE")], order[(second, "READY")])
+        # the DAG object agrees with the store after the run
+        self.assertEqual(dag.get_node(first).state, "COMPLETE")
+        self.assertEqual(dag.get_node(second).state, "COMPLETE")
+
+    def test_incomplete_dependency_blocks_the_dependent_node(self):
+        from e3_team_assembly import TeamAssignment
+        fp, plan, dag = _plan_and_dag(required_roles=["builder", "integrator"])
+        first, second = plan["nodes"][0]["node_id"], plan["nodes"][1]["node_id"]
+        # Force the dependency to fail so the dependent node must stay blocked.
+        adapter = FakeAdapter(["wrong", "wrong"])
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(first, "deepseek-v41-flash",
+                                               "builder", "HIGH", "unit-test"))
+        assembly.add_assignment(TeamAssignment(second, "deepseek-v41-flash",
+                                               "integrator", "HIGH", "unit-test"))
+        assembly.complete = True
+
+        execu = E3ProductionExecutor(self.store, _registry(adapter))
+        run = execu.execute_plan(
+            plan, dag, assembly, fp, "task",
+            verification_test_cases_by_node={
+                first: [{"name": "c", "field": "content", "expected": "builder-out"}],
+                second: [{"name": "c", "field": "content", "expected": "integrator-out"}],
+            },
+            max_repair_attempts=0,
+            role_by_node={first: "builder", second: "integrator"},
+        )
+        states = {n["node_id"]: n["state"] for n in run["nodes"]}
+        self.assertEqual(states[first], "FAILED")
+        self.assertEqual(states[second], "BLOCKED")
+        # the blocked dependent node never spent a dispatch
+        self.assertEqual(run["nodes"][1]["blocking_reason"], "dependency_incomplete")
+        self.assertEqual(run["nodes"][1]["dispatch_attempts"], [])
+        self.assertEqual(len(adapter.calls), 1)
+
+
+class TestPlannerDagDependencyWiring(unittest.TestCase):
+    """``build_dag`` must resolve declared dependency ids, not positions."""
+
+    def test_three_node_chain_wires_the_declared_ids(self):
+        fp = TaskFingerprint(task_family="code", reasoning_depth=5,
+                             risk_class="R1",
+                             required_roles=["builder", "verifier"],
+                             integration_complexity="medium",
+                             verification_type="deterministic")
+        plan = E3Planner().plan("chain", fp)
+        self.assertGreaterEqual(len(plan["nodes"]), 3)
+        dag = E3Planner().build_dag(plan)
+        ids = [n["node_id"] for n in plan["nodes"]]
+        prev = None
+        for node_id in ids:
+            expected = [prev] if prev else []
+            self.assertEqual(list(dag.get_node(node_id).dependencies), expected,
+                             msg=f"{node_id} should depend on {expected}")
+            prev = node_id
+
+    def test_unknown_dependency_is_not_replaced_by_an_arbitrary_node(self):
+        plan = {"plan_id": "p", "decomposition": True, "nodes": [
+            {"node_id": "n1", "objective": "a", "capability_roles": ["builder"],
+             "dependencies": []},
+            {"node_id": "n2", "objective": "b", "capability_roles": ["builder"],
+             "dependencies": ["does-not-exist"]},
+        ]}
+        dag = E3Planner().build_dag(plan)
+        self.assertEqual(list(dag.get_node("n2").dependencies), [])
+
+
 class TestE1E2Boundary(unittest.TestCase):
     def test_execution_module_performs_no_direct_e1_e2_writes(self):
         from e3_production_rehearsal import scan_e1_e2_boundary

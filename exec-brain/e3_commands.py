@@ -99,10 +99,11 @@ class E3Commands:
         print(f"Database: {self.db_path}")
         print()
 
-        # Schema version
+        # Schema version — MAX(version) is the applied schema level; an
+        # unordered SELECT returns the oldest migration row and understates it.
         try:
-            row = con.execute("SELECT version FROM schema_version").fetchone()
-            print(f"Schema version: {row[0] if row else 'unknown'}")
+            row = con.execute("SELECT MAX(version) FROM schema_version").fetchone()
+            print(f"Schema version: {row[0] if row and row[0] is not None else 'unknown'}")
         except Exception:
             print("Schema version: not initialized")
 
@@ -344,10 +345,10 @@ class E3Commands:
         con = self._connect()
         issues = []
 
-        # Check schema version
+        # Check schema version (highest applied migration = current level)
         try:
-            row = con.execute("SELECT version FROM schema_version").fetchone()
-            if row:
+            row = con.execute("SELECT MAX(version) FROM schema_version").fetchone()
+            if row and row[0] is not None:
                 print(f"Schema version: {row[0]}")
             else:
                 issues.append("No schema version found")
