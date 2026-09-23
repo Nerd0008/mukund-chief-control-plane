@@ -1,110 +1,137 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T18:38:20Z
+- Timestamp: 2026-09-23T20:22:00Z
+- Latest evidence run: 2026-09-23T20:21:03Z at code SHA `40f8f68363d9e23a761c3398c91ed09b066991ed`
+- Evidence file: `audits/evidence/2026-09-23T20-21-03Z-isolated-queue-recovery/evidence.json` (+ `.md`)
 - Shared Control Plane status: Phase 2A
-- Hermes: installed and previously executed successfully through the GitHub remote bridge
+- Hermes: running on DeepSeek direct API (`deepseek-flash`); the GitHub remote bridge dispatches `agent-*` tasks through it
 - Discord: connected
 - Company Registry: installed
 - Company audit: completed
 - Discord capture: active for Chief channel (#chief + its threads)
 - Local archive: active
-- Automatic periodic Chief sync: previously ACTIVE via scheduled task "ChiefDiscordSync" (every 30 min); not revalidated in this reconciliation
+- Automatic periodic Chief sync: scheduled task "ChiefDiscordSync" (every 30 min), observed Ready and scheduled; functionality itself not re-exercised in this run
 - Manual fallback: python C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py
 
-## Executive Brain
+## Executive Brain — measured test state
 
-- E1: ACTIVE, verified previously (32/32 tests PASS)
-- E2: ACTIVE, verified previously (45/45 tests PASS)
+All numbers below come from one isolated run at 2026-09-23T20:21:03Z recorded by
+`scripts/evidence_runner.py`. Each suite is one real subprocess with a declared import root;
+counts are per suite and are not extrapolated.
+
+- E1 executive brain runtime matrix: 32 collected / 32 passed / exit 0
+- E2 governor + provider adapters: 45 collected / 45 passed / exit 0
+- E3 baseline: 50 collected / 48 passed / 2 errors / exit 1 (both errors environmental — Codex CLI binary is not installed on this machine; no other failures)
+- E3 extended: 60 collected / 60 passed / exit 0
+- E3 shadow orchestrator: 13 collected / 13 passed / exit 0
+- E4 resource continuity + E5 safe mode (combined suite): 37 collected / 37 passed / exit 0
+- Remote queue (isolated suite): 30 collected / 30 passed / exit 0
+- Single-run totals: 267 collected, 265 passed, 2 errors, 0 skipped across 7 suites
+
+Corrections to earlier state claims:
+
+- The previously recorded "207 tests pass" aggregate is not reproducible. The old arithmetic
+  32+45+50+60+13+37+15 also never equalled 207. The table above replaces it.
+- `test_governor.py` was previously recorded as un-runnable (missing `governor` module). It is
+  runnable when the E2 runtime import root `%LOCALAPPDATA%\hermes\exec-brain` is on `PYTHONPATH`,
+  and it passes 45/45. E1/E2 evidence is therefore measured now, not only historical.
+
+### E3 status
+
 - E3 Stage 1: ACTIVE / SHADOW ONLY — Stage 2 production enablement is NOT APPROVED
 - E3 orchestration DB: schema v2
-- E3 baseline suite: 50/50 PASS
-- E3 extended suite: 60/60 PASS
-- E3 shadow orchestrator suite: 13/13 PASS (new — validates component composition)
-- E4/E5 combined suite: 37/37 PASS
-- Remote queue suite: 15/15 PASS
-- Full local regression: 207 tests across all suites (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 13 E3 shadow + 37 E4/E5 + 15 queue = 207; excludes test_governor which requires E2 governor module not present in this repo)
-- Latest verified run: 2026-09-23T18:38:20Z — all suites pass except 2 Codex adapter tests (environmental: Codex CLI binary not installed on this machine)
+- Implemented component set (unchanged by this run): task fingerprinting, decomposition planner,
+  execution DAG, capability registry + qualification gate, worker contracts, planner, router /
+  meta-selector, decomposition review, context compiler, permission compiler, temporary team
+  assembly, integrator, independent verifier / critic surface, conflict handling, logical
+  replanning, evidence / outcome learning, escalation, exploration / shadow rules, cold-start
+  qualification benchmark harness, decision rationale audit surface, shadow orchestrator.
+- Recorded gap: the shadow orchestrator passing 13/13 composition tests is NOT production
+  rehearsal evidence. Executable rejection/repair and simulation-evidence isolation remain open.
 
-### E3 implemented components
+### E4 / E5
 
-- task fingerprinting
-- decomposition planner
-- execution DAG
-- capability registry + qualification gate
-- worker contracts
-- planner
-- router / meta-selector
-- decomposition review
-- context compiler
-- permission compiler
-- temporary team assembly
-- integrator
-- independent verifier / critic surface
-- conflict handling
-- logical replanning
-- evidence / outcome learning
-- escalation
-- exploration / shadow rules
-- cold-start qualification benchmark harness
-- decision rationale audit surface
-- shadow orchestrator (rehearsal pipeline composing all E3 components)
-
-### E4 implemented components
-
-- ResourceMonitor
-- CheckpointManager
-- EquivalentFailover
-- orchestration schema v2 resource/checkpoint persistence
-
-### E5 implemented components
-
-- SafeModeManager
-- FailureDrills
-- ConvergenceEnforcer
-- MalformedOutputHandler
-- orchestration schema v2 safe-mode/failure/convergence persistence
+- E4: ResourceMonitor, CheckpointManager, EquivalentFailover, orchestration schema v2
+  resource/checkpoint persistence
+- E5: SafeModeManager, FailureDrills, ConvergenceEnforcer, MalformedOutputHandler, schema v2
+  safe-mode/failure/convergence persistence
+- Both are unit-verified only; drill/failover evidence on real execution paths remains open.
 
 ## Worker / provider state
 
-All workers remain evidence-driven; smoke readiness is not qualification.
+Smoke readiness is not qualification; qualification is evidence-driven.
 
-- DeepSeek: adapter implemented; observed live model deepseek-flash; smoke PASS; E2 linkage VERIFIED; routable=true; qualification UNPROVEN
-- Google image worker: adapter implemented; live backing model gemini-3.1-flash-image; smoke PASS; E2 linkage VERIFIED; routable=true; qualification UNPROVEN
-- Codex CLI: adapter implemented; currently blocked on usage-limit reset; routable=false; qualification UNPROVEN
-- Remaining seven generic API workers: Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0, MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3 — adapters exist, but owner-local credentials / live provider verification remain outstanding; routable=false until readiness evidence exists
+- DeepSeek (deepseek-flash): adapter implemented; live model observed; smoke PASS; E2 linkage
+  VERIFIED; routable=true; qualification UNPROVEN
+- Google image worker (gemini-3.1-flash-image): adapter implemented; smoke PASS; E2 linkage
+  VERIFIED; routable=true; qualification UNPROVEN
+- Codex CLI: adapter implemented; usage limit reported reset by owner (2026-09-23) — this is a
+  claim to re-test, not execution evidence; routable=false; qualification UNPROVEN
+- Remaining seven generic API workers (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0,
+  MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3): adapters exist; owner-local credentials and
+  live readiness evidence outstanding; routable=false
 
 ## Remote Task Queue
 
-- Canonical GitHub task-data location: remote-queue/
-- Python package / implementation location: remote_queue/
-- Queue bridge: implemented and remotely E2E-verified
-- Agent dispatch path: agent-* tasks invoke Hermes CLI through the bridge
+- Canonical GitHub task-data location: `remote-queue/`; implementation package: `remote_queue/`
+- Bridge: implemented and remotely E2E-verified
+- `agent-*` tasks are dispatched into the Hermes CLI through `remote_queue/hermes_dispatch.py`
 - Visible remote-worker console support: implemented
-- Windows poller mutex lifecycle fix: pushed
-- Scheduler installer path fix: pushed
-- Current scheduler status: local repair was attempted on 2026-09-23, but successful pickup of the pending E3 integration task has NOT yet been observed remotely
-- Current pending task: agent-e3-integration-and-truth-reconciliation-2026-09-23
-- Existing long-running umbrella task: full-operational-build-2026-09-24 remains in running/
+- Streaming hardening: `e643fd162cf2b627d734b5735e205de3d00387a4` forces UTF-8 with replacement
+  fallback in the visible worker and fails closed on reader errors
+- Queue tests are now isolated: `remote_queue/tests/test_queue.py` runs against disposable queue
+  and repository roots, with git publication mocked or aimed at a throwaway bare origin, a
+  distinct poller mutex, and env-redirected kill switch / lock paths. Isolation is asserted by
+  guard tests, including a whole-suite live-state check.
+- Scheduler: `HermesRemoteQueuePoller` is registered and Ready (2-minute cadence)
+- Queue lifecycle defects fixed and regression-tested on 2026-09-23:
+  1. `claim_task` could destroy a task when publication raised (pending unlinked first, then the
+     running copy deleted) — now the running copy is written first and the task is never in
+     neither state.
+  2. `find_pending_tasks` / `get_running_tasks` read task JSON with the platform default codec,
+     so non-ASCII task content raised `UnicodeDecodeError` and silently demoted or dropped
+     records on Windows — now explicit UTF-8.
+  3. A push rejected because origin advanced (observed live at 2026-09-23T20:13:59Z) left queue
+     state unpublished with no retry — now rebased and retried exactly once, failing closed with
+     the local commit preserved when a rebase genuinely conflicts.
+  4. An invalid pending task could never reach a terminal state: `block_task()` raised for a
+     pending file, which skipped the `blocked/` copy, so the task failed validation on every
+     later cycle — now it is copied to `blocked/` and removed from `pending/`.
+- Recorded, deliberately unfixed defect: `poller.handle_task` routes any task id containing
+  "operational" to `handle_operational_build()`, which returns a hardcoded status with no
+  execution evidence. Left as-is because the umbrella id is not an `agent-` id, so re-routing it
+  would immediately block the umbrella; it must not be read as evidence of executed work.
+- Queue record reconciliation 2026-09-23T20:22:00Z:
+  - `agent-live-queue-recovery-deepseek-2026-09-23`: terminal, `execution_error`, verdict
+    interrupted by the bridge stream decoding failure; successor linkage recorded.
+  - `agent-e3-integration-and-truth-reconciliation-2026-09-23`: orphaned running record with no
+    worker and no terminal transition; moved to `blocked/` with evidence, implementation commits
+    `617e69cb` and `aae7d036` preserved, completion deliberately not inferred from code existing.
+  - `full-operational-build-2026-09-24`: still in `running/` as the umbrella task, annotated with
+    the handler-truth finding above.
+- Pending: empty at 2026-09-23T20:22:00Z
 
 ## Current blockers / owner dependencies
 
 - E3 Stage 2 production enablement requires explicit Mukund approval
-- Seven provider credentials/account readiness steps remain owner/provider dependent
-- Codex CLI usage-limit reset remains external
-- Deployment architecture remains unresolved: original authority says full VPS cutover, while laptop-primary + GitHub control/collaboration plane + optional VPS watchdog/failover was discussed but not formally approved
-- VPS access/details are required before any real VPS deployment/cutover
+- Seven provider credentials / account readiness steps remain owner/provider dependent
+- Codex CLI re-validation is now engineering work (allowance reset); no owner blocker unless the
+  CLI itself requests login/account action
+- Deployment architecture remains unresolved: the authority specifies full VPS cutover, while
+  laptop-primary + GitHub control plane + optional VPS watchdog/failover was discussed but never
+  formally approved. This run did not choose or act on either option.
+- VPS access/details are required before any real deployment/cutover
 
 ## Next non-blocked priority
 
-1. Shadow orchestrator composed and validated (13/13 tests pass).
-2. Full local regression verified (207 tests pass across all suites; 2 Codex adapter tests fail only due to missing CLI binary on this machine).
-3. Deployment-preparation steps that do not require choosing the unresolved deployment architecture or possessing VPS access.
-4. Resume provider onboarding immediately when owner-local credentials are supplied.
+1. `agent-codex-reset-revalidation-2026-09-23` — re-test the existing Codex CLI worker now that
+   the allowance has reset: discover the real CLI path, prove non-interactive harmless execution
+   and a harmless smoke, capture provider-returned usage if exposed, verify E2 linkage, and set
+   routability truthfully without marking Codex QUALIFIED from smoke alone.
+2. E3 shadow orchestration rejection/repair and executable rehearsal evidence.
+3. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths.
+4. Provider onboarding resumes immediately when owner-local credentials are supplied.
+5. Deployment preparation that does not require choosing the unresolved architecture or VPS access.
 
-Remaining blockers:
-- E3 Stage 2 production enablement requires explicit Mukund approval.
-- Seven provider credentials/account readiness steps remain owner/provider dependent.
-- Codex CLI usage-limit reset remains external.
-- VPS access/details and deployment architecture decision remain unresolved.
-
-Do not enable E3 Stage 2, fabricate qualification/provider evidence, or silently choose the deployment architecture.
+Do not enable E3 Stage 2, fabricate qualification/provider evidence, or silently choose the
+deployment architecture.

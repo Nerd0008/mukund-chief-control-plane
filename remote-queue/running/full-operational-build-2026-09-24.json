@@ -15,17 +15,17 @@
   "requires_owner_approval": false,
   "status": "running",
   "completed_items": [
-    "E3 shadow orchestrator composed from all E3 components (planner, decomposition review, router, context compiler, permission compiler, team assembly, integrator, verifier, conflict handler, evidence manager, escalator, exploration/shadow rules, qualification harness, replanner) — 13/13 tests pass",
+    "E3 shadow orchestrator composed from all E3 components (planner, decomposition review, router, context compiler, permission compiler, team assembly, integrator, verifier, conflict handler, evidence manager, escalator, exploration/shadow rules, qualification harness, replanner) \u2014 13/13 tests pass",
     "Full local regression verified: 207 tests pass (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 13 E3 shadow + 37 E4/E5 + 15 queue)",
     "State file corrected: timestamp, test counts, E3 shadow orchestrator suite added, E4/E5 combined (not per-suite) count clarified, provider truth preserved (LongCat/Nous not replaced)",
-    "E4/E5 suites remain at 37/37 combined (not 37 each — corrected in state file)"
+    "E4/E5 suites remain at 37/37 combined (not 37 each \u2014 corrected in state file)"
   ],
   "exact_remaining_blockers": [
-    "E3 Stage 2 production enablement — requires explicit Mukund approval",
-    "Seven provider credentials/account readiness — owner/provider dependent (Mistral, GLM, Qwen, LongCat/Nous, MiniMax, Step, Tencent Hunyuan)",
-    "Codex CLI usage-limit reset — external",
-    "VPS access/details and deployment architecture decision — unresolved",
-    "Live provider execution evidence for 7 workers — blocked on credentials"
+    "E3 Stage 2 production enablement \u2014 requires explicit Mukund approval",
+    "Seven provider credentials/account readiness \u2014 owner/provider dependent (Mistral, GLM, Qwen, LongCat/Nous, MiniMax, Step, Tencent Hunyuan)",
+    "Codex CLI usage-limit reset \u2014 external",
+    "VPS access/details and deployment architecture decision \u2014 unresolved",
+    "Live provider execution evidence for 7 workers \u2014 blocked on credentials"
   ],
   "stop_conditions": [
     "owner credentials or account action required",
@@ -33,5 +33,13 @@
     "irreversible or destructive action requires owner approval",
     "architecture or safety blocker requires owner decision",
     "VPS access details missing"
-  ]
+  ],
+  "recovery_findings": {
+    "observed_at": "2026-09-23T20:22:00Z",
+    "findings": [
+      "No worker process is associated with this umbrella record at observation time.",
+      "poller.handle_task routes any task id containing 'operational' to handle_operational_build(), which returns a hardcoded status without any real execution evidence. This is recorded as a known truth defect; it was NOT changed in the recovery task because the umbrella id is not an 'agent-' id, so re-routing it would turn the umbrella into an immediate execution_error block. The record therefore stays in running/ as the umbrella and must not be read as evidence that its listed steps were executed.",
+      "Its status must be re-derived from evidence by whoever retires the umbrella."
+    ]
+  }
 }

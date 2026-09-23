@@ -32,5 +32,18 @@
     "category": "execution_error",
     "owner_action_required": "Hermes CLI exited with code 3221225786 (output_bytes=0).",
     "continue_without": "Independent safe work may continue"
+  },
+  "terminal_reconciliation": {
+    "reconciled_at": "2026-09-23T20:22:00Z",
+    "reconciled_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23",
+    "verdict": "interrupted_by_bridge_stream_decoding_failure",
+    "evidence": "The predecessor's own blocker records execution_error with Hermes CLI exit code 3221225786 (0xC000013A, STATUS_CONTROL_C_EXIT) and output_bytes=0. The successor's task notes record the visible worker console showing UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d followed by heartbeats with no further events, i.e. the child stopped producing output while the bridge kept waiting. No implementation commit or file change from the predecessor survives in the worktree: at successor start the only modified tracked file was remote-queue/logs/queue.log.",
+    "partial_work_found": [],
+    "bridge_hardening_commit": "e643fd162cf2b627d734b5735e205de3d00387a4",
+    "successor_task_id": "agent-live-queue-recovery-deepseek-utf8-2026-09-23"
+  },
+  "recovery_observation": {
+    "observed_at": "2026-09-23T20:22:00Z",
+    "finding": "Terminal state confirmed from the queue record and local evidence. The successor continued the bounded scope (queue-test isolation, lifecycle reconciliation, reproducible evidence, state/tracker truth) rather than re-doing the predecessor's transport diagnosis."
   }
 }
