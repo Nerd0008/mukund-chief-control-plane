@@ -35,6 +35,12 @@ def main() -> int:
     parser.add_argument("--exit-file", required=True)
     parser.add_argument("--task-id", required=True)
     parser.add_argument("--cwd", required=True)
+    parser.add_argument(
+        "--idle-timeout-seconds",
+        type=int,
+        default=int(os.environ.get("HERMES_REMOTE_IDLE_TIMEOUT", "300")),
+        help="Fail closed if Hermes emits no stream event for this many seconds.",
+    )
     args = parser.parse_args()
 
     task_id = args.task_id
@@ -51,6 +57,7 @@ def main() -> int:
     print(f"Hermes executable: {args.hermes}", flush=True)
     print(f"Working directory: {args.cwd}", flush=True)
     print("Mode: stream-json (live tool activity; final response captured separately)", flush=True)
+    print(f"Idle watchdog: {args.idle_timeout_seconds}s without a stream event", flush=True)
     print("=" * 78, flush=True)
 
     # Show installed Hermes version without mutating state.
@@ -110,6 +117,34 @@ def main() -> int:
         return 127
 
     reader_errors = []
+    watchdog_fired = False
+    active_tool = None
+
+    def _terminate_child_tree() -> None:
+        """Terminate only this worker's Hermes child/process tree."""
+        if proc.poll() is not None:
+            return
+        if os.name == "nt":
+            try:
+                subprocess.run(
+                    ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=20,
+                )
+                return
+            except Exception:
+                pass
+        try:
+            proc.terminate()
+            proc.wait(timeout=10)
+        except Exception:
+            try:
+                proc.kill()
+            except Exception:
+                pass
 
     def reader():
         assert proc.stdout is not None
@@ -163,10 +198,12 @@ def main() -> int:
 
             elif etype == "tool_use":
                 name = event.get("name") or "unknown"
+                active_tool = name
                 print(f"[{_stamp()}] >>> TOOL START: {name}", flush=True)
 
             elif etype == "tool_result":
                 name = event.get("name") or "unknown"
+                active_tool = None
                 duration = event.get("duration_ms")
                 status = "ERROR" if event.get("is_error") else "OK"
                 dur_text = f"  {duration}ms" if duration is not None else ""
@@ -206,18 +243,29 @@ def main() -> int:
                 flush=True,
             )
             print(f"[{_stamp()}] Terminating Hermes child to avoid an invisible hang.", flush=True)
-            try:
-                proc.terminate()
-                proc.wait(timeout=10)
-            except Exception:
-                try:
-                    proc.kill()
-                except Exception:
-                    pass
+            _terminate_child_tree()
 
         now = time.monotonic()
+        quiet_for = int(now - last_activity)
+        if (
+            proc.poll() is None
+            and args.idle_timeout_seconds > 0
+            and quiet_for >= args.idle_timeout_seconds
+        ):
+            watchdog_fired = True
+            tool_text = active_tool or "no active tool reported"
+            print(
+                f"[{_stamp()}] WATCHDOG TIMEOUT: no stream event for {quiet_for}s "
+                f"(active={tool_text}).",
+                flush=True,
+            )
+            print(
+                f"[{_stamp()}] Terminating only this Hermes child tree so the queue can recover.",
+                flush=True,
+            )
+            _terminate_child_tree()
+
         if proc.poll() is None and now - last_heartbeat >= 5:
-            quiet_for = int(now - last_activity)
             print(f"[{_stamp()}] Hermes is working... ({quiet_for}s since last event)", flush=True)
             last_heartbeat = now
 
@@ -245,7 +293,9 @@ def main() -> int:
             text_chunks.append(event["text"])
 
     rc = proc.wait()
-    if result_exit_code is not None:
+    if watchdog_fired:
+        rc = 124
+    elif result_exit_code is not None:
         try:
             rc = int(result_exit_code)
         except Exception:
