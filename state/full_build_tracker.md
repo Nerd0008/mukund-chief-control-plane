@@ -29,8 +29,8 @@ Evidence source for every test figure below:
 | E3 | Extended suite | VERIFIED | 60/60 pass, exit 0 |
 | E3 | Shadow orchestrator composition | VERIFIED | 13/13 pass, exit 0 |
 | E3 | Stage 1 shadow implementation set | PRESENT | component list in state file; commits `617e69cb`, `aae7d036` preserved |
-| E3 | Production rehearsal / executable rejection + repair evidence | OPEN | not evidenced; composition tests are not rehearsal |
-| E3 | Stage 2 production enablement | NOT APPROVED | owner gate — unchanged |
+| E3 | Production rehearsal / executable rejection + repair evidence | OPEN | not evidenced; composition tests are not rehearsal. This is the unmet precondition for the standing conditional Stage 2 approval |
+| E3 | Stage 2 local production enablement | CONDITIONALLY APPROVED, NOT ENABLED | standing conditional owner approval 2026-09-23 (authority `3838c61`, owner-actions `baf73d8`); preconditions not all met |
 | E4 | Resource continuity implementation | PRESENT, unit-tested | included in the 37/37 combined suite |
 | E4 | Checkpoint/failover drill evidence on real execution paths | OPEN | not evidenced |
 | E5 | Safe mode / resilience implementation | PRESENT, unit-tested | included in the 37/37 combined suite |
@@ -39,14 +39,17 @@ Evidence source for every test figure below:
 | Providers | Google image worker | ROUTABLE, QUALIFICATION UNPROVEN | smoke PASS; E2 linkage verified |
 | Providers | Codex CLI | BLOCKED ON RE-VALIDATION | allowance reported reset by owner; adapter present; no execution evidence |
 | Providers | 7 generic API workers | NOT READY | owner-local credentials / live readiness missing |
-| Deployment | Architecture decision | UNRESOLVED OWNER DECISION | authority says full VPS cutover; alternative discussed but not approved |
+| Deployment | Architecture decision | DEFERRED BY OWNER | owner direction: prove local operation first. Laptop-primary + GitHub control plane + VPS watchdog/failover is a recorded *preference*, not a final decision |
 | Deployment | VPS access/details | NOT PROVIDED | owner dependency |
 | Deployment | Non-architecture-dependent deployment preparation | NOT STARTED THIS RUN | out of scope of the 2026-09-23 recovery task |
 
 ## Owner gates (must not be bypassed)
 
-1. E3 Stage 2 production enablement — explicit Mukund approval.
-2. Deployment architecture choice and VPS access.
+1. E3 Stage 2 **local** production enablement — standing conditional approval granted
+   2026-09-23; must not be enabled until every recorded precondition (including
+   production rehearsal evidence) is objectively satisfied.
+2. Deployment architecture choice and VPS cutover — deferred by owner until the local system is
+   proven; the recorded laptop-primary preference is not a decision and cutover is not authorized.
 3. Seven provider credentials provisioned locally (never via GitHub/queue/logs).
 4. Anything irreversible or destructive.
 

@@ -38,7 +38,17 @@ Corrections to earlier state claims:
 
 ### E3 status
 
-- E3 Stage 1: ACTIVE / SHADOW ONLY — Stage 2 production enablement is NOT APPROVED
+- E3 Stage 1: ACTIVE / SHADOW ONLY
+- E3 Stage 2 production enablement: STANDING CONDITIONAL OWNER APPROVAL granted 2026-09-23 for
+  **local** enablement only (authority updated in `3838c61`, owner-actions file in `baf73d8`).
+  It is not self-executing: local enablement requires the recorded preconditions — local
+  E1/E2/E3/E4/E5 regressions pass, production rehearsal passes, no unresolved critical
+  integrity/privacy/safety defect, evidence-based routing, an available rollback/recovery path,
+  and truthfully updated state/evidence. It does not authorize VPS cutover or a final
+  deployment-architecture choice.
+  - Unmet precondition as of this run: production rehearsal evidence does not exist yet
+    (E3 rehearsal is OPEN in the tracker below). Stage 2 therefore was NOT enabled by this
+    recovery task, which is also required by this task's own stop conditions.
 - E3 orchestration DB: schema v2
 - Implemented component set (unchanged by this run): task fingerprinting, decomposition planner,
   execution DAG, capability registry + qualification gate, worker contracts, planner, router /
@@ -120,14 +130,18 @@ Smoke readiness is not qualification; qualification is evidence-driven.
 
 ## Current blockers / owner dependencies
 
-- E3 Stage 2 production enablement requires explicit Mukund approval
+- E3 Stage 2 production enablement: standing conditional owner approval granted 2026-09-23 for
+  local enablement only — it becomes actionable when the recorded readiness preconditions pass
+  (production rehearsal is the currently unmet one). This recovery task did not enable Stage 2.
 - Seven provider credentials / account readiness steps remain owner/provider dependent
 - Codex CLI re-validation is now engineering work (allowance reset); no owner blocker unless the
   CLI itself requests login/account action
-- Deployment architecture remains unresolved: the authority specifies full VPS cutover, while
-  laptop-primary + GitHub control plane + optional VPS watchdog/failover was discussed but never
-  formally approved. This run did not choose or act on either option.
-- VPS access/details are required before any real deployment/cutover
+- Deployment architecture: intentionally deferred by owner until local operation is proven. The
+  authority records laptop-primary + GitHub control plane + VPS watchdog/failover as the current
+  owner *preference*, explicitly not a final architecture decision and not authorization for VPS
+  cutover. This run did not choose or act on any architecture.
+- VPS access/details are required before any real deployment/cutover, and cutover is not yet
+  authorized
 
 ## Next non-blocked priority
 
@@ -135,10 +149,15 @@ Smoke readiness is not qualification; qualification is evidence-driven.
    the allowance has reset: discover the real CLI path, prove non-interactive harmless execution
    and a harmless smoke, capture provider-returned usage if exposed, verify E2 linkage, and set
    routability truthfully without marking Codex QUALIFIED from smoke alone.
-2. E3 shadow orchestration rejection/repair and executable rehearsal evidence.
+2. E3 shadow orchestration rejection/repair and executable rehearsal evidence — this is now the
+   critical path: the standing conditional Stage 2 approval needs production rehearsal evidence
+   before local enablement can be considered.
 3. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths.
 4. Provider onboarding resumes immediately when owner-local credentials are supplied.
-5. Deployment preparation that does not require choosing the unresolved architecture or VPS access.
+5. Local-first completion work (owner direction: make the system run perfectly locally before any
+   deployment architecture choice); deployment preparation that needs no architecture decision or
+   VPS access may proceed in parallel.
 
-Do not enable E3 Stage 2, fabricate qualification/provider evidence, or silently choose the
-deployment architecture.
+Do not fabricate qualification/provider evidence, and do not enable Stage 2 or choose a
+deployment architecture without the readiness evidence and owner decisions recorded in the
+authority file.
