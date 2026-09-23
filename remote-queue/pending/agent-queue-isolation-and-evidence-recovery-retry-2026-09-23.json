@@ -1,0 +1,27 @@
+{
+  "task_id": "agent-queue-isolation-and-evidence-recovery-retry-2026-09-23",
+  "created_at": "2026-09-23T19:14:30Z",
+  "objective": "Resume the queue isolation and truthful evidence recovery work from blocked predecessor agent-queue-isolation-and-evidence-recovery-2026-09-23. Begin by verifying latest main, this queue state, poller identity/path/lock behavior, Hermes CLI dispatch result, and the predecessor's recovery_observation. Do not assume the predecessor implementation ran or completed. Finish the same bounded queue/test isolation objective with a visible worker and strict terminal JSON.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "Inspect latest repo state, local poller/worker/scheduler processes, task logs and current worktree before changes. Preserve all work and unrelated Hermes processes. Confirm dispatch is live before editing; report factual progress and do not loop indefinitely.",
+    "Safely isolate remote_queue/tests/test_queue.py from the real repository and scheduler. TestQueueOperations currently can invoke the live Git commit/push helper, and TestPollerCLI can alter live queue/kill state. Use disposable roots and mock Git/process/dispatch boundaries. Prove no test commits/pushes, consumes pending tasks, modifies the real kill switch or mutex, or races the live poller. Do not run current unsafe tests against the live checkout.",
+    "Diagnose and minimally repair the actual poller-to-Hermes dispatch and terminal lifecycle if evidence confirms a defect. Record only observed process/CLI exit evidence. Keep task IDs unique, avoid parallel retry dispatch, and never claim completion from a commit alone.",
+    "Produce a reproducible evidence runner for suites that can be run with isolated DB/queue roots. Record UTC timestamp, code SHA, runtime/import roots, exact command, collected/passed/failed/error/skipped and exit codes; mark unavailable tests as unavailable and keep historical suite results separate.",
+    "Update state/current_company_state.md and the full-build tracker accurately: bridge pickup success and present dispatch health, exact supported per-suite evidence, predecessor blocked reason, unresolved UNKNOWNs and concrete E3 rehearsal gaps. Do not report 207 or 252 as a verified aggregate.",
+    "Review shadow orchestration rejection/repair, E4 checkpoint/failover, E5 convergence/safe-mode hooks and evidence isolation; record remaining reproducible gaps without enabling production dispatch.",
+    "Commit/push small recoverable changes. End with only the bridge's strict JSON response; let the poller transition this successor to a terminal queue state."
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "E3 Stage 2 production remains NOT APPROVED; no production enablement or live production dispatch.",
+    "Deployment architecture is unresolved; do not deploy, cut over, migrate, install services, reboot, alter firewall, or choose an architecture.",
+    "No credentials/secrets, private runtime databases, raw model output or chain-of-thought in GitHub.",
+    "No destructive reset/clean/force push, broad process termination, approval/quality gate weakening, or fabricated evidence.",
+    "If another recovery worker is actually active or a file conflict exists, stop conflicting edits and record dependency; do not dispatch duplicate work.",
+    "If verified CLI failure requires Mukund login/account/provider action, identify exact owner action and continue independent authorized work."
+  ],
+  "notes": "Coordinator verified at 2026-09-23T19:13:45Z: predecessor was in running/ without a corresponding poller.py, visible_worker.py, hermes_dispatch or new Hermes CLI process. Scheduler reports Ready with successful recurring runs and queue.log records pulls through 19:12Z; the sole Hermes process predates the task. Predecessor moved to blocked/ with execution_error and evidence, not completed. Unique retry is safe. Preserve E3 Stage 2 and unresolved VPS architecture gates."
+}
