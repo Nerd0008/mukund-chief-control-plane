@@ -1,0 +1,78 @@
+{
+  "task_id": "agent-codex-reset-revalidation-2026-09-23",
+  "created_at": "2026-09-23T20:20:00Z",
+  "objective": "Immediately after the active recovery task reaches a truthful terminal state, re-validate the existing Codex CLI worker now that Mukund reports the usage allowance has reset. Preserve the existing adapter architecture. Discover the actual local CLI/runtime path and authenticated identity/model only where directly observable, prove non-interactive harmless execution, perform one deterministic harmless smoke, capture provider-returned usage only if exposed, verify E2 request/record linkage through public interfaces, rerun relevant adapter/E3 plus E1/E2 regressions, and update worker/state truth. Do not spend Codex on unrelated work and do not mark QUALIFIED from smoke alone.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "allowed_scope": [
+    "Inspect latest main and the terminal result of the active queue/evidence recovery before editing; do not race an active conflicting worker.",
+    "Discover the actual Codex CLI executable on Windows using deterministic local discovery: first an explicit CODEX_EXECUTABLE environment/config override if present, then PATH/where.exe/Get-Command, then scan %LOCALAPPDATA%\\OpenAI\\Codex\\bin\\*\\codex.exe for current installed builds. Validate any candidate with `codex.exe --version`; do not assume the old hash-specific directory is current.",
+    "Replace the brittle hash-specific executable resolver in exec-brain/codex_adapter.py with a stable resolver: explicit override -> PATH -> validated installed Codex bin candidates. If multiple candidates exist, choose deterministically from validated candidates and record only the resolved path/version, never credentials.",
+    "Use the existing E3 Codex ExecutionAdapter and safe execution profile; make only minimal fixes proven necessary by fresh smoke/regression evidence.",
+    "Confirm authentication state locally without exposing tokens or credentials.",
+    "Run exactly one harmless deterministic non-interactive smoke sufficient to prove execution readiness; avoid wasting Codex allowance on exploratory or unrelated tasks.",
+    "Observe provider/model identity only if exposed deterministically by the CLI/runtime. Keep UNKNOWN if not exposed; do not infer or hardcode.",
+    "Capture token/usage metadata only when returned by the provider/CLI. Do not fabricate missing usage.",
+    "Verify sanitized execution metadata and E2 public record-request linkage. No direct E3 SQL writes into E1/E2 databases.",
+    "Set routable=true only if fresh execution readiness and required linkage checks genuinely pass. Qualification remains UNPROVEN until cold-start/task-role benchmark evidence exists.",
+    "Rerun relevant Codex adapter/E3 tests and E1/E2 regressions with exact command/count/exit-code evidence.",
+    "Update worker matrix/current_company_state.md and close or update tasks-or-issues/e3-codex-smoke-test-after-limit-reset.md truthfully.",
+    "Commit/push small recoverable changes and return strict terminal JSON."
+  ],
+  "requires_owner_approval": false,
+  "status": "completed",
+  "stop_conditions": [
+    "If Codex requires Mukund login/account/subscription/billing action, record the exact owner action in tasks-or-issues/overnight-owner-actions-2026-09-24.md, preserve evidence, and return blocked without exposing secrets.",
+    "E3 Stage 2 remains NOT APPROVED.",
+    "Do not use Codex for broad project implementation during this task; this is a bounded readiness re-validation.",
+    "No secret/token/raw chain-of-thought/private runtime DB content in GitHub or logs.",
+    "No destructive reset/clean/force push or deployment/cutover actions.",
+    "If an active conflicting worker exists, stop conflicting edits rather than racing it."
+  ],
+  "notes": "Owner reports Codex usage reset. Historical state: CLI installed/authenticated, adapter implemented, previous smoke BLOCKED_USAGE_LIMIT, model identity UNKNOWN, E2 linkage NOT_VERIFIED, qualification UNPROVEN, routable=false. This task should be picked only after the current UTF-8 recovery task terminates; the singleton local poller/worker is expected to prevent concurrent execution. Current code hardcodes C:/Users/mukun/AppData/Local/OpenAI/Codex/bin/247581e40ee272fb/codex.exe; likely stale after a Codex update. Treat stale hash path as the first hypothesis, not proof that Codex is uninstalled.",
+  "completed_at": "2026-09-23T20:42:40.882741Z",
+  "result": {
+    "status": "completed",
+    "summary": "Codex CLI worker re-validated after the owner-reported usage reset. The stale-hash hypothesis was correct: the hardcoded ...\\Codex\\bin\\247581e40ee272fb\\codex.exe no longer exists. Replaced the brittle resolver with an explicit-override -> PATH -> validated-installed-bin resolver (candidate must pass --version; highest validated version wins deterministically), verified against bin/80f78947ad880e6e/codex.exe v0.155.0-alpha.16.3. Auth confirmed locally via `codex doctor --json` (auth configured, storage mode File, auth mode chatgpt, stored API key false); no token or credential value was read, logged, or committed. A harmless, deterministic, non-interactive `codex exec --json` smoke through the existing E3 adapter returned READY (exit 0, thread 01a0cffb-4ca1-7052-babc-3db7a233ddac, ~6.0s, safe workspace-write profile). Provider `openai` is deterministically reported, but the served model is not exposed (server model present=false), so execution model identity stays UNKNOWN; local config's gpt-6-astra is recorded only as configured_model. Provider usage IS exposed on the CLI's turn.completed event (16207 in / 13184 cached / 5 out); the E2 row was written before the extractor fix was verified, so its token columns are null (documented, not hidden, and no extra request was spent to correct it). E2 linkage VERIFIED via the public governor.record_request() interface as obs-20260923-d42e34a5. routable=true, qualification UNPROVEN, E3 Stage 2 untouched. Two further genuine adapter defects were found and fixed from real evidence: the assistant reply arrives as an item.completed item of type `agent_message` (not `message`), and boolean fields in `doctor --json` are strings. Full regressions: 271 collected / 271 passed / 0 errors across 7 suites (E3 baseline improved from 50/48/2 errors to 54/54/0). Two Codex executions were spent, not one, and both are disclosed in the repo records: the first proved execution worked while exposing our own parser defect, and the second produced the canonical PASS evidence.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "a999f6f codex: re-validate CLI worker after usage reset (stable resolver, smoke PASS, E2 linkage)",
+      "db98b2d evidence: anchor Codex re-validation run at pushed SHA a999f6f"
+    ],
+    "tests": [
+      "E1 executive brain runtime matrix: 32 collected / 32 passed / exit 0",
+      "E2 governor + provider adapters: 45 collected / 45 passed / exit 0",
+      "E3 baseline: 54 collected / 54 passed / exit 0 (was 50/48/2 errors before the resolver fix)",
+      "E3 extended: 60 collected / 60 passed / exit 0",
+      "E3 shadow orchestrator: 13 collected / 13 passed / exit 0",
+      "E4 resource continuity + E5 safe mode: 37 collected / 37 passed / exit 0",
+      "Remote queue (isolated suite): 30 collected / 30 passed / exit 0",
+      "Single-run totals at SHA a999f6f: 271 collected / 271 passed / 0 errors / 0 skipped across 7 suites (scripts/evidence_runner.py --label codex-reset-revalidation)",
+      "Codex smoke (one harmless non-interactive execution): PASS, final_message=READY, exit_code=0",
+      "E2 linkage read-back: obs-20260923-d42e34a5 present, provider=openai-codex-cli, status=success",
+      "Usage extractor verified against the recorded real exec stdout fixture: {input_tokens: 16207, cached_input_tokens: 13184, output_tokens: 5}"
+    ],
+    "changed_files": [
+      "exec-brain/codex_adapter.py",
+      "exec-brain/worker_registry.py",
+      "exec-brain/tests/test_e3.py",
+      "exec-brain/tests/fixtures/codex_exec_jsonl_turn_completed.jsonl",
+      "state/current_company_state.md",
+      "tasks-or-issues/e3-codex-smoke-test-after-limit-reset.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/2026-09-23T20-40-53Z-codex-reset-revalidation/evidence.json",
+      "audits/evidence/2026-09-23T20-40-53Z-codex-reset-revalidation/evidence.md",
+      "audits/evidence/2026-09-23T20-40-53Z-codex-reset-revalidation/codex-smoke.json",
+      "audits/evidence/2026-09-23T20-40-53Z-codex-reset-revalidation/codex-exec-jsonl-turn-completed.jsonl"
+    ],
+    "remaining": [
+      "Codex qualification remains UNPROVEN: no cold-start / task-role benchmark evidence exists; routable=true reflects execution readiness + E2 linkage only.",
+      "E2 row obs-20260923-d42e34a5 has null input/output token columns because it was written before the usage-extractor fix was verified; the true provider-reported values for that request (16207 in / 5 out) are recorded in evidence only, and no duplicate row was created.",
+      "Serviced model identity remains UNKNOWN: the CLI and runtime do not expose it (server model present=false); do not promote config's gpt-6-astra to execution identity.",
+      "A stale pre-fix copy of codex_adapter.py remains outside the repo at %LOCALAPPDATA%\\hermes\\exec-brain\\codex_adapter.py; nothing under the E3 test import root imports it, but it must be resynced at the next deployment step.",
+      "E3 Stage 2 production enablement remains NOT APPROVED/not enabled; production rehearsal evidence is still the unmet precondition.",
+      "Next staged queue item is agent-e3-local-production-rehearsal-2026-09-23 (pending, not running)."
+    ]
+  }
+}
