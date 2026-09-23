@@ -88,6 +88,16 @@ def _sha256(path: Path) -> Optional[str]:
     return digest.hexdigest()
 
 
+def _code_sha() -> str:
+    import subprocess
+    try:
+        result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(REPO_ROOT),
+                                capture_output=True, text=True, timeout=60)
+    except Exception:  # noqa: BLE001 — reported as UNKNOWN, never invented
+        return "UNKNOWN"
+    return result.stdout.strip() if result.returncode == 0 else "UNKNOWN"
+
+
 def hash_live_stores(root: Optional[Path] = None) -> Dict[str, Optional[str]]:
     root = Path(root or RUNTIME_ROOT)
     out: Dict[str, Optional[str]] = {}
@@ -968,6 +978,7 @@ class E4E5DrillHarness:
             "harness": "e4e5-real-path-drill-harness",
             "task_id": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
             "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+            "code_sha": _code_sha(),
             "run_started_utc": started.isoformat(),
             "run_finished_utc": datetime.now(timezone.utc).isoformat(),
             "evidence_kind": EVIDENCE_KIND,
@@ -1083,6 +1094,8 @@ def write_evidence(report: Dict[str, Any], out_dir: Path) -> Path:
         "# E4/E5 real-path drill evidence (stubbed provider failures)",
         "",
         f"- Task: `{report['task_id']}`",
+        f"- Authority: `{report['authority']}`",
+        f"- Code SHA: `{report.get('code_sha')}`",
         f"- Run started (UTC): {report['run_started_utc']}",
         f"- Run finished (UTC): {report['run_finished_utc']}",
         f"- Evidence kind: `{report['evidence_kind']}` — {report['evidence_kind_note']}",
@@ -1136,6 +1149,7 @@ def main() -> int:
     write_evidence(report, out_dir)
 
     summary = {
+        "code_sha": report.get("code_sha"),
         "checks_passed": report["checks_passed"],
         "checks_total": report["checks_total"],
         "failed_checks": [k for k, v in report["checks"].items() if not v],
