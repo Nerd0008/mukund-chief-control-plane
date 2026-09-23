@@ -241,3 +241,52 @@ Mukund has superseded the earlier automatic local Stage 2 timing instruction.
 - Mukund plans to configure all remaining provider credentials on **2026-09-24**.
 - After those credentials are configured and truthfully verified, re-run the complete local Stage 2 readiness gates and complete local Stage 2 if they pass.
 - This timing change does not weaken any readiness criterion and does not authorize VPS cutover or finalize deployment architecture.
+
+
+## V1 company workflows — restored to active scope (owner reconfirmed 2026-09-23)
+
+The Sep 21 Chief OS handover defines v1 as more than E1-E5. The following are active release-scope items and must be completed locally as far as safely possible before the final whole-company acceptance test:
+
+### Career Ops + job-search automation
+- inspect and preserve the existing Career Ops installation at `C:\Users\mukun\Documents\ChatGPT\CV customizer\career-ops-career-ops-v1.29.0`
+- connect it to Chief as an employee/workflow rather than rebuilding it unnecessarily
+- replace the standalone `@oai/artifact-tool` Excel-write dependency with a deterministic supported writer (prefer Python/openpyxl) while preserving the canonical workbook structure, formulas, validation/status metadata and dedupe rules
+- preserve the canonical UK tracker at `C:\Users\mukun\Downloads\codex\uk-cyber-job-tracker.xlsx` and the existing Dubai/Japan/Singapore trackers
+- restore/define regional automated job-search schedules without duplicating applications
+- keep Excel authoritative for departmental operational records; Chief state is orchestration, not a replacement
+- prove scan -> eligibility/filtering -> dedupe -> tracker write -> Chief summary on a bounded dry-run/evidence run
+
+### Company Watch
+- build Company Watch under Career using the historical employer/recruiter/application evidence already identified
+- prefer structured career/ATS endpoints where available
+- share dedupe/application state with Career Ops so it cannot create conflicting application records
+- feed eligible findings into the appropriate regional tracker
+- create its own monthly operational workbook only where it does not conflict with canonical application state
+- evidence a bounded scan and handoff into Career Ops
+
+### CV + cover-letter workflow
+- connect the existing CV/customization workflow to Chief/Career Ops
+- use job description + canonical CV/profile sources to produce a tailored draft and evidence record
+- preserve source truth; do not fabricate experience, metrics, certifications or eligibility
+- keep owner approval before any external application submission
+
+### LinkedIn workflow
+- implement the minimal LinkedIn workflow required for v1: job/discovery signal intake, profile/post drafting support, and handoff into Career Ops/company tracking
+- drafts/read-only automation may run autonomously; external posting, messaging, connection requests, or application submission require explicit owner authorization unless a separately approved policy exists
+- dedupe any LinkedIn-sourced job/company against Career Ops/Company Watch before adding it to trackers
+
+### Whole-company acceptance
+After the above lanes and E1-E5 local work are ready, run a local whole-company acceptance test covering:
+- owner -> Chief intake
+- E1 classification/floors
+- E2 telemetry
+- E3 delegation/verification
+- E4/E5 continuity/safe-mode paths where applicable
+- Career Ops job discovery + tracker write
+- Company Watch handoff
+- CV/cover-letter draft path
+- LinkedIn draft/read-only path
+- owner escalation for an action requiring approval
+- truthful final state + handover
+
+Do not initialize/restructure the existing Career Ops git repository without owner approval. Reuse existing systems and deterministic tooling first.
