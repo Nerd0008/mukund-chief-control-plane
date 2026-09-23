@@ -1,16 +1,17 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T21:35:00Z
-- Latest evidence run: 2026-09-23T21:33:19Z at code SHA `bf48a2b` (this run's commit)
+- Timestamp: 2026-09-23T21:55:00Z
+- Latest evidence run: 2026-09-23T21:53:37Z at code SHA `4da92eb` (this run's code commit)
 - Evidence files (this run):
-  - `audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/evidence.json` (+ `.md`) —
-    **formal production-rehearsal re-run**: decomposed multi-worker real path, rejection → repair →
-    re-verification inside the decomposed plan, dependency-gated dispatch, isolation + contamination
-    proof, E2 read-back. 7 bounded real provider calls.
-  - `audits/evidence/2026-09-23T21-33-19Z-e3-production-rehearsal-retry-regression/evidence.json` (+ `.md`)
-    — 11 suites, 351 collected / 351 passed, exit 0
-  - `audits/evidence/superseded/2026-09-23T21-31-09Z-e3-production-execution-rehearsal/` — superseded
-    first attempt (see its `SUPERSEDED.md`: an unrequested optional scenario was reported as passing)
+  - `audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/evidence.json` (+ `.md`)
+    — **12 suites, 364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0**
+  - `audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/evidence.json` (+ `.md`) —
+    **bounded Google image real-dispatch diagnosis: exactly 1 real call spent**, on the identical
+    request that had failed. The failure **did not reproduce**.
+  - `audits/evidence/2026-09-23T21-52-00Z-e3-qualification-from-evidence/` — dry-run artifact
+    (evaluated, wrote nothing); `…T21-52-08Z-…` and `…T21-53-01Z-…` — the qualification run
+    (the 21:53:01Z artifact is the final one; the 21:52:08Z artifact predates the addition of the
+    distinct-DAG-node reporting fields and is preserved rather than overwritten)
 - Earlier evidence (still valid):
   - `audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/` — first real-execution
     rehearsal on the built execution leg (single-node plans)
@@ -41,9 +42,18 @@ declared import root; counts are per suite and are not extrapolated.
 - E3 production rehearsal (Stage-1 path, isolation, E1/E2 boundary): 24 collected / 24 passed / exit 0
 - E3 production execution leg (dispatch, verification gating, DAG/evidence persistence): 18 collected / 18 passed / exit 0
 - E3 production execution rehearsal driver (stubbed providers, isolated DB): 10 collected / 10 passed / exit 0
+- E3 evidence-backed qualification (recorded-evidence harness, isolated DB): 13 collected / 13 passed / exit 0 (new in the 21:53:37Z run)
 - E4 resource continuity + E5 safe mode (combined suite): 37 collected / 37 passed / exit 0
 - Remote queue (isolated suite): 30 collected / 30 passed / exit 0
 - Single-run totals: 323 collected, 323 passed, 0 failed, 0 errors, 0 skipped across 10 suites
+
+**Current baseline (2026-09-23T21:53:37Z, `scripts/evidence_runner.py --label
+e3-image-diagnosis-and-qualification`):** 12 suites, 364 collected / 364 passed / 0 failed /
+0 errors / 0 skipped, every suite exit 0, at code SHA `4da92eb`. The delta against the
+21:33:19Z run (11 suites / 351) is exactly +1 suite / +13 tests:
+`exec-brain/tests/test_e3_qualification_evidence.py` (13) — the evidence-backed qualification
+harness suite. Every other suite count is unchanged. Evidence:
+`audits/evidence/2026-09-23T21-53-37Z-e3-image-diagnosis-and-qualification/`.
 
 **Superseding baseline (2026-09-23T21:33:19Z, `scripts/evidence_runner.py --label
 e3-production-rehearsal-retry-regression`):** 11 suites, 351 collected / 351 passed / 0 failed /
@@ -82,7 +92,10 @@ authoritative figure.
     approval text.
   - Preconditions were nevertheless re-evaluated with evidence — see below.
 - E3 orchestration DB: schema **v2** (live `orchestration.db` upgraded from v1 by the execution leg)
-- Worker-capability states in the live store: none QUALIFIED (no qualification evidence exists)
+- Worker-capability states in the live store: **4 rows** (2026-09-23T21:53Z) — `codex-cli` builder
+  and `integrator` QUALIFIED, `deepseek-v41-flash` builder QUALIFIED, `google-nano-banana-2` vision
+  EVALUATING. Every QUALIFIED row carries a non-zero evidence count and a
+  `worker_capability_event` audit row; `qualified_rows_without_evidence = 0`
 
 ### E3 production execution leg — BUILT AND EVIDENCED (this run)
 
@@ -198,18 +211,84 @@ Runtime deployment was refreshed for the changed modules (`scripts/deploy_e3_run
 `backups/e3-deploy-20260923T213238Z`), and the deployed runtime CLI was re-checked:
 `eb.py e3-status` and `eb.py e3-verify-db` both now report **Schema version: 2** (see defect 5 below).
 
-### Unresolved: Google image worker real dispatch (D)
+### Unresolved: Google image worker real dispatch (D) — DIAGNOSED 2026-09-23T21:49Z, STILL NOT SETTLED
 
-The Google image worker's real dispatch returned a candidate **without an inline image part**; the
-provider reported 17 prompt tokens and no output tokens, so no image was produced or billed. The
-adapter reported this honestly (`no_image_part_in_response`) and the deterministic verifier recorded
-`FAIL`; no qualification or success was invented. Root cause is **not yet determined** (prompt
-wording, `responseModalities` handling, or a provider-side block are all consistent with the
-observed response). One earlier, separate smoke test of this adapter did produce a decodable
-1024×1024 image, so the adapter itself is not known-broken. A single extra diagnostic call was
-**not** spent, to respect the bounded-usage instruction; the executor now records `finish_reason`,
-image mime/dims/size and `prompt_feedback` on every attempt so the next run is diagnosable from
-evidence alone.
+Original failure (2026-09-23T21:07Z, dispatch `gem-d8c43b8cb447`): the real dispatch returned a
+candidate **without an inline image part**; the provider reported 17 prompt tokens and **no output
+tokens**, so no image was produced. The adapter reported this honestly
+(`no_image_part_in_response`) and the deterministic verifier recorded `FAIL`.
+
+Bounded diagnosis (2026-09-23T21:49Z, evidence
+`audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/`). **Exactly one** additional real
+Google image call was spent, on the **identical** request (same objective, same adapter path), and
+the failure **did not reproduce**:
+
+- dispatch `gem-2a656cbf22c2`, `status=COMPLETED`, `error=None`;
+- `finish_reason = STOP`, `prompt_feedback = None`, `candidate_count = 1`,
+  `candidate_finish_reasons = ['STOP']`;
+- `response_part_kinds = ['inlineData:image/jpeg']` — a real image part, no text part;
+- `image_mime = image/jpeg`, `image_dims = (1024, 1024)`, `image_size_bytes = 434365`,
+  `image_decode_ok = True`;
+- provider usage: `promptTokenCount 17`, `candidatesTokenCount 1383`,
+  `totalTokenCount 1400`, candidate IMAGE-modality tokens 1120;
+- the deterministic verifier recorded `PASS` and the node persisted `COMPLETE`;
+- E2 row `obs-20260923-40a19c78` written through the public `governor.record_request()`.
+
+**Recorded conclusion (not an interpretation):** the earlier no-image response is **intermittent**;
+it is *not* explained by the request shape, since the same shape now returns a decodable image with
+normal provider-reported output tokens. **Remaining unknown:** the trigger of that single
+intermittent response. One observation cannot distinguish provider-side variability from a transient
+capacity or content-moderation condition, and this run does **not** claim the worker is stable. The
+successor task
+`agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23` (staged in
+`remote-queue/pending/`) owns a bounded repeat series to measure the recurrence rate and a controlled
+comparison of the request shape.
+
+Two further facts recorded without interpretation: the objective asked for a **64×64** image and the
+provider returned **1024×1024**, so the declared contract ("image decoded") passed while the
+prompt-stated size was demonstrably **not** honoured — image size is not under prompt control here.
+The earlier attempt's node row in `dag_node` now reads `COMPLETE` because the rehearsal reuses node
+ids and `dag_node` is upserted; the historical **failure remains on record** in `performance_evidence`
+(`evidence-53374aa1dde4`, `final_success=0`, `failure_attribution=verification_fail`).
+
+### Evidence-backed worker qualification (NEW — 2026-09-23T21:53Z)
+
+Harness: `exec-brain/e3_qualification_benchmark.py::EvidenceBackedBenchmark`, driven by
+`scripts/e3_qualification_from_evidence.py`. Evidence:
+`audits/evidence/2026-09-23T21-53-01Z-e3-qualification-from-evidence/`.
+
+**No provider call is spent**: every check reads rows that already exist in the live
+`orchestration.db` (`performance_evidence`, cross-checked against `dag_node`). The previously
+synthetic `ColdStartBenchmark` is now explicitly a *fixture* harness — it marks every result
+`evidence_backed=False`, can never return `PASS`, and can never map to `QUALIFIED`
+(`registry_state_for()` returns `UNPROVEN` for any non-evidence-backed result).
+
+Qualification bar (stated in the artifact, applied to recorded executions only): at least
+`MIN_RECORDED_PASSES = 2` verified passes over at least `MIN_RECORDED_EXECUTIONS = 2` recorded
+executions, with at least `MIN_FIRST_PASS_PASSES = 1` first-pass pass. Rationale recorded in the
+artifact: a single observation cannot distinguish a capability from a lucky first attempt, and a
+worker that has since recovered must not be permanently blocked by an earlier failed attempt.
+
+| Worker | Role (task_family `code`) | Recorded executions | Verified passes | First-pass | Recorded failures | Result | Registry state |
+|---|---|---|---|---|---|---|---|
+| codex-cli | builder | 3 | 3 | 3 | 0 | pass | **QUALIFIED** |
+| codex-cli | integrator | 2 | 2 | 2 | 0 | pass | **QUALIFIED** |
+| deepseek-v41-flash | builder | 8 | 8 | 3 | 0 | pass | **QUALIFIED** |
+| google-nano-banana-2 | vision | 2 | 1 | 1 | 1 | inconclusive | **EVALUATING** |
+
+The Google vision row is deliberately **not** qualified: only 1 of its 2 recorded executions passed,
+and the bar needs ≥ 2 verified passes. `qualified_rows_without_evidence = 0`, and
+`CapabilityRegistry.record_qualification` raises rather than write a `QUALIFIED` row with zero
+evidence (asserted by a test). Each decision wrote a `worker_capability_event` audit row
+(`previous_state` → `new_state`, actor `e3-qualification-from-evidence`, model identity, evidence
+references).
+
+Honesty caveat recorded in the artifact: one `performance_evidence` row is one recorded execution
+outcome, and rehearsal plans reuse node ids (`dag_node` is upserted), so several rows can share a
+`dag_node_id`; the row count is not a count of distinct DAG nodes, and both figures are reported.
+The static `worker_registry.py` fields stay `qualification: UNPROVEN` (they are the roster default
+and are asserted by tests); each affected worker now carries an additive `qualification_source` field
+pointing at the `capability_registry` as the evidence-backed state of record.
 
 ### Defects found and fixed this run
 
@@ -245,19 +324,39 @@ evidence alone.
    `null` ("not evaluated") and a `scenarios_requested` map is written into the report; the first
    affected artifact is preserved under `audits/evidence/superseded/` with a `SUPERSEDED.md`.
 
+## Owner throughput directive (arrived mid-run — 2026-09-23T22:50Z)
+
+Owner commit `1310440` ("owner: prioritize completion over token conservation") was pushed to the
+authority file while this task was executing. It states that for the completion sprint engineering
+must **not** be optimised for token conservation or provider cost, and gives the priority order
+correctness/truthfulness → completion/deployment readiness → execution speed and unattended
+continuity → reliability/recoverability → token efficiency. It explicitly does **not** authorise
+weakening gates or fabricating completion.
+
+Effect on this task: none of its recorded results change. This task's live contract independently
+capped the Google image diagnosis at **one** additional bounded call, so exactly one was spent; the
+directive was received after that call and does not retroactively widen a contract that was already
+authoritative. The next task should read the directive in full and may use DeepSeek aggressively
+where it is the appropriate worker, while keeping every task bounded enough to avoid hangs.
+
 ## Worker / provider state
 
-Smoke readiness is not qualification; qualification is evidence-driven.
+Smoke readiness is not qualification; qualification is evidence-driven. Qualification below is the
+recorded `capability_registry` state (task_family `code`), derived from real executions only — see
+the evidence-backed qualification section above.
 
 - Codex CLI: routable=true; executed on the real path (scenario C and, in the 21:32:41Z re-run,
   scenario F node 2 under a dependency gate, COMPLETE); served model identity **UNKNOWN**; usage not
-  exposed by the CLI; E2 linkage VERIFIED; qualification UNPROVEN
+  exposed by the CLI; E2 linkage VERIFIED; **qualification: builder QUALIFIED (3/3/3), integrator
+  QUALIFIED (2/2/2)**
 - DeepSeek (`deepseek-flash`): routable=true; executed on the real path (scenarios A and B, plus
   scenario F node 1 — rejected then repaired — COMPLETE); provider-returned usage captured;
-  E2 linkage VERIFIED; qualification UNPROVEN
-- Google image worker (`gemini-3.1-flash-image`): routable=true; **real dispatch failed this run**
-  (scenario D, provider error, no image produced); E2 linkage row written (status `error`);
-  qualification UNPROVEN
+  E2 linkage VERIFIED; **qualification: builder QUALIFIED (8 recorded executions / 8 verified passes
+  / 3 first-pass, 0 failures)**
+- Google image worker (`gemini-3.1-flash-image`): routable=true; the 21:07Z real dispatch failed with
+  no image part, and the bounded 21:49Z re-dispatch of the identical request **succeeded** (decodable
+  1024×1024 JPEG). The failure is intermittent and its trigger is an open unknown.
+  **qualification: vision EVALUATING (2 recorded executions, 1 verified pass)** — not qualified
 - Remaining seven generic API workers (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0,
   MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3): adapters exist; owner-local credentials and live
   readiness evidence outstanding; routable=false — and correctly refused by the execution leg
@@ -305,12 +404,12 @@ instruction irrespective of the results below.
 
 | # | Precondition | Result | Evidence |
 |---|---|---|---|
-| 1 | E1/E2/E3/E4/E5 relevant regressions pass | MET | 11 suites, 351/351, 0 failed, exit 0, SHA `bf48a2b` (`…T21-33-19Z-e3-production-rehearsal-retry-regression`) |
-| 2 | Production rehearsal passes | **PARTIALLY MET** | the execution leg now runs real workers end-to-end including a **decomposed multi-worker plan** (scenario F: 2 nodes, 2 distinct workers, per-node deterministic verification, rejection → REWORK → targeted repair → re-verify, dependency-gated dispatch) with persisted DAG state/evidence rows and E2 linkage, plus the refusal path; the **Google image real dispatch remains failed/unresolved** (not re-spent here; owned by the pending image-diagnosis task) |
-| 3 | No unresolved critical integrity/privacy/safety defect | MET (in the E3 path) | nodes cannot complete without a verification PASS (22 tests assert the leg's truth rules, including a dependency-gated multi-node test); refusal path spends no provider call; raw objectives stored only as hashes; simulated evidence provably cannot reach the production stores (fail-closed + hashes incl. WAL); live stores hold no simulated row and no QUALIFIED claim; E1/E2 boundary scan clean. 4 defects found and fixed this run (above) |
-| 4 | Worker routing/qualification state evidence-driven | MET | `routable` still derives from smoke PASS + E2 linkage; the live `capability_registry` is still empty (no QUALIFIED anywhere); the rehearsal consumed no QUALIFIED claim; a not-requested scenario is no longer reported as passing |
-| 5 | Rollback/recovery available | MET | `scripts/deploy_e3_runtime.py` backs up every overwritten file with a SHA-256 manifest and a documented `--restore` (this run: `backups/e3-deploy-20260923T213238Z`); the pre-patch `eb.py` is backed up; the E3 store is separate from E1/E2 |
-| 6 | State/evidence truthfully updated | MET | this file + `full_build_tracker.md` + the run's evidence artifacts, including the superseded artifact and its reason |
+| 1 | E1/E2/E3/E4/E5 relevant regressions pass | MET | 12 suites, 364/364, 0 failed, 0 errors, 0 skipped, every suite exit 0, SHA `4da92eb` (`…T21-53-37Z-e3-image-diagnosis-and-qualification`) |
+| 2 | Production rehearsal passes | **PARTIALLY MET (improved)** | the execution leg runs real workers end-to-end including a **decomposed multi-worker plan** (scenario F: 2 nodes, 2 distinct workers, per-node deterministic verification, rejection → REWORK → targeted repair → re-verify, dependency-gated dispatch) with persisted DAG state/evidence rows and E2 linkage, plus the refusal path; the Google image worker's earlier real dispatch **failure did not reproduce** on the identical request under a bounded single-call diagnosis (200, decodable 1024×1024 JPEG, deterministic verifier PASS), so the previously "failing" image path now has a recorded success — **but the failure was intermittent and its trigger is still an open unknown**, and the prompt-stated image size was not honoured. Not settled here |
+| 3 | No unresolved critical integrity/privacy/safety defect | MET (in the E3 path) | nodes cannot complete without a verification PASS (tests assert the leg's truth rules, incl. dependency-gated multi-node execution); refusal path spends no provider call; raw objectives stored only as hashes; simulated evidence provably cannot reach the production stores (fail-closed + hashes incl. WAL); live stores hold no simulated row and **no QUALIFIED row without recorded evidence** (`qualified_rows_without_evidence = 0`; the registry now *refuses* to write one); E1/E2 boundary untouched — this run wrote only to the E3 store, and the qualification/regression steps spent **no** provider calls |
+| 4 | Worker routing/qualification state evidence-driven | MET (strengthened) | `routable` still derives from smoke PASS + E2 linkage; qualification is now derived **only** from recorded `performance_evidence` via `EvidenceBackedBenchmark`, with the fixture harness structurally unable to produce a qualification; 3 scopes QUALIFIED with recorded evidence counts and audit events, 1 left EVALUATING because the evidence does not clear the bar; the static roster field is not used as the qualification source |
+| 5 | Rollback/recovery available | MET | `scripts/deploy_e3_runtime.py` backs up every overwritten file with a SHA-256 manifest and a documented `--restore` (this run: `backups/e3-deploy-20260923T214919Z`, `…T215200Z`, `…T215301Z`, `…T215329Z`); the pre-patch `eb.py` is backed up; the E3 store is separate from E1/E2 |
+| 6 | State/evidence truthfully updated | MET | this file + `full_build_tracker.md` + this run's evidence artifacts, including the dry-run artifact, the earlier qualification artifact superseded by a field addition (preserved, not overwritten), and the explicitly recorded remaining unknown |
 
 **Exact remaining conditions (recorded, not resolved):**
 
@@ -319,22 +418,30 @@ instruction irrespective of the results below.
    directive (`a58549c` / `2d5f332` / `d7e718c`) defers local Stage 2 completion until **after
    Mukund configures all remaining provider credentials on 2026-09-24 and the readiness gates are
    re-run**. Enabling now requires that separate, explicit owner step.
-2. **Google image worker real dispatch fails** — provider returned no image part; root cause
-   undetermined (unresolved, above).
-3. **Qualification evidence is still absent for every worker** (smoke readiness ≠ qualification), so
-   routing still relies on `EVALUATING` state for low-risk work. The cold-start benchmark work is
-   owned by the pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23`.
+2. **The Google image worker failure is intermittent, not resolved** — one identical request failed
+   with no image part, the next returned a decodable 1024×1024 JPEG. The trigger is unknown and a
+   bounded repeat series is required before the worker can be called stable or (re)qualified for the
+   vision role. Prompt-stated image size is also not honoured (64×64 requested, 1024×1024 returned).
+3. **Qualification is now partial, not complete** — 3 of 4 evidence-bearing (worker, role) scopes are
+   QUALIFIED for task_family `code`; the vision role is EVALUATING, and the seven credential-missing
+   workers have no execution evidence at all (a check that cannot be evaluated is never counted as a
+   pass).
 4. **E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain
    unevidenced** — the contract gates them behind Stage 2 enablement, which is disabled.
 
-Resolved from the previous list: *"the real dispatch path has not been exercised on a decomposed
-multi-worker plan"* — now evidenced (scenario F above).
+Resolved from the previous list: *"Qualification evidence is still absent for every worker"* — now
+partially resolved (3 scopes QUALIFIED from recorded evidence, with the bar, counts and audit events
+recorded). The previously listed item *"Google image worker real dispatch fails — root cause
+undetermined"* is now **partially** resolved: the diagnosis was made and the failure did not
+reproduce, so the recorded state is "intermittent, trigger unknown" rather than "fails".
 
 ## Current blockers / owner dependencies
 
 - E3 Stage 2 local enablement: **blocked by explicit current owner instruction** (not an engineering
   gap any more — the execution leg now exists and is evidenced).
-- Google image worker real dispatch: unresolved provider-side failure (engineering, not owner action).
+- Google image worker real dispatch: **intermittent** — the identical request failed once (no image
+  part) and succeeded on the bounded re-dispatch. The trigger is unknown; a bounded repeat series is
+  required. Engineering, not owner action.
 - Seven provider credentials / account readiness steps remain owner/provider dependent
 - Deployment architecture: intentionally deferred by owner until local operation is proven. The
   authority records laptop-primary + GitHub control plane + VPS watchdog/failover as the current
@@ -343,14 +450,17 @@ multi-worker plan"* — now evidenced (scenario F above).
 
 ## Next non-blocked priority
 
-1. The pending `agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23` owns: the Google
-   image real-dispatch diagnosis (≤1 bounded call) and the cold-start qualification benchmark. It
-   should **consume** this run's decomposed multi-worker evidence (scenario F) rather than repeating
-   it — that scenario is now evidenced on the real path.
+1. The successor staged by this run —
+   `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23` (pending): a bounded
+   repeat series to measure how often the no-image response recurs, a controlled comparison of the
+   image request shape, and the truth about whether a requested image size can be honoured. Then
+   re-run the evidence-backed qualification for the vision role.
 2. After Mukund configures the remaining provider credentials on 2026-09-24: re-run the full local
-   Stage 2 readiness gate and record the result (owned by the successor task staged by this run).
-3. Qualification evidence for the routable workers (cold-start benchmark harness) so routing stops
-   depending on `EVALUATING`.
+   Stage 2 readiness gate and record the result (owned by the pending
+   `agent-e3-stage2-readiness-gate-rerun-2026-09-24`, which consumes this run's diagnosis and
+   qualification results rather than repeating them).
+3. Extend qualification evidence for the remaining roles/workers as real execution evidence arrives;
+   the harness and the bar are now in place, so this is evidence collection, not new engineering.
 4. E4 checkpoint/failover and E5 convergence/safe-mode drill evidence on real execution paths
    (currently gated: the contract only asks for these if Stage 2 is enabled, which it is not).
 5. Provider onboarding resumes immediately when owner-local credentials are supplied.
