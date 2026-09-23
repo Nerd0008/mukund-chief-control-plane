@@ -6,16 +6,39 @@ set "POLLER=%REPO_ROOT%\remote_queue\poller.py"
 set "TASK_NAME=HermesRemoteQueuePoller"
 
 if "%~1"=="" goto :install
+if /i "%~1"=="install" goto :install
+if /i "%~1"=="repair" goto :repair
+if /i "%~1"=="run" goto :run
 if /i "%~1"=="uninstall" goto :uninstall
 if /i "%~1"=="status" goto :status
 goto :install
 
 :install
-schtasks /create /tn "%TASK_NAME%" /tr "%PYTHON% %POLLER%" /sc minute /mo 2 /f /rl highest
-if %ERRORLEVEL% neq 0 echo Failed - run as administrator
+echo Installing %TASK_NAME% as an interactive one-shot task every 2 minutes...
+schtasks /create /tn "%TASK_NAME%" /tr "\"%PYTHON%\" \"%POLLER%\" --once" /sc minute /mo 2 /f /rl highest /it
+if %ERRORLEVEL% neq 0 (
+  echo Failed - run this installer from an elevated terminal while logged in.
+  exit /b 1
+)
+echo Installed successfully.
+goto :eof
+
+:repair
+echo Repairing %TASK_NAME%...
+schtasks /end /tn "%TASK_NAME%" >nul 2>&1
+schtasks /delete /tn "%TASK_NAME%" /f >nul 2>&1
+call "%~f0" install
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+call "%~f0" run
+goto :eof
+
+:run
+echo Starting %TASK_NAME% now...
+schtasks /run /tn "%TASK_NAME%"
 goto :eof
 
 :uninstall
+schtasks /end /tn "%TASK_NAME%" >nul 2>&1
 schtasks /delete /tn "%TASK_NAME%" /f
 goto :eof
 
