@@ -17,7 +17,7 @@
   "depends_on": [
     "Hermes remote GitHub queue implementation complete"
   ],
-  "status": "pending",
+  "status": "blocked",
   "stop_conditions": [
     "owner credentials or provider account action required",
     "explicit Stage 2 production approval required",
@@ -25,5 +25,11 @@
     "irreversible/destructive action requires owner approval",
     "architecture/safety decision required"
   ],
-  "notes": "Do not wait idle for the seven provider keys. Those are tracked separately in tasks-or-issues/owner-action-provider-keys-on-return.md."
+  "notes": "Do not wait idle for the seven provider keys. Those are tracked separately in tasks-or-issues/owner-action-provider-keys-on-return.md.",
+  "blocked_at": "2026-09-23T15:21:04.116501Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "No handler for task: bridge-validation-and-autonomous-continuation",
+    "continue_without": "Other tasks continue"
+  }
 }
