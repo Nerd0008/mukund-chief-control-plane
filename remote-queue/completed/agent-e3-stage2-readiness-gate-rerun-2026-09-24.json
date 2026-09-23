@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "completed",
   "prerequisites": [
     "agent-e3-local-production-rehearsal-retry-2026-09-23 is terminal in completed/ OR blocked/ with its substantive rehearsal evidence landed and independently verifiable. Current truthful state: it is blocked only because the Hermes dispatcher exceeded the 1200s hard task bound after landing the formal multi-worker rehearsal evidence, state updates, regression results and successor handoff.",
     "agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23 has reached a terminal state, or is clearly still running (in which case do not race it) - its Google image diagnosis and qualification-benchmark results are the inputs for two readiness preconditions",
@@ -45,5 +45,48 @@
       "audits/evidence/2026-09-23T21-53-01Z-e3-qualification-from-evidence/"
     ],
     "successor_staged_by_that_task": "agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23"
+  },
+  "completed_at": "2026-09-23T22:39:36.248865Z",
+  "result": {
+    "status": "completed",
+    "summary": "Local E3 Stage 2 readiness gate re-run completed with executable evidence; Stage 2 / production dispatch remains NOT ENABLED. Credentials (presence-only probe, no value read or logged): 0 of the 7 credential-missing providers are configured \u2014 mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3 all absent from Windows Credential Manager and env; the 3 existing workers verified present (codex-cli chatgpt login, google-nano-banana-2 + deepseek-v41-flash credential_manager). Full regression via scripts/evidence_runner.py --label e3-stage2-readiness-gate-rerun: 12 suites, 364 collected / 364 passed / 0 failed / 0 errors / 0 skipped, every suite exit 0, code SHA 56d923b. The real-path production rehearsal (2026-09-23T21:32:41Z decomposed multi-worker plan) was CONSUMED, not repeated, per the contract (sha256 88212b70\u2026; 0 failed checks; 7 bounded real calls; google_image_complete=None, not a pass). Google image worker: still INTERMITTENT/not settled (routable true, vision EVALUATING, 2 recorded executions / 1 verified pass). Qualification re-derived read-only from recorded evidence: codex-cli builder QUALIFIED 3/3/3, codex-cli integrator QUALIFIED 2/2/2, deepseek-v41-flash builder QUALIFIED 8/8/3, google-nano-banana-2 vision EVALUATING; qualified_rows_without_evidence=0. Fresh isolation + boundary proof: all production writes refused fail-closed, all 3 stores byte-identical before/after including -wal/-shm sidecars, isolated sink written outside the production root, E1/E2 static scan clean:true with 0 direct SQL violations and E2 reached only via governor.record_request(). Rollback: deploy --restore path present, 14 backup dirs with manifests, 0 runtime E3 modules missing, orchestration schema v2. New deterministic gate script scripts/e3_stage2_readiness_gate.py made ZERO provider calls. Verdict: all three enablement conditions fail \u2014 (a) credentials 0/7, (b) the only unmet readiness criterion is the Google image worker intermittency (all others MET), (c) owner authorization is conditional on (a) and therefore does not yet apply. E4/E5 real-path drills remain gated behind Stage 2 and were not run. Exactly one successor staged: agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24 (pending).",
+    "owner_action_required": "Configure the remaining seven provider credentials locally (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0/Nous, MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3) via Windows Credential Manager targets (mistral, glm, qwen, nous, minimax, stepfun, hunyuan) or the matching env vars \u2014 never via GitHub/queue/logs. Then the staged successor agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24 will re-run the gate and enable LOCAL Stage 2 only if all three conditions hold. Resolving the Google image worker intermittency (owned by the pending agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23) is the remaining engineering item for condition (b).",
+    "blocker_category": "credentials",
+    "commits": [
+      "e61183c e3: Stage 2 readiness gate re-run - NOT ENABLED (0/7 provider keys), deterministic gate + evidence (pushed, origin/main)"
+    ],
+    "tests": [
+      "python scripts/evidence_runner.py --label e3-stage2-readiness-gate-rerun -> 12 suites, 364 collected / 364 passed, 0 failed, 0 errors, 0 skipped, every suite exit 0, code SHA 56d923b",
+      "python scripts/e3_stage2_readiness_gate.py -> Stage 2 NOT ENABLED; condition_a=false (0/7 credentials), condition_b=false (only unmet criterion: Google image intermittency), condition_c=false; 0 real provider calls",
+      "credential presence probe (generic_openai_adapter._resolve_auth + gemini/deepseek keyaccess presence checks) -> 0/7 configured; codex-cli, google-nano-banana-2, deepseek-v41-flash present",
+      "rehearsal-evidence isolation probe (EvidenceIsolationGuard before/after SHA-256 incl. -wal/-shm) -> all production writes refused fail-closed, stores unchanged true, isolated sink outside production root true",
+      "E1/E2 boundary static scan (e3_production_rehearsal.scan_e1_e2_boundary) -> clean: true, direct_sql_violations: [], E2 reached only via governor.record_request()",
+      "worker qualification read-only from recorded performance_evidence -> 3 scopes QUALIFIED, 1 EVALUATING, qualified_rows_without_evidence=0; 0 provider calls",
+      "real-path rehearsal evidence consumed (sha256 88212b70\u2026) -> 0 failed checks, multi-node/dependency-gate/isolation/E1-E2 checks true, google_image_complete None",
+      "py_compile scripts/e3_stage2_readiness_gate.py -> OK"
+    ],
+    "changed_files": [
+      "scripts/e3_stage2_readiness_gate.py",
+      "audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/evidence.json",
+      "audits/evidence/2026-09-23T22-35-32Z-e3-stage2-readiness-gate-rerun/evidence.md",
+      "audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/evidence.json",
+      "audits/evidence/2026-09-23T22-37-29Z-e3-stage2-readiness-gate-verdict/evidence.md",
+      "audits/evidence/superseded/2026-09-23T22-36-36Z-e3-stage2-readiness-gate-rerun-superseded-by-gate-verdict/evidence.json",
+      "audits/evidence/superseded/2026-09-23T22-36-36Z-e3-stage2-readiness-gate-rerun-superseded-by-gate-verdict/evidence.md",
+      "audits/evidence/superseded/2026-09-23T22-37-09Z-e3-stage2-readiness-gate-rerun-superseded-by-gate-verdict/evidence.json",
+      "audits/evidence/superseded/2026-09-23T22-37-09Z-e3-stage2-readiness-gate-rerun-superseded-by-gate-verdict/evidence.md",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "remote-queue/pending/agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24.json",
+      "remote-queue/logs/queue.log"
+    ],
+    "remaining": [
+      "Stage 2 / production dispatch stays disabled: the exact remaining conditions are (a) 0/7 provider credentials configured, (b) Google image worker real-dispatch intermittency unresolved, (c) owner authorization conditional on (a).",
+      "Owner must configure the seven provider credentials locally; then agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24 re-runs the gate (reusing scripts/e3_stage2_readiness_gate.py) and enables LOCAL Stage 2 only if all three conditions hold.",
+      "Google image worker stability remains owned by the pending agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23 (bounded repeat series); the vision role stays EVALUATING.",
+      "E4 checkpoint/failover and E5 convergence/safe-mode drills on real execution paths remain gated behind Stage 2 enablement and were not run.",
+      "Newly configured providers will still need per-provider live identity/model discovery, a harmless smoke test and E2 linkage before routable=true \u2014 presence of a credential alone is not execution readiness.",
+      "VPS cutover and deployment-architecture finalisation remain out of scope and unauthorized."
+    ]
   }
 }
