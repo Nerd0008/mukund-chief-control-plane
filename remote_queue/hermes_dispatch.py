@@ -99,11 +99,38 @@ Use exactly this shape:
 
 
 def _parse_response(raw: str) -> Dict[str, Any]:
-    """Parse Hermes' final-only response without ever persisting raw output on failure."""
+    """Parse Hermes' final response without persisting raw output on failure.
+
+    Hermes sometimes wraps the requested JSON in a short prose/fenced response
+    even in final-only mode. Accept the first embedded JSON object that carries
+    a valid task status, while still failing closed for arbitrary prose.
+    """
     text = raw.strip()
+    result = None
+
+    # Fast path: exact JSON object.
     try:
-        result = json.loads(text)
+        candidate = json.loads(text)
+        if isinstance(candidate, dict):
+            result = candidate
     except json.JSONDecodeError:
+        pass
+
+    # Tolerate a fenced/embedded JSON object without storing surrounding prose.
+    if result is None:
+        decoder = json.JSONDecoder()
+        for idx, ch in enumerate(text):
+            if ch != "{":
+                continue
+            try:
+                candidate, _ = decoder.raw_decode(text[idx:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(candidate, dict) and candidate.get("status") in {"completed", "blocked"}:
+                result = candidate
+                break
+
+    if result is None:
         # Be conservative: do not write unstructured model output into GitHub.
         digest = hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
         return {
