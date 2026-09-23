@@ -1,0 +1,93 @@
+{
+  "task_id": "agent-visible-worker-console-quickedit-hardening-2026-09-23",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "run_utc": "2026-09-23T23:28:11Z",
+  "base_sha": "2fbe2f40bbd2492e59bced8c9e67220e76eea295",
+  "change_commit": "7439acd3910b6d4011d02c0587a6bdd6a0476c23",
+  "status": "completed",
+  "objective_1_quickedit": {
+    "status": "implemented_and_tested",
+    "root_cause": "Observed worker window title 'Select Administrator: Hermes Remote Worker ...' is the classic console mark/QuickEdit title prefix. In a classic Windows console, mark/select mode suspends the process on its next console write. The worker printed progress and its watchdog from the same thread, so both the worker and the 300s no-progress watchdog could be suspended while the dispatched task had already landed its commit.",
+    "mechanism": "remote_queue/visible_worker.py: disable_quick_edit_for_this_console() opens this process's own console input buffer via CreateFileW(\"CONIN$\"), reads the input mode, clears ENABLE_QUICK_EDIT_MODE (0x0040), ensures ENABLE_EXTENDED_FLAGS (0x0080), and verifies the result. Applied before the first progress line and before the Hermes child is launched.",
+    "scope_limits": [
+      "this worker console only (scope=this-process-console-only)",
+      "worker window stays visible; CREATE_NEW_CONSOLE launch path unchanged",
+      "no global/registry console preference read or written",
+      "no AttachConsole/AllocConsole/FreeConsole/GetConsoleProcessList, no other process console touched (source-inspection test)",
+      "on failure the exact limitation is printed and the worker continues (stop condition honoured)"
+    ],
+    "secondary_fix": "Console output is serialised through a bounded writer thread (_ConsoleWriter) and the no-progress watchdog also runs in its own thread, terminating the Hermes child tree before it prints anything; both firing paths are idempotent. The in-loop watchdog backstop, 300s default, HERMES_REMOTE_IDLE_TIMEOUT override, exit code 124 and taskkill /PID <child> /T /F semantics are unchanged.",
+    "real_console_evidence": {
+      "command": "python scripts/quickedit_console_probe.py",
+      "result": {
+        "applied": true,
+        "changed": true,
+        "reason": "ok",
+        "mode_before": 503,
+        "mode_after": 439,
+        "quick_edit_before": true,
+        "quick_edit_after": false,
+        "scope": "this-process-console-only"
+      },
+      "interpretation": "503 -> 439 is exactly the QuickEdit bit 0x40 cleared on a live console with all other input-mode bits preserved.",
+      "note": "The probe changed only the probing process's own console instance (the Hermes terminal session console). No HKCU/registry value, shortcut property, or owner-level console preference was written."
+    }
+  },
+  "objective_2_bounded_retry": {
+    "status": "implemented_and_tested",
+    "policy_module": "remote_queue/retry_policy.py",
+    "max_retries": 2,
+    "max_attempts": 3,
+    "retryable_categories": ["execution_error"],
+    "non_retryable_categories": ["credentials", "owner_approval", "architecture", "safety", "irreversible_action", "external_provider"],
+    "unknown_category_behaviour": "park (fail closed; transient cannot be proven)",
+    "bound": "plan_retry() cannot return retry beyond MAX_ATTEMPTS, and poller._run_task_with_bounded_retry() additionally refuses to re-execute a task whose persisted budget is exhausted: no input can produce an unbounded loop.",
+    "audit_state": "remote_queue/queue_schema.py record_execution_attempt() persists execution_attempts[] and retry_state{attempts_used, retries_used, max_attempts, max_retries, last_blocker_category, next_action, reason} on remote-queue/running/<task_id>.json before the next attempt and publishes it with the normal queue commit path; read_retry_state()/next_attempt_number() resume the same bounded count after a restart.",
+    "landed_work_preserved": "Retries are labelled (visible console 'Attempt: N', dispatch --attempt) and the generated prompt gains a RETRY CONTEXT block instructing the agent to re-inspect repository/queue state, keep commits/evidence from earlier attempts, resume from the smallest unfinished unit, and report a genuine deterministic blocker instead of redoing work. The running task contract file is never rewritten.",
+    "stage2_anti_loop_rule": "Unchanged and covered by a regression test: a blocked result with blocker_category=credentials parks on the first attempt."
+  },
+  "tests": [
+    {"command": "python -m py_compile remote_queue/visible_worker.py remote_queue/hermes_dispatch.py remote_queue/poller.py remote_queue/queue_schema.py remote_queue/retry_policy.py", "result": "COMPILE_OK"},
+    {"command": "python -m unittest remote_queue.tests.test_console_quickedit -v", "result": "12/12 passed, exit 0"},
+    {"command": "python -m unittest remote_queue.tests.test_worker_retry -v", "result": "24/24 passed, exit 0"},
+    {"command": "python -m unittest remote_queue.tests.test_bridge_watchdog -v", "result": "12/12 passed, exit 0 (pre-existing suite unaffected)"},
+    {"command": "python -m unittest remote_queue.tests.test_queue -v", "result": "30/30 passed, exit 0"},
+    {"command": "python -m unittest discover -s remote_queue/tests (3 consecutive runs)", "result": "78/78 passed each run, exit 0 (no flakiness in the blocked-console watchdog test)"},
+    {"command": "python scripts/evidence_runner.py --label quickedit-and-two-retry-hardening", "result": "14 suites, 400 tests collected, 400 passed, 0 failed, exit 0; evidence.json code_sha=2fbe2f4 (HEAD at run time, changes still uncommitted)"},
+    {"command": "python scripts/quickedit_console_probe.py", "result": "applied=true, quick_edit_after=false on a real console"}
+  ],
+  "key_regressions": [
+    "test_watchdog_still_fires_and_records_124_while_console_writes_block: with the console sink deliberately blocked, the worker still kills the Hermes child, writes 124 to its exit file, writes no fabricated response, and returns in under 15s.",
+    "test_console_writer_never_blocks_its_caller_and_counts_drops: say() never blocks against a stalled console; drops are counted; the bounded drain always returns.",
+    "test_disables_quick_edit_on_this_console_only: exact mode write to this process's own handle, unrelated input modes preserved, handle closed; already-clean console not rewritten.",
+    "test_worker_reports_the_exact_limitation_when_no_console_exists: truthful UNAVAILABLE (no-console-attached) line, no write, worker still completes.",
+    "test_recoverable_failure_is_retried_twice_then_blocked: exactly attempts [1,2,3] then blocked with persisted/published retry metadata; never a fourth execution.",
+    "test_deterministic_blockers_park_on_the_first_attempt + test_stage2_missing_key_gate_is_not_retried: one attempt only.",
+    "test_resume_continues_from_persisted_attempt_count / test_exhausted_persisted_budget_is_not_re_executed: resume keeps the bound; an exhausted budget never re-runs."
+  ],
+  "changed_files": [
+    "remote_queue/visible_worker.py",
+    "remote_queue/hermes_dispatch.py",
+    "remote_queue/poller.py",
+    "remote_queue/queue_schema.py",
+    "remote_queue/retry_policy.py",
+    "remote_queue/README.md",
+    "remote_queue/tests/test_console_quickedit.py",
+    "remote_queue/tests/test_worker_retry.py",
+    "scripts/evidence_runner.py",
+    "scripts/quickedit_console_probe.py",
+    "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/hardening_report.md",
+    "audits/evidence/2026-09-23T23-26-56Z-quickedit-and-two-retry-hardening/hardening_checks.json"
+  ],
+  "limitations": [
+    "No automated test drives a real console window; the isolated suites inject a fake console API / blocked sink, and the real-console proof is the separate probe script run once on this host.",
+    "state/current_company_state.md and state/full_build_tracker.md carried unrelated uncommitted work from the parent umbrella run and were deliberately not touched.",
+    "No scheduled task, worker console window, or global console preference was created, stopped, or modified by this work."
+  ],
+  "remaining": [
+    "Independent review of the two new suites and the retry bound before the VPS cutover.",
+    "The umbrella task remote-queue/running/full-operational-build-2026-09-24.json remains in running/ (unchanged by this task) and still needs an owner-driven terminal state."
+  ],
+  "owner_action_required": null,
+  "blocker_category": null
+}
