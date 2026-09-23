@@ -5,3 +5,7 @@ error: Please commit or stash them.
 [2026-09-23T15:21:04.112523Z] Claimed task: bridge-validation-and-autonomous-continuation
 [2026-09-23T15:21:04.112523Z] Handling task: bridge-validation-and-autonomous-continuation
 [2026-09-23T15:21:04.113502Z] Task bridge-validation-and-autonomous-continuation failed: No handler for task: bridge-validation-and-autonomous-continuation
+[2026-09-23T15:23:01.473721Z] Poller starting
+[2026-09-23T15:23:01.530249Z] git pull failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+
