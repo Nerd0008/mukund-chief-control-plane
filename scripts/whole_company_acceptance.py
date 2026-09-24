@@ -364,6 +364,13 @@ STEPS = [
          name="Career Daily Brief status read-out (scheduled task + last brief)",
          kind="local", timeout=600, check=_check_exit0,
          argv=[PY, "career-ops/daily_brief.py", "status"]),
+    dict(id="career_high_recall_discovery", category="career_discovery",
+         name="High-recall semantic discovery pipeline acceptance (two-tier title policy + "
+              "semantic contract + bounded escalation + compare-modes; fixtures only, no live "
+              "source, no provider call, no tracker write)",
+         kind="local", timeout=600, check=_check_exit0,
+         argv=[PY, "career-ops/run_discovery_acceptance.py",
+               "--out-dir", "{ev}/career-discovery"]),
     dict(id="tracker_rollover", category="career_records",
          name="Monthly Tracker Rollover / archive worker acceptance (dated copies only)",
          kind="local", timeout=1800, check=_check_exit0,
@@ -456,6 +463,7 @@ ROSTER_ACCOUNT = [
     ("B22", "Interview Prep Agent", "PASS", "career-ops/interview_prep.py; this run: linkedin_outreach_interview_prep"),
     ("B23", "Career Daily Brief / Pipeline Prioritizer", "PASS", "career-ops/daily_brief.py; this run: career_daily_brief + career_brief_status"),
     ("B24", "Regional Scheduler / run-health monitor", "PASS", "career-ops/install_schedules.py + dept_run_health; this run: regional_jobs_lanes + validate-persistence"),
+    ("B25", "High-Recall Semantic Discovery Pipeline", "PASS", "career-ops/discovery/ (Tier A/B title policy + semantic contract + DeepSeek bulk triage + bounded Codex second pass + funnel metrics + compare-modes); this run: career_high_recall_discovery (fixtures only). Bounded live evidence: audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/"),
     ("C01", "Whole-company Local Acceptance Runner", "PASS", "scripts/whole_company_acceptance.py; this acceptance run's evidence bundle"),
     ("C02", "Owner-Action Consolidator", "PASS", "consolidated order in tasks-or-issues/overnight-owner-actions-2026-09-24.md + the handover's ordered afternoon list"),
     ("C03", "Deployment Prep / Manifest / Restore Agent", "READY_NEEDS_OWNER_CONFIG", "deployments/ manifest, preflight GO, backup/restore drill pass; cutover itself is owner-gated (architecture + VPS details + authorisation)"),
