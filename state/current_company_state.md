@@ -4,8 +4,9 @@
 - Latest evidence run: 2026-09-24T01:30:00Z — **LinkedIn people/network layer completed: networking /
   recruiter / hiring-manager outreach drafts + Interview Prep Agent (B22)** (task
   `agent-linkedin-networking-interview-support-2026-09-23`),
-  `audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/acceptance.json` (+ `.md`) —
-  **27/27 critical checks pass**: three unsent outreach variants each with an explicit unsent state and
+  `audits/evidence/20260924T020000Z-linkedin-outreach-interview-prep/acceptance.json` (+ `.md`) —
+  **27/27 critical checks pass** (run against code SHA `bc6391c`): three unsent outreach variants each
+  with an explicit unsent state and
   per-draft provenance (role/employer taken only from the resolved Career Ops record); interview prep
   pack built from a canonical JobBrief + cited research + the canonical `cv.md`/`profile.yml`
   (every talking point re-read verbatim from `cv.md`, every question marked

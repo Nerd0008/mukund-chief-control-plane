@@ -368,13 +368,14 @@ deterministic re-derivation and its own output records that limitation.
 ## LinkedIn people/network layer: outreach drafts + Interview Prep Agent (2026-09-24T01:30Z)
 
 Task `agent-linkedin-networking-interview-support-2026-09-23` (roster B19, B20, B21, B22).
-Acceptance evidence: `audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/`
-(`acceptance.json` + `acceptance.md`) — **27/27 checks passed, 0 critical failures**. The
-same runner was re-run unchanged as `audits/evidence/20260924T014000Z-linkedin-outreach-interview-prep/`
-(**27/27 again**) and the pre-existing LinkedIn/CV acceptance was re-run against the modified
-workflow as `audits/evidence/20260924T014100Z-cv-linkedin-workflows/` (**23/23, 0 critical
-failures** — no regression). `runtime/career-ops/interview-prep/acceptance/20260924T013000Z/`
-holds the generated JobBrief and pack (runtime state is git-ignored).
+Acceptance evidence (authoritative): `audits/evidence/20260924T020000Z-linkedin-outreach-interview-prep/`
+(`acceptance.json` + `acceptance.md`) — **27/27 checks passed, 0 critical failures**, run against
+code SHA `bc6391c` (recorded in the artifact itself). Earlier runs of the same runner are preserved:
+`…T015000Z-…`, `…T014000Z-…` (27/27 each) and `…T013000Z-…` (27/27, on the pre-test-only revision),
+plus `audits/evidence/20260924T014100Z-cv-linkedin-workflows/` (**23/23, 0 critical failures** — the
+pre-existing LinkedIn/CV acceptance re-run against the modified workflow; no regression).
+`runtime/career-ops/interview-prep/acceptance/20260924T013000Z/` holds the generated JobBrief and pack
+(runtime state is git-ignored).
 
 The B19 read-only intake and the B20 profile/post drafts already existed and were
 evidenced by `agent-cv-cover-letter-linkedin-workflows-2026-09-23`; this task added the
