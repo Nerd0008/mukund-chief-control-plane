@@ -1,0 +1,85 @@
+{
+  "task_id": "agent-job-intelligence-and-application-pack-2026-09-23",
+  "created_at": "2026-09-23T21:34:00Z",
+  "objective": "Build the job-intelligence and application-pack workers: JD analyzer, company/role research brief, CV-tailoring handoff, cover-letter handoff, independent truth/completeness review and deterministic owner submission gate.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Career Ops canonical job record and CV workflow source paths must be identified."
+  ],
+  "allowed_scope": [
+    "Define a structured JobBrief schema: source/provenance, requirements, responsibilities, eligibility, useful keywords, risks/unknowns, company facts with citations/provenance where available.",
+    "Implement JD analysis without converting preferences into facts or inventing requirements.",
+    "Build a company/role research brief interface that can use web/browser tooling when available, and otherwise records research-needed rather than guessing.",
+    "Pass only source-supported facts into CV and cover-letter workflows; preserve canonical owner/profile data.",
+    "Implement an independent Application Pack Reviewer that checks truthfulness, requirement coverage, consistency, formatting/export readiness and unresolved unknowns.",
+    "Implement a Submission Gate that always requires owner approval before any external application action.",
+    "Run a representative local fixture/safe-data acceptance from job record -> JobBrief -> CV draft -> cover-letter draft -> reviewer -> owner gate.",
+    "Update state/tracker and commit/push."
+  ],
+  "stop_conditions": [
+    "No fabricated experience/metrics/certifications/eligibility.",
+    "No external application submission.",
+    "No secrets/private source dumps in GitHub."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-24T00:52:24.686943Z",
+  "result": {
+    "status": "completed",
+    "summary": "Built and evidenced the job-intelligence and application-pack workers (roster B13/B14/B17/B18) for task agent-job-intelligence-and-application-pack-2026-09-23. career-ops/job_intelligence.py + job_brief_schema.json produce a structured JobBrief that is extractive only: every requirement/responsibility/eligibility line is a verbatim posting line with its 1-based source_line and section; desirable/preferred lines are recorded as preferences and can never appear as essential requirements; labelled posting terms (Location:/Right to work:) are routed out of the requirements bucket; candidate_claims is always empty and a first-person-claim scanner fails the build if one appears; an eligibility condition is 'satisfied_by_owner_source' only when a canonical owner source states it (cited by file and line) and is otherwise 'unknown' with a blocker risk (the UK fixture is met by the owner's own profile; a UAE work-permit fixture stays unknown). The research brief interface accepts company facts only with source+citation, rejects uncited facts, and with no provider returns research_needed plus the exact requested list; the http provider is disabled (no owner-approved endpoint) and the browser provider is disabled by the owner GUI-safety directive, so neither is ever launched. Only source_supported_facts are handed to the existing Career Ops CV/cover-letter workflow. career-ops/application_pack_review.py is a separate reviewer module that re-reads artifacts, the posting file and the canonical sources and re-derives truthfulness, requirement coverage (essential vs desirable kept separate), consistency, formatting/export readiness and unresolved unknowns; its own output records that this is independent deterministic re-derivation, not a second model. career-ops/submission_gate.py implements no submission path: 14 external actions are refused and logged, and it refuses blocked reviews, unverified truthfulness, missing approvals, approvals not bound to pack_id+pack_sha256, packs changed after approval, unacknowledged unknowns, and approvals stored inside the repository; a valid external approval yields only approved_pending_owner_manual_submission plus an owner checklist, with external_action_performed false on every decision. The acceptance runner (42/42 checks PASS, 0 critical failures) walks job record -> JobBrief -> research -> handoff -> CV + cover-letter drafts -> reviewer -> tamper proof -> submission gate on labelled synthetic fixtures, and a deliberately falsified pack (invented CV line, invented metric, invented first-person CISSP claim) is blocked. A real defect was found by re-running the suite against the committed revision: brief's overloaded --record flag wrote the generated brief over the job-record fixture it had just read; inputs and outputs are now separate flags, a guard refuses any output path that resolves to an input, the fixture is restored and 3 regression tests were added. No application submitted, no employer/recruiter contact, no browser, no network research; canonical sources and trackers byte-identical before/after; both commits pushed.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "875fe4a career: job intelligence, application pack reviewer, deterministic owner submission gate",
+      "814d88e career: fix job_intelligence CLI writing over its own input; restore fixture",
+      "pushed to origin/main (HEAD 814d88e == origin/main)"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_job_intelligence.py -q -> 41 passed (re-run on the committed revision 814d88e)",
+      "python -m pytest career-ops/tests -q -> 248 passed, 0 failed (was 207 before this task; no regressions)",
+      "python career-ops/run_job_intelligence_acceptance.py -> 42/42 checks, 0 critical failures, verdict PASS (audits/evidence/20260924T005049Z-job-intelligence-and-application-pack/)",
+      "acceptance check: reviewer verdict on an honest pack = pass_with_owner_input_required, truthfulness_verified true, no truthfulness/consistency/formatting blocker",
+      "acceptance check: tampered pack (invented CV line + invented metric + first-person claim) -> verdict block on cv_draft_not_verbatim / cover_letter_free_text / candidate_claim_not_canonical",
+      "acceptance check: every JobBrief requirement/responsibility/eligibility line matches the posting line it cites (0 mismatches); desirable set and essential set disjoint; 5 essential / 4 desirable on the fixture",
+      "acceptance check: UAE work-permit fixture -> eligibility status unknown + blocker risk; UK fixture -> satisfied_by_owner_source citing config/profile.yml#location.authorized_in line 51",
+      "acceptance check: research uncited fact rejected (1 accepted / 1 rejected), no provider -> research_needed, browser+http providers disabled, --allow-network with no enabled provider fetched nothing",
+      "acceptance check: submission gate = awaiting_owner_approval without approval; refused for in-repo approval, stale/hash-mismatched approval, approval vs tampered pack and unverified truthfulness; approved_pending_owner_manual_submission with external_action_performed=false and a written checklist for a valid external approval",
+      "acceptance check: canonical cv.md / config/profile.yml / config/cv-facts.json SHA-256 identical before and after; applications_submitted 0, external_messages_sent 0, browser_launched false, network_research_calls 0",
+      "CLI smoke: schema / brief / validate / research / submission_gate actions / submission_gate guard --action submit_application all exit 0 with the documented JSON, and all input files are byte-identical afterwards",
+      "python scripts/company_inventory.py --json -> exit 0 (roster coverage map updated for B13/B14/B17/B18)",
+      "secret/PII scan over the new evidence and fixtures: clean"
+    ],
+    "changed_files": [
+      "career-ops/job_intelligence.py",
+      "career-ops/job_intelligence_config.json",
+      "career-ops/job_brief_schema.json",
+      "career-ops/application_pack_review.py",
+      "career-ops/submission_gate.py",
+      "career-ops/run_job_intelligence_acceptance.py",
+      "career-ops/tests/test_job_intelligence.py",
+      "career-ops/tests/fixtures/job-intelligence/job-record-uk.json",
+      "career-ops/tests/fixtures/job-intelligence/jd-unknown-eligibility.txt",
+      "career-ops/tests/fixtures/job-intelligence/research-cited.json",
+      "career-ops/tests/fixtures/job-intelligence/research-uncited.json",
+      "career-ops/README.md",
+      "state/v1-agent-roster.md",
+      "state/full_build_tracker.md",
+      "scripts/company_inventory.py",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/20260924T005049Z-job-intelligence-and-application-pack/acceptance.json",
+      "audits/evidence/20260924T005049Z-job-intelligence-and-application-pack/acceptance.md",
+      "audits/evidence/superseded/20260924T004602Z-job-intelligence-and-application-pack-superseded-by-005049-run/ (superseded copy)",
+      "audits/evidence/superseded/20260924T004406Z-job-intelligence-and-application-pack-superseded-by-final-004602-run/ (superseded copy)"
+    ],
+    "remaining": [
+      "Owner decision (optional, recorded as item 11 in tasks-or-issues/overnight-owner-actions-2026-09-24.md): name one approved company/role research source, or confirm 'cited-file path only'. Until then every JobBrief carries research.status = research_needed with zero company facts \u2014 nothing is blocked.",
+      "Owner-facing procedure (recorded as item 12): the exact out-of-repository approval file that lets the B18 gate mark a pack submission-eligible, and the manual submission step the owner still performs.",
+      "Not claimed and not implemented anywhere: PDF export of the cover letter (the install's generate-pdf.mjs launches headless Chromium, owner-gated) and any live-vacancy verification \u2014 the acceptance posting is a labelled synthetic fixture.",
+      "Next lane (not this task's scope): wire this path into the whole-company local acceptance runner (C01) and into the Career Brief/pipeline prioritizer; the pending agent-linkedin-networking-interview-support task already expects to consume JobBrief.",
+      "Untracked audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ from the completed Company Watch lane is still uncommitted on disk; deliberately left untouched here to avoid mixing task attribution.",
+      "B17 is independent deterministic re-derivation, not a second AI opinion \u2014 if the owner wants a genuinely independent model-based reviewer on top of it, that is a new decision, not covered by this evidence."
+    ]
+  }
+}
