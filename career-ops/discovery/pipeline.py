@@ -49,6 +49,7 @@ import tracker_writer as tw  # noqa: E402
 from classifiers import (  # noqa: E402
     DEFAULT_BATCH_SIZE,
     DEFAULT_CODEX_BUDGET,
+    DEFAULT_MAX_TOKENS,
     codex_escalate,
     deepseek_bulk_classify,
     deepseek_probe,
@@ -306,7 +307,9 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
 
 def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     batch_size: int, timeout: int, mode: str,
+                    max_tokens: int | None = None,
                     deepseek_adapter=None) -> dict:
+    max_tokens = max_tokens or DEFAULT_MAX_TOKENS
     if semantic == "off":
         return {"provider": "none", "requested": "off",
                 "limitation": "semantic stage disabled by the caller",
@@ -316,6 +319,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
         if probe["available"]:
             doc = deepseek_bulk_classify(candidates, model=deepseek_model,
                                          batch_size=batch_size, timeout=timeout,
+                                         max_tokens=max_tokens,
                                          adapter=deepseek_adapter, mode=mode)
             doc["requested"] = semantic
             doc["probe"] = probe
@@ -349,6 +353,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
 def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                deepseek_model: str, batch_size: int, codex_budget: int,
                codex_enabled: bool, timeout: int, run_id: str,
+               max_tokens: int | None = None,
                deepseek_adapter=None, codex_adapter=None,
                codex_workdir: str | None = None,
                collection: list | None = None) -> dict:
@@ -369,16 +374,33 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     # 2. semantic ----------------------------------------------------------- #
     semantic_doc = _semantic_stage(kept, semantic=semantic, deepseek_model=deepseek_model,
                                    batch_size=batch_size, timeout=timeout, mode=mode,
-                                   deepseek_adapter=deepseek_adapter)
+                                   max_tokens=max_tokens, deepseek_adapter=deepseek_adapter)
     classifications = semantic_doc.get("classifications") or {}
     funnel.set("semantically_reviewed", len(classifications))
     for cls in classifications.values():
         if not cls.get("valid"):
             funnel.reject("semantic_contract_guard_rejected: "
                           + "; ".join(cls.get("guard", {}).get("violations", [])[:2]))
-    accepted = [c for c in kept if classifications.get(candidate_id(c), {}).get("accepted")]
-    funnel.set("deepseek_accept", len(accepted)
-               if semantic_doc.get("provider") == "deepseek" else 0)
+    if semantic_doc.get("requested") == "off":
+        # No semantic triage was requested: the prefiltred candidates go straight to the
+        # deterministic gates, and the semantic counters are marked not-applicable rather
+        # than reported as the place the funnel died.
+        accepted = list(kept)
+        funnel.skip("semantically_reviewed",
+                    "semantic stage disabled by the caller (--semantic off)")
+        funnel.skip("deepseek_accept",
+                    "semantic stage disabled by the caller (--semantic off)")
+        funnel.set("deepseek_accept", 0)
+    else:
+        accepted = [c for c in kept if classifications.get(candidate_id(c), {}).get("accepted")]
+        if semantic_doc.get("provider") == "deepseek":
+            funnel.set("deepseek_accept", len(accepted))
+        else:
+            funnel.set("deepseek_accept", 0)
+            funnel.skip("deepseek_accept",
+                        f"no DeepSeek pass was made in this run (provider: "
+                        f"{semantic_doc.get('provider')}); the declared deterministic rule "
+                        "classifier or an explicit provider choice was used instead")
 
     # 3. bounded Codex second pass ------------------------------------------ #
     codex_doc = {"provider": "openai-codex-cli", "requested": codex_enabled, "requests": 0,
@@ -397,9 +419,29 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     funnel.set("codex_accept", sum(1 for c in accepted
                                    if classifications.get(candidate_id(c), {}).get("classifier")
                                    == "codex_second_pass"))
+    if not codex_enabled:
+        funnel.skip("codex_escalated", "Codex escalation disabled by the caller (--codex off)")
+        funnel.skip("codex_accept", "Codex escalation disabled by the caller (--codex off)")
+    elif not codex_doc.get("eligible_for_escalation"):
+        funnel.skip("codex_escalated",
+                    "no candidate met the deterministic escalation conditions, so no Codex "
+                    "call was made (see codex.limitation)")
+        funnel.skip("codex_accept", "no Codex second pass was run in this run")
 
     # 4. deterministic gates ------------------------------------------------ #
     scope = rjs.lane_scope(region, schedules["regions"][region])
+    if semantic_doc.get("requested") != "off":
+        for rec in kept:
+            cls = classifications.get(candidate_id(rec)) or {}
+            if not cls.get("accepted"):
+                funnel.reject(f"semantic_label: {cls.get('primary_label') or 'unclassified'}"
+                              f" ({cls.get('classifier') or 'no classifier'})")
+    if not accepted:
+        funnel.explain(
+            "deterministic_eligibility_pass",
+            "no candidate was left accepted by the semantic stage (DeepSeek bulk pass, plus any "
+            "Codex second pass) — so no candidate reached the deterministic gates; see the "
+            "classification labels and rejections_by_reason for the per-candidate reason")
     gated = []
     for rec in accepted:
         verdict = deterministic_gates(region, rec, policy, scope)
@@ -635,17 +677,29 @@ def cmd_run(args) -> int:
               "run_id": run_id, "region": args.region})
         return 2
 
-    if len(candidates) > args.max_candidates:
-        candidates = candidates[: args.max_candidates]
+    total_candidates = sum(len(b["candidates"]) for b in collection)
+    if total_candidates > args.max_candidates:
+        remaining = args.max_candidates
         for block in collection:
-            block.setdefault("coverage", {})["truncated_to_max_candidates"] = args.max_candidates
+            block.setdefault("coverage", {})["candidates_before_max_candidate_limit"] = len(block["candidates"])
+            block["candidates"] = block["candidates"][:max(0, remaining)]
+            remaining -= len(block["candidates"])
+        candidates = [c for b in collection for c in b["candidates"]]
+        collection.append({"source": "run limits", "candidates": [],
+                           "coverage": {"max_candidates": args.max_candidates,
+                                        "candidates_before_limit": total_candidates,
+                                        "candidates_after_limit": len(candidates),
+                                        "note": ("the funnel counters below describe the limited "
+                                                 "candidate set actually processed; the pre-limit "
+                                                 "count is recorded here so a limit is never "
+                                                 "presented as a market fact")}})
 
     doc = run_funnel(candidates, region=args.region, mode=args.title_mode,
                      semantic=args.semantic, deepseek_model=args.model,
                      batch_size=args.batch_size, codex_budget=args.codex_budget,
                      codex_enabled=(args.codex != "off"), timeout=args.timeout,
                      run_id=run_id, codex_workdir=str(args.workdir or CONTROL_PLANE),
-                     collection=collection)
+                     max_tokens=args.max_tokens, collection=collection)
     doc["schema_version"] = SCHEMA_VERSION
     doc["started_at"] = None
     doc["finished_at"] = now_utc()
@@ -739,6 +793,9 @@ def main(argv=None) -> int:
     p.add_argument("--codex-budget", type=int, default=DEFAULT_CODEX_BUDGET)
     p.add_argument("--model", default="deepseek-flash")
     p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
+    p.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS,
+                   help="completion budget per bulk request (a reasoning model can otherwise "
+                        "return an empty response after spending the whole budget on reasoning)")
     p.add_argument("--timeout", type=int, default=180)
     p.add_argument("--max-candidates", type=int, default=400)
     p.add_argument("--out-dir")

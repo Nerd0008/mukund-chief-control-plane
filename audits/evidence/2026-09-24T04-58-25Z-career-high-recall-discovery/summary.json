@@ -1,0 +1,102 @@
+{
+  "task": "agent-career-high-recall-semantic-discovery-2026-09-24",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "generated_at": "2026-09-24T05:05:00Z",
+  "region": "uk",
+  "title_policy_mode": "high_recall",
+  "run_id": "discovery-uk-20260924T050143Z",
+  "aggregate_only": true,
+  "privacy_note": "Per-posting titles, companies, application URLs and per-candidate classifications are NOT reproduced here. They are owner job-search data and stay in the git-ignored path runtime/career-ops/discovery/evidence-2026-09-24T045825Z/. This file records counts, provider usage and verification results only.",
+  "source_coverage": {
+    "career_ops_scan_record": {
+      "path": "runtime/career-ops/scan-runs/regional-run-uk-20260924T034745Z.json",
+      "scan_ok": true,
+      "counters": {"jobs_found": 2861, "filtered_title": 2726, "filtered_location": 130,
+                   "filtered_age": 3, "duplicates": 1, "new_offers_added": 1},
+      "offers_parsed": 1,
+      "url_bearing": false,
+      "job_description_text_available": false
+    },
+    "company_watch": {
+      "path": "runtime/company-watch/findings-uk-latest.json",
+      "findings_total": 594,
+      "findings_entering_funnel": 505,
+      "findings_excluded_before_funnel": {"company_watch_decision:duplicate-in-run": 85,
+                                          "routed_other_region:dubai": 1,
+                                          "routed_other_region:japan": 1,
+                                          "routed_other_region:singapore": 2}
+    },
+    "run_limit": {"max_candidates": 60, "candidates_before_limit": 506,
+                  "candidates_after_limit": 60}
+  },
+  "funnel_counts": {
+    "discovered_raw": 60,
+    "after_hard_negative_prefilter": 6,
+    "semantically_reviewed": 6,
+    "deepseek_accept": 1,
+    "codex_escalated": 3,
+    "codex_accept": 0,
+    "deterministic_eligibility_pass": 0,
+    "duplicates_removed": 0,
+    "tracker_candidates": 0
+  },
+  "zero_attribution": {
+    "first_zero_stage": "deterministic_eligibility_pass",
+    "reason": "no candidate was left accepted by the semantic stage (DeepSeek bulk pass, plus any Codex second pass) - so no candidate reached the deterministic gates",
+    "attribution_source": "funnel counters (not an inference about the job market or real vacancies)"
+  },
+  "rejections_by_reason": {
+    "tier_b_hard_negative_total": 21,
+    "tier_b_hard_negative_by_signal": {"manager": 10, "executive": 5, "senior": 5,
+                                       "director": 2, "chief": 1, "principal": 1, "lead": 1},
+    "tier_a_no_recall_signal_total": 25,
+    "tier_a_no_recall_signal_by_reason": {"no discipline signal in the title": 18,
+                                          "no early-career level signal": 7},
+    "non_cyber_title_signal": {"sales": 2, "business development": 1},
+    "semantic_labels": {"codex_second_pass ambiguous_review": 3,
+                        "deepseek_bulk too_senior": 2,
+                        "deepseek_bulk wrong_discipline": 1}
+  },
+  "providers": {
+    "deepseek": {"provider": "deepseek", "model_observed": "deepseek-flash",
+                 "model_identity_observed": true, "auth_source": "credential_manager",
+                 "requests": 2, "batches": 2, "classified": 6, "unclassified_by_provider": 0,
+                 "split_retries": 0, "errors": 0,
+                 "usage_provider_reported": {"prompt_tokens": 1222, "completion_tokens": 6356,
+                                             "total_tokens": 7578}},
+    "codex": {"provider": "openai-codex-cli", "cli_version": "codex-cli 0.155.0-alpha.16.3",
+              "budget": 4, "requests": 1, "escalated": 3, "dropped_due_to_budget": 0,
+              "escalation_reasons": {"deepseek_label_ambiguous_review": 2,
+                                     "high_value_plausible_without_jd_text": 1},
+              "whole_scan_escalation": false}
+  },
+  "compare_modes": {
+    "same_candidate_set": true,
+    "candidate_set_size": 506,
+    "intern_only": {"title_pass": 3, "title_reject": 503, "would_reach_tracker": 0},
+    "high_recall": {"title_pass": 15, "title_reject": 491, "would_reach_tracker": 4},
+    "title_pass_delta": 12,
+    "tracker_candidate_delta": 4,
+    "recall_lost_titles": 0,
+    "writes": {"canonical_workbook_written": false, "manifest_written": false,
+               "tracker_probe_run": false}
+  },
+  "canonical_workbooks": {
+    "unchanged": true,
+    "verified_by": "sha256 before/after the whole evidence pass",
+    "sha256": {
+      "uk-cyber-job-tracker.xlsx": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "Dubai_Cybersecurity_Job_Tracker.xlsx": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "Japan_Cybersecurity_Job_Tracker.xlsx": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "Singapore_Cybersecurity_Job_Tracker.xlsx": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "browser_or_gui_used": false,
+    "account_mutations": 0,
+    "canonical_workbook_writes": 0,
+    "linkedin_actions": 0
+  }
+}

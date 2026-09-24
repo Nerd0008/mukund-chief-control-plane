@@ -47,7 +47,12 @@ PROMPT_VERSION = "discovery-semantic-v1"
 DEFAULT_CODEX_BUDGET = 8
 
 #: DeepSeek: how many candidates go into one bulk request.
-DEFAULT_BATCH_SIZE = 12
+DEFAULT_BATCH_SIZE = 6
+
+#: completion budget per bulk request. Observed 2026-09-24: a reasoning model can
+#: spend a 4096-token completion budget on reasoning and return empty content, so
+#: the budget is larger and a failed batch is retried in halves.
+DEFAULT_MAX_TOKENS = 8192
 
 #: escalation thresholds (deterministic, declared).
 CONFIDENCE_ESCALATE_BELOW = 0.60
@@ -214,10 +219,42 @@ def deepseek_probe(model: str = "deepseek-flash") -> dict:
     }
 
 
+def _dispatch_batch(adapter, batch: list, resolved: str, timeout: int, max_tokens: int) -> tuple:
+    """One bulk request. Returns ``(payload_or_None, error_or_None, usage)``."""
+    result = adapter.dispatch({
+        "contract_id": "discovery-bulk-semantic",
+        "objective": build_bulk_prompt(batch),
+        "model": resolved,
+        "timeout": timeout,
+        "max_tokens": max_tokens,
+        "temperature": 0.0,
+    })
+    usage = result.get("usage") or {}
+    if result.get("status") != "COMPLETED":
+        return None, {"error": result.get("error"), "exit_code": result.get("exit_code"),
+                      "finish_reason": result.get("finish_reason")}, usage
+    payload, err = parse_json_payload(result.get("content") or "")
+    if err:
+        return None, {"error": err, "finish_reason": result.get("finish_reason")}, usage
+    if isinstance(payload, dict) and isinstance(payload.get("classifications"), list):
+        payload = payload["classifications"]
+    if not isinstance(payload, list):
+        return None, {"error": "payload was not a list",
+                      "finish_reason": result.get("finish_reason")}, usage
+    return payload, None, usage
+
+
 def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                            batch_size: int = DEFAULT_BATCH_SIZE, timeout: int = 120,
+                           max_tokens: int = DEFAULT_MAX_TOKENS,
                            adapter=None, mode: str = MODE_HIGH_RECALL) -> dict:
-    """Classify the candidate pool with DeepSeek in bounded batches."""
+    """Classify the candidate pool with DeepSeek in bounded batches.
+
+    A batch that returns no parseable JSON is retried once at half the batch
+    size before it is recorded as a failure: a reasoning model that spends its
+    whole completion budget on reasoning (observed 2026-09-24: 4096 completion
+    tokens, empty content) must not be reported as "no candidates".
+    """
     out = {
         "provider": "deepseek",
         "model_requested": model,
@@ -232,6 +269,9 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
         "usage_reported_by_provider": True,
         "errors": [],
         "raw_responses": 0,
+        "split_retries": 0,
+        "classified": 0,
+        "unclassified_by_provider": 0,
         "classifications": {},
         "limitation": None,
     }
@@ -257,56 +297,48 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                                if observed else "model list not observed; requested id used unverified")
 
     for start in range(0, len(records), batch_size):
-        batch = records[start:start + batch_size]
         out["batches"] += 1
-        result = adapter.dispatch({
-            "contract_id": "discovery-bulk-semantic",
-            "objective": build_bulk_prompt(batch),
-            "model": resolved,
-            "timeout": timeout,
-            "max_tokens": 4096,
-            "temperature": 0.0,
-        })
+        payload, error, usage = _dispatch_batch(adapter, records[start:start + batch_size],
+                                                resolved, timeout, max_tokens)
         out["requests"] += 1
-        usage = result.get("usage") or {}
-        for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
-            if isinstance(usage.get(key), int):
-                out["usage"][key] = (out["usage"].get(key) or 0) + usage[key]
-        if result.get("status") != "COMPLETED":
-            out["errors"].append({"batch": out["batches"], "error": result.get("error"),
-                                  "exit_code": result.get("exit_code")})
-            continue
-        payload, err = parse_json_payload(result.get("content") or "")
-        if err:
-            out["errors"].append({"batch": out["batches"], "error": err})
-            continue
-        if isinstance(payload, dict) and isinstance(payload.get("classifications"), list):
-            payload = payload["classifications"]
-        if not isinstance(payload, list):
-            out["errors"].append({"batch": out["batches"], "error": "payload was not a list"})
+        out["usage"] = _add_usage(out["usage"], usage)
+        if error and len(records[start:start + batch_size]) > 1:
+            # split once: a truncated/empty batch is retried in halves before failing
+            out["split_retries"] += 1
+            halves = [records[start:start + batch_size // 2],
+                      records[start + batch_size // 2:start + batch_size]]
+            payload_items: list = []
+            ok = True
+            for half in halves:
+                if not half:
+                    continue
+                payload_h, error_h, usage_h = _dispatch_batch(adapter, half, resolved,
+                                                              timeout, max_tokens)
+                out["requests"] += 1
+                out["batches"] += 1
+                out["usage"] = _add_usage(out["usage"], usage_h)
+                if error_h:
+                    ok = False
+                    out["errors"].append({"batch": out["batches"], "error": error_h.get("error"),
+                                          "finish_reason": error_h.get("finish_reason"),
+                                          "candidates_in_batch": len(half)})
+                else:
+                    payload_items.extend(payload_h)
+            if ok:
+                payload, error = payload_items, None
+        if error:
+            out["errors"].append({"batch": out["batches"], "error": error.get("error"),
+                                  "finish_reason": error.get("finish_reason"),
+                                  "candidates_in_batch": len(records[start:start + batch_size])})
+            for rec in records[start:start + batch_size]:
+                out["classifications"][candidate_id(rec)] = _unclassified(
+                    rec, "the model returned no parseable classification for this candidate")
             continue
         out["raw_responses"] += 1
-        by_id = {str(item.get("candidate_id")): item for item in payload
-                 if isinstance(item, dict) and item.get("candidate_id")}
-        for rec in batch:
-            cid = candidate_id(rec)
-            item = by_id.get(cid)
-            if item is None:
-                out["errors"].append({"batch": out["batches"], "candidate_id": cid,
-                                      "error": "no classification returned for this candidate"})
-                out["classifications"][cid] = _unclassified(rec, "model returned no label for this candidate")
-                continue
-            doc = build_classification(
-                rec,
-                primary_label=item.get("primary_label"),
-                confidence=item.get("confidence") if isinstance(item.get("confidence"), (int, float)) else None,
-                reasons=item.get("reasons") if isinstance(item.get("reasons"), list) else [],
-                uncertainty=item.get("uncertainty") if isinstance(item.get("uncertainty"), list) else [],
-                provider="deepseek", model=resolved,
-                model_identity_observed=bool(observed), prompt_version=PROMPT_VERSION,
-                classifier="deepseek_bulk")
-            doc["rejected_by_guard"] = not doc["valid"]
-            out["classifications"][cid] = doc
+        batch = records[start:start + batch_size]
+        out["classified"] += len(payload)
+        out["unclassified_by_provider"] += _count_missing(batch, payload)
+        _record_batch(out, batch, payload, resolved, observed)
     if not out["classifications"]:
         out["limitation"] = ("the deepseek pass produced no usable classifications; the funnel "
                             "records this instead of treating the pool as empty")
@@ -322,6 +354,46 @@ def _unclassified(record: dict, reason: str) -> dict:
     doc["escalation_eligible"] = False
     doc["escalation_blocked_reason"] = "no usable first-pass classification"
     return doc
+
+
+def _add_usage(total: dict, usage: dict) -> dict:
+    """Accumulate provider-returned token counts only (never estimated)."""
+    for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+        if isinstance((usage or {}).get(key), int):
+            total[key] = (total.get(key) or 0) + usage[key]
+    return total
+
+
+def _count_missing(batch: list, payload: list) -> int:
+    returned = {str(i.get("candidate_id")) for i in payload
+                if isinstance(i, dict) and i.get("candidate_id")}
+    return sum(1 for rec in batch if candidate_id(rec) not in returned)
+
+
+def _record_batch(out: dict, batch: list, payload: list, resolved: str, observed: list) -> None:
+    """Turn one batch's model output into contract-shaped classifications."""
+    by_id = {str(item.get("candidate_id")): item for item in payload
+             if isinstance(item, dict) and item.get("candidate_id")}
+    for rec in batch:
+        cid = candidate_id(rec)
+        item = by_id.get(cid)
+        if item is None:
+            out["errors"].append({"batch": out["batches"], "candidate_id": cid,
+                                  "error": "no classification returned for this candidate"})
+            out["classifications"][cid] = _unclassified(
+                rec, "the model returned no label for this candidate")
+            continue
+        doc = build_classification(
+            rec,
+            primary_label=item.get("primary_label"),
+            confidence=item.get("confidence") if isinstance(item.get("confidence"), (int, float)) else None,
+            reasons=item.get("reasons") if isinstance(item.get("reasons"), list) else [],
+            uncertainty=item.get("uncertainty") if isinstance(item.get("uncertainty"), list) else [],
+            provider="deepseek", model=resolved,
+            model_identity_observed=bool(observed), prompt_version=PROMPT_VERSION,
+            classifier="deepseek_bulk")
+        doc["rejected_by_guard"] = not doc["valid"]
+        out["classifications"][cid] = doc
 
 
 # --------------------------------------------------------------------------- #

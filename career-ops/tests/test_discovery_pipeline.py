@@ -425,6 +425,8 @@ def test_run_reports_every_funnel_counter(run_doc):
     assert counts["deterministic_eligibility_pass"] == 5   # clearance, India posting and missing URL gate out
     assert counts["tracker_candidates"] >= 0
     assert run_doc["funnel"]["rejections_by_reason"]
+    # the fallback run made no DeepSeek call, and says so rather than reporting a funnel zero
+    assert "deepseek_accept" in run_doc["funnel"]["not_applicable_stages"]
 
 
 def test_run_attaches_a_reason_to_every_rejection(run_doc):
@@ -463,12 +465,66 @@ def test_run_health_file_is_written_and_does_not_touch_trackers(tmp_path):
     assert h(tracker) == before
 
 
-def test_zero_attribution_names_the_first_empty_stage(run_doc):
-    z = run_doc["funnel"]["zero_attribution"]
-    assert z["first_zero_stage"] in ("deepseek_accept", "tracker_candidates",
-                                     "deterministic_eligibility_pass")
-    assert z["reason"]
+def test_zero_attribution_names_the_first_empty_stage(tmp_path):
+    """A run whose candidates all lack an application URL must say so."""
+    records = tmp_path / "nourl.json"
+    records.write_text(json.dumps({"records": [
+        {"company": "Test A (NOT A REAL VACANCY)", "title": "SOC Analyst L1",
+         "location": "London, United Kingdom"},
+        {"company": "Test B (NOT A REAL VACANCY)", "title": "Graduate Cyber Security Analyst",
+         "location": "Leeds, England"},
+    ]}), encoding="utf-8")
+    rc, doc = run_cli(["run", "--region", "uk", "--records", str(records),
+                       "--semantic", "off", "--codex", "off",
+                       "--out-dir", str(tmp_path / "out")])
+    assert rc == 0
+    counts = doc["funnel"]["counts"]
+    assert counts["discovered_raw"] == 2
+    assert counts["after_hard_negative_prefilter"] == 2
+    assert counts["deterministic_eligibility_pass"] == 0
+    z = doc["funnel"]["zero_attribution"]
+    assert z["first_zero_stage"] == "deterministic_eligibility_pass"
+    assert "deterministic gate" in z["reason"]
     assert "not an inference" in z["attribution_source"]
+    # a stage disabled by configuration is reported separately, never as a funnel zero
+    assert "semantically_reviewed" in doc["funnel"]["not_applicable_stages"]
+    assert any("no usable application URL" in r
+               for r in doc["funnel"]["rejections_by_reason"])
+
+
+def test_semantic_rejections_are_counted_and_attributed(tmp_path):
+    """A run whose semantics accept nothing must blame the semantic stage, not a gate."""
+    import pipeline as pl
+    records = tmp_path / "sem.json"
+    records.write_text(json.dumps({"records": [
+        {"company": "Test A (NOT A REAL VACANCY)", "title": "SOC Analyst L1",
+         "location": "London, United Kingdom", "url": "https://a.invalid/jobs/1"},
+        {"company": "Test B (NOT A REAL VACANCY)", "title": "IAM Analyst",
+         "location": "Leeds, England", "url": "https://b.invalid/jobs/2"},
+    ]}), encoding="utf-8")
+    collected = pl.collect_from_records(records)
+    doc = pl.run_funnel(collected["candidates"], region="uk", mode=MODE_HIGH_RECALL,
+                        semantic="deepseek", deepseek_model="deepseek-flash", batch_size=5,
+                        codex_budget=0, codex_enabled=False, timeout=10,
+                        run_id="test-semantic-reject", collection=[
+                            {"source": SOURCE, "candidates": collected["candidates"],
+                             "coverage": {}}],
+                        deepseek_adapter=StubDeepSeek(
+                            labels={"SOC Analyst L1": ("wrong_discipline", 0.9),
+                                    "IAM Analyst": ("too_senior", 0.9)}))
+    counts = doc["funnel"]["counts"]
+    assert counts["semantically_reviewed"] == 2
+    assert counts["deepseek_accept"] == 0
+    assert counts["deterministic_eligibility_pass"] == 0
+    reasons = doc["funnel"]["rejections_by_reason"]
+    assert reasons.get("semantic_label: wrong_discipline (deepseek_bulk)") == 1
+    assert reasons.get("semantic_label: too_senior (deepseek_bulk)") == 1
+    z = doc["funnel"]["zero_attribution"]
+    assert z["first_zero_stage"] == "deepseek_accept"
+    assert z["reason"]
+
+
+SOURCE = pipeline.SOURCE_EXPLICIT
 
 
 # --------------------------------------------------------------------------- #

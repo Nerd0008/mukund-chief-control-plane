@@ -51,6 +51,8 @@ class Funnel:
         self.rejections = Counter()
         self.notes: list = []
         self.discovered_by_source: Counter[str] = Counter()
+        self.not_applicable: dict[str, str] = {}
+        self.reasons_override: dict[str, str] = {}
 
     def set(self, key: str, value: int) -> None:
         self.counts[key] = int(value)
@@ -71,6 +73,18 @@ class Funnel:
         if text and text not in self.notes:
             self.notes.append(text)
 
+    def skip(self, key: str, reason: str) -> None:
+        """Mark a counter as structurally not applicable in this run.
+
+        A stage that was *disabled by configuration* is not a funnel zero, and
+        must not be reported as the place the funnel died.
+        """
+        self.not_applicable[key] = reason
+
+    def explain(self, key: str, reason: str) -> None:
+        """Override the generic stage text with this run's actual cause."""
+        self.reasons_override[key] = reason
+
     def document(self) -> dict:
         counts: dict[str, object] = dict(self.counts)
         counts["discovered_raw_by_source"] = dict(sorted(self.discovered_by_source.items()))
@@ -79,18 +93,23 @@ class Funnel:
             "counts": counts,
             "rejections_by_reason": dict(sorted(self.rejections.items())),
             "zero_attribution": zero_attribution,
+            "not_applicable_stages": dict(sorted(self.not_applicable.items())),
             "notes": list(self.notes),
         }
 
     def zero_attribution(self) -> dict:
         """Name the first stage that reached zero, and why."""
         for key, reason in STAGE_ORDER:
+            if key in self.not_applicable:
+                continue
             if self.counts.get(key, 0) == 0:
                 return {"first_zero_stage": key,
-                        "reason": reason,
+                        "reason": self.reasons_override.get(key, reason),
+                        "skipped_not_applicable": dict(sorted(self.not_applicable.items())),
                         "attribution_source": "funnel counters (not an inference about the "
                                               "job market or about real vacancies)"}
         return {"first_zero_stage": None, "reason": None,
+                "skipped_not_applicable": dict(sorted(self.not_applicable.items())),
                 "attribution_source": "funnel counters"}
 
     def summary_line(self) -> str:

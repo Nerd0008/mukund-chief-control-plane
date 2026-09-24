@@ -79,6 +79,15 @@ audits/evidence/**/status-store/
 runtime/career-ops/daily-brief/
 runtime/career-ops/daily-brief-*/
 
+# --- Career high-recall discovery funnel (owner-private) ---
+# A funnel run-health record and its classification list restate real posting
+# titles, companies and application URLs, i.e. Mukund's job-search targets. They
+# stay local; the committed evidence under
+# audits/evidence/<stamp>-career-high-recall-discovery/ is aggregate only
+# (funnel counters, provider usage, recall deltas).
+runtime/career-ops/discovery/
+audits/evidence/**/funnel-records/
+
 # --- Chief operational runtime artifacts (regenerated each run) ---
 # The Morning Chief Brief is a derived aggregate regenerated on every run
 # (queue task ids, health verdicts, owner-action titles). Keep it local; the
