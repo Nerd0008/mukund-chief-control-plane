@@ -37,5 +37,26 @@
     "Do not activate a research provider, recruiter feed, external brief-delivery destination or tracker-vocabulary change without either existing owner authorization or a recorded owner decision.",
     "Do not mark a built-but-not-live integration PASS solely because fixture/dry-run tests pass."
   ],
-  "notes": "This task captures owner decisions made after the morning acceptance and audits omissions from the previous agent. It is intentionally queued behind provider verification and Career final acceptance to avoid shared-worktree conflicts. The previous agent completed LinkedIn draft/read-only workflows only; no live LinkedIn credential/session/API path exists yet. Re-queued as a successor because the original record was rejected by queue schema solely for priority='normal'; valid priority is now 'medium'."
+  "notes": "This task captures owner decisions made after the morning acceptance and audits omissions from the previous agent. It is intentionally queued behind provider verification and Career final acceptance to avoid shared-worktree conflicts. The previous agent completed LinkedIn draft/read-only workflows only; no live LinkedIn credential/session/API path exists yet. Re-queued as a successor because the original record was rejected by queue schema solely for priority='normal'; valid priority is now 'medium'.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T22:35:26.837944Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=892).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=892).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
