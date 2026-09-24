@@ -1,0 +1,129 @@
+{
+  "task_id": "agent-career-codex-style-open-web-job-research-2026-09-24",
+  "created_at": "2026-09-24T11:55:00Z",
+  "objective": "Make Hermes job discovery behave like the owner's successful Codex workflow: actively research the open web for current entry-level cybersecurity opportunities, not merely scan a fixed provider list. Add a bounded, read-only web-research lane that searches broad web results (including public LinkedIn Jobs/Indeed/Google-indexed job results and employer ATS/career pages when discoverable), validates source URLs, normalizes findings into the existing unified discovery schema, and sends them through the already-built semantic triage -> deterministic eligibility -> dedupe -> tracker/Chief handoff funnel.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Reuse the completed high-recall/unified-discovery implementation already on main.",
+    "Do not modify or weaken the existing deterministic eligibility, dedupe, owner-approval or no-external-mutation gates.",
+    "Respect the 2026-09-23 safety directive: no local interactive browser/GUI automation, no signed-in browser profiles/cookies/sessions."
+  ],
+  "allowed_scope": [
+    "First inspect the earlier Codex-driven job-search workflow/config/prompts still present on disk/repo and determine how it obtained web results; preserve useful query patterns rather than guessing.",
+    "Implement a Web Research discovery collector as another SOURCE_REGISTRY surface feeding the exact same unified candidate schema; do not create a parallel tracker, classifier or eligibility engine.",
+    "Primary behavior must be active research, not a static provider scan: generate/search a query matrix across role families (graduate/new-grad/junior/associate/analyst/L1/SOC/GRC/IAM/technology risk/security operations/information security/cybersecurity) and configured regions.",
+    "Use Codex as the research worker when its available runtime can perform current web research; test this capability explicitly. If Codex CLI cannot browse/search in the installed runtime, fail truthfully and implement a provider interface/fallback rather than pretending it searched.",
+    "Search the open web broadly enough to discover public job-result URLs from LinkedIn Jobs, Indeed and Google-indexed job pages/search results where accessible, plus direct employer careers/ATS domains such as Greenhouse, Lever, Workday, Ashby, SmartRecruiters, Teamtailor, Workable, HRMOS/HERP/Jobcan and other source URLs found by the research worker.",
+    "Do not log into LinkedIn/Indeed/Google, do not use cookies/session state, do not scrape behind authentication, do not solve CAPTCHAs, and do not drive a local browser. Public/search-index discovery only.",
+    "For each discovered vacancy preserve provenance: search query, discovery surface, result URL, canonical URL if resolved, employer/title/location as observed, fetched/validated state, source timestamp and any missing fields. Never invent a vacancy from a search snippet.",
+    "Where safe HTTP retrieval is available, validate that the destination exists and extract only source-supported fields; otherwise keep it as a discovered-but-unverified candidate and label that status explicitly.",
+    "Resolve cross-source duplicates so a vacancy seen on LinkedIn, Indeed, Google/search, an ATS and Company Watch becomes one canonical candidate with all provenance retained.",
+    "Use the existing DeepSeek bulk semantic triage and bounded Codex second pass after collection. Do not spend Codex review calls over the entire raw web-result universe; web research and semantic review are separate budgeted stages.",
+    "Add per-source/funnel telemetry: queries_executed, results_seen, candidate_urls, validated_live, validation_failed, duplicates_collapsed, semantically_reviewed, deterministic_eligibility_pass, tracker_candidates, and zero attribution. A zero result must distinguish search-source failure, no accessible results, validation failure, filtering, eligibility and dedupe.",
+    "Add company-watchlist hooks so an owner-provided list of companies can later be searched explicitly by company + cybersecurity role family in addition to the general market search. Do not require the list to exist to finish the generic search agent.",
+    "Keep schedules dry-run/read-only initially. Do not enable canonical workbook writes automatically. Produce a candidate manifest + Chief summary for review.",
+    "Add tests with captured public-search fixtures proving LinkedIn/Indeed/ATS result normalization, source provenance, cross-source collapse and fail-closed behavior for inaccessible/unverified results.",
+    "Run a bounded live research acceptance if the available Codex/web path supports it. Record exact queries, source classes, candidate counts and URLs privately/safely; no fabricated PASS if web access is unavailable.",
+    "Update Career Ops README, roster/state/tracker and acceptance docs. Commit and push in checkpointed units."
+  ],
+  "stop_conditions": [
+    "No job applications, employer/recruiter outreach, LinkedIn posts/messages/connections or account mutations.",
+    "No interactive browser/GUI automation and no use of signed-in browser profiles/cookies/session secrets.",
+    "No claim that LinkedIn/Indeed/Google Jobs were searched unless the actual live research evidence proves those source classes were reached.",
+    "No fabricated jobs, titles, employers, URLs, JDs, eligibility or sponsorship facts.",
+    "Do not bypass robots/auth/CAPTCHA/access controls or implement stealth/evasion scraping.",
+    "If a source blocks public access, record it as unavailable and continue other sources."
+  ],
+  "notes": "This is intentionally different from the existing provider scanner. The owner wants the successful Codex behavior: active, broad web research for jobs, while retaining the new Career Ops reliability, semantic filtering, provenance, dedupe and tracker controls.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T12:52:57.293887Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    },
+    {
+      "attempt": 2,
+      "recorded_at": "2026-09-24T13:06:49.080100Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=2108).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 2,
+    "retries_used": 1,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=2108).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T13:26:12.141063Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt-3 resume of the open-web research lane (B26). Repository inspected first: attempts 1-2 had landed the implementation, tests, fixtures, acceptance runner and six evidence bundles but never committed them (both died on dispatch timeouts, not on a real blocker). Resume work: (1) re-verified the landed lane at HEAD (Codex CLI resolved from %LOCALAPPDATA%\\OpenAI\\Codex\\bin, codex-cli 0.155.0-alpha.16.3, real web_search events proven); (2) found and fixed a real truthfulness gap \u2014 a bounded live pass reached 13 real URLs of which 11 were the boards' own search/listing pages (LinkedIn /jobs/<keywords>, Indeed /q-..., Reed ...-jobs-in-<place>) and 7 of them passed the deterministic gates as tracker candidates; every URL is now classified from the URL alone (classify_result_kind -> job_posting/search_listing/unknown) and the source-agnostic gate refuses search_listing, so a search page can never be written as a job; (3) produced the reviewable candidate manifest + Chief summary (0 rows, truthful: every live-discovered URL was a listing page or failed liveness validation); (4) corrected a misquote in the lane's provenance text ('Each query triggers a WebSearch' was attributed to portals.yml; the real wording and the Level-3 WebSearch/liveness rules live in modes/scan.md \u2014 verified read-only against the owner's install); (5) committed and pushed in 7 checkpointed units. Delivered: career-ops/discovery/web_research.py (generated query matrix across role families x regions x surfaces with the owner's site: shapes preserved, research-worker interface codex-web-search/captured/none, per-result provenance, robots-respecting read-only HTTP validation, telemetry + zero attribution, optional company-watchlist hook), wired into discovery/pipeline.py as SOURCE_WEB_RESEARCH feeding the ONE existing funnel (semantic triage -> deterministic eligibility -> dedupe -> tracker/Chief). No application, outreach, login, cookie/session, CAPTCHA bypass or browser/GUI action occurred; raw result URLs stay in the git-ignored runtime directory and committed evidence is aggregate only. Every live claim is backed by committed evidence; earlier FAIL bundles were kept as history rather than overwritten.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "5aabe9e discovery: open-web research lane (B26) \u2014 active query-matrix research into the one funnel",
+      "6d02da7 acceptance: open-web research lane runner (22 checks incl. bounded live Codex pass)",
+      "149f6a3 discovery: a search/listing page is never written as a vacancy (B26 guard)",
+      "60b122c acceptance: open-web research lane re-verified at HEAD (24/24 with live pass, 21/21 fixtures)",
+      "ccb1df1 docs: B26 open-web research lane in README, roster, build tracker and company state",
+      "3e3e8bd runtime: queue log and tracker-writer run-health bookkeeping (attempt 3, dry-run)",
+      "8b308db acceptance: fixtures-only re-verification of the open-web research lane at the pushed HEAD (21/21 PASS)",
+      "3499d19 docs: correct the owner-install citation for the open-web research lane",
+      "a5c1abe runtime: tracker-writer run-health dry-run timestamps (no workbook write)",
+      "pushed to origin/main (669f29f -> a5c1abe; rebased over 848a753/a0ee7b9, worktree clean, in sync)"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_web_research.py -q -> 72 passed (55 at first landing; +11 result-kind cases, +4 guard/legacy tests)",
+      "python -m pytest career-ops/tests/ -q -> 471 passed (113s) at final pushed HEAD",
+      "python career-ops/run_web_research_acceptance.py -> PASS 21/21 (fixtures only) at final HEAD",
+      "python career-ops/run_web_research_acceptance.py --live --live-queries 3 -> PASS 24/24, live checks: codex_web_search_capability_proven=available, 3 queries, 10 results seen, 9 candidates, source classes reached [linkedin_jobs, indeed, employer_careers]; canonical workbooks byte-identical before/after (uk 84c53dcb\u20263f40, dubai 495edb45\u202645ca, japan a8c4ef90\u2026c89, singapore 25c7b95b\u2026bf1)",
+      "guard re-verified on real live data: of the 13 URLs from the 13:13Z live pass, 11 classify as search_listing and 0 could reach a tracker candidate (the 2 posting-shaped URLs failed liveness validation); final pass 7 of 9 listings, tracker_candidates=0",
+      "dry-run manifest: runtime/career-ops/web-research/manifest-uk-live.json -> records=[] with funnel summary_line + per-source zero attribution (deterministic_eligibility_pass), safety.canonical_workbook_written=false"
+    ],
+    "changed_files": [
+      "career-ops/discovery/web_research.py",
+      "career-ops/discovery/pipeline.py",
+      "career-ops/run_web_research_acceptance.py",
+      "career-ops/tests/test_web_research.py",
+      "career-ops/tests/fixtures/discovery/web-research/captured-codex-search.json",
+      "career-ops/tests/fixtures/discovery/web-research/web-research-export-unverified.json",
+      "career-ops/README.md",
+      ".gitignore",
+      "state/v1-agent-roster.md",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "audits/evidence/2026-09-24T12-44-03Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T12-50-00Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T12-55-00Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T12-57-45Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T12-58-00Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T13-05-00Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T13-13-30Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T13-13-35Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T13-18-08Z-career-open-web-research/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T13-22-22Z-career-open-web-research/{evidence.json,evidence.md}",
+      "remote-queue/logs/queue.log",
+      "runtime/career-ops/run-health/tracker-writer.json"
+    ],
+    "remaining": [
+      "Not done (deliberately deferred, no owner approval needed): register career-ops/run_web_research_acceptance.py as a step in scripts/whole_company_acceptance.py the way the B25 discovery runner is registered (the runner has no --out-dir override, so the step wiring needs that small addition plus a whole-company acceptance re-run to verify).",
+      "Optional: drop an owner-provided company watchlist at runtime/career-ops/web-research/company-watchlist.json (shape {\"companies\": [...]}) to activate company x role-family and site:<ats> \"<company>\" queries; the generic market search works without it.",
+      "Owner decision only: enabling a schedule and/or canonical workbook writes for this lane. It stays dry-run/read-only today; applying remains career_ops_cli.py write --apply.",
+      "The two genuine postings the live pass surfaced (a PA Consulting 2026 graduate cyber role and an NHS England junior cyber role) failed live retrieval validation; a future pass could retry validation via an alternate retrieval path rather than leaving them as validation_failed."
+    ]
+  }
+}
