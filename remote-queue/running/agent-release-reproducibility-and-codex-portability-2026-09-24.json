@@ -28,5 +28,26 @@
     "Do not skip or xfail the Codex test merely to get green.",
     "Do not claim portable acceptance unless it was actually executed in the pinned isolated environment."
   ],
-  "notes": "Independent audit found no top-level lock/setup/release identity and a fresh isolated E3 baseline of 53/54 due to Codex doctor returning provider=unknown where a test expected openai. This task should close those engineering gaps before calling the project reproducibly release-ready."
+  "notes": "Independent audit found no top-level lock/setup/release identity and a fresh isolated E3 baseline of 53/54 due to Codex doctor returning provider=unknown where a test expected openai. This task should close those engineering gaps before calling the project reproducibly release-ready.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T15:18:08.215980Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
