@@ -612,3 +612,5 @@ error: Please commit or stash them.
 [2026-09-24T13:06:50.572419Z] Task agent-career-codex-style-open-web-job-research-2026-09-24 attempt 2/3: retry (recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled)
 [2026-09-24T13:06:50.573418Z] Handling task: agent-career-codex-style-open-web-job-research-2026-09-24 (attempt 3)
 [2026-09-24T13:28:02.468459Z] git pull: success
+[2026-09-24T13:28:05.657264Z] Claimed task: agent-career-priority-company-watchlist-engine-2026-09-24
+[2026-09-24T13:28:05.667258Z] Handling task: agent-career-priority-company-watchlist-engine-2026-09-24 (attempt 1)

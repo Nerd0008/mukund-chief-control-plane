@@ -28,5 +28,26 @@
     "No browser/GUI automation or signed-in session use.",
     "A company with inaccessible careers infrastructure must be labelled unavailable/unknown, not 'no jobs'."
   ],
-  "notes": "Owner will provide the actual company list later. This task should make adding that list a data/config step, not another engineering project."
+  "notes": "Owner will provide the actual company list later. This task should make adding that list a data/config step, not another engineering project.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T13:48:05.960628Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
