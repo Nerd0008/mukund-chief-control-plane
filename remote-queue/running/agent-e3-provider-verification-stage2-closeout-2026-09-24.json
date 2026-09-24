@@ -37,5 +37,26 @@
     "Do not claim real-provider failover/recovery if only stubbed/simulated evidence is available; preserve the gap explicitly.",
     "Do not enable Stage 2 if any required provider identity, regression, rehearsal, integrity or safety gate fails."
   ],
-  "notes": "Owner explicitly requested this work be scheduled immediately after confirming all provider keys are stored. This task is the highest-priority next execution unit. It may wait behind the currently running Career recovery worker only to avoid shared-worktree corruption; once that worker releases the slot, begin immediately. Coordinator appended an active-run policy override at 2026-09-24T20:56Z: provider verification and the readiness gate may continue, but Stage 2/production dispatch enablement is forbidden for this run. This explicit live instruction supersedes any earlier embedded authorization."
+  "notes": "Owner explicitly requested this work be scheduled immediately after confirming all provider keys are stored. This task is the highest-priority next execution unit. It may wait behind the currently running Career recovery worker only to avoid shared-worktree corruption; once that worker releases the slot, begin immediately. Coordinator appended an active-run policy override at 2026-09-24T20:56Z: provider verification and the readiness gate may continue, but Stage 2/production dispatch enablement is forbidden for this run. This explicit live instruction supersedes any earlier embedded authorization.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T21:14:08.709214Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
