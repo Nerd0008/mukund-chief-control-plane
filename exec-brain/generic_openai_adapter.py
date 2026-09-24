@@ -91,7 +91,7 @@ PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
     },
     "longcat": {
         "base_url": "https://api.longcat.chat/openai",
-        "models_endpoint": "https://api.longcat.chat/v1/models",
+        "models_endpoint": "https://api.longcat.chat/openai/v1/models",
         "chat_endpoint": "https://api.longcat.chat/openai/v1/chat/completions",
         "api_model_id": "LongCat-2.0",
         "display_name": "LongCat 2.0",
