@@ -1,0 +1,93 @@
+{
+  "task_id": "agent-release-reproducibility-and-codex-portability-2026-09-24",
+  "created_at": "2026-09-24T12:40:00Z",
+  "objective": "Remediate the independent audit's release-reproducibility and fresh-smoke-test findings. Make the repository reproducible from a clean clone/archive with pinned dependencies, explicit setup/verification instructions, release identity/hashes, and a portable Codex identity contract; then prove the current acceptance suite in an isolated environment without weakening evidence standards.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Preserve all currently running/pending Career discovery work; inspect main before editing and do not race overlapping files unnecessarily.",
+    "Treat the audit result (isolated E3 baseline 53/54 because Codex doctor provider became unknown) as a reproducibility failure to diagnose, not permission to suppress the test."
+  ],
+  "allowed_scope": [
+    "Inventory every Python/runtime dependency actually imported by the repo (including openpyxl, PyYAML/yaml, pytest and test/runtime support) and produce a top-level reproducible dependency manifest plus pinned lock/constraints artifact appropriate for Python 3.11.16.",
+    "Add clean-clone/setup instructions that distinguish repository dependencies from machine-local Hermes runtime, Codex CLI, credentials and Windows scheduled-task provisioning.",
+    "Add a release manifest generator that records repository commit SHA, dirty/clean state, supported Python version, dependency-lock hash, important deployable artifact hashes and acceptance-evidence identifiers; never include secrets or private runtime databases.",
+    "Add archive/release verification tooling so an exported ZIP can prove which commit and dependency set it represents even though ZIPs do not carry .git history.",
+    "Reproduce the Codex identity failure in an isolated environment. Inspect the current codex doctor --json contract and make the test assert the truthful contract: configured provider/model, observed provider identity when actually reported, and UNKNOWN when the CLI does not report it. Do not convert UNKNOWN into openai or weaken routability/qualification requirements.",
+    "Add a compatibility fixture/test for at least both provider=openai and provider=unknown doctor payloads, with explicit provenance semantics.",
+    "Build a clean isolated Python environment from the new pinned dependency artifacts and run the E3 baseline plus the full repository acceptance/evidence runner there. Record exact collected/passed/failed counts and environment identity.",
+    "If 579 is no longer the current collected count because later engineering added tests, report the new count truthfully; do not force the old number.",
+    "Document which parts cannot be reproduced from a source archive alone because they are deliberately machine-local (credentials, Hermes state DBs, owner data, Codex login) and provide deterministic probes for those dependencies.",
+    "Update deployment/release docs and state with the isolated-environment evidence. Commit/push checkpointed changes."
+  ],
+  "stop_conditions": [
+    "No secrets, credential values, auth.json, cookies, private databases or owner application data in release artifacts.",
+    "Do not fake Git history inside an archive; record commit identity and hashes instead.",
+    "Do not skip or xfail the Codex test merely to get green.",
+    "Do not claim portable acceptance unless it was actually executed in the pinned isolated environment."
+  ],
+  "notes": "Independent audit found no top-level lock/setup/release identity and a fresh isolated E3 baseline of 53/54 due to Codex doctor returning provider=unknown where a test expected openai. This task should close those engineering gaps before calling the project reproducibly release-ready.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T15:18:08.215980Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T15:27:44.415504Z",
+  "result": {
+    "status": "completed",
+    "summary": "Resumed the retry from its actual failure point: the prior attempt had landed the engineering (commit 61d8b67) but died on 'git push' because origin/main had diverged and another parked task's uncommitted changes blocked the rebase. Verified the landed work was real before trusting it, then finished and pushed. Verification performed: (1) dependency honesty check passes -- all third-party imports (openpyxl, PyYAML, pytest) declared; (2) codex identity contract check passes and reproduces the audit failure as a correction, covering provider=openai, provider=unknown and configured-provider-only payloads, with UNKNOWN never converted to openai and routability/qualification gates unchanged; (3) the isolated pinned interpreter (CPython 3.11.16 built from requirements.lock, 9 packages byte-identical to the lock) independently re-ran the whole acceptance suite twice: 21 suites / 583 collected / 583 passed / 0 failed / 0 unavailable, reproducing the preserved evidence exactly -- the audit's 579 figure is superseded by 583 because the E3 baseline legitimately grew 54 to 58 truthful-contract Codex tests; (4) evidence.json arithmetic re-checked programmatically. NEW DEFECT FOUND AND FIXED while verifying the archive deliverable end to end: with no .gitattributes and core.autocrlf=true, git archive rewrote line endings, so the exported requirements.lock hashed 7bcd9003... while the committed blob hashes dc933454... -- meaning the same commit produced different release-identity hashes per platform and verify_release_archive.py --expect-lock-sha256 could never bind to a blob-derived hash, defeating the stated purpose of proving 'which commit and dependency set the ZIP represents'. Added .gitattributes (* text=auto eol=lf plus binary pins) and forced 'git -c core.autocrlf=false -c core.eol=lf archive' in the exporter; the recorded lock hash now equals 'git show <commit>:requirements.lock'. Proven on a clean clone of the final pushed commit: archive built from a clean worktree (dirty=False) and independently verified OK (commit + dependency + file hashes + hygiene), containing no .git history (only .gitkeep/.gitignore files, no git directory) and no secret-like paths. Committed and pushed. No secrets, credentials, auth.json, cookies, private databases or owner data were read into or written from any release artifact; no Git history was fabricated; the Codex test was neither skipped nor xfailing; portable acceptance was only claimed because it actually executed in the pinned isolated interpreter. The other parked task's uncommitted work was preserved untouched throughout.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "3469185 release: record isolated-environment acceptance evidence and release identity docs",
+      "fa561d9 release: pin line endings so archive hashes match committed blobs",
+      "021f7ab docs: bind the isolated acceptance re-confirmation to the archive commit",
+      "61d8b67 (preserved from prior attempt) release: pinned dependency lock, release identity/archive tooling, portable Codex identity contract",
+      "pushed to origin/main; local == remote == 021f7abcd51737e7fb617efd34121d5bc82f1f0b (a second rebase was needed after another queue task pushed 180ca6a mid-task)"
+    ],
+    "tests": [
+      "scripts/evidence_runner.py in pinned isolated CPython 3.11.16 (built from requirements.lock): 21 suites / 21 passed / 0 failed / 0 unavailable / 583 collected / 583 passed / 0 skipped, every suite exit 0 -- run twice, identical",
+      "exec-brain/tests/test_e3.py (E3 baseline) in pinned isolated venv: 58 collected / 58 passed, OK (audit's 54-test expectation superseded; the audit's provider==openai assertion replaced by the truthful contract)",
+      "scripts/codex_identity_contract_check.py: PASS -- fixtures=3, providers covered ['openai','unknown'], historical failure reproduced=True (actual provider=unknown), contract holds",
+      "scripts/dependency_inventory.py --check: PASS -- every third-party import declared in requirements.txt",
+      "isolated venv package set vs requirements.lock: exact match, 9/9 packages, Python 3.11.16",
+      "scripts/make_release_archive.py on a clean clone of 021f7ab: archive built, dirty=False, commit 021f7ab, lock sha256 dc9334542f910aa0f6d1dd81628196d8b31b42674a2fb420dbc807b24584e337 (= git blob), 683 files, manifest re-checked against the finished archive",
+      "scripts/verify_release_archive.py --expect-commit 021f7ab... --expect-lock-sha256 dc933454... : OK -- identity + dependency + file hashes + hygiene verified independently from the ZIP bytes",
+      "archive hygiene: no .git directory, no release/ build output, no secret-like paths; the only name-heuristic match (tasks-or-issues/e3-remaining-provider-credentials-and-parallel-continuation.md) scanned manually and contains no credential values",
+      "evidence.json internal arithmetic re-verified programmatically: per-suite sums equal the recorded totals"
+    ],
+    "changed_files": [
+      "audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json",
+      "audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.md",
+      "docs/RELEASE.md",
+      "state/current_company_state.md",
+      ".gitattributes",
+      "scripts/make_release_archive.py"
+    ],
+    "remaining": [
+      "The control-plane worktree still carries another parked task's uncommitted changes (career-ops scheduled-orchestrator files and deployments/06-service-definitions.md). They were deliberately left untouched, so make_release_archive.py --allow-dirty is required to build a ZIP in place; the clean-archive proof was therefore produced from a clean clone of the pushed commit.",
+      "E1 and E2 suites pass only because this host's machine-local Hermes runtime root (LOCALAPPDATA/hermes/exec-brain) is present; on a bare source archive they are truthfully recorded 'unavailable' by design.",
+      "Deliberately machine-local and therefore not reproducible from an archive alone: provider credentials (still 0/7 owner-local), Codex login store, Hermes state databases and owner application data. Deterministic presence-only probes for each are documented in docs/SETUP.md.",
+      "E3 Stage 2 remains NOT ENABLED and no VPS cutover was performed; both stay outside this task's scope and subject to the authority file's owner gates.",
+      "release/ remains git-ignored build output; regenerate release-manifest.json from a clean clone when a manifest for a specific commit is wanted."
+    ]
+  }
+}
