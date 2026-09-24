@@ -250,6 +250,8 @@ donor. Engineering will not change it without that decision.
 
 **Qwen adapter verification TODO added 2026-09-24:** the owner has provisioned the Qwen/Alibaba Model Studio credential successfully. The current worker/adapter name remains `qwen38-27b` for credential lookup compatibility, but the intended live model selected during setup is `qwen3.7-plus`. During the post-key verification run, confirm the live Singapore-region model id and endpoint from provider evidence, update the adapter mapping if required, and qualify it only after credential, endpoint and smoke test all pass.
 
+**GLM adapter verification TODO added 2026-09-24:** during the post-key verification run, verify and update the legacy GLM provider endpoint to the current Z.ai API endpoint for the owner's account, confirm the live `glm-5.3-flash` model identifier, and only mark the provider qualified after credential, endpoint and smoke-test checks pass.
+
 **Status:** OWNER-GATED — cannot be run before the seven credentials exist and Stage 2 is enabled.
 **Blocks:** the *only* remaining E4/E5 item — a drill on the **live provider** path (a real provider
 failure actually failing a node, and real provider-health re-verification before leaving safe mode).
