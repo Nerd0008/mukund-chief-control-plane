@@ -836,3 +836,5 @@ error: Please commit or stash them.
 [2026-09-24T22:06:04.594930Z] git pull: success (with stash/restore)
 [2026-09-24T22:06:07.138067Z] Claimed task: agent-provider-debug-qwen-tencent-entitlement-2026-09-24
 [2026-09-24T22:06:07.140145Z] Handling task: agent-provider-debug-qwen-tencent-entitlement-2026-09-24 (attempt 1)
+[2026-09-24T22:14:03.953821Z] git pull: success (with stash/restore)
+[2026-09-24T22:16:04.316581Z] git pull: success (with stash/restore)
