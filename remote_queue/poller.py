@@ -404,8 +404,9 @@ def run_poll_cycle():
                     shutil.copy2(str(task_path), str(dest))
                 if task_path.exists():
                     task_path.unlink()
+                _git_commit_and_push(f"queue: block invalid task {task_id}")
             except Exception as e:
-                log_event(f"Failed to block: {e}")
+                log_event(f"Failed to block/publish invalid task: {e}")
             continue
 
         if is_task_completed(task_id) or is_task_blocked(task_id):
