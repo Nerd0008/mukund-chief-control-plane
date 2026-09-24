@@ -4,6 +4,17 @@
 Safety properties:
   * Registered tasks run BOUNDED DRY-RUN SCANS only. They never write a tracker,
     never submit an application and never contact an employer.
+  * Each region's task runs the UNIFIED scheduled orchestrator
+    (`career-ops/discovery/scheduled_orchestrator.py run --scheduled
+    --require-live-web`), which combines the structured regional provider scan,
+    the bounded open-web/Codex research pass, Company Watch findings, the owner's
+    priority company watchlist findings and the recruiter-watch / LinkedIn-export
+    intakes into one unified funnel + candidate manifest. Discovery policy is
+    `high_recall`; the owner's Intern/Internship-only rule is diagnostic only.
+    A run with no operational current-web search mechanism exits 3 with the
+    blocker recorded and never falls back to fixtures. Rollback to the previous
+    single-worker behaviour is documented in `career-ops/scheduled_orchestrator.md`
+    (the launcher path is unchanged, so no re-registration is needed).
   * Registration is idempotent (`schtasks /Create /F`) and fully reversible
     (`--remove`).
   * A region whose Career Ops lane config is missing is registered in a
@@ -159,7 +170,10 @@ def main(argv=None) -> int:
         if args.status:
             q = query(spec["task_name"])
             q.update({"region": region, "time": spec["time"], "lane_ready": spec.get("ready"),
-                      "mode": "bounded dry-run scan; never writes a tracker"})
+                      "mode": ("bounded dry-run unified orchestrator run "
+                               "(structured regional scan + open-web/Codex research + Company "
+                               "Watch + priority watchlist + recruiter/LinkedIn intakes); never "
+                               "writes a tracker, never applies a manifest")})
             results.append(q)
         elif args.install:
             results.append(install(region, spec, schedules, args.time_override))
@@ -177,7 +191,8 @@ def main(argv=None) -> int:
         "action": "status" if args.status else ("install" if args.install else "remove"),
         "schtasks_available": shutil.which("schtasks") is not None,
         "results": results,
-        "note": "Scheduled tasks perform dry-run scans only; tracker writes stay an explicit backed-up step.",
+        "note": ("Scheduled tasks run the unified dry-run orchestrator only; tracker writes and "
+                 "manifest application stay explicit, separately approved steps."),
     }, indent=2))
     return 0 if all(r.get("ok", True) for r in results) else 1
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "description": "Regional automated job-search schedules for Chief's Career department. Schedules run BOUNDED DRY-RUN scans only: they never write to a tracker and never submit anything. Tracker writes stay an explicit, backed-up, approval-gated step (career_ops_cli.py write --apply).",
+  "description": "Regional automated job-search schedules for Chief's Career department. Each region's scheduled launcher (career-ops/run_scheduled_scan.cmd) calls the UNIFIED scheduled orchestrator (career-ops/discovery/scheduled_orchestrator.py run --scheduled --require-live-web, discovery policy high_recall), which combines the structured regional provider scan, the bounded open-web/Codex research pass, Company Watch findings, the owner's priority company watchlist findings and the recruiter-watch / LinkedIn-export intakes into ONE unified funnel + candidate manifest. Schedules run BOUNDED DRY-RUN scans only: they never write a tracker, never apply a manifest and never submit anything. Tracker writes stay an explicit, backed-up, approval-gated step (career_ops_cli.py write --apply). Rollback to the pre-cutover behaviour is one command (see career-ops/scheduled_orchestrator.md).",
   "updated": "2026-09-24",
   "interpreter": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
   "control_plane": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
@@ -16,7 +16,9 @@
     "log_dir": "runtime/career-ops/daily-brief",
     "mode": "read-only aggregation; writes only the brief artifact under runtime/career-ops/daily-brief",
     "delivery": "local file only; no external delivery channel is configured, attempted or assumed healthy",
-    "note": "The Career Daily Brief / Pipeline Prioritizer (roster B23). Morning time is chosen so the brief exists before the owner's working day; making the artifact available is all the schedule does. Delivering it to a messaging surface is a separate, unverified step (see career-ops/daily_brief_config.json#delivery)."
+    "note": "The Career Daily Brief / Pipeline Prioritizer (roster B23). Morning time is chosen so the brief exists before the owner's working day; making the artifact available is all the schedule does. Delivering it to a messaging surface is a separate, unverified step (see career-ops/daily_brief_config.json#delivery).",
+    "discovery_unified_latest": "runtime/career-ops/discovery/latest.json",
+    "discovery_unified_note": "The unified orchestrator writes its whole-company funnel + manifest summary to runtime/career-ops/discovery/latest.json, which is the path this brief's discovery collector reads (career-ops/daily_brief_config.json#discovery.latest)."
   },
   "regions": {
     "uk": {
@@ -32,7 +34,8 @@
         "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
       },
       "provider_coverage": "12 global/remote job boards + the owner's own ATS tracked_companies (existing lane, unchanged)",
-      "notes": "Wires the existing UK lane (portals.yml + data/pipeline.md + data/scan-history.tsv). Matches the historical ~23:48 local run window recorded in data/scan-runs.tsv. Reuses the owner's installation in place; no files are added to it."
+      "notes": "Wires the existing UK lane (portals.yml + data/pipeline.md + data/scan-history.tsv). Matches the historical ~23:48 local run window recorded in data/scan-runs.tsv. Reuses the owner's installation in place; no files are added to it. The scheduled launcher now runs the unified orchestrator (structured regional scan + open-web/Codex research + Company Watch + priority watchlist + recruiter/LinkedIn intakes) in bounded dry-run mode; the structured regional worker is still invoked unchanged inside it.",
+      "orchestrator": "career-ops/discovery/scheduled_orchestrator.py run --region uk --scheduled --require-live-web --mode high_recall"
     },
     "dubai": {
       "task_name": "ChiefCareerScan-Dubai",
@@ -47,7 +50,8 @@
         "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\dubai\\scan-history.tsv"
       },
       "provider_coverage": "no UAE-specific provider exists in the Career Ops install; global/remote boards under an explicit UAE location scope",
-      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Work authorisation for the UAE is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record."
+      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Work authorisation for the UAE is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record. The scheduled launcher now runs the unified orchestrator (structured regional scan + open-web/Codex research + Company Watch + priority watchlist + recruiter/LinkedIn intakes) in bounded dry-run mode; the structured regional worker is still invoked unchanged inside it.",
+      "orchestrator": "career-ops/discovery/scheduled_orchestrator.py run --region dubai --scheduled --require-live-web --mode high_recall"
     },
     "japan": {
       "task_name": "ChiefCareerScan-Japan",
@@ -62,7 +66,8 @@
         "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\japan\\scan-history.tsv"
       },
       "provider_coverage": "no Japan-specific provider exists in the Career Ops install; global/remote boards under an explicit Japan location scope plus the region's search_queries for the agent-driven source path",
-      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Japanese work authorisation is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record."
+      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Japanese work authorisation is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record. The scheduled launcher now runs the unified orchestrator (structured regional scan + open-web/Codex research + Company Watch + priority watchlist + recruiter/LinkedIn intakes) in bounded dry-run mode; the structured regional worker is still invoked unchanged inside it.",
+      "orchestrator": "career-ops/discovery/scheduled_orchestrator.py run --region japan --scheduled --require-live-web --mode high_recall"
     },
     "singapore": {
       "task_name": "ChiefCareerScan-Singapore",
@@ -77,7 +82,25 @@
         "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\scan-history.tsv"
       },
       "provider_coverage": "MyCareersFuture (national job bank) + Glints (SG) + Jobstreet/SEEK (SG-Main)",
-      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Singapore work-pass eligibility is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record."
+      "notes": "Lane config created 2026-09-24 in the Chief control plane so the owner's Career Ops install stays untouched. Singapore work-pass eligibility is UNKNOWN (see regional_policy.json) and is recorded as such on every accepted record. The scheduled launcher now runs the unified orchestrator (structured regional scan + open-web/Codex research + Company Watch + priority watchlist + recruiter/LinkedIn intakes) in bounded dry-run mode; the structured regional worker is still invoked unchanged inside it.",
+      "orchestrator": "career-ops/discovery/scheduled_orchestrator.py run --region singapore --scheduled --require-live-web --mode high_recall"
     }
+  },
+  "unified_orchestrator": {
+    "worker": "career-ops/discovery/scheduled_orchestrator.py",
+    "launcher": "career-ops/run_scheduled_scan.cmd",
+    "discovery_policy": "high_recall (the owner's Intern/Internship-only rule is available only as an explicit diagnostic: --mode intern_only --compare)",
+    "live_requirement": "--require-live-web: exits 3 with the blocker recorded when no current-web search mechanism is operational; no fixture fallback is ever accepted as proof",
+    "state_file": "runtime/career-ops/discovery/unified-run-state.json",
+    "lock_file": "runtime/career-ops/discovery/unified-run.lock",
+    "outputs": [
+      "runtime/career-ops/discovery/unified/<region>/latest.json",
+      "runtime/career-ops/discovery/unified/<region>/manifest-latest.json",
+      "runtime/career-ops/discovery/unified-latest.json",
+      "runtime/career-ops/discovery/unified-manifest-latest.json",
+      "runtime/career-ops/discovery/latest.json (the artifact the Career Daily Brief reads)"
+    ],
+    "rollback": "\"%PY%\" \"%CP%\\career-ops\\regional_job_search.py\" run --region %REGION% --scheduled --timeout 1800 --record \"%LOGDIR%\" (restore this line in run_scheduled_scan.cmd; the launcher path is unchanged so the scheduled tasks do not need re-registration)",
+    "docs": "career-ops/scheduled_orchestrator.md"
   }
 }

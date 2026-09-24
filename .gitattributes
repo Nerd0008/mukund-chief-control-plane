@@ -31,3 +31,10 @@
 *.woff2 binary
 *.ttf  binary
 *.exe  binary
+
+# Windows batch launchers are the exception to the LF policy: cmd.exe mis-parses
+# an LF-only .cmd/.bat (a scheduled launcher would silently mis-run). Pin them to
+# CRLF in the worktree; git still stores a normalised LF blob in the repository,
+# so the archive/release hash guarantee above is unaffected.
+*.cmd text eol=crlf
+*.bat text eol=crlf

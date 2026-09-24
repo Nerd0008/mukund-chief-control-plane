@@ -35,8 +35,18 @@ All run as `mukun` with `<LogonType>InteractiveToken</LogonType>`
 with `RunLevel: HighestAvailable`; all others default.
 
 `ExecutionTimeLimit`: gateway `PT0S` (unlimited, it is a daemon); the rest carry
-the scheduler default (~72 h) — the scan launchers are themselves bounded
-(`--timeout 1800`).
+the scheduler default (~72 h) — the scan launchers are themselves bounded (the
+unified orchestrator's `--budget-seconds 2700` with `--scan-timeout 900`, and it
+holds a lock so a second instance exits without running).
+
+The four `ChiefCareerScan-*` tasks each run
+`career-ops/run_scheduled_scan.cmd <region>`, which invokes the unified scheduled
+orchestrator (`career-ops/discovery/scheduled_orchestrator.py run --scheduled
+--require-live-web --mode high_recall`). Behaviour, outputs, source-coverage
+matrix, rollback and no-go criteria: `career-ops/scheduled_orchestrator.md`.
+A run without an operational current-web search mechanism exits 3 (recorded
+blocker, no fixture fallback), which Task Scheduler reports as a non-zero last
+result by design.
 
 ## 2. Two material deployment findings (recorded, not changed)
 

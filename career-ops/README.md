@@ -186,8 +186,27 @@ A test asserts the state files contain no URL or workbook text.
 `regional_schedules.json` + `install_schedules.py` define and register Windows
 scheduled tasks (`ChiefCareerScan-UK`, `-Dubai`, `-Japan`, `-Singapore`).
 
-* Scheduled runs are **bounded dry-run scans only** — they never write a tracker
-  and never submit anything, so overlapping runs cannot duplicate rows.
+* Each region's task runs `career-ops/run_scheduled_scan.cmd <region>`, which now
+  invokes the **unified scheduled orchestrator**
+  (`career-ops/discovery/scheduled_orchestrator.py run --scheduled
+  --require-live-web`). One bounded pass combines the structured regional provider
+  scan, the bounded open-web/Codex research pass, Company Watch findings, the
+  owner's priority company watchlist findings and the recruiter-watch /
+  LinkedIn-export intakes into ONE funnel + candidate manifest. See
+  `career-ops/scheduled_orchestrator.md` for operations, the source-coverage
+  matrix, rollback and the no-go criteria.
+* Discovery policy is `high_recall`. The owner's own Intern/Internship-only rule
+  (`portals.yml title_filter`) is preserved only as an explicit diagnostic
+  (`--mode intern_only --compare`) and is no longer the scheduled discovery gate.
+* Scheduled runs are **bounded dry-run only** — they never write a tracker, never
+  apply a manifest, never submit anything and never log in anywhere, so
+  overlapping runs cannot duplicate rows.
+* Regions are staggered (23:45 / 23:50 / 23:55 / 00:00) and each run takes a lock
+  file; a second instance that finds a fresh lock exits without running.
+* `--require-live-web` makes the trade-off explicit: if no current-web search
+  mechanism is operational the run still completes truthfully from the other
+  sources, records the blocker and exits 3 — it never silently falls back to
+  fixtures and never claims production readiness.
 * Every region has a real lane config (2026-09-24):
   * `uk` reuses the owner's existing install lane (`portals.yml`,
     `data/pipeline.md`, `data/scan-history.tsv`) and runs daily at 23:45 local,

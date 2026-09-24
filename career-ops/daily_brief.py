@@ -510,6 +510,64 @@ def collect_company_watch(cfg: dict, now: dt.datetime | None = None) -> dict:
     }
 
 
+def source_coverage_view(doc: dict) -> dict:
+    """Per-source and per-surface-class coverage from the funnel's own run evidence.
+
+    Two shapes exist and both are reported as-is:
+
+    * a single-region run (``discovery/pipeline.py`` or
+      ``discovery/scheduled_orchestrator.py run``) carries
+      ``funnel.by_source`` and ``source_coverage.classes`` directly;
+    * the unified multi-region run (``scheduled_orchestrator.py run-all``) carries
+      ``source_coverage.<region>.classes``.
+
+    Nothing here is recomputed or reinterpreted: the counters are the worker's own.
+    A source class that was blocked or unavailable keeps that state — it is never
+    flattened into "empty".
+    """
+    funnel = doc.get("funnel") or {}
+    by_source = funnel.get("by_source") or {}
+    sources = {
+        src: {
+            "discovered": (entry.get("counts") or {}).get("discovered"),
+            "counts": entry.get("counts") or {},
+            "rejections_by_reason": entry.get("rejections_by_reason") or {},
+            "zero_attribution": entry.get("zero_attribution") or {},
+            "not_applicable_stages": entry.get("not_applicable_stages") or {},
+        }
+        for src, entry in by_source.items()
+    }
+    raw = doc.get("source_coverage") or {}
+    classes: dict = {}
+    if isinstance(raw.get("classes"), dict):
+        classes = {"all": {k: _class_state(v) for k, v in raw["classes"].items()}}
+    else:
+        for region, block in raw.items():
+            if isinstance(block, dict) and isinstance(block.get("classes"), dict):
+                classes[region] = {k: _class_state(v) for k, v in block["classes"].items()}
+    return {
+        "sources": sources,
+        "sources_discovered_total": {k: v["discovered"] for k, v in sources.items()},
+        "classes_by_region": classes,
+        "class_state_vocabulary": (raw.get("states_vocabulary")
+                                   if isinstance(raw, dict) else None) or {},
+        "note": ("source coverage is the worker's own per-source and per-source-class "
+                 "evidence; a class recorded as blocked or unavailable is never reported as "
+                 "an empty source"),
+    }
+
+
+def _class_state(entry: dict) -> dict:
+    return {"state": entry.get("state"), "reason": entry.get("reason"),
+            "queries_targeting": entry.get("queries_targeting"),
+            "queries_with_observed_live_search": entry.get("queries_with_observed_live_search"),
+            "result_urls_discovered": entry.get("result_urls_discovered"),
+            "job_posting_urls": entry.get("job_posting_urls"),
+            "validated_live": entry.get("validated_live"),
+            "validation_failed": entry.get("validation_failed"),
+            "blocking_evidence": entry.get("blocking_evidence") or []}
+
+
 def collect_discovery_funnel(cfg: dict, now: dt.datetime | None = None) -> dict:
     """High-recall discovery funnel metrics + top semantic candidates (read-only).
 
@@ -593,6 +651,17 @@ def collect_discovery_funnel(cfg: dict, now: dt.datetime | None = None) -> dict:
         "classifications_total": len(classifications),
         "accepted_total": len(accepted),
         "top_semantic_candidates": top,
+        "run_kind": doc.get("kind"),
+        "regions_covered": doc.get("regions_covered") or ([doc.get("region")]
+                                                          if doc.get("region") else []),
+        "discovery_mode": (doc.get("discovery_mode") or doc.get("title_policy_mode")),
+        "production_discovery_policy": doc.get("production_discovery_policy"),
+        "aggregation_note": doc.get("aggregation_note"),
+        "source_coverage": source_coverage_view(doc),
+        "live_research": doc.get("live_research"),
+        "production_ready": doc.get("production_ready"),
+        "no_go": doc.get("no_go"),
+        "manifest_counts": doc.get("manifest_counts") or doc.get("manifest"),
         "ranking_semantics": {
             "kind": "deterministic_policy_output",
             "order": ("accepted label (strong_entry_level_match, then plausible_entry_level), then "
@@ -1204,6 +1273,38 @@ def chief_summary(brief: dict, cfg: dict) -> str:
               f"accept(s) — policy output, not a vacancy claim]")
     else:
         lines.append("Discovery funnel: unavailable (no run evidence) — UNKNOWN, never zero jobs")
+    if df.get("available"):
+        sc = df.get("source_coverage") or {}
+        discovered = sc.get("sources_discovered_total") or {}
+        if discovered:
+            lines.append("Discovery sources: " + ", ".join(
+                f"{src}={n}" for src, n in sorted(discovered.items())))
+        classes = sc.get("classes_by_region") or {}
+        if classes:
+            states = "; ".join(
+                f"{region}: " + ", ".join(f"{name}={entry.get('state')}"
+                                          for name, entry in sorted(entry_map.items()))
+                for region, entry_map in sorted(classes.items()))
+            lines.append(f"Source-class coverage: {states} (reached/blocked/unavailable/"
+                         "not_applicable/searched_no_results are recorded from this run's own "
+                         "evidence; a blocked source is never reported as empty)")
+        lr = df.get("live_research") or {}
+        if lr:
+            lines.append(
+                "Live research mechanism: "
+                + (f"{lr.get('mechanism') or 'unknown'} operational in "
+                   f"{len(lr.get('regions_operational') or [])} region(s)"
+                   if lr.get("regions_operational") is not None else
+                   f"{lr.get('mechanism') or 'unknown'} "
+                   f"{'operational' if lr.get('operational') else 'NOT operational'}")
+                + ("" if (lr.get("operational") or lr.get("regions_operational"))
+                   else " — no current-web search proven: the lane is NOT production-ready"))
+        if df.get("no_go"):
+            lines.append(f"NO-GO: {df['no_go']}")
+        mc = df.get("manifest_counts") or {}
+        if mc:
+            lines.append(f"Unified candidate manifest: {mc.get('records', mc.get('manifest_records'))} "
+                         f"record(s) ready for the explicit apply step (no tracker write here)")
     wl = brief.get("priority_watchlist") or {}
     if wl.get("declared"):
         c = wl.get("counts") or {}
