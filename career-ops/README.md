@@ -41,6 +41,8 @@ one JSON object on stdout — no prose for Chief to parse.
 | `verify --region R` | integrity verification of a canonical workbook | no |
 | `dedupe --region R --manifest F` | dedupe decisions for a manifest | no |
 | `write --region R --manifest F [--apply]` | deduplicated append | dry-run unless `--apply` |
+| `rollover --region R [--month YYYY-MM] [--apply]` | monthly rollover into a per-region archive workbook (B09) | dry-run unless `--apply` |
+| `run-health [--job J]` | deterministic run-health for the Excel workers (B08/B09) | no |
 | `summary [--region R]` | Chief-readable tracker summary | no |
 | `scan --region R [--record DIR]` | bounded Career Ops scan wrapper | no (always `--dry-run`) |
 | `ledger --region R` | cross-month dedupe index provenance | no |
@@ -91,6 +93,93 @@ covers the last data row; header row unchanged; fit-tier formulas intact; every
 profile data validation preserved; no `#REF!/#DIV/0!/#VALUE!/#NAME?/#N/A/...`
 tokens anywhere; no duplicate URL keys; expected data-row count; owner columns
 unchanged. On any failure the canonical workbook is left untouched.
+
+## Monthly Tracker Rollover / archive worker (B09, 2026-09-24)
+
+`career-ops/tracker_rollover.py` rotates one closed month of records out of each
+canonical workbook into a per-region **archive workbook**:
+
+    uk        -> uk-cyber-job-tracker.<YYYY-MM>.xlsx
+    dubai     -> Dubai_Cybersecurity_Job_Tracker.<YYYY-MM>.xlsx
+    japan     -> Japan_Cybersecurity_Job_Tracker.<YYYY-MM>.xlsx
+    singapore -> Singapore_Cybersecurity_Job_Tracker.<YYYY-MM>.xlsx
+
+| Subcommand (standalone or via `career_ops_cli.py rollover`) | Purpose | Writes? |
+|---|---|---|
+| `plan --region R [--month M]` | read-only: what would rotate, months present, conflicts | no |
+| `rollover --region R [--month M]` | dry run of the rollover | no |
+| `rollover ... --apply` | archive the month, then rotate those rows out of the canonical workbook | archive + canonical |
+| `rollover ... --apply --archive-only` | snapshot the month without touching the canonical workbook | archive only |
+| `archives --region R` | the region's archive workbooks (name, hash, row count) | no |
+
+    python career-ops/tracker_rollover.py plan --region uk --month 2026-08
+    python career-ops/career_ops_cli.py rollover --region uk --month 2026-08 --apply
+
+**The archive name is deliberate.** It matches the region's archive glob in
+`regional_profiles.json`, and `tracker_writer.build_cross_month_index` already
+unions every non-canonical workbook matching that glob — so every rotated row
+feeds the cross-month dedupe index and a posting seen in a previous month is
+refused as `duplicate-cross-month` instead of being appended again.
+
+**Schema preservation.** The archive is built from a *copy of the canonical
+workbook*, so its sheets, table, header row, data validations, number formats and
+column layout are inherited rather than re-created; the data block is then
+replaced with exactly the rotated rows, and any row-number-dependent formula
+(`formula_map`, e.g. the fit-tier column) is re-templated for its new row. Each
+cell of each rotated row is copied verbatim, **owner columns included** — the
+archive is the faithful record of what left the live workbook.
+
+**Rotation safety (the same path as the tracker writer).**
+
+1. Dry run by default; nothing is written without `--apply`.
+2. The archive is written, verified and only then atomically moved into place —
+   **before** the canonical workbook is touched.
+3. A canonical write takes a hash-verified backup first, is written to a
+   `*.rollover-tmp.xlsx` file, is re-opened and verified (expected row count +
+   owner columns unchanged at their new positions), is re-checked against a
+   concurrent-modification hash guard, and is only then atomically replaced.
+4. **Owner state is never silently deleted.** If a row due to rotate carries a
+   value in an owner-only column that is not the profile's own automation default
+   (an `Applied` status, a tailored CV path, an applied date), the whole run is
+   refused and the offending rows are reported **by row and column letter only**
+   — the value is never read into the result, because owner columns can hold
+   private notes. `--allow-owner-state-removal` overrides it after owner approval.
+5. An existing archive with different content is refused unless `--force`, which
+   backs it up hash-verified first.
+6. Re-running the same month is deterministic: byte-identical archive content is
+   reported as `unchanged` and nothing is rewritten.
+
+**Honest limits (recorded, not hidden).** A row whose `date_found` is not a real
+date or ISO date string (for example the free text `"Posted 30+ days ago"`) is
+reported as `undated` and **never rotated**. The regional profiles map the
+manifest's `notes` field to column `Z` while also declaring `Z` an owner column,
+so `Z` is *automation-writable* and cannot be attributed to the owner from the
+data alone: the guard reports it in `owner_columns_automation_writable` instead of
+pretending to protect it, and always protects the genuinely owner-only columns
+(application status, selected flag, CV/cover-letter status, applied date).
+Overview sheets (for example the UK `Summary`) are not rewritten; their formulas
+use whole-column ranges (`Jobs!$A$10:$A$500`) and recompute over the remaining
+rows when the workbook is opened.
+
+## Department run-health (roster B08 / B09)
+
+`career-ops/dept_run_health.py` is the single deterministic place where the Excel
+workers' **orchestration** metadata is written and read back:
+
+    runtime/career-ops/run-health/tracker-writer.json      (B08)
+    runtime/career-ops/run-health/monthly-rollover.json    (B09)
+
+Each document records the worker, its roster id, `runs_recorded`, the last run
+(time, region, status, mode, result) and the last run per region, with row counts,
+hashes and file names. `career_ops_cli.py run-health [--job J]` prints it as one
+JSON object. Both the `write` and `rollover` commands record a run automatically
+(`--state-dir` overrides the location, which the tests use).
+
+**Excel stays authoritative.** Every document states
+`excel_is_source_of_truth: true` and `chief_state_role: "orchestration-only"`, and
+the documents are **aggregate only** — no company, title, URL, note or other
+workbook content is ever stored there, which is why they are safe to commit.
+A test asserts the state files contain no URL or workbook text.
 
 ## Regional schedules
 
@@ -195,6 +284,18 @@ ledger, manifest-cannot-set-application-state, dry-run-changes-nothing, full
 append→verify→backup→rollback acceptance for all four regions, and idempotency of
 a repeated run. Tests only ever write to copies; the canonical workbooks are
 opened read-only by the suite.
+
+`career-ops/tests/test_tracker_rollover.py` (32 tests) covers the monthly
+rollover worker: archive naming vs the profile's archive globs, month parsing
+(including free-text dates that must not rotate), read-only planning, dry runs
+that write nothing, archive+rotation on a copy in all four regions with schema,
+formula and data-validation preservation and verbatim cell copies, cross-month
+dedupe for every rotated row, first-run refusal on existing archive content and
+the `--force` backup path, refusal on owner-column state (with an assertion that
+the owner's value never appears in the refusal), `--archive-only` leaving the
+canonical untouched, `unchanged` on a deterministic re-run, backup-based rollback,
+and run-health recording for both workers (asserting the state files hold no
+workbook content or URLs).
 
 ## CV + cover-letter draft workflow (2026-09-24)
 
@@ -568,6 +669,29 @@ no canonical source or tracker changed. Writes
 
 ## Acceptance runner
 
+    python career-ops/run_rollover_acceptance.py [--stamp S] [--month YYYY-MM]
+
+The reversible B09 acceptance run, on a dated **copy** of every canonical
+workbook (the canonical files are only read):
+
+    tracker writer append (2 probe rows, .invalid) -> rollover plan (read-only)
+      -> archive written + verified -> month rotated out of the copy
+      -> rotated rows present in the cross-month index and re-added postings
+         refused as duplicate-cross-month -> second run changes nothing
+      -> copy restored byte-identically from the rollover backup, then the
+         archive removed and its keys gone from the index
+      -> run-health for both workers
+
+It writes `audits/evidence/<stamp>-career-ops-monthly-rollover/acceptance-<stamp>.json`
+(aggregate only — counts, statuses, hashes, file names) and fails unless every
+region reached `written`, every archive verified with the canonical sheet set,
+every rotated row was refused as `duplicate-cross-month` with zero appends, the
+rollback restored the copy byte-identically, the run-health documents stayed
+aggregate-only, and all four canonical workbooks are hash-identical before and
+after.
+
+## Acceptance runner (CV + LinkedIn)
+
     python career-ops/run_cv_linkedin_acceptance.py [--region uk] [--stamp S]
 
 Exercises the representative path end to end with fixtures:
@@ -688,13 +812,14 @@ schedule + launcher exist with the task state read from Task Scheduler.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 300 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 332 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
     python -m pytest career-ops/tests/test_daily_brief.py -q    # 22 passed
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
+    python -m pytest career-ops/tests/test_tracker_rollover.py -q  # 32 passed (B09)
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

@@ -11,6 +11,10 @@ Subcommands
   dedupe  --region R --manifest F dedupe decisions for a manifest (no writes)
   write   --region R --manifest F [--apply] [--update-existing]
                                   append deduplicated records (dry-run by default)
+  rollover --region R [--month YYYY-MM] [--apply] [--archive-only] [--force]
+                                  monthly rollover into a per-region archive workbook
+                                  (dry-run by default; roster B09)
+  run-health [--job J]            deterministic run-health for the Excel workers
   summary --region R              Chief-readable tracker summary
   scan    --region R [--dry-run]  bounded Career Ops scan wrapper (delegates to scan.mjs)
   ledger  --region R              cross-month dedupe index provenance
@@ -41,6 +45,8 @@ from tracker_writer import (  # noqa: E402
     verify_workbook,
 )
 import tracker_writer  # noqa: E402
+import dept_run_health  # noqa: E402
+import tracker_rollover  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 CAREER_OPS_DIR = HERE
@@ -178,6 +184,14 @@ def cmd_dedupe(args) -> int:
     return 0
 
 
+def _write_run_status(args, result: dict) -> str:
+    if not result.get("applied"):
+        if result.get("error"):
+            return "failed"
+        return "dry-run" if not args.apply else "no-op"
+    return "ok"
+
+
 def cmd_write(args) -> int:
     profiles = load_profiles(args.profiles)
     records = _load_manifest(args.manifest)
@@ -191,8 +205,58 @@ def cmd_write(args) -> int:
     )
     result["mode"] = "apply" if args.apply else "dry-run"
     result["provenance"] = {"manifest": args.manifest, "writer": "career-ops/tracker_writer.py"}
+    # Department run-health: counts/status/hashes only — never workbook content.
+    verification = result.get("verification") or result.get("verification_of_temp") or {}
+    dept_run_health.record_run(
+        "tracker-writer",
+        region=args.region,
+        status=_write_run_status(args, result),
+        mode=result["mode"],
+        counts={
+            "input": (result.get("counts") or {}).get("input"),
+            "appended": (result.get("counts") or {}).get("appended"),
+            "duplicates": (result.get("counts") or {}).get("duplicates"),
+            "rejected": (result.get("counts") or {}).get("rejected"),
+            "refreshed": (result.get("counts") or {}).get("refreshed"),
+            "data_rows_before": result.get("pre_data_rows"),
+            "data_rows_after": result.get("post_data_rows"),
+        },
+        extra={
+            "tracker_filename": Path(result["tracker"]).name,
+            "applied": bool(result.get("applied")),
+            "verification_ok": bool(verification.get("ok")),
+            "problems": len(verification.get("problems") or []),
+            "error": result.get("error"),
+        },
+        state_dir=getattr(args, "state_dir", None),
+    )
     emit(result)
     return 0 if result.get("applied") or not args.apply else 1
+
+
+def cmd_rollover(args) -> int:
+    """Monthly Tracker Rollover / archive worker (roster B09)."""
+    profiles = load_profiles(args.profiles)
+    result = tracker_rollover.rollover(
+        profiles, args.region, args.month or tracker_rollover.previous_month(),
+        apply=args.apply,
+        archive_only=args.archive_only,
+        archive_dir=args.archive_dir,
+        tracker_override=args.tracker,
+        backup_dir=args.backup_dir,
+        force=args.force,
+        allow_owner_state_removal=args.allow_owner_state_removal,
+        state_dir=getattr(args, "state_dir", None),
+    )
+    result["provenance"] = {"worker": "career-ops/tracker_rollover.py", "roster": "B09"}
+    emit(result)
+    return 0 if result.get("status") in ("written", "planned", "unchanged", "no_rows") else 1
+
+
+def cmd_run_health(args) -> int:
+    """Deterministic Chief-readable run-health for the Career Ops Excel workers."""
+    emit(dept_run_health.summarise(getattr(args, "state_dir", None), getattr(args, "job", None)))
+    return 0
 
 
 def cmd_summary(args) -> int:
@@ -374,7 +438,26 @@ def main(argv=None) -> int:
     p.add_argument("--update-existing", action="store_true")
     p.add_argument("--tracker"); p.add_argument("--backup-dir")
     p.add_argument("--archive-dir", action="append")
+    p.add_argument("--state-dir", help="run-health directory (default: runtime/career-ops/run-health)")
     p.set_defaults(fn=cmd_write)
+
+    p = sub.add_parser("rollover")
+    p.add_argument("--region", required=True)
+    p.add_argument("--month", help="YYYY-MM (default: previous calendar month)")
+    p.add_argument("--apply", action="store_true")
+    p.add_argument("--archive-only", action="store_true",
+                   help="write the archive but leave the canonical workbook untouched")
+    p.add_argument("--force", action="store_true")
+    p.add_argument("--allow-owner-state-removal", action="store_true")
+    p.add_argument("--tracker"); p.add_argument("--archive-dir")
+    p.add_argument("--backup-dir")
+    p.add_argument("--state-dir")
+    p.set_defaults(fn=cmd_rollover)
+
+    p = sub.add_parser("run-health")
+    p.add_argument("--job", choices=sorted(dept_run_health.JOBS))
+    p.add_argument("--state-dir")
+    p.set_defaults(fn=cmd_run_health)
 
     p = sub.add_parser("summary")
     p.add_argument("--region")

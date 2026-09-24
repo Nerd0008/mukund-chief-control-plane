@@ -1,0 +1,119 @@
+{
+  "chief_state_role": "orchestration-only",
+  "excel_is_source_of_truth": true,
+  "job": "tracker-writer",
+  "last_by_region": {
+    "dubai": {
+      "applied": false,
+      "at": "2026-09-24T02:05:27+00:00",
+      "counts": {
+        "appended": 0,
+        "data_rows_after": null,
+        "data_rows_before": 21,
+        "duplicates": 0,
+        "input": 0,
+        "refreshed": 0,
+        "rejected": 0
+      },
+      "error": null,
+      "mode": "dry-run",
+      "problems": 0,
+      "region": "dubai",
+      "result": "dry-run",
+      "status": "dry-run",
+      "tracker_filename": "Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "verification_ok": false
+    },
+    "japan": {
+      "applied": false,
+      "at": "2026-09-24T02:05:28+00:00",
+      "counts": {
+        "appended": 0,
+        "data_rows_after": null,
+        "data_rows_before": 41,
+        "duplicates": 0,
+        "input": 0,
+        "refreshed": 0,
+        "rejected": 0
+      },
+      "error": null,
+      "mode": "dry-run",
+      "problems": 0,
+      "region": "japan",
+      "result": "dry-run",
+      "status": "dry-run",
+      "tracker_filename": "Japan_Cybersecurity_Job_Tracker.xlsx",
+      "verification_ok": false
+    },
+    "singapore": {
+      "applied": false,
+      "at": "2026-09-24T02:05:29+00:00",
+      "counts": {
+        "appended": 0,
+        "data_rows_after": null,
+        "data_rows_before": 22,
+        "duplicates": 0,
+        "input": 0,
+        "refreshed": 0,
+        "rejected": 0
+      },
+      "error": null,
+      "mode": "dry-run",
+      "problems": 0,
+      "region": "singapore",
+      "result": "dry-run",
+      "status": "dry-run",
+      "tracker_filename": "Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "verification_ok": false
+    },
+    "uk": {
+      "applied": true,
+      "at": "2026-09-24T02:08:01+00:00",
+      "counts": {
+        "appended": 1,
+        "data_rows_after": 35,
+        "data_rows_before": 34,
+        "duplicates": 0,
+        "input": 1,
+        "refreshed": 0,
+        "rejected": 0
+      },
+      "error": null,
+      "mode": "apply",
+      "problems": 0,
+      "region": "uk",
+      "result": "ok",
+      "status": "ok",
+      "tracker_filename": "uk-cyber-job-tracker.xlsx",
+      "verification_ok": true
+    }
+  },
+  "last_run": {
+    "applied": true,
+    "at": "2026-09-24T02:08:01+00:00",
+    "counts": {
+      "appended": 1,
+      "data_rows_after": 35,
+      "data_rows_before": 34,
+      "duplicates": 0,
+      "input": 1,
+      "refreshed": 0,
+      "rejected": 0
+    },
+    "error": null,
+    "mode": "apply",
+    "problems": 0,
+    "region": "uk",
+    "result": "ok",
+    "status": "ok",
+    "tracker_filename": "uk-cyber-job-tracker.xlsx",
+    "verification_ok": true
+  },
+  "owns": "deduplicated append into a canonical regional workbook",
+  "roster": "B08",
+  "runs_recorded": 16,
+  "schema_version": 1,
+  "title": "Excel Tracker Writer",
+  "updated_at": "2026-09-24T02:08:01+00:00",
+  "worker": "career-ops/tracker_writer.py"
+}

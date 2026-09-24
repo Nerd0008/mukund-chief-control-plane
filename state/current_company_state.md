@@ -525,6 +525,8 @@ Coverage gap closed:
   (now committed). Exactly **one** successor task was staged:
   `remote-queue/pending/agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23.json`,
   explicitly excluding the scope already owned by the regional-lanes and Company Watch tasks.
+  *(Update 2026-09-24T02:04Z: that successor has now executed — B09 is built, tested and evidenced;
+  see the "Career Records: tracker writer + monthly rollover" section below.)*
 
 No roster entry needed to be added: the audit found no missing owner-relevant workflow.
 
@@ -1042,3 +1044,57 @@ production dispatch was enabled by this work.**
   shape, the attempt/persistence path, the no-image-is-not-a-pass rule and the repeat-series
   accounting. Change deployed to the runtime root via `scripts/deploy_e3_runtime.py` (backup
   `exec-brain/backups/e3-deploy-20260924T014415Z`).
+
+## Career Records: tracker writer (B08) + monthly rollover (B09) — 2026-09-24T02:04Z
+
+Task `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23` (authority
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`). Scope was limited to the tracker
+interface and B09; the regional lanes and Company Watch were left to their own tasks.
+
+**Current state of the Career Records capability (verified now, not assumed):**
+
+- **B07/B08 deterministic interface — committed and green.** `career-ops/career_ops_cli.py` is the
+  single Chief entry point (one JSON object per call: `inventory`, `verify`, `dedupe`, `write`,
+  `rollover`, `run-health`, `summary`, `scan`, `ledger`). `career-ops/tracker_writer.py` is the
+  openpyxl writer that replaced the unsupported `@oai/artifact-tool` dependency. Both were already
+  committed at `70dd715`; nothing was reverted, re-written or duplicated.
+- **B09 Monthly Tracker Rollover / archive worker — built and evidenced.**
+  `career-ops/tracker_rollover.py` rotates one closed month per region into
+  `uk-cyber-job-tracker.<YYYY-MM>.xlsx` / `<Region>_Cybersecurity_Job_Tracker.<YYYY-MM>.xlsx`.
+  The archive is built from a copy of the canonical workbook, so its sheets, table, formulas, number
+  formats and data validations are inherited, and every rotated cell — owner columns included — is
+  copied verbatim. Because the archive name matches the region's archive glob, every rotated row
+  feeds `build_cross_month_index`: re-adding a posting from a previous month is refused as
+  `duplicate-cross-month` with 0 appends.
+- **Safety, all proven on dated copies:** archive written and verified before the canonical is
+  touched; hash-verified backup → temp write → re-open verification → concurrent-modification guard →
+  atomic replace; refusal (with owner-action flag) when a row due to rotate carries owner-only
+  column state, reporting row/column only and never the value; refusal on a pre-existing archive with
+  different content unless `--force` (which backs it up first); `unchanged` on a byte-identical
+  re-run; byte-identical restore from the backup. **All four canonical workbooks are SHA-256
+  identical before and after the tests and the acceptance run** — nothing in this task wrote to them.
+- **Real-data finding (the gate firing on live workbooks).** A read-only `rollover --month 2026-09`
+  plan against the current canonical files reports owner-column conflicts that block rotation:
+  **uk 26 rows (J×5 application status, K×21 priority), dubai 8 (R), singapore 4 (R), japan 0**.
+  Those rows carry the owner's own application state, so rotation was correctly refused instead of
+  deleting owner records. This is recorded as an **owner decision**, not a defect.
+- **Department run-health (B08 + B09).** `career-ops/dept_run_health.py` writes
+  `runtime/career-ops/run-health/tracker-writer.json` and `monthly-rollover.json` — last run, result,
+  mode, row counts and the last run per region. `career_ops_cli.py run-health` reads them as one JSON
+  object. The documents state `excel_is_source_of_truth: true` and
+  `chief_state_role: "orchestration-only"` and are **aggregate only** (no company, title, URL or note
+  ever lands there), so they are safe to commit; a test asserts that.
+- **Rollover is deliberately not scheduled.** It is an explicit owner-invoked month-end step; the
+  regional scans stay as they are. Adding a schedule later is a normal reversible
+  `install_schedules.py` step once the rotation policy is settled.
+- **Tests:** `career-ops/tests/test_tracker_rollover.py` (32 new tests) → whole `career-ops/tests/`
+  suite **332 passed** (was 300). Acceptance: `career-ops/run_rollover_acceptance.py` exit 0,
+  `ok: true` for uk/dubai/japan/singapore, evidence
+  `audits/evidence/2026-09-24T02-04-31Z-career-ops-monthly-rollover/acceptance-20260924T020431Z.json`.
+- **Registry updated:** the `mukund-company-registry` skill references now carry the interface
+  (`integration_rules.md` §8), the corrected ownership map rows, the canonical ↔ archive naming
+  (`resource_map.md`), the new `career_records_interface` resource (`company_registry.yaml`) and the
+  rollover scheduling decision (`schedule_map.md`).
+
+**Open owner decision:** whether to rotate the current month out of the live workbooks, and how to
+treat the rows that hold owner application state. No rotation was applied to any canonical workbook.

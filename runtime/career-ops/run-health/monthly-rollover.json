@@ -1,0 +1,109 @@
+{
+  "chief_state_role": "orchestration-only",
+  "excel_is_source_of_truth": true,
+  "job": "monthly-rollover",
+  "last_by_region": {
+    "dubai": {
+      "archive_filename": "Dubai_Cybersecurity_Job_Tracker.2026-09.xlsx",
+      "archive_only": false,
+      "at": "2026-09-24T02:05:33+00:00",
+      "counts": {
+        "archived_rows": 0,
+        "data_rows": 21,
+        "month_rows": 21,
+        "retained_rows": 0,
+        "rotated_out_of_canonical": 0,
+        "undated_rows": 0
+      },
+      "mode": "dry-run",
+      "month": "2026-09",
+      "reason": "8 row(s) due to rotate carry owner-column state that is not an automation default; rotation would delete owner records. Re-run with --allow-owner-state-removal only after owner approval.",
+      "region": "dubai",
+      "result": "refused",
+      "status": "refused"
+    },
+    "japan": {
+      "archive_filename": "Japan_Cybersecurity_Job_Tracker.2026-09.xlsx",
+      "archive_only": false,
+      "at": "2026-09-24T02:05:33+00:00",
+      "counts": {
+        "archived_rows": 0,
+        "data_rows": 41,
+        "month_rows": 41,
+        "retained_rows": 0,
+        "rotated_out_of_canonical": 0,
+        "undated_rows": 0
+      },
+      "mode": "dry-run",
+      "month": "2026-09",
+      "reason": "dry run: pass --apply to write the archive and rotate the rows out of the canonical workbook",
+      "region": "japan",
+      "result": "planned",
+      "status": "planned"
+    },
+    "singapore": {
+      "archive_filename": "Singapore_Cybersecurity_Job_Tracker.2026-09.xlsx",
+      "archive_only": false,
+      "at": "2026-09-24T02:05:34+00:00",
+      "counts": {
+        "archived_rows": 0,
+        "data_rows": 22,
+        "month_rows": 22,
+        "retained_rows": 0,
+        "rotated_out_of_canonical": 0,
+        "undated_rows": 0
+      },
+      "mode": "dry-run",
+      "month": "2026-09",
+      "reason": "4 row(s) due to rotate carry owner-column state that is not an automation default; rotation would delete owner records. Re-run with --allow-owner-state-removal only after owner approval.",
+      "region": "singapore",
+      "result": "refused",
+      "status": "refused"
+    },
+    "uk": {
+      "archive_filename": "uk-cyber-job-tracker.2026-09.xlsx",
+      "archive_only": false,
+      "at": "2026-09-24T02:05:32+00:00",
+      "counts": {
+        "archived_rows": 0,
+        "data_rows": 34,
+        "month_rows": 34,
+        "retained_rows": 0,
+        "rotated_out_of_canonical": 0,
+        "undated_rows": 0
+      },
+      "mode": "dry-run",
+      "month": "2026-09",
+      "reason": "26 row(s) due to rotate carry owner-column state that is not an automation default; rotation would delete owner records. Re-run with --allow-owner-state-removal only after owner approval.",
+      "region": "uk",
+      "result": "refused",
+      "status": "refused"
+    }
+  },
+  "last_run": {
+    "archive_filename": "Singapore_Cybersecurity_Job_Tracker.2026-09.xlsx",
+    "archive_only": false,
+    "at": "2026-09-24T02:05:34+00:00",
+    "counts": {
+      "archived_rows": 0,
+      "data_rows": 22,
+      "month_rows": 22,
+      "retained_rows": 0,
+      "rotated_out_of_canonical": 0,
+      "undated_rows": 0
+    },
+    "mode": "dry-run",
+    "month": "2026-09",
+    "reason": "4 row(s) due to rotate carry owner-column state that is not an automation default; rotation would delete owner records. Re-run with --allow-owner-state-removal only after owner approval.",
+    "region": "singapore",
+    "result": "refused",
+    "status": "refused"
+  },
+  "owns": "rotating one closed month of records per region into an archive workbook",
+  "roster": "B09",
+  "runs_recorded": 16,
+  "schema_version": 1,
+  "title": "Monthly Tracker Rollover / archive worker",
+  "updated_at": "2026-09-24T02:05:34+00:00",
+  "worker": "career-ops/tracker_rollover.py"
+}

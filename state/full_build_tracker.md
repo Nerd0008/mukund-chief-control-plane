@@ -222,8 +222,8 @@ deterministic, read-only). Evidence:
 | Ops | A04 Daily Resource Brief | WORKS | `eb brief` deterministic; unknown dimensions stay UNKNOWN |
 | Ops | Boot persistence | PARTIAL / UNVERIFIED | gateway at logon + restart-on-failure; poller + sync sync have no logon/boot trigger and no `StartWhenAvailable` — post-reboot resumption unverified (reboot prohibited) |
 | Career | Scheduled regional scan defect | **FOUND + FIXED + LIVE-CONFIRMED** | `ChiefCareerScan-UK` exited 1 after a successful scan (`UnicodeEncodeError` on cp1252 stdout); `emit()` hardened + `run_scheduled_scan.cmd` sets UTF-8; `career-ops/tests/test_emit_encoding.py` 5 tests; suite 33/33; real Task Scheduler re-run 2026-09-23T22:28:39Z → Last Result 0, valid JSON stdout, 89.0 s dry-run, 0 tracker writes |
-| Career | B07/B08 tracker interface | **PRESERVED** | `career-ops/` (CLI + writer + 33 tests) was untracked; now committed |
-| Career | B09 Monthly rollover worker | **MISSING → STAGED** | `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23` (pending); owned by no other task |
+| Career | B07/B08 tracker interface | **PRESERVED + COMMITTED + TESTED** | `career-ops/career_ops_cli.py` + `tracker_writer.py` (33 tests) were untracked; committed at `70dd715` and still green |
+| Career | B09 Monthly rollover worker | **BUILT + EVIDENCED 2026-09-24** | `career-ops/tracker_rollover.py`; 32 new tests; acceptance on copies at `audits/evidence/2026-09-24T02-04-31Z-career-ops-monthly-rollover/` |
 
 ## Next bounded task
 
@@ -549,4 +549,39 @@ inside this task: the first revision of the runner wrote `evidence.json` and the
 markdown renderer (`calls_completed` read from the wrong nesting level). The provider cost was
 already spent at that point, so the artifacts were re-derived from the captured responses with the
 new `--from-evidence` path — **0 additional provider calls** — rather than re-running the series.
+
+## Career Ops tracker interface committed + Monthly Tracker Rollover worker (B09) (2026-09-24T02:04Z)
+
+Task `agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23`. This closed the one real
+coverage gap found by the company-registry gap audit: the deterministic Chief ⇄ Career Ops tracker
+interface (B07/B08) was preserved and committed, and the missing Monthly Tracker Rollover / archive
+worker (B09) was built, tested and evidenced. The regional lanes and Company Watch were **not**
+touched — other pending tasks own them.
+
+| Item | State | Evidence |
+|---|---|---|
+| B07/B08 interface confirmed | **PASS — no change needed** | `career-ops/career_ops_cli.py` + `tracker_writer.py` were already committed at `70dd715`; they import cleanly and the whole suite is green (no revert of the audit's `emit()` UnicodeEncodeError fix) |
+| B09 Monthly Tracker Rollover / archive worker | **BUILT** | `career-ops/tracker_rollover.py` (+ `career_ops_cli.py rollover` / `archives`): rotates one closed month per region into `uk-cyber-job-tracker.<YYYY-MM>.xlsx` / `<Region>_Cybersecurity_Job_Tracker.<YYYY-MM>.xlsx`, dry-run by default |
+| Archive preserves the canonical schema | **PROVEN** | the archive is built from a copy of the canonical workbook, so sheets, table, header row, data validations, number formats and column layout are inherited; row-number-dependent formulas are re-templated; every cell of every rotated row is copied verbatim, owner columns included (asserted cell by cell) |
+| Canonical workbook stays authoritative | **ENFORCED** | the archive is written and verified *before* the canonical is touched; a canonical write takes a hash-verified backup, writes to `*.rollover-tmp.xlsx`, re-opens and verifies it (row count + owner columns unchanged at their new positions), passes a concurrent-modification hash guard, and is only then atomically replaced |
+| Owner state is never silently deleted | **ENFORCED — and it fired on real data** | rotation refuses the whole run when a row due to rotate carries a value in an owner-only column that is not the profile's own automation default; conflicts are reported by row/column only and the value never enters the result. Running `rollover --month 2026-09` against the real canonical workbooks today: **uk 26 conflicting rows (J×5, K×21), dubai 8 (R), singapore 4 (R), japan 0** — those rows carry owner application state, so rotation was correctly refused rather than deleting them |
+| Rotated rows feed the cross-month dedupe index | **PROVEN** | every rotated row is present in `tracker_writer.build_cross_month_index` via the region's archive glob, and re-adding the same posting is refused as `duplicate-cross-month` with **0 appends** in all four regions |
+| Determinism / idempotency | **PROVEN** | a byte-identical re-run reports `unchanged` and rewrites nothing; a re-run after rotation reports `no_rows`; an existing archive with different content is refused unless `--force`, which backs it up hash-verified first |
+| Reversibility | **PROVEN** | the dated copy restores byte-identically from the rollover backup, and deleting the archive removes exactly its keys from the dedupe index |
+| New regression suite | **PASS** | `career-ops/tests/test_tracker_rollover.py` — **32 passed** (was 0); whole `career-ops/tests/` suite **332 passed** (was 300) |
+| Reversible acceptance run (safe copies only) | **PASS** | `career-ops/run_rollover_acceptance.py`, exit 0, `ok: true` for all four regions; artifact `audits/evidence/2026-09-24T02-04-31Z-career-ops-monthly-rollover/acceptance-20260924T020431Z.json` (aggregate only) |
+| Canonical workbooks untouched by the whole exercise | **VERIFIED** | SHA-256 of all four canonical workbooks identical before and after the tests and the acceptance run; the suite asserts it as a final test |
+| Department run-health (B08 + B09) | **BUILT + RECORDED** | `career-ops/dept_run_health.py` → `runtime/career-ops/run-health/tracker-writer.json` and `monthly-rollover.json` (last run, result, row counts, mode, per region), read back with `career_ops_cli.py run-health`. Aggregate only — a test asserts no URL or workbook text is ever stored there. Both workers state `excel_is_source_of_truth: true` and `chief_state_role: "orchestration-only"` |
+| Registry / operating map updated | **DONE** | registry skill references updated: `ownership_map.md` (dedupe / UK tracker writing / monthly rollover / run-health rows), `integration_rules.md` §8 (the interface + its 8 non-weakenable rules), `company_registry.yaml` (new `career_records_interface` resource), `resource_map.md` (canonical ↔ archive naming), `schedule_map.md` (rollover is deliberately unscheduled) |
+
+Documented limits (recorded, not hidden): a row whose `date_found` is not a real date or ISO date
+string (e.g. the free text `"Posted 30+ days ago"`) is reported as `undated` and never rotated; the
+regional profiles map the manifest `notes` field to column `Z` while also declaring `Z` an owner
+column, so `Z` is automation-writable and is reported under `owner_columns_automation_writable`
+rather than being claimed as protected; overview sheets (UK `Summary`) are not rewritten — their
+formulas use whole-column ranges and recompute over the remaining rows when opened.
+
+Owner decision still open: whether to rotate the current month out of the live workbooks at all, and
+what to do with the rows that carry owner application state. The worker refuses those rotations by
+design; nothing was forced, and no canonical workbook was modified.
 

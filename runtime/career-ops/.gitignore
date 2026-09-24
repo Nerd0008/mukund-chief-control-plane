@@ -6,3 +6,8 @@
 !.gitignore
 !scan-runs/
 !scan-runs/*.json
+# Department run-health for the Excel workers (tracker writer B08, monthly
+# rollover B09). Aggregate only: statuses, row counts, hashes and file names —
+# never workbook content, so it is safe to commit as operational evidence.
+!run-health/
+!run-health/*.json
