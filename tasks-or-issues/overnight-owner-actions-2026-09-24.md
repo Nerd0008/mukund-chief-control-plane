@@ -78,10 +78,57 @@ path. Both are owner decisions, not engineering defaults.
 **Action:** choose one — "add a provider for region X", "keep search_queries (agent-driven path) only",
 or "park the region's scanning".
 
+### 9. Authorise the Gmail read-only monitor once (owner OAuth)
+**Status:** PENDING — OWNER ACTION (recorded 2026-09-24 by the application-inbox task)
+**Blocks:** the *live* mailbox feed for the Application Inbox / Status Monitor
+(`career-ops/application_inbox.py`). Everything else about that monitor is built,
+tested and evidenced; only the live read needs an owner-authorised account.
+**Why owner-only:** it is an OAuth consent and client-secret step against your own
+Google account. Automation must not create, hold or approve that grant.
+**Exact steps (about 10 minutes):**
+1. Google Cloud Console -> create/select a project -> enable **Gmail API**.
+2. OAuth consent screen: type `External`, publishing status `Testing`, add your own
+   address as a test user.
+3. Create an OAuth client of type **Desktop app** and download the client JSON.
+4. Save it — outside the repository — to
+   `C:\Users\mukun\AppData\Local\hermes\secrets\gmail-readonly\credentials.json`
+   (the path in `career-ops/application_inbox_config.json#adapters.gmail_readonly.credential_path`;
+   it can also be overridden with the `CHIEF_GMAIL_CREDENTIALS` environment variable).
+5. Authorise the single scope `https://www.googleapis.com/auth/gmail.readonly` once
+   and save the resulting refresh token to `…\gmail-readonly\token.json`
+   (`CHIEF_GMAIL_TOKEN`).
+6. Set `adapters.gmail_readonly.enabled` to `true`, then run
+   `python career-ops/application_inbox.py adapters` — it must report
+   `available: true`.
+**Safety:** the scope is read-only. The monitor cannot send, reply, forward,
+archive, delete, move, label or mark anything read, and every such action is
+refused and logged. Nothing is ever written to a workbook or submitted anywhere.
+**Continue without owner:** everything else on this feature is complete and
+evidenced. Until step 5, the monitor runs on an owner-provided local export
+directory (`career-ops/application_inbox.py run --inbox DIR`) with no loss of
+capability other than automatic retrieval.
+
+### 10. Two tracker-vocabulary gaps worth a decision (not blocking)
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the application-inbox task)
+**Blocks:** nothing mechanically; it limits what the monitor can propose.
+**Exact facts, from the monitor's own drift tests:**
+* an **assessment / online test** invitation has no accurate status in *any* of the
+  four regional vocabularies, so no status is proposed for one and it appears as an
+  owner decision every time (`status_map.*.assessment_invite == null`);
+* a **rejection** has no accurate status in the **Japan** vocabulary
+  (`Pending, Selected, CV Tailored, Applied, Closed, Discarded`), so a Japan
+  rejection also becomes an owner decision rather than a proposed status;
+* a **Dubai offer** likewise has no equivalent status in that vocabulary.
+**Why owner-only:** changing a tracker's status vocabulary is a change to your own
+operational records, and adding a status is an owner decision about how you want
+the tracker to read.
+**Action (optional):** say whether you want an `Assessment` (and/or `Offer` for
+Dubai, `Rejected` for Japan) status added to the relevant tracker's validation
+list, or whether you prefer these to keep arriving as owner decisions.
+
 ## Resolved / no longer owner-blocking
 
 - Hermes primary execution brain: restored via DeepSeek direct API.
-- Hermes model smoke: `deepseek-flash` returned `AUTH_OK` with exit code 0.
 - Nous Portal: currently rate-limited with HTTP 429; do not keep retrying overnight. This is not an owner-action blocker because Hermes has a working DeepSeek path.
 - Codex allowance: owner reports reset; fresh Codex worker re-validation remains engineering work, not an owner blocker unless login/account action is actually requested by the CLI.
 - Codex CLI worker re-validation: COMPLETED 2026-09-23 (`agent-codex-reset-revalidation-2026-09-23`).

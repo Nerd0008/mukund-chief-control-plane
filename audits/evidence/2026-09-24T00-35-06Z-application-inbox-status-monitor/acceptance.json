@@ -1,0 +1,471 @@
+{
+  "task": "agent-application-inbox-status-monitor-2026-09-23",
+  "run_id": "2026-09-24T00-35-06Z",
+  "started_at": "2026-09-24T00:35:06+00:00",
+  "finished_at": "2026-09-24T00:35:10+00:00",
+  "duration_s": 4.4,
+  "code_sha": "b4727cf0040742c48dadfcbea97670f3dc08d6d7",
+  "config": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\application_inbox_config.json",
+  "evidence_modes": {
+    "repo_fixture_mailbox": "EXECUTED — synthetic committed fixtures",
+    "canonical_derived_synthetic_mailbox": "EXECUTED — synthetic message envelopes referencing real canonical rows, read-only",
+    "live_mailbox": "NOT RUN — no Gmail credentials exist on this machine"
+  },
+  "adapters": {
+    "local_mailbox": {
+      "implemented": true,
+      "tested": true,
+      "available": true
+    },
+    "gmail_readonly": {
+      "implemented": true,
+      "tested": "interface+refusal only",
+      "available": false,
+      "fetch_path_executed": false,
+      "verification": "UNVERIFIED",
+      "reason": "adapter is disabled in configuration; the owner-exported local mailbox path is the active one"
+    }
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "rows": 34,
+      "unchanged_by_run": true
+    },
+    "dubai": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "rows": 21,
+      "unchanged_by_run": true
+    },
+    "japan": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "rows": 41,
+      "unchanged_by_run": true
+    },
+    "singapore": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1",
+      "rows": 22,
+      "unchanged_by_run": true
+    }
+  },
+  "fixture_counts": {
+    "messages": 16,
+    "already_ingested": 0,
+    "new_signals": 16,
+    "unknown": 5,
+    "ambiguous_classification": 2,
+    "matched_high": 0,
+    "matched_medium": 0,
+    "ambiguous_match": 0,
+    "unmatched": 16,
+    "status_events": 0,
+    "no_status_events": 0,
+    "already_recorded_events": 0,
+    "owner_actions": 14,
+    "review_items": 16,
+    "signals_by_kind": {
+      "application_acknowledgement": 4,
+      "interview_invite": 2,
+      "rejection": 2,
+      "unknown": 5,
+      "assessment_invite": 1,
+      "follow_up_request": 1,
+      "recruiter_outreach": 1
+    }
+  },
+  "derived_counts": {
+    "messages": 6,
+    "already_ingested": 0,
+    "new_signals": 6,
+    "unknown": 1,
+    "ambiguous_classification": 0,
+    "matched_high": 4,
+    "matched_medium": 0,
+    "ambiguous_match": 0,
+    "unmatched": 2,
+    "status_events": 4,
+    "no_status_events": 0,
+    "already_recorded_events": 0,
+    "owner_actions": 5,
+    "review_items": 2,
+    "signals_by_match": {
+      "matched": 4,
+      "unmatched": 2
+    },
+    "signals_by_kind": {
+      "application_acknowledgement": 3,
+      "rejection": 1,
+      "interview_invite": 1,
+      "unknown": 1
+    }
+  },
+  "derived_cases": [
+    {
+      "case": "url_match_acknowledgement",
+      "region": "uk",
+      "row_id": "J10",
+      "expected_basis": "posting_url_in_message"
+    },
+    {
+      "case": "id_reference_rejection",
+      "region": "uk",
+      "row_id": "J11",
+      "expected_basis": "explicit_canonical_reference_in_message"
+    },
+    {
+      "case": "url_match_interview_invite",
+      "region": "uk",
+      "row_id": "J12",
+      "expected_basis": "posting_url_in_message"
+    },
+    {
+      "case": "id_reference_acknowledgement_cross_region",
+      "region": "singapore",
+      "row_id": "SG-GRAD-260909-01",
+      "expected_basis": "explicit_canonical_reference_in_message"
+    },
+    {
+      "case": "unmatched_employer_no_record_created",
+      "region": null,
+      "row_id": null,
+      "expected_basis": "no_match"
+    },
+    {
+      "case": "unknown_stays_unknown",
+      "region": null,
+      "row_id": null,
+      "expected_basis": "no_match"
+    }
+  ],
+  "proposals": {
+    "total": 4,
+    "all_within_region_vocabulary": true,
+    "all_requiring_owner_confirmation": true,
+    "state_written_to_workbook": 0
+  },
+  "idempotency": {
+    "replay_new_signals": 0,
+    "replay_new_events": 0,
+    "store_byte_identical": true
+  },
+  "safety": {
+    "emails_sent": 0,
+    "replies_sent": 0,
+    "mailbox_mutations": 0,
+    "workbooks_written": 0,
+    "applications_created": 0,
+    "canonical_workbooks_unchanged": true,
+    "mutations_refused": 12,
+    "ingest_path_network_used": false
+  },
+  "checks": [
+    {
+      "check": "fixture_run_completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "fixture_expected_kinds_present",
+      "ok": true,
+      "detail": {
+        "application_acknowledgement": 4,
+        "interview_invite": 2,
+        "rejection": 2,
+        "unknown": 5,
+        "assessment_invite": 1,
+        "follow_up_request": 1,
+        "recruiter_outreach": 1
+      }
+    },
+    {
+      "check": "fixture_unknown_never_guessed",
+      "ok": true,
+      "detail": 5
+    },
+    {
+      "check": "fixture_ambiguous_classification_flagged",
+      "ok": true,
+      "detail": 2
+    },
+    {
+      "check": "fixture_contradictory_message_left_for_human",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "fixture_nothing_matched_so_no_state_proposed",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "check": "fixture_evidence_mode_labelled",
+      "ok": true,
+      "detail": "fixture"
+    },
+    {
+      "check": "non_envelope_files_skipped_not_guessed",
+      "ok": true,
+      "detail": [
+        ".md has no message envelope; use .eml/.mbox/.json/.jsonl/.csv so no field is guessed"
+      ]
+    },
+    {
+      "check": "derived_mailbox_generated_with_real_canonical_references",
+      "ok": true,
+      "detail": {
+        "messages": 6,
+        "cases": [
+          "url_match_acknowledgement",
+          "id_reference_rejection",
+          "url_match_interview_invite",
+          "id_reference_acknowledgement_cross_region",
+          "unmatched_employer_no_record_created",
+          "unknown_stays_unknown"
+        ]
+      }
+    },
+    {
+      "check": "derived_run_completed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "derived_url_match_exercised",
+      "ok": true,
+      "detail": [
+        "posting_url_in_message",
+        "explicit_canonical_reference_in_message",
+        "posting_url_in_message",
+        "explicit_canonical_reference_in_message",
+        "no canonical reference, id or company name found in the message",
+        "no canonical reference, id or company name found in the message"
+      ]
+    },
+    {
+      "check": "derived_id_reference_match_exercised",
+      "ok": true,
+      "detail": [
+        "posting_url_in_message",
+        "explicit_canonical_reference_in_message",
+        "posting_url_in_message",
+        "explicit_canonical_reference_in_message",
+        "no canonical reference, id or company name found in the message",
+        "no canonical reference, id or company name found in the message"
+      ]
+    },
+    {
+      "check": "derived_unmatched_still_unmatched",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "derived_status_proposals_created",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "check": "derived_no_applications_created",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "proposed_statuses_are_in_region_vocabulary",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "check": "unrecorded_application_requires_owner_confirmation",
+      "ok": true,
+      "detail": [
+        {
+          "row_id": "SG-GRAD-260909-01",
+          "flag": true
+        },
+        {
+          "row_id": "J10",
+          "flag": true
+        },
+        {
+          "row_id": "J11",
+          "flag": true
+        },
+        {
+          "row_id": "J12",
+          "flag": true
+        }
+      ]
+    },
+    {
+      "check": "state_never_written_to_workbook",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "replay_adds_no_signals",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "check": "replay_adds_no_events",
+      "ok": true,
+      "detail": {
+        "messages": 6,
+        "already_ingested": 6,
+        "new_signals": 0,
+        "unknown": 1,
+        "ambiguous_classification": 0,
+        "matched_high": 4,
+        "matched_medium": 0,
+        "ambiguous_match": 0,
+        "unmatched": 2,
+        "status_events": 0,
+        "no_status_events": 0,
+        "already_recorded_events": 0,
+        "owner_actions": 5,
+        "review_items": 2
+      }
+    },
+    {
+      "check": "store_is_byte_identical_on_replay",
+      "ok": true,
+      "detail": {
+        "changed": []
+      }
+    },
+    {
+      "check": "canonical_workbooks_unchanged",
+      "ok": true,
+      "detail": {
+        "before": {
+          "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+          "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+          "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+          "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+        },
+        "after": {
+          "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+          "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+          "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+          "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+        }
+      }
+    },
+    {
+      "check": "default_runtime_store_untouched",
+      "ok": true,
+      "detail": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\application-status"
+    },
+    {
+      "check": "no_workbooks_written",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "no_mail_sent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "no_mailbox_mutations",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "ingest_path_declares_no_network",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "every_mailbox_mutation_refused",
+      "ok": true,
+      "detail": {
+        "send": {
+          "allowed": false,
+          "performed": false
+        },
+        "reply": {
+          "allowed": false,
+          "performed": false
+        },
+        "reply_all": {
+          "allowed": false,
+          "performed": false
+        },
+        "forward": {
+          "allowed": false,
+          "performed": false
+        },
+        "archive": {
+          "allowed": false,
+          "performed": false
+        },
+        "delete": {
+          "allowed": false,
+          "performed": false
+        },
+        "trash": {
+          "allowed": false,
+          "performed": false
+        },
+        "move": {
+          "allowed": false,
+          "performed": false
+        },
+        "mark_read": {
+          "allowed": false,
+          "performed": false
+        },
+        "label_apply": {
+          "allowed": false,
+          "performed": false
+        },
+        "unsubscribe": {
+          "allowed": false,
+          "performed": false
+        },
+        "apply": {
+          "allowed": false,
+          "performed": false
+        }
+      }
+    },
+    {
+      "check": "gmail_adapter_reports_unavailable",
+      "ok": true,
+      "detail": "adapter is disabled in configuration; the owner-exported local mailbox path is the active one"
+    },
+    {
+      "check": "gmail_fetch_refuses_without_credentials",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "gmail_scope_is_read_only",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "no_credential_contents_reported",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "ingest_module_imports_no_network_or_mail_library",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "checks_total": 33,
+  "checks_passed": 33,
+  "checks_failed": 0,
+  "verdict": "PASS",
+  "raw_signal_and_status_store_local_only": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-24T00-35-06Z-application-inbox-status-monitor\\status-store",
+  "reconcile_summary": {
+    "singapore": 1,
+    "uk": 3
+  }
+}

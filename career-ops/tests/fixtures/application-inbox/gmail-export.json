@@ -1,0 +1,53 @@
+{
+  "messages": [
+    {
+      "id": "fixturegmail0001",
+      "threadId": "fixturethread0001",
+      "internalDate": "1789809120000",
+      "snippet": "Thank you for applying to Northwind Analytics Ltd.",
+      "payload": {
+        "mimeType": "multipart/alternative",
+        "headers": [
+          {"name": "From", "value": "no-reply@example-ats.test"},
+          {"name": "To", "value": "mukund@example.com"},
+          {"name": "Subject", "value": "Thank you for applying to Northwind Analytics Ltd"},
+          {"name": "Date", "value": "Fri, 19 Sep 2026 09:12:00 +0000"},
+          {"name": "Message-ID", "value": "<gmail-fixture-0001@example.com>"}
+        ],
+        "parts": [
+          {
+            "mimeType": "text/plain",
+            "body": {
+              "data": "VGhhbmsgeW91IGZvciBhcHBseWluZyB0byBOb3J0aHdpbmQgQW5hbHl0aWNzIEx0ZC4gV2UgaGF2ZSByZWNlaXZlZCB5b3VyIGFwcGxpY2F0aW9uIGFuZCB3aWxsIHJldmlldyB5b3VyIGFwcGxpY2F0aW9uLg=="
+            }
+          },
+          {
+            "mimeType": "text/html",
+            "body": {
+              "data": "PHA+VGhhbmsgeW91IGZvciBhcHBseWluZyB0byBOb3J0aHdpbmQgQW5hbHl0aWNzIEx0ZC48L3A+"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fixturegmail0002",
+      "threadId": "fixturethread0002",
+      "internalDate": "1789980300000",
+      "snippet": "We would like to invite you for an interview",
+      "payload": {
+        "mimeType": "text/plain",
+        "headers": [
+          {"name": "From", "value": "talent@contoso-security.test"},
+          {"name": "To", "value": "mukund@example.com"},
+          {"name": "Subject", "value": "Interview invitation - Security Analyst"},
+          {"name": "Date", "value": "Sun, 21 Sep 2026 08:45:00 +0000"},
+          {"name": "Message-ID", "value": "<gmail-fixture-0002@example.com>"}
+        ],
+        "body": {
+          "data": "V2Ugd291bGQgbGlrZSB0byBpbnZpdGUgeW91IGZvciBhbiBpbnRlcnZpZXcgZm9yIHRoZSBTZWN1cml0eSBBbmFseXN0IHJvbGUuIFBsZWFzZSBzaGFyZSB5b3VyIGludGVydmlldyBhdmFpbGFiaWxpdHku"
+        }
+      }
+    }
+  ]
+}

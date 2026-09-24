@@ -283,6 +283,96 @@ whose location, title or freshness cannot satisfy those filters is **not** eligi
 and only region-routed eligible signals are handed off. A manifest never carries
 application status (and the writer would ignore it).
 
+## Application Inbox / Status Monitor (2026-09-24)
+
+`career-ops/application_inbox.py` is the read-only intake for application and
+recruiter status signals. It classifies a message, reconciles it against the
+canonical regional workbooks, and writes an **idempotent local status store of
+proposed changes and owner actions**. It never sends, replies, forwards,
+archives, deletes, moves, labels or marks anything read; it never writes to a
+workbook; it never creates an application record.
+
+| Subcommand | Purpose | Writes? |
+|---|---|---|
+| `adapters` | adapter readiness + the exact owner step for the Gmail path | no |
+| `ingest [--inbox DIR] [--source NAME] [--runtime-dir DIR]` | classify, match, store | local store only |
+| `summary [--runtime-dir DIR]` | Chief summary: changed statuses, owner actions, review queue | no |
+| `status [--runtime-dir DIR]` | store + adapter + refusal counts | no |
+| `guard --action NAME` | refuse a mailbox mutation, and log the refusal | log only |
+| `run [--inbox DIR]` | `ingest` + `summary` in one document | local store only |
+
+    python career-ops/application_inbox.py adapters
+    python career-ops/application_inbox.py run --inbox career-ops/tests/fixtures/application-inbox
+    python career-ops/application_inbox.py summary
+
+**Classification is deterministic phrase matching, not a model.** Kinds:
+application acknowledgement, rejection, interview invitation, assessment
+invitation, follow-up/document request, offer, recruiter outreach — otherwise
+**unknown**. Strong patterns decide; weak (contextual) patterns never decide on
+their own; two contradictory strong signals (e.g. an offer *and* a rejection in
+one message) resolve to `unknown` and go to human review. Quoted reply history
+is stripped first, so an old acknowledgement inside a thread cannot be
+re-classified as new. Every match records which phrase matched and at which tier.
+
+**Matching is conservative and evidence-only.** Only three bases can match:
+
+1. a posting URL that appears verbatim in the message **and** in a canonical row
+   (high confidence);
+2. an explicit canonical reference in the message (`J11`, `SG-GRAD-260909-01`)
+   (high confidence; a bare number is never a reference, and a reference shorter
+   than three characters is never matched — a documented limitation for UK
+   J1–J9, which must match by URL instead);
+3. company name **plus** title agreement (medium confidence).
+
+A company name on its own is **always** ambiguous — it lists the candidate rows
+and asks a human. A message that matches nothing is `unmatched` and no record is
+created from it, ever.
+
+**Status is proposed, never applied.** A signal maps to a status in the region's
+*own* vocabulary (from `regional_profiles.json` validations; the test suite fails
+if the map drifts). Where a region has no accurate equivalent — a Japan rejection,
+an assessment invite anywhere — no status is proposed and the owner decides. If
+the row's current status says no application was made, the proposal is flagged
+`requires_owner_confirmation` with the reason recorded: the message implies an
+application the tracker does not record, and the monitor does not assume it
+happened. Excel stays authoritative; `state_written` is always `false`.
+
+**Idempotent local store** (`runtime/career-ops/application-status/`, git-ignored):
+`signals.jsonl` (keyed by `signal_id`), `status-events.jsonl` (keyed by
+`event_id` = region+row+kind), `current-state.json` (derived projection, holds no
+run timestamp) and the append-only `run-log.jsonl`. Re-ingesting the same mailbox
+is byte-identical and reports zero new signals (asserted by test and by the
+acceptance run).
+
+**Adapters.**
+
+* `local_mailbox` — **implemented, tested, active.** Parses an owner-provided
+  export directory: `.eml`, `.mbox`, `.json`/`.jsonl` (generic records *or*
+  Gmail API message objects, base64 bodies decoded), `.csv`. A `.md`/`.txt` file
+  is reported as skipped rather than guessed into a message.
+* `gmail_readonly` (`career-ops/gmail_readonly.py`) — **interface implemented,
+  disabled, no credentials, UNVERIFIED.** Read-only scope
+  `gmail.readonly` only. It reports credential/token *presence* (never contents),
+  and refuses to fetch until the owner completes the OAuth step recorded in
+  `tasks-or-issues/overnight-owner-actions-2026-09-24.md`. The HTTP fetch path is
+  implemented but **has never been executed on this machine** and is reported as
+  `UNVERIFIED` / `fetch_path_executed: false` everywhere. The Gmail payload →
+  signal conversion *is* covered by fixtures, so only the HTTP call is untested.
+
+**Evidence.** `python career-ops/run_application_inbox_acceptance.py` runs 33
+checks: the repo fixture mailbox, a synthetic mailbox generated at run time from
+the canonical workbooks' own rows (so real matching and real proposals are
+exercised without copying owner records into the repo), idempotent replay,
+workbook-hash verification, the guard refusals and the Gmail refusal. It writes
+`audits/evidence/<stamp>-application-inbox-status-monitor/acceptance.json` + `.md`;
+raw signals stay in the git-ignored `status-store/`. Evidence modes are labelled
+separately and **no live-mailbox evidence is claimed**.
+
+### Tests
+
+    python -m pytest career-ops/tests/test_application_inbox.py -q   # 87 passed
+    python -m pytest career-ops/tests/ -q                            # 207 passed
+
 ## Acceptance runner
 
     python career-ops/run_cv_linkedin_acceptance.py [--region uk] [--stamp S]

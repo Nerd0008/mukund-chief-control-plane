@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "description": "Read-only Application Inbox / Status Monitor for Chief OS v1. Ingests application and recruiter status signals from a local, owner-provided mailbox export (and, when the owner configures it, a Gmail read-only API adapter), classifies them, reconciles them conservatively against the canonical Career Ops regional workbooks, and writes an idempotent LOCAL status store of PROPOSED state changes plus owner actions. It never sends, replies, forwards, archives, deletes, labels or marks anything read, and it never writes to a canonical workbook.",
+
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "runtime_dir": "runtime/career-ops/application-status",
+  "inbox_dir": "runtime/career-ops/application-inbox/inbox",
+  "evidence_dir": "audits/evidence",
+
+  "supported_extensions": [".json", ".jsonl", ".csv", ".eml", ".mbox", ".md", ".txt"],
+
+  "classification": {
+    "note": "Deterministic phrase matching over the message subject + body with email quoting removed. No model is involved and nothing is inferred beyond a recorded phrase match. 'strong' patterns are explicit status statements; 'weak' patterns are contextual and never decide a classification on their own.",
+    "priority": [
+      "rejection",
+      "offer",
+      "interview_invite",
+      "assessment_invite",
+      "follow_up_request",
+      "application_acknowledgement",
+      "recruiter_outreach"
+    ],
+    "contradictions": [
+      ["rejection", "offer"],
+      ["rejection", "interview_invite"],
+      ["rejection", "assessment_invite"],
+      ["offer", "application_acknowledgement"]
+    ],
+    "kinds": {
+      "rejection": {
+        "label": "Application rejected / not progressed",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "we will not be proceeding"],
+          ["strong", "we will not be progressing"],
+          ["strong", "we have decided not to progress"],
+          ["strong", "not to proceed with your application"],
+          ["strong", "we regret to inform you"],
+          ["strong", "your application was not successful"],
+          ["strong", "was unsuccessful"],
+          ["strong", "not been selected for"],
+          ["strong", "we are unable to offer you"],
+          ["strong", "no longer under consideration"],
+          ["strong", "will not be moving forward with your application"],
+          ["strong", "we have decided to move forward with other candidates"],
+          ["strong", "proceed with other applicants"]
+        ]
+      },
+      "offer": {
+        "label": "Offer",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "we are pleased to offer you"],
+          ["strong", "pleased to offer you the position"],
+          ["strong", "we would like to offer you the role"],
+          ["strong", "offer of employment"],
+          ["strong", "formal offer"],
+          ["strong", "conditional offer of employment"],
+          ["weak", "job offer"]
+        ]
+      },
+      "interview_invite": {
+        "label": "Interview invitation",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "invite you to interview"],
+          ["strong", "invite you for an interview"],
+          ["strong", "invitation to interview"],
+          ["strong", "schedule an interview"],
+          ["strong", "arrange an interview"],
+          ["strong", "interview invitation"],
+          ["strong", "book a time for your interview"],
+          ["strong", "invite you to a video interview"],
+          ["strong", "would like to discuss your application"],
+          ["strong", "share your interview availability"],
+          ["weak", "interview availability"]
+        ]
+      },
+      "assessment_invite": {
+        "label": "Assessment / test invitation",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "invite you to complete an assessment"],
+          ["strong", "online assessment"],
+          ["strong", "technical assessment"],
+          ["strong", "coding challenge"],
+          ["strong", "assessment centre"],
+          ["strong", "take-home exercise"],
+          ["strong", "has invited you to"],
+          ["weak", "hackerrank"],
+          ["weak", "codility"],
+          ["weak", "hirevue"]
+        ]
+      },
+      "follow_up_request": {
+        "label": "Employer asked for something",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "please provide"],
+          ["strong", "could you please send"],
+          ["strong", "kindly send us"],
+          ["strong", "please complete the following"],
+          ["strong", "additional information is required"],
+          ["strong", "we require the following"],
+          ["strong", "please upload"],
+          ["weak", "right to work documents"],
+          ["weak", "proof of your right to work"]
+        ]
+      },
+      "application_acknowledgement": {
+        "label": "Application acknowledgement / receipt",
+        "implies_application": true,
+        "patterns": [
+          ["strong", "thank you for applying"],
+          ["strong", "thanks for applying"],
+          ["strong", "we have received your application"],
+          ["strong", "we received your application"],
+          ["strong", "your application has been received"],
+          ["strong", "application has been submitted"],
+          ["strong", "acknowledge receipt of your application"],
+          ["strong", "thank you for your application"],
+          ["strong", "we will review your application"],
+          ["weak", "application received"]
+        ]
+      },
+      "recruiter_outreach": {
+        "label": "Recruiter outreach (no application implied)",
+        "implies_application": false,
+        "patterns": [
+          ["strong", "i came across your profile"],
+          ["strong", "i came across your cv"],
+          ["strong", "reaching out about a"],
+          ["strong", "i am reaching out regarding"],
+          ["strong", "an opportunity that might interest you"],
+          ["strong", "would you be open to"],
+          ["strong", "are you open to"],
+          ["strong", "on behalf of our client"],
+          ["weak", "talent acquisition"],
+          ["weak", "we are hiring"]
+        ]
+      }
+    }
+  },
+
+  "status_map": {
+    "note": "Signal kind -> the region's OWN application-status vocabulary, taken verbatim from regional_profiles.json validations. 'null' means the region's tracker has no accurate equivalent, so no status is proposed and the owner decides. Nothing outside these vocabularies is ever proposed.",
+    "uk": {
+      "application_acknowledgement": "Applied",
+      "rejection": "Rejected",
+      "interview_invite": "Interview",
+      "assessment_invite": null,
+      "offer": "Offer",
+      "follow_up_request": null,
+      "recruiter_outreach": null
+    },
+    "dubai": {
+      "application_acknowledgement": "Submitted",
+      "rejection": "Rejected",
+      "interview_invite": "Interview",
+      "assessment_invite": null,
+      "offer": null,
+      "follow_up_request": null,
+      "recruiter_outreach": null
+    },
+    "japan": {
+      "application_acknowledgement": "Applied",
+      "rejection": null,
+      "interview_invite": null,
+      "assessment_invite": null,
+      "offer": null,
+      "follow_up_request": null,
+      "recruiter_outreach": null
+    },
+    "singapore": {
+      "application_acknowledgement": "Applied",
+      "rejection": "Rejected",
+      "interview_invite": "Interview",
+      "assessment_invite": null,
+      "offer": "Offer",
+      "follow_up_request": null,
+      "recruiter_outreach": null
+    }
+  },
+
+  "pre_application_states": {
+    "note": "A status that means the owner has not yet told the tracker an application was made. A signal that implies an application therefore requires explicit owner confirmation before any state is proposed as confirmed.",
+    "uk": ["To Review", "Selected", "CV Tailored", "Not Applying"],
+    "dubai": ["New", "Reviewed", "Selected", "Preparing Documents", "Ready to Apply"],
+    "japan": ["Pending", "Selected", "CV Tailored"],
+    "singapore": ["Pending"]
+  },
+
+  "matching": {
+    "note": "Conservative, evidence-only matching. A posting URL that appears verbatim in the message and in a canonical row is the only high-confidence basis. Company+title agreement is medium: `title_overlap_threshold` is the share of the canonical title's significant words that must appear in the message. A company-only agreement is ALWAYS ambiguous and goes to human review; unmatched signals never create a record. Known limitation: a canonical id of fewer than three characters (UK J1..J9) can never be matched by reference and must be matched by posting URL.",
+    "min_company_key_length": 3,
+    "title_overlap_threshold": 0.5,
+    "max_candidates_reported": 5,
+    "max_urls_scanned_per_message": 40
+  },
+
+  "owner_action_kinds": {
+    "interview_invite": "Respond to the interview invitation and book a slot — this monitor never replies.",
+    "assessment_invite": "Complete or schedule the assessment before its stated deadline (if any) — this monitor never replies.",
+    "offer": "Review the offer and reply directly — this monitor never replies.",
+    "follow_up_request": "Send the information the employer requested — this monitor never replies.",
+    "rejection": "No reply required. Confirm the rejection in the tracker and close the row if appropriate.",
+    "application_acknowledgement": "Confirm the application in the tracker (status proposal below) — no reply required.",
+    "recruiter_outreach": "Decide whether to respond. This is outreach, not an application; no tracker row is proposed unless you already have one.",
+    "unknown": "Read this message yourself: it could not be classified from its text. Nothing was recorded as application state."
+  },
+
+  "blocked_actions": [
+    "send", "reply", "reply_all", "forward", "draft_send", "archive", "delete", "trash",
+    "move", "label_apply", "label_remove", "mark_read", "mark_unread", "mark_spam",
+    "unsubscribe", "apply", "attachment_download", "attachment_open"
+  ],
+  "external_action_policy": "Every mailbox mutation and every outbound message is OWNER-GATED. This monitor implements no path that performs one: it reads (or is handed) messages and records proposals. Refusals are logged.",
+
+  "adapters": {
+    "local_mailbox": {
+      "kind": "local_file",
+      "enabled": true,
+      "evidence_mode": "fixture",
+      "description": "Owner-provided local mailbox export. Supported: .eml, .mbox, .json/.jsonl (generic message records or Gmail API message objects), .csv, .md/.txt.",
+      "inbox_dir": "runtime/career-ops/application-inbox/inbox"
+    },
+    "gmail_readonly": {
+      "kind": "gmail_api_readonly",
+      "enabled": false,
+      "evidence_mode": "live",
+      "required_scope": "https://www.googleapis.com/auth/gmail.readonly",
+      "credential_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\secrets\\gmail-readonly\\credentials.json",
+      "token_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\secrets\\gmail-readonly\\token.json",
+      "credential_path_env": "CHIEF_GMAIL_CREDENTIALS",
+      "token_path_env": "CHIEF_GMAIL_TOKEN",
+      "query": "newer_than:180d",
+      "max_messages": 200,
+      "description": "Read-only Gmail API adapter. DISABLED until the owner completes the OAuth step. Read-only scope only; the API path is implemented but has never been executed on this machine because no credentials exist (reported truthfully as UNVERIFIED, never as working)."
+    }
+  },
+
+  "not_performed": [
+    "Any send, reply, forward, archive, delete, move, label, mark-read or unsubscribe action",
+    "Any Gmail/IMAP login or OAuth flow initiated by automation",
+    "Any write to a canonical regional workbook (Excel remains authoritative)",
+    "Any creation of an application record from a message alone",
+    "Any inference of employer, title, location, salary, clearance or eligibility that the message does not state"
+  ]
+}

@@ -1,0 +1,3 @@
+message_id,received_at,from,to,subject,body
+<fixture-csv-0001@example.com>,2026-09-23T08:00:00+00:00,recruiter@agency.test,mukund@example.com,Rejection from Contoso Security,"Unfortunately, we have decided not to progress your application for the Security Analyst role."
+<fixture-csv-0002@example.com>,2026-09-23T08:30:00+00:00,no-reply@example-ats.test,mukund@example.com,Reference number challenge,"This message contains no configured phrase and no reference, so it must be classified UNKNOWN and never guessed."

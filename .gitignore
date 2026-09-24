@@ -56,6 +56,14 @@ runtime/company-watch/
 runtime/career-ops/cv-drafts/
 runtime/linkedin/
 
+# --- Application Inbox / Status Monitor: owner-private mailbox data ---
+# Raw status signals, matched subjects/senders and proposed status changes name
+# Mukund's employers, recruiters and application history. They stay local; only
+# aggregate counts, hashes and check results are committed.
+runtime/career-ops/application-status/
+runtime/career-ops/application-inbox/
+audits/evidence/**/status-store/
+
 # --- Owner-private evidence artifacts (never committed) ---
 # Raw tracker backups, raw ATS findings and raw resolution dumps name Mukund's
 # companies, postings and application history. Committed evidence stays
