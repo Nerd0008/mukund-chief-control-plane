@@ -200,6 +200,34 @@ class TestWorkerRegistry(unittest.TestCase):
         self.assertEqual(worker['e2_usage_linkage'], 'VERIFIED')
         self.assertEqual(worker['qualification'], 'UNPROVEN')
 
+    def test_qwen_model_selection_matches_owner_intent(self):
+        """Qwen's roster model id is the owner's intended `qwen3.7-plus`.
+
+        Regression for the 2026-09-24 reconciliation bug: the prior closeout
+        selected `qwen3.8-27b` on the false claim that `qwen3.7-plus` was absent
+        from the live catalogue (the committed catalogue evidence lists both
+        `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`). The worker_id is
+        deliberately preserved as `qwen38-27b` — the stable credential-registry
+        key — so the model selection must never be inferred from the id, and the
+        adapter config must agree with the registry.
+        """
+        registry = WorkerRegistry()
+        worker = registry.get_worker('qwen38-27b')
+        self.assertIsNotNone(worker)
+        self.assertEqual(worker['api_model_id'], 'qwen3.7-plus')
+        self.assertEqual(worker['model'], 'qwen3.7-plus')
+
+        from generic_openai_adapter import PROVIDER_CONFIGS, get_adapter
+        self.assertEqual(PROVIDER_CONFIGS['qwen']['api_model_id'], 'qwen3.7-plus')
+        # the credential target is independent of the worker id (lock-in guard)
+        self.assertEqual(PROVIDER_CONFIGS['qwen']['credential_target'], 'qwen')
+        adapter = get_adapter('qwen38-27b')
+        self.assertEqual(adapter.config['api_model_id'], worker['api_model_id'])
+        # a selection correction must never promote an unproven worker
+        self.assertFalse(worker['routable'])
+        self.assertEqual(worker['smoke_test'], 'FAILED')
+        self.assertEqual(worker['qualification'], 'UNPROVEN')
+
 
 class TestTaskFingerprint(unittest.TestCase):
     """Test TaskFingerprint."""

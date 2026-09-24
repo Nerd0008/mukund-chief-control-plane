@@ -28,6 +28,24 @@ E2 linkage was exercised for all seven (one ``governor.record_request()`` row
 each, ids ``obs-20260924-3db12e3a``/``c87241eb``/``85e21e86``/``7f5c7fce``/
 ``5af88a42``/``f05452e1``/``242e4937``), so the linkage mechanism is proven even
 though the recorded status is ``error``.
+
+2026-09-24 provider-debug follow-up (task
+agent-provider-debug-qwen-tencent-entitlement-2026-09-24):
+
+* Qwen model-selection reconciliation fixed: the owner's intended model is
+  ``qwen3.7-plus`` and the committed live catalogue evidence lists both
+  ``qwen3.7-plus`` and ``qwen3.7-plus-2026-05-26``, so the earlier claim that the
+  intended id was absent was wrong. The roster model id was corrected from
+  ``qwen3.8-27b`` to ``qwen3.7-plus`` (worker_id kept as ``qwen38-27b``, the
+  stable credential-registry key). One bounded re-test of the *corrected* id
+  returned HTTP 403 ``AccessDenied.Unpurchased`` — a genuine account entitlement
+  blocker for the intended model, not a Hermes configuration fault.
+* Tencent/Hy3 re-probe of ``GET /v1/models`` returned the same 401 code 401002,
+  classified as a TokenHub credential/product/account mismatch (no chat call
+  spent).
+* Mistral: a single diagnostic call captured the 429 response headers — the
+  provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be
+  separated further from provider evidence.
 """
 
 WORKER_ROSTER = [
@@ -195,15 +213,21 @@ WORKER_ROSTER = [
                   'an adapter/model fault; routable=false, qualification UNPROVEN.'),
     },
     {
+        # worker_id is preserved as the stable roster / credential-registry key
+        # the owner provisioned under ('qwen38-27b'); it does NOT carry the model
+        # selection. The credential is resolved through the adapter's
+        # credential_target ('qwen'), independent of this id. The served API
+        # model was corrected 2026-09-24 to the owner's intended `qwen3.7-plus`.
         'worker_id': 'qwen38-27b',
         'provider': 'qwen',
-        'model': 'qwen3.8-27b',
-        'api_model_id': 'qwen3.8-27b',
+        'display_name': 'Qwen3.7-Plus',
+        'model': 'qwen3.7-plus',
+        'api_model_id': 'qwen3.7-plus',
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['vision', 'multimodal', 'gui-understanding', 'screenshots'],
-        'routable': False,  # credential valid on the international host, but the
-                            # account has not purchased this model
+        'routable': False,  # credential valid on the international host; dispatch
+                            # state recorded in verified_2026_09_24 below
         'auth_configured': True,
         'auth_source': 'credential_manager',
         'exec_interface': 'generic_openai_adapter (qwen)',
@@ -222,13 +246,29 @@ WORKER_ROSTER = [
             'provider_error_code': 'AccessDenied.Unpurchased',
             'provider_error': 'Access to model denied. Please make sure you are eligible for using the model.',
             'routable_reason': 'provider_model_not_purchased_for_this_account',
+            # 2026-09-24 live debug of the corrected model id (one bounded call,
+            # max_tokens=16, single attempt, no retry) —
+            # audits/evidence/2026-09-24T22-08-43Z-e3-provider-bounded-smoke
+            'live_debug_model_tested': 'qwen3.7-plus',
+            'live_debug_http_status': 403,
+            'live_debug_provider_error_code': 'AccessDenied.Unpurchased',
+            'live_debug_provider_returned_model': None,
+            'live_debug_usage': None,
+            'live_debug_model_in_live_catalogue': True,
+            'live_debug_evidence': 'audits/evidence/2026-09-24T22-08-43Z-e3-provider-bounded-smoke/evidence.json',
         },
         'notes': ('2026-09-24 post-credential verification: the credential is an Alibaba '
                   'Model Studio *international* key — the CN dashscope host rejected it with 401 '
-                  'invalid_api_key, while dashscope-intl answered 200 with 172 models including '
-                  '`qwen3.8-27b`. One bounded smoke call returned HTTP 403 '
-                  'AccessDenied.Unpurchased: the model exists but is not enabled/purchased on this '
-                  'account, so routable=false and qualification remains UNPROVEN.'),
+                  'invalid_api_key, while dashscope-intl answered 200 with 172 models. '
+                  'Model-selection correction 2026-09-24 (task '
+                  'agent-provider-debug-qwen-tencent-entitlement-2026-09-24): the owner\'s '
+                  'intended model is Qwen3.7-Plus; the committed live catalogue evidence lists '
+                  'BOTH `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`, so the earlier claim that '
+                  'the intended id was absent was incorrect. The roster model id was corrected '
+                  'from `qwen3.8-27b` to `qwen3.7-plus`; the worker_id stays `qwen38-27b` as the '
+                  'stable credential-registry key (the credential resolves via credential_target '
+                  '`qwen`, not the worker id). See verified_2026_09_24.live_debug_* for the '
+                  'bounded re-test of the corrected id.'),
     },
     {
         'worker_id': 'longcat-2.0',

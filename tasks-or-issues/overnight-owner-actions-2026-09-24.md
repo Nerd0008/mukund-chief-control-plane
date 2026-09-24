@@ -30,13 +30,13 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 **Blocks:** live execution of the seven generic API workers, provider-diverse E3 routing, and the live-provider E4/E5 failover drill.  
 **What was verified:** endpoint + API model ID live-verified for 6/7 (Tencent documentation-derived because its key is rejected); every one of the seven bounded smoke completions was refused by the provider itself.  
 **Action:** the six working keys need account-level billing/quota/entitlement; Tencent needs a re-issued TokenHub key:
-- mistral — HTTP 429 `Rate limit exceeded`
+- mistral — HTTP 429 `Rate limit exceeded` (a single diagnostic call on 2026-09-24 captured the response headers; the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be narrowed further from provider evidence)
 - GLM / Z.ai — HTTP 429 `Insufficient balance or no resource package`
-- Qwen (intl dashscope) — HTTP 403 `AccessDenied.Unpurchased` (purchase `qwen3.8-27b`)
+- Qwen (intl dashscope) — HTTP 403 `AccessDenied.Unpurchased` on the owner's intended `qwen3.7-plus` (purchase/enable **`qwen3.7-plus`**; the earlier `qwen3.8-27b` selection was a Hermes-side mapping error, corrected 2026-09-24 — the intended id IS present in the live catalogue)
 - LongCat — HTTP 402 `Insufficient token quota`
 - MiniMax — HTTP 402 `insufficient balance (1008)`
 - StepFun (global) — HTTP 402 `exceeded your current quota`
-- Tencent Hunyuan/Hy3 — HTTP 401 `code 401002` invalid API key; re-issue at https://console.tencentcloud.com/tokenhub/apikey
+- Tencent Hunyuan/Hy3 — HTTP 401 `code 401002` invalid API key (re-confirmed by a single GET /v1/models re-probe on 2026-09-24); re-issue at https://console.tencentcloud.com/tokenhub/apikey
 **Safest next action for Mukund:** fund/enable the six provider accounts and re-issue the Tencent TokenHub key, then re-run `python scripts/e3_provider_bounded_smoke.py` followed by the readiness gate.
 
 ### 2. Complete E3 Stage 2 after all provider keys are configured
@@ -279,10 +279,14 @@ weakened. See items 1b and 2b for the remaining owner actions.
 - **Mistral** — confirmed `mistral-small-latest` against the live catalogue; the stale
   `mistral-small-4` string was corrected in the adapter and worker registry. Smoke call then refused
   by the provider itself (HTTP 429 `Rate limit exceeded`).
-- **Qwen** — the live Singapore/international id observed in the provider catalogue is `qwen3.8-27b`
-  (the previously intended `qwen3.7-plus` does **not** appear in the catalogue for this account), and
-  the endpoint was corrected from the CN DashScope host to the international host. Smoke call refused
-  by the provider (HTTP 403 `AccessDenied.Unpurchased` — the model must be purchased).
+- **Qwen** — the live Singapore/international catalogue contains BOTH `qwen3.7-plus` and
+  `qwen3.7-plus-2026-05-26` (the owner's intended model), and the endpoint was corrected from the CN
+  DashScope host to the international host. **Corrected 2026-09-24** (task
+  `agent-provider-debug-qwen-tencent-entitlement-2026-09-24`): the earlier closeout wrongly claimed the
+  intended id did not appear in the catalogue — it does. The adapter and registry model id were
+  corrected from `qwen3.8-27b` to `qwen3.7-plus` (worker_id `qwen38-27b` kept as the stable
+  credential-registry key). One bounded re-test of the corrected id was refused by the provider
+  (HTTP 403 `AccessDenied.Unpurchased` — the intended model must be purchased/enabled for this account).
 - **GLM** — endpoint corrected to the current Z.ai API host and the live `glm-5.3-flash` id confirmed
   from the provider catalogue. Smoke call refused by the provider (HTTP 429 `Insufficient balance or
   no resource package`).

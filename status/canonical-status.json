@@ -71,7 +71,7 @@
       "test_counts": "E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run",
       "notes": "E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) remains gated: a recorded readiness criterion (Google image real-dispatch settled) is unmet and every newly-credentialed provider refused live dispatch at the billing/entitlement/auth layer, so provider-diverse routing cannot execute.",
       "real_path_rehearsal_note": "Re-run at HEAD for this task: planner-decomposed multi-worker plan on the real execution leg, per-node deterministic verification, rejection -> repair -> re-verify, 7 bounded real provider calls (deepseek 5 / openai 2), plus the content-stop stub scenario. No failed check.",
-      "provider_verification_2026_09_24": "All ten roster credentials present; 6/7 provider endpoints and API model IDs live-verified and 1/7 documentation-derived; 0/7 generic API workers execution-ready (every provider refused the smoke call). Worker routable/qualification state updated from observed evidence only."
+      "provider_verification_2026_09_24": "All ten roster credentials present; 6/7 provider endpoints and API model IDs live-verified and 1/7 documentation-derived; 0/7 generic API workers execution-ready (every provider refused the smoke call). Worker routable/qualification state updated from observed evidence only. Follow-up debug (task agent-provider-debug-qwen-tencent-entitlement-2026-09-24): the Qwen model-selection mapping was corrected to the owner's intended `qwen3.7-plus` (the prior closeout wrongly claimed the intended id was absent; the committed live catalogue evidence lists both `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`); the corrected id was re-tested once and the provider returned HTTP 403 AccessDenied.Unpurchased (account entitlement), and the Tencent TokenHub re-probe returned the same 401 code 401002. No provider became execution-ready, so the blocker is unchanged."
     },
     "E4": {
       "name": "Predictive exhaustion, protected reserves, resource-driven checkpointing, handover, equivalent-worker failover",
@@ -305,7 +305,7 @@
       "google image worker / gemini (routable; content-side intermittency attributed)",
       "mistral-small-4 (present; endpoint+model live-verified; provider refuses dispatch HTTP 429)",
       "glm-53-flash (present; Z.ai endpoint+model live-verified; provider refuses dispatch HTTP 429 balance)",
-      "qwen38-27b (present; dashscope-intl endpoint+model live-verified; provider refuses dispatch HTTP 403 Unpurchased)",
+      "qwen38-27b (present; dashscope-intl endpoint verified; API model corrected to the owner's intended `qwen3.7-plus`, which the live catalogue contains; the corrected id was re-tested and the provider refuses dispatch HTTP 403 AccessDenied.Unpurchased = account entitlement, not a Hermes fault)",
       "longcat-2.0 (present; direct endpoint+model live-verified; provider refuses dispatch HTTP 402 quota)",
       "minimax-m3 (present; endpoint+model live-verified; provider refuses dispatch HTTP 402 balance)",
       "step-37-flash (present; StepFun global endpoint+model live-verified; provider refuses dispatch HTTP 402 quota)",
@@ -328,6 +328,18 @@
       "bounded_smoke_retry": "audits/evidence/2026-09-24T21-14-53Z-e3-provider-bounded-smoke/evidence.json",
       "presence_probe_retry_local_only": "audits/evidence/2026-09-24T21-14-50Z-e3-credential-presence-probe/evidence.json",
       "retry_note": "Retry attempt 2 of 3 re-ran the same bounded smoke (one minimal completion per worker, max_tokens=16, single attempt, no retries) plus the presence-only probe to test whether the external provider state had changed. It had not: all seven workers were refused again with the same provider-returned classes (mistral 429 rate limit; GLM/Z.ai 429 balance; Qwen 403 Unpurchased; LongCat 402 quota; MiniMax 402 balance; StepFun 402 quota; Tencent 401 code 401002). No credential value was read, printed or stored. A local-only presence-only probe re-run at 2026-09-24T21:14:50Z confirmed still_missing_count = 0 (the artifact audits/evidence/2026-09-24T21-14-50Z-e3-credential-presence-probe/evidence.json is git-ignored by the repository credential policy, so it is corroboration on the authoring host only and is never required to exist in a clean clone; the committed bounded-smoke and gate evidence is the durable record)."
+    },
+    "provider_debug_2026_09_24": {
+      "task": "agent-provider-debug-qwen-tencent-entitlement-2026-09-24",
+      "qwen_model_selection_correction": "The owner's intended model is `qwen3.7-plus`. The earlier closeout claimed the intended id was absent, but the committed live catalogue evidence (audits/evidence/2026-09-24T21-06-25Z-e3-provider-live-identity-probe) lists BOTH `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`. generic_openai_adapter.py and worker_registry.py were corrected from `qwen3.8-27b` to `qwen3.7-plus`; the worker_id stays `qwen38-27b` as the stable credential-registry key (the credential resolves via credential_target `qwen`, not the worker id).",
+      "qwen_re_test": "audits/evidence/2026-09-24T22-08-43Z-e3-provider-bounded-smoke/evidence.json",
+      "qwen_re_test_result": "One bounded call to the CORRECTED id `qwen3.7-plus` (max_tokens=16, single attempt, no retry): model present in the live catalogue (172 models), HTTP 403 code=AccessDenied.Unpurchased, no provider-returned model field, no usage. A genuine account entitlement blocker for the intended model — the correction fixed the Hermes-side mapping; the refusal is provider-side.",
+      "mistral_rate_limit_diagnostic": "audits/evidence/2026-09-24T22-08-59Z-e3-provider-rate-limit-diagnostic/evidence.json",
+      "mistral_rate_limit_note": "One bounded diagnostic call (max_tokens=16, single attempt) captured the Mistral 429 response headers: the provider exposed none of the rate-limit headers on the allow-list (Retry-After / x-ratelimit-* / ratelimit-*), so a transient request-rate limit cannot be separated from an account/tier/monthly quota from provider evidence. The authenticated GET /models still succeeds, so it is not an auth or adapter fault.",
+      "tencent_tokenhub_reprobe": "audits/evidence/2026-09-24T22-09-28Z-e3-tencent-endpoint-reprobe/evidence.json",
+      "tencent_tokenhub_note": "One bounded GET /v1/models re-probe against the configured TokenHub international endpoint reproduced HTTP 401 code 401002 (no chat completion attempted). Classified as a TokenHub credential/product/account mismatch — owner key re-issuance is the next step.",
+      "budget": "Qwen 1 real completion; Tencent 1 GET /v1/models (no completion); Mistral 1 real completion. No repeated deterministic provider calls were spent.",
+      "evidence_note": "No credential value was read, printed, logged or stored by any of these runs."
     },
     "routable_workers": [
       "codex-cli",
@@ -390,7 +402,7 @@
       "blocks": "live execution of the seven generic API workers and therefore provider-diverse E3 routing; Tencent/Hy3 provider identity stays documentation-derived only",
       "evidence": "audits/evidence/2026-09-24T21-00-28Z-e3-provider-bounded-smoke/evidence.json",
       "owner_action_required": true,
-      "owner_action": "Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded'; GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased (purchase qwen3.8-27b); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002). Each worker stays routable=false meanwhile."
+      "owner_action": "Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded' (a single diagnostic call captured the response headers and the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence); GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased on the owner's intended `qwen3.7-plus` (purchase/enable qwen3.7-plus for this account — the earlier `qwen3.8-27b` selection was a Hermes-side mapping error, now corrected, and the intended id IS present in the live catalogue); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002 repeats on a single GET /v1/models re-probe — TokenHub credential/product/account mismatch). Each worker stays routable=false meanwhile."
     },
     {
       "id": "stage2-not-enabled",
@@ -601,6 +613,12 @@
     "Whether the six provider accounts can be funded/entitled so the stored keys serve traffic, and whether the Tencent key belongs to the correct TokenHub product, are owner/provider questions."
   ],
   "history": [
+    {
+      "at": "2026-09-24T22:09:28Z",
+      "id": "2026-09-24T22-08-43Z-e3-provider-bounded-smoke",
+      "result": "QWEN MAPPING CORRECTED (qwen3.8-27b -> qwen3.7-plus); re-test HTTP 403 AccessDenied.Unpurchased (account entitlement)",
+      "what": "Task agent-provider-debug-qwen-tencent-entitlement-2026-09-24: a live debug of the post-key provider failures. (1) Qwen model-selection reconciliation fixed — the owner's intended model is `qwen3.7-plus` and the committed live catalogue evidence lists both `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`, so the earlier claim that the intended id was absent was wrong; generic_openai_adapter.py and worker_registry.py were corrected from `qwen3.8-27b` to `qwen3.7-plus` (worker_id `qwen38-27b` preserved as the stable credential-registry key; the credential resolves via credential_target `qwen`). The corrected E3 runtime was deployed and exactly ONE bounded real call was made to `qwen3.7-plus` (max_tokens=16, one attempt, no retry): HTTP 403 code=AccessDenied.Unpurchased, no returned model field, no usage — a genuine account entitlement blocker for the intended model. (2) Tencent/Hy3: one bounded GET /v1/models re-probe reproduced HTTP 401 code 401002 (no chat call) — TokenHub credential/product/account mismatch. (3) Mistral: one bounded diagnostic call captured the 429 response headers; the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence. GLM/LongCat/MiniMax/StepFun were classified from existing catalogue/deterministic-billing evidence without new calls; the Google image IMAGE_RECITATION finding was audited as a provider content-side stop with the Stage-2 criterion left unchanged. No credential value was read, printed, logged or stored; Stage 2 remains NOT ENABLED." 
+    },
     {
       "at": "2026-09-24T21:34:00Z",
       "id": "2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover",

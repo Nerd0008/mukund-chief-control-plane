@@ -198,6 +198,8 @@ def probe_endpoint(models_url: str, key: str) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--only", default=None,
+                        help="probe only this provider_key (read-only GET /models)")
     args = parser.parse_args()
 
     started = datetime.now(timezone.utc)
@@ -205,6 +207,8 @@ def main() -> int:
     touched_models = set()
 
     for provider_key, candidates in CANDIDATE_ENDPOINTS.items():
+        if args.only and provider_key != args.only:
+            continue
         config = goa.PROVIDER_CONFIGS[provider_key]
         key, source = goa._resolve_key(config)
         configured_model = config.get("api_model_id")

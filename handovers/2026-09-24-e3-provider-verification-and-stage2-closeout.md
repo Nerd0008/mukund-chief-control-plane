@@ -40,7 +40,7 @@ now reads the coordinator override from the contract and fails closed while it s
 |---|---|---|
 | Mistral | `mistral-small-4` | `mistral-small-latest` (live catalogue) |
 | MiniMax | `minimax-m3` (lower case) | `MiniMax-M3` (live catalogue) |
-| Qwen | CN DashScope host, intended `qwen3.7-plus` | international DashScope host, `qwen3.8-27b` (the intended id is not in this account's catalogue) |
+| Qwen | CN DashScope host, intended `qwen3.7-plus` | international DashScope host, `qwen3.8-27b` (the intended id is not in this account's catalogue) — **SUPERSEDED 2026-09-24** (task `agent-provider-debug-qwen-tencent-entitlement-2026-09-24`): this claim was wrong. The committed live catalogue evidence lists BOTH `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`; the adapter/registry model id was corrected to `qwen3.7-plus` and one bounded re-test of the corrected id returned HTTP 403 `AccessDenied.Unpurchased` (account entitlement, not a mapping/config fault). See `handovers/2026-09-24-provider-debug-qwen-tencent-reconciliation.md`. |
 | GLM | legacy BigModel CN endpoint | Z.ai international endpoint, `glm-5.3-flash` confirmed |
 | StepFun | `api.stepfun.com` | `api.stepfun.ai` (global API), `step-3.7-flash` confirmed |
 | LongCat | direct API | **unchanged — already correct**, preserved deliberately |

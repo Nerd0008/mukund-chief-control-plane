@@ -1,0 +1,46 @@
+{
+  "label": "e3-provider-rate-limit-diagnostic",
+  "run_started_utc": "2026-09-24T22:08:59+00:00",
+  "run_finished_utc": "2026-09-24T22:08:59+00:00",
+  "stage": "single bounded diagnostic call to capture non-secret provider rate-limit headers (max_tokens<=16, one attempt, no retry)",
+  "record": {
+    "worker_id": "mistral-small-4",
+    "budget": {
+      "max_tokens": 16,
+      "attempts": 1,
+      "retry": false,
+      "timeout_s": 90
+    },
+    "credential_handling": "resolved in-process via the deployed adapter; used only as an Authorization header; never printed, logged, stored or passed as a shell argument",
+    "header_allowlist": [
+      "retry-after",
+      "retry-after-ms",
+      "x-ratelimit-limit",
+      "x-ratelimit-remaining",
+      "x-ratelimit-reset",
+      "x-ratelimit-limit-requests",
+      "x-ratelimit-remaining-requests",
+      "x-ratelimit-limit-tokens",
+      "x-ratelimit-remaining-tokens",
+      "x-ratelimit-reset-requests",
+      "x-ratelimit-reset-tokens",
+      "ratelimit-limit",
+      "ratelimit-remaining",
+      "ratelimit-reset",
+      "x-request-id",
+      "request-id",
+      "x-should-retry"
+    ],
+    "provider_key": "mistral",
+    "chat_endpoint": "https://api.mistral.ai/v1/chat/completions",
+    "api_model_id": "mistral-small-latest",
+    "credential_present": true,
+    "auth_source": "credential_manager",
+    "http_status": 429,
+    "provider_returned_headers": {},
+    "rate_limit_headers_present": [],
+    "provider_error_body_sanitized": "Rate limit exceeded",
+    "provider_returned_model_field": null,
+    "usage": null
+  }
+}

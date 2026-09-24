@@ -90,11 +90,22 @@ PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
         # Correction 2026-09-24: the stored credential is an Alibaba Model
         # Studio *international* key. The CN dashscope host rejected it with
         # 401 invalid_api_key; dashscope-intl answered 200 with 172 models.
+        #
+        # Model-selection correction 2026-09-24 (this task): the owner's
+        # selected model is Qwen3.7-Plus (recorded in
+        # handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md
+        # and in the deferred-correction plan). The committed live catalogue
+        # evidence (audits/evidence/2026-09-24T21-06-25Z-e3-provider-live-identity-probe)
+        # lists BOTH `qwen3.7-plus` and its dated alias `qwen3.7-plus-2026-05-26`
+        # among the 172 observed ids, so the earlier claim that the intended id
+        # was "not in this account's catalogue" was wrong. The previous
+        # `qwen3.8-27b` selection has been corrected to the owner's intended
+        # `qwen3.7-plus`.
         "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
         "models_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
         "chat_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-        "api_model_id": "qwen3.8-27b",  # observed in the live catalogue
-        "display_name": "Qwen3.8-27B",
+        "api_model_id": "qwen3.7-plus",  # observed in the live catalogue (172 models)
+        "display_name": "Qwen3.7-Plus",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "DASHSCOPE_API_KEY",
         "credential_target": "qwen",
