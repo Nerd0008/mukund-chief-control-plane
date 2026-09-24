@@ -5,7 +5,7 @@
   "last_by_region": {
     "dubai": {
       "applied": false,
-      "at": "2026-09-24T05:42:58+00:00",
+      "at": "2026-09-24T12:57:07+00:00",
       "counts": {
         "appended": 0,
         "data_rows_after": null,
@@ -26,7 +26,7 @@
     },
     "japan": {
       "applied": false,
-      "at": "2026-09-24T05:43:03+00:00",
+      "at": "2026-09-24T12:57:12+00:00",
       "counts": {
         "appended": 0,
         "data_rows_after": null,
@@ -47,7 +47,7 @@
     },
     "singapore": {
       "applied": false,
-      "at": "2026-09-24T05:43:06+00:00",
+      "at": "2026-09-24T12:57:15+00:00",
       "counts": {
         "appended": 0,
         "data_rows_after": null,
@@ -67,14 +67,14 @@
       "verification_ok": false
     },
     "uk": {
-      "applied": false,
-      "at": "2026-09-24T05:42:54+00:00",
+      "applied": true,
+      "at": "2026-09-24T13:16:39+00:00",
       "counts": {
-        "appended": 0,
-        "data_rows_after": null,
-        "data_rows_before": 36,
-        "duplicates": 2,
-        "input": 2,
+        "appended": 1,
+        "data_rows_after": 35,
+        "data_rows_before": 34,
+        "duplicates": 0,
+        "input": 1,
         "refreshed": 0,
         "rejected": 0
       },
@@ -82,20 +82,20 @@
       "mode": "apply",
       "problems": 0,
       "region": "uk",
-      "result": "no-op",
-      "status": "no-op",
+      "result": "ok",
+      "status": "ok",
       "tracker_filename": "uk-cyber-job-tracker.xlsx",
-      "verification_ok": false
+      "verification_ok": true
     }
   },
   "last_run": {
-    "applied": false,
-    "at": "2026-09-24T05:43:06+00:00",
+    "applied": true,
+    "at": "2026-09-24T13:16:39+00:00",
     "counts": {
-      "appended": 0,
-      "data_rows_after": null,
-      "data_rows_before": 23,
-      "duplicates": 1,
+      "appended": 1,
+      "data_rows_after": 35,
+      "data_rows_before": 34,
+      "duplicates": 0,
       "input": 1,
       "refreshed": 0,
       "rejected": 0
@@ -103,17 +103,17 @@
     "error": null,
     "mode": "apply",
     "problems": 0,
-    "region": "singapore",
-    "result": "no-op",
-    "status": "no-op",
-    "tracker_filename": "Singapore_Cybersecurity_Job_Tracker.xlsx",
-    "verification_ok": false
+    "region": "uk",
+    "result": "ok",
+    "status": "ok",
+    "tracker_filename": "uk-cyber-job-tracker.xlsx",
+    "verification_ok": true
   },
   "owns": "deduplicated append into a canonical regional workbook",
   "roster": "B08",
-  "runs_recorded": 48,
+  "runs_recorded": 76,
   "schema_version": 1,
   "title": "Excel Tracker Writer",
-  "updated_at": "2026-09-24T05:43:06+00:00",
+  "updated_at": "2026-09-24T13:16:39+00:00",
   "worker": "career-ops/tracker_writer.py"
 }

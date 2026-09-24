@@ -602,3 +602,12 @@ hint: have locall
 error: Please commit or stash them.
 [2026-09-24T12:52:58.823172Z] Task agent-career-codex-style-open-web-job-research-2026-09-24 attempt 1/3: retry (recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled)
 [2026-09-24T12:52:58.824195Z] Handling task: agent-career-codex-style-open-web-job-research-2026-09-24 (attempt 2)
+[2026-09-24T13:06:50.483135Z] CRITICAL: git push failed: To https://github.com/Nerd0008/mukund-chief-control-plane.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/Nerd0008/mukund-chief-control-plane.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locall
+[2026-09-24T13:06:50.571411Z] CRITICAL: push recovery rebase failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[2026-09-24T13:06:50.572419Z] Task agent-career-codex-style-open-web-job-research-2026-09-24 attempt 2/3: retry (recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled)
+[2026-09-24T13:06:50.573418Z] Handling task: agent-career-codex-style-open-web-job-research-2026-09-24 (attempt 3)
