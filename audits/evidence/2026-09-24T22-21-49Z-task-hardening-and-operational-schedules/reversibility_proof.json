@@ -1,0 +1,66 @@
+{
+  "task": "ChiefDiscordSync",
+  "backup_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\backups\\20260924T221712Z-pre-hardening",
+  "steps": [
+    {
+      "step": "hardened-state",
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "start_when_available": true,
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "state": "Enabled"
+    },
+    {
+      "step": "restore-from-backup",
+      "ok": true,
+      "results": [
+        {
+          "task": "ChiefDiscordSync",
+          "exit_code": 0,
+          "ok": true,
+          "output": "SUCCESS: The scheduled task \"ChiefDiscordSync\" has successfully been created."
+        }
+      ]
+    },
+    {
+      "step": "restored-state",
+      "disallow_on_batteries": true,
+      "stop_on_batteries": true,
+      "start_when_available": false,
+      "triggers": [
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "state": "Enabled"
+    },
+    {
+      "step": "re-apply-hardened",
+      "ok": true,
+      "imported": [
+        {
+          "task": "ChiefDiscordSync",
+          "exit_code": 0,
+          "ok": true,
+          "output": "SUCCESS: The scheduled task \"ChiefDiscordSync\" has successfully been created."
+        }
+      ]
+    },
+    {
+      "step": "final-state",
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "start_when_available": true,
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "state": "Enabled"
+    }
+  ],
+  "reversibility_proven": true
+}

@@ -1,78 +1,40 @@
 <?xml version="1.0" encoding="UTF-16"?>
-
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-
   <RegistrationInfo>
-
-    <Date>2026-09-23T23:13:11</Date>
-
+    <Date>2026-09-24T23:22:05</Date>
     <Author>MISTY\mukun</Author>
-
-    <URI>\ChiefCareerScan-Dubai</URI>
-
+    <URI>\ChiefOperationalBackup</URI>
+    <Description>Chief operational service: operational backup of the declared state set (7 SQLite databases + E1/E2 chain heads) with 7-snapshot retention; snapshot root stays outside the repository at %LOCALAPPDATA%\hermes\backups\operational. Interactive user token is preserved so the owner's user-scoped Windows Credential Manager secrets stay readable. No external delivery destination.</Description>
   </RegistrationInfo>
-
   <Principals>
-
     <Principal id="Author">
-
       <UserId>S-1-5-21-3453725374-3777210888-4048049496-1001</UserId>
-
       <LogonType>InteractiveToken</LogonType>
-
     </Principal>
-
   </Principals>
-
   <Settings>
-
     <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
-
     <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
-
+    <ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
     <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
-
-    <IdleSettings>
-
-      <Duration>PT10M</Duration>
-
-      <WaitTimeout>PT1H</WaitTimeout>
-
-      <StopOnIdleEnd>false</StopOnIdleEnd>
-
-      <RestartOnIdle>false</RestartOnIdle>
-
-    </IdleSettings>
-
     <StartWhenAvailable>true</StartWhenAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
   </Settings>
-
   <Triggers>
-
     <CalendarTrigger>
-
-      <StartBoundary>2026-09-23T23:50:00</StartBoundary>
-
+      <StartBoundary>2026-09-24T02:30:00</StartBoundary>
       <ScheduleByDay>
-
         <DaysInterval>1</DaysInterval>
-
       </ScheduleByDay>
-
     </CalendarTrigger>
-
   </Triggers>
-
   <Actions Context="Author">
-
     <Exec>
-
-      <Command>"C:\Users\mukun\Documents\mukund-chief-control-plane\career-ops\run_scheduled_scan.cmd"</Command>
-
-      <Arguments>dubai</Arguments>
-
+      <Command>"C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\run_scheduled_ops.cmd"</Command>
+      <Arguments>backup</Arguments>
     </Exec>
-
   </Actions>
-
 </Task>

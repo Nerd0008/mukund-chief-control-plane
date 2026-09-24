@@ -1,0 +1,287 @@
+{
+  "artifact": "log rotation / retention",
+  "run_utc": "2026-09-24T22:21:53+00:00",
+  "code_sha": "5fe74fc67e6388a1a13f9ad04051c28e18760b86",
+  "mode": "apply",
+  "policy": {
+    "max_bytes": 5000000,
+    "keep_archives": 5
+  },
+  "log_paths_covered": [
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-error.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-stdio.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-exit-diag.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\update.log",
+    "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\chief\\logs\\operational-services.log"
+  ],
+  "log_paths_out_of_scope": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\process-results",
+      "reason": "Hermes-managed process-result records (JSON store, not a log stream)"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\update_receipts",
+      "reason": "Hermes-managed update receipts (JSON store, not a log stream)"
+    }
+  ],
+  "before": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 3951805,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 385007,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 70884,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-error.log",
+      "exists": true,
+      "size_bytes": 1126,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-stdio.log",
+      "exists": true,
+      "size_bytes": 24407,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-exit-diag.log",
+      "exists": true,
+      "size_bytes": 13926,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\update.log",
+      "exists": true,
+      "size_bytes": 14628,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 65797,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\chief\\logs\\operational-services.log",
+      "exists": true,
+      "size_bytes": 1510,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    }
+  ],
+  "results": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 3951805,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 385007,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 70884,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-error.log",
+      "exists": true,
+      "size_bytes": 1126,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-stdio.log",
+      "exists": true,
+      "size_bytes": 24407,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-exit-diag.log",
+      "exists": true,
+      "size_bytes": 13926,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\update.log",
+      "exists": true,
+      "size_bytes": 14628,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 65797,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\chief\\logs\\operational-services.log",
+      "exists": true,
+      "size_bytes": 1510,
+      "action": "no_rotation_needed"
+    }
+  ],
+  "after": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 3951805,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 385007,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 70884,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-error.log",
+      "exists": true,
+      "size_bytes": 1126,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-stdio.log",
+      "exists": true,
+      "size_bytes": 24407,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway-exit-diag.log",
+      "exists": true,
+      "size_bytes": 13926,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\update.log",
+      "exists": true,
+      "size_bytes": 14628,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 65797,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\chief\\logs\\operational-services.log",
+      "exists": true,
+      "size_bytes": 1510,
+      "rotation_configured": true,
+      "rotation_policy": "archive at 5000000 bytes, keep newest 5",
+      "archives": 0,
+      "covered_by": "scripts/operational_services.py rotate-logs"
+    }
+  ],
+  "archives": [],
+  "rotated": [],
+  "would_rotate": [],
+  "skipped_locked": [],
+  "failure_labels": [],
+  "archive_count_before": 0,
+  "archive_count_after": 0,
+  "live_state_modified": false,
+  "network_calls_spent": 0
+}

@@ -209,6 +209,71 @@ class TestLogRotation(TempRoot):
         self.assertEqual(res[0]["action"], "no_rotation_needed")
 
 
+class TestLogRotationPolicyReport(TempRoot):
+    """The declared policy surface: every live log path, bounded, no stray paths."""
+
+    def _patch_targets(self, ops, paths):
+        self._saved = ops.LOG_TARGETS
+        ops.LOG_TARGETS = list(paths)
+        self.addCleanup(lambda: setattr(ops, "LOG_TARGETS", self._saved))
+
+    def test_every_policy_target_is_declared_and_read_only_plan_changes_nothing(self):
+        import operational_services as ops
+        big = self.root / "big.log"
+        small = self.root / "small.log"
+        big.write_text("x" * 100, encoding="utf-8")
+        small.write_text("y", encoding="utf-8")
+        self._patch_targets(ops, [big, small])
+        before = {p: p.stat().st_size for p in (big, small)}
+        report = ops.build_log_rotation_report(apply=False, keep=3, max_bytes=10)
+        self.assertEqual(report["mode"], "dry-run")
+        self.assertFalse(report["live_state_modified"])
+        self.assertEqual(report["would_rotate"], [str(big)])
+        self.assertEqual(report["rotated"], [])
+        self.assertEqual({p: p.stat().st_size for p in (big, small)}, before)
+        self.assertEqual(sorted(report["log_paths_covered"]), sorted([str(big), str(small)]))
+        self.assertEqual(report["network_calls_spent"], 0)
+
+    def test_apply_rotates_and_prunes_only_inside_the_policy_set(self):
+        import operational_services as ops
+        big = self.root / "big.log"
+        big.write_text("x" * 100, encoding="utf-8")
+        outside = self.root / "do-not-touch.log"
+        outside.write_text("z" * 100, encoding="utf-8")
+        self._patch_targets(ops, [big])
+        # Pre-existing stale archives beyond the keep bound, plus one stranger.
+        for i in range(4):
+            (self.root / f"big.log.20200101T00000{i}Z.1").write_text("old", encoding="utf-8")
+        report = ops.build_log_rotation_report(apply=True, keep=2, max_bytes=10)
+        self.assertEqual(report["rotated"], [str(big)])
+        self.assertTrue(report["live_state_modified"])
+        self.assertEqual(big.stat().st_size, 0)
+        remaining = sorted(p.name for p in self.root.glob("big.log.*.1"))
+        self.assertEqual(len(remaining), 2, remaining)
+        self.assertEqual(outside.stat().st_size, 100)  # outside the policy set
+        self.assertEqual(report["failure_labels"], [])
+
+    def test_missing_log_is_recorded_not_invented(self):
+        import operational_services as ops
+        missing = self.root / "absent.log"
+        self._patch_targets(ops, [missing])
+        report = ops.build_log_rotation_report(apply=False, max_bytes=10)
+        self.assertEqual(report["results"][0]["action"], "skip_missing")
+        self.assertFalse(report["results"][0]["exists"])
+
+    def test_live_policy_targets_cover_every_declared_hermes_chief_log(self):
+        import operational_services as ops
+        names = {Path(p).name for p in ops.LOG_TARGETS}
+        for expected in ("agent.log", "errors.log", "gateway.log", "gateway-error.log",
+                         "gateway-stdio.log", "gateway-exit-diag.log", "update.log",
+                         "gateway-starts.log", "queue.log", "operational-services.log"):
+            self.assertIn(expected, names)
+        # Hermes-managed JSON record stores are recorded out of scope, never pruned.
+        scope = {r["path"] for r in ops.LOG_TARGETS_OUT_OF_SCOPE}
+        self.assertTrue(any("process-results" in s for s in scope))
+        self.assertTrue(all(s not in {str(p) for p in ops.LOG_TARGETS} for s in scope))
+
+
 class TestOwnerActionsAndBriefs(TempRoot):
     def test_parse_owner_actions(self):
         import operational_services as ops

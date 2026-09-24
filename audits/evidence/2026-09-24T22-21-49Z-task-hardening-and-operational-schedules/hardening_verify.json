@@ -1,0 +1,442 @@
+{
+  "artifact": "scheduled-task hardening verification",
+  "run_utc": "2026-09-24T22:21:51+00:00",
+  "code_sha": "5fe74fc67e6388a1a13f9ad04051c28e18760b86",
+  "read_only": true,
+  "owned_tasks": [
+    "HermesRemoteQueuePoller",
+    "ChiefDiscordSync",
+    "ChiefCareerBrief",
+    "ChiefCareerScan-UK",
+    "ChiefCareerScan-Dubai",
+    "ChiefCareerScan-Japan",
+    "ChiefCareerScan-Singapore",
+    "ChiefOperationalBackup",
+    "ChiefLogRotation",
+    "ChiefMorningBrief",
+    "ChiefHealthSnapshot"
+  ],
+  "tasks": {
+    "HermesRemoteQueuePoller": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefDiscordSync": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefCareerBrief": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefCareerScan-UK": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefCareerScan-Dubai": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefCareerScan-Japan": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefCareerScan-Singapore": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": null,
+      "state": "Enabled",
+      "exists": true
+    },
+    "Hermes_Gateway": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "logon"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT0S",
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefOperationalBackup": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT1H",
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefLogRotation": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT1H",
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefMorningBrief": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT1H",
+      "state": "Enabled",
+      "exists": true
+    },
+    "ChiefHealthSnapshot": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "calendar"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT1H",
+      "state": "Enabled",
+      "exists": true
+    },
+    "Mukund Chief of Staff": {
+      "logon_type": "InteractiveToken",
+      "triggers": [
+        "logon"
+      ],
+      "start_when_available": true,
+      "disallow_on_batteries": false,
+      "stop_on_batteries": false,
+      "execution_time_limit": "PT0S",
+      "state": "Disabled",
+      "exists": true
+    }
+  },
+  "verdicts": {
+    "Hermes_Gateway": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "logon"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": true,
+      "disallow_on_batteries": false,
+      "last_result": "0",
+      "next_run_time": "N/A",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    },
+    "HermesRemoteQueuePoller": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "-2147020576",
+      "next_run_time": "24-09-2026 23:22:00",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    },
+    "ChiefDiscordSync": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "logon",
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "0",
+      "next_run_time": "24-09-2026 23:36:00",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    },
+    "ChiefCareerBrief": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "0",
+      "next_run_time": "25-09-2026 07:00:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefCareerScan-UK": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "0",
+      "next_run_time": "24-09-2026 23:45:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefCareerScan-Dubai": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:50:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefCareerScan-Japan": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:55:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefCareerScan-Singapore": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "2",
+      "next_run_time": "25-09-2026 00:00:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefOperationalBackup": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "267011",
+      "next_run_time": "25-09-2026 02:30:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefLogRotation": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "267011",
+      "next_run_time": "25-09-2026 03:00:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefMorningBrief": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "267011",
+      "next_run_time": "25-09-2026 06:30:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "ChiefHealthSnapshot": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": false,
+      "disallow_on_batteries": false,
+      "last_result": "267011",
+      "next_run_time": "25-09-2026 08:00:00",
+      "survives_boot": "yes",
+      "reason": "StartWhenAvailable=true"
+    },
+    "Mukund Chief of Staff": {
+      "exists": true,
+      "state": "Disabled",
+      "triggers": [
+        "logon"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": true,
+      "disallow_on_batteries": false,
+      "last_result": "-1073741510",
+      "next_run_time": "N/A",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    }
+  },
+  "unverified_after_reboot": [],
+  "still_battery_gated": [],
+  "owner_checklist": [
+    {
+      "task": "Hermes_Gateway",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "HermesRemoteQueuePoller",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefDiscordSync",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerBrief",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-UK",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Dubai",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Japan",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Singapore",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefOperationalBackup",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefLogRotation",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefMorningBrief",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefHealthSnapshot",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    }
+  ]
+}

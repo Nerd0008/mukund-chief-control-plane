@@ -8,7 +8,7 @@
 
     <Author>MISTY\mukun</Author>
 
-    <URI>\ChiefCareerScan-Dubai</URI>
+    <URI>\ChiefCareerScan-Singapore</URI>
 
   </RegistrationInfo>
 
@@ -26,9 +26,9 @@
 
   <Settings>
 
-    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>
 
-    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>
 
     <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
 
@@ -38,20 +38,19 @@
 
       <WaitTimeout>PT1H</WaitTimeout>
 
-      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <StopOnIdleEnd>true</StopOnIdleEnd>
 
       <RestartOnIdle>false</RestartOnIdle>
 
     </IdleSettings>
 
-    <StartWhenAvailable>true</StartWhenAvailable>
   </Settings>
 
   <Triggers>
 
     <CalendarTrigger>
 
-      <StartBoundary>2026-09-23T23:50:00</StartBoundary>
+      <StartBoundary>2026-09-23T00:00:00</StartBoundary>
 
       <ScheduleByDay>
 
@@ -69,7 +68,7 @@
 
       <Command>"C:\Users\mukun\Documents\mukund-chief-control-plane\career-ops\run_scheduled_scan.cmd"</Command>
 
-      <Arguments>dubai</Arguments>
+      <Arguments>singapore</Arguments>
 
     </Exec>
 

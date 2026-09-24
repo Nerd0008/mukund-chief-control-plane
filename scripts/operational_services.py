@@ -90,17 +90,43 @@ CHIEF_TASKS = [
     "ChiefCareerScan-Dubai",
     "ChiefCareerScan-Japan",
     "ChiefCareerScan-Singapore",
+    # Owner-approved operational service schedules (registered by
+    # scripts/harden_scheduled_tasks.py from deployments/service-definitions/).
+    "ChiefOperationalBackup",
+    "ChiefLogRotation",
+    "ChiefMorningBrief",
+    "ChiefHealthSnapshot",
 ]
 
 # Reads-only legacy tasks that must be *recorded*, never silently repaired.
 LEGACY_TASKS = ["Mukund Chief of Staff"]
 
+# Every live Hermes/Chief *log* path, verified against the host on 2026-09-24.
+# Scope note: `%LOCALAPPDATA%\hermes\logs\process-results\*.json` and
+# `%LOCALAPPDATA%\hermes\logs\update_receipts\*.json` are Hermes-managed record
+# stores (not `.log` streams) and are deliberately NOT covered by this policy;
+# they are recorded as out of scope rather than silently pruned.
+HERMES_LOG_DIR = HERMES_ROOT / "logs"
+CHIEF_LOG_DIR = REPO_ROOT / "runtime" / "chief" / "logs"
 LOG_TARGETS = [
-    HERMES_ROOT / "logs" / "agent.log",
-    HERMES_ROOT / "logs" / "errors.log",
-    HERMES_ROOT / "logs" / "gateway.log",
+    HERMES_LOG_DIR / "agent.log",
+    HERMES_LOG_DIR / "errors.log",
+    HERMES_LOG_DIR / "gateway.log",
+    HERMES_LOG_DIR / "gateway-error.log",
+    HERMES_LOG_DIR / "gateway-stdio.log",
+    HERMES_LOG_DIR / "gateway-exit-diag.log",
+    HERMES_LOG_DIR / "update.log",
     HERMES_ROOT / "gateway-starts.log",
     REPO_ROOT / "remote-queue" / "logs" / "queue.log",
+    CHIEF_LOG_DIR / "operational-services.log",
+]
+
+# Log paths a rotation policy deliberately does NOT own (recorded, never pruned).
+LOG_TARGETS_OUT_OF_SCOPE = [
+    {"path": str(HERMES_LOG_DIR / "process-results"),
+     "reason": "Hermes-managed process-result records (JSON store, not a log stream)"},
+    {"path": str(HERMES_LOG_DIR / "update_receipts"),
+     "reason": "Hermes-managed update receipts (JSON store, not a log stream)"},
 ]
 
 QUEUE_DIRS = {
@@ -404,15 +430,32 @@ def career_brief_status(repo_root: Path = REPO_ROOT) -> dict:
 
 
 def log_status(log_paths=None) -> list:
+    """Size + policy state for every live log path. Read-only, never prunes."""
     log_paths = log_paths if log_paths is not None else LOG_TARGETS
+    archives = log_archives()
     out = []
     for p in log_paths:
         p = Path(p)
         rec = {"path": str(p), "exists": p.exists()}
         if rec["exists"]:
             rec["size_bytes"] = p.stat().st_size
-            rec["rotation_configured"] = False  # nothing rotates these today
+        rec["rotation_configured"] = True
+        rec["rotation_policy"] = (f"archive at {DEFAULT_LOG_MAX_BYTES} bytes, "
+                                  f"keep newest {DEFAULT_LOG_KEEP}")
+        rec["archives"] = len([a for a in archives if a["live"] == str(p)])
+        rec["covered_by"] = "scripts/operational_services.py rotate-logs"
         out.append(rec)
+    return out
+
+
+def log_archives() -> list:
+    """Every archive file this policy can have produced, with its live path."""
+    out = []
+    for lp in LOG_TARGETS:
+        lp = Path(lp)
+        for a in sorted(lp.parent.glob(lp.name + ".*.1")):
+            out.append({"live": str(lp), "archive": str(a),
+                        "size_bytes": a.stat().st_size})
     return out
 
 
@@ -1185,6 +1228,77 @@ def rotate_logs(log_paths=None, *, keep: int = DEFAULT_LOG_KEEP,
 
 
 # --------------------------------------------------------------------------- #
+# Log rotation / retention report
+# --------------------------------------------------------------------------- #
+
+def build_log_rotation_report(*, apply: bool = False, keep: int = DEFAULT_LOG_KEEP,
+                              max_bytes: int = DEFAULT_LOG_MAX_BYTES) -> dict:
+    """Bounded rotation/retention over the declared live log paths only.
+
+    ``apply=False`` is a pure plan: nothing on disk changes. ``apply=True``
+    archives a log that has passed ``max_bytes``, truncates it only when it can
+    be opened for writing (a service-held log is recorded ``skipped_locked``,
+    never forced) and prunes the archive set to the newest ``keep``. No path
+    outside ``LOG_TARGETS`` is ever read, written or pruned.
+    """
+    before = log_status()
+    archives_before = len(log_archives())
+    results = rotate_logs(keep=keep, max_bytes=max_bytes, apply=apply)
+    after = log_status()
+    archives_after = log_archives()
+    rotated = [r for r in results if r.get("action") == "rotated"]
+    planned = [r for r in results if r.get("action") == "would_rotate"]
+    locked = [r for r in results if r.get("action") == "skipped_locked"]
+    failed = [r for r in results if r.get("action") == "error"]
+    return {
+        "artifact": "log rotation / retention",
+        "run_utc": utc_now(),
+        "code_sha": git_sha(),
+        "mode": "apply" if apply else "dry-run",
+        "policy": {"max_bytes": max_bytes, "keep_archives": keep},
+        "log_paths_covered": [str(p) for p in LOG_TARGETS],
+        "log_paths_out_of_scope": LOG_TARGETS_OUT_OF_SCOPE,
+        "before": before,
+        "results": results,
+        "after": after,
+        "archives": archives_after,
+        "rotated": [r["path"] for r in rotated],
+        "would_rotate": [r["path"] for r in planned],
+        "skipped_locked": [r["path"] for r in locked],
+        "failure_labels": [r["path"] for r in failed],
+        "archive_count_before": archives_before,
+        "archive_count_after": len(archives_after),
+        "live_state_modified": bool(apply and (rotated or
+                                               archives_before != len(archives_after))),
+        "network_calls_spent": 0,
+    }
+
+
+def render_log_rotation_markdown(report: dict) -> str:
+    lines = [
+        "# Log rotation / retention",
+        "",
+        f"- Run (UTC): {report['run_utc']}",
+        f"- Mode: {report['mode']} (live state modified: {report['live_state_modified']})",
+        f"- Policy: archive a log above {report['policy']['max_bytes']} bytes; "
+        f"keep the newest {report['policy']['keep_archives']} archives per log",
+        "",
+        "| Log | Exists | Size (bytes) | Action |",
+        "|---|---|---|---|",
+    ]
+    for r in report["results"]:
+        lines.append(f"| {r['path']} | {r['exists']} | {r.get('size_bytes', '')} | "
+                     f"{r.get('action')}{(' - ' + r['reason']) if r.get('reason') else ''} |")
+    lines += ["", "## Out of scope (recorded, never pruned)", ""]
+    for r in report["log_paths_out_of_scope"]:
+        lines.append(f"- {r['path']}: {r['reason']}")
+    lines += ["", f"Archives before/after: {report['archive_count_before']} / "
+                  f"{report['archive_count_after']}. Nothing outside the declared "
+                  "log paths was read, written or pruned.", ""]
+    return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- #
 # Persistence validation
 # --------------------------------------------------------------------------- #
 
@@ -1341,6 +1455,17 @@ def main(argv=None) -> int:
     p.add_argument("--out-dir", default=None)
     p.add_argument("--json", action="store_true")
 
+    p = sub.add_parser("rotate-logs",
+                       help="bounded log rotation/retention over the declared log paths")
+    p.add_argument("--out-dir", default=None)
+    p.add_argument("--keep", type=int, default=DEFAULT_LOG_KEEP,
+                   help="archive copies to keep per log (default 5)")
+    p.add_argument("--max-bytes", type=int, default=DEFAULT_LOG_MAX_BYTES,
+                   help="rotate a log once it passes this size (default 5,000,000)")
+    p.add_argument("--apply", action="store_true",
+                   help="perform the rotation; without it this is a dry-run plan")
+    p.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     stamp = _stamp()
 
@@ -1406,6 +1531,24 @@ def main(argv=None) -> int:
                               "owner_checklist_items": len(report["owner_checklist"])},
                              indent=2))
         return 0
+
+    if args.command == "rotate-logs":
+        report = build_log_rotation_report(apply=args.apply, keep=args.keep,
+                                           max_bytes=args.max_bytes)
+        out_dir = Path(args.out_dir) if args.out_dir else (
+            REPO_ROOT / "audits" / "evidence" / f"{stamp}-log-rotation")
+        _write_report(out_dir, "log_rotation", report, render_log_rotation_markdown)
+        if args.json:
+            print(json.dumps(report, indent=2, default=str))
+        else:
+            print(json.dumps({"evidence_dir": str(out_dir), "mode": report["mode"],
+                              "rotated": report["rotated"],
+                              "would_rotate": report["would_rotate"],
+                              "skipped_locked": report["skipped_locked"],
+                              "archive_count_after": report["archive_count_after"],
+                              "live_state_modified": report["live_state_modified"]},
+                             indent=2))
+        return 0 if not report["failure_labels"] else 1
 
     return 2
 

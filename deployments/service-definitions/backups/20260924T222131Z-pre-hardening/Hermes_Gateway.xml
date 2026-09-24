@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-16"?>
 
-<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
 
   <RegistrationInfo>
 
-    <Date>2026-09-23T23:13:11</Date>
+    <Description>Hermes Agent Gateway - Messaging Platform Integration</Description>
 
-    <Author>MISTY\mukun</Author>
-
-    <URI>\ChiefCareerScan-Dubai</URI>
+    <URI>\Hermes_Gateway</URI>
 
   </RegistrationInfo>
 
@@ -30,13 +28,21 @@
 
     <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
 
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+
     <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
 
+    <RestartOnFailure>
+
+      <Count>999</Count>
+
+      <Interval>PT1M</Interval>
+
+    </RestartOnFailure>
+
+    <StartWhenAvailable>true</StartWhenAvailable>
+
     <IdleSettings>
-
-      <Duration>PT10M</Duration>
-
-      <WaitTimeout>PT1H</WaitTimeout>
 
       <StopOnIdleEnd>false</StopOnIdleEnd>
 
@@ -44,22 +50,17 @@
 
     </IdleSettings>
 
-    <StartWhenAvailable>true</StartWhenAvailable>
+    <UseUnifiedSchedulingEngine>true</UseUnifiedSchedulingEngine>
+
   </Settings>
 
   <Triggers>
 
-    <CalendarTrigger>
+    <LogonTrigger>
 
-      <StartBoundary>2026-09-23T23:50:00</StartBoundary>
+      <Delay>PT30S</Delay>
 
-      <ScheduleByDay>
-
-        <DaysInterval>1</DaysInterval>
-
-      </ScheduleByDay>
-
-    </CalendarTrigger>
+    </LogonTrigger>
 
   </Triggers>
 
@@ -67,9 +68,9 @@
 
     <Exec>
 
-      <Command>"C:\Users\mukun\Documents\mukund-chief-control-plane\career-ops\run_scheduled_scan.cmd"</Command>
+      <Command>wscript.exe</Command>
 
-      <Arguments>dubai</Arguments>
+      <Arguments>//B //Nologo "C:\Users\mukun\AppData\Local\hermes\gateway-service\Hermes_Gateway.vbs"</Arguments>
 
     </Exec>
 

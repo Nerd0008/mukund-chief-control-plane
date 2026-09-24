@@ -1,0 +1,130 @@
+{
+  "artifact": "scheduled-task hardening + operational schedules",
+  "run_utc": "2026-09-24T22:21:50+00:00",
+  "code_sha": "5fe74fc67e6388a1a13f9ad04051c28e18760b86",
+  "mode": "apply",
+  "battery_gating_removed_from": [
+    "HermesRemoteQueuePoller",
+    "ChiefDiscordSync",
+    "ChiefCareerBrief",
+    "ChiefCareerScan-UK",
+    "ChiefCareerScan-Dubai",
+    "ChiefCareerScan-Japan",
+    "ChiefCareerScan-Singapore"
+  ],
+  "legacy_tasks_recorded_not_modified": [
+    "Mukund Chief of Staff"
+  ],
+  "logon_type_preserved": "InteractiveToken (owner SID S-1-5-21-3453725374-3777210888-4048049496-1001) - never SYSTEM",
+  "definition_encoding_note": "checked-in definitions keep the Task Scheduler XML 'encoding=\"UTF-16\"' declaration: the loader REJECTS encoding=\"UTF-8\" with '(1,40)::ERROR: unable to switch the encoding' even when the bytes match. Verified on this host.",
+  "changes": {
+    "HermesRemoteQueuePoller": [],
+    "ChiefDiscordSync": [],
+    "ChiefCareerBrief": [],
+    "ChiefCareerScan-UK": [],
+    "ChiefCareerScan-Dubai": [],
+    "ChiefCareerScan-Japan": [],
+    "ChiefCareerScan-Singapore": [],
+    "Hermes_Gateway": [
+      "none (recorded; already hardened / legacy donor)"
+    ],
+    "Mukund Chief of Staff": [
+      "none (recorded; already hardened / legacy donor)"
+    ],
+    "ChiefOperationalBackup": [
+      "new definition: daily 02:30 -> run_scheduled_ops.cmd backup"
+    ],
+    "ChiefLogRotation": [
+      "new definition: daily 03:00 -> run_scheduled_ops.cmd logs"
+    ],
+    "ChiefMorningBrief": [
+      "new definition: daily 06:30 -> run_scheduled_ops.cmd brief"
+    ],
+    "ChiefHealthSnapshot": [
+      "new definition: daily 08:00 -> run_scheduled_ops.cmd health"
+    ]
+  },
+  "definitions_written": [
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\HermesRemoteQueuePoller.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefDiscordSync.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefCareerBrief.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefCareerScan-UK.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefCareerScan-Dubai.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefCareerScan-Japan.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefCareerScan-Singapore.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefOperationalBackup.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefLogRotation.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefMorningBrief.xml",
+    "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\ChiefHealthSnapshot.xml"
+  ],
+  "imported": [
+    {
+      "task": "HermesRemoteQueuePoller",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"HermesRemoteQueuePoller\" has successfully been created."
+    },
+    {
+      "task": "ChiefDiscordSync",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefDiscordSync\" has successfully been created."
+    },
+    {
+      "task": "ChiefCareerBrief",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefCareerBrief\" has successfully been created."
+    },
+    {
+      "task": "ChiefCareerScan-UK",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefCareerScan-UK\" has successfully been created."
+    },
+    {
+      "task": "ChiefCareerScan-Dubai",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefCareerScan-Dubai\" has successfully been created."
+    },
+    {
+      "task": "ChiefCareerScan-Japan",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefCareerScan-Japan\" has successfully been created."
+    },
+    {
+      "task": "ChiefCareerScan-Singapore",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefCareerScan-Singapore\" has successfully been created."
+    },
+    {
+      "task": "ChiefOperationalBackup",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefOperationalBackup\" has successfully been created."
+    },
+    {
+      "task": "ChiefLogRotation",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefLogRotation\" has successfully been created."
+    },
+    {
+      "task": "ChiefMorningBrief",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefMorningBrief\" has successfully been created."
+    },
+    {
+      "task": "ChiefHealthSnapshot",
+      "exit_code": 0,
+      "ok": true,
+      "output": "SUCCESS: The scheduled task \"ChiefHealthSnapshot\" has successfully been created."
+    }
+  ],
+  "live_state_modified": true,
+  "backup_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\deployments\\service-definitions\\backups\\20260924T222150Z-pre-hardening"
+}

@@ -1,0 +1,7 @@
+{
+  "evidence_dir": "audits\\evidence\\2026-09-24T22-21-49Z-task-hardening-and-operational-schedules\\backup",
+  "status": "PASS",
+  "snapshot_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20260924T222156Z",
+  "failure_labels": [],
+  "pruned": []
+}

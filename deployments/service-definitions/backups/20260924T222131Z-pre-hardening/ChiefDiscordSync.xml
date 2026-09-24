@@ -4,11 +4,11 @@
 
   <RegistrationInfo>
 
-    <Date>2026-09-23T23:13:11</Date>
+    <Date>2026-09-21T21:06:11</Date>
 
     <Author>MISTY\mukun</Author>
 
-    <URI>\ChiefCareerScan-Dubai</URI>
+    <URI>\ChiefDiscordSync</URI>
 
   </RegistrationInfo>
 
@@ -26,9 +26,9 @@
 
   <Settings>
 
-    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>
 
-    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>
 
     <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
 
@@ -38,28 +38,27 @@
 
       <WaitTimeout>PT1H</WaitTimeout>
 
-      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <StopOnIdleEnd>true</StopOnIdleEnd>
 
       <RestartOnIdle>false</RestartOnIdle>
 
     </IdleSettings>
 
-    <StartWhenAvailable>true</StartWhenAvailable>
   </Settings>
 
   <Triggers>
 
-    <CalendarTrigger>
+    <TimeTrigger>
 
-      <StartBoundary>2026-09-23T23:50:00</StartBoundary>
+      <StartBoundary>2026-09-21T21:06:00</StartBoundary>
 
-      <ScheduleByDay>
+      <Repetition>
 
-        <DaysInterval>1</DaysInterval>
+        <Interval>PT30M</Interval>
 
-      </ScheduleByDay>
+      </Repetition>
 
-    </CalendarTrigger>
+    </TimeTrigger>
 
   </Triggers>
 
@@ -67,9 +66,9 @@
 
     <Exec>
 
-      <Command>"C:\Users\mukun\Documents\mukund-chief-control-plane\career-ops\run_scheduled_scan.cmd"</Command>
+      <Command>"C:\Users\mukun\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe"</Command>
 
-      <Arguments>dubai</Arguments>
+      <Arguments>"C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\scheduled_sync_chief.py"</Arguments>
 
     </Exec>
 

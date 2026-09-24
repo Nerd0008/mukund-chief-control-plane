@@ -26,9 +26,9 @@
 
   <Settings>
 
-    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>
 
-    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>
 
     <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
 
@@ -38,13 +38,12 @@
 
       <WaitTimeout>PT1H</WaitTimeout>
 
-      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <StopOnIdleEnd>true</StopOnIdleEnd>
 
       <RestartOnIdle>false</RestartOnIdle>
 
     </IdleSettings>
 
-    <StartWhenAvailable>true</StartWhenAvailable>
   </Settings>
 
   <Triggers>

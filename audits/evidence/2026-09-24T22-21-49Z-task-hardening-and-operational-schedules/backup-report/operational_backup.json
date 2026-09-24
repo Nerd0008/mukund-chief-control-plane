@@ -1,0 +1,114 @@
+{
+  "artifact": "operational backup",
+  "started_utc": "2026-09-24T22:21:56+00:00",
+  "snapshot_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational",
+  "snapshot_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20260924T222156Z",
+  "dry_run": false,
+  "retention_keep": 7,
+  "artifacts": [
+    {
+      "label": "e1-e2-exec-brain",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 77824,
+        "sha256": "85a5d6fccaedae63510f9871eb7f7e0fe14ea13ae58443ff2a6883ad05228498"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e2-governor",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 90112,
+        "sha256": "8b4504d47d62736fac0e6221649fe805d93f72a58a0a3504c7f7aca6d4b6ff23"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e3-orchestration",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 241664,
+        "sha256": "2fd01df260e26afd3d6f2b9aa382b6f24213b0117663bea262d08ea58ae9ab1a"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 83779584,
+        "sha256": "87b2171485fc9c1247211585fba022ebc779948891ecf512e969a552131ecba2"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-kanban",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 118784,
+        "sha256": "b7985707317a7d745a241e4a4c07efa76c779739d50791156ee54a231bec4aa6"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-shared-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 155648,
+        "sha256": "cb97dd3a26c50e0bec1429d3c98ec487d6ac94094a2e2e25275dea2bfc724042"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-cron-executions",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 24576,
+        "sha256": "8d7f34d7722951059ba50edb6a9c46251163d5460fe3b6037da9f8c5332995e5"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e1-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\chain-head.json",
+      "snapshot": {
+        "sha256": "78089562a15ddbf574bd573bf6ddba23ae5627891d93ff278fd7502f885b24db",
+        "size_bytes": 126
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e2-gov-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\gov-chain-head.json",
+      "snapshot": {
+        "sha256": "5984cf4517cdba4c6d76db53116ce76a0af218be7d09911dd213a42d130e7358",
+        "size_bytes": 110
+      },
+      "status": "PASS"
+    }
+  ],
+  "pruned": [],
+  "live_state_modified": false,
+  "network_calls_spent": 0,
+  "provider_calls_spent": 0,
+  "failure_labels": [],
+  "status": "PASS",
+  "finished_utc": "2026-09-24T22:21:57+00:00"
+}
