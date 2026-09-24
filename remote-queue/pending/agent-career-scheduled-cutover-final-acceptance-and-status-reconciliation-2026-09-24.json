@@ -1,0 +1,40 @@
+{
+  "task_id": "agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24",
+  "created_at": "2026-09-24T20:52:13Z",
+  "objective": "Close out the scheduled Career discovery cutover lane: bind the committed cutover revision to ONE coherent acceptance record (offline structural checks plus a bounded live pass where the environment's non-GUI search interface is available) and reconcile status/canonical-status.json + its generated surfaces so the repository's own status-consistency check is green for this lane, without enabling or triggering any owner scheduled task.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 committed and pushed the unified scheduled orchestrator, the CRLF-repaired launcher, the focused tests and both cutover evidence records (commit 0e676f5).",
+    "Do not race another active agent in the same worktree; if the Career recovery worker or the E3 provider closeout worker is executing, begin only after it reaches a terminal queue state.",
+    "Inspect current main and git status before editing; preserve everything already landed."
+  ],
+  "allowed_scope": [
+    "Record the exact committed revision under test (git rev-parse HEAD) in the new evidence record so the acceptance is bound to bytes, not to a date.",
+    "Re-run career-ops/run_scheduled_orchestrator_acceptance.py without --live first (bounded, offline, ~2 minutes) and confirm the structural + whole-company checks still pass on the committed revision, including launcher_keeps_crlf_line_endings.",
+    "Run the live pass (--live with a small bounded query budget) only if a non-GUI current-web search interface is already present in the environment; otherwise record live.attempted=false with the precise unavailability reason and do NOT infer live source coverage from fixtures.",
+    "The predecessor's live evidence (audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover) proves codex-web-search operational in uk/dubai/japan/singapore on pre-CRLF-fix bytes; treat it as historical proof, not as proof for the committed revision.",
+    "Reconcile status/canonical-status.json: reference both committed cutover evidence records so they stop being flagged as unincorporated, and state the cutover lane's real state (implementation landed and structural acceptance PASS; live acceptance on the committed revision is recorded as PASS or truthfully UNKNOWN).",
+    "Regenerate the generated surfaces with scripts/status_render.py and verify with scripts/status_verify.py, keeping the required 'Scheduled orchestrator cutover' and 'NOT COMPLETE / BLOCKED' style markers truthful rather than deleting them to force a pass.",
+    "Any remaining unincorporated evidence directory that belongs to another lane (for example the e3-credential-presence-probe records owned by the pending E3 provider closeout task) stays that lane's responsibility: record it explicitly instead of silently absorbing or mis-attributing it.",
+    "Run the focused Career suites and scripts/tests/test_status_consistency.py with explicit progress output and bounded timeouts.",
+    "Commit and push only the reconciliation, tests and truthful evidence attributable to this task."
+  ],
+  "stop_conditions": [
+    "Do not register, enable, disable, replace or trigger the real ChiefCareerScan-* / ChiefCareerBrief scheduled tasks; a read-only status query is allowed. The four region tasks are already registered and enabled by an earlier task and run read-only dry runs, so no schedule change is needed for this lane.",
+    "Do not use a local interactive browser/GUI, Edge, a signed-in session, cookies or the owner browser profile.",
+    "Do not claim a source is live, empty or validated without direct evidence; preserve UNKNOWN/unavailable distinctions.",
+    "Do not write a canonical tracker workbook, apply a manifest, submit an application, contact an employer, mutate LinkedIn or log in to any account.",
+    "Do not mark the cutover COMPLETE merely to clear the status warning; if the live acceptance cannot be run on the committed revision, keep that gap explicit.",
+    "Do not run long commands that produce no output: previous attempts of this lane died to a 300s no-progress watchdog. Stream progress (background run plus periodic polling) instead of redirecting a multi-minute suite to a file silently."
+  ],
+  "notes": "This is the single successor for the scheduled-cutover lane. The implementation and both evidence records are committed (0e676f5); what remains is (a) an acceptance record bound to that revision, and (b) canonical-status reconciliation, which currently emits: 'WARN: evidence directories newer than as_of 2026-09-24T15:36:57Z are not incorporated: [2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover, 2026-09-24T20-47-43Z-e3-credential-presence-probe]'. scripts/tests/test_status_consistency.py::test_10 fails on that warning. The second id is not this lane's evidence. The pending E3 task agent-e3-provider-verification-stage2-closeout-2026-09-24 already owns canonical-status reconciliation for the provider side, so coordinate with it rather than overwriting its figures.",
+  "references": [
+    "remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json",
+    "remote-queue/running/agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24.json",
+    "career-ops/scheduled_orchestrator.md",
+    "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json"
+  ]
+}
