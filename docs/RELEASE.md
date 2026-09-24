@@ -147,6 +147,12 @@ Evidence: `audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility
 (`evidence.json` + `evidence.md` record the exact interpreter path, per-suite
 counts and the code SHA the run was executed at).
 
+The recorded run is bound to code SHA `e9d2195`. The same suite was re-executed
+unchanged at the archive commit in the same pinned interpreter and returned
+identical totals: **21 suites / 583 collected / 583 passed / 0 failed /
+0 unavailable**. The intervening commits touch release/state documentation, the
+archive export tooling and `.gitattributes` only — no tested behaviour changed.
+
 Note on counts: the audit's 579-collected figure is superseded. The current
 count is **583 collected** (the E3 baseline grew from 54 to 58 tests as part of
 this remediation: five truthful-contract Codex tests replaced one incorrect
