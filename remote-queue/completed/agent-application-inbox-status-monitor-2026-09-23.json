@@ -1,0 +1,80 @@
+{
+  "task_id": "agent-application-inbox-status-monitor-2026-09-23",
+  "created_at": "2026-09-23T21:33:00Z",
+  "objective": "Build a read-only Application Inbox / Status Monitor that can ingest application/recruiter status signals, reconcile them with Career Ops canonical application state and regional trackers, and surface owner-action items without sending mail.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Career Ops dedupe/application-state interface should be stable."
+  ],
+  "allowed_scope": [
+    "Prefer an existing Gmail/API integration if already present locally; otherwise build the adapter/interface and leave owner OAuth/login as an exact afternoon step.",
+    "Read-only only: classify application acknowledgements, rejections, interview/invite/follow-up signals, recruiter messages and unknowns with provenance.",
+    "Map signals to canonical company/job/application records using conservative matching and require human review when ambiguous.",
+    "Update a safe local status store/tracker interface idempotently; never invent an application if no evidence exists.",
+    "Generate a concise Chief summary of changed statuses and owner actions.",
+    "Test on fixtures/sanitized samples if live access is unavailable; clearly distinguish fixture evidence from live evidence.",
+    "Record any owner OAuth/account requirement in the owner-action TODO."
+  ],
+  "stop_conditions": [
+    "Never send/reply/archive/delete email.",
+    "No credentials in repo/logs.",
+    "No fabricated application state."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-24T00:36:39.541515Z",
+  "result": {
+    "status": "completed",
+    "summary": "Built the read-only Application Inbox / Status Monitor. career-ops/application_inbox.py deterministically classifies application/recruiter signals (acknowledgement, rejection, interview invite, assessment invite, follow-up request, offer, recruiter outreach, else unknown) with quoted-reply stripping, priority ordering and contradiction -> unknown+human review; matches conservatively against the four canonical Career Ops workbooks by verbatim posting URL or explicit canonical reference (high) or company+title agreement (medium), treats a company-only match as ALWAYS ambiguous with candidates listed, and never creates an application record (unmatched -> review queue, nothing invented). Status is mapped only into each region's own vocabulary (drift-tested against regional_profiles.json validations); where a region has no accurate equivalent (assessment invites anywhere, Japan rejections, Dubai offers) no status is proposed and the owner decides; a proposal for a row whose tracker records no application yet is flagged requires_owner_confirmation with the reason recorded. Writes an idempotent local store (signals.jsonl by signal_id, status-events.jsonl by region+row+kind, derived current-state.json with no run timestamp, append-only run-log) and a concise Chief summary of changed statuses, owner actions and review items; Excel remains authoritative and state_written is always false. Adapters: local_mailbox implemented+tested (.eml/.mbox/.json/.jsonl incl. Gmail API payloads with base64 bodies/.csv; .md/.txt skipped, not guessed); gmail_readonly (career-ops/gmail_readonly.py) is an interface + credential-presence probe with a refusing fetch - gmail.readonly scope only, disabled, no credentials, and its untested HTTP path is reported UNVERIFIED/fetch_path_executed:false, never as working. No send/reply/forward/archive/delete/move/label/mark-read path exists; guard refuses and logs each. Verified: 87 new tests pass (207 in career-ops/tests, 0 failures); acceptance runner 33/33 checks PASS with canonical workbook SHA-256s unchanged, store byte-identical on replay with zero new signals, 0 workbook writes, 0 applications created, all mailbox mutations refused, no credential contents reported. Live evidence: NOT claimed - no live mailbox was read.",
+    "owner_action_required": "Optional, ~10 minutes, only needed for the LIVE mailbox feed (the monitor works today on a local export directory): complete the Gmail read-only OAuth step - enable Gmail API, create a Desktop-app OAuth client, save its JSON to C:\\Users\\mukun\\AppData\\Local\\hermes\\secrets\\gmail-readonly\\credentials.json, authorise scope https://www.googleapis.com/auth/gmail.readonly once, save the refresh token to token.json, then set adapters.gmail_readonly.enabled=true and run 'python career-ops/application_inbox.py adapters' (must report available:true). Exact steps are in tasks-or-issues/overnight-owner-actions-2026-09-24.md item 9. Separately, item 10 asks whether you want Assessment / Japan-Rejected / Dubai-Offer statuses added to the tracker vocabularies, or prefer those to keep arriving as owner decisions.",
+    "blocker_category": "credentials",
+    "commits": [
+      "561d2e7 career: read-only application inbox / status monitor",
+      "96fde3f audit: application-inbox acceptance evidence against 561d2e7 (33/33 checks)",
+      "8e88c98 audit: supersede the earlier application-inbox evidence run",
+      "pushed to origin/main (HEAD 8e88c98 == origin/main)"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_application_inbox.py -q -> 87 passed",
+      "python -m pytest career-ops/tests/ -q -> 207 passed, 0 failed (whole Career Ops suite, no regressions)",
+      "python career-ops/run_application_inbox_acceptance.py -> checks: 33/33 passed, verdict PASS (audits/evidence/2026-09-24T00-35-41Z-application-inbox-status-monitor)",
+      "acceptance check: canonical_workbooks_unchanged (uk/dubai/japan/singapore SHA-256 identical before/after) = True",
+      "acceptance check: store_byte_identical_on_replay = True, replay_new_signals = 0, replay_new_events = 0",
+      "acceptance check: proposed statuses all inside the region's own vocabulary; all pre-application proposals flagged requires_owner_confirmation; state_written false everywhere",
+      "acceptance check: 12 mailbox-mutation actions (send/reply/reply_all/forward/archive/delete/trash/move/mark_read/label_apply/unsubscribe/apply) all refused and logged",
+      "acceptance check: gmail_readonly available=false, fetch refused with network_used=false, verification=UNVERIFIED; no credential contents in adapter status",
+      "acceptance check: application_inbox.py imports no network/mail library (urllib/requests/socket/httplib/httpx/aiohttp/webbrowser/playwright/selenium/imaplib/smtplib/poplib)",
+      "drift test: every status_map value is a real status in that region's tracker validation, and pre_application_states are real statuses",
+      "CLI smoke: adapters / run --inbox / summary / status / guard --action reply all exit 0 with the expected JSON object",
+      "secret scan over the new files: no credential values (only a deliberate fake literal in the non-leakage test)"
+    ],
+    "changed_files": [
+      "career-ops/application_inbox.py",
+      "career-ops/application_inbox_config.json",
+      "career-ops/gmail_readonly.py",
+      "career-ops/run_application_inbox_acceptance.py",
+      "career-ops/tests/test_application_inbox.py",
+      "career-ops/tests/fixtures/application-inbox/messages.jsonl",
+      "career-ops/tests/fixtures/application-inbox/messages.csv",
+      "career-ops/tests/fixtures/application-inbox/gmail-export.json",
+      "career-ops/tests/fixtures/application-inbox/quoted-reply.eml",
+      "career-ops/tests/fixtures/application-inbox/notes.md",
+      "career-ops/README.md",
+      ".gitignore",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/2026-09-24T00-35-41Z-application-inbox-status-monitor/acceptance.json",
+      "audits/evidence/2026-09-24T00-35-41Z-application-inbox-status-monitor/acceptance.md",
+      "audits/evidence/superseded/2026-09-24T00-35-06Z-application-inbox-status-monitor/ (superseded copy)",
+      "audits/evidence/superseded/2026-09-24T00-33-32Z-application-inbox-status-monitor/ (superseded copy)"
+    ],
+    "remaining": [
+      "Owner-gated (item 9): the Gmail read-only OAuth step, after which the live adapter must be re-verified and its fetch path may finally be called EXECUTED instead of UNVERIFIED (today it has never run on this machine).",
+      "Owner decision (item 10): three tracker-vocabulary gaps found by the drift tests - assessment invites have no equivalent status in any region; Japan has no Rejected status; Dubai has no Offer status. Until decided, those arrive as explicit owner decisions rather than proposed statuses. No engineering work is blocked.",
+      "Observation, not actioned (out of this task's scope): scripts/evidence_runner.py registers 15 suites and covers exec-brain + remote_queue only, so the company-wide regression figure does not include any career-ops suite (this feature's 87 tests and the other 120 career-ops tests are run separately). Registering them would strengthen the Stage-2 gate evidence but changes the recorded 438-test baseline, so it was left for the owner/whole-company-acceptance lane.",
+      "Observation, not actioned (another lane's artifact): audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ is still untracked on disk from the completed company-watch integration task. It was deliberately left out of these commits to avoid mixing task attribution; it needs committing by that lane or by the blocked-work reconciliation task before it is lost.",
+      "The raw signal/status store for any real run is git-ignored by design (runtime/career-ops/application-status/, audits/evidence/**/status-store/) because it names employers, recruiters and subjects; only aggregate counts, hashes and check results are committed."
+    ]
+  }
+}
