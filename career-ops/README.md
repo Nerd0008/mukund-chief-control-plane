@@ -635,8 +635,16 @@ and Dubai/Japan/Singapore work authorisation stays UNKNOWN on every record.
 `content_digest` and the `delivery` block excluded. Where the content digest
 matches, the existing digest-named file is left untouched: a repeat run over
 unchanged inputs writes **no new bytes**, only appends to `run-log.jsonl`, and
-reports `idempotent: true`. A different window is genuinely different content and
-therefore a new brief.
+reports `idempotent: true`.
+
+The brief's identity is "the state as of the end of a window", not "the state at
+the instant this process happened to run", so the as-of clock is floored to
+`window.quantize_minutes` (default **60**, `0` disables it). Two runs inside the
+same quantum over unchanged artifacts are therefore the *same* brief — same
+`brief_id` (stamped with the brief's own `as_of`, not the run clock) and same
+digest — and the second writes no bytes; `generated_at` keeps the true run
+instant and is excluded from the digest. Crossing a quantum boundary moves the
+window, which is genuinely different content and therefore a new brief.
 
 **Delivery.** Local file only, verified by sha256 read-back: `brief-<digest>.json`
 (machine-readable), `chief-summary-<digest>.md`, plus `latest.json` / `latest.md`.
@@ -658,11 +666,12 @@ channel and does not claim one.
     python career-ops/run_daily_brief_acceptance.py [--stamp S]
 
 Writes `audits/evidence/<stamp>-career-daily-brief/acceptance.json` + `.md` —
-**32/32 critical checks** at the time of writing. Encoded guarantees: the live
+**34/34 critical checks** at the time of writing. Encoded guarantees: the live
 brief validates structurally; an empty-input run still builds and labels every
 absent input (never as healthy or as zero); a partial-input run names the missing
 sources and invents no owner action; a repeat run is byte-neutral and
-idempotent; every score equals the sum of its declared components with no unknown
+idempotent **and a run inside the same declared as-of quantum is the same brief**;
+every score equals the sum of its declared components with no unknown
 input also reported as known; every required section (scan health, newly added
 jobs, duplicates suppressed, application-status changes, interview/follow-up
 items, owner actions) is present, with unavailable ones saying so; canonical
@@ -672,9 +681,9 @@ schedule + launcher exist with the task state read from Task Scheduler.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 299 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 300 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
-    python -m pytest career-ops/tests/test_daily_brief.py -q    # 21 passed
+    python -m pytest career-ops/tests/test_daily_brief.py -q    # 22 passed
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed

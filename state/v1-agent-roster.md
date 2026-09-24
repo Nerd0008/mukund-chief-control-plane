@@ -136,8 +136,9 @@ re-derivation, not a second model.
 ## Status update — 2026-09-24 (Career Daily Brief / Pipeline Prioritizer: B23)
 
 Task `agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23`. Acceptance evidence:
-`audits/evidence/20260924T034000Z-career-daily-brief/` (**32/32 critical checks**,
-0 failures, code SHA recorded in the artifact).
+`audits/evidence/20260924T013238Z-career-daily-brief/` (**34/34 critical checks**,
+0 failures, code SHA `9b414f1` recorded in the artifact; attempt 1's 32/32 runs at
+`…T033000Z-…`/`…T034000Z-…` are preserved as the pre-amendment record).
 
 | ID | Worker / service | Status now | Evidence |
 |---|---|---|---|
@@ -145,10 +146,10 @@ Task `agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23`. Acceptance 
 | B23 | Deterministic priority policy | **DECLARED + ENFORCED** | five explicit inputs (deadline 40, stage 20, eligibility certainty 15, freshness 15, owner flag 10); score over the full policy weight so an UNKNOWN lowers the score instead of being imputed; every item reports components, weights, contributions, `coverage_pct`, UNKNOWN inputs and any override; three declared overrides (`urgent_deadline`, `owner_action_min_class`, `unscoreable`) |
 | B23 | No fabricated priority facts | **ENFORCED** | `score_semantics.kind = "deterministic_policy_output"`; a status outside the declared stage vocabulary is UNKNOWN (not zero); the UK tracker has no deadline column so deadline is UNKNOWN for every UK row; Dubai/Japan/Singapore work authorisation stays UNKNOWN; a zero-coverage item is labelled, never scored silently |
 | B23 | Required content | **DONE** | regional scan health per region, newly added jobs (window-dated tracker rows + scan offers that carry no URL), duplicates suppressed (scanner counters + prior-run idempotency + shared writer dedupe), Company Watch findings, application-status change proposals, interview/follow-up items, owner actions |
-| B23 | Idempotency | **PROVEN** | a repeat run over unchanged inputs produces the same content digest and input fingerprint, writes **no new bytes**, and appends only to `run-log.jsonl`; a different window is genuinely different content and therefore a new brief |
+| B23 | Idempotency | **PROVEN (quantized)** | a repeat run over unchanged inputs produces the same content digest and input fingerprint, writes **no new bytes**, and appends only to `run-log.jsonl`; the as-of clock is floored to `window.quantize_minutes` (60; `0` disables) so a run inside the same quantum is the same brief, and crossing the quantum is a genuinely new one |
 | B23 | Delivery honesty | **ENFORCED** | local file, verified by sha256 read-back; `external_channels: []`, `external_channel_health: "not_verified"` — no messaging/Discord delivery is configured, attempted or assumed healthy |
 | B24-related | Morning schedule | **REGISTERED** | `ChiefCareerBrief` daily 07:00 via `career-ops/run_scheduled_brief.cmd`; `install_schedules.py --install-brief/--remove-brief/--status` (brief task included in `--status`) |
-| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **21 passed**; whole `career-ops/tests/` **299 passed** (was 278) |
+| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **22 passed**; whole `career-ops/tests/` **300 passed** (was 278 before B23) |
 | Safety | Read-only | **VERIFIED** | canonical workbook SHA-256s identical before/after; `applications_submitted: 0`, `external_messages_sent: 0`, `canonical_workbook_writes: 0`; no network/browser/CLI-execution surface in the module (asserted by test) |
 
 Truth boundaries: the brief **owns no career state** — every fact is read back out

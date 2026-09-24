@@ -446,13 +446,13 @@ other Career-department workers already own and restates them.
 | B23 | Company Watch findings | **DONE + PRIVATE-SAFE** | findings counts and freshness; the company registry is restated at aggregate level only, because it is owner-private |
 | B23 | Owner actions | **DONE** | open items read from `overnight-owner-actions-2026-09-24.md`, each becoming a priority candidate with `owner_action_min_class`; an absent file yields zero items and a named missing input, never an invented action |
 | B23 | Machine-readable + Chief-facing outputs | **DONE** | `brief-<digest>.json` (with its own schema block, priority items, unknowns, safety block and run metadata) plus `chief-summary-<digest>.md`, bounded to a declared maximum of lines, `latest.json`/`latest.md` for stable paths |
-| B23 | Idempotency | **PROVEN** | the content digest excludes `generated_at`, `brief_id`, `content_digest` and the `delivery` block; where the stored file's recomputed digest matches, the run writes **no new bytes** and reports `idempotent: true`; a repeat run is asserted byte-neutral apart from the append-only `run-log.jsonl` |
+| B23 | Idempotency | **PROVEN (quantized)** | the content digest excludes `generated_at`, `brief_id`, `content_digest` and the `delivery` block; where the stored file's recomputed digest matches, the run writes **no new bytes** and reports `idempotent: true`; a repeat run is asserted byte-neutral apart from the append-only `run-log.jsonl`. The as-of clock is floored to `window.quantize_minutes` (60; `0` disables), so a run inside the same quantum over unchanged artifacts is the same brief and crossing the quantum is a new one |
 | B23 | Empty / partial input behaviour | **PROVEN** | an empty-input run (no workbooks, no run-state, no findings, no owner-action file, no packs) still builds, labels every absent input as absent, never reports an absent source as healthy or as zero, and keeps `ok: true`; a partial-input run names the missing sources and invents no owner action |
 | B23 | Delivery honesty | **ENFORCED** | local file only, verified by sha256 read-back (`stored_content_matches`); `external_channels: []` and `external_channel_health: "not_verified"` — nothing is sent, posted or scheduled to a messaging surface, and no channel is assumed healthy |
 | B23 | Morning schedulability | **DONE** | `ChiefCareerBrief` registered daily at **07:00** (`career-ops/run_scheduled_brief.cmd`); `install_schedules.py` gained `--install-brief` / `--remove-brief`, and `--status` now includes the brief task alongside the regional lanes |
 | Safety | No submission, no outreach | **ENFORCED** | the module contains no submission, messaging, browser or provider call; acceptance asserts zero submissions, zero external messages, zero external actions |
 | Safety | Canonical state not overwritten | **VERIFIED** | workbook SHA-256s identical before/after; the brief's only writes are its own digest-named artifact, the `latest` pointers and its run log, all under git-ignored `runtime/career-ops/daily-brief/` |
-| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **21 passed** (new); whole `career-ops/tests/` **299 passed** (was 278) |
+| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **22 passed** (new; 21 at attempt 1 + the quantized-identity contract); whole `career-ops/tests/` **300 passed** (was 278) |
 
 Defect found and fixed inside this task (recorded because it was a real correctness bug, not polish):
 the content digest was computed **before** `chief_summary`, `input_fingerprint`, `delivery` and
@@ -477,3 +477,39 @@ Truth boundaries recorded in the artifact, not glossed over:
 Successor task: **no new `agent-*` task staged** — the aggregation is complete and scheduled inside
 this task's scope; the only open item is the owner delivery-channel decision, which is a decision,
 not engineering.
+
+### Attempt 2 amendment (2026-09-24, task retry)
+
+Attempt 1 of this task ended in a recoverable execution failure **after** it had committed and pushed
+the worker (code SHA `911fd9c`), and left one uncommitted change plus its test not yet updated. The
+retry finished that unit only — nothing above was recreated, reverted or re-run as new work.
+
+- **What was outstanding:** the as-of clock was the instant the process ran, so two runs of the same
+  unchanged artifacts minutes apart were two different briefs and the second rewrote everything. The
+  fix floors the as-of/window clock to a declared quantum — `window.quantize_minutes` (default 60;
+  `0` is the documented opt-out) — so the brief's identity is "the state as of the end of a quantum".
+  `generated_at` keeps the true run instant and stays excluded from the content digest.
+- **Second defect found while completing it:** `brief_id` was still stamped with the raw run clock
+  while the as-of was floored, so two runs over an identical digest published different ids
+  (`cdb-…T013130Z-62b8de90` vs `cdb-…T013136Z-62b8de90`). The id is now stamped with the brief's own
+  `as_of`, so an id no longer drifts per run. Verified on the real scheduled path
+  (`run_scheduled_brief.cmd` run twice: second run `wrote: []`, `idempotent: true`, identical
+  `brief_id` in both run-log entries).
+- **Contract pinned both ways:** `tests/test_daily_brief.py` now asserts a sub-quantum rerun is the
+  same id and digest with no writes, a crossed quantum is a new brief, and `quantize_minutes: 0`
+  restores per-run identity (22 passed, was 21; whole `career-ops/tests/` **300 passed**, was 299).
+  The acceptance runner gained the same stage-4 checks against the live config.
+- **Harness defect found and fixed inside this retry:** the first version of the new stage-4 check
+  compared *all* files after the sub-quantum run, including the append-only `run-log.jsonl`, which
+  must grow — so it reported a false failure. The check now excludes the run log; the false-negative
+  run is preserved under `audits/evidence/superseded/20260924T012854Z-career-daily-brief-interim-check-bug/`
+  rather than deleted.
+- **Authoritative evidence:** `audits/evidence/20260924T013238Z-career-daily-brief/` — **34/34 critical
+  checks, 0 failures** (attempt 1: 32/32), code SHA `9b414f1` recorded in the artifact, canonical
+  workbook SHA-256s identical before/after, zero submissions / messages / canonical writes, no
+  external channel claimed. Attempt 1's evidence (`…T033000Z-…`, `…T034000Z-…`) is left untouched as
+  the record of the pre-amendment code; the interim 34/34 run
+  (`…T012926Z-…`, before the `brief_id` fix) is kept under `audits/evidence/superseded/`.
+- **Unchanged:** scope, stop conditions, priority policy, delivery honesty (`not_verified`), the
+  07:00 `ChiefCareerBrief` schedule (queried as `Ready`, next run 24-09-2026 07:00), and the fact that
+  this worker still owns no career state.

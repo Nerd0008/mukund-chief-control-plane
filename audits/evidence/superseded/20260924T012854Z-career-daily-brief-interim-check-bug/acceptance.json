@@ -1,0 +1,593 @@
+{
+  "acceptance_run": "20260924T012854Z",
+  "generated_at": "2026-09-24T01:28:54+00:00",
+  "code_sha": "26908646d126a4b5a4249cb31710eef253bd1ab4",
+  "workflow": "Career Daily Brief / Pipeline Prioritizer (B23)",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md § Career Ops + job-search automation / roster B23",
+  "cheating_guards": {
+    "applications_submitted": 0,
+    "external_messages_sent": 0,
+    "employer_or_recruiter_contact": 0,
+    "canonical_workbook_writes": 0,
+    "external_delivery_attempted": 0,
+    "browser_or_gui_launched": false,
+    "network_or_provider_calls": 0,
+    "invented_deadlines": 0,
+    "invented_eligibility_positions": 0,
+    "invented_priority_scores": 0
+  },
+  "stage_1_live_brief": {
+    "brief_id": "cdb-20260924T070000Z-ceba76cd",
+    "content_digest": "ceba76cded33dcaf1a045e3c11e14278a95f21ff0b9415cb96fa0ed64fb18f71",
+    "input_fingerprint": "4a5c7cb0e0cda761639989c6f5dd2e76ee0c243f3b5912499a16dca3d27b4b09",
+    "brief_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\brief-ceba76cded33dcaf1a045e3c11e14278a95f21ff0b9415cb96fa0ed64fb18f71.json",
+    "summary_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\chief-summary-ceba76cded33dcaf1a045e3c11e14278a95f21ff0b9415cb96fa0ed64fb18f71.md",
+    "window": {
+      "hours": 24,
+      "from": "2026-09-23T07:00:00+00:00",
+      "to": "2026-09-24T07:00:00+00:00",
+      "quantize_minutes": 60,
+      "quantize_note": "the as-of/window clock is floored to this quantum, so re-running inside the same quantum over unchanged artifacts produces the identical brief and writes no bytes; generated_at keeps the true run instant"
+    },
+    "status": {
+      "ok": true,
+      "degraded": true,
+      "headline": "0 new tracker row(s); 8 dated deadline(s); 15 open owner action(s); 6 unknown(s) recorded",
+      "source_of_truth": "canonical regional workbooks + the workflows' own runtime outputs",
+      "read_only": true
+    },
+    "counts": {
+      "priorities": 30,
+      "new_tracker_rows": 0,
+      "scan_offers_without_url": 5,
+      "deadlines_known": 8,
+      "open_owner_actions": 15,
+      "unknowns": 6
+    },
+    "missing_keys": [],
+    "inputs_present": {
+      "regional_state": true,
+      "scan_runs_dir": true,
+      "regional_schedules": true,
+      "regional_profiles": true,
+      "regional_policy": true,
+      "application_status_dir": true,
+      "application_inbox_config": true,
+      "interview_prep_config": true,
+      "job_intelligence_config": true,
+      "submission_gate_log": true,
+      "company_watch_runtime": true,
+      "company_watch_config": true,
+      "linkedin_handoff_dir": true,
+      "owner_actions_file": true
+    },
+    "canonical_workbooks_present": {
+      "uk": true,
+      "dubai": true,
+      "japan": true,
+      "singapore": true
+    },
+    "policy": {
+      "version": "b23-policy-1",
+      "sha256": "9f71f53a44eff67143208cc7349c2857858daf96aaff6011cfcd456a96d8a6f1",
+      "score_kind": "deterministic_policy_output"
+    }
+  },
+  "stage_2_empty_inputs": {
+    "ok": true,
+    "degraded": true,
+    "priorities": 0,
+    "unknowns": [
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\regional_state",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\scan-runs",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\regional_schedules",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\regional_profiles",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\regional_policy",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\application_status_dir",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\application_inbox_config",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\interview_prep_config",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\job_intelligence_config",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\submission_gate_log",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\company-watch",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\company_watch_config",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\handoffs",
+      "declared input absent: C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\empty\\absent\\owner_actions_file",
+      "scan health unavailable: missing",
+      "Company Watch findings file unavailable",
+      "Application Inbox summary unavailable: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\mukun\\\\Documents\\\\mukund-chief-control-plane\\\\career-ops\\\\application_inbox_config'"
+    ],
+    "inputs_absent": [
+      "application_inbox_config",
+      "application_status_dir",
+      "company_watch_config",
+      "company_watch_runtime",
+      "interview_prep_config",
+      "job_intelligence_config",
+      "linkedin_handoff_dir",
+      "owner_actions_file",
+      "regional_policy",
+      "regional_profiles",
+      "regional_schedules",
+      "regional_state",
+      "scan_runs_dir",
+      "submission_gate_log"
+    ],
+    "canonical_state_unchanged": true
+  },
+  "stage_3_partial_inputs": {
+    "ok": true,
+    "regional_state_present": true,
+    "owner_actions_available": false,
+    "owner_action_counts": {
+      "items_parsed": 0,
+      "open": 0,
+      "unknown_status": 0,
+      "from_monitor": 0
+    },
+    "owner_actions_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\partial\\absent\\owner_actions_file",
+    "interviews_available": false,
+    "interviews_error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\mukun\\\\Documents\\\\mukund-chief-control-plane\\\\runtime\\\\career-ops\\\\daily-brief\\\\acceptance\\\\20260924T012854Z\\\\partial\\\\absent\\\\interview_prep_config'",
+    "absent_inputs": [
+      "application_inbox_config",
+      "application_status_dir",
+      "company_watch_config",
+      "company_watch_runtime",
+      "interview_prep_config",
+      "job_intelligence_config",
+      "linkedin_handoff_dir",
+      "owner_actions_file",
+      "regional_policy",
+      "regional_profiles",
+      "regional_schedules",
+      "submission_gate_log"
+    ],
+    "unknown_areas": [
+      "application_status",
+      "company_watch",
+      "input",
+      "regional_scan"
+    ],
+    "chief_summary_lines": 14
+  },
+  "stage_4_idempotency": {
+    "digest_repeat_identical": true,
+    "fingerprint_repeat_identical": true,
+    "second_run_writes": [],
+    "second_run_reported_idempotent": true,
+    "quantize_minutes": 60,
+    "sub_quantum_run_same_digest": true,
+    "sub_quantum_run_writes": [],
+    "sub_quantum_run_added_no_file": false,
+    "brief_window_reports_quantum": true,
+    "third_run_different_window_new_brief": true,
+    "third_run_writes": 4,
+    "run_log_entries": 4,
+    "files_after_two_runs": 5
+  },
+  "stage_5_no_fabricated_priority": {
+    "items": 30,
+    "arithmetic_mismatches": [],
+    "unknown_also_imputed": [],
+    "unlabelled_zero_coverage": [],
+    "coverage_range": [
+      30.0,
+      85.0
+    ],
+    "unknowns_total": 6,
+    "unknown_areas": [
+      "deadline",
+      "priority_input"
+    ]
+  },
+  "stage_6_required_content": {
+    "scan_health_available": true,
+    "scan_regions": {
+      "uk": {
+        "health": "ok",
+        "last_status": "ok",
+        "age_hours": 6.73,
+        "accepted": 0,
+        "duplicates_suppressed": {
+          "scan_duplicates": 1,
+          "policy_duplicate_prior_run": 2,
+          "writer_duplicates": 0
+        },
+        "new_offers_without_url": 1
+      },
+      "dubai": {
+        "health": "ok",
+        "last_status": "ok",
+        "age_hours": 6.7,
+        "accepted": 0,
+        "duplicates_suppressed": {
+          "scan_duplicates": 0,
+          "policy_duplicate_prior_run": 0,
+          "writer_duplicates": 0
+        },
+        "new_offers_without_url": 0
+      },
+      "japan": {
+        "health": "ok",
+        "last_status": "ok",
+        "age_hours": 6.68,
+        "accepted": 0,
+        "duplicates_suppressed": {
+          "scan_duplicates": 0,
+          "policy_duplicate_prior_run": 0,
+          "writer_duplicates": 0
+        },
+        "new_offers_without_url": 0
+      },
+      "singapore": {
+        "health": "ok",
+        "last_status": "ok",
+        "age_hours": 6.68,
+        "accepted": 0,
+        "duplicates_suppressed": {
+          "scan_duplicates": 2,
+          "policy_duplicate_prior_run": 0,
+          "writer_duplicates": 0
+        },
+        "new_offers_without_url": 4
+      }
+    },
+    "newly_added_jobs": {
+      "tracker_rows_in_window": 0,
+      "scan_offers_without_url": 5
+    },
+    "duplicates_suppressed_totals": {
+      "scan_duplicates": 3,
+      "policy_duplicate_prior_run": 2,
+      "writer_duplicates": 0
+    },
+    "application_status_counts": {
+      "signals_ingested": 0,
+      "status_events": 0,
+      "proposed_status_changes": 0,
+      "owner_actions_required": 0,
+      "review_items": 0
+    },
+    "application_status_available": true,
+    "interviews_followups_counts": {
+      "packs": 0,
+      "pack_items": 0,
+      "application_rows_past_first_stage": 0
+    },
+    "owner_action_counts": {
+      "items_parsed": 17,
+      "open": 15,
+      "unknown_status": 0,
+      "from_monitor": 0
+    },
+    "deadlines": {
+      "deadlines_known": 8,
+      "deadlines_unknown_regions": 1
+    },
+    "regions_without_deadline_column": [
+      "uk"
+    ],
+    "tracker_rows_total": 118
+  },
+  "stage_7_no_change_no_external": {
+    "canonical_hashes_before": {
+      "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    },
+    "canonical_hashes_after": {
+      "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    },
+    "changed": [],
+    "brief_records_unchanged": true,
+    "safety": {
+      "read_only_aggregation": true,
+      "applications_submitted": 0,
+      "external_messages_sent": 0,
+      "canonical_workbook_writes": 0,
+      "canonical_hashes_before": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      },
+      "canonical_hashes_after": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      },
+      "canonical_state_unchanged": true,
+      "not_performed": [
+        "Any application submission or application preparation action",
+        "Any contact with an employer, recruiter, agency or candidate",
+        "Any LinkedIn or other social-platform action",
+        "Any write to a canonical tracker or any other workflow's store",
+        "Any invented deadline, eligibility position, priority score component, metric or owner state",
+        "Any interactive browser, GUI application or network call"
+      ]
+    },
+    "delivery": {
+      "channel": "local_file",
+      "out_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live",
+      "mode": "write",
+      "local_write_check": "sha256 read-back; result recorded in run-log.jsonl",
+      "external_channels": [],
+      "external_channel_health": "not_verified",
+      "external_channel_note": "No external delivery channel is configured or claimed. A messaging/Discord channel is NOT assumed healthy: nothing here sends, posts or notifies. The brief is a local artifact until a delivery channel is separately verified.",
+      "writes": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\brief-ceba76cded33dcaf1a045e3c11e14278a95f21ff0b9415cb96fa0ed64fb18f71.json",
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\chief-summary-ceba76cded33dcaf1a045e3c11e14278a95f21ff0b9415cb96fa0ed64fb18f71.md",
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\latest.json",
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\acceptance\\20260924T012854Z\\live\\latest.md"
+      ],
+      "would_write": [],
+      "local_write_verified_by_hash": true,
+      "idempotent": false
+    }
+  },
+  "stage_8_chief_summary": {
+    "lines": 25,
+    "max_lines": 40,
+    "text": "Career Daily Brief — 2026-09-24T07:00:00+00:00 (window 24h)\nStatus: 0 new tracker row(s); 8 dated deadline(s); 15 open owner action(s); 6 unknown(s) recorded\nScan health: uk=ok(ok, 6.73h); dubai=ok(ok, 6.7h); japan=ok(ok, 6.68h); singapore=ok(ok, 6.68h)\nNew: 0 tracker row(s) in window, 5 scan offer(s) needing a URL\nDuplicates suppressed: scan=3, prior-run=2, writer=0\nDeadlines known: 8 (unknown: 1 region(s) have no deadline column: uk)\nApplication status: 0 proposal(s), 0 owner action(s) from the monitor\nInterviews/follow-ups: 0 prep pack(s)\nOwner actions: 15 open, 0 with no readable status\nPriorities:\n  P2 score 63.0 (coverage 85.0%) tracker_row japan JP-20260911-03 — Security Engineer - SOC, Vulnerability & Zero Trust [unknown: eligibility_certainty]\n  P2 score 63.0 (coverage 85.0%) tracker_row japan JP-20260911-02 — Security Patch Updates / Infrastructure Operations [unknown: eligibility_certainty]\n  P2 score 63.0 (coverage 85.0%) tracker_row japan JP-20260911-04 — Infrastructure Security Operations [unknown: eligibility_certainty]\n  P2 score 63.0 (coverage 85.0%) tracker_row japan JP-20260911-05 — Infrastructure Monitoring & Alert Design [unknown: eligibility_certainty]\n  P2 score 63.0 (coverage 85.0%) tracker_row japan JP-20260911-01 — Entry-level Security Log Collection & Analysis [unknown: eligibility_certainty]\n  P2 score 52.5 (coverage 85.0%) tracker_row japan JP-20260914-02 — 2027 New Graduate Engineer [unknown: eligibility_certainty]\n  P2 score 48.0 (coverage 70.0%) tracker_row dubai DUBAI-2026-09-01-07 — Cybersecurity Consultant [unknown: eligibility_certainty,freshness]\n  P2 score 24.0 (coverage 30.0%) owner_action - owner-action-1-configure-all-remaining-provider-credentials — Configure all remaining provider credentials [unknown: deadline,eligibility_certainty,freshness]\n  P2 score 24.0 (coverage 30.0%) owner_action - owner-action-10-two-tracker-vocabulary-gaps-worth-a-decision-not — Two tracker-vocabulary gaps worth a decision (not blocking) [unknown: deadline,eligibility_certainty,freshness]\n  P2 score 24.0 (coverage 30.0%) owner_action - owner-action-11-optional-authorise-a-company-role-research-provi — Optional — authorise a company/role research provider [unknown: deadline,eligibility_certainty,freshness]\n  P2 score 24.0 (coverage 30.0%) owner_action - owner-action-13-decide-whether-the-live-linkedin-surface-should- — Decide whether the live LinkedIn surface should ever have account access [unknown: deadline,eligibility_certainty,freshness]\n  P2 score 24.0 (coverage 30.0%) owner_action - owner-action-14-decide-whether-the-career-daily-brief-should-be- — Decide whether the Career Daily Brief should be *delivered* anywhere (not blocking) [unknown: deadline,eligibility_certainty,freshness]\nUnknowns: 6 item(s) — uk: tracker schema has no deadline column, so deadline is UNKNOWN for all 34 row(s); recorded work-authorisation state is UNKNOWN — not resolved to a known position; no posting date or date-found value in the source record\nDelivery: channel=local_file mode=write (sha256 read-back); external channels not_verified\nSafety: read-only aggregation; no submission, no outreach, no canonical write."
+  },
+  "stage_9_schedulability": {
+    "declared": {
+      "task_name": "ChiefCareerBrief",
+      "time": "07:00",
+      "runner": "career-ops/run_scheduled_brief.cmd",
+      "log_dir": "runtime/career-ops/daily-brief",
+      "mode": "read-only aggregation; writes only the brief artifact under runtime/career-ops/daily-brief",
+      "delivery": "local file only; no external delivery channel is configured, attempted or assumed healthy",
+      "note": "The Career Daily Brief / Pipeline Prioritizer (roster B23). Morning time is chosen so the brief exists before the owner's working day; making the artifact available is all the schedule does. Delivering it to a messaging surface is a separate, unverified step (see career-ops/daily_brief_config.json#delivery)."
+    },
+    "launcher": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_brief.cmd",
+    "launcher_exists": true,
+    "task_query": {
+      "queried": true,
+      "registered": true,
+      "output": "Folder: \\\nHostName:      MISTY\nTaskName:      \\ChiefCareerBrief\nNext Run Time: 24-09-2026 07:00:00\nStatus:        Ready\nLogon Mode:    Interactive only"
+    },
+    "morning_delivery_note": "the schedule makes the brief available in the morning; delivering it to a messaging surface is not configured and not claimed healthy"
+  },
+  "checks": [
+    {
+      "check": "stage1 the live brief parses and carries every required section",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage1 the brief is marked read-only with its source of truth",
+      "ok": true,
+      "critical": true,
+      "detail": "canonical regional workbooks + the workflows' own runtime outputs"
+    },
+    {
+      "check": "stage1 the declared priority policy is carried with its hash",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage2 an empty-input run still builds a valid brief",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage2 every missing input is reported, none is read as healthy or zero",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage2 no priority item is invented from absent inputs",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 a partial-input run still builds a valid brief",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 the absent owner-action file is named as a missing input",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        "application_inbox_config",
+        "application_status_dir",
+        "company_watch_config",
+        "company_watch_runtime",
+        "interview_prep_config",
+        "job_intelligence_config",
+        "linkedin_handoff_dir",
+        "owner_actions_file",
+        "regional_policy",
+        "regional_profiles",
+        "regional_schedules",
+        "submission_gate_log"
+      ]
+    },
+    {
+      "check": "stage3 no owner action is invented when the owner-action file is absent",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 an unavailable input section reports unavailable plus its reason",
+      "ok": true,
+      "critical": true,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\mukun\\\\Documents\\\\mukund-chief-control-plane\\\\runtime\\\\career-ops\\\\daily-brief\\\\acceptance\\\\20260924T012854Z\\\\partial\\\\absent\\\\interview_prep_config'"
+    },
+    {
+      "check": "stage4 a repeat run yields the same digest and the same input fingerprint",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 a repeat run writes no new bytes and says so",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage4 a run inside the same declared quantum is the same brief and writes nothing",
+      "ok": false,
+      "critical": true,
+      "detail": {
+        "quantize_minutes": 60,
+        "writes": []
+      }
+    },
+    {
+      "check": "stage4 the brief reports the quantum its identity is derived from",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 a different window is a genuinely different brief",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage5 every score equals the sum of its declared component contributions",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage5 no unknown input is also reported as a known component",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage5 a zero-coverage item is labelled unscoreable, never silently scored",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage5 unknowns are recorded with a reason",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 regional scan health is present for every scheduled region",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        "uk",
+        "dubai",
+        "japan",
+        "singapore"
+      ]
+    },
+    {
+      "check": "stage6 newly added jobs and duplicates suppressed are both reported",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 application-status changes are reported (zero is stated, not omitted)",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 interview/follow-up items are reported",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 owner actions are reported with their open/unknown split",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 a region whose tracker has no deadline column is labelled unknown",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        "uk"
+      ]
+    },
+    {
+      "check": "stage7 the canonical workbooks are byte-identical after the run",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 the brief records zero submissions, zero messages, zero canonical writes",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 no external delivery channel is claimed healthy",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 the local write is verified by sha256 read-back",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 the Chief summary is concise and factual",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 the summary states the delivery channel honestly",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 a morning schedule is declared for the brief",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 the scheduled launcher exists",
+      "ok": true,
+      "critical": true,
+      "detail": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_brief.cmd"
+    },
+    {
+      "check": "stage9 the task state is read from Task Scheduler, not assumed",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "queried": true,
+        "registered": true,
+        "output": "Folder: \\\nHostName:      MISTY\nTaskName:      \\ChiefCareerBrief\nNext Run Time: 24-09-2026 07:00:00\nStatus:        Ready\nLogon Mode:    Interactive only"
+      }
+    }
+  ],
+  "critical_checks_failed": [
+    "stage4 a run inside the same declared quantum is the same brief and writes nothing"
+  ],
+  "ok": false
+}

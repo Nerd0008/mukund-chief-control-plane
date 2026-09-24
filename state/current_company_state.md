@@ -963,9 +963,17 @@ The Career department's outputs are now summarisable in one morning read. `caree
 (+ `daily_brief_config.json`) is a **read-only aggregator**: it owns no career state, restates what
 the canonical artifacts already say, and writes only `runtime/career-ops/daily-brief/` (git-ignored).
 
-- **Evidence:** `audits/evidence/20260924T034000Z-career-daily-brief/` — **32/32 critical checks**,
-  0 failures; canonical workbook SHA-256s identical before/after; `applications_submitted: 0`,
-  `external_messages_sent: 0`, `canonical_workbook_writes: 0`.
+- **Evidence:** `audits/evidence/20260924T013238Z-career-daily-brief/` — **34/34 critical checks**,
+  0 failures, code SHA `9b414f1` recorded in the artifact; canonical workbook SHA-256s identical
+  before/after; `applications_submitted: 0`, `external_messages_sent: 0`, `canonical_workbook_writes: 0`.
+  (Attempt 1's `…T033000Z-…`/`…T034000Z-…` runs, 32/32, are preserved as the record of the
+  pre-amendment code — see `state/full_build_tracker.md` § "Attempt 2 amendment".)
+- **Idempotency is quantized, not instant-based.** The as-of/window clock is floored to
+  `window.quantize_minutes` (default 60; `0` disables), so two runs inside the same hour over
+  unchanged artifacts are the *same* brief — same `brief_id` and digest — and the second writes no
+  bytes; `generated_at` keeps the true run instant and stays out of the content digest. Crossing the
+  quantum is a new brief. Verified on the real scheduled path (`run_scheduled_brief.cmd`, run twice:
+  second run `wrote: []`, `idempotent: true`, identical `brief_id`).
 - **Priority is a declared policy output, not a fact.** Five explicit inputs (deadline, application
   stage, eligibility certainty, freshness, owner flag) with declared weights; UNKNOWN inputs lower
   coverage instead of being imputed, and every item publishes its components and unknowns. The UK
