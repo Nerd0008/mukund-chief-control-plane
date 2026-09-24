@@ -144,19 +144,19 @@ WORKER_ROSTER = [
     },
     {
         'worker_id': 'longcat-2.0',
-        'provider': 'nous',
-        'model': 'longcat-2.0',
+        'provider': 'longcat',
+        'model': 'LongCat-2.0',
         'interface': 'api',
         'pool_status': 'EVALUATE',
         'capability_hints': ['reasoning', 'coding'],
         'routable': False,  # Issue #1: auth unresolved yet
         'auth_configured': False,
         'auth_source': 'none',
-        'exec_interface': 'generic_openai_adapter (longcat/nous)',
+        'exec_interface': 'generic_openai_adapter (longcat)',
         'adapter_implemented': True,
         'adapter_file': 'generic_openai_adapter.py',
         'smoke_test': 'NOT_RUN',
-        'notes': 'Generic OpenAI adapter implemented. Awaiting Nous API key (not OAuth) to enable smoke test.'
+        'notes': 'Generic OpenAI adapter implemented. Awaiting direct LongCat Platform API key to enable smoke test.'
     },
     {
         'worker_id': 'minimax-m3',
