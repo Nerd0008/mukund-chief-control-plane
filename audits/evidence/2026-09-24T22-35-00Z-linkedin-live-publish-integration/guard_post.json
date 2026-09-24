@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "action": "post",
+  "allowed": false,
+  "owner_gated": true,
+  "performed": false,
+  "reason": "owner-gated: this workflow implements no path that posts. Publishing exists ONLY as the separate explicit owner-approved action `career-ops/linkedin_publish.py publish --approve-publish --confirm-token <sha256 of the draft body>`; it is dry-run by default, never scrapes or reuses a browser session, and records the post URN/timestamp/result",
+  "policy": "External LinkedIn messaging, connection requests, reactions, follows, profile edits and application submission are OWNER-GATED. This workflow refuses them and records the refusal; it implements no path that performs them. Publishing a POST is the single implemented account mutation and it lives in a separate module (career-ops/linkedin_publish.py) behind an explicit owner approval for that exact action; nothing is ever published silently.",
+  "owner_approved_publish_action": {
+    "implemented_kinds": [
+      "post"
+    ],
+    "module": "career-ops/linkedin_publish.py",
+    "command": "python career-ops/linkedin_publish.py publish --drafts <draft artefact> --kind post --index N --approve-publish --confirm-token <sha256 of the exact draft body>",
+    "transport": "LinkedIn official REST API (https://api.linkedin.com/rest/posts) with an OAuth 2.0 member token (openid profile w_member_social)",
+    "credential_store": "Windows Credential Manager generic credentials via career-ops/linkedin_auth.py; never the repository, never a command line, never a log",
+    "requires": [
+      "an explicit --approve-publish flag",
+      "--confirm-token equal to the sha256 of the exact draft body being approved",
+      "no matching entry already in the local published ledger (or --allow-duplicate)"
+    ],
+    "safeguards": [
+      "dry-run by default",
+      "duplicate-post prevention via a local body-hash ledger",
+      "bounded retries (429/5xx/transport only; a 4xx is never retried)",
+      "post URN, post URL, timestamp, HTTP status and body hash recorded; no token recorded"
+    ],
+    "explicitly_not_used": [
+      "browser automation or GUI control",
+      "browser session or cookie reuse",
+      "CAPTCHA bypass",
+      "scraping behind authentication"
+    ]
+  },
+  "available_paths": [
+    "intake (read-only)",
+    "dedupe (read-only)",
+    "draft (unsent)",
+    "handoff (dry-run unless --apply)",
+    "publish (separate, owner-approved, posts only)"
+  ],
+  "logged_to": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\action-gate-log.jsonl"
+}

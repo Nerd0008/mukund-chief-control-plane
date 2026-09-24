@@ -1,0 +1,48 @@
+{
+  "artefact": "LinkedIn live-account publish integration - live drill",
+  "draft_artefact": "runtime\\linkedin\\drafts\\2026-09-24T22-35-00Z\\linkedin_drafts.json",
+  "body_sha256": "fcc88f1557088d1c52bf74ac7a3318391bac6bfe0a7e47ae0b8a15a60792d9af",
+  "steps": {
+    "plan_without_approval": {
+      "rc": 1,
+      "not_a_pass": true,
+      "blockers": [
+        "oauth_credentials_present",
+        "owner_approval_flag",
+        "owner_approval_matches_bytes"
+      ]
+    },
+    "plan_approved_no_credentials": {
+      "rc": 1,
+      "blockers": [
+        "oauth_credentials_present"
+      ],
+      "network_calls_spent": 0
+    },
+    "publish_dry_run": {
+      "rc": 0,
+      "ok": true,
+      "performed": false,
+      "network_calls_spent": 0
+    },
+    "publish_real_attempt": {
+      "rc": 1,
+      "ok": false,
+      "performed": false,
+      "blocker_category": "credentials",
+      "network_calls_spent": null
+    },
+    "workflow_publish_dry_run": {
+      "rc": 0,
+      "ok": true,
+      "state": null
+    }
+  },
+  "live_publish_performed": false,
+  "reason_live_publish_not_performed": "No LinkedIn OAuth credential set is stored (client id / client secret / refresh token all absent), and posting to the live account requires explicit owner approval of that exact action. This drill therefore exercised the whole path as plan + dry-run and hit the credential gate on the real attempt.",
+  "not_claimed": [
+    "NOT verified against the real LinkedIn account",
+    "NOT an end-to-end publish proof: fixture/dry-run tests passing is not a live PASS",
+    "LinkedIn app review / product approval for w_member_social is an external step"
+  ]
+}

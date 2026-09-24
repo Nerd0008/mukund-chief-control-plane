@@ -1,0 +1,112 @@
+{
+  "ok": false,
+  "generated_at": "2026-09-24T22:27:52+00:00",
+  "mode": "plan",
+  "network_calls_spent": 0,
+  "external_actions_taken": [],
+  "checks": [
+    {
+      "check": "draft_is_publishable_text",
+      "passed": true,
+      "detail": "draft body is non-empty",
+      "blocking": true
+    },
+    {
+      "check": "body_within_linkedin_limit",
+      "passed": true,
+      "detail": "220 chars (LinkedIn commentary limit 3000)",
+      "blocking": true
+    },
+    {
+      "check": "draft_passed_review",
+      "passed": true,
+      "detail": "fact gate verdict 'pass', draft not blocked",
+      "blocking": true
+    },
+    {
+      "check": "oauth_credentials_present",
+      "passed": false,
+      "detail": "no LinkedIn OAuth credential set is stored - owner setup required (see career-ops/linkedin_auth.py)",
+      "blocking": true
+    },
+    {
+      "check": "owner_approval_flag",
+      "passed": false,
+      "detail": "publishing requires the explicit --approve-publish flag",
+      "blocking": true
+    },
+    {
+      "check": "owner_approval_matches_bytes",
+      "passed": false,
+      "detail": "--confirm-token must equal the sha256 of the exact draft body (fcc88f1557088d1c52bf74ac7a3318391bac6bfe0a7e47ae0b8a15a60792d9af)",
+      "blocking": true
+    },
+    {
+      "check": "not_a_duplicate",
+      "passed": true,
+      "detail": "body hash is not in the published ledger",
+      "blocking": true
+    }
+  ],
+  "blockers": [
+    {
+      "check": "oauth_credentials_present",
+      "detail": "no LinkedIn OAuth credential set is stored - owner setup required (see career-ops/linkedin_auth.py)"
+    },
+    {
+      "check": "owner_approval_flag",
+      "detail": "publishing requires the explicit --approve-publish flag"
+    },
+    {
+      "check": "owner_approval_matches_bytes",
+      "detail": "--confirm-token must equal the sha256 of the exact draft body (fcc88f1557088d1c52bf74ac7a3318391bac6bfe0a7e47ae0b8a15a60792d9af)"
+    }
+  ],
+  "warnings": [],
+  "draft": {
+    "kind": "post",
+    "subtype": null,
+    "status": "draft_unsent",
+    "publish_requires": "explicit owner authorization",
+    "sources_count": 1,
+    "sources_redacted": "canonical source citations omitted from the committed record (owner-private draft provenance)"
+  },
+  "draft_from": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\2026-09-24T22-35-00Z\\linkedin_drafts.json",
+  "body_chars": 220,
+  "body_sha256": "fcc88f1557088d1c52bf74ac7a3318391bac6bfe0a7e47ae0b8a15a60792d9af",
+  "status_was": "draft_unsent",
+  "fact_gate_verdict": "pass",
+  "draft_blocked_flag": false,
+  "oauth_credentials_present": false,
+  "credential_state": {
+    "client_id": {
+      "target": "chief-linkedin-client-id",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_ID",
+      "present": false,
+      "source": "none"
+    },
+    "client_secret": {
+      "target": "chief-linkedin-client-secret",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_SECRET",
+      "present": false,
+      "source": "none"
+    },
+    "refresh_token": {
+      "target": "chief-linkedin-refresh-token",
+      "env_var": "CHIEF_LINKEDIN_REFRESH_TOKEN",
+      "present": false,
+      "source": "none"
+    },
+    "access_token": {
+      "target": "chief-linkedin-access-token",
+      "env_var": "CHIEF_LINKEDIN_ACCESS_TOKEN",
+      "present": false,
+      "source": "none"
+    }
+  },
+  "ledger_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\published\\posts.jsonl",
+  "ledger_records": 2,
+  "max_retries": 2,
+  "would_post_to": "https://api.linkedin.com/rest/posts",
+  "dry_run_possible": false
+}

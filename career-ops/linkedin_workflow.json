@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Minimal LinkedIn workflow for Chief OS v1: read-only job/discovery signal intake, profile/post/outreach DRAFT generation, dedupe against Career Ops + Company Watch, and handoff into the existing Career Ops tracker writer. LinkedIn is treated strictly as a READ-ONLY signal source and a DRAFT surface. Nothing in this workflow posts, messages, connects, follows, reacts, applies or mutates any account, and nothing here opens a network connection or a browser.",
+  "description": "Minimal LinkedIn workflow for Chief OS v1: read-only job/discovery signal intake, profile/post/outreach DRAFT generation, dedupe against Career Ops + Company Watch, and handoff into the existing Career Ops tracker writer. LinkedIn is treated as a READ-ONLY signal source and a DRAFT surface. Nothing in this workflow posts, messages, connects, follows, reacts, applies or mutates any account, and nothing here opens a network connection or a browser. Publishing a POST exists only as a separate, explicitly owner-approved action in career-ops/linkedin_publish.py.",
   "career_ops_dir": "career-ops",
   "company_watch_config": "company-watch/company_watch_config.json",
   "company_watch_dir": "company-watch",
@@ -24,11 +24,41 @@
     "inmail", "apply", "easy_apply", "profile_update", "headline_update",
     "about_update", "account_settings", "delete_account", "job_save"
   ],
-  "external_action_policy": "External LinkedIn posting, messaging, connection requests, reactions, follows, profile edits and application submission are OWNER-GATED. This workflow refuses them and records the refusal; it implements no path that performs them.",
+  "not_implemented_actions": [
+    "comment", "reaction", "follow", "connection_request", "message", "inmail",
+    "apply", "easy_apply", "profile_update", "headline_update", "about_update",
+    "account_settings", "delete_account", "job_save"
+  ],
+  "owner_approved_publish_action": {
+    "implemented_kinds": ["post"],
+    "module": "career-ops/linkedin_publish.py",
+    "command": "python career-ops/linkedin_publish.py publish --drafts <draft artefact> --kind post --index N --approve-publish --confirm-token <sha256 of the exact draft body>",
+    "transport": "LinkedIn official REST API (https://api.linkedin.com/rest/posts) with an OAuth 2.0 member token (openid profile w_member_social)",
+    "credential_store": "Windows Credential Manager generic credentials via career-ops/linkedin_auth.py; never the repository, never a command line, never a log",
+    "requires": [
+      "an explicit --approve-publish flag",
+      "--confirm-token equal to the sha256 of the exact draft body being approved",
+      "no matching entry already in the local published ledger (or --allow-duplicate)"
+    ],
+    "safeguards": [
+      "dry-run by default",
+      "duplicate-post prevention via a local body-hash ledger",
+      "bounded retries (429/5xx/transport only; a 4xx is never retried)",
+      "post URN, post URL, timestamp, HTTP status and body hash recorded; no token recorded"
+    ],
+    "explicitly_not_used": [
+      "browser automation or GUI control",
+      "browser session or cookie reuse",
+      "CAPTCHA bypass",
+      "scraping behind authentication"
+    ]
+  },
+  "external_action_policy": "External LinkedIn messaging, connection requests, reactions, follows, profile edits and application submission are OWNER-GATED. This workflow refuses them and records the refusal; it implements no path that performs them. Publishing a POST is the single implemented account mutation and it lives in a separate module (career-ops/linkedin_publish.py) behind an explicit owner approval for that exact action; nothing is ever published silently.",
   "not_performed": [
-    "Any LinkedIn login, session use, API call or scraping",
+    "Any LinkedIn login, session use, API call or scraping performed by this workflow",
     "Any browser launch or GUI interaction",
-    "Any posting, messaging, connection request, reaction or profile mutation",
+    "Any automatic posting: publishing exists ONLY as the separate explicit owner-approved action in career-ops/linkedin_publish.py, and this workflow never posts",
+    "Any messaging, connection request, reaction, follow or profile mutation",
     "Any application submission or employer/recruiter contact"
   ]
 }

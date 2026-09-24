@@ -1,0 +1,45 @@
+{
+  "ok": true,
+  "generated_at": "2026-09-24T22:25:56+00:00",
+  "provider": "linkedin-official-api",
+  "store": "Windows Credential Manager (generic credentials) / CHIEF_LINKEDIN_* env",
+  "scope_requested": [
+    "openid",
+    "profile",
+    "w_member_social"
+  ],
+  "credentials": {
+    "client_id": {
+      "target": "chief-linkedin-client-id",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_ID",
+      "present": false,
+      "source": "none"
+    },
+    "client_secret": {
+      "target": "chief-linkedin-client-secret",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_SECRET",
+      "present": false,
+      "source": "none"
+    },
+    "refresh_token": {
+      "target": "chief-linkedin-refresh-token",
+      "env_var": "CHIEF_LINKEDIN_REFRESH_TOKEN",
+      "present": false,
+      "source": "none"
+    },
+    "access_token": {
+      "target": "chief-linkedin-access-token",
+      "env_var": "CHIEF_LINKEDIN_ACCESS_TOKEN",
+      "present": false,
+      "source": "none"
+    }
+  },
+  "client_id_present": false,
+  "client_secret_present": false,
+  "refresh_token_present": false,
+  "access_token_present": false,
+  "access_token_expiry_utc": null,
+  "oauth_ready": false,
+  "secret_values_read": false,
+  "note": "Presence only: no secret value is read, printed or logged. A missing credential means the owner has not completed LinkedIn app/OAuth setup yet; nothing is invented to fill the gap."
+}

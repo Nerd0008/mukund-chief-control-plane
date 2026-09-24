@@ -1,0 +1,60 @@
+{
+  "ok": true,
+  "generated_at": "2026-09-24T22:25:57+00:00",
+  "provider": "linkedin-official-api",
+  "endpoint": "https://api.linkedin.com/rest/posts",
+  "api_version_header": "202609",
+  "implemented_account_mutations": [
+    "post"
+  ],
+  "still_refused_actions": [
+    "comment",
+    "reaction",
+    "follow",
+    "connection_request",
+    "message",
+    "inmail",
+    "apply",
+    "easy_apply",
+    "profile_update",
+    "headline_update",
+    "about_update",
+    "account_settings",
+    "delete_account",
+    "job_save"
+  ],
+  "credentials": {
+    "client_id": {
+      "target": "chief-linkedin-client-id",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_ID",
+      "present": false,
+      "source": "none"
+    },
+    "client_secret": {
+      "target": "chief-linkedin-client-secret",
+      "env_var": "CHIEF_LINKEDIN_CLIENT_SECRET",
+      "present": false,
+      "source": "none"
+    },
+    "refresh_token": {
+      "target": "chief-linkedin-refresh-token",
+      "env_var": "CHIEF_LINKEDIN_REFRESH_TOKEN",
+      "present": false,
+      "source": "none"
+    },
+    "access_token": {
+      "target": "chief-linkedin-access-token",
+      "env_var": "CHIEF_LINKEDIN_ACCESS_TOKEN",
+      "present": false,
+      "source": "none"
+    }
+  },
+  "access_token_expiry_utc": null,
+  "published_records": 0,
+  "last_published": null,
+  "ledger_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\published\\posts.jsonl",
+  "browser_automation_used": false,
+  "session_or_cookie_reuse": false,
+  "scraping_behind_authentication": false,
+  "network_calls_spent": 0
+}

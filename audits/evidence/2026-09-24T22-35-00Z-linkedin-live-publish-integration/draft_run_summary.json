@@ -1,0 +1,19 @@
+{
+  "artefact": "B20/B21 LinkedIn draft run (aggregate summary; draft text stays local)",
+  "generated_at": "2026-09-24T22:25:59+00:00",
+  "fact_gate_verdict": "pass",
+  "fact_gate_available": true,
+  "draft_count": 7,
+  "draft_kinds": [
+    "outreach",
+    "post",
+    "profile"
+  ],
+  "blocked_drafts": 0,
+  "statuses": [
+    "draft_unsent"
+  ],
+  "raw_artefact_committed": false,
+  "raw_artefact_location": "runtime/linkedin/drafts/<stamp>/linkedin_drafts.json (git-ignored: it restates canonical CV text)",
+  "note": "The full draft artefact is owner-private and git-ignored, exactly like the other Career Ops runtime outputs. Only this aggregate is committed."
+}

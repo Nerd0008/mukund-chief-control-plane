@@ -12,10 +12,17 @@ LinkedIn is treated as two things only:
 
 What this is NOT
 ----------------
-There is no LinkedIn login, no session reuse, no API call, no scraping, no
-browser and no network I/O of any kind. ``guard`` exists as an explicit,
-permanent refusal: posting, messaging, connecting, following, reacting, editing
-the profile or applying is owner-gated and no code path here performs it.
+This workflow performs no LinkedIn login, no session reuse, no API call, no
+scraping, no browser and no network I/O of any kind. ``guard`` exists as an
+explicit refusal: messaging, connecting, following, reacting, editing the
+profile and applying are owner-gated and no code path here performs them.
+
+Publishing a **post** is the single implemented account mutation, and it does not
+live here: it is the separate, explicitly owner-approved action in
+``career-ops/linkedin_publish.py`` (official REST API, OAuth member token, dry-run
+by default, duplicate prevention, bounded retries). ``guard post`` still refuses
+in this workflow and names that action; ``publish`` only resolves the draft
+artefact and delegates every guard to that module.
 
 Reused, not rebuilt
 -------------------
@@ -655,17 +662,34 @@ def guard_action(cfg: dict, action: str) -> dict:
     action_key = (action or "").strip().casefold()
     blocked = {a.casefold() for a in cfg.get("blocked_actions", [])}
     allowed = action_key not in blocked
+    if allowed:
+        reason = "action is not an external LinkedIn mutation (read/draft only)"
+    elif action_key == "post":
+        # A post is the one mutation for which a separate, explicitly
+        # owner-approved path exists — but it is NOT performed by this workflow.
+        # Kept in blocked_actions so `guard` still refuses it here; the approved
+        # action lives in career-ops/linkedin_publish.py and requires an approval
+        # flag plus a confirmation token equal to the sha256 of the exact body.
+        reason = ("owner-gated: this workflow implements no path that posts. Publishing "
+                  "exists ONLY as the separate explicit owner-approved action "
+                  "`career-ops/linkedin_publish.py publish --approve-publish "
+                  "--confirm-token <sha256 of the draft body>`; it is dry-run by default, "
+                  "never scrapes or reuses a browser session, and records the post "
+                  "URN/timestamp/result")
+    else:
+        reason = ("external LinkedIn action is owner-gated; this workflow implements no "
+                  "path that performs it")
     result = {
         "action": action,
         "allowed": allowed,
         "owner_gated": not allowed,
         "performed": False,
-        "reason": ("external LinkedIn action is owner-gated; this workflow implements no path "
-                   "that performs it" if not allowed else
-                   "action is not an external LinkedIn mutation (read/draft only)"),
+        "reason": reason,
         "policy": cfg.get("external_action_policy"),
+        "owner_approved_publish_action": cfg.get("owner_approved_publish_action"),
         "available_paths": ["intake (read-only)", "dedupe (read-only)", "draft (unsent)",
-                            "handoff (dry-run unless --apply)"],
+                            "handoff (dry-run unless --apply)",
+                            "publish (separate, owner-approved, posts only)"],
     }
     log = runtime_dir(cfg) / "action-gate-log.jsonl"
     with log.open("a", encoding="utf-8") as fh:
@@ -1162,6 +1186,88 @@ def cmd_handoff(args) -> int:
     return 0
 
 
+def cmd_publish(args) -> int:
+    """Delegate to the separate, owner-approved publishing surface.
+
+    This workflow stays the *generation and review* path; it resolves which
+    draft artefact to publish and hands the decision (and every guard) to
+    ``career-ops/linkedin_publish.py``. Nothing here posts.
+    """
+    import linkedin_publish as lip
+
+    drafts = resolve_drafts_path(load_config(args.config), args)
+    argv = ["publish", "--drafts", str(drafts), "--kind", args.kind,
+            "--index", str(args.index), "--max-retries", str(args.max_retries)]
+    if args.approve_publish:
+        argv.append("--approve-publish")
+    if args.confirm_token:
+        argv += ["--confirm-token", args.confirm_token]
+    if args.dry_run:
+        argv.append("--dry-run")
+    if args.allow_duplicate:
+        argv.append("--allow-duplicate")
+    return lip.main(argv)
+
+
+def resolve_drafts_path(cfg: dict, args) -> Path:
+    """Which B20/B21 draft artefact to publish from.
+
+    Explicit ``--drafts`` wins; ``--run`` addresses one draft run; otherwise the
+    newest run is used. Resolution never invents a draft: a missing artefact is
+    an error, and the error names the exact path it looked for.
+    """
+    if getattr(args, "drafts", None):
+        p = Path(args.drafts)
+        if not p.exists():
+            raise FileNotFoundError(f"no such draft artefact: {p}")
+        return p
+    root = runtime_dir(cfg) / cfg["drafts_subdir"]
+    if getattr(args, "run", None):
+        run = Path(args.run)
+        candidate = run if run.suffix == ".json" else (root / run / "linkedin_drafts.json")
+        if not candidate.exists():
+            candidate = root / args.run / "linkedin_drafts.json"
+        if not candidate.exists():
+            raise FileNotFoundError(f"no such draft run: {candidate}")
+        return candidate
+    runs = sorted(root.glob("*/linkedin_drafts.json")) if root.exists() else []
+    if not runs:
+        raise FileNotFoundError(
+            f"no draft run found under {root}; generate one with `draft` first")
+    return runs[-1]
+
+
+def cmd_publish_status(args) -> int:
+    """Availability of the live publish path, without spending any call."""
+    import linkedin_auth as lia
+    import linkedin_publish as lip
+
+    cfg = load_config(args.config)
+    pres = lia.presence()
+    emit({
+        "ok": True,
+        "generated_at": now_utc(),
+        "implemented_account_mutations": list(lip.SUPPORTED_KINDS),
+        "still_refused_actions": list(lip.STILL_BLOCKED_ACTIONS),
+        "oauth_credentials_present": all(pres[k]["present"]
+                                         for k in ("client_id", "client_secret",
+                                                   "refresh_token")),
+        "credentials": pres,
+        "access_token_expiry_utc": lia.access_token_expiry(),
+        "published_records": len([r for r in lip.read_ledger()
+                                  if r.get("result") == "published"]),
+        "ledger_path": str(lip.PUBLISHED_LEDGER),
+        "drafts_root": str(runtime_dir(cfg) / cfg["drafts_subdir"]),
+        "network_calls_spent": 0,
+        "external_actions_taken": [],
+        "state": ("LIVE PATH CONFIGURED (owner OAuth present)"
+                  if all(pres[k]["present"] for k in ("client_id", "client_secret",
+                                                      "refresh_token"))
+                  else "READY_NEEDS_OWNER_CONFIG (no LinkedIn OAuth credential set stored)"),
+    })
+    return 0
+
+
 def cmd_status(args) -> int:
     cfg = load_config(args.config)
     cc = cw_config(cfg)
@@ -1235,8 +1341,33 @@ def main(argv=None) -> int:
 
     p = sub.add_parser("status"); p.set_defaults(fn=cmd_status)
 
+    p = sub.add_parser("publish-status",
+                       help="availability of the separate, owner-approved publish path")
+    p.set_defaults(fn=cmd_publish_status)
+
+    p = sub.add_parser("publish",
+                       help="publish ONE approved post draft via the official LinkedIn API "
+                            "(posts only; dry-run unless --approve-publish AND a matching "
+                            "--confirm-token are given)")
+    p.add_argument("--drafts", default=None,
+                   help="path to a `draft` artefact; defaults to the newest draft run")
+    p.add_argument("--run", default=None, help="a draft run stamp or directory")
+    p.add_argument("--kind", default="post", choices=("post",))
+    p.add_argument("--index", type=int, default=0)
+    p.add_argument("--approve-publish", action="store_true")
+    p.add_argument("--confirm-token", default=None)
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--allow-duplicate", action="store_true")
+    p.add_argument("--max-retries", type=int, default=2)
+    p.set_defaults(fn=cmd_publish)
+
     args = ap.parse_args(argv)
-    return args.fn(args)
+    try:
+        return args.fn(args)
+    except FileNotFoundError as exc:
+        emit({"ok": False, "refused": True, "blocker_category": "execution_error",
+              "reason": str(exc), "external_actions_taken": []})
+        return 1
 
 
 if __name__ == "__main__":
