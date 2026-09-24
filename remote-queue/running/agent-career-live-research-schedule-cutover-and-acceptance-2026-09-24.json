@@ -32,5 +32,26 @@
     "Do not call a source 'empty' when it was inaccessible or blocked.",
     "Do not cut over the schedule if live research has no functioning current-web mechanism."
   ],
-  "notes": "This is the operational cutover task missing from the first web-research contract. Current run_scheduled_scan.cmd still invokes regional_job_search.py and the old Career Ops lane title filter; this task makes the new research architecture the actual scheduled behavior."
+  "notes": "This is the operational cutover task missing from the first web-research contract. Current run_scheduled_scan.cmd still invokes regional_job_search.py and the old Career Ops lane title filter; this task makes the new research architecture the actual scheduled behavior.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T14:16:50.075737Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=372).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=372).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
