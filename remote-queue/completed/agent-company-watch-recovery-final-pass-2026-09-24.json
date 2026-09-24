@@ -1,0 +1,68 @@
+{
+  "task_id": "agent-company-watch-recovery-final-pass-2026-09-24",
+  "created_at": "2026-09-23T23:35:14Z",
+  "objective": "Recover the blocked Company Watch/job-search integration near the end of the remaining build, preserving any partial local/landed work and completing only the unfinished scope. The previous Company Watch worker hit the old 1200-second execution ceiling before the new bounded retry hardening was installed. Re-inspect current main and local worktree first, then resume in small checkpointed units so the task can finish under the hardened queue without rebuilding successful work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "All currently queued high-priority independent v1 engineering tasks should be allowed to run first.",
+    "Career Ops tracker-writer/monthly-rollover should be in a truthful terminal state or expose a stable deterministic interface.",
+    "Do not race another active Company Watch worker."
+  ],
+  "allowed_scope": [
+    "Inspect blocked/agent-company-watch-job-search-integration-2026-09-23.json, current main, local worktree, queue logs, and relevant Career Ops/Company Watch files before editing. Preserve any unpushed partial work if it is attributable and safe; do not assume it exists.",
+    "Use the hardened retry system now in main (initial attempt + at most two recoverable retries). Do not create manual retry loops.",
+    "Break the original broad scope into bounded phases with checkpoint commits/evidence between phases: source/inventory reconciliation, structured ATS/career endpoint watcher, canonical dedupe handoff, regional tracker handoff, and bounded acceptance evidence.",
+    "Prefer structured ATS/career endpoints and bounded batches. Avoid a single long-running terminal command that can consume the entire 1200-second task budget without a checkpoint.",
+    "Reuse the Career Ops <-> Chief interface and deterministic tracker writer already present/pending. Do not rebuild Career Ops or duplicate canonical application state.",
+    "Treat historical employer/recruiter/application counts as historical until reverified from source evidence. Do not fabricate organizations, jobs, applications, eligibility, or provenance.",
+    "Run bounded evidence for watch -> finding -> dedupe -> Career Ops handoff -> tracker update using safe/test data or owner-owned local data. Keep external application/recruiter/contact actions disabled.",
+    "Update state/tracker truthfully, commit/push recoverably, and return strict terminal JSON."
+  ],
+  "stop_conditions": [
+    "No external applications, recruiter/company messages, LinkedIn/account mutations, or irreversible actions.",
+    "No secrets or raw sensitive email content in GitHub.",
+    "Do not overwrite canonical application history or trackers without backup/verification.",
+    "If the only remaining gap requires owner login/account action, record it and stop only that substep; do not invent a workaround."
+  ],
+  "notes": "Research/recovery diagnosis before queueing: the original Company Watch task was claimed at 2026-09-23T22:58:06Z and hard-blocked at 2026-09-23T23:18:06Z because Hermes dispatch exceeded 1200 seconds. No substantive Company Watch commit is visible on origin/main between claim and block, so completion must not be inferred. The queue itself recovered and later installed commit 7439acd3/85f604aa: per-process QuickEdit disable, independent watchdog thread, persisted attempt state, and bounded initial+2 retry handling. The likely fix is therefore not 'rerun the same 20-minute monolith'; it is to inspect for partial local work first and resume the smallest unfinished units with checkpoint commits and bounded scans/tests. Medium priority intentionally places this after the remaining high-priority v1 work and after the older medium deployment-prep task, but before the low-priority whole-company acceptance.",
+  "completed_at": "2026-09-24T02:29:00.255881Z",
+  "result": {
+    "status": "completed",
+    "summary": "Recovered the blocked Company Watch record by inspecting first and rebuilding nothing: the integration had already reached main in commit 42a2bec (the CV/cover-letter + LinkedIn task, which imports it), so the recovery pass verified that landed work, closed the one real evidence gap, produced fresh bounded evidence, and reconciled state. Gap closed: the suite only asserted the regional provenance mapping, never a regional write; added a parametrized end-to-end test that routes a finding into a copy of the Dubai/Japan/Singapore tracker and asserts provenance in Source (X), unchanged owner columns R,S,T,U,V,Z, 0 appends on repeat and an unchanged canonical hash, plus a refusal test that an elsewhere-routed finding is never handed to the UK tracker (company-watch tests 31 -> 35 passed, offline). Also made evidence attributable via `run --task-id`. Fresh bounded live evidence (23.2 s, 12 companies, 58 HTTP requests, budget_exhausted false): 19 findings all new, 0 tracker-eligible under the owner's intern-only UK filter; dry-run marked sample 3/3 appended against the canonical workbook with canonical SHA-256 re-checked identical; acceptance write on a workbook copy 3 appended then 3 duplicates on repeat; canonical workbook untouched. The original blocked run's evidence is now committed private-safe (aggregate files only; findings/resolution/manifests/backups stay git-ignored because they name owner companies and postings). No external applications, messages, recruiter/company contact, account or LinkedIn mutation; no canonical tracker written. The blocked-record JSON was deliberately left in place because the pending agent-blocked-work-final-reconciliation-2026-09-24 owns it and lists this task as its prerequisite.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "1e107ec company-watch: prove the regional handoff end to end, make evidence attributable",
+      "9961288 company-watch: bounded recovery evidence + reconciled state (private-safe) (origin/main HEAD, pushed 7e194ef..9961288)"
+    ],
+    "tests": [
+      "python -m pytest company-watch/tests/test_company_watch.py -q -> 35 passed in 16.10s (was 31; +4 regional end-to-end/refusal tests), offline, canonical trackers opened read-only",
+      "python company-watch/company_watch.py run --region uk --limit 12 --budget-s 90 --acceptance-copy runtime/company-watch/acceptance-recovery --task-id agent-company-watch-recovery-final-pass-2026-09-24 -> exit 0, 23.2 s, budget_exhausted false, canonical_untouched true, evidence audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/",
+      "acceptance write on workbook COPY: first apply 3 appended/0 duplicates, repeat apply 0 appended/3 duplicates, data rows 34 -> 37, canonical SHA-256 84c53dcb... unchanged",
+      "CLI smoke: `registry` reproduces 203 employers/18 recruiters/221 evidenced orgs with zero declared-vs-parsed mismatch; `run --help` exposes --task-id"
+    ],
+    "changed_files": [
+      "company-watch/tests/test_company_watch.py",
+      "company-watch/company_watch.py",
+      "company-watch/README.md",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/evidence.md",
+      "audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/evidence.json",
+      "audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/acceptance.json",
+      "audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/evidence.md",
+      "audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/evidence.json",
+      "audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/acceptance.json",
+      "remote-queue/logs/queue.log"
+    ],
+    "remaining": [
+      "Reconcile/close the historical blocked record remote-queue/blocked/agent-company-watch-job-search-integration-2026-09-23.json - owned by the pending agent-blocked-work-final-reconciliation-2026-09-24 (its prerequisite is this task; evidence now exists on main at 9961288)",
+      "Regional scan/schedule lanes (Dubai/Japan/Singapore portals.yml) stay owned by agent-regional-job-search-agents-and-schedulers-2026-09-23; Company Watch routes to a region but hands off only when that region is explicitly requested",
+      "Observation for the Career Ops tracker-writer owner (not fixed here, outside this task's scope): any writer invocation - including copy-targeted acceptance/test runs - updates runtime/career-ops/run-health/tracker-writer.json, so test noise can move department health counters; the file was restored to its committed state after this pass",
+      "Untracked audits/evidence/2026-09-24T02-21-00Z-deployment-preflight/ belongs to the completed deployment-prep task and was deliberately not committed by this pass (no attribution claim over another task's artifacts)"
+    ]
+  }
+}
