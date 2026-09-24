@@ -91,3 +91,25 @@ After 1 and 2: re-run `python scripts/e3_provider_bounded_smoke.py`, then
   so auth-failure bodies are never persisted (classified to `error_class` only).
 - No secret, credential value, token, cookie or private runtime database is committed or rendered in
   the canonical status.
+
+## Retry attempt 2 of 3 — re-verification (2026-09-24T21:14–21:16Z)
+
+Attempt 1 landed and pushed all of the work above, then the dispatch was killed at the 1200-second
+limit before it returned its final response (queue record: `execution_error`, recoverable). Attempt 2
+therefore resumed by *re-verifying* rather than repeating:
+
+| Step | Command | Result |
+|---|---|---|
+| 1 | `python scripts/e3_credential_presence_probe.py` | `still_missing_count = 0` — 10/10 present; no value read. Local-only artifact (git-ignored). |
+| 2 | `python scripts/e3_provider_bounded_smoke.py` | **0/7 dispatched.** One minimal completion per worker (`max_tokens=16`, single attempt, no retries); the provider state is **unchanged** — same refusal classes as attempt 1 (mistral 429, GLM/Z.ai 429 balance, Qwen 403 Unpurchased, LongCat 402 quota, MiniMax 402 balance, StepFun 402 quota, Tencent 401 code 401002). Evidence: `audits/evidence/2026-09-24T21-14-53Z-e3-provider-bounded-smoke/`. |
+| 3 | `python scripts/e3_stage2_readiness_gate.py --regression-evidence audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json` | `NOT ENABLED` — identical verdict (a=PASS 10/10, b=FAIL Google image criterion, c=FAIL live coordinator override), `0` execution-ready providers. 0 provider calls. Evidence: `audits/evidence/2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict/`. |
+| 4 | `python scripts/status_render.py` + `python scripts/status_verify.py` | regenerated; **PASSED, 0 warnings** |
+| 5 | `python scripts/tests/test_status_consistency.py` | **23/23 OK** |
+
+**Disposition.** The unchanged provider refusal is a *deterministic external blocker*, not a retryable
+execution failure, so this task is parked rather than looped, per the owner's 2026-09-24 retry policy
+(do not retry an unchanged external-provider blocker; the 0/7-key style gate is not retryable). No
+provider call was repeated beyond one minimal completion per worker, no gate was weakened, no live
+failover is claimed, and Stage 2 remains **NOT ENABLED**. The full 22-suite regression is not re-run
+here because no code changed after the committed clean run at SHA `6cbb573`; the canonical status
+records that run as `latest_evidence`.

@@ -120,7 +120,7 @@ Known open items:
 
 ## 8. Stage 2 state
 
-**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:12:42Z)
+**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:16:01Z)
 
 Failing conditions at the last verdict:
 - condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)
@@ -272,6 +272,7 @@ unless the documented product scope requires it.
 
 | At (UTC) | Evidence | Result | What |
 |---|---|---|---|
+| 2026-09-24T21:16:01Z | `2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (a=PASS 10/10 credentials, b=FAIL Google image criterion, c=FAIL live coordinator override) | Retry attempt 2 of 3 re-verified the post-key state at HEAD and re-ran the override-aware readiness gate with the newest bounded-smoke evidence and the same clean 22-suite regression. Credentials 10/10 present (presence-only probe, no value read); provider identity still verified for every intended provider; 0/7 newly-credentialed workers execution-ready because every provider refused the bounded call again with the same error class. Verdict unchanged and no gate weakened: Stage 2 stays NOT ENABLED. The unchanged external-provider refusal is a deterministic external blocker, so the task is parked pending owner provider funding rather than re-attempted in a loop. Evidence: bounded smoke audits/evidence/2026-09-24T21-14-53Z-e3-provider-bounded-smoke/evidence.json and gate verdict audits/evidence/2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict/evidence.json. |
 | 2026-09-24T21:12:42Z | `2026-09-24T21-12-42Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (a=PASS, b=FAIL, c=FAIL: live coordinator override) | Override-aware E3 Stage 2 readiness gate re-run with the clean 22-suite regression. Credential presence 10/10; provider identity verified for every intended provider; bounded real-provider rehearsal and E4/E5 drills consumed; regressions all pass; integrity isolation and rollback checks pass. Sole unmet readiness criterion is the Google image real-dispatch condition. Condition (c) additionally fails because the live coordinator instruction forbids enablement for this run. All seven provider refusals are recorded as external blockers with their exact provider errors. |
 | 2026-09-24T21:11:06Z | `2026-09-24T21-11-06Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (condition a PASS, condition b FAIL, condition c PASS) | E3 Stage 2 readiness gate re-run with the clean 22-suite regression: credentials 10/10 present; provider identity verified for every intended provider (6/7 live catalogue, 1/7 authoritative documentation); bounded real-provider rehearsal and E4/E5 drills consumed; regressions all pass; integrity isolation and rollback checks pass. Sole unmet criterion is the Google image real-dispatch condition. All seven newly-credentialed provider refusals are recorded as external blockers with their exact provider errors. |
 | 2026-09-24T21:10:44Z | `2026-09-24T21-09-18Z-e3-provider-verification-regression` | PASS 22 suites / 606 collected / 606 passed / 0 failed | Clean post-key regression at SHA 6cbb573: every E1/E2/E3/E4/E5 suite, the queue/bridge suites and the canonical-status consistency suite passed after the provider adapter and worker-registry corrections and the canonical-status reconciliation. |
