@@ -981,11 +981,13 @@ source and no provider call.
 good decisions, but its collection step still depended on what an existing surface
 happened to supply. The owner's successful standalone Codex workflow did something
 different: it *actively researched the open web*. That behaviour is documented in
-the owner's own Career Ops install — `portals.yml#search_queries` says "Each query
-triggers a WebSearch", and `modes/scan.md` describes the Level-3 agent workflow
-(`site:` queries against the ATS portals, results treated as *unverified* until
-liveness is confirmed, title/company extracted from the result title with a
-documented regex). `career-ops/discovery/web_research.py` restores that behaviour as
+the owner's own Career Ops install (inspected read-only) — `portals.yml` declares a
+`search_queries` list of `site:` WebSearch queries per ATS portal, and
+`modes/scan.md` describes the Level-3 agent workflow (for each `search_queries`
+entry with `enabled: true`, "Execute WebSearch with the defined `query`", results
+treated as *unverified* until liveness is confirmed, title/company extracted from
+the result title with a documented regex). `career-ops/discovery/web_research.py`
+restores that behaviour as
 one more **read-only discovery surface feeding the exact same unified funnel** — no
 second tracker, classifier or eligibility engine.
 
@@ -997,6 +999,15 @@ generated query matrix (role families × regions × surfaces, + optional watchli
   -> discovery.pipeline  (prefilter -> semantic triage -> deterministic gates ->
                           shared dedupe -> tracker manifest)
 ```
+
+**What was inspected first (read-only).** The owner's Career Ops install at
+`C:\Users\mukun\Documents\ChatGPT\CV customizer\career-ops-career-ops-v1.29.0`
+(the install root the regional profiles already point at) was read, not modified:
+`portals.yml` `search_queries` (the `site:` ATS query list, `enabled: true`,
+preserved verbatim in `OWNER_ATS_SITE_QUERIES`), `portals.yml` `title_filter`
+(negative list), and `modes/scan.md` (Level 3 = WebSearch, liveness verification of
+every Level-3 URL, the generic title/company regex). No install file was edited,
+patched or migrated.
 
 **Primary behaviour is active research, not a static scan.** `build_query_matrix`
 generates queries across the role families named in the task scope

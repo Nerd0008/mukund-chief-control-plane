@@ -5,11 +5,13 @@ Why this exists
 ---------------
 The owner's successful standalone Codex workflow did not merely scan a fixed
 provider list: it *actively researched the open web*. The owner's own Career Ops
-``portals.yml`` says so in its ``search_queries`` block — "Each query triggers a
-WebSearch" — and ``modes/scan.md`` documents the agent workflow: Level 3 is a set
-of ``site:`` search queries against the ATS portals, with the results treated as
-*unverified* until liveness is confirmed, and title/company extracted from the
-result title with the documented regex.
+install documents that in two places, inspected read-only: ``portals.yml``
+declares a ``search_queries`` list of ``site:`` WebSearch queries per ATS portal,
+and ``modes/scan.md`` describes the Level-3 agent workflow — for each
+``search_queries`` entry with ``enabled: true``, "Execute WebSearch with the
+defined ``query``", with every Level-3 hit treated as *unverified* until liveness
+is confirmed and title/company extracted from the result title with a documented
+regex.
 
 This module adds exactly that behaviour back, as one more read-only discovery
 surface feeding the SAME unified funnel (``discovery.pipeline``): the query
