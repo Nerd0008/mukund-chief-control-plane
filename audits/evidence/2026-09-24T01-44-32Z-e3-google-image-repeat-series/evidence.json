@@ -1,0 +1,1336 @@
+{
+  "label": "e3-google-image-repeat-series",
+  "run_started_utc": "2026-09-24T01:44:32+00:00",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+  "worker_id": "google-nano-banana-2",
+  "role": "vision",
+  "objective": "Generate a small solid white square image, 64 by 64 pixels.",
+  "objective_hash": "c2e948d48a63",
+  "stated_call_budget": {
+    "total_real_image_generations": 9,
+    "calls": [
+      {
+        "calls": "1-6",
+        "count": 6,
+        "shape": "responseModalities=['IMAGE'], no imageConfig",
+        "purpose": "repeat series on the exact request that failed once and did not reproduce once, to measure whether/at what rate the no-image response recurs"
+      },
+      {
+        "calls": "7-8",
+        "count": 2,
+        "shape": "responseModalities=['TEXT','IMAGE'], no imageConfig",
+        "purpose": "controlled comparison: the production adapter sends IMAGE-only with no text modality and no image output config; two calls with the same objective but TEXT+IMAGE show what the provider does with the alternative shape (a shape-level acceptance/rejection is deterministic and does not need a large n)"
+      },
+      {
+        "calls": "9",
+        "count": 1,
+        "shape": "responseModalities=['TEXT','IMAGE'] + generationConfig.imageConfig (explicit output size)",
+        "purpose": "size-control probe: determine whether an explicitly requested output size is honoured, and whether the provider's own image-output parameter can control it (the earlier objective asked for 64x64 and the provider returned 1024x1024)"
+      }
+    ],
+    "hard_rule": "the script spends at most TOTAL_PLANNED_CALLS real image generations; it records every call and stops rather than exceeding the stated budget",
+    "not_counted": "metadata reads only (the adapter's /models health and identity calls) are not image generations; this run makes no metadata call either, so the real generation count equals the total"
+  },
+  "provider_calls_planned": 9,
+  "calls_attempted": 9,
+  "observations": [
+    {
+      "index": 1,
+      "executed": true,
+      "plan_id": "imgseries-1",
+      "node_id": "node-imgseries-1-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-c1221155bd5c",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 238310,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1322,
+        "totalTokenCount": 1339,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 6.53998327255249,
+      "e2_request_id": "obs-20260924-3dd57fa4",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-6d81da3a32d6",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-6d81da3a32d6",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "executed": true,
+      "plan_id": "imgseries-2",
+      "node_id": "node-imgseries-2-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-ba1dd13e260d",
+      "status": "FAILED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": "no_image_part_in_response",
+      "classification": "no_image_part_in_response",
+      "finish_reason": "IMAGE_RECITATION",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "IMAGE_RECITATION"
+      ],
+      "response_part_kinds": [],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": null,
+      "image_dims": null,
+      "image_size_bytes": null,
+      "image_decode_ok": false,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "totalTokenCount": 17,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 5.815467834472656,
+      "e2_request_id": "obs-20260924-cb49d14a",
+      "node_state": "FAILED",
+      "final_verification": "FAIL",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'dispatch completed': expected COMPLETED, got FAILED",
+            "Test 'image decoded': expected True, got False"
+          ]
+        }
+      ],
+      "failure_attribution": "verification_fail",
+      "evidence_id": "evidence-9341f0214539",
+      "persisted_node_state": "FAILED",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "FAILED",
+          "cause": "verification_failed_no_repair_budget_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-9341f0214539",
+          "first_pass_success": 0,
+          "final_success": 0,
+          "verification_outcome": "FAIL",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": "verification_fail"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "executed": true,
+      "plan_id": "imgseries-3",
+      "node_id": "node-imgseries-3-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-809e7a8a3ec1",
+      "status": "FAILED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": "no_image_part_in_response",
+      "classification": "no_image_part_in_response",
+      "finish_reason": "IMAGE_RECITATION",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "IMAGE_RECITATION"
+      ],
+      "response_part_kinds": [],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": null,
+      "image_dims": null,
+      "image_size_bytes": null,
+      "image_decode_ok": false,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "totalTokenCount": 17,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 6.821141481399536,
+      "e2_request_id": "obs-20260924-4d42b6a0",
+      "node_state": "FAILED",
+      "final_verification": "FAIL",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "FAIL",
+          "passed": false,
+          "issues": [
+            "Test 'dispatch completed': expected COMPLETED, got FAILED",
+            "Test 'image decoded': expected True, got False"
+          ]
+        }
+      ],
+      "failure_attribution": "verification_fail",
+      "evidence_id": "evidence-9c0e3ea830fc",
+      "persisted_node_state": "FAILED",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "FAILED",
+          "cause": "verification_failed_no_repair_budget_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-9c0e3ea830fc",
+          "first_pass_success": 0,
+          "final_success": 0,
+          "verification_outcome": "FAIL",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": "verification_fail"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "executed": true,
+      "plan_id": "imgseries-4",
+      "node_id": "node-imgseries-4-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-dfee69d48d6a",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 53415,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1365,
+        "totalTokenCount": 1382,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 8.282077074050903,
+      "e2_request_id": "obs-20260924-ee966b4f",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-bf51846ddf37",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-bf51846ddf37",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "executed": true,
+      "plan_id": "imgseries-5",
+      "node_id": "node-imgseries-5-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-2cdbcf6a38d0",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 50645,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1291,
+        "totalTokenCount": 1308,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 7.271856307983398,
+      "e2_request_id": "obs-20260924-47d6c78f",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-97d46a5a4e19",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-97d46a5a4e19",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "executed": true,
+      "plan_id": "imgseries-6",
+      "node_id": "node-imgseries-6-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "IMAGE-only",
+      "dispatch_id": "gem-88b08e79fc93",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 43700,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1321,
+        "totalTokenCount": 1338,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 7.362238168716431,
+      "e2_request_id": "obs-20260924-d54b7e2e",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-39461691545a",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-39461691545a",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "executed": true,
+      "plan_id": "imgseries-7",
+      "node_id": "node-imgseries-7-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "TEXT",
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "TEXT+IMAGE",
+      "dispatch_id": "gem-ba4c638a09d2",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 63495,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1355,
+        "totalTokenCount": 1372,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 7.626524209976196,
+      "e2_request_id": "obs-20260924-29ae0438",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-6f14432de7ad",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-6f14432de7ad",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "executed": true,
+      "plan_id": "imgseries-8",
+      "node_id": "node-imgseries-8-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "TEXT",
+        "IMAGE"
+      ],
+      "requested_image_config": null,
+      "shape_label": "TEXT+IMAGE",
+      "dispatch_id": "gem-d9c5510cbd98",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        1024,
+        1024
+      ],
+      "image_size_bytes": 711175,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1269,
+        "totalTokenCount": 1286,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 7.711860418319702,
+      "e2_request_id": "obs-20260924-8f3bfa57",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-68ff6571331f",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-68ff6571331f",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "executed": true,
+      "plan_id": "imgseries-9",
+      "node_id": "node-imgseries-9-1",
+      "objective_hash": "c2e948d48a63",
+      "requested_response_modalities": [
+        "TEXT",
+        "IMAGE"
+      ],
+      "requested_image_config": {
+        "imageSize": "512"
+      },
+      "shape_label": "TEXT+IMAGE+imageConfig",
+      "dispatch_id": "gem-621009631cd2",
+      "status": "COMPLETED",
+      "provider_model_returned": "gemini-3.1-flash-image",
+      "requested_model": "gemini-3.1-flash-image",
+      "error": null,
+      "classification": "image_decoded",
+      "finish_reason": "STOP",
+      "candidate_count": 1,
+      "candidate_finish_reasons": [
+        "STOP"
+      ],
+      "response_part_kinds": [
+        "inlineData:image/jpeg"
+      ],
+      "response_text_chars": null,
+      "response_text_excerpt": null,
+      "image_mime": "image/jpeg",
+      "image_dims": [
+        512,
+        512
+      ],
+      "image_size_bytes": 71330,
+      "image_decode_ok": true,
+      "prompt_feedback": null,
+      "usage": {
+        "promptTokenCount": 17,
+        "candidatesTokenCount": 1030,
+        "totalTokenCount": 1047,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 17
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 747
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "runtime_s": 5.054141998291016,
+      "e2_request_id": "obs-20260924-52847cf5",
+      "node_state": "COMPLETE",
+      "final_verification": "PASS",
+      "verification_attempts": [
+        {
+          "attempt": 1,
+          "method": "test",
+          "outcome": "PASS",
+          "passed": true,
+          "issues": []
+        }
+      ],
+      "failure_attribution": null,
+      "evidence_id": "evidence-4bbce7459fdd",
+      "persisted_node_state": "COMPLETE",
+      "persisted_state_events": [
+        {
+          "previous": "PLANNED",
+          "new": "READY",
+          "cause": "dependencies_satisfied"
+        },
+        {
+          "previous": "READY",
+          "new": "RUNNING",
+          "cause": "dispatch_attempt_1"
+        },
+        {
+          "previous": "RUNNING",
+          "new": "VERIFYING",
+          "cause": "verify_attempt_1"
+        },
+        {
+          "previous": "VERIFYING",
+          "new": "COMPLETE",
+          "cause": "verified_pass_attempt_1"
+        }
+      ],
+      "persisted_evidence": [
+        {
+          "evidence_id": "evidence-4bbce7459fdd",
+          "first_pass_success": 1,
+          "final_success": 1,
+          "verification_outcome": "PASS",
+          "retries": 0,
+          "corrections": 0,
+          "failure_attribution": null
+        }
+      ]
+    }
+  ],
+  "run_finished_utc": "2026-09-24T01:45:35+00:00",
+  "aborted": null,
+  "stage": "Bounded Google image repeat series + request-protocol conformance. Stage 2 NOT enabled by this run.",
+  "prior_evidence": {
+    "rehearsal_failure": {
+      "evidence": "audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/evidence.json",
+      "dispatch_id": "gem-d8c43b8cb447",
+      "error": "no_image_part_in_response",
+      "usage": {
+        "promptTokenCount": 17,
+        "totalTokenCount": 17
+      }
+    },
+    "one_shot_diagnosis": {
+      "evidence": "audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/evidence.json",
+      "dispatch_id": "gem-2a656cbf22c2",
+      "verdict": "IMAGE_PART_PRESENT_AND_DECODED",
+      "note": "the identical request did not reproduce the failure; 1 call cannot establish a rate"
+    }
+  },
+  "summary": {
+    "calls_attempted": 9,
+    "calls_completed": 9,
+    "outcome_counts": {
+      "image_decoded": 7,
+      "no_image_part_in_response": 2
+    },
+    "no_image_part_in_response_count": 2,
+    "no_image_part_in_response_rate": {
+      "numerator": 2,
+      "denominator": 9,
+      "rate": 0.2222222222222222
+    },
+    "per_shape": {
+      "IMAGE-only": {
+        "executed_calls": 6,
+        "image_decoded": 4,
+        "no_image_part_in_response": 2,
+        "other_failures": 0,
+        "errors": [
+          "no_image_part_in_response",
+          "no_image_part_in_response"
+        ],
+        "observed_dims": [
+          [
+            1024,
+            1024
+          ],
+          [
+            1024,
+            1024
+          ],
+          [
+            1024,
+            1024
+          ],
+          [
+            1024,
+            1024
+          ]
+        ],
+        "finish_reasons": [
+          "STOP",
+          "IMAGE_RECITATION",
+          "IMAGE_RECITATION",
+          "STOP",
+          "STOP",
+          "STOP"
+        ],
+        "response_part_kinds": [
+          [
+            "inlineData:image/jpeg"
+          ],
+          [],
+          [],
+          [
+            "inlineData:image/jpeg"
+          ],
+          [
+            "inlineData:image/jpeg"
+          ],
+          [
+            "inlineData:image/jpeg"
+          ]
+        ]
+      },
+      "TEXT+IMAGE": {
+        "executed_calls": 2,
+        "image_decoded": 2,
+        "no_image_part_in_response": 0,
+        "other_failures": 0,
+        "errors": [],
+        "observed_dims": [
+          [
+            1024,
+            1024
+          ],
+          [
+            1024,
+            1024
+          ]
+        ],
+        "finish_reasons": [
+          "STOP",
+          "STOP"
+        ],
+        "response_part_kinds": [
+          [
+            "inlineData:image/jpeg"
+          ],
+          [
+            "inlineData:image/jpeg"
+          ]
+        ]
+      },
+      "TEXT+IMAGE+imageConfig": {
+        "executed_calls": 1,
+        "image_decoded": 1,
+        "no_image_part_in_response": 0,
+        "other_failures": 0,
+        "errors": [],
+        "observed_dims": [
+          [
+            512,
+            512
+          ]
+        ],
+        "finish_reasons": [
+          "STOP"
+        ],
+        "response_part_kinds": [
+          [
+            "inlineData:image/jpeg"
+          ]
+        ]
+      }
+    },
+    "distinct_dims_observed": [
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "all_calls_returned_1024_conformant_dims": false
+  },
+  "size_control": {
+    "prompt_stated_size": [
+      64,
+      64
+    ],
+    "prompt_stated_size_how": "stated in the objective text only",
+    "series_calls": 6,
+    "series_observed_dims": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "prompt_stated_size_honoured_in_series": false,
+    "provider_image_config_probe": [
+      {
+        "requested_image_config": {
+          "imageSize": "512"
+        },
+        "status": "COMPLETED",
+        "error": null,
+        "image_dims": [
+          512,
+          512
+        ],
+        "image_mime": "image/jpeg",
+        "response_part_kinds": [
+          "inlineData:image/jpeg"
+        ],
+        "finish_reason": "STOP"
+      }
+    ],
+    "verdict": "PROMPT_STATED_SIZE_IGNORED"
+  },
+  "orchestration_db_after": {
+    "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "exists": true,
+    "schema_version": 2,
+    "row_counts": {
+      "dag_node": 16,
+      "dag_state_event": 114,
+      "performance_evidence": 24,
+      "router_decision": 0,
+      "capability_registry": 4
+    }
+  },
+  "e2_linkage": {
+    "available": true,
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+    "requested_ids": [
+      "obs-20260924-3dd57fa4",
+      "obs-20260924-cb49d14a",
+      "obs-20260924-4d42b6a0",
+      "obs-20260924-ee966b4f",
+      "obs-20260924-47d6c78f",
+      "obs-20260924-d54b7e2e",
+      "obs-20260924-29ae0438",
+      "obs-20260924-8f3bfa57",
+      "obs-20260924-52847cf5"
+    ],
+    "rows_read_back": [
+      {
+        "request_id": "obs-20260924-3dd57fa4",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1322,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-cb49d14a",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": null,
+        "status": "error",
+        "error_code": "no_image_part_in_response"
+      },
+      {
+        "request_id": "obs-20260924-4d42b6a0",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": null,
+        "status": "error",
+        "error_code": "no_image_part_in_response"
+      },
+      {
+        "request_id": "obs-20260924-ee966b4f",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1365,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-47d6c78f",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1291,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-d54b7e2e",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1321,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-29ae0438",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1355,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-8f3bfa57",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1269,
+        "status": "success",
+        "error_code": null
+      },
+      {
+        "request_id": "obs-20260924-52847cf5",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "input_tokens": 17,
+        "output_tokens": 1030,
+        "status": "success",
+        "error_code": null
+      }
+    ],
+    "all_found": true
+  },
+  "live_store_contamination": {
+    "orchestration_db": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+    "performance_evidence_by_execution_profile": {
+      "production-execution-leg": 24
+    },
+    "performance_evidence_by_provider": {
+      "deepseek": 8,
+      "google": 11,
+      "openai": 5
+    },
+    "simulated_or_shadow_evidence_rows": 0,
+    "qualified_rows_without_evidence": 0,
+    "capability_state_counts": {
+      "EVALUATING": 1,
+      "QUALIFIED": 3
+    },
+    "dag_node_state_counts": {
+      "BLOCKED": 1,
+      "COMPLETE": 13,
+      "FAILED": 2
+    },
+    "dag_state_event_count": 114,
+    "performance_evidence_count": 24,
+    "simulated_evidence_absent": true,
+    "no_unearned_qualification": true
+  },
+  "qualification_note": "This run records execution evidence only. Whether the vision role moves off EVALUATING is decided by scripts/e3_qualification_from_evidence.py from the recorded rows, not by this script.",
+  "diagnosis": {
+    "measured_rate": {
+      "no_image_part_in_response": 2,
+      "executed_calls": 9,
+      "rate": 0.2222222222222222,
+      "per_shape": {
+        "IMAGE-only": {
+          "executed": 6,
+          "no_image_part_in_response": 2
+        },
+        "TEXT+IMAGE": {
+          "executed": 2,
+          "no_image_part_in_response": 0
+        },
+        "TEXT+IMAGE+imageConfig": {
+          "executed": 1,
+          "no_image_part_in_response": 0
+        }
+      }
+    },
+    "provider_signals_on_recurrence": {
+      "finish_reason_counts": {
+        "IMAGE_RECITATION": 2
+      },
+      "response_part_kinds_counts": {
+        "[]": 2
+      },
+      "distinct_shapes_affected": {
+        "IMAGE-only": 2
+      }
+    },
+    "supported_statements": [
+      "the no-image response recurred 2 time(s) in 9 executed identical single-shot dispatch(es) (observed rate 0.2222222222222222)",
+      "every recurrence carried a provider-supplied finishReason of IMAGE_RECITATION with an empty response part list and no candidate tokens \u2014 that is the provider's own documented stop reason for a generated image withheld by its recitation filter, not an adapter-side or transport-side failure",
+      "the production request shape (responseModalities=['IMAGE'], no imageConfig) was accepted by the provider and returned a decodable inline image on the other IMAGE-only call(s) of the same series, so an IMAGE-only modality list is not on its own rejected by this model"
+    ],
+    "not_supported_by_this_series": [
+      "a stability claim: a series this size bounds the rate, it does not certify the worker as stable",
+      "a breakage claim: the same request succeeded on most calls in the same series",
+      "a modality-shape cause: the recurrences happened to fall on the IMAGE-only shape, but that shape also succeeded repeatedly, and the provider reported an explicit content-side stop reason",
+      "an attribution of the earlier 2026-09-23 failure to a specific trigger: that attempt did not capture finish_reason, so its identity with these recurrences is an inference from identical usage (17 prompt tokens / 0 output) and request, not a recorded fact"
+    ],
+    "remaining_unknown": "what makes the recitation filter fire on some calls and not others for the identical prompt; the provider exposes the stop reason but not the filter input. A bounded series cannot resolve that, and no unbounded generation was performed to chase it."
+  },
+  "rederived": {
+    "from_evidence": "audits\\evidence\\2026-09-24T01-44-32Z-e3-google-image-repeat-series\\evidence.json",
+    "rederived_at_utc": "2026-09-24T01:46:47+00:00",
+    "extra_provider_calls_spent": 0,
+    "note": "artifacts re-derived from the provider responses already captured in that run; no additional provider call, no new execution"
+  }
+}

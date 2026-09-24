@@ -931,11 +931,12 @@ labelled synthetic), and any external message or application.
 
 ## Next non-blocked priority
 
-1. The successor staged by this run —
-   `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23` (pending): a bounded
-   repeat series to measure how often the no-image response recurs, a controlled comparison of the
-   image request shape, and the truth about whether a requested image size can be honoured. Then
-   re-run the evidence-backed qualification for the vision role.
+1. **DONE 2026-09-24T01:44Z** — `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23`
+   (bounded 9-call repeat series through the real path; recurrence measured at **2 of 9** with
+   `finishReason=IMAGE_RECITATION` on both; request-shape comparison; size-control probe). See
+   § "Google image worker — bounded repeat series + request-protocol conformance" at the end of this
+   file. The remaining item from it is the *unresolved trigger of the recitation stop*, which no
+   bounded series can settle — recorded, not chased with unbounded generation.
 2. **After Mukund configures the remaining provider credentials on 2026-09-24:** re-run the local
    Stage 2 readiness gate (`scripts/e3_stage2_readiness_gate.py` + `scripts/evidence_runner.py`) and,
    only if all three conditions hold (credentials confirmed configured; every readiness criterion
@@ -985,3 +986,59 @@ the canonical artifacts already say, and writes only `runtime/career-ops/daily-b
 - **Open owner decision (not blocking, item 14 in `tasks-or-issues/overnight-owner-actions-2026-09-24.md`):**
   keep the brief local-only, or name a channel to deliver it to. The delivery path will stay separate
   from the brief so a broken channel can never make the brief look unhealthy.
+
+## Google image worker — bounded repeat series + request-protocol conformance (2026-09-24T01:44Z)
+
+Task `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23`, authority
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. **Stage 2 was NOT enabled and no
+production dispatch was enabled by this work.**
+
+- **Evidence:** `audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/` (evidence.json,
+  evidence.md, observations.json — the per-call record written as the series ran) and
+  `audits/evidence/2026-09-24T01-46-56Z-e3-qualification-from-evidence/`.
+- **Stated budget, honoured:** **9** real Google image generations, stated in the evidence artifact
+  before the first call (6 identical IMAGE-only repeats, 2 `['TEXT','IMAGE']`, 1
+  `['TEXT','IMAGE']+imageConfig`). 9 attempted / 9 recorded; no abort; no metadata call either, so
+  the generation count equals the total. Every call ran the real deployed path
+  (`ExecutionAdapterRegistry` → `GeminiImageExecutionAdapter` → `generateContent`) and persisted
+  schema-v2 `dag_node`/`dag_state_event`/`performance_evidence` rows (google evidence rows 2 → 11).
+  E2 telemetry went only through the public `governor.record_request()`; all 9 rows were read back
+  from `governor.db` (`all_found: true`) — the two failures record `status=error`,
+  `output_tokens=null` (never approximated).
+- **Measured recurrence: 2 of 9** (rate 0.2222) — 2/6 on the IMAGE-only shape, 0/2 on `TEXT+IMAGE`,
+  0/1 on `TEXT+IMAGE+imageConfig`. This is a measured rate over an executed series, nothing more.
+- **New finding (protocol fact):** both recurrences carried a **provider-supplied
+  `finishReason=IMAGE_RECITATION`** with an empty response part list, no candidate, and 17 prompt /
+  **0** output tokens — the provider's own content-side stop reason for a withheld image, not an
+  adapter/transport failure and not a modality-list rejection (the same IMAGE-only shape returned a
+  decodable 1024×1024 JPEG on 4 of its 6 calls). The earlier 21:07Z failure recorded no
+  `finish_reason`, so its identity with these is an inference from identical usage (17/0) and the
+  identical request — not a recorded fact.
+- **Still unknown:** what makes the recitation filter fire on some calls and not others for the
+  identical prompt. The provider exposes the stop reason but not the filter input. Recorded as an
+  open unknown; it was deliberately NOT chased with unbounded generation.
+- **Image request shape — complete enough for this model, and now contract-declarable.** The
+  adapter previously hard-coded `generationConfig.responseModalities=['IMAGE']`. It now accepts an
+  optional contract-declared `response_modalities` and `image_config`, echoing both back on the
+  result and in the sanitized dispatch metadata; the **production default shape is unchanged**.
+  Measured: the provider accepted IMAGE-only and returned images; it also accepted
+  `['TEXT','IMAGE']`; neither shape is rejected.
+- **Output size — recorded as a protocol fact, never as a pass.** A size stated only in the prompt is
+  **ignored** (objective asked 64×64; every IMAGE-only call returned 1024×1024). The provider's own
+  parameter `generationConfig.imageConfig={imageSize:'512'}` was **accepted and changed the output to
+  512×512**, so size is controllable through that supported parameter. A literal 64×64 is **not**
+  achievable this way (it is a size class, not arbitrary pixels) and remains a **known limitation**.
+  No verification contract was changed or weakened: the image node's deterministic contract is still
+  "an image part arrived and decodes".
+- **Qualification (evidence-driven, bar unchanged):** re-running
+  `scripts/e3_qualification_from_evidence.py` moved **`google-nano-banana-2` / vision from EVALUATING
+  to QUALIFIED** — 11 recorded executions, 8 verified passes, 8 first-pass passes, all six checks
+  pass, `qualified_rows_without_evidence = 0`. **This must not be read as "always returns an image"**:
+  the same series measured a 2/9 no-image rate, and the harness bar qualifies recorded dispatch
+  repeatability under the declared deterministic contract, not image reliability.
+- **Regressions:** full E1/E2/E3/E4/E5 + queue/bridge suite run via `scripts/evidence_runner.py`
+  after the change (see `state/full_build_tracker.md` for the exact counts/SHA), plus a new offline
+  suite `exec-brain/tests/test_e3_google_image_protocol.py` (18 tests) covering the declared request
+  shape, the attempt/persistence path, the no-image-is-not-a-pass rule and the repeat-series
+  accounting. Change deployed to the runtime root via `scripts/deploy_e3_runtime.py` (backup
+  `exec-brain/backups/e3-deploy-20260924T014415Z`).

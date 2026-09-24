@@ -513,3 +513,40 @@ retry finished that unit only — nothing above was recreated, reverted or re-ru
 - **Unchanged:** scope, stop conditions, priority policy, delivery honesty (`not_verified`), the
   07:00 `ChiefCareerBrief` schedule (queried as `Ready`, next run 24-09-2026 07:00), and the fact that
   this worker still owns no career state.
+
+## Google image worker — bounded repeat series + image request-protocol conformance (2026-09-24T01:44Z)
+
+Task `agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23`. Everything below is
+from recorded provider responses and recorded store rows. **Stage 2 and production dispatch were
+NOT enabled** by this work.
+
+| Item | State | Evidence |
+|---|---|---|
+| Stated call budget honoured | **DONE** | 9 real Google image generations declared in the evidence artifact before the first call; 9 attempted, 9 recorded, no abort. Table: 6 identical `IMAGE-only` repeats, 2 `['TEXT','IMAGE']`, 1 `['TEXT','IMAGE']+imageConfig`. No metadata call was made either, so generations == stated total |
+| Ran on the real deployed path | **DONE** | every call went `ExecutionAdapterRegistry` → `GeminiImageExecutionAdapter` → `generateContent`; per-call sanitized diagnostics recorded; schema-v2 `dag_node`/`dag_state_event`/`performance_evidence` rows persisted (google evidence rows 2 → 11) |
+| E2 integration public-interface only | **VERIFIED** | telemetry written only through `governor.record_request()`; all 9 request ids read back from `governor.db` (`all_found: true`); the two failures record `status=error` with `output_tokens=null`, never approximated; no SQL write to `exec_brain.db` or `governor.db` from E3 |
+| Recurrence measured, not characterised | **DONE** | **2 of 9** (rate 0.2222); 2/6 on `IMAGE-only`, 0/2 `TEXT+IMAGE`, 0/1 `TEXT+IMAGE+imageConfig`. Reported as counts over executed calls; no stable/unreliable/broken claim is made |
+| Root signal of the recurrence | **NEW FINDING** | both recurrences carried provider-supplied `finishReason=IMAGE_RECITATION`, empty response part list, no candidate, 17 prompt / **0** output tokens — a provider content-side stop, not an adapter/transport failure and not a modality rejection |
+| Request shape completeness | **SETTLED (measured)** | the production shape (`responseModalities=['IMAGE']`, no `imageConfig`) is accepted and returned a decodable 1024×1024 JPEG on 4 of its 6 calls; `['TEXT','IMAGE']` is also accepted. The adapter now takes an optional contract-declared `response_modalities` / `image_config` (production default unchanged) and echoes the shape used into the result + sanitized metadata + persisted attempt record |
+| Prompt-stated image size | **IGNORED — protocol fact, not a pass** | objective asked 64×64; every `IMAGE-only` call returned 1024×1024 |
+| Explicit size control | **SUPPORTED PARAMETER PROVEN** | `generationConfig.imageConfig={imageSize:'512'}` was accepted and returned **512×512**; exact 64×64 is **not** achievable through it (size class, not arbitrary pixels) → recorded as a **known limitation** |
+| Readiness criteria weakened | **NONE** | the image node's deterministic verification contract is unchanged ("image part present and decodes"); size findings are recorded as protocol facts |
+| Evidence-backed qualification for vision | **MOVED OFF EVALUATING** | `scripts/e3_qualification_from_evidence.py` (bar unchanged: ≥2 verified passes over ≥2 recorded executions, ≥1 first-pass) → `google-nano-banana-2`/vision **QUALIFIED**: 11 recorded executions, 8 verified passes, 8 first-pass, all six checks pass, `qualified_rows_without_evidence = 0`. **Not** to be read as "always returns an image" — the same series measured a 2/9 no-image rate; the bar qualifies recorded dispatch repeatability under the declared contract |
+| New offline test suite | **PASS** | `exec-brain/tests/test_e3_google_image_protocol.py` — **18 passed** (stubbed HTTP layer, isolated db, no provider call) covering the declared shape reaching the payload, shape + diagnostics surviving into the persisted attempt, the no-image-is-not-a-pass rule, and the repeat-series accounting |
+| Full regression | **PASS** | `python scripts/evidence_runner.py --label e3-google-image-protocol-conformance` → **16 suites / 456 tests / 16 passed / 0 failed / 0 unavailable, exit_code 0**, code SHA `5a12463`; artifact `audits/evidence/2026-09-24T01-47-46Z-e3-google-image-protocol-conformance/` |
+| Deployment | **DONE** | `python scripts/deploy_e3_runtime.py` copied `e3_qualification_benchmark.py`, `e3_execution.py`, `gemini_adapter.py` to the runtime root with rollback backup `exec-brain/backups/e3-deploy-20260924T014415Z` (manifest recorded there) |
+
+Still open (recorded, not chased): **what makes the provider's recitation filter fire on some calls
+and not others for the identical prompt.** The earlier 21:07Z failure `gem-d8c43b8cb447` captured no
+`finish_reason`, so its identity with these recurrences is an inference from identical usage (17
+prompt / 0 output tokens) and the identical request — stated as an inference, never as a fact. No
+unbounded or exploratory generation was performed to chase it.
+
+Evidence: `audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/` (evidence.json,
+evidence.md, observations.json — the per-call record written incrementally) and
+`audits/evidence/2026-09-24T01-46-56Z-e3-qualification-from-evidence/`. One driver defect was fixed
+inside this task: the first revision of the runner wrote `evidence.json` and then crashed in the
+markdown renderer (`calls_completed` read from the wrong nesting level). The provider cost was
+already spent at that point, so the artifacts were re-derived from the captured responses with the
+new `--from-evidence` path — **0 additional provider calls** — rather than re-running the series.
+
