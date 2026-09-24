@@ -1,0 +1,36 @@
+{
+  "task_id": "agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24",
+  "created_at": "2026-09-24T12:01:00Z",
+  "objective": "Make the new Codex-style open-web research lane the real scheduled job-search path across UK/Dubai/Japan/Singapore, alongside structured providers and Company Watch/watchlist, and prove it with live read-only acceptance. Retire the old scheduled behavior where the owner's Intern/Internship-only scanner is the sole discovery gate. Produce one unified nightly candidate manifest and morning Career Brief with source/funnel attribution.",
+  "authority": "owner instruction in current chat",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-career-codex-style-open-web-job-research-2026-09-24 completed truthfully.",
+    "agent-career-priority-company-watchlist-engine-2026-09-24 completed truthfully or has a valid empty-watchlist mode.",
+    "Existing unified discovery/high-recall tests remain green."
+  ],
+  "allowed_scope": [
+    "Add a scheduled orchestrator that combines: current structured regional provider scan, open-web/Codex research, Company Watch findings, priority company watchlist findings, recruiter-watch exports when present and LinkedIn-export intake when present; then feeds one unified funnel.",
+    "The scheduled path must use the high-recall policy by default. Preserve intern_only only as an explicit diagnostic/compare mode, not the production discovery gate.",
+    "Run broad open-web searches for each configured region and role family. Explicitly test public LinkedIn Jobs discovery (for example indexed/public LinkedIn job URLs), Indeed/public results where accessible, Google/web-indexed vacancy discovery, and direct ATS/employer-careers discovery. Record each source class as reached, blocked, unavailable or not applicable based on real evidence.",
+    "Do not declare the live research lane production-ready unless at least one real current-web search mechanism is operational end-to-end. If Codex CLI cannot search the live web, use the implemented fallback provider interface and prove an allowed working source; otherwise stop with a precise blocker rather than falling back silently to fixtures.",
+    "For LinkedIn specifically, prove the system can discover at least a public LinkedIn Jobs result URL or truthfully record that public LinkedIn discovery is blocked in the environment. Do not use login/session cookies or local browser automation.",
+    "Validate discovered URLs where allowed, preserve current/live verification timestamps, and clearly separate validated-live, discovered-unverified and inaccessible results.",
+    "Replace/update the four ChiefCareerScan scheduled launchers so they call the unified scheduled orchestrator rather than regional_job_search.py alone; keep all scheduled runs read-only/dry-run with no automatic canonical tracker write or application action.",
+    "Keep per-region schedules staggered or otherwise concurrency-safe; enforce bounded run time, retry/idempotency, and source budgets so one blocked site cannot consume the whole scan.",
+    "Feed the resulting unified manifest/funnel metrics into Career Daily Brief: raw results, source coverage, semantic pass, eligibility pass, duplicates, tracker candidates, watchlist hits and explicit zero attribution.",
+    "Run an owner-safe live acceptance for each region with bounded queries and no external mutation, plus a whole-company regression. Canonical tracker hashes must be unchanged.",
+    "Document exact operational behavior, run commands, source coverage matrix, rollback to old scheduler, and no-go criteria.",
+    "Commit and push all changes."
+  ],
+  "stop_conditions": [
+    "No autonomous tracker apply, job submission, outreach, LinkedIn mutation or account login.",
+    "No local interactive browser/GUI automation and no signed-in profile/cookie/session access.",
+    "Do not claim LinkedIn/Indeed/Google/source coverage from fixture tests alone.",
+    "Do not call a source 'empty' when it was inaccessible or blocked.",
+    "Do not cut over the schedule if live research has no functioning current-web mechanism."
+  ],
+  "notes": "This is the operational cutover task missing from the first web-research contract. Current run_scheduled_scan.cmd still invokes regional_job_search.py and the old Career Ops lane title filter; this task makes the new research architecture the actual scheduled behavior."
+}
