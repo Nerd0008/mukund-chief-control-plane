@@ -970,6 +970,17 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     hours = int(window_hours or cfg["window"]["default_hours"])
     if hours > cfg["window"]["max_hours"]:
         hours = cfg["window"]["max_hours"]
+    # The brief's identity is its *content*, and its content is "the state as of the
+    # end of a window" - not "the state at the instant this process happened to run".
+    # So the as-of/window clock is floored to a declared quantum: two runs inside the
+    # same quantum over unchanged artifacts are the same brief and the second one
+    # writes no bytes. `generated_at` keeps the true run instant (and is excluded
+    # from the digest), so the brief still says exactly when it was produced.
+    observed_at = now
+    quantum_min = int(cfg["window"].get("quantize_minutes", 0) or 0)
+    if quantum_min > 0:
+        per = quantum_min * 60
+        now = dt.datetime.fromtimestamp((int(now.timestamp()) // per) * per, dt.timezone.utc)
     window_start = now - dt.timedelta(hours=hours)
 
     inputs = collect_inputs(cfg)
@@ -1114,10 +1125,15 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     brief = {
         "schema_version": SCHEMA_VERSION,
         "brief_id": None,  # set below (derived from the content digest)
-        "generated_at": now.replace(microsecond=0).isoformat(),
+        "generated_at": observed_at.replace(microsecond=0).isoformat(),
         "as_of": now.replace(microsecond=0).isoformat(),
         "window": {"hours": hours, "from": window_start.replace(microsecond=0).isoformat(),
-                   "to": now.replace(microsecond=0).isoformat()},
+                   "to": now.replace(microsecond=0).isoformat(),
+                   "quantize_minutes": quantum_min,
+                   "quantize_note": ("the as-of/window clock is floored to this quantum, so "
+                                     "re-running inside the same quantum over unchanged "
+                                     "artifacts produces the identical brief and writes no bytes; "
+                                     "generated_at keeps the true run instant")},
         "status": {
             "ok": True,
             "degraded": bool(unknowns),
@@ -1335,7 +1351,12 @@ def run_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     # `chief_summary` (and the excluded delivery block) exist. Called directly,
     # build_brief() finalises it too; the value is the same either way.
     brief["content_digest"] = content_digest(brief)
-    brief["brief_id"] = f"cdb-{now.strftime('%Y%m%dT%H%M%SZ')}-{brief['content_digest'][:8]}"
+    # The id is stamped with the brief's own as_of (the floored window end), not the
+    # instant this process ran: two runs inside one quantum over unchanged artifacts
+    # must produce the same id as well as the same digest. `generated_at` still
+    # carries the true run instant.
+    as_of = dt.datetime.fromisoformat(brief["as_of"])
+    brief["brief_id"] = f"cdb-{as_of.strftime('%Y%m%dT%H%M%SZ')}-{brief['content_digest'][:8]}"
     result = write_brief(brief, root, dry_run=dry_run)
     delivery = dict(brief["delivery"])
     delivery["writes"] = result.get("writes", [])

@@ -12,7 +12,10 @@ The tests pin the four contracts this worker is judged on:
 2. **No fabricated priority facts** - every score reports its components,
    weights and UNKNOWN inputs; an unknown input is not imputed.
 3. **Idempotency** - re-running over unchanged inputs writes no new bytes and
-   produces the same content digest; only the append-only run log grows.
+   produces the same content digest; only the append-only run log grows. The
+   as-of clock is floored to a declared quantum (`window.quantize_minutes`), so
+   the brief's identity is the state as of the end of a quantum rather than the
+   instant the process happened to run; `0` is the documented opt-out.
 4. **Read-only** - the canonical workbooks are byte-identical before/after and
    the brief records that.
 
@@ -284,18 +287,50 @@ def test_content_digest_ignores_clock_and_delivery_but_not_content(tmp_path):
     assert db.content_digest(a) != db.content_digest(b)
 
 
-def test_window_is_part_of_the_brief_identity_but_repeating_a_run_is_a_no_op(tmp_path):
+def test_brief_identity_is_the_quantized_window_and_a_sub_quantum_rerun_is_a_no_op(tmp_path):
+    """The as-of clock is floored to the declared quantum, so the brief's identity
+    is "the state as of the end of a quantum", not "the instant this process ran"."""
     cfg = empty_cfg(tmp_path)
-    db.run_brief(cfg, now=NOW)
-    # a later logical clock changes the window, which is real content: new brief
-    out2, _ = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=30))
+    quantum = int(cfg["window"]["quantize_minutes"])
+    assert quantum == 60 and NOW.minute == 0  # NOW sits exactly on a quantum boundary
+    first, _ = db.run_brief(cfg, now=NOW)
     files = sorted(p.name for p in Path(cfg["out_dir"]).glob("brief-*.json"))
-    assert len(files) == 2
-    # repeating the *same* run writes nothing at all
-    out3, res3 = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=30))
-    assert out3["content_digest"] == out2["content_digest"]
-    assert res3["writes"] == []
+    assert len(files) == 1
+
+    # 30 minutes later is still inside the same quantum: same brief, no new bytes
+    inner, inner_res = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=30))
+    assert inner["window"]["to"] == first["window"]["to"]
+    assert inner["content_digest"] == first["content_digest"]
+    # the id is stamped with the brief's own as_of, so it does not drift per run
+    assert inner["brief_id"] == first["brief_id"]
+    assert inner_res["writes"] == [] and inner["idempotent"] is True
     assert sorted(p.name for p in Path(cfg["out_dir"]).glob("brief-*.json")) == files
+
+    # crossing the quantum boundary moves the window, which is real content
+    later, _later_res = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=90))
+    assert later["window"]["to"] == "2026-09-24T08:00:00+00:00"
+    assert later["window"]["quantize_minutes"] == quantum
+    files2 = sorted(p.name for p in Path(cfg["out_dir"]).glob("brief-*.json"))
+    assert len(files2) == 2
+    # repeating that later run writes nothing at all
+    again, again_res = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=100))
+    assert again["content_digest"] == later["content_digest"]
+    assert again_res["writes"] == []
+    assert sorted(p.name for p in Path(cfg["out_dir"]).glob("brief-*.json")) == files2
+
+
+def test_quantisation_can_be_disabled_and_every_run_then_gets_its_own_as_of(tmp_path):
+    """`quantize_minutes: 0` is the declared opt-out: no flooring, no collapsing."""
+    cfg = empty_cfg(tmp_path)
+    cfg["window"]["quantize_minutes"] = 0
+
+    a, _ = db.run_brief(cfg, now=NOW)
+    b, _ = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=30))
+
+    assert a["window"]["quantize_minutes"] == 0
+    assert b["window"]["to"] != a["window"]["to"]
+    assert b["content_digest"] != a["content_digest"]
+    assert len(sorted(p.name for p in Path(cfg["out_dir"]).glob("brief-*.json"))) == 2
 
 
 # --------------------------------------------------------------------------- #

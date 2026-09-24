@@ -22,7 +22,9 @@
   "window": {
     "default_hours": 24,
     "max_hours": 168,
-    "note": "The window bounds what counts as 'new'. It never widens a source's own truth: a tracker row is 'new' only if its own date-found column falls inside the window."
+    "quantize_minutes": 60,
+    "note": "The window bounds what counts as 'new'. It never widens a source's own truth: a tracker row is 'new' only if its own date-found column falls inside the window.",
+    "quantize_note": "The as-of/window clock is floored to quantize_minutes (default: hourly). Two runs inside the same quantum over unchanged artifacts therefore produce the identical brief and the second one writes no new bytes; generated_at still carries the true run instant. Set to 0 to disable quantisation (every run then gets its own as-of and is a new brief)."
   },
   "freshness": {
     "scan_stale_after_hours": 30,

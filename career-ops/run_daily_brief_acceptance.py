@@ -14,7 +14,10 @@ the evidence bundle records the raw values it checked.
            reports the missing sources and still produces a usable brief.
   stage 4  idempotency: a second identical run produces the same content digest
            and the same input fingerprint, writes NO new bytes, and grows only
-           the append-only run log. A different window is a different brief.
+           the append-only run log. The as-of clock is floored to a declared
+           quantum, so a run inside the same quantum over unchanged artifacts is
+           the *same* brief; a different window (a crossed quantum) is a
+           genuinely different brief.
   stage 5  no fabricated priority facts: every item's score equals the sum of its
            declared component contributions; unknowns are listed and excluded;
            a zero-coverage item is labelled unscoreable, not scored.
@@ -228,6 +231,14 @@ def main(argv=None) -> int:
     # ---------------- stage 4: idempotency ------------------------------ #
     again, again_res = db.run_brief(cfg, now=NOW, out_dir_override=str(live_dir))
     files_after = {p.name: sha(p) for p in live_dir.glob("*")}
+    # The as-of clock is floored to the declared quantum, so a run inside the
+    # same quantum over unchanged artifacts is the *same* brief, not a new one.
+    quantum_min = int(cfg["window"].get("quantize_minutes") or 0)
+    within, within_res = db.run_brief(cfg, now=NOW + dt.timedelta(minutes=30),
+                                      out_dir_override=str(live_dir))
+    files_after_within = {p.name: sha(p) for p in live_dir.glob("*")}
+    # only the append-only run log may differ; no brief/summary/latest byte changes
+    _no_log = lambda fs: {k: v for k, v in fs.items() if k != "run-log.jsonl"}
     third, third_res = db.run_brief(cfg, now=NOW + dt.timedelta(hours=6),
                                     out_dir_override=str(live_dir))
     ev["stage_4_idempotency"] = {
@@ -235,6 +246,12 @@ def main(argv=None) -> int:
         "fingerprint_repeat_identical": again["input_fingerprint"] == live["input_fingerprint"],
         "second_run_writes": again_res["writes"],
         "second_run_reported_idempotent": again["idempotent"],
+        "quantize_minutes": quantum_min,
+        "sub_quantum_run_same_digest": within["content_digest"] == live["content_digest"],
+        "sub_quantum_run_same_brief_id": within["brief_id"] == live["brief_id"],
+        "sub_quantum_run_writes": within_res["writes"],
+        "sub_quantum_run_added_no_file": _no_log(files_after_within) == _no_log(files_after),
+        "brief_window_reports_quantum": brief["window"].get("quantize_minutes") == quantum_min,
         "third_run_different_window_new_brief": third["content_digest"] != live["content_digest"],
         "third_run_writes": len(third_res["writes"]),
         "run_log_entries": len([l for l in (live_dir / "run-log.jsonl")
@@ -246,6 +263,16 @@ def main(argv=None) -> int:
           and ev["stage_4_idempotency"]["fingerprint_repeat_identical"])
     check("stage4 a repeat run writes no new bytes and says so", again_res["writes"] == []
           and again["idempotent"] is True, again_res["writes"])
+    check("stage4 a run inside the same declared quantum is the same brief and writes nothing",
+          quantum_min > 0
+          and ev["stage_4_idempotency"]["sub_quantum_run_same_digest"]
+          and ev["stage_4_idempotency"]["sub_quantum_run_same_brief_id"]
+          and within_res["writes"] == []
+          and ev["stage_4_idempotency"]["sub_quantum_run_added_no_file"],
+          {"quantize_minutes": quantum_min, "writes": within_res["writes"]})
+    check("stage4 the brief reports the quantum its identity is derived from",
+          ev["stage_4_idempotency"]["brief_window_reports_quantum"]
+          and bool(brief["window"].get("quantize_note")))
     check("stage4 a different window is a genuinely different brief",
           ev["stage_4_idempotency"]["third_run_different_window_new_brief"])
 
