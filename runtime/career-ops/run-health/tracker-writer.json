@@ -67,53 +67,53 @@
       "verification_ok": false
     },
     "uk": {
-      "applied": true,
-      "at": "2026-09-24T02:08:01+00:00",
+      "applied": false,
+      "at": "2026-09-24T03:50:29+00:00",
       "counts": {
-        "appended": 1,
-        "data_rows_after": 35,
+        "appended": 3,
+        "data_rows_after": null,
         "data_rows_before": 34,
         "duplicates": 0,
-        "input": 1,
+        "input": 3,
         "refreshed": 0,
         "rejected": 0
       },
       "error": null,
-      "mode": "apply",
+      "mode": "dry-run",
       "problems": 0,
       "region": "uk",
-      "result": "ok",
-      "status": "ok",
+      "result": "dry-run",
+      "status": "dry-run",
       "tracker_filename": "uk-cyber-job-tracker.xlsx",
-      "verification_ok": true
+      "verification_ok": false
     }
   },
   "last_run": {
-    "applied": true,
-    "at": "2026-09-24T02:08:01+00:00",
+    "applied": false,
+    "at": "2026-09-24T03:50:29+00:00",
     "counts": {
-      "appended": 1,
-      "data_rows_after": 35,
+      "appended": 3,
+      "data_rows_after": null,
       "data_rows_before": 34,
       "duplicates": 0,
-      "input": 1,
+      "input": 3,
       "refreshed": 0,
       "rejected": 0
     },
     "error": null,
-    "mode": "apply",
+    "mode": "dry-run",
     "problems": 0,
     "region": "uk",
-    "result": "ok",
-    "status": "ok",
+    "result": "dry-run",
+    "status": "dry-run",
     "tracker_filename": "uk-cyber-job-tracker.xlsx",
-    "verification_ok": true
+    "verification_ok": false
   },
   "owns": "deduplicated append into a canonical regional workbook",
   "roster": "B08",
-  "runs_recorded": 16,
+  "runs_recorded": 17,
   "schema_version": 1,
   "title": "Excel Tracker Writer",
-  "updated_at": "2026-09-24T02:08:01+00:00",
+  "updated_at": "2026-09-24T03:50:29+00:00",
   "worker": "career-ops/tracker_writer.py"
 }
