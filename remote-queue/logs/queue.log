@@ -809,3 +809,5 @@ error: Please commit or stash them.
 [2026-09-24T20:30:40.455663Z] git pull: success (with stash/restore)
 [2026-09-24T20:31:06.803562Z] git pull: success (with stash/restore)
 [2026-09-24T20:32:04.845378Z] git pull: success (with stash/restore)
+[2026-09-24T20:32:07.425670Z] Claimed task: agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24
+[2026-09-24T20:32:07.428340Z] Handling task: agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 (attempt 1)

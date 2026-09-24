@@ -33,5 +33,26 @@
   "references": [
     "remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json",
     "handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md"
-  ]
+  ],
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T20:41:46.871548Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=69).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=69).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
