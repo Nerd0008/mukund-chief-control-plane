@@ -1,0 +1,45 @@
+{
+  "evidence_dir": "audits\\evidence\\2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final",
+  "verdict": "ATTENTION",
+  "fail_count": 0,
+  "attention_count": 2,
+  "escalations": [
+    {
+      "severity": "info",
+      "category": "queue",
+      "item": "12 blocked queue task(s): categories=['execution_error', 'external_provider']"
+    },
+    {
+      "severity": "owner_action",
+      "category": "credentials",
+      "item": "7 provider credential(s) absent \u2014 owner action (provider keys)"
+    },
+    {
+      "severity": "warning",
+      "category": "provider_content_stop_pressure",
+      "item": "provider content-side stop pressure (recorded evidence, observation only): google/gemini-3.1-flash-image [worker google-nano-banana-2] stop rate 0.222 at sample size 9 classified recorded dispatch attempts (bounds: rate >= 0.2 AND sample >= 5); last finishReason IMAGE_RECITATION. observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision"
+    }
+  ]
+}
+health_snapshot_exit=0
+{
+  "out_dir": "audits\\evidence\\2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final",
+  "verdict": "ATTENTION",
+  "active_count": 3,
+  "blocked_count": 12,
+  "owner_actions": 18,
+  "escalations": 3
+}
+morning_brief_exit=0
+{
+  "code_sha": "ed390dbb3f53f499ee5a9a9339fd31289f17d0d6",
+  "checks_passed": 36,
+  "checks_total": 36,
+  "failed_checks": [],
+  "real_provider_calls": 0,
+  "stub_dispatches": 10,
+  "evidence_kind": "stubbed_provider_failure",
+  "out_dir": "audits\\evidence\\2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final"
+}
+drill_harness_exit=0
+deploy_dry_run_exit=0

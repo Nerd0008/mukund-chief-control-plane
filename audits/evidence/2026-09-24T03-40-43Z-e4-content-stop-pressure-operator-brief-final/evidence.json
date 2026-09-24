@@ -1,0 +1,1204 @@
+{
+  "harness": "e4e5-real-path-drill-harness",
+  "task_id": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "code_sha": "ed390dbb3f53f499ee5a9a9339fd31289f17d0d6",
+  "run_started_utc": "2026-09-24T03:42:07.105983+00:00",
+  "run_finished_utc": "2026-09-24T03:42:07.616572+00:00",
+  "evidence_kind": "stubbed_provider_failure",
+  "evidence_kind_note": "provider transport is a recorded in-process stub; these drills evidence OUR handling of injected failures on the real execution path and are NOT real external provider evidence",
+  "real_provider_calls": 0,
+  "stub_dispatches": 10,
+  "stage2_enabled": false,
+  "deployment_performed": false,
+  "isolation": {
+    "live_store_hashes_before": {
+      "orchestration.db": "d9ba0e531a634e2181d4b9484711921031bb9688ee69749061944c2378da7106",
+      "orchestration.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "orchestration.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "governor.db": "6e7f6c3e6700ccbd42f97c3a6786b7dcf3d06875646d6d23814a34d8822e489e",
+      "governor.db-wal": null,
+      "governor.db-shm": null,
+      "exec_brain.db": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+      "exec_brain.db-wal": null,
+      "exec_brain.db-shm": null
+    },
+    "live_store_hashes_after": {
+      "orchestration.db": "d9ba0e531a634e2181d4b9484711921031bb9688ee69749061944c2378da7106",
+      "orchestration.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "orchestration.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "governor.db": "6e7f6c3e6700ccbd42f97c3a6786b7dcf3d06875646d6d23814a34d8822e489e",
+      "governor.db-wal": null,
+      "governor.db-shm": null,
+      "exec_brain.db": "0ffd7ff23a0ae739240faebd2acc6862c57d88fde0f1783802a919c0fbe5dd34",
+      "exec_brain.db-wal": null,
+      "exec_brain.db-shm": null
+    },
+    "live_stores_changed": [],
+    "isolated_db": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e4e5-drills-97hl5wqb\\orchestration.db",
+    "isolated_db_exists": true,
+    "e2_rows_written": 0,
+    "e2_linkage_kind": "stubbed (no live governor row written)"
+  },
+  "adapter_call_log": [
+    {
+      "scenario": "D1_checkpoint_failover_handover",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "transport_error",
+      "objective_hash": "0bf6af515a19",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D1_checkpoint_failover_handover",
+      "worker_id": "codex-cli",
+      "behaviour": "ok",
+      "objective_hash": "25a25a7c3adb",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D3_provider_outage",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "outage",
+      "objective_hash": "b588939d9a0b",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D3_provider_outage",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "transport_error",
+      "objective_hash": "b588939d9a0b",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D4_malformed_output",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed",
+      "objective_hash": "84625d8dfc80",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D4_malformed_output",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed_then_ok",
+      "objective_hash": "84625d8dfc80",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D4_malformed_output",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed_then_ok",
+      "objective_hash": "05b82af79d61",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D5_convergence_cap",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed",
+      "objective_hash": "229b28d1085c",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D5_convergence_cap",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed",
+      "objective_hash": "229b28d1085c",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    },
+    {
+      "scenario": "D5_convergence_cap",
+      "worker_id": "deepseek-v41-flash",
+      "behaviour": "malformed",
+      "objective_hash": "229b28d1085c",
+      "objective_present": true,
+      "contract_keys": [
+        "contract_id",
+        "max_tokens",
+        "objective",
+        "temperature",
+        "timeout"
+      ]
+    }
+  ],
+  "drills": {
+    "D1": {
+      "drill": "D1_checkpoint_failover_handover",
+      "plan_id": "drill-e4-failover",
+      "task_id": "drill-task-e4-1",
+      "expected_token": "HANDOVER-5501",
+      "checkpoint": {
+        "checkpoint_id": "ckpt-d6baa1c73826",
+        "state_saved": {
+          "attempt": 1,
+          "completed_substeps": [
+            "read_objective",
+            "draft_outline"
+          ],
+          "residual_requirement": "reply with exactly HANDOVER-5501",
+          "checkpoint_reason": "resource_driven_pre_dispatch"
+        },
+        "checkpoints_for_task": [
+          {
+            "checkpoint_id": "ckpt-d6baa1c73826",
+            "node_id": "node-drill-e4-failover-1",
+            "created_at": "2026-09-24T03:42:07.219634"
+          }
+        ],
+        "restored": {
+          "state": {
+            "attempt": 1,
+            "completed_substeps": [
+              "read_objective",
+              "draft_outline"
+            ],
+            "residual_requirement": "reply with exactly HANDOVER-5501",
+            "checkpoint_reason": "resource_driven_pre_dispatch"
+          },
+          "created_at": "2026-09-24T03:42:07.219634"
+        },
+        "restore_matches_saved": true
+      },
+      "primary_dispatch": {
+        "worker_id": "deepseek-v41-flash",
+        "stub_behaviour": "transport_error",
+        "node_state": "FAILED",
+        "dispatch_attempts": [
+          {
+            "attempt": 1,
+            "dispatch_id": null,
+            "status": "FAILED",
+            "provider": null,
+            "model": null,
+            "error": "ProviderOutage: stub outage: deepseek-v41-flash unreachable",
+            "runtime_s": 0.0,
+            "usage": null,
+            "usage_exposed": false,
+            "objective_hash": "0bf6af515a19",
+            "e2_request_id": "e2-stub-92fa9295",
+            "content_present": false,
+            "finish_reason": null,
+            "image_mime": null,
+            "image_dims": null,
+            "image_size_bytes": null,
+            "image_decode_ok": null,
+            "prompt_feedback": null,
+            "requested_model": null,
+            "candidate_count": null,
+            "candidate_finish_reasons": null,
+            "response_part_kinds": null,
+            "response_text_chars": null,
+            "response_text_excerpt": null,
+            "requested_response_modalities": null,
+            "requested_image_config": null
+          }
+        ],
+        "verification_attempts": [
+          {
+            "attempt": 1,
+            "method": "test",
+            "outcome": "FAIL",
+            "passed": false,
+            "issues": [
+              "Test 'node-drill-e4-failover-1 exact token': expected HANDOVER-5501, got None"
+            ]
+          }
+        ],
+        "failure_attribution": "provider_error",
+        "persisted_node": {
+          "node_id": "node-drill-e4-failover-1",
+          "plan_id": "drill-e4-failover",
+          "task_subtask_id": null,
+          "objective": "Drill objective. Reply with exactly HANDOVER-5501.",
+          "capability_roles": "[\"builder\"]",
+          "dependencies": "[]",
+          "inputs": "{}",
+          "expected_outputs": "{}",
+          "floor_id": null,
+          "allowed_tools": "[]",
+          "permissions": "{}",
+          "verification_method": "test",
+          "assigned_worker": "deepseek-v41-flash",
+          "fallback_candidates": "[]",
+          "state": "FAILED",
+          "attempts": 1,
+          "defect_attempts": "{}",
+          "created_at": "2026-09-24 03:42:07",
+          "updated_at": "2026-09-24 03:42:07"
+        }
+      },
+      "equivalent_selection": {
+        "worker_id": "codex-cli",
+        "task_family": "code",
+        "role": "builder",
+        "equivalence": "partial",
+        "reason": "Same role/task family qualified worker available"
+      },
+      "capability_fixture": {
+        "kind": "drill_fixture_not_qualification_evidence",
+        "db": "isolated drill orchestration db",
+        "records": [
+          {
+            "worker_id": "deepseek-v41-flash",
+            "task_family": "code",
+            "capability_role": "builder",
+            "previous_state": "UNPROVEN",
+            "new_state": "QUALIFIED",
+            "evidence_count": 1,
+            "first_pass_successes": 0,
+            "first_pass_attempts": 0,
+            "recorded_at": "2026-09-24T03:42:07.200649"
+          },
+          {
+            "worker_id": "codex-cli",
+            "task_family": "code",
+            "capability_role": "builder",
+            "previous_state": "UNPROVEN",
+            "new_state": "QUALIFIED",
+            "evidence_count": 1,
+            "first_pass_successes": 0,
+            "first_pass_attempts": 0,
+            "recorded_at": "2026-09-24T03:42:07.203669"
+          }
+        ]
+      },
+      "live_registry_read_only": {
+        "source": "live_registry_read_only_snapshot",
+        "db_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+        "snapshot_path": "C:\\Users\\mukun\\AppData\\Local\\Temp\\e4e5-drills-97hl5wqb\\live-registry-snapshot\\live-orchestration-snapshot.db",
+        "live_file_untouched": true,
+        "rows": [
+          {
+            "worker_id": "codex-cli",
+            "task_family": "code",
+            "capability_role": "builder",
+            "state": "QUALIFIED",
+            "evidence_count": 3,
+            "first_pass_successes": 3,
+            "first_pass_attempts": 3
+          },
+          {
+            "worker_id": "deepseek-v41-flash",
+            "task_family": "code",
+            "capability_role": "builder",
+            "state": "QUALIFIED",
+            "evidence_count": 8,
+            "first_pass_successes": 3,
+            "first_pass_attempts": 8
+          }
+        ]
+      },
+      "handover": {
+        "from_worker": "deepseek-v41-flash",
+        "to_worker": "codex-cli",
+        "restored_checkpoint_id": "ckpt-d6baa1c73826",
+        "restored_state": {
+          "attempt": 1,
+          "completed_substeps": [
+            "read_objective",
+            "draft_outline"
+          ],
+          "residual_requirement": "reply with exactly HANDOVER-5501",
+          "checkpoint_reason": "resource_driven_pre_dispatch"
+        },
+        "failed_node_state": "FAILED",
+        "failed_dispatch_errors": [
+          "ProviderOutage: stub outage: deepseek-v41-flash unreachable"
+        ]
+      },
+      "handover_objective_hash": "25a25a7c3adb",
+      "handover_objective_delivered_to_replacement": true,
+      "replacement_dispatch": {
+        "worker_id": "codex-cli",
+        "node_state": "COMPLETE",
+        "dispatch_attempts": [
+          {
+            "attempt": 1,
+            "dispatch_id": "stub-codex-cli-1",
+            "status": "COMPLETED",
+            "provider": "stub",
+            "model": "codex-cli-stub",
+            "error": null,
+            "runtime_s": 0.0,
+            "usage": null,
+            "usage_exposed": false,
+            "objective_hash": "25a25a7c3adb",
+            "e2_request_id": "e2-stub-64ba8648",
+            "content_present": true,
+            "finish_reason": null,
+            "image_mime": null,
+            "image_dims": null,
+            "image_size_bytes": null,
+            "image_decode_ok": null,
+            "prompt_feedback": null,
+            "requested_model": null,
+            "candidate_count": null,
+            "candidate_finish_reasons": null,
+            "response_part_kinds": null,
+            "response_text_chars": null,
+            "response_text_excerpt": null,
+            "requested_response_modalities": null,
+            "requested_image_config": null
+          }
+        ],
+        "verification_attempts": [
+          {
+            "attempt": 1,
+            "method": "test",
+            "outcome": "PASS",
+            "passed": true,
+            "issues": []
+          }
+        ],
+        "final_verification": "PASS",
+        "evidence_id": "evidence-c99a3c506107",
+        "persisted_node": {
+          "node_id": "node-drill-e4-failover-1",
+          "plan_id": "drill-e4-failover",
+          "task_subtask_id": null,
+          "objective": "Drill objective. Reply with exactly HANDOVER-5501.",
+          "capability_roles": "[\"builder\"]",
+          "dependencies": "[]",
+          "inputs": "{}",
+          "expected_outputs": "{}",
+          "floor_id": null,
+          "allowed_tools": "[]",
+          "permissions": "{}",
+          "verification_method": "test",
+          "assigned_worker": "codex-cli",
+          "fallback_candidates": "[]",
+          "state": "COMPLETE",
+          "attempts": 1,
+          "defect_attempts": "{}",
+          "created_at": "2026-09-24 03:42:07",
+          "updated_at": "2026-09-24 03:42:07"
+        }
+      },
+      "failover_state_log": [
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "PLANNED",
+          "new_state": "READY",
+          "cause": "dependencies_satisfied",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "READY",
+          "new_state": "RUNNING",
+          "cause": "dispatch_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "RUNNING",
+          "new_state": "VERIFYING",
+          "cause": "verify_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "VERIFYING",
+          "new_state": "FAILED",
+          "cause": "verification_failed_no_repair_budget_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": "verify-node-drill-e4-failover-1-1",
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "PLANNED",
+          "new_state": "READY",
+          "cause": "dependencies_satisfied",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "READY",
+          "new_state": "RUNNING",
+          "cause": "dispatch_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "RUNNING",
+          "new_state": "VERIFYING",
+          "cause": "verify_attempt_1",
+          "dispatch_reference": "stub-codex-cli-1",
+          "verification_reference": null,
+          "timestamp": "2026-09-24 03:42:07"
+        },
+        {
+          "node_id": "node-drill-e4-failover-1",
+          "previous_state": "VERIFYING",
+          "new_state": "COMPLETE",
+          "cause": "verified_pass_attempt_1",
+          "dispatch_reference": null,
+          "verification_reference": "verify-node-drill-e4-failover-1-1",
+          "timestamp": "2026-09-24 03:42:07"
+        }
+      ],
+      "failover_state_log_note": "the replacement dispatch reuses the same node id (real failover), so the persisted log shows the failed cycle followed by the replacement cycle on one node",
+      "failover_log_shows_failed_then_complete": true
+    },
+    "D2": {
+      "drill": "D2_no_equivalent_escalation",
+      "equivalent_found": null,
+      "escalation_record": {
+        "escalation_type": "no_equivalent_worker",
+        "failed_worker": "deepseek-v41-flash",
+        "task_family": "code",
+        "role": "verifier",
+        "timestamp": "2026-09-24T03:42:07.298048",
+        "owner_action": "Provide alternative worker or approve quality floor reduction",
+        "auto_approve": false
+      },
+      "escalation": {
+        "escalation_id": "escalate-d636944705fb",
+        "trigger": "no_qualified_worker",
+        "context": "Drill: worker failed on role 'verifier' and the capability registry records no qualified equivalent",
+        "owner_decision_needed": "Provide alternative worker or approve quality floor reduction",
+        "recommended_action": "owner provides an equivalent worker or explicitly approves a floor change"
+      },
+      "rationale_id": "rationale-c84ff402d771",
+      "active_escalations": 1,
+      "gate_result": "OWNER_APPROVAL_REQUIRED",
+      "quality_floor_lowered": false
+    },
+    "D3": {
+      "drill": "D3_provider_outage",
+      "variants": {
+        "reported_provider_error": {
+          "worker_id": "deepseek-v41-flash",
+          "node_state": "FAILED",
+          "dispatch_attempts": [
+            {
+              "attempt": 1,
+              "dispatch_id": "stub-deepseek-v41-flash-1",
+              "status": "FAILED",
+              "provider": "stub",
+              "model": "deepseek-v41-flash-stub",
+              "error": "provider_unavailable: HTTP 503 from stub",
+              "runtime_s": 0.0,
+              "usage": null,
+              "usage_exposed": false,
+              "objective_hash": "b588939d9a0b",
+              "e2_request_id": "e2-stub-98d9c09e",
+              "content_present": false,
+              "finish_reason": null,
+              "image_mime": null,
+              "image_dims": null,
+              "image_size_bytes": null,
+              "image_decode_ok": null,
+              "prompt_feedback": null,
+              "requested_model": null,
+              "candidate_count": null,
+              "candidate_finish_reasons": null,
+              "response_part_kinds": null,
+              "response_text_chars": null,
+              "response_text_excerpt": null,
+              "requested_response_modalities": null,
+              "requested_image_config": null
+            }
+          ],
+          "verification_attempts": [
+            {
+              "attempt": 1,
+              "method": "test",
+              "outcome": "FAIL",
+              "passed": false,
+              "issues": [
+                "Test 'node-drill-e5-outage-1 exact token': expected OUTAGE-8801, got None"
+              ]
+            }
+          ],
+          "failure_attribution": "provider_error",
+          "blocking_reason": null,
+          "evidence_id": "evidence-8121adcd8bb5",
+          "persisted_node_state": "FAILED",
+          "complete": false
+        },
+        "raised_transport_error": {
+          "worker_id": "deepseek-v41-flash",
+          "node_state": "FAILED",
+          "dispatch_attempts": [
+            {
+              "attempt": 1,
+              "dispatch_id": null,
+              "status": "FAILED",
+              "provider": null,
+              "model": null,
+              "error": "ProviderOutage: stub connection reset",
+              "runtime_s": 0.0,
+              "usage": null,
+              "usage_exposed": false,
+              "objective_hash": "b588939d9a0b",
+              "e2_request_id": "e2-stub-4b944ef5",
+              "content_present": false,
+              "finish_reason": null,
+              "image_mime": null,
+              "image_dims": null,
+              "image_size_bytes": null,
+              "image_decode_ok": null,
+              "prompt_feedback": null,
+              "requested_model": null,
+              "candidate_count": null,
+              "candidate_finish_reasons": null,
+              "response_part_kinds": null,
+              "response_text_chars": null,
+              "response_text_excerpt": null,
+              "requested_response_modalities": null,
+              "requested_image_config": null
+            }
+          ],
+          "verification_attempts": [
+            {
+              "attempt": 1,
+              "method": "test",
+              "outcome": "FAIL",
+              "passed": false,
+              "issues": [
+                "Test 'node-drill-e5-outage-1 exact token': expected OUTAGE-8801, got None"
+              ]
+            }
+          ],
+          "failure_attribution": "provider_error",
+          "blocking_reason": null,
+          "evidence_id": "evidence-c89dd48235d9",
+          "persisted_node_state": "FAILED",
+          "complete": false
+        }
+      },
+      "no_node_reached_complete": true,
+      "errors_recorded_verbatim": [
+        "provider_unavailable: HTTP 503 from stub",
+        "ProviderOutage: stub connection reset"
+      ],
+      "failover_claimed": false
+    },
+    "D4": {
+      "drill": "D4_malformed_output",
+      "malformed_content_repr": "'\\x00\\x01\\x02{{{not json, not the token'",
+      "validator": {
+        "cases": {
+          "none": {
+            "valid": false,
+            "errors": [
+              "Output is None"
+            ],
+            "warnings": []
+          },
+          "empty_string": {
+            "valid": false,
+            "errors": [
+              "Output is empty"
+            ],
+            "warnings": []
+          },
+          "missing_required_field": {
+            "valid": false,
+            "errors": [
+              "Missing required field: content_stripped"
+            ],
+            "warnings": []
+          },
+          "non_empty_garbage_string": {
+            "valid": true,
+            "errors": [],
+            "warnings": []
+          }
+        },
+        "flags_structural_malformation": true,
+        "shallow_precheck_passes_garbage_string": true,
+        "authority": "the independent deterministic verifier decides contract conformance; the pre-check does not",
+        "sanitized_repr": "'{{{not json, not the token'",
+        "sanitizer_removed_non_printables": true
+      },
+      "handler": {
+        "worker_id": "deepseek-v41-flash",
+        "task_id": "node-drill-e5-malformed-1",
+        "validation_error": "output does not match the deterministic contract",
+        "is_recoverable": true,
+        "action": "retry_with_correction",
+        "output_preview": "\u0000\u0001\u0002{{{not json, not the token",
+        "timestamp": "2026-09-24T03:42:07.371042"
+      },
+      "no_repair_budget": {
+        "node_state": "FAILED",
+        "verification_attempts": [
+          {
+            "attempt": 1,
+            "method": "test",
+            "outcome": "FAIL",
+            "passed": false,
+            "issues": [
+              "Test 'node-drill-e5-malformed-1 exact token': expected WELLFORMED-3320, got \u0000\u0001\u0002{{{not json, not the token"
+            ]
+          }
+        ],
+        "rejections": [
+          {
+            "attempt": 1,
+            "outcome": "FAIL",
+            "issues": [
+              "Test 'node-drill-e5-malformed-1 exact token': expected WELLFORMED-3320, got \u0000\u0001\u0002{{{not json, not the token"
+            ],
+            "failure_class": "verification_fail",
+            "finish_reason": null
+          }
+        ],
+        "failure_attribution": "verification_fail",
+        "dispatch_count": 1
+      },
+      "with_repair_budget": {
+        "node_state": "COMPLETE",
+        "dispatch_count": 2,
+        "verification_attempts": [
+          {
+            "attempt": 1,
+            "method": "test",
+            "outcome": "FAIL",
+            "passed": false,
+            "issues": [
+              "Test 'node-drill-e5-malformed-1 exact token': expected WELLFORMED-3320, got \u0000\u0001\u0002{{{not json, not the token"
+            ]
+          },
+          {
+            "attempt": 2,
+            "method": "test",
+            "outcome": "PASS",
+            "passed": true,
+            "issues": []
+          }
+        ],
+        "repairs": [
+          {
+            "attempt": 1,
+            "issues": [
+              "Test 'node-drill-e5-malformed-1 exact token': expected WELLFORMED-3320, got \u0000\u0001\u0002{{{not json, not the token"
+            ],
+            "failure_class": "verification_fail"
+          }
+        ],
+        "final_verification": "PASS",
+        "state_log": [
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "PLANNED",
+            "new_state": "READY",
+            "cause": "dependencies_satisfied",
+            "dispatch_reference": null,
+            "verification_reference": null,
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "READY",
+            "new_state": "RUNNING",
+            "cause": "dispatch_attempt_1",
+            "dispatch_reference": null,
+            "verification_reference": null,
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "RUNNING",
+            "new_state": "VERIFYING",
+            "cause": "verify_attempt_1",
+            "dispatch_reference": "stub-deepseek-v41-flash-1",
+            "verification_reference": null,
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "VERIFYING",
+            "new_state": "REWORK",
+            "cause": "targeted_repair_after_attempt_1",
+            "dispatch_reference": null,
+            "verification_reference": "verify-node-drill-e5-malformed-repaired-1-1",
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "REWORK",
+            "new_state": "RUNNING",
+            "cause": "dispatch_attempt_2",
+            "dispatch_reference": null,
+            "verification_reference": null,
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "RUNNING",
+            "new_state": "VERIFYING",
+            "cause": "verify_attempt_2",
+            "dispatch_reference": "stub-deepseek-v41-flash-2",
+            "verification_reference": null,
+            "timestamp": "2026-09-24 03:42:07"
+          },
+          {
+            "node_id": "node-drill-e5-malformed-repaired-1",
+            "previous_state": "VERIFYING",
+            "new_state": "COMPLETE",
+            "cause": "verified_pass_attempt_2",
+            "dispatch_reference": null,
+            "verification_reference": "verify-node-drill-e5-malformed-repaired-1-2",
+            "timestamp": "2026-09-24 03:42:07"
+          }
+        ]
+      },
+      "malformed_never_accepted": true
+    },
+    "D5": {
+      "drill": "D5_convergence_cap",
+      "cap": 3,
+      "iterations": [
+        {
+          "iteration": 1,
+          "attempt": 1,
+          "node_state": "FAILED",
+          "convergence": {
+            "worker_id": "deepseek-v41-flash",
+            "task_family": "code",
+            "failure_count": 1,
+            "action_taken": "log_and_retry",
+            "escalated": false,
+            "timestamp": "2026-09-24T03:42:07.477958"
+          }
+        },
+        {
+          "iteration": 2,
+          "attempt": 2,
+          "node_state": "FAILED",
+          "convergence": {
+            "worker_id": "deepseek-v41-flash",
+            "task_family": "code",
+            "failure_count": 2,
+            "action_taken": "warn_and_reduce_scope",
+            "escalated": false,
+            "timestamp": "2026-09-24T03:42:07.504728"
+          },
+          "mode_transition": "DEGRADED"
+        },
+        {
+          "iteration": 3,
+          "attempt": 3,
+          "node_state": "FAILED",
+          "convergence": {
+            "worker_id": "deepseek-v41-flash",
+            "task_family": "code",
+            "failure_count": 3,
+            "action_taken": "quarantine_worker",
+            "escalated": true,
+            "timestamp": "2026-09-24T03:42:07.538237"
+          },
+          "mode_transition": "SAFE_MODE"
+        },
+        {
+          "iteration": 4,
+          "stopped": true,
+          "reason": "Max retries (3) reached for node-drill-e5-convergence-1"
+        }
+      ],
+      "dispatches_performed": 3,
+      "loop_terminated_by_cap": true,
+      "stop_markers": 1,
+      "iterations_total": 4,
+      "iterations_bounded": true,
+      "convergence_event_count": 3,
+      "escalations": [
+        {
+          "event_id": 3,
+          "worker_id": "deepseek-v41-flash",
+          "task_family": "code",
+          "failure_count": 3,
+          "action_taken": "quarantine_worker",
+          "created_at": "2026-09-24T03:42:07.538237"
+        }
+      ],
+      "quarantine_recorded": true,
+      "system_mode": "SAFE_MODE",
+      "active_safe_mode_events": [
+        {
+          "event_id": 2,
+          "trigger_type": "repeated_failure",
+          "severity": "safe_mode",
+          "description": "convergence cap 3 reached for deepseek-v41-flash",
+          "affected_workers": [
+            "deepseek-v41-flash"
+          ],
+          "created_at": "2026-09-24T03:42:07.540240"
+        },
+        {
+          "event_id": 1,
+          "trigger_type": "repeated_failure",
+          "severity": "degraded",
+          "description": "deepseek-v41-flash failed 2x on code",
+          "affected_workers": [
+            "deepseek-v41-flash"
+          ],
+          "created_at": "2026-09-24T03:42:07.507756"
+        }
+      ]
+    },
+    "D6": {
+      "drill": "D6_safe_mode_override_and_recovery",
+      "safe_mode_entry": {
+        "safe_event_id": 3,
+        "active_events_before": []
+      },
+      "recovery_refused_without_override": {
+        "recovered": false,
+        "refusal_reasons": [
+          "active owner-only safe-mode trigger(s) without a recorded owner override: no_equivalent_worker"
+        ],
+        "owner_only_event_ids": [
+          3
+        ],
+        "mode_after_refusal": "SAFE_MODE"
+      },
+      "recovery_refused_when_unhealthy": {
+        "recovered": false,
+        "refusal_reasons": [
+          "health check not healthy: stubbed_local_probe (injected unhealthy probe)",
+          "active owner-only safe-mode trigger(s) without a recorded owner override: no_equivalent_worker"
+        ]
+      },
+      "owner_override": {
+        "event_id": 4,
+        "rationale_id": "rationale-1711d3cd0be4",
+        "owner": "Mukund",
+        "scope": "safe_mode_recovery",
+        "reason": "Drill: authorise leaving safe mode for the no-equivalent-worker trigger after the owner supplies an equivalent worker.",
+        "recorded_at": "2026-09-24T03:42:07.561590",
+        "trigger_type": "owner_override"
+      },
+      "overrides_before": [],
+      "gate_after_override": {
+        "can_recover": true,
+        "refusal_reasons": [],
+        "active_event_ids": [
+          4,
+          3,
+          2,
+          1
+        ],
+        "owner_only_event_ids": [
+          3
+        ],
+        "owner_override_present": true,
+        "health": {
+          "healthy": true,
+          "source": "stubbed_local_probe",
+          "detail": "drill db integrity_check=ok",
+          "provider_health_verified": false
+        }
+      },
+      "recovery": {
+        "recovered": true,
+        "gate": {
+          "can_recover": true,
+          "refusal_reasons": [],
+          "active_event_ids": [
+            4,
+            3,
+            2,
+            1
+          ],
+          "owner_only_event_ids": [
+            3
+          ],
+          "owner_override_present": true,
+          "health": {
+            "healthy": true,
+            "source": "stubbed_local_probe",
+            "detail": "drill db integrity_check=ok",
+            "provider_health_verified": false
+          }
+        },
+        "mode": "NORMAL",
+        "resolved_events": [
+          {
+            "event_id": 4,
+            "trigger_type": "owner_override",
+            "auto_resolved": true
+          },
+          {
+            "event_id": 3,
+            "trigger_type": "no_equivalent_worker",
+            "auto_resolved": false
+          },
+          {
+            "event_id": 2,
+            "trigger_type": "repeated_failure",
+            "auto_resolved": true
+          },
+          {
+            "event_id": 1,
+            "trigger_type": "repeated_failure",
+            "auto_resolved": true
+          }
+        ]
+      },
+      "owner_override_audit_rows": [
+        {
+          "rationale_id": "rationale-1711d3cd0be4",
+          "decision_actor": "owner",
+          "gate_result": "OWNER_APPROVAL_REQUIRED",
+          "concise_rationale": "Owner Mukund authorised safe_mode_recovery: Drill: authorise leaving safe mode for the no-equivalent-worker trigger after the owner supplies an equivalent worker.",
+          "timestamp": "2026-09-24T03:42:07.561590"
+        }
+      ],
+      "resolved_event_rows": [
+        {
+          "event_id": 1,
+          "trigger_type": "repeated_failure",
+          "auto_resolved": 1,
+          "resolved_at": "2026-09-24T03:42:07.575013"
+        },
+        {
+          "event_id": 2,
+          "trigger_type": "repeated_failure",
+          "auto_resolved": 1,
+          "resolved_at": "2026-09-24T03:42:07.572246"
+        },
+        {
+          "event_id": 3,
+          "trigger_type": "no_equivalent_worker",
+          "auto_resolved": 0,
+          "resolved_at": "2026-09-24T03:42:07.568613"
+        },
+        {
+          "event_id": 4,
+          "trigger_type": "owner_override",
+          "auto_resolved": 1,
+          "resolved_at": "2026-09-24T03:42:07.565589"
+        }
+      ],
+      "active_events_after_recovery": [],
+      "final_mode": "NORMAL",
+      "provider_health_verified": false,
+      "provider_health_note": "the drill's health probe is a labelled local stub (db integrity); real provider-health re-verification before leaving safe mode on the live system remains owner-gated"
+    },
+    "D7": {
+      "drill": "D7_content_stop_pressure_observation",
+      "view": "e4_provider_content_stop_pressure",
+      "observation_only": true,
+      "decision": "observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision",
+      "rate_threshold": 0.2,
+      "minimum_sample": 5,
+      "content_stop_pressure_detected": false,
+      "evidence_rows_before": 9,
+      "evidence_rows_after": 9,
+      "store_rows_written_by_observation": 0,
+      "provider_calls_spent": 0,
+      "sources": [
+        {
+          "source": "orchestration_store.performance_evidence",
+          "groups": [
+            {
+              "source": "orchestration_store.performance_evidence",
+              "worker_id": "codex-cli",
+              "provider": "stub",
+              "model": "codex-cli-stub",
+              "attempts_observed": 1,
+              "attempts_classified": 1,
+              "content_stops_observed": 0,
+              "rows_observed": 1,
+              "rows_without_readable_ledger": 0,
+              "last_finish_reason": null,
+              "last_stop_at": null,
+              "attempts_unclassified": 0,
+              "sample_size": 1,
+              "content_stop_rate": 0.0,
+              "content_stop_rate_basis": "0/1 classified recorded dispatch attempts",
+              "content_withheld_at_measurable_rate": false,
+              "status": "clean"
+            },
+            {
+              "source": "orchestration_store.performance_evidence",
+              "worker_id": "deepseek-v41-flash",
+              "provider": "stub",
+              "model": "deepseek-v41-flash-stub",
+              "attempts_observed": 7,
+              "attempts_classified": 7,
+              "content_stops_observed": 0,
+              "rows_observed": 6,
+              "rows_without_readable_ledger": 0,
+              "last_finish_reason": null,
+              "last_stop_at": null,
+              "attempts_unclassified": 0,
+              "sample_size": 7,
+              "content_stop_rate": 0.0,
+              "content_stop_rate_basis": "0/7 classified recorded dispatch attempts",
+              "content_withheld_at_measurable_rate": false,
+              "status": "clean"
+            },
+            {
+              "source": "orchestration_store.performance_evidence",
+              "worker_id": "deepseek-v41-flash",
+              "provider": "unknown",
+              "model": "unknown",
+              "attempts_observed": 2,
+              "attempts_classified": 2,
+              "content_stops_observed": 0,
+              "rows_observed": 2,
+              "rows_without_readable_ledger": 0,
+              "last_finish_reason": null,
+              "last_stop_at": null,
+              "attempts_unclassified": 0,
+              "sample_size": 2,
+              "content_stop_rate": 0.0,
+              "content_stop_rate_basis": "0/2 classified recorded dispatch attempts",
+              "content_withheld_at_measurable_rate": false,
+              "status": "clean"
+            }
+          ],
+          "attempts_observed": 10,
+          "attempts_classified": 10,
+          "content_stops_observed": 0
+        }
+      ],
+      "source_errors": [],
+      "operator_lines": [
+        "  bounds: rate >= 0.2 AND sample >= 5 recorded dispatch attempts (bounded flag)",
+        "  source: orchestration_store.performance_evidence (attempts observed 10, classified 10, content-side stops 0)",
+        "    stub/codex-cli-stub [worker codex-cli]",
+        "      attempts observed: 1 (1 classified, 0 without the content-stop ledger)",
+        "      content-side stops observed: 0",
+        "      stop rate: 0.000 (sample size 1 classified attempts; 0/1 classified recorded dispatch attempts)",
+        "      last observed finishReason: none recorded",
+        "      last stop recorded at: none recorded",
+        "      content withheld at a measurable rate: no (status: clean)",
+        "    stub/deepseek-v41-flash-stub [worker deepseek-v41-flash]",
+        "      attempts observed: 7 (7 classified, 0 without the content-stop ledger)",
+        "      content-side stops observed: 0",
+        "      stop rate: 0.000 (sample size 7 classified attempts; 0/7 classified recorded dispatch attempts)",
+        "      last observed finishReason: none recorded",
+        "      last stop recorded at: none recorded",
+        "      content withheld at a measurable rate: no (status: clean)",
+        "    unknown/unknown [worker deepseek-v41-flash]",
+        "      attempts observed: 2 (2 classified, 0 without the content-stop ledger)",
+        "      content-side stops observed: 0",
+        "      stop rate: 0.000 (sample size 2 classified attempts; 0/2 classified recorded dispatch attempts)",
+        "      last observed finishReason: none recorded",
+        "      last stop recorded at: none recorded",
+        "      content withheld at a measurable rate: no (status: clean)",
+        "  content_stop_pressure_detected: no",
+        "  decision: observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision"
+      ],
+      "note": "read-only observation over this harness's isolated drill store (no live store is read; every value is read from already-recorded rows); no dispatch, no provider call, no store write and no automatic action on a flagged group"
+    }
+  },
+  "checks": {
+    "D1_checkpoint_created": true,
+    "D1_checkpoint_restore_matches_saved": true,
+    "D1_primary_worker_failed": true,
+    "D1_equivalent_worker_selected": true,
+    "D1_handover_state_delivered": true,
+    "D1_replacement_verified_complete": true,
+    "D1_failover_log_ordered": true,
+    "D1_failover_not_fabricated": true,
+    "D2_no_equivalent_returns_none": true,
+    "D2_owner_escalation_recorded": true,
+    "D2_quality_floor_not_lowered": true,
+    "D3_reported_outage_fails_node": true,
+    "D3_raised_transport_error_caught": true,
+    "D3_errors_recorded_verbatim": true,
+    "D3_no_failover_claimed": true,
+    "D4_validator_flags_structural_malformation": true,
+    "D4_validator_shallow_precheck_recorded": true,
+    "D4_sanitizer_strips_non_printables": true,
+    "D4_malformed_rejected_by_verifier": true,
+    "D4_repair_path_converges": true,
+    "D5_cap_bounded_no_infinite_loop": true,
+    "D5_quarantine_escalated": true,
+    "D5_safe_mode_entered": true,
+    "D6_safe_mode_event_persisted": true,
+    "D6_recovery_refused_without_override": true,
+    "D6_recovery_refused_when_unhealthy": true,
+    "D6_owner_override_audited": true,
+    "D6_recovery_succeeded": true,
+    "D6_mode_normal_after_recovery": true,
+    "D6_no_active_events_after_recovery": true,
+    "D1_live_registry_read_via_snapshot": true,
+    "isolation_live_stores_untouched": true,
+    "D7_pressure_view_recorded_over_isolated_store": true,
+    "D7_no_rate_without_a_recorded_sample": true,
+    "D7_observation_only_no_action": true,
+    "no_real_provider_calls": true
+  },
+  "checks_passed": 36,
+  "checks_total": 36
+}

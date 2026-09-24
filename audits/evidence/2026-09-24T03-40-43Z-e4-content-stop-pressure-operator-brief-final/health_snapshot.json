@@ -1,0 +1,638 @@
+{
+  "artifact": "operational health snapshot",
+  "run_started_utc": "2026-09-24T03:42:05+00:00",
+  "run_finished_utc": "2026-09-24T03:42:06+00:00",
+  "repository": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "code_sha": "ed390dbb3f53f499ee5a9a9339fd31289f17d0d6",
+  "host": {
+    "platform": "win32",
+    "python_version": "3.11.16"
+  },
+  "provider_calls_spent": 0,
+  "network_calls_spent": 0,
+  "live_state_modified": false,
+  "checks": [
+    {
+      "check": "db.e1-e2-exec-brain",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.e2-governor",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.e3-orchestration",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.hermes-state",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.hermes-kanban",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.hermes-shared-state",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "db.hermes-cron-executions",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "check": "queue.valid",
+      "status": "PASS",
+      "detail": "0 invalid task envelopes"
+    },
+    {
+      "check": "credentials.presence",
+      "status": "ATTENTION",
+      "detail": "configured=2 missing=7"
+    },
+    {
+      "check": "brief.resource",
+      "status": "PASS",
+      "detail": "renders from live governor state"
+    },
+    {
+      "check": "brief.career",
+      "status": "PASS",
+      "detail": "latest.json exists=True"
+    },
+    {
+      "check": "resource.content_stop_pressure",
+      "status": "ATTENTION",
+      "detail": "google/gemini-3.1-flash-image recorded content-side stop rate 0.222 at sample size 9 (threshold 0.2, minimum sample 5); last finishReason IMAGE_RECITATION; observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision"
+    }
+  ],
+  "fail_count": 0,
+  "attention_count": 2,
+  "unknown_count": 0,
+  "verdict": "ATTENTION",
+  "escalations": [
+    {
+      "severity": "info",
+      "category": "queue",
+      "item": "12 blocked queue task(s): categories=['execution_error', 'external_provider']"
+    },
+    {
+      "severity": "owner_action",
+      "category": "credentials",
+      "item": "7 provider credential(s) absent \u2014 owner action (provider keys)"
+    },
+    {
+      "severity": "warning",
+      "category": "provider_content_stop_pressure",
+      "item": "provider content-side stop pressure (recorded evidence, observation only): google/gemini-3.1-flash-image [worker google-nano-banana-2] stop rate 0.222 at sample size 9 classified recorded dispatch attempts (bounds: rate >= 0.2 AND sample >= 5); last finishReason IMAGE_RECITATION. observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision"
+    }
+  ],
+  "databases": [
+    {
+      "label": "e1-e2-exec-brain",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 7,
+      "size_bytes": 77824,
+      "status": "PASS"
+    },
+    {
+      "label": "e2-governor",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 5,
+      "size_bytes": 81920,
+      "status": "PASS"
+    },
+    {
+      "label": "e3-orchestration",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 18,
+      "size_bytes": 217088,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-state",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 25,
+      "size_bytes": 56029184,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-kanban",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 8,
+      "size_bytes": 118784,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-shared-state",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 15,
+      "size_bytes": 155648,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-cron-executions",
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "exists": true,
+      "integrity_check": "ok",
+      "table_count": 1,
+      "size_bytes": 24576,
+      "status": "PASS"
+    }
+  ],
+  "queue": {
+    "pending": {
+      "count": 1,
+      "tasks": [
+        {
+          "task_id": "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23",
+          "priority": "low"
+        }
+      ]
+    },
+    "running": {
+      "count": 2,
+      "tasks": [
+        {
+          "task_id": "agent-e4-content-stop-pressure-operator-brief-integration-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "full-operational-build-2026-09-24",
+          "priority": "critical"
+        }
+      ]
+    },
+    "completed": {
+      "count": 32,
+      "tasks": [
+        {
+          "task_id": "agent-application-inbox-status-monitor-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-blocked-work-final-reconciliation-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-bridge-watchdog-validation-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-codex-reset-revalidation-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-company-registry-gap-audit-and-runtime-services-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-company-watch-recovery-final-pass-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-cv-cover-letter-linkedin-workflows-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-e3-production-execution-leg-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-2026-09-24",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-e3-stage2-readiness-gate-rerun-2026-09-24",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-e4-provider-content-stop-pressure-visibility-2026-09-24",
+          "priority": "medium"
+        },
+        {
+          "task_id": "agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-job-intelligence-and-application-pack-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-linkedin-networking-interview-support-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-live-queue-recovery-deepseek-utf8-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "agent-operational-brief-health-backup-persistence-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-regional-job-search-agents-and-schedulers-2026-09-23",
+          "priority": "high"
+        },
+        {
+          "task_id": "agent-visible-worker-console-quickedit-hardening-2026-09-23",
+          "priority": "critical"
+        },
+        {
+          "task_id": "bridge-validation-and-autonomous-continuation",
+          "priority": "critical"
+        },
+        {
+          "task_id": "hardened-final-e2e",
+          "priority": "critical"
+        },
+        {
+          "task_id": "hardened-regression",
+          "priority": "critical"
+        },
+        {
+          "task_id": "remote-e2e-final-verification-v2",
+          "priority": "high"
+        },
+        {
+          "task_id": "remote-e2e-final-verification",
+          "priority": "high"
+        },
+        {
+          "task_id": "remote-e2e-test-001",
+          "priority": "medium"
+        },
+        {
+          "task_id": "remote-e2e-test-002",
+          "priority": "medium"
+        }
+      ]
+    },
+    "blocked": {
+      "count": 12,
+      "tasks": [
+        {
+          "task_id": "agent-autonomous-nonblocked-continuation-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-career-ops-integration-and-tracker-automation-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-company-watch-job-search-integration-2026-09-23",
+          "priority": "high",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-e3-integration-and-truth-reconciliation-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-e3-local-production-rehearsal-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-e3-local-production-rehearsal-retry-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-retry-2-2026-09-24",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-live-queue-recovery-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "external_provider"
+        },
+        {
+          "task_id": "agent-live-queue-recovery-deepseek-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-queue-isolation-and-evidence-recovery-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        },
+        {
+          "task_id": "agent-queue-isolation-and-evidence-recovery-retry-2026-09-23",
+          "priority": "critical",
+          "blocker_category": "execution_error"
+        }
+      ]
+    },
+    "kill_switch": false
+  },
+  "credentials": {
+    "workers": [
+      {
+        "worker_id": "codex-cli",
+        "provider": "openai",
+        "interface": "cli",
+        "routable": true,
+        "credential_present": null,
+        "note": "non-API interface; credential handled by its own CLI/adapter"
+      },
+      {
+        "worker_id": "mistral-small-4",
+        "provider": "mistral",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "google-nano-banana-2",
+        "provider": "google",
+        "interface": "api",
+        "routable": true,
+        "credential_present": true,
+        "auth_source": "credential-manager",
+        "resolver": "gemini_keyaccess.credential_manager_entry_present/env_var_present"
+      },
+      {
+        "worker_id": "deepseek-v41-flash",
+        "provider": "deepseek",
+        "interface": "api",
+        "routable": true,
+        "credential_present": true,
+        "auth_source": "credential-manager",
+        "resolver": "deepseek_keyaccess.credential_manager_entry_present/env_var_present"
+      },
+      {
+        "worker_id": "glm-53-flash",
+        "provider": "glm",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "qwen38-27b",
+        "provider": "qwen",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "longcat-2.0",
+        "provider": "nous",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "minimax-m3",
+        "provider": "minimax",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "step-37-flash",
+        "provider": "step",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      },
+      {
+        "worker_id": "tencent-hunyuan-hy3",
+        "provider": "tencent",
+        "interface": "api",
+        "routable": false,
+        "credential_present": false,
+        "auth_source": "none",
+        "resolver": "generic_openai_adapter._resolve_auth()"
+      }
+    ],
+    "provider_calls_spent": 0,
+    "network_calls_spent": 0,
+    "configured_api_workers": [
+      "google-nano-banana-2",
+      "deepseek-v41-flash"
+    ],
+    "credential_missing_api_workers": [
+      "mistral-small-4",
+      "glm-53-flash",
+      "qwen38-27b",
+      "longcat-2.0",
+      "minimax-m3",
+      "step-37-flash",
+      "tencent-hunyuan-hy3"
+    ],
+    "configured_count": 2,
+    "missing_count": 7,
+    "status": "ATTENTION"
+  },
+  "resource_brief": {
+    "artifact": "E2 Daily Resource Brief",
+    "source": "governor.db",
+    "briefs_logged": 3,
+    "generated": true,
+    "renders": true,
+    "unknown_preserved": true,
+    "status": "PASS",
+    "published_latest": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\resource-status\\latest-brief.md",
+      "exists": false
+    }
+  },
+  "content_stop_pressure": {
+    "artifact": "E4 provider content-side stop pressure (recorded evidence)",
+    "source": "orchestration_store.performance_evidence",
+    "observation_only": true,
+    "provider_calls_spent": 0,
+    "network_calls_spent": 0,
+    "live_state_modified": false,
+    "decision": "observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision",
+    "status": "ATTENTION",
+    "detected": true,
+    "groups": [
+      {
+        "source": "orchestration_store.performance_evidence",
+        "worker_id": "codex-cli",
+        "provider": "openai",
+        "model": "unknown",
+        "attempts_observed": 5,
+        "attempts_classified": 0,
+        "attempts_unclassified": 5,
+        "content_stops_observed": 0,
+        "sample_size": 0,
+        "content_stop_rate": null,
+        "content_stop_rate_basis": null,
+        "content_withheld_at_measurable_rate": null,
+        "last_finish_reason": null,
+        "last_stop_at": null,
+        "status": "unknown"
+      },
+      {
+        "source": "orchestration_store.performance_evidence",
+        "worker_id": "deepseek-v41-flash",
+        "provider": "deepseek",
+        "model": "deepseek-flash",
+        "attempts_observed": 13,
+        "attempts_classified": 0,
+        "attempts_unclassified": 13,
+        "content_stops_observed": 0,
+        "sample_size": 0,
+        "content_stop_rate": null,
+        "content_stop_rate_basis": null,
+        "content_withheld_at_measurable_rate": null,
+        "last_finish_reason": null,
+        "last_stop_at": null,
+        "status": "unknown"
+      },
+      {
+        "source": "orchestration_store.performance_evidence",
+        "worker_id": "google-nano-banana-2",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "attempts_observed": 11,
+        "attempts_classified": 0,
+        "attempts_unclassified": 11,
+        "content_stops_observed": 0,
+        "sample_size": 0,
+        "content_stop_rate": null,
+        "content_stop_rate_basis": null,
+        "content_withheld_at_measurable_rate": null,
+        "last_finish_reason": null,
+        "last_stop_at": null,
+        "status": "unknown"
+      },
+      {
+        "source": "recorded_provider_series:e3-google-image-repeat-series",
+        "worker_id": "google-nano-banana-2",
+        "provider": "google",
+        "model": "gemini-3.1-flash-image",
+        "attempts_observed": 9,
+        "attempts_classified": 9,
+        "attempts_unclassified": 0,
+        "content_stops_observed": 2,
+        "sample_size": 9,
+        "content_stop_rate": 0.2222222222222222,
+        "content_stop_rate_basis": "2/9 classified recorded dispatch attempts",
+        "content_withheld_at_measurable_rate": true,
+        "last_finish_reason": "IMAGE_RECITATION",
+        "last_stop_at": "2026-09-24T01:44:32+00:00",
+        "status": "pressured"
+      }
+    ],
+    "rate_threshold": 0.2,
+    "minimum_sample": 5,
+    "source_errors": [],
+    "detail": "google/gemini-3.1-flash-image recorded content-side stop rate 0.222 at sample size 9 (threshold 0.2, minimum sample 5); last finishReason IMAGE_RECITATION; observation only \u2014 no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision",
+    "reason": null
+  },
+  "career_brief": {
+    "artifact": "Career Daily Brief",
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\daily-brief\\latest.json",
+    "exists": true,
+    "size_bytes": 110917,
+    "modified_utc": "2026-09-24T01:31:31+00:00",
+    "age_hours": 2.18,
+    "stale": false,
+    "status": "PASS"
+  },
+  "logs": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 2859904,
+      "rotation_configured": false
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 343238,
+      "rotation_configured": false
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 69263,
+      "rotation_configured": false
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "rotation_configured": false
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 26161,
+      "rotation_configured": false
+    }
+  ],
+  "scheduled_tasks": {}
+}

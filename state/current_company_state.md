@@ -1390,3 +1390,66 @@ dbs, and the recorded series artifact read verbatim; no provider series re-run.
   verification criterion weakened; no automatic failover/re-dispatch path created. Still open and
   deliberately not chased: what makes the recitation filter fire on some identical calls and not
   others. Owner action required: **none new** (unchanged dependencies only).
+
+## E4 provider content-side stop pressure on the operator surfaces — `agent-e4-content-stop-pressure-operator-brief-integration-2026-09-24`
+
+Ran 2026-09-24T03:36Z–03:44Z at code SHA `ed390db`. Evidence:
+`audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/`
+(`integration_evidence.md`, `operator_surface_output.txt`, `health_snapshot.json/.md`,
+`latest.json/.md` (Morning Chief Brief), `evidence.json/.md` (drill harness D7),
+`regression/evidence.json`, `source_and_deployed_hashes.txt`, `deploy_dry_run.json`), plus the
+pre-commit run `audits/evidence/2026-09-24T03-38-51Z-regression-operator-brief-pressure-integration/`
+(21 suites / 579 tests / exit 0 at `13634b3` with the working-tree change).
+Provider-call budget: **0 (stated up front)** — recorded rows/artifacts only, stubs and fixtures in
+tests, no provider series re-run.
+
+- **Gap closed.** The pressure view existed (`resource_monitor.py`) and printed through `e3-status`,
+  but only if the owner ran `e3-status` by hand; the status surfaces the owner actually reads
+  (operational-services health snapshot, Morning Chief Brief escalation list, E4/E5 drill artifact)
+  did not carry it.
+- **Operator surfaces.** `scripts/operational_services.py` gained `content_stop_pressure_status()`
+  (reuses `resource_monitor.build_content_stop_pressure_view`; orchestration store opened `mode=ro`;
+  the declared recorded series artifact `audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/observations.json`
+  is consumed verbatim, overridable with the repeatable `--pressure-series`), `pressure_escalations()`
+  and `render_pressure_lines()`. `build_health_snapshot` adds check `resource.content_stop_pressure`
+  and a **warning**-grade escalation (`category provider_content_stop_pressure`) naming the
+  provider/model, the stop rate, its sample size, the last finishReason and the bounded flag;
+  `build_morning_brief` carries the same view inside `resource_status` next to the E2 resource status
+  and both `render_*` print it. An unclassified/pre-classification sample reports `unknown` (never
+  clear), a rate is never reported from zero attempts, and the pressure check never produces a FAIL
+  and never changes a readiness/qualification gate.
+- **First real operator output (live, read-only).** Health snapshot check = `ATTENTION`, one warning
+  escalation: `google/gemini-3.1-flash-image [worker google-nano-banana-2] stop rate 0.222 at sample
+  size 9 classified recorded dispatch attempts (bounds: rate >= 0.2 AND sample >= 5); last
+  finishReason IMAGE_RECITATION`, labelled observation only. Store rows still report
+  `unknown` (codex-cli 5 / deepseek-v41-flash 13 / google-nano-banana-2 11 attempts, 0 classified →
+  29 attempts observed, 0 classified) — unknown, not clear. Verdict `ATTENTION` with `fail_count 0`.
+- **Drill harness.** `exec-brain/e4e5_drill_harness.py` gained `D7_content_stop_pressure_observation`:
+  the same read-only view recorded over the harness's isolated drill store (like the
+  continuity/outage/convergence drills) with `store_rows_written_by_observation = 0` (via
+  `Connection.total_changes` before/after), `provider_calls_spent = 0`, unchanged
+  `performance_evidence` row counts, and operator lines; **36/36 checks pass**, 0 real provider calls
+  (was 33 checks). The drill store's rows classify clean, so D7 raises no warning — the clean case.
+- **Tests.** +10 tests in `scripts/tests/test_operational_services.py` (17 → 27) and +9 in
+  `exec-brain/tests/test_e4e5_drills.py` (38 → 47), all offline (stub adapters, hand-written
+  fixtures, disposable stores): clean provider raises no warning; pre-classification store reports
+  UNKNOWN, not clear; zero attempts never yield a fabricated rate; a crossing recorded rate is a
+  warning-grade observation with its rate/sample/finishReason/bounded flag; snapshot escalation list
+  and markdown; Morning Chief Brief carry + render; the view never writes the store (file hash and
+  sidecar checks); absent/undeclared store → UNKNOWN; the declared recorded series is consumed by
+  default; an unreadable series artifact is recorded as a source error, never fabricated.
+- **Regression.** Post-commit `scripts/evidence_runner.py --label e4-operator-pressure-integration-final`
+  → **21 suites / 21 passed / 0 failed / 0 unavailable / 579 tests collected / 579 passed, runner exit
+  code 0** (`audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/regression/`).
+  No suite lost tests; only this task's own suites grew. Baseline was 21 suites / 560 tests at
+  `03ebc74` (20 / 529 at `82ddf0`).
+- **Deployment.** None required and none performed: only `scripts/` and the repo-only drill harness
+  changed, and `exec-brain/resource_monitor.py` is byte-identical to the deployed runtime copy
+  (`c138c0ec…`), so `python scripts/deploy_e3_runtime.py --dry-run` → `copied: []`, exit 0. No runtime
+  module, no E1/E2 file, no store schema changed; no E1 runtime-root allow-list change was needed.
+- **Not done.** E3 Stage 2 **NOT ENABLED**; no production dispatch; no VPS cutover; the 0/7
+  provider-credential gate was not run, re-parameterised or re-opened; no automatic worker swap,
+  re-dispatch, failover, retry or safe-mode entry (observation only); no readiness, qualification or
+  verification criterion weakened. Still open and deliberately not chased: what makes the recitation
+  filter fire on some identical calls and not others. Owner action required: **none new** (the
+  pressure warning is informational; any failover stays an explicit E4/owner decision).

@@ -1,0 +1,13 @@
+{
+  "deployed_at_utc": "2026-09-24T03:42:07+00:00",
+  "source_git_sha": "ed390dbb3f53f499ee5a9a9339fd31289f17d0d6",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "backup_dir": null,
+  "dry_run": true,
+  "copied": [],
+  "eb_py": {
+    "file": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\eb.py",
+    "action": "already-patched",
+    "reason": null
+  }
+}
