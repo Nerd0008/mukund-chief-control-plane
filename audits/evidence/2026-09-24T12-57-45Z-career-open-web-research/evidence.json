@@ -1,0 +1,1167 @@
+{
+  "task": "agent-career-codex-style-open-web-job-research-2026-09-24",
+  "runner": "career-ops/run_web_research_acceptance.py",
+  "stamp": "2026-09-24T12-57-45Z",
+  "started_at": "2026-09-24T12:57:45+00:00",
+  "finished_at": "2026-09-24T12:59:57+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "query_matrix_covers_role_families",
+      "ok": true,
+      "detail": [
+        "analyst",
+        "cross_family_entry",
+        "cybersecurity",
+        "graduate_new_grad",
+        "grc",
+        "iam",
+        "information_security",
+        "junior_associate",
+        "l1_tier1",
+        "level_coverage",
+        "soc_security_operations",
+        "technology_risk"
+      ]
+    },
+    {
+      "check": "query_matrix_covers_owner_ats_site_patterns",
+      "ok": true,
+      "detail": [
+        "ashby",
+        "employer_careers",
+        "google_index",
+        "greenhouse",
+        "icims",
+        "indeed",
+        "lever",
+        "linkedin_jobs",
+        "smartrecruiters",
+        "teamtailor",
+        "workable",
+        "workday"
+      ]
+    },
+    {
+      "check": "query_matrix_covers_broad_public_surfaces",
+      "ok": true,
+      "detail": [
+        "linkedin_jobs",
+        "indeed",
+        "google_index"
+      ]
+    },
+    {
+      "check": "query_matrix_is_per_region",
+      "ok": true,
+      "detail": [
+        "uk",
+        "dubai",
+        "japan",
+        "singapore"
+      ]
+    },
+    {
+      "check": "watchlist_hook_adds_company_queries_and_is_optional",
+      "ok": true,
+      "detail": {
+        "generic": 22,
+        "with_watchlist": 31
+      }
+    },
+    {
+      "check": "surface_classifier_maps_linkedin_indeed_ats_employer",
+      "ok": true,
+      "detail": "all ok"
+    },
+    {
+      "check": "captured_run_normalises_into_the_candidate_schema",
+      "ok": true,
+      "detail": {
+        "candidates": 5
+      }
+    },
+    {
+      "check": "per_result_provenance_is_complete",
+      "ok": true,
+      "detail": "query/surface/url/state/timestamp"
+    },
+    {
+      "check": "a_posting_seen_by_two_queries_collapses_to_one_candidate",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "check": "every_declared_telemetry_counter_exists",
+      "ok": true,
+      "detail": [
+        "candidate_urls",
+        "deterministic_eligibility_pass",
+        "discovered_unverified",
+        "duplicates_collapsed",
+        "fetch_states",
+        "queries_executed",
+        "rejections_by_reason",
+        "results_seen",
+        "semantically_reviewed",
+        "tracker_candidates",
+        "validated_live",
+        "validation_failed",
+        "zero_attribution"
+      ]
+    },
+    {
+      "check": "a_zero_is_attributable_to_the_failing_stage",
+      "ok": true,
+      "detail": {
+        "validation": "no discovered destination validated as live"
+      }
+    },
+    {
+      "check": "a_result_without_an_observed_search_is_never_accepted",
+      "ok": true,
+      "detail": {
+        "search_not_observed": 1
+      }
+    },
+    {
+      "check": "only_the_validated_destination_passes_the_gates",
+      "ok": true,
+      "detail": {
+        "accepted": "accepted",
+        "rejected": 3
+      }
+    },
+    {
+      "check": "unverified_and_failed_destinations_are_refused_by_the_gate",
+      "ok": true,
+      "detail": "deterministic gate reason present"
+    },
+    {
+      "check": "web_research_and_the_regional_lane_collapse_to_one_candidate",
+      "ok": true,
+      "detail": {
+        "shared": 1,
+        "sources": [
+          "explicit records file",
+          "open-web research (codex-style)"
+        ]
+      }
+    },
+    {
+      "check": "codex_provider_reports_unavailability_truthfully_when_absent",
+      "ok": true,
+      "detail": "Codex CLI unavailable: RuntimeError: Codex CLI not found (acceptance)"
+    },
+    {
+      "check": "lane_default_run_is_read_only_and_declares_zero_attribution",
+      "ok": true,
+      "detail": {
+        "search": "no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)",
+        "queries": "no query was executed",
+        "candidate_urls": "no candidate URL was discovered"
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical",
+      "ok": true,
+      "detail": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    },
+    {
+      "check": "live_codex_web_search_capability_proven",
+      "ok": true,
+      "detail": "available"
+    },
+    {
+      "check": "live_research_produced_real_candidates",
+      "ok": true,
+      "detail": {
+        "queries_executed": 5,
+        "results_seen": 16,
+        "candidates": 14,
+        "source_classes_reached": [
+          "employer_careers",
+          "indeed",
+          "lever",
+          "linkedin_jobs"
+        ]
+      }
+    },
+    {
+      "check": "live_research_declares_only_reached_source_classes",
+      "ok": true,
+      "detail": [
+        "employer_careers",
+        "indeed",
+        "lever",
+        "linkedin_jobs"
+      ]
+    },
+    {
+      "check": "canonical_workbooks_byte_identical_after_live_pass",
+      "ok": true,
+      "detail": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    }
+  ],
+  "counts": {
+    "checks": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "matrix": {
+    "queries_uk": 22,
+    "surfaces": [
+      "ashby",
+      "employer_careers",
+      "google_index",
+      "greenhouse",
+      "icims",
+      "indeed",
+      "lever",
+      "linkedin_jobs",
+      "smartrecruiters",
+      "teamtailor",
+      "workable",
+      "workday"
+    ],
+    "families": [
+      "analyst",
+      "cross_family_entry",
+      "cybersecurity",
+      "graduate_new_grad",
+      "grc",
+      "iam",
+      "information_security",
+      "junior_associate",
+      "l1_tier1",
+      "level_coverage",
+      "soc_security_operations",
+      "technology_risk"
+    ]
+  },
+  "research_telemetry": {
+    "queries_executed": 4,
+    "results_seen": 6,
+    "candidate_urls": 5,
+    "validated_live": 0,
+    "validation_failed": 0,
+    "duplicates_collapsed": 1,
+    "semantically_reviewed": 0,
+    "deterministic_eligibility_pass": 0,
+    "tracker_candidates": 0,
+    "discovered_unverified": 5,
+    "fetch_states": {
+      "validated_live": 0,
+      "discovered_unverified": 5,
+      "validation_failed": 0,
+      "not_attempted": 0
+    },
+    "rejections_by_reason": {},
+    "zero_attribution": {}
+  },
+  "live": {
+    "attempted": true,
+    "probe": {
+      "provider": "codex-web-search",
+      "available": true,
+      "web_search_observed": true,
+      "cli_version": null,
+      "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\OpenAI\\Codex\\bin\\80f78947ad880e6e\\codex.exe",
+      "reason": null
+    },
+    "executed_queries": [
+      "site:job-boards.greenhouse.io cyber security graduate London"
+    ],
+    "run": {
+      "candidates": [
+        {
+          "company": null,
+          "title": "2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom",
+          "location": null,
+          "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+          "description": "Today&amp;#39;s top 2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+          "source": "linkedin_jobs",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "linkedin_jobs",
+            "surface_description": "public LinkedIn Jobs result",
+            "search_query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-2a706c19dbd0",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+            "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+            "observed": {
+              "title": "2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom",
+              "company": null,
+              "location": null,
+              "result_title": "2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom",
+              "snippet": "SOC Analyst - Tier 1; Cyber Security SOC Analyst (L1); Graduate SOC Analyst; Junior Cyber Risk and Assurance Analyst (12m FTC).",
+              "page_title": "2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom",
+              "page_description": "Today&amp;#39;s top 2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+              "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs",
+              "page_title": "2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom",
+              "meta_description": "Today&amp;#39;s top 2,000+ Cyber Security Graduate (entry Level) jobs in United Kingdom. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:48+00:00"
+            },
+            "missing_fields": [
+              "company",
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "LinkedIn",
+          "title": "Cyber Security Graduate (entry Level) Jobs in London (836 Open Roles)",
+          "location": null,
+          "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+          "description": "Today&amp;#39;s top 836 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+          "source": "linkedin_jobs",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "linkedin_jobs",
+            "surface_description": "public LinkedIn Jobs result",
+            "search_query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-2a706c19dbd0",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+            "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+            "observed": {
+              "title": "Cyber Security Graduate (entry Level) Jobs in London (836 Open Roles)",
+              "company": "LinkedIn",
+              "location": null,
+              "result_title": "Cyber Security Graduate (entry Level) Jobs in London (903 Open Roles)",
+              "snippet": "SOC Analyst - Tier 1; Graduate Cyber Security Consultant; VIE - Cyber Security Analsyt – December 2026.",
+              "page_title": "Cyber Security Graduate (entry Level) Jobs in London (836 Open Roles) | LinkedIn",
+              "page_description": "Today&amp;#39;s top 836 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+              "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+              "page_title": "Cyber Security Graduate (entry Level) Jobs in London (836 Open Roles) | LinkedIn",
+              "meta_description": "Today&amp;#39;s top 836 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:49+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "LinkedIn",
+          "title": "Graduate Cyber Security Specialist Jobs in London (788 Open Roles)",
+          "location": null,
+          "url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+          "description": "Today&amp;#39;s top 788 Graduate Cyber Security Specialist jobs in London. Leverage your professional network, and get hired. New Graduate Cyber Security Specialist jobs added daily.",
+          "source": "linkedin_jobs",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "linkedin_jobs",
+            "surface_description": "public LinkedIn Jobs result",
+            "search_query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-2a706c19dbd0",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+            "canonical_url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+            "observed": {
+              "title": "Graduate Cyber Security Specialist Jobs in London (788 Open Roles)",
+              "company": "LinkedIn",
+              "location": null,
+              "result_title": "Graduate Cyber Security Specialist Jobs in London (809 Open Roles)",
+              "snippet": "Graduate Cyber Security Consultant; Cyber Security / IT Analyst; SOC Analyst - Tier 1; Cyber Security R&D Graduate.",
+              "page_title": "Graduate Cyber Security Specialist Jobs in London (788 Open Roles) | LinkedIn",
+              "page_description": "Today&amp;#39;s top 788 Graduate Cyber Security Specialist jobs in London. Leverage your professional network, and get hired. New Graduate Cyber Security Specialist jobs added daily."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+              "canonical_url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://uk.linkedin.com/jobs/graduate-cyber-security-specialist-jobs-london",
+              "page_title": "Graduate Cyber Security Specialist Jobs in London (788 Open Roles) | LinkedIn",
+              "meta_description": "Today&amp;#39;s top 788 Graduate Cyber Security Specialist jobs in London. Leverage your professional network, and get hired. New Graduate Cyber Security Specialist jobs added daily.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:51+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "LinkedIn",
+          "title": "Cyber Security Graduate (entry Level) Jobs in London (837 Open Roles)",
+          "location": null,
+          "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london?f_AL=true",
+          "description": "Today&amp;#39;s top 837 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+          "source": "linkedin_jobs",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "linkedin_jobs",
+            "surface_description": "public LinkedIn Jobs result",
+            "search_query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-2a706c19dbd0",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london?f_AL=true",
+            "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london?f_AL=true",
+            "observed": {
+              "title": "Cyber Security Graduate (entry Level) Jobs in London (837 Open Roles)",
+              "company": "LinkedIn",
+              "location": null,
+              "result_title": "Cyber Security Graduate (entry Level) Jobs in London (1,000+ Open Roles)",
+              "snippet": "Graduate SOC Analyst; SOC Analyst - Tier 1; Graduate Security Operations Engineer; Information Security Analyst (Junior).",
+              "page_title": "Cyber Security Graduate (entry Level) Jobs in London (837 Open Roles) | LinkedIn",
+              "page_description": "Today&amp;#39;s top 837 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london?f_AL=true",
+              "canonical_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london?f_AL=true",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://uk.linkedin.com/jobs/cyber-security-graduate-%28entry-level%29-jobs-london",
+              "page_title": "Cyber Security Graduate (entry Level) Jobs in London (837 Open Roles) | LinkedIn",
+              "meta_description": "Today&amp;#39;s top 837 Cyber Security Graduate (entry Level) jobs in London. Leverage your professional network, and get hired. New Cyber Security Graduate (entry Level) jobs added daily.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:52+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "LinkedIn",
+          "title": "Junior Information Security Jobs in United Kingdom (2,000+ Open Roles)",
+          "location": null,
+          "url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+          "description": "Today&amp;#39;s top 2,000+ Junior Information Security jobs in United Kingdom. Leverage your professional network, and get hired. New Junior Information Security jobs added daily.",
+          "source": "linkedin_jobs",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "linkedin_jobs",
+            "surface_description": "public LinkedIn Jobs result",
+            "search_query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-2a706c19dbd0",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+            "canonical_url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+            "observed": {
+              "title": "Junior Information Security Jobs in United Kingdom (2,000+ Open Roles)",
+              "company": "LinkedIn",
+              "location": null,
+              "result_title": "Junior Information Security Jobs in United Kingdom (2,000+ Open Roles)",
+              "snippet": "Cyber Security SOC Analyst (L1); Cyber Security / IT Analyst; SOC Analyst - Tier 1.",
+              "page_title": "Junior Information Security Jobs in United Kingdom (2,000+ Open Roles) | LinkedIn",
+              "page_description": "Today&amp;#39;s top 2,000+ Junior Information Security jobs in United Kingdom. Leverage your professional network, and get hired. New Junior Information Security jobs added daily."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+              "canonical_url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://uk.linkedin.com/jobs/junior-information-security-jobs",
+              "page_title": "Junior Information Security Jobs in United Kingdom (2,000+ Open Roles) | LinkedIn",
+              "meta_description": "Today&amp;#39;s top 2,000+ Junior Information Security jobs in United Kingdom. Leverage your professional network, and get hired. New Junior Information Security jobs added daily.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:53+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Indeed United Kingdom",
+          "title": "Soc Analyst Junior Cyber Security Jobs in London (with Salaries)",
+          "location": null,
+          "url": "https://uk.indeed.com/q-soc-analyst-junior-cyber-security-l-london-jobs.html",
+          "description": null,
+          "source": "indeed",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "indeed",
+            "surface_description": "public Indeed result",
+            "search_query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-f06e821c02c9",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.indeed.com/q-soc-analyst-junior-cyber-security-l-london-jobs.html",
+            "canonical_url": "https://uk.indeed.com/q-soc-analyst-junior-cyber-security-l-london-jobs.html",
+            "observed": {
+              "title": "Soc Analyst Junior Cyber Security Jobs in London (with Salaries)",
+              "company": "Indeed United Kingdom",
+              "location": null,
+              "result_title": "Soc Analyst Junior Cyber Security Jobs in London (with Salaries) | Indeed United Kingdom",
+              "snippet": "SOC Analysts (DV Security Clearance), SOC Analyst - Tier 1, and Cyber Security Analyst roles in London.",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.indeed.com/q-soc-analyst-junior-cyber-security-l-london-jobs.html",
+              "canonical_url": "https://uk.indeed.com/q-soc-analyst-junior-cyber-security-l-london-jobs.html",
+              "status": "validation_failed",
+              "http_status": 403,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": "HTTP 403",
+              "fetched_at": "2026-09-24T12:59:55+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Indeed United Kingdom",
+          "title": "Junior Cyber Security Job in London (with Salaries)",
+          "location": null,
+          "url": "https://uk.indeed.com/q-junior-cyber-security-jobs-l-london-jobs.html",
+          "description": null,
+          "source": "indeed",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "indeed",
+            "surface_description": "public Indeed result",
+            "search_query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-f06e821c02c9",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.indeed.com/q-junior-cyber-security-jobs-l-london-jobs.html",
+            "canonical_url": "https://uk.indeed.com/q-junior-cyber-security-jobs-l-london-jobs.html",
+            "observed": {
+              "title": "Junior Cyber Security Job in London (with Salaries)",
+              "company": "Indeed United Kingdom",
+              "location": null,
+              "result_title": "Junior Cyber Security Job in London (with Salaries) | Indeed United Kingdom",
+              "snippet": "Junior cyber security jobs in London, including SOC Analysts (DV Security Clearance).",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.indeed.com/q-junior-cyber-security-jobs-l-london-jobs.html",
+              "canonical_url": "https://uk.indeed.com/q-junior-cyber-security-jobs-l-london-jobs.html",
+              "status": "validation_failed",
+              "http_status": 403,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": "HTTP 403",
+              "fetched_at": "2026-09-24T12:59:55+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Indeed United Kingdom",
+          "title": "Cyber & Information Security Graduate Jobs in London (with Salaries)",
+          "location": null,
+          "url": "https://uk.indeed.com/q-cyber-%26-information-security-graduate-l-london-jobs.html",
+          "description": null,
+          "source": "indeed",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "indeed",
+            "surface_description": "public Indeed result",
+            "search_query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-f06e821c02c9",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.indeed.com/q-cyber-%26-information-security-graduate-l-london-jobs.html",
+            "canonical_url": "https://uk.indeed.com/q-cyber-%26-information-security-graduate-l-london-jobs.html",
+            "observed": {
+              "title": "Cyber & Information Security Graduate Jobs in London (with Salaries)",
+              "company": "Indeed United Kingdom",
+              "location": null,
+              "result_title": "Cyber & Information Security Graduate Jobs in London (with Salaries) | Indeed United Kingdom",
+              "snippet": "Cyber and information security graduate jobs in London, including Graduate Audit - Technology Audit London Autumn 2027.",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.indeed.com/q-cyber-%26-information-security-graduate-l-london-jobs.html",
+              "canonical_url": "https://uk.indeed.com/q-cyber-%26-information-security-graduate-l-london-jobs.html",
+              "status": "validation_failed",
+              "http_status": 403,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": "HTTP 403",
+              "fetched_at": "2026-09-24T12:59:55+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Indeed United Kingdom",
+          "title": "Graduate Soc Analyst Job in London (with Salaries)",
+          "location": null,
+          "url": "https://uk.indeed.com/q-graduate-soc-analyst-l-london-jobs.html",
+          "description": null,
+          "source": "indeed",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "indeed",
+            "surface_description": "public Indeed result",
+            "search_query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-f06e821c02c9",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.indeed.com/q-graduate-soc-analyst-l-london-jobs.html",
+            "canonical_url": "https://uk.indeed.com/q-graduate-soc-analyst-l-london-jobs.html",
+            "observed": {
+              "title": "Graduate Soc Analyst Job in London (with Salaries)",
+              "company": "Indeed United Kingdom",
+              "location": null,
+              "result_title": "Graduate Soc Analyst Job in London (with Salaries) | Indeed United Kingdom",
+              "snippet": "Graduate SOC analyst jobs in London, including Graduate Programme 2027: Information Security Engineer (Operations).",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.indeed.com/q-graduate-soc-analyst-l-london-jobs.html",
+              "canonical_url": "https://uk.indeed.com/q-graduate-soc-analyst-l-london-jobs.html",
+              "status": "validation_failed",
+              "http_status": 403,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": "HTTP 403",
+              "fetched_at": "2026-09-24T12:59:55+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Indeed United Kingdom",
+          "title": "Junior Analyst Cyber Job in London (with Salaries)",
+          "location": null,
+          "url": "https://uk.indeed.com/q-junior-analyst-cyber-l-london-jobs.html",
+          "description": null,
+          "source": "indeed",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "indeed",
+            "surface_description": "public Indeed result",
+            "search_query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-f06e821c02c9",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://uk.indeed.com/q-junior-analyst-cyber-l-london-jobs.html",
+            "canonical_url": "https://uk.indeed.com/q-junior-analyst-cyber-l-london-jobs.html",
+            "observed": {
+              "title": "Junior Analyst Cyber Job in London (with Salaries)",
+              "company": "Indeed United Kingdom",
+              "location": null,
+              "result_title": "Junior Analyst Cyber Job in London (with Salaries) | Indeed United Kingdom",
+              "snippet": "Junior analyst cyber jobs in London, including Cyber Security Operations Support Analyst at UK Health Security Agency.",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://uk.indeed.com/q-junior-analyst-cyber-l-london-jobs.html",
+              "canonical_url": "https://uk.indeed.com/q-junior-analyst-cyber-l-london-jobs.html",
+              "status": "validation_failed",
+              "http_status": 403,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": "HTTP 403",
+              "fetched_at": "2026-09-24T12:59:56+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Consultancy.uk",
+          "title": "2026 Graduate - Digital Trust & Cyber Security Analyst - London - PA Consulting",
+          "location": null,
+          "url": "https://www.consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+          "description": "10 Bressenden Place, London, SW1E 5DN, United Kingdom, London SW1E 5DN, GB Full-time Company description We believe in the power of ingenuity to build a positive human future.",
+          "source": "google_index",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "employer_careers",
+            "surface_description": "direct employer careers page",
+            "search_query": "(graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-28236a52a1c8",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://www.consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+            "canonical_url": "https://consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+            "observed": {
+              "title": "2026 Graduate - Digital Trust & Cyber Security Analyst - London - PA Consulting",
+              "company": "Consultancy.uk",
+              "location": null,
+              "result_title": "2026 Graduate - Digital Trust & Cyber Security Analyst - London - PA Consulting",
+              "snippet": "Graduate analyst role based at PA Consulting's London Victoria Office; starts Autumn 2026.",
+              "page_title": "2026 Graduate - Digital Trust & Cyber Security Analyst - London - PA Consulting | Consultancy.uk",
+              "page_description": "10 Bressenden Place, London, SW1E 5DN, United Kingdom, London SW1E 5DN, GB Full-time Company description We believe in the power of ingenuity to build a positive human future."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://www.consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+              "canonical_url": "https://consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+              "status": "validation_failed",
+              "http_status": 200,
+              "final_url": "https://www.consultancy.uk/jobs/49848/pa-consulting/2026-graduate-digital-trust-cyber-security-analyst-london",
+              "page_title": "2026 Graduate - Digital Trust & Cyber Security Analyst - London - PA Consulting | Consultancy.uk",
+              "meta_description": "10 Bressenden Place, London, SW1E 5DN, United Kingdom, London SW1E 5DN, GB Full-time Company description We believe in the power of ingenuity to build a positive human future.",
+              "content_chars": 44826,
+              "robots": "robots.txt allows this path",
+              "expired_marker": "no longer available",
+              "error": "page states the posting is closed: no longer available",
+              "fetched_at": "2026-09-24T12:59:56+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "NHS England",
+          "title": "Junior Cyber Security Analyst (Security Officer)",
+          "location": null,
+          "url": "https://www.jobs.service.gov.uk/jobs/6a9ec5abdfbe1104d5629ab2",
+          "description": null,
+          "source": "google_index",
+          "fetch_state": "validation_failed",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "employer_careers",
+            "surface_description": "direct employer careers page",
+            "search_query": "(graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-28236a52a1c8",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://www.jobs.service.gov.uk/jobs/6a9ec5abdfbe1104d5629ab2",
+            "canonical_url": "https://jobs.service.gov.uk/jobs/6a9ec5abdfbe1104d5629ab2",
+            "observed": {
+              "title": "Junior Cyber Security Analyst (Security Officer)",
+              "company": "NHS England",
+              "location": null,
+              "result_title": "Junior Cyber Security Analyst (Security Officer) | NHS England",
+              "snippet": "Permanent NHS England cyber-operations role in Leeds / Exeter, posted 7 September 2026.",
+              "page_title": null,
+              "page_description": null
+            },
+            "title_source": "search_result_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://www.jobs.service.gov.uk/jobs/6a9ec5abdfbe1104d5629ab2",
+              "canonical_url": "https://jobs.service.gov.uk/jobs/6a9ec5abdfbe1104d5629ab2",
+              "status": "validation_failed",
+              "http_status": null,
+              "final_url": null,
+              "page_title": null,
+              "meta_description": null,
+              "content_chars": 0,
+              "robots": "robots.txt disallows '/' for this agent",
+              "expired_marker": null,
+              "error": "robots.txt disallows '/' for this agent",
+              "fetched_at": "2026-09-24T12:59:56+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": "Reed.co.uk",
+          "title": "Graduate Cyber Security Analyst Jobs in London",
+          "location": null,
+          "url": "https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+          "description": "Find Graduate Cyber Security Analyst jobs in London with Reed.co.uk. Discover Graduate Cyber Security Analyst vacancies on offer, in and around London, helping you ❤ Mondays.",
+          "source": "google_index",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "employer_careers",
+            "surface_description": "direct employer careers page",
+            "search_query": "(graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-28236a52a1c8",
+            "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+            "canonical_url": "https://reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+            "observed": {
+              "title": "Graduate Cyber Security Analyst Jobs in London",
+              "company": "Reed.co.uk",
+              "location": null,
+              "result_title": "Graduate Cyber Security Analyst Jobs in London | Reed.co.uk",
+              "snippet": "Lists London roles including Cyber Security SOC Analyst and Junior GRC Analyst.",
+              "page_title": "Graduate Cyber Security Analyst Jobs in London | Reed.co.uk",
+              "page_description": "Find Graduate Cyber Security Analyst jobs in London with Reed.co.uk. Discover Graduate Cyber Security Analyst vacancies on offer, in and around London, helping you ❤ Mondays."
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+              "canonical_url": "https://reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isEasyApply=true",
+              "page_title": "Graduate Cyber Security Analyst Jobs in London | Reed.co.uk",
+              "meta_description": "Find Graduate Cyber Security Analyst jobs in London with Reed.co.uk. Discover Graduate Cyber Security Analyst vacancies on offer, in and around London, helping you ❤ Mondays.",
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:56+00:00"
+            },
+            "missing_fields": [
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "company",
+              "url"
+            ]
+          }
+        },
+        {
+          "company": null,
+          "title": "Saviynt - L3 SOC Analyst",
+          "location": null,
+          "url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+          "description": null,
+          "source": "lever",
+          "fetch_state": "validated_live",
+          "_collection_source": "web research",
+          "web_research": {
+            "discovery_surface": "lever",
+            "surface_description": "employer Lever board",
+            "search_query": "site:jobs.lever.co (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+            "query_id": "q-6133a55d3cce",
+            "query_provenance": "owner portals.yml search_queries (site: pattern preserved)",
+            "role_family": "cross_family_entry",
+            "region": "uk",
+            "result_url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+            "canonical_url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+            "observed": {
+              "title": "Saviynt - L3 SOC Analyst",
+              "company": null,
+              "location": null,
+              "result_title": "Saviynt - L3 SOC Analyst",
+              "snippet": "Remote UK. The L3 SOC Analyst will act as the senior technical escalation point within the SOC, leading complex investigations, driving automation initiatives, and mentoring junior analysts.",
+              "page_title": "Saviynt - L3 SOC Analyst",
+              "page_description": null
+            },
+            "title_source": "fetched_page_title",
+            "source_timestamp": "2026-09-24T12:58:04+00:00",
+            "fetch": {
+              "url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+              "canonical_url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+              "status": "validated_live",
+              "http_status": 200,
+              "final_url": "https://jobs.lever.co/saviynt/bcb3c9f3-3688-446e-b85b-269f8949aa91",
+              "page_title": "Saviynt - L3 SOC Analyst",
+              "meta_description": null,
+              "content_chars": 200000,
+              "robots": "robots.txt allows this path",
+              "expired_marker": null,
+              "error": null,
+              "fetched_at": "2026-09-24T12:59:57+00:00"
+            },
+            "missing_fields": [
+              "company",
+              "location",
+              "description",
+              "posted_date",
+              "salary",
+              "employment_type"
+            ],
+            "present_fields": [
+              "title",
+              "url"
+            ]
+          }
+        }
+      ],
+      "telemetry": {
+        "queries_executed": 5,
+        "results_seen": 16,
+        "candidate_urls": 14,
+        "validated_live": 7,
+        "validation_failed": 7,
+        "duplicates_collapsed": 2,
+        "semantically_reviewed": 0,
+        "deterministic_eligibility_pass": 0,
+        "tracker_candidates": 0,
+        "fetch_states": {
+          "validated_live": 7,
+          "discovered_unverified": 0,
+          "validation_failed": 7,
+          "not_attempted": 0
+        },
+        "rejections_by_reason": {
+          "validation_failed": 7
+        },
+        "zero_attribution": {}
+      },
+      "export_id": "webresearch-f1132e8ad7e0e646"
+    },
+    "source_classes_reached": [
+      "employer_careers",
+      "indeed",
+      "lever",
+      "linkedin_jobs"
+    ],
+    "export_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\live-acceptance-webresearch-f1132e8ad7e0e646.json",
+    "queries_executed": [
+      "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+      "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+      "(graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+      "site:job-boards.greenhouse.io (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)",
+      "site:jobs.lever.co (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (UK OR \"United Kingdom\" OR London)"
+    ]
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40"
+    },
+    "dubai": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "canonical_workbook_writes": 0,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "browser_or_gui_used": false,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "captcha_bypassed": false,
+    "scraping_behind_auth": false
+  },
+  "privacy_note": "raw result URLs are owner-private job-search data and stay under the git-ignored runtime directory; this evidence is aggregate only"
+}
