@@ -248,6 +248,8 @@ donor. Engineering will not change it without that decision.
 
 **Provider adapter verification TODO added 2026-09-24:** before the Mistral smoke/qualification run, re-check the live Mistral model catalogue and update the adapter's configured API model id if needed. The current control-plane adapter still uses `mistral-small-4`; the verification run must confirm the provider-accepted id (for example the current Small 4 alias/version exposed by Mistral) from live provider evidence rather than assuming the old string is valid. Do not change qualification state until the corrected id, endpoint, credential and smoke test all pass.
 
+**Qwen adapter verification TODO added 2026-09-24:** the owner has provisioned the Qwen/Alibaba Model Studio credential successfully. The current worker/adapter name remains `qwen38-27b` for credential lookup compatibility, but the intended live model selected during setup is `qwen3.7-plus`. During the post-key verification run, confirm the live Singapore-region model id and endpoint from provider evidence, update the adapter mapping if required, and qualify it only after credential, endpoint and smoke test all pass.
+
 **Status:** OWNER-GATED — cannot be run before the seven credentials exist and Stage 2 is enabled.
 **Blocks:** the *only* remaining E4/E5 item — a drill on the **live provider** path (a real provider
 failure actually failing a node, and real provider-health re-verification before leaving safe mode).
