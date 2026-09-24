@@ -830,3 +830,5 @@ error: Please commit or stash them.
 [2026-09-24T21:41:37.533826Z] Handling task: agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24 (attempt 2)
 [2026-09-24T21:49:29.320472Z] Task agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24 attempt 2/3: retry (recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled)
 [2026-09-24T21:49:29.321463Z] Handling task: agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24 (attempt 3)
+[2026-09-24T22:02:04.093126Z] git pull: success (with stash/restore)
+[2026-09-24T22:02:04.096167Z] Invalid task agent-post-stage2-integrations-and-production-hardening-2026-09-24: ["priority must be one of {'low', 'critical', 'high', 'medium'}"]
