@@ -6,6 +6,7 @@ import os
 import sqlite3
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 # Add parent to path
@@ -502,22 +503,36 @@ class TestGenericOpenAIAdapter(unittest.TestCase):
             GenericOpenAIAdapter("nonexistent")
 
     def test_health_without_credentials(self):
-        """Without credentials, health check reports unhealthy."""
+        """Without credentials, health check reports unhealthy.
+
+        Hermetic by construction: credential absence is injected rather than
+        read from the host Windows Credential Manager, so the assertion holds on
+        any machine (a provisioned host key must not change this result).
+        """
         from generic_openai_adapter import GenericOpenAIAdapter
         adapter = GenericOpenAIAdapter("mistral")
-        health = adapter.check_health()
+        with unittest.mock.patch(
+                "generic_openai_adapter._resolve_key",
+                return_value=(None, "none")):
+            health = adapter.check_health()
         self.assertEqual(health["status"], "unhealthy")
         self.assertEqual(health["reason"], "credential_absent")
 
     def test_dispatch_without_credentials(self):
-        """Dispatch without credentials returns FAILED."""
+        """Dispatch without credentials returns FAILED.
+
+        Hermetic by construction (see test_health_without_credentials).
+        """
         from generic_openai_adapter import GenericOpenAIAdapter
         adapter = GenericOpenAIAdapter("mistral")
         contract = {
             "contract_id": "test-1",
             "objective": "Test objective",
         }
-        result = adapter.dispatch(contract)
+        with unittest.mock.patch(
+                "generic_openai_adapter._resolve_key",
+                return_value=(None, "none")):
+            result = adapter.dispatch(contract)
         self.assertEqual(result["status"], "FAILED")
         self.assertEqual(result["error"], "credential_absent")
         self.assertEqual(result["provider"], "mistral")
@@ -554,6 +569,13 @@ class TestCodexAdapter(unittest.TestCase):
 
     FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures",
                            "codex_exec_jsonl_turn_completed.jsonl")
+    DOCTOR_FIXTURES = os.path.join(os.path.dirname(__file__), "fixtures")
+
+    def _doctor_payload(self, filename):
+        """Load a recorded `codex doctor --json` compatibility fixture."""
+        with open(os.path.join(self.DOCTOR_FIXTURES, filename),
+                  encoding="utf-8") as fh:
+            return json.load(fh)
 
     def _adapter_or_skip(self):
         from codex_adapter import CodexExecutionAdapter
@@ -582,13 +604,90 @@ class TestCodexAdapter(unittest.TestCase):
         self.assertIsInstance(version, str)
         self.assertTrue(len(version) > 0)
 
-    def test_codex_identity_does_not_hardcode_model(self):
-        """Execution-observed model identity stays UNKNOWN until observed."""
+    def test_codex_identity_contract_is_truthful(self):
+        """Live doctor payload: provider is observed-or-UNKNOWN, never fabricated.
+
+        The audit regression was this test demanding ``provider == "openai"`` on
+        a machine where ``codex doctor --json`` did not report a provider. It
+        now asserts the truthful contract: the served model is always UNKNOWN,
+        and the provider is either genuinely observed by a live probe or
+        UNKNOWN — never inferred from configuration.
+        """
+        from codex_adapter import PROVENANCE_OBSERVED_WS
         adapter = self._adapter_or_skip()
         identity = adapter.get_identity()
         self.assertEqual(identity["model"], "unknown")
-        self.assertEqual(identity["provider"], "openai")  # deterministically reported
+        self.assertIn(identity["provider"], ("openai", "unknown"))
+        if identity["provider"] == "unknown":
+            self.assertEqual(identity["provider_provenance"], "unknown")
+        else:
+            self.assertEqual(identity["provider_provenance"],
+                             PROVENANCE_OBSERVED_WS)
+        # Configured declarations are recorded and labelled as declarations.
+        self.assertIsInstance(identity["configured_provider"], str)
+        self.assertTrue(identity["configured_provider"])
+        self.assertIsInstance(identity["configured_model"], str)
         self.assertNotIn("api_key", json.dumps(identity).lower().replace("stored_api_key", ""))
+
+    def test_codex_doctor_provider_openai_payload(self):
+        """Recorded payload where the CLI reports provider=openai."""
+        from codex_adapter import parse_doctor_identity, PROVENANCE_OBSERVED_WS
+        payload = self._doctor_payload("codex_doctor_provider_openai.json")
+        identity = parse_doctor_identity(payload, version="fixture")
+        self.assertEqual(identity["provider"], "openai")
+        self.assertEqual(identity["provider_provenance"], PROVENANCE_OBSERVED_WS)
+        self.assertEqual(identity["configured_provider"], "openai")
+        self.assertEqual(identity["configured_model"], "gpt-5.6-terra")
+        self.assertEqual(identity["model"], "unknown")
+        self.assertEqual(identity["auth_mode"], "chatgpt")
+
+    def test_codex_doctor_provider_unknown_payload(self):
+        """Recorded payload where the CLI reports no provider: stays UNKNOWN."""
+        from codex_adapter import parse_doctor_identity, PROVENANCE_UNKNOWN
+        payload = self._doctor_payload("codex_doctor_provider_unknown.json")
+        identity = parse_doctor_identity(payload, version="fixture")
+        self.assertEqual(identity["provider"], "unknown")
+        self.assertNotEqual(identity["provider"], "openai")  # never converted
+        self.assertEqual(identity["provider_provenance"], PROVENANCE_UNKNOWN)
+        self.assertEqual(identity["configured_provider"], "unknown")
+        self.assertEqual(identity["configured_model"], "unknown")
+        self.assertEqual(identity["model"], "unknown")
+
+    def test_codex_doctor_configured_provider_is_not_promoted(self):
+        """A configured provider is never promoted to the observed identity.
+
+        This is the exact anti-fabrication boundary behind the audit finding:
+        config.toml declaring ``model provider = openai`` does not make the
+        observed provider ``openai`` when the live probe reports nothing.
+        """
+        from codex_adapter import parse_doctor_identity
+        payload = self._doctor_payload("codex_doctor_configured_provider_only.json")
+        identity = parse_doctor_identity(payload, version="fixture")
+        self.assertEqual(identity["configured_provider"], "openai")
+        self.assertEqual(identity["provider"], "unknown")
+        self.assertEqual(identity["provider_provenance"], "unknown")
+
+    def test_codex_doctor_fixtures_match_declared_expectations(self):
+        """Every recorded doctor payload parses to its declared provenance contract."""
+        from codex_adapter import parse_doctor_identity
+        names = sorted(n for n in os.listdir(self.DOCTOR_FIXTURES)
+                       if n.startswith("codex_doctor_") and n.endswith(".json"))
+        self.assertGreaterEqual(len(names), 2)
+        observed_providers = set()
+        for name in names:
+            payload = self._doctor_payload(name)
+            expected = payload["_provenance"]["expected"]
+            identity = parse_doctor_identity(payload, version="fixture")
+            for key, value in expected.items():
+                self.assertEqual(identity[key], value, f"{name}: {key}")
+            if identity.get("provider_provenance") == "observed:network.websocket_reachability":
+                observed_providers.add(identity["provider"])
+        # the fixture set must cover both a reported provider and UNKNOWN
+        self.assertIn("openai", observed_providers)
+        self.assertIn("unknown",
+                      {parse_doctor_identity(self._doctor_payload(n),
+                                             version="fixture")["provider"]
+                       for n in names})
 
     def test_codex_usage_extraction_matches_recorded_exec_output(self):
         """Provider-returned usage on turn.completed is parsed (real fixture)."""

@@ -43,14 +43,27 @@ scanner are stdlib / local package respectively, not external dependencies.
 Minimum viable destination environment:
 
 ```bash
-python -m venv <venv>
-<venv>/Scripts/python.exe -m pip install openpyxl==3.1.5 PyYAML==6.0.3
+uv venv --python 3.11.16 <venv>
+uv pip install --python <venv>/Scripts/python.exe -r requirements.lock
 ```
 
-No `requirements.txt` exists in the repository yet; these two pins are the whole
-dependency set. (Adding a pinned `requirements.txt` is a small, safe follow-up —
-it is not required for the current deployment and was left out to avoid touching
-packaging in a deployment-prep task.)
+The repository now carries a top-level reproducible dependency manifest and a
+hash-pinned lock (added 2026-09-24 by the release-reproducibility task):
+
+| Artifact | Contents |
+|---|---|
+| `requirements.txt` | Direct dependencies — `openpyxl==3.1.5`, `PyYAML==6.0.3` (runtime) and `pytest==9.1.1` (test-only). |
+| `requirements.lock` | Generated hash-pinned transitive closure for CPython 3.11 (9 packages incl. `et-xmlfile`, `colorama`, `iniconfig`, `packaging`, `pluggy`, `pygments`). |
+| `scripts/dependency_inventory.py` | AST-based inventory of every top-level import; `--check` fails on an undeclared third-party import. |
+| `docs/SETUP.md` | Clean-clone/setup path, per-area test commands, and the machine-local provisioning checklist with deterministic probes. |
+| `docs/RELEASE.md` | Release identity, archive build/verify procedure and its limits. |
+
+Regenerate the lock after changing `requirements.txt`:
+
+```bash
+uv pip compile requirements.txt --python-version 3.11 --python-platform windows \
+    --generate-hashes -o requirements.lock
+```
 
 ## 3. Background jobs / scheduled tasks
 

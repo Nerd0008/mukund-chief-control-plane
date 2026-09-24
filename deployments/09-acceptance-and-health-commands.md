@@ -171,7 +171,37 @@ Expected: all `Enabled`, logon mode `Interactive only`, next-run times advancing
 | Owner escalation | escalation path in `e3_escalate.py` | escalation surfaces to the owner with a rationale record |
 | State truth | `state/current_company_state.md` updated | matches deployed reality |
 
-## 11. Safety properties of every command above
+## 12. Release reproducibility, identity and archive verification
+
+```bash
+python scripts/dependency_inventory.py --check                  # undeclared-import gate
+python scripts/codex_identity_contract_check.py                 # Codex identity contract (offline)
+python scripts/release_manifest.py --out release/release-manifest.json
+python scripts/release_manifest.py --verify --out release/release-manifest.json
+python scripts/make_release_archive.py --out release/chief-<sha>.zip
+python scripts/verify_release_archive.py release/chief-<sha>.zip \
+    --expect-commit <sha> --expect-lock-sha256 <sha256>
+```
+
+- `dependency_inventory.py --check` exits `1` if any third-party import is not
+  declared in `requirements.txt`.
+- `codex_identity_contract_check.py` runs with no CLI and no network: it checks
+  every `codex doctor --json` compatibility fixture against its declared
+  provenance contract, reproduces the audit's `provider=openai` expectation
+  failure as a *correction* (UNKNOWN stays UNKNOWN), and reports machine-local
+  Codex facts by presence only.
+- `release_manifest.py` records commit SHA, dirty state, supported Python, lock
+  hash, curated artifact hashes, an aggregate source-tree hash and the
+  acceptance-evidence identifiers. `--verify` recomputes them.
+- `make_release_archive.py` refuses a dirty worktree, refuses to package a
+  hard-excluded secret-like path, injects the manifest into the ZIP, and
+  re-verifies the finished archive before reporting success.
+- `verify_release_archive.py` fails on hash mismatch, missing artifact, a
+  recorded dirty worktree, a `.git` entry or a hard-excluded secret-like path.
+- Setup path and machine-local provisioning checklist: `docs/SETUP.md`.
+  Design, guarantees and limits: `docs/RELEASE.md`.
+
+## 13. Safety properties of every command above
 
 - No command here starts, stops, creates or deletes a scheduled task.
 - No command here makes a public/external/posted change.

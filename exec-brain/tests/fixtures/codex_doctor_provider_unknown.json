@@ -1,0 +1,59 @@
+{
+  "_provenance": {
+    "captured_from": "codex doctor --json",
+    "cli_version": "0.155.0-alpha.16.3",
+    "captured_on": "2026-09-24",
+    "note": "Recorded compatibility fixture for the case the independent audit hit: the CLI reports NO provider anywhere (config.load carries no 'model provider' and the live websocket probe did not report one). The truthful identity is UNKNOWN on every provider field. This payload must never parse to provider=openai.",
+    "expected": {
+      "provider": "unknown",
+      "provider_provenance": "unknown",
+      "configured_provider": "unknown",
+      "model": "unknown",
+      "configured_model": "unknown"
+    }
+  },
+  "schemaVersion": 1,
+  "overallStatus": "warning",
+  "codexVersion": "0.155.0-alpha.16.3",
+  "checks": {
+    "auth.credentials": {
+      "id": "auth.credentials",
+      "category": "auth",
+      "status": "warning",
+      "summary": "auth is not configured",
+      "details": {
+        "auth file": "<CODEX_HOME>/auth.json",
+        "auth storage mode": "File",
+        "stored API key": "false",
+        "stored ChatGPT tokens": "false",
+        "stored agent identity": "false",
+        "stored auth mode": "unknown"
+      }
+    },
+    "config.load": {
+      "id": "config.load",
+      "category": "config",
+      "status": "ok",
+      "summary": "config loaded",
+      "details": {
+        "CODEX_HOME": "<CODEX_HOME>",
+        "config.toml": "<CODEX_HOME>/config.toml",
+        "config.toml parse": "ok"
+      }
+    },
+    "network.websocket_reachability": {
+      "id": "network.websocket_reachability",
+      "category": "websocket",
+      "status": "error",
+      "summary": "Responses WebSocket handshake failed",
+      "details": {
+        "auth mode": "unknown",
+        "endpoint": "wss://chatgpt.com/backend-api/<redacted>",
+        "handshake result": "not reached",
+        "server model present": "false",
+        "supports websockets": "unknown",
+        "wire API": "responses"
+      }
+    }
+  }
+}

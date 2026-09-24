@@ -1,0 +1,25 @@
+# Top-level dependency manifest — Mukund Chief Control Plane
+#
+# Direct dependencies actually imported by this repository. Keep this file as
+# the human-readable source of truth; `requirements.lock` is the fully resolved,
+# hash-pinned transitive closure for CPython 3.11.16 and is what a clean
+# environment should install from.
+#
+# Regenerate the lock after editing this file:
+#   uv pip compile requirements.txt --python-version 3.11 --generate-hashes \
+#       -o requirements.lock
+#
+# Install (isolated, reproducible):
+#   uv venv --python 3.11.16 .venv
+#   uv pip install --python .venv/Scripts/python.exe -r requirements.lock
+#
+# Everything else imported by the repository is the Python 3.11 standard
+# library (sqlite3, json, urllib, ctypes, hashlib, subprocess, argparse,
+# pathlib, csv, unittest, tempfile, ...). See docs/SETUP.md.
+
+# ─── Runtime (imported by shipped code) ─────────────────────────────────────
+openpyxl==3.1.5          # Career Ops tracker/workbook writes (deterministic replacement for the removed @oai/artifact-tool Excel path)
+PyYAML==6.0.3            # config/profile YAML parsing (Career Ops, regional search config, Company Watch)
+
+# ─── Test / acceptance tooling (imported only by test suites) ───────────────
+pytest==9.1.1            # career-ops/ and company-watch/ suites are pytest-style; exec-brain/ suites are unittest-style

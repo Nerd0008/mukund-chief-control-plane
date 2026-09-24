@@ -50,6 +50,12 @@ venv/
 exec_brain.db
 chain-head.json
 
+# --- Release build output (generated per release, never committed) -----------
+# `scripts/make_release_archive.py` writes exported ZIPs and
+# `scripts/release_manifest.py` writes the identity manifest here. Release
+# identity for an accepted run is recorded under audits/evidence/ instead.
+release/
+
 # --- Company Watch: owner-private company-level job-search data ---
 # The full company registry and per-posting findings name Mukund's historical
 # application history. They stay local; only aggregate counts/evidence are

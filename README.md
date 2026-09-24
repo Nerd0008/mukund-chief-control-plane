@@ -124,6 +124,7 @@ The design explicitly avoids storing raw private chain-of-thought or secrets. Th
 | Directory | Contents |
 |---|---|
 | `state/` | Current company state snapshot |
+| `docs/` | Setup and release/reproducibility documentation |
 | `conversations/` | Curated conversation summaries |
 | `runtime/` | Runtime status notes |
 | `resource-status/` | Resource Governor / provider status |
@@ -198,6 +199,28 @@ Truth boundaries that hold in this repository:
 Details, commands and measured evidence: `career-ops/README.md`
 (§ "High-recall semantic discovery pipeline") and
 `audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/`.
+
+## Reproducible setup and releases
+
+The repository is set up to be reproducible from a clean clone or an exported
+release archive.
+
+- Dependency manifest: `requirements.txt` (direct, human-readable).
+- Pinned lock for CPython 3.11.16: `requirements.lock` (hash-pinned transitive
+  closure — install from this, never from an unpinned `pip install`).
+- Clean-clone instructions, per-area test commands, and the machine-local
+  provisioning checklist with deterministic probes: `docs/SETUP.md`.
+- Release identity + archive build/verify tooling: `docs/RELEASE.md`,
+  `scripts/release_manifest.py`, `scripts/make_release_archive.py`,
+  `scripts/verify_release_archive.py`.
+- Dependency honesty check: `python scripts/dependency_inventory.py --check`
+  fails if any third-party import is missing from `requirements.txt`.
+- Codex worker identity contract and its offline fixtures:
+  `scripts/codex_identity_contract_check.py`.
+
+A release archive deliberately carries **no Git history** — it proves which
+commit and dependency set it represents through the recorded commit SHA and
+content hashes, never through fabricated history.
 
 ## Security
 

@@ -121,6 +121,95 @@ UNSAFE_EXECUTION_PROFILE = {
 }
 
 
+# Provenance labels for identity fields. Kept as constants so tests and callers
+# never have to match on a string literal by hand.
+PROVENANCE_OBSERVED_WS = "observed:network.websocket_reachability"
+PROVENANCE_UNKNOWN = "unknown"
+
+
+def parse_doctor_identity(report: Dict[str, Any],
+                          version: str = "unknown",
+                          executable_name: Optional[str] = None,
+                          executable_dir: Optional[str] = None) -> Dict[str, Any]:
+    """Parse a `codex doctor --json` payload into a truthful identity record.
+
+    Provenance contract (2026-09-24 release-reproducibility remediation):
+
+    * ``configured_provider`` / ``configured_model`` come from the CLI's own
+      configuration report (``config.load``). They are *declarations* — what the
+      CLI is told to use — and are never promoted to observed identity.
+    * ``provider`` is only filled when a live probe actually reports a provider
+      (``network.websocket_reachability`` handshake). Otherwise it stays
+      ``unknown`` and ``provider_provenance`` records that the CLI did not
+      report it. A configured value is never copied into ``provider``: turning
+      an unreported provider into ``openai`` would fabricate provider identity.
+    * ``model`` is the execution-observed served model. The Codex CLI does not
+      expose it, so it always stays ``unknown``.
+
+    Splitting the parse out of the adapter is deliberate: it makes the contract
+    testable from recorded payloads without executing or even installing Codex.
+    """
+    checks = report.get("checks") or {}
+
+    def _details(check_id):
+        entry = checks.get(check_id) or {}
+        return (entry.get("details") or {}) if isinstance(entry, dict) else {}
+
+    def _truthy(value):
+        # `codex doctor --json` reports these as strings ("true"/"false").
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() == "true"
+
+    identity: Dict[str, Any] = {
+        "provider": "unknown",
+        "provider_provenance": PROVENANCE_UNKNOWN,
+        "configured_provider": "unknown",
+        "model": "unknown",  # execution-observed model: not exposed by the CLI
+        "configured_model": "unknown",
+        "auth_mode": "unknown",
+        "version": version,
+        "interface": "Codex CLI",
+        "cancellation_support": "UNSUPPORTED",  # Issue #7
+        "e2_usage_linkage": "NOT_VERIFIED",     # Issue #6
+        "supports_websockets": True,
+        "supports_jsonl": True,
+    }
+
+    auth = _details("auth.credentials")
+    auth_check = checks.get("auth.credentials") or {}
+    identity["auth_configured"] = auth_check.get("status") == "ok"
+    if auth.get("stored auth mode"):
+        identity["auth_mode"] = auth["stored auth mode"]
+    identity["auth_storage_mode"] = auth.get("auth storage mode", "unknown")
+    identity["stored_api_key"] = _truthy(auth.get("stored API key"))
+
+    # config.load is NOT execution evidence: recorded separately, never
+    # promoted to the execution-observed model identity.
+    config = _details("config.load")
+    identity["configured_model"] = config.get("model", "unknown")
+    if config.get("model provider"):
+        identity["configured_provider"] = config["model provider"]
+
+    # Only a live observation may populate the observed provider identity.
+    ws_check = checks.get("network.websocket_reachability") or {}
+    ws = _details("network.websocket_reachability")
+    identity["websocket_reachable"] = ws_check.get("status") == "ok"
+    identity["server_model_present"] = _truthy(ws.get("server model present"))
+    if ws.get("model provider"):
+        identity["provider"] = ws["model provider"]
+        identity["provider_provenance"] = PROVENANCE_OBSERVED_WS
+    if ws.get("provider name"):
+        identity["observed_provider_name"] = ws["provider name"]
+
+    identity["cli_version"] = report.get("codexVersion", version)
+    if executable_name is not None:
+        identity["resolved_executable_name"] = executable_name
+    if executable_dir is not None:
+        identity["resolved_executable_dir"] = executable_dir
+    return identity
+
+
 class CodexExecutionAdapter:
     """Executes non-interactive Codex CLI commands."""
 
@@ -328,7 +417,14 @@ class CodexExecutionAdapter:
             return {'status': 'unhealthy', 'error': str(e)}
 
     def get_identity(self) -> Dict[str, Any]:
-        """Get provider/model identity from Codex."""
+        """Get provider/model identity from Codex.
+
+        Delegates parsing to `parse_doctor_identity`, which keeps configured
+        declarations (`config.load`) separate from provider identity actually
+        observed by a live probe (`network.websocket_reachability`) and reports
+        UNKNOWN when the CLI does not report either. Never fabricates a provider
+        or a served model.
+        """
         version = self._get_version()
         try:
             result = subprocess.run(
@@ -338,7 +434,10 @@ class CodexExecutionAdapter:
             if result.returncode != 0:
                 return {
                     'provider': 'unknown',
+                    'provider_provenance': PROVENANCE_UNKNOWN,
+                    'configured_provider': 'unknown',
                     'model': 'unknown',
+                    'configured_model': 'unknown',
                     'version': version,
                     'interface': 'Codex CLI',
                     'cancellation_support': 'UNSUPPORTED',
@@ -346,64 +445,19 @@ class CodexExecutionAdapter:
                     'error': f"doctor --json exit {result.returncode}",
                 }
             report = json.loads(result.stdout)
-            checks = report.get('checks') or {}
-
-            def _details(check_id):
-                entry = checks.get(check_id) or {}
-                return (entry.get('details') or {}) if isinstance(entry, dict) else {}
-
-            def _truthy(value):
-                # `codex doctor --json` reports these as strings ("true"/"false").
-                if isinstance(value, bool):
-                    return value
-                return str(value).strip().lower() == "true"
-            
-            # Issue #2: Parse identity from doctor, but model remains UNKNOWN
-            # until deterministically observed from actual execution
-            identity = {
-                'provider': 'unknown',
-                'model': 'unknown',  # execution-observed model: not exposed by CLI/runtime
-                'auth_mode': 'unknown',
-                'version': version,
-                'interface': 'Codex CLI',
-                'cancellation_support': 'UNSUPPORTED',  # Issue #7
-                'e2_usage_linkage': 'NOT_VERIFIED',     # Issue #6
-                'supports_websockets': True,
-                'supports_jsonl': True,
-            }
-
-            # Deterministically observed fields from `codex doctor --json`.
-            auth = _details('auth.credentials')
-            auth_check = checks.get('auth.credentials') or {}
-            identity['auth_configured'] = auth_check.get('status') == 'ok'
-            if auth.get('stored auth mode'):
-                identity['auth_mode'] = auth['stored auth mode']
-            identity['auth_storage_mode'] = auth.get('auth storage mode', 'unknown')
-            identity['stored_api_key'] = _truthy(auth.get('stored API key'))
-
-            config = _details('config.load')
-            # config is NOT execution evidence: recorded separately, never
-            # promoted to the execution-observed model identity.
-            identity['configured_model'] = config.get('model', 'unknown')
-            if config.get('model provider'):
-                identity['provider'] = config['model provider']
-
-            ws_check = checks.get('network.websocket_reachability') or {}
-            ws = _details('network.websocket_reachability')
-            identity['websocket_reachable'] = ws_check.get('status') == 'ok'
-            identity['server_model_present'] = _truthy(ws.get('server model present'))
-            if ws.get('model provider'):
-                identity['provider'] = ws['model provider']
-
-            identity['cli_version'] = report.get('codexVersion', version)
-            identity['resolved_executable_name'] = self.executable.name
-            identity['resolved_executable_dir'] = self.executable.parent.name
-
-            return identity
+            return parse_doctor_identity(
+                report,
+                version=version,
+                executable_name=self.executable.name,
+                executable_dir=self.executable.parent.name,
+            )
         except Exception as e:
             return {
                 'provider': 'unknown',
+                'provider_provenance': PROVENANCE_UNKNOWN,
+                'configured_provider': 'unknown',
                 'model': 'unknown',
+                'configured_model': 'unknown',
                 'version': version,
                 'cancellation_support': 'UNSUPPORTED',
                 'e2_usage_linkage': 'NOT_VERIFIED',
