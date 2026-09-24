@@ -284,3 +284,5 @@ error: Please commit or stash them.
 [2026-09-23T23:46:06.366777Z] Claimed task: agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23
 [2026-09-23T23:46:06.375777Z] Handling task: agent-e4e5-real-path-drill-harness-and-readiness-2026-09-23 (attempt 1)
 [2026-09-24T00:00:04.444037Z] git pull: success (with stash/restore)
+[2026-09-24T00:00:07.050044Z] Claimed task: agent-regional-job-search-agents-and-schedulers-2026-09-23
+[2026-09-24T00:00:07.053042Z] Handling task: agent-regional-job-search-agents-and-schedulers-2026-09-23 (attempt 1)
