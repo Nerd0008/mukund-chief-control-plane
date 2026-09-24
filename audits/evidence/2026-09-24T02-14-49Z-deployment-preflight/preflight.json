@@ -1,0 +1,672 @@
+{
+  "artifact": "deployment preflight / go-no-go check",
+  "run_started_utc": "2026-09-24T02:14:49+00:00",
+  "run_finished_utc": "2026-09-24T02:14:50+00:00",
+  "repository": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "provider_calls_spent": 0,
+  "network_calls_spent": 0,
+  "guarantees": [
+    "read-only against live state and databases",
+    "no provider/network call",
+    "no credential value read, printed or stored (presence + store name only)",
+    "does not change scheduled tasks, services or state"
+  ],
+  "checks": [
+    {
+      "check": "host.python>=3.11",
+      "status": "PASS",
+      "detail": "{\"platform\": \"win32\", \"python_version\": \"3.11.16\", \"python_executable\": \"C:\\\\Users\\\\mukun\\\\AppData\\\\Local\\\\hermes\\\\hermes-agent\\\\venv\\\\Scripts\\\\python.exe\"}",
+      "evidence": null
+    },
+    {
+      "check": "repo.exec-brain module set complete",
+      "status": "PASS",
+      "detail": "34 modules present",
+      "evidence": null
+    },
+    {
+      "check": "runtime.module set complete",
+      "status": "PASS",
+      "detail": "34 modules present in runtime root",
+      "evidence": null
+    },
+    {
+      "check": "runtime.eb.py e3-* registration patch",
+      "status": "PASS",
+      "detail": "patch present",
+      "evidence": null
+    },
+    {
+      "check": "state.databases present and integrity ok",
+      "status": "PASS",
+      "detail": "7 databases, all integrity_check=ok",
+      "evidence": [
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+          "exists": true,
+          "integrity_check": "ok"
+        },
+        {
+          "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+          "exists": true,
+          "integrity_check": "ok"
+        }
+      ]
+    },
+    {
+      "check": "scheduled tasks present and match manifest",
+      "status": "PASS",
+      "detail": "8 tasks match",
+      "evidence": {
+        "Hermes_Gateway": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "logon"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "logon"
+            ],
+            "restart_on_failure": true,
+            "start_when_available": true
+          },
+          "mismatches": []
+        },
+        "HermesRemoteQueuePoller": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "time"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "time"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefDiscordSync": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "time"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "time"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefCareerBrief": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefCareerScan-UK": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefCareerScan-Dubai": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefCareerScan-Japan": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        },
+        "ChiefCareerScan-Singapore": {
+          "expected": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ]
+          },
+          "observed": {
+            "enabled": true,
+            "logon_type": "InteractiveToken",
+            "triggers": [
+              "calendar"
+            ],
+            "restart_on_failure": false,
+            "start_when_available": false
+          },
+          "mismatches": []
+        }
+      }
+    },
+    {
+      "check": "python.third-party dependencies importable",
+      "status": "PASS",
+      "detail": "{\"openpyxl\": \"3.1.5\", \"yaml\": \"6.0.3\"}",
+      "evidence": null
+    },
+    {
+      "check": "credentials.presence (owner-gated)",
+      "status": "WARN",
+      "detail": "7 API worker credential(s) absent: ['mistral-small-4', 'glm-53-flash', 'qwen38-27b', 'longcat-2.0', 'minimax-m3', 'step-37-flash', 'tencent-hunyuan-hy3'] \u2014 owner action, not an execution failure",
+      "evidence": {
+        "workers": [
+          {
+            "worker_id": "codex-cli",
+            "provider": "openai",
+            "interface": "cli",
+            "routable": true,
+            "credential_present": null,
+            "note": "non-API interface; credential handled by its own CLI/adapter"
+          },
+          {
+            "worker_id": "mistral-small-4",
+            "provider": "mistral",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "google-nano-banana-2",
+            "provider": "google",
+            "interface": "api",
+            "routable": true,
+            "credential_present": null,
+            "note": "no generic_openai_adapter binding"
+          },
+          {
+            "worker_id": "deepseek-v41-flash",
+            "provider": "deepseek",
+            "interface": "api",
+            "routable": true,
+            "credential_present": null,
+            "note": "no generic_openai_adapter binding"
+          },
+          {
+            "worker_id": "glm-53-flash",
+            "provider": "glm",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "qwen38-27b",
+            "provider": "qwen",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "longcat-2.0",
+            "provider": "nous",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "minimax-m3",
+            "provider": "minimax",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "step-37-flash",
+            "provider": "step",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          },
+          {
+            "worker_id": "tencent-hunyuan-hy3",
+            "provider": "tencent",
+            "interface": "api",
+            "routable": false,
+            "credential_present": false,
+            "auth_source": "none"
+          }
+        ],
+        "provider_calls_spent": 0,
+        "network_calls_spent": 0,
+        "configured_api_workers": [],
+        "credential_missing_api_workers": [
+          "mistral-small-4",
+          "glm-53-flash",
+          "qwen38-27b",
+          "longcat-2.0",
+          "minimax-m3",
+          "step-37-flash",
+          "tencent-hunyuan-hy3"
+        ],
+        "configured_count": 0,
+        "missing_count": 7
+      }
+    },
+    {
+      "check": "acceptance.command targets exist",
+      "status": "PASS",
+      "detail": "9 command targets present",
+      "evidence": null
+    },
+    {
+      "check": "git.no secret-looking files tracked or staged",
+      "status": "PASS",
+      "detail": "no match for secret filename patterns",
+      "evidence": null
+    },
+    {
+      "check": "topology.decision still pending (by design)",
+      "status": "PASS",
+      "detail": "pending owner decisions: deployment architecture (laptop primary vs VPS primary); VPS host/account details; VPS cutover authorisation",
+      "evidence": null
+    }
+  ],
+  "fail_count": 0,
+  "warn_count": 1,
+  "verdict": "GO",
+  "details": {
+    "host": {
+      "platform": "win32",
+      "python_version": "3.11.16",
+      "python_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe"
+    },
+    "state_databases": [
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+        "exists": true,
+        "integrity_check": "ok"
+      },
+      {
+        "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+        "exists": true,
+        "integrity_check": "ok"
+      }
+    ],
+    "scheduled_tasks": {
+      "Hermes_Gateway": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "logon"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "logon"
+          ],
+          "restart_on_failure": true,
+          "start_when_available": true
+        },
+        "mismatches": []
+      },
+      "HermesRemoteQueuePoller": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "time"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "time"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefDiscordSync": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "time"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "time"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefCareerBrief": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefCareerScan-UK": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefCareerScan-Dubai": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefCareerScan-Japan": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      },
+      "ChiefCareerScan-Singapore": {
+        "expected": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ]
+        },
+        "observed": {
+          "enabled": true,
+          "logon_type": "InteractiveToken",
+          "triggers": [
+            "calendar"
+          ],
+          "restart_on_failure": false,
+          "start_when_available": false
+        },
+        "mismatches": []
+      }
+    },
+    "dependencies": {
+      "openpyxl": "3.1.5",
+      "yaml": "6.0.3"
+    },
+    "credentials": {
+      "workers": [
+        {
+          "worker_id": "codex-cli",
+          "provider": "openai",
+          "interface": "cli",
+          "routable": true,
+          "credential_present": null,
+          "note": "non-API interface; credential handled by its own CLI/adapter"
+        },
+        {
+          "worker_id": "mistral-small-4",
+          "provider": "mistral",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "google-nano-banana-2",
+          "provider": "google",
+          "interface": "api",
+          "routable": true,
+          "credential_present": null,
+          "note": "no generic_openai_adapter binding"
+        },
+        {
+          "worker_id": "deepseek-v41-flash",
+          "provider": "deepseek",
+          "interface": "api",
+          "routable": true,
+          "credential_present": null,
+          "note": "no generic_openai_adapter binding"
+        },
+        {
+          "worker_id": "glm-53-flash",
+          "provider": "glm",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "qwen38-27b",
+          "provider": "qwen",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "longcat-2.0",
+          "provider": "nous",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "minimax-m3",
+          "provider": "minimax",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "step-37-flash",
+          "provider": "step",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        },
+        {
+          "worker_id": "tencent-hunyuan-hy3",
+          "provider": "tencent",
+          "interface": "api",
+          "routable": false,
+          "credential_present": false,
+          "auth_source": "none"
+        }
+      ],
+      "provider_calls_spent": 0,
+      "network_calls_spent": 0,
+      "configured_api_workers": [],
+      "credential_missing_api_workers": [
+        "mistral-small-4",
+        "glm-53-flash",
+        "qwen38-27b",
+        "longcat-2.0",
+        "minimax-m3",
+        "step-37-flash",
+        "tencent-hunyuan-hy3"
+      ],
+      "configured_count": 0,
+      "missing_count": 7
+    }
+  }
+}

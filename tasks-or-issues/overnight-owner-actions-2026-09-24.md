@@ -302,6 +302,52 @@ under whose account.
 
 
 
+## Consolidated owner-action order (added 2026-09-24 by the deployment-prep task)
+
+The numbered items above remain the authoritative detail. This is the single
+ordered execution list, produced while preparing the deployment package
+(`deployments/`; long form in `deployments/03-owner-action-todo.md`):
+
+1. **Configure the seven provider credentials** (item 1). Use
+   `python scripts/set_provider_key.py --worker <id>` — it prompts with no
+   echo, so no key ever reaches shell history, a log, chat or GitHub. Verify with
+   `python scripts/set_provider_key.py --status` (expect 10/10 present).
+2. **Post-key verification sequence** (item 8, steps 1–6) — engineering-run; your
+   only manual part is step 1 above.
+3. **Deployment architecture decision** (item 3) — one written line.
+4. **VPS host/account details** (item 4) — only if a VPS path is chosen; supply
+   locally, never via GitHub.
+5. **Owner-attended laptop security audit** (item 5).
+6. **Reboot-persistence confirmation** (item 6).
+7. Optional, non-blocking: items 10, 11, 13, 14, the regional work-authorisation
+   answer (item 6) and Dubai/Japan provider choice (item 7), the E4/E5 acceptance
+   question in item 8, and the legacy `Mukund Chief of Staff` task disposition.
+
+New deployment-time facts surfaced by the deployment-prep task, recorded here so
+they are not lost (all recorded, none changed):
+
+- **Battery gating:** 7 of the 8 Chief tasks set
+  `DisallowStartIfOnBatteries=true` / `StopIfGoingOnBatteries=true`, so on battery
+  the queue poller, Discord sync, daily brief and all four regional scans will not
+  run (only `Hermes_Gateway` is exempt). Needs an owner-aware fix before any
+  unattended laptop-primary role. See `deployments/06-service-definitions.md` §2.
+- **Log rotation/retention is not implemented** for `%LOCALAPPDATA%\hermes\logs`,
+  `gateway-starts.log` or `remote-queue\logs\queue.log`.
+- **No off-site backup exists.** Both deployment topologies need one before the
+  node is treated as production.
+- **No inbound network exposure is required** by any Chief/Hermes component
+  (outbound 443 only), which simplifies the firewall and the topology choice.
+- **Interactive-token constraint confirmed:** every Chief task runs only while
+  Mukund is signed in; no unattended topology is possible without an
+  owner-approved service-account change.
+- **Deployment package prepared** under `deployments/` (manifest, secret checklist,
+  owner-action order, dependency inventory, backup/restore plan, service
+  definitions with re-importable task XML, cutover runbook, rollback/no-go list,
+  acceptance commands) with three new executable verifiers:
+  `scripts/deployment_inventory.py`, `scripts/deployment_preflight.py`,
+  `scripts/deployment_backup_restore_drill.py`, plus
+  `scripts/set_provider_key.py` for item 1.
+
 ## Owner manual-work target
 
 Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.

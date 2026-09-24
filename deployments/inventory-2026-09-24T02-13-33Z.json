@@ -1,0 +1,534 @@
+{
+  "artifact": "deployment inventory (read-only collector)",
+  "generated_utc": "2026-09-24T02:13:33+00:00",
+  "host": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "os": "Windows",
+    "release": "10",
+    "machine": "AMD64",
+    "python_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
+    "python_version": "3.11.16",
+    "note": "python_executable is the interpreter that ran this collector"
+  },
+  "paths": {
+    "repo_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+    "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+    "hermes_root": "C:\\Users\\mukun\\AppData\\Local\\hermes"
+  },
+  "workers": [
+    {
+      "worker_id": "codex-cli",
+      "registry_provider": "openai",
+      "registry_model": "codex-cli",
+      "registry_interface": "cli",
+      "registry_routable": true,
+      "registry_qualification": "UNPROVEN",
+      "adapter_config": null,
+      "adapter_error": "ValueError"
+    },
+    {
+      "worker_id": "mistral-small-4",
+      "registry_provider": "mistral",
+      "registry_model": "mistral-small-4",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://api.mistral.ai/v1",
+        "models_endpoint": "https://api.mistral.ai/v1/models",
+        "chat_endpoint": "https://api.mistral.ai/v1/chat/completions",
+        "api_model_id": "mistral-small-4",
+        "display_name": "Mistral Small 4",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "MISTRAL_API_KEY",
+        "credential_target": "mistral"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "google-nano-banana-2",
+      "registry_provider": "google",
+      "registry_model": "gemini-3.1-flash-image",
+      "registry_interface": "api",
+      "registry_routable": true,
+      "registry_qualification": "UNPROVEN",
+      "adapter_config": null,
+      "adapter_error": "ValueError"
+    },
+    {
+      "worker_id": "deepseek-v41-flash",
+      "registry_provider": "deepseek",
+      "registry_model": "deepseek-flash",
+      "registry_interface": "api",
+      "registry_routable": true,
+      "registry_qualification": "UNPROVEN",
+      "adapter_config": null,
+      "adapter_error": "ValueError"
+    },
+    {
+      "worker_id": "glm-53-flash",
+      "registry_provider": "glm",
+      "registry_model": "glm-5.3-flash",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "models_endpoint": "https://open.bigmodel.cn/api/paas/v4/models",
+        "chat_endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "api_model_id": "glm-5.3-flash",
+        "display_name": "GLM-5.3 Flash",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "GLM_API_KEY",
+        "credential_target": "glm"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "qwen38-27b",
+      "registry_provider": "qwen",
+      "registry_model": "qwen3.8-27b",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "models_endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
+        "chat_endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "api_model_id": "qwen3.8-27b",
+        "display_name": "Qwen3.8-27B",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "DASHSCOPE_API_KEY",
+        "credential_target": "qwen"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "longcat-2.0",
+      "registry_provider": "nous",
+      "registry_model": "longcat-2.0",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://inference-api.nousresearch.com/v1",
+        "models_endpoint": "https://inference-api.nousresearch.com/v1/models",
+        "chat_endpoint": "https://inference-api.nousresearch.com/v1/chat/completions",
+        "api_model_id": "longcat-2.0",
+        "display_name": "LongCat 2.0",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "NOUS_API_KEY",
+        "credential_target": "nous"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "minimax-m3",
+      "registry_provider": "minimax",
+      "registry_model": "minimax-m3",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://api.minimax.io/v1",
+        "models_endpoint": "https://api.minimax.io/v1/models",
+        "chat_endpoint": "https://api.minimax.io/v1/chat/completions",
+        "api_model_id": "minimax-m3",
+        "display_name": "MiniMax M3",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "MINIMAX_API_KEY",
+        "credential_target": "minimax"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "step-37-flash",
+      "registry_provider": "step",
+      "registry_model": "step-3.7-flash",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://api.stepfun.com/v1",
+        "models_endpoint": "https://api.stepfun.com/v1/models",
+        "chat_endpoint": "https://api.stepfun.com/v1/chat/completions",
+        "api_model_id": "step-3.7-flash",
+        "display_name": "Step 3.7 Flash",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "STEP_API_KEY",
+        "credential_target": "stepfun"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    },
+    {
+      "worker_id": "tencent-hunyuan-hy3",
+      "registry_provider": "tencent",
+      "registry_model": "hunyuan-hy3",
+      "registry_interface": "api",
+      "registry_routable": false,
+      "registry_qualification": null,
+      "adapter_config": {
+        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+        "models_endpoint": "https://api.hunyuan.cloud.tencent.com/v1/models",
+        "chat_endpoint": "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+        "api_model_id": "hunyuan-hy3",
+        "display_name": "Tencent Hunyuan Hy3",
+        "cancellation_support": "SUPPORTED_PROCESS_KILL",
+        "env_var": "HUNYUAN_API_KEY",
+        "credential_target": "hunyuan"
+      },
+      "adapter_env_var_names": [
+        "credential_target",
+        "env_var"
+      ]
+    }
+  ],
+  "scheduled_tasks": [
+    {
+      "task_name": "Hermes_Gateway",
+      "query_ok": true,
+      "command": "wscript.exe",
+      "arguments": "//B //Nologo \"C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-service\\Hermes_Gateway.vbs\"",
+      "logonType": "InteractiveToken",
+      "interval": "PT1M",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": false,
+        "logon": true,
+        "boot": false
+      },
+      "restart_on_failure": true,
+      "start_when_available": true
+    },
+    {
+      "task_name": "HermesRemoteQueuePoller",
+      "query_ok": true,
+      "command": "\"C:\\WINDOWS\\System32\\wscript.exe\"",
+      "arguments": "//B \"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\..\\remote_queue\\run_poller_hidden.vbs\"",
+      "startBoundary": "2026-09-23T21:08:00",
+      "logonType": "InteractiveToken",
+      "interval": "PT2M",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": true,
+        "calendar": false,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefDiscordSync",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\"",
+      "arguments": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\scheduled_sync_chief.py\"",
+      "startBoundary": "2026-09-21T21:06:00",
+      "logonType": "InteractiveToken",
+      "interval": "PT30M",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": true,
+        "calendar": false,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefCareerBrief",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_brief.cmd\"",
+      "startBoundary": "2026-09-24T07:00:00",
+      "logonType": "InteractiveToken",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": true,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefCareerScan-UK",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\"",
+      "arguments": "uk",
+      "startBoundary": "2026-09-23T23:45:00",
+      "logonType": "InteractiveToken",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": true,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefCareerScan-Dubai",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\"",
+      "arguments": "dubai",
+      "startBoundary": "2026-09-23T23:50:00",
+      "logonType": "InteractiveToken",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": true,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefCareerScan-Japan",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\"",
+      "arguments": "japan",
+      "startBoundary": "2026-09-23T23:55:00",
+      "logonType": "InteractiveToken",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": true,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    },
+    {
+      "task_name": "ChiefCareerScan-Singapore",
+      "query_ok": true,
+      "command": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\run_scheduled_scan.cmd\"",
+      "arguments": "singapore",
+      "startBoundary": "2026-09-23T00:00:00",
+      "logonType": "InteractiveToken",
+      "userId": "S-1-5-21-3453725374-3777210888-4048049496-1001",
+      "triggers": {
+        "time": false,
+        "calendar": true,
+        "logon": false,
+        "boot": false
+      },
+      "restart_on_failure": false,
+      "start_when_available": false
+    }
+  ],
+  "state_paths": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "exists": true,
+      "size_bytes": 77824,
+      "modified_utc": "2026-09-21T21:59:06+00:00",
+      "tables": [
+        "audit_log",
+        "override_record",
+        "quality_floor",
+        "sqlite_sequence",
+        "strategy_decision",
+        "subtask_record",
+        "task_record"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "exists": true,
+      "size_bytes": 77824,
+      "modified_utc": "2026-09-24T01:48:16+00:00",
+      "tables": [
+        "capacity_dimension",
+        "daily_aggregate",
+        "daily_brief_log",
+        "observed_request",
+        "provider_snapshot"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "exists": true,
+      "size_bytes": 217088,
+      "modified_utc": "2026-09-24T01:46:56+00:00",
+      "tables": [
+        "capability_registry",
+        "conflict_record",
+        "convergence_event",
+        "dag_node",
+        "dag_state_event",
+        "decision_outcome_review",
+        "decision_rationale_event",
+        "failure_drill_log",
+        "performance_evidence",
+        "plan_version",
+        "resource_checkpoint",
+        "resource_snapshot",
+        "router_decision",
+        "safe_mode_event",
+        "schema_version",
+        "sqlite_sequence",
+        "task_fingerprint_index",
+        "worker_capability_event"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\chain-head.json",
+      "exists": true,
+      "size_bytes": 49,
+      "modified_utc": "2026-09-23T22:23:50+00:00"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\gov-chain-head.json",
+      "exists": true,
+      "size_bytes": 109,
+      "modified_utc": "2026-09-22T09:32:08+00:00"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\deepseek-config.json",
+      "exists": true,
+      "size_bytes": 119,
+      "modified_utc": "2026-09-22T09:32:55+00:00"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "exists": true,
+      "size_bytes": 47484928,
+      "modified_utc": "2026-09-24T02:13:17+00:00",
+      "tables": [
+        "async_delegations",
+        "compression_locks",
+        "conversation_generations",
+        "delivery_obligations",
+        "gateway_heartbeats",
+        "gateway_hygiene_state",
+        "gateway_routing",
+        "messages",
+        "messages_fts",
+        "messages_fts_config",
+        "messages_fts_data",
+        "messages_fts_docsize",
+        "messages_fts_idx",
+        "messages_fts_trigram",
+        "messages_fts_trigram_config",
+        "messages_fts_trigram_data",
+        "messages_fts_trigram_docsize",
+        "messages_fts_trigram_idx",
+        "schema_version",
+        "session_model_usage",
+        "session_turn_leases",
+        "sessions",
+        "sqlite_sequence",
+        "state_meta",
+        "system_prompts"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "exists": true,
+      "size_bytes": 118784,
+      "modified_utc": "2026-09-21T13:57:48+00:00",
+      "tables": [
+        "kanban_notify_subs",
+        "sqlite_sequence",
+        "task_attachments",
+        "task_comments",
+        "task_events",
+        "task_links",
+        "task_runs",
+        "tasks"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "exists": true,
+      "size_bytes": 155648,
+      "modified_utc": "2026-09-21T13:57:38+00:00",
+      "tables": [
+        "hosted_room_events",
+        "hosted_room_legacy_imports",
+        "hosted_room_links",
+        "hosted_room_peer_reservations",
+        "hosted_room_policy_cursors",
+        "hosted_room_policy_events",
+        "hosted_room_policy_publications",
+        "hosted_room_policy_threads",
+        "hosted_room_policy_transcript",
+        "hosted_room_policy_transcript_state",
+        "hosted_room_policy_watermarks",
+        "hosted_room_remote_runs",
+        "hosted_room_retired_ids",
+        "hosted_room_revoked_grants",
+        "hosted_rooms"
+      ],
+      "integrity_check": "ok"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "exists": true,
+      "size_bytes": 24576,
+      "modified_utc": "2026-09-21T13:57:43+00:00",
+      "tables": [
+        "executions"
+      ],
+      "integrity_check": "ok"
+    }
+  ],
+  "third_party_imports": {
+    "mailbox": [
+      "career-ops/application_inbox.py"
+    ],
+    "openpyxl": [
+      "career-ops/run_rollover_acceptance.py",
+      "career-ops/tracker_rollover.py",
+      "career-ops/tracker_writer.py",
+      "company-watch/company_watch.py"
+    ],
+    "remote_queue": [
+      "remote_queue/hermes_dispatch.py",
+      "remote_queue/poller.py",
+      "remote_queue/queue_schema.py",
+      "scripts/quickedit_console_probe.py"
+    ],
+    "yaml": [
+      "career-ops/application_pack_review.py",
+      "career-ops/cv_workflow.py",
+      "career-ops/job_intelligence.py",
+      "career-ops/regional_job_search.py",
+      "company-watch/company_watch.py"
+    ]
+  },
+  "collector_guarantees": [
+    "read-only; made no network call",
+    "no credential value read, dereferenced, printed or stored",
+    "credential stores referenced by name only"
+  ]
+}

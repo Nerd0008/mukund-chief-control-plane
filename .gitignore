@@ -16,6 +16,13 @@ id_ecdsa*
 authorized_keys
 known_hosts
 
+# --- Explicit exception -------------------------------------------------------
+# Gate/deployment tooling whose *filename* matches the credential patterns above
+# but which contains no secret: it performs presence checks only and never reads
+# a credential value. Without this negation the file is silently excluded from
+# the control plane while being referenced by the deployment runbook.
+!scripts/e3_credential_presence_probe.py
+
 # --- Hermes databases / session state (raw data stays local) ---
 *.db
 *.sqlite
@@ -80,3 +87,10 @@ audits/evidence/**/backups/*.xlsx
 audits/evidence/**/findings.json
 audits/evidence/**/resolution.json
 audits/evidence/**/manifest-*.json
+
+# --- Deployment backup/restore drill: raw snapshots must never be committed ---
+# The drill writes its snapshots to a scratch directory outside the repository;
+# these patterns are defence in depth in case a drill is ever pointed at an
+# evidence directory. Only the aggregate report (hashes, row counts) is kept.
+audits/evidence/**/backup/
+audits/evidence/**/restore-check/
