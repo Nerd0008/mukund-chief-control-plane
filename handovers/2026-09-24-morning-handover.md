@@ -260,3 +260,27 @@ work-authorisation, LinkedIn live surface, operational scheduling). No UNKNOWN o
 Superseded with evidence (outside the roster): the legacy `Mukund Chief of Staff` logon task
 (`state/v1-agent-roster.md`, 2026-09-23 Company Registry audit) — retained as a donor, not revived,
 not deleted; it is also a known `survives boot = yes` row in the persistence audit above.
+
+---
+
+## 12. Independent retry verification (attempt 2, 2026-09-24T04:03Z)
+
+The queue recorded attempt 1 of this task as a **response-format** failure (`execution_error`): the
+work below was already committed, but the final response was unstructured. Attempt 2 therefore
+re-verified rather than rebuilt.
+
+- The acceptance driver at HEAD is byte-identical to the driver at the accepted SHA
+  (`git hash-object scripts/whole_company_acceptance.py` = `5b644dab9fb424850e7409feceef1f9fbc5b569e`,
+  unchanged between `31eecdb` and `e9f5db8`), and no code changed between those commits — only
+  evidence, state and handover documents did.
+- The full regression was **re-run from scratch at HEAD** and reproduced the recorded figures exactly:
+  **21 suites / 21 passed / 0 failed / 0 unavailable / 579 collected / 579 passed / runner exit 0**,
+  code SHA `e9f5db8`, python 3.11.16 (win32).
+  Evidence: `audits/evidence/2026-09-24T04-03-58Z-regression-attempt2-verification-at-head/`
+  (`evidence.json`, `evidence.md`).
+- All **12** blocked queue records carry a `final_reconciliation_2026_09_24` disposition: **10
+  superseded by verified successors**, **2 parked unchanged as deterministic owner/external
+  (provider-credential) blockers**. No recoverable non-owner gap remains.
+- No new owner action was created. No credential, external, deployment or Stage 2 step was run in
+  this verification.
+

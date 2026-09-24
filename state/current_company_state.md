@@ -991,6 +991,15 @@ commands/exit codes, 13 sub-artifacts, `roster_account.md/.json`), code SHA `31e
 - **Not done, by contract:** local Stage 2 **NOT ENABLED**; no production dispatch; no provider call;
   no VPS cutover; no external publish/submit; no readiness, qualification or verification criterion
   weakened; the 0/7 credential gate was not re-staged (anti-loop directive).
+- **Attempt-2 independent verification (2026-09-24T04:03Z):** attempt 1 of this task failed only in its
+  response format (`execution_error`), so attempt 2 re-verified instead of rebuilding. The acceptance
+  driver is byte-identical between `31eecdb` and `e9f5db8` and no code changed between them; the full
+  regression was re-run from scratch at HEAD and reproduced **21/21 suites, 579/579 tests, 0 failed,
+  0 unavailable, exit 0** (`audits/evidence/2026-09-24T04-03-58Z-regression-attempt2-verification-at-head/`).
+  All 12 blocked queue records carry a `final_reconciliation_2026_09_24` disposition (10 superseded by
+  verified successors, 2 parked as deterministic owner/external credential blockers). No new owner
+  action; no credential, external, deployment or Stage 2 step executed.
+
 
 Owner action required: **only the pre-existing owner items** — 7 provider credentials (item 1), the
 post-key verification sequence (item 8), the work-authorisation answer, the deployment architecture /
