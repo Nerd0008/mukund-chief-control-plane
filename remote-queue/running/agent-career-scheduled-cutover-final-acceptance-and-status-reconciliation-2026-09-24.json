@@ -36,5 +36,26 @@
     "remote-queue/running/agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24.json",
     "career-ops/scheduled_orchestrator.md",
     "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json"
-  ]
+  ],
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T21:41:34.071114Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=397).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=397).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
