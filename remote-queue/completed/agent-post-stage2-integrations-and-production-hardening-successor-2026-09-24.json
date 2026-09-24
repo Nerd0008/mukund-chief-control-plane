@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "medium",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "completed",
   "prerequisites": [
     "The provider debug task and Career final-acceptance task are terminal; no real agent currently owns the shared worktree.",
     "Mukund has approved removal of scheduled-task battery gating, unattended-service hardening, log rotation/retention, and operational-service scheduling.",
@@ -58,5 +58,53 @@
     "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=892).",
     "next_action": "retry",
     "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T22:43:34.210147Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 2 resumed from the smallest unfinished unit: attempt 1 had already landed the scheduled-task hardening (6541db8) and the owner-authenticated LinkedIn publish path (9972af4), so this attempt closed the remaining unit, the built-but-not-live gap audit and the owner/status reconciliation. Live state was re-measured, not assumed: battery gating is gone on all owned tasks (still_battery_gated=[]), the four owner-approved operational schedules are registered and Enabled (backup 02:30, log rotation 03:00, morning brief 06:30, health 08:00; local artifacts only), log rotation/retention is implemented and scheduled, all twelve owned tasks carry StartWhenAvailable with a logon trigger on the two light periodic tasks (unverified_after_reboot=[]), and the legacy 'Mukund Chief of Staff' task is confirmed Disabled and left in place as a rollback donor. New scripts/integration_gap_audit.py produced a deterministic read-only audit accounting for all thirteen required items (Gmail read-only OAuth, JobBrief research provider, recruiter feed, Career Daily Brief delivery, tracker vocabulary, monthly rollover, owner watchlist names, UAE/Japan coverage, LinkedIn live account, off-machine backup, laptop trust audit, deployment topology/VPS, live-provider E4/E5) \u2014 0 live PASS, each open item carrying its exact next owner step; no fixture/dry-run result was recorded as a live PASS and no credential value was read. status/canonical-status.json gained a resolved_blockers section so battery-gating and log-rotation-retention are recorded as resolved rather than silently dropped, with validator/renderer/test rules that fail if a resolved blocker reappears as open or loses its evidence; LinkedIn is READY_NEEDS_OWNER_CONFIG (path built, no credential set, nothing published), ops scheduling SCHEDULED, legacy task DISABLED. Regenerated surfaces verify with 0 warnings. Added deployments/11-owner-reboot-acceptance-checklist.md and reconciled deployments/03, 06, 07, 08, 10, deployments/README.md and the authoritative overnight-owner-actions list against measured live state only; no historical evidence was erased and no owner decision was pre-empted. Committed and pushed as 2949358.",
+    "owner_action_required": "1) After your next reboot, run the seven checks in deployments/11-owner-reboot-acceptance-checklist.md (engineering is prohibited from cycling the laptop, so survival is configured-but-unobserved). 2) Fund/enable the seven provider accounts so the stored keys serve traffic (mistral 429, GLM 429 balance, Qwen 403 AccessDenied.Unpurchased on qwen3.7-plus, LongCat 402, MiniMax 402, StepFun 402, Tencent 401 code 401002 \u2014 re-issue TokenHub key), then the post-key sequence re-runs. 3) Optional, non-blocking decisions recorded with exact next steps: LinkedIn app credentials for the publish path, off-machine backup destination, deployment topology/VPS, laptop trust audit, regional work-authorisation facts, Gmail read-only OAuth, tracker vocabulary, research provider, Career Daily Brief delivery channel, owner company watchlist names.",
+    "blocker_category": null,
+    "commits": [
+      "2949358 ops: reconcile the built-but-not-live integration gaps and record the owner acceptance checklist (attempt 2, pushed to origin/main)",
+      "9972af4 linkedin: add owner-authenticated live publish integration around the B20/B21 drafts (attempt 1, preserved)",
+      "6541db8 ops: remove scheduled-task battery gating, harden unattended execution, register operational service schedules (attempt 1, preserved)"
+    ],
+    "tests": [
+      "python scripts/status_verify.py -> PASSED (as_of 2026-09-24T21:10:44Z; 8 production blockers recorded; 0 warnings)",
+      "python -m pytest scripts/tests/test_status_consistency.py -q -> 24 passed",
+      "python -m pytest scripts/tests -q -> 55 passed",
+      "python -m pytest scripts/tests/test_status_consistency.py scripts/tests/test_operational_services.py career-ops/tests/test_linkedin_publish.py -q -> 77 passed",
+      "python scripts/integration_gap_audit.py -> 13 items, 0 live PASS, 13 owner-gated (evidence written)",
+      "schtasks live query -> owned tasks Enabled; no Power Management battery gating; 'Mukund Chief of Staff' State=Disabled"
+    ],
+    "changed_files": [
+      "scripts/integration_gap_audit.py",
+      "scripts/status_sources.py",
+      "scripts/status_render.py",
+      "scripts/tests/test_status_consistency.py",
+      "status/canonical-status.json",
+      "status/executive-tracker.md",
+      "README.md",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "deployments/03-owner-action-todo.md",
+      "deployments/06-service-definitions.md",
+      "deployments/07-cutover-runbook.md",
+      "deployments/08-rollback-and-no-go-checklist.md",
+      "deployments/10-operational-services.md",
+      "deployments/11-owner-reboot-acceptance-checklist.md",
+      "deployments/README.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.json",
+      "audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.md"
+    ],
+    "remaining": [
+      "Owner runs deployments/11-owner-reboot-acceptance-checklist.md after the next reboot and records the result",
+      "Fund/enable the seven provider accounts (and re-issue the Tencent TokenHub key), then re-run the post-key sequence and the Stage-2 readiness gate",
+      "Decide the still-open owner items: deployment topology/VPS, off-machine backup destination, owner-attended laptop trust audit, regional work-authorisation facts, Gmail read-only OAuth, tracker vocabulary, research provider, Career Daily Brief delivery channel, owner company watchlist names, LinkedIn app credentials",
+      "Resolve or re-scope the Google-image Stage-2 criterion and answer the live-provider E4/E5 acceptance question",
+      "Live-provider E4/E5 failover evidence remains absent (harness has no live mode) and must not be claimed as live"
+    ]
   }
 }
