@@ -133,3 +133,24 @@ Not claimed: any live company research (no approved provider), any live vacancy,
 submission, and any "independent AI opinion" — B17 is independent deterministic
 re-derivation, not a second model.
 
+## Status update — 2026-09-24 (LinkedIn people/network layer: B19, B20, B21, B22)
+
+Task `agent-linkedin-networking-interview-support-2026-09-23`. Acceptance evidence:
+`audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/` (27/27 checks,
+0 critical failures).
+
+| ID | Worker / service | Status now | Evidence |
+|---|---|---|---|
+| B19 | LinkedIn Job Discovery Agent | **BUILT + EVIDENCED — read-only** | `career-ops/linkedin_workflow.py` `intake`/`dedupe`/`handoff`; owner-exported local files only, no login/API/scrape/browser; deduped against Career Ops workbook + cross-month ledger + Company Watch registry + Company Watch handoff manifests |
+| B20 | LinkedIn Profile / Post Draft Agent | **BUILT + EVIDENCED — no posting** | `draft`; profile/posts are canonical CV text verbatim plus declared structural phrasing, fact-gated by the install's own `verify-cv-facts.mjs`; every draft `draft_unsent` with a `provenance` block |
+| B21 | Networking / Recruiter Outreach Draft Agent | **BUILT + EVIDENCED — no sending** | `draft` emits `networking`, `recruiter` and `hiring_manager` variants; explicit `unsent_state` (sent/sent_at/recipient_selected/connection_request_created/message_queued/scheduled/attachments all false or null); the hiring-manager variant names the role/employer only from the resolved Career Ops record (`references_job`) and is omitted when no job context resolves |
+| B22 | Interview Prep Agent | **BUILT + EVIDENCED** | `career-ops/interview_prep.py` + `career-ops/interview_prep_schema.json`; consumes JobBrief + cited research + canonical `cv.md`/`profile.yml`/`cv-facts.json`; produces technical/behavioural prep, a likely-question list, `cv.md`-quoted talking points and an explicit unknown list; every question is a deterministic template marked `employer_supplied: false` |
+
+Truth boundaries: the interview prep pack's questions are **generated preparation
+prompts**, not employer-supplied questions, and every one says so; talking points
+quote canonical lines verbatim (independently re-read from `cv.md` in the acceptance
+run); a requirement with no canonical evidence becomes an owner action, never a
+claim. A LinkedIn account/API read path does not exist in this runtime, so the live
+LinkedIn surface remains **owner-gated and untested against the real account**
+(recorded in `tasks-or-issues/overnight-owner-actions-2026-09-24.md` item 13).
+

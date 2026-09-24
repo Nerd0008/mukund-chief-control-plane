@@ -1,7 +1,19 @@
 # Current Company State
 
-- Timestamp: 2026-09-24T00:14:21Z
-- Latest evidence run: 2026-09-24T00:14:21Z — **four regional job-search workers + deterministic
+- Timestamp: 2026-09-24T01:30:00Z
+- Latest evidence run: 2026-09-24T01:30:00Z — **LinkedIn people/network layer completed: networking /
+  recruiter / hiring-manager outreach drafts + Interview Prep Agent (B22)** (task
+  `agent-linkedin-networking-interview-support-2026-09-23`),
+  `audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/acceptance.json` (+ `.md`) —
+  **27/27 critical checks pass**: three unsent outreach variants each with an explicit unsent state and
+  per-draft provenance (role/employer taken only from the resolved Career Ops record); interview prep
+  pack built from a canonical JobBrief + cited research + the canonical `cv.md`/`profile.yml`
+  (every talking point re-read verbatim from `cv.md`, every question marked
+  `employer_supplied: false`); owner action gate refuses post/message/connect/apply. New suite
+  `career-ops/tests/test_interview_prep.py` 25 passed; `test_linkedin_workflow.py` 38 passed; whole
+  `career-ops/tests/` **277 passed**. 0 LinkedIn mutations, 0 messages, 0 applications, 0 provider
+  calls, 0 browser launches; canonical source hashes unchanged.
+- Previous evidence run: 2026-09-24T00:14:21Z — **four regional job-search workers + deterministic
   scheduled execution** (task `agent-regional-job-search-agents-and-schedulers-2026-09-23`),
   `career-ops/evidence/acceptance-20260924T001500Z.json` — one shared implementation for UK, Dubai,
   Japan and Singapore; all four Windows scheduled tasks registered and `Ready`; bounded dry-run
@@ -9,7 +21,7 @@
   hash; **all four canonical workbook hashes unchanged**; `applications_submitted: 0`,
   `external_messages_sent: 0`. New suite `career-ops/tests/test_regional_job_search.py` 32 passed;
   whole `career-ops/tests/` 120 passed.
-- Previous evidence run: 2026-09-23T23:43:10Z — **CV/cover-letter workflow connected + minimal LinkedIn
+- Before that: 2026-09-23T23:43:10Z — **CV/cover-letter workflow connected + minimal LinkedIn
   workflow implemented** (task `agent-cv-cover-letter-linkedin-workflows-2026-09-23`),
   `audits/evidence/20260923T234310Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) —
   **23/23 critical checks pass**: representative path Career Ops job → tailored CV/cover-letter draft
@@ -875,6 +887,46 @@ agent-driven `search_queries` path).
 Successor task: **none staged** — this task's remaining dependencies are owner decisions, not
 engineering, and no equivalent regional task is pending. Staging another regional task would duplicate
 this one.
+
+## LinkedIn people/network layer: outreach drafts + Interview Prep Agent (2026-09-24T01:30Z)
+
+Task `agent-linkedin-networking-interview-support-2026-09-23` (roster B19, B20, B21, B22).
+Evidence: `audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/` —
+`acceptance.json` + `acceptance.md`, **27/27 checks passed, 0 critical failures**.
+Roster/worker detail is in `state/full_build_tracker.md` and `state/v1-agent-roster.md`.
+
+Built on top of the existing B19 read-only intake and B20 profile/post drafts (evidenced by
+`agent-cv-cover-letter-linkedin-workflows-2026-09-23`), this run adds:
+
+- **B21 outreach drafting** — `linkedin_workflow.build_outreach_drafts()` produces unsent
+  `networking`, `recruiter` and `hiring_manager` drafts. Each carries an explicit
+  `unsent_state` (`sent`/`sent_at`/`recipient_selected`/`connection_request_created`/
+  `message_queued`/`scheduled` all false or null, `attachments_sent: 0`,
+  `owner_approval_required: true`) and a `provenance` block with the canonical source hashes
+  and exact `cv.md:<line>` refs. The hiring-manager variant names the role and employer only
+  from the resolved Career Ops record (`references_job`) and is **omitted** when no job
+  context resolves.
+- **B22 Interview Prep Agent** — `career-ops/interview_prep.py` (+
+  `interview_prep_schema.json`) consumes a canonical JobBrief, an optional cited research
+  file, and the canonical `cv.md` / `config/profile.yml` / `config/cv-facts.json` and emits
+  technical preparation, behavioural preparation, a likely-question list, evidence-backed
+  talking points and an unknown list. Every question is a deterministic template marked
+  `employer_supplied: false` with its verbatim posting basis; every talking point quotes a
+  canonical CV line verbatim; a requirement with no canonical evidence becomes an explicit
+  owner action instead of a claim.
+
+Defect found and fixed in this run: the first revision of the evidence matcher scored any
+term overlap, so a mainframe-RACF requirement was reported `evidence_backed` off the word
+"security" alone. `evidence_matching.general_terms` now strips domain words before scoring
+and a qualification requirement is answered from the canonical qualification headings. The
+defect was caught by an explicit test, and the fix is recorded in
+`state/full_build_tracker.md`.
+
+Not claimed: any live LinkedIn account access (none exists in this runtime; the live surface
+stays owner-gated — owner decision recorded as item 13 in
+`tasks-or-issues/overnight-owner-actions-2026-09-24.md`), any real interview, any
+employer-supplied question, any live vacancy or company research (the acceptance fixtures are
+labelled synthetic), and any external message or application.
 
 ## Next non-blocked priority
 

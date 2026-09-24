@@ -364,3 +364,56 @@ Not claimed (deliberately): any live company research (no approved provider exis
 every brief carries `research_needed`), any live vacancy (the fixture posting is
 synthetic), any submission, and any "independent AI opinion" — B17 is independent
 deterministic re-derivation and its own output records that limitation.
+
+## LinkedIn people/network layer: outreach drafts + Interview Prep Agent (2026-09-24T01:30Z)
+
+Task `agent-linkedin-networking-interview-support-2026-09-23` (roster B19, B20, B21, B22).
+Acceptance evidence: `audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/`
+(`acceptance.json` + `acceptance.md`) — **27/27 checks passed, 0 critical failures**. The
+same runner was re-run unchanged as `audits/evidence/20260924T014000Z-linkedin-outreach-interview-prep/`
+(**27/27 again**) and the pre-existing LinkedIn/CV acceptance was re-run against the modified
+workflow as `audits/evidence/20260924T014100Z-cv-linkedin-workflows/` (**23/23, 0 critical
+failures** — no regression). `runtime/career-ops/interview-prep/acceptance/20260924T013000Z/`
+holds the generated JobBrief and pack (runtime state is git-ignored).
+
+The B19 read-only intake and the B20 profile/post drafts already existed and were
+evidenced by `agent-cv-cover-letter-linkedin-workflows-2026-09-23`; this task added the
+people/network layer on top of them.
+
+| Lane | Item | Status | Evidence |
+|---|---|---|---|
+| B21 | Networking / recruiter / hiring-manager outreach drafts | **BUILT + EVIDENCED — unsent** | `linkedin_workflow.build_outreach_drafts()`; three variants, each `draft_unsent` |
+| B21 | Explicit unsent state | **ENFORCED** | every outreach draft carries `unsent_state`: `sent=false`, `sent_at=null`, `recipient_selected=false`, `recipient=null`, `connection_request_created=false`, `message_queued=false`, `scheduled=false`, `attachments_sent=0`, `owner_approval_required=true`; the run reports `sends_performed=0`, `messages_queued=0`, `connection_requests_created=0` |
+| B21 | Provenance per draft | **ENFORCED** | `provenance` block per draft: generator, timestamp, canonical `cv.md`/`profile.yml`/`cv-facts.json` SHA-256s, and the exact `cv.md:<line>` refs |
+| B21 | No invented role/employer | **ENFORCED** | the hiring-manager draft names the role/employer only from the resolved Career Ops record, recorded in `references_job` (id/title/company/location/source kind/source path); with no job context the variant is **omitted**, never guessed |
+| B21 | Generated phrasing is bounded and declared | **ENFORCED** | `linkedin_workflow.STRUCTURAL_PHRASES` is the exhaustive exported list of non-canonical lines; the test suite asserts draft bodies against that same list rather than a copy |
+| B22 | Interview Prep Agent | **BUILT + EVIDENCED** | `career-ops/interview_prep.py` + `career-ops/interview_prep_schema.json`; `pack` consumes a JobBrief (+ optional cited research file), `from-job` resolves the job from Career Ops state and briefs it first |
+| B22 | Role-specific technical + behavioural prep | **DONE** | 13 technical prompts + 7 behavioural themes on the fixture posting, each tied to the verbatim posting line and its `source_line`, with the derivation stated |
+| B22 | Likely questions are never employer questions | **ENFORCED** | every question item carries `employer_supplied: false`, its posting basis, and a note saying a deterministic template generated it; `validate_pack` fails a pack that claims employer origin |
+| B22 | Evidence-backed talking points | **DONE + PROVEN** | talking points quote canonical CV lines verbatim with `cv.md:<line>`; the acceptance run **independently re-reads `cv.md`** and confirms every quote; a deliberately altered quote is detected |
+| B22 | No invented claims | **ENFORCED** | `candidate_claims: []`, `external_actions_taken: []`, `interview_scheduled/attended: false`; a first-person-claim scanner runs over every generated (non-quoted) field and an injected claim is detected |
+| B22 | Honest gaps | **ENFORCED** | a requirement with no canonical evidence becomes `owner_input_required` with an explicit owner action; the UAE fixture posting's eligibility stays `unknown` and no right-to-work position is invented |
+| B22 | Commercial-credibility defect found and fixed | **FIXED** | the first revision scored evidence by any term overlap, so a mainframe-RACF requirement was reported `evidence_backed` off the word "security" alone. `evidence_matching.general_terms` now strips domain words before scoring (a match must include a term outside that list), and a qualification requirement is answered from the canonical qualification headings (`qualification_section_patterns`) instead of the general-term filter. Ordinary-postings terms are unaffected. Caught by an explicit test, not by inspection |
+| Safety | Owner action gate | **ENFORCED** | `guard` refuses and logs `post`, `message`, `connection_request`, `apply`, `profile_update`, `inmail`; no code path performs any of them |
+| Safety | Canonical sources + trackers untouched | **VERIFIED** | source SHA-256s re-read after the run: identical; the run's own writes are the pack, its markdown and the brief under git-ignored `runtime/` |
+| Tests | New/extended suites | **PASS** | `career-ops/tests/test_interview_prep.py` **25 passed** (new); `career-ops/tests/test_linkedin_workflow.py` **38 passed** (was 34); whole `career-ops/tests/` **277 passed** (was 248) |
+
+Truth boundaries recorded in the artifact, not glossed over:
+
+- The questions in a pack are **generated preparation prompts derived from the
+  posting's own text**. They are not the employer's interview questions, and the pack
+  never claims an interview, a panel, an interviewer or a process detail.
+- The job description and job record used by the acceptance run are explicitly
+  labelled **synthetic fixtures**; no live vacancy is claimed and nothing is
+  submitted. The cited research file is a labelled transport/shape fixture, not live
+  company research.
+- `questions_to_ask_employer` suggestions are prompts for the candidate to ask; they
+  are not claims that the employer said anything.
+- The live LinkedIn account surface is **owner-gated and untested** — no account,
+  session, API key or browser path exists in this runtime (owner decision recorded as
+  item 13 in `tasks-or-issues/overnight-owner-actions-2026-09-24.md`).
+
+Successor task: **no new `agent-*` task staged** — the whole-company local acceptance
+task (`agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`, pending)
+already lists the LinkedIn draft/read-only path, and its scope does not mention the
+interview-prep path, so that gap is recorded here for that task rather than duplicated.

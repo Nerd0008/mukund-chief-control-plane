@@ -168,6 +168,34 @@ checklist — and still performs **no** external action. You submit manually. An
 stored inside the repository, or one whose `pack_sha256` no longer matches (the pack
 changed), is refused.
 
+### 13. Decide whether the live LinkedIn surface should ever have account access
+
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the LinkedIn
+outreach / interview-prep task)
+**Blocks:** nothing. The LinkedIn layer (B19 job discovery, B20 profile/post
+drafts, B21 networking/recruiter/hiring-manager outreach drafts) is built, tested
+and acceptance-evidenced **entirely on owner-exported local files and canonical CV
+text**. No LinkedIn account, session, cookie, API key or scraping path exists in
+this runtime, so the live surface is untested against the real account.
+
+**Why owner-only:** whether the build may touch the real account at all is a
+decision about your own account's terms and risk. No read-only personal-job-data
+API is available to this runtime, and your 2026-09-23 GUI-safety directive forbids
+driving an interactive browser from this machine, so the honest options are:
+
+1. **keep the current owner-export path** (recommended, no action needed): export
+   saved jobs / alerts / followed companies to a local file — e.g.
+   `runtime/linkedin/inbox/` — and the workflow parses it read-only. Formats:
+   `.json`, `.jsonl`, `.csv`, `.md`, `.txt`;
+2. **authorise a different read-only source** you are content with (name it
+   explicitly); or
+3. **say the live surface stays owner-only forever** and the drafts remain
+   copy-paste material for you to send by hand.
+
+**Continue without owner:** everything in the layer is complete; nothing else is
+blocked. Posting, messaging, connecting and applying are owner-gated by design and
+no code path performs them (`guard` refuses and logs each one).
+
 ## Resolved / no longer owner-blocking
 
 - Hermes primary execution brain: restored via DeepSeek direct API.

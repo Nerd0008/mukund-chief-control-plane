@@ -250,11 +250,10 @@ and no code path performs them.
 |---|---|---|
 | `intake --inbox DIR [--record FILE]` | parse local read-only signal files into job/company signals | no |
 | `dedupe --region R --inbox DIR` | dedupe signals against Career Ops + Company Watch | no |
-| `draft [--out DIR]` | profile/post/outreach drafts from canonical facts, fact-gated, `draft_unsent` | only under `runtime/linkedin/drafts/` (git-ignored) |
+| `draft [--out DIR] [--job-record REC.json \| --id ID \| --url URL \| --row N \| --pipeline-index N]` | profile/post/outreach drafts from canonical facts, fact-gated, `draft_unsent` | only under `runtime/linkedin/drafts/` (git-ignored) |
 | `handoff --region R [--apply]` | hand eligible new signals to the Career Ops writer | dry-run unless `--apply` |
 | `guard --action NAME` | refuse an external LinkedIn action, and log the refusal | log only |
 | `status` | configuration + last-run summary | no |
-| `run` (see the acceptance runner) | end-to-end acceptance path | evidence only |
 
 Accepted inbox formats: `.json`, `.jsonl`, `.csv`, `.md`/`.txt`. A text line
 carrying no URL is reported as `unclassified` rather than guessed into a company
@@ -282,6 +281,37 @@ Career Ops install's `portals.yml` (the same file the UK scan lane uses). A sign
 whose location, title or freshness cannot satisfy those filters is **not** eligible,
 and only region-routed eligible signals are handed off. A manifest never carries
 application status (and the writer would ignore it).
+
+### Networking / recruiter / hiring-manager outreach drafts (B21, 2026-09-24)
+
+`draft` produces three unsent outreach variants alongside the profile and post
+drafts:
+
+| Variant | Recipient kind | Notes |
+|---|---|---|
+| `networking` | peer / alumni / community contact | chat request framing |
+| `recruiter` | recruiter or agency contact | carries the canonical Certifications line; no CV is attached or transmitted |
+| `hiring_manager` | hiring manager for one posting | produced **only** when a job context resolves from Career Ops state |
+
+Every variant is `draft_unsent` with an explicit `unsent_state` block —
+`sent: false`, `sent_at: null`, `recipient_selected: false`, `recipient: null`,
+`connection_request_created: false`, `message_queued: false`, `scheduled: false`,
+`attachments_sent: 0`, `owner_approval_required: true` — plus a `provenance` block
+carrying the canonical source hashes and the exact `cv.md:<line>` refs used.
+
+Two rules keep the drafts honest:
+
+* **Only structural connective phrasing is generated.** `linkedin_workflow.STRUCTURAL_PHRASES`
+  is the exhaustive, exported list of every line a draft body may contain that is not
+  verbatim canonical text, and the test suite asserts draft bodies against that same
+  list. Everything substantive is a canonical CV line quoted verbatim.
+* **No role or employer is ever guessed.** The hiring-manager draft names the role and
+  employer only from the resolved Career Ops record, and records that record
+  (`references_job`: id, title, company, location, source kind, source path) so the
+  claim can be checked. With no job context the variant is simply omitted.
+
+No recipient is chosen, nothing is queued, no connection request is created and the
+install's fact gate must not block the drafts.
 
 ## Application Inbox / Status Monitor (2026-09-24)
 
@@ -468,6 +498,74 @@ unless every critical check holds.
 
     python -m pytest career-ops/tests/test_job_intelligence.py -q   # 38 passed
 
+## Interview Prep Agent (B22, 2026-09-24)
+
+`career-ops/interview_prep.py` turns a canonical JobBrief plus the canonical owner
+sources into a role-specific preparation pack. It is deterministic: no model call,
+no network call, no browser.
+
+    python career-ops/interview_prep.py pack --brief JOB_BRIEF.json [--research-file F] \
+        [--out DIR] [--stamp S]
+    python career-ops/interview_prep.py from-job --region uk --jd-file JD.txt \
+        [--job-record REC.json | --id ID | --url URL | --row N | --pipeline-index N] \
+        [--research-file F] [--out DIR] [--stamp S]
+    python career-ops/interview_prep.py validate --pack PACK.json
+    python career-ops/interview_prep.py schema
+    python career-ops/interview_prep.py status
+
+`from-job` resolves the job from Career Ops state, builds the JobBrief with
+`job_intelligence.build_brief`, and then builds the pack. `pack` takes an existing
+brief. `--brief` / `--jd-file` / `--job-record` / `--research-file` are inputs and
+are never written to; the command refuses to run if an output path would overwrite
+one of its own inputs. The contract is committed as `interview_prep_schema.json`.
+
+Sections produced (`interview_prep_pack.json` + `.md`):
+
+| Section | Content |
+|---|---|
+| `technical_prep` | one preparation prompt per essential requirement and per responsibility |
+| `behavioural_prep` | themes, each tied to a posting responsibility when one matches, otherwise labelled a standard theme |
+| `likely_questions` | the bounded union of the above plus motivation and eligibility prompts |
+| `evidence_backed_talking_points` | `cv.md` lines quoted verbatim with `cv.md:<line>` refs, or an explicit owner action |
+| `questions_to_ask_employer` | drawn only from the brief's own unknowns |
+| `unknowns` | eligibility unknowns, brief risks, missing research, requirements with no canonical evidence |
+
+Truthfulness rules the agent enforces:
+
+* **A generated question is never presented as an employer's question.** Every
+  question carries `employer_supplied: false`, the verbatim posting line and source
+  line it was derived from, and a note saying it was generated by template.
+* **Talking points quote, they do not paraphrase.** Each quote is a canonical CV
+  line verified against `cv.md` at the line it claims; `quote_violations` must be
+  empty. A deliberately altered quote fails the check (tested).
+* **A match on a general domain word is not evidence.** `evidence_matching.general_terms`
+  (security, data, analysis, …) are removed before scoring, so a line that only
+  shares "security" with a requirement is not dressed up as evidence. A qualification
+  requirement is answered from the canonical qualification headings instead
+  (`qualification_section_patterns`).
+* **Nothing is invented for a gap.** Where the posting asks for something the
+  canonical sources do not evidence, the item is `owner_input_required` with an
+  explicit owner action.
+* **Company context is cited or absent.** Facts come only from the brief's cited
+  research; with no provider the pack records `research_needed`.
+* **No candidate claim.** `candidate_claims` and `external_actions_taken` are empty,
+  a first-person-claim scanner runs over every generated (non-quoted) field, and
+  `interview_scheduled` / `interview_attended` are always `false`.
+
+### Acceptance runner
+
+    python career-ops/run_interview_prep_acceptance.py [--stamp S]
+
+27 checks over labelled synthetic fixtures: LinkedIn read-only intake contract,
+the three outreach variants with their unsent state and provenance, the owner action
+gate refusals, the pack build from Brief + cited research + canonical sources,
+an independent re-read of `cv.md` confirming every quote, tamper detection
+(quote / injected claim / employer-supplied question), the honest-unknowns path
+(unmatched requirement → owner action, UAE eligibility staying `unknown` with no
+invented right-to-work statement), determinism, and a before/after hash proof that
+no canonical source or tracker changed. Writes
+`audits/evidence/<stamp>-linkedin-outreach-interview-prep/`.
+
 ## Acceptance runner
 
     python career-ops/run_cv_linkedin_acceptance.py [--region uk] [--stamp S]
@@ -492,10 +590,11 @@ deduped.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 248 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 277 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
+    python -m pytest career-ops/tests/test_interview_prep.py -q    # 25 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
-    python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 34 passed
+    python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
