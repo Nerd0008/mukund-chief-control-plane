@@ -152,6 +152,91 @@ def surface_description(name: str) -> str | None:
 
 
 # --------------------------------------------------------------------------- #
+# result kind — is a discovered URL a vacancy posting or a search/listing page?
+# --------------------------------------------------------------------------- #
+
+#: A search-result *listing* page (``site:linkedin.com/jobs <keywords>`` returns
+#: LinkedIn's own search page, ``uk.indeed.com/q-…`` is Indeed's results page, a
+#: Google result page is a search page) is **not a vacancy**. Treating one as a
+#: vacancy would invent a posting from a search snippet, so these are classified
+#: explicitly and the deterministic gate refuses them tracker handoff.
+RESULT_KIND_POSTING = "job_posting"
+RESULT_KIND_SEARCH_LISTING = "search_listing"
+RESULT_KIND_UNKNOWN = "unknown"
+RESULT_KINDS = (RESULT_KIND_POSTING, RESULT_KIND_SEARCH_LISTING, RESULT_KIND_UNKNOWN)
+
+_LISTING_QUERY_KEYS = ("keywords", "q", "searchterm", "search", "query", "keywords_input")
+_POSTING_PATH_TOKENS = ("/jobs/view", "/viewjob", "/job/", "/rc/clk", "/pagead/clk",
+                        "/jobs/apply", "/o/", "/j/")
+
+
+def classify_result_kind(url: str | None) -> tuple:
+    """``(kind, reason)`` for a discovered result URL.
+
+    Conservative: only a clearly-shaped search/listing page is refused, and only a
+    clearly-shaped posting is asserted as one. Anything else stays ``unknown`` and
+    is handled by the liveness gate instead. Nothing here is inferred from a title
+    or a snippet — only the URL itself.
+    """
+    try:
+        parsed = urllib.parse.urlsplit(str(url or ""))
+    except Exception:  # noqa: BLE001 - an unparseable URL is simply unknown
+        return RESULT_KIND_UNKNOWN, "URL could not be parsed"
+    host = (parsed.hostname or "").casefold()
+    path = (parsed.path or "").casefold()
+    query = (parsed.query or "").casefold()
+    if not host:
+        return RESULT_KIND_UNKNOWN, "no host in the result URL"
+    surface = classify_surface(url)
+
+    if surface == "linkedin_jobs":
+        if path.startswith("/jobs/view") or "/jobs/view/" in path:
+            return RESULT_KIND_POSTING, "LinkedIn job view path"
+        if path.startswith("/jobs/search") or path.startswith("/jobs/collections"):
+            return RESULT_KIND_SEARCH_LISTING, "LinkedIn job search/collection page"
+        if re.match(r"^/jobs/[^/]+/?$", path):
+            return RESULT_KIND_SEARCH_LISTING, "LinkedIn /jobs/<keywords> search page"
+        return RESULT_KIND_UNKNOWN, "unrecognised LinkedIn path"
+
+    if surface == "indeed":
+        if path.startswith("/viewjob") or "/clk" in path:
+            return RESULT_KIND_POSTING, "Indeed viewjob/click-through path"
+        if path.startswith("/q-") or path.startswith("/m/jobs") or path.startswith("/jobs"):
+            return RESULT_KIND_SEARCH_LISTING, "Indeed query results page"
+        return RESULT_KIND_UNKNOWN, "unrecognised Indeed path"
+
+    if surface == "google_index":
+        return RESULT_KIND_SEARCH_LISTING, "Google search-result page (a search page is not a vacancy)"
+
+    if surface != "employer_careers" and surface != "linkedin_jobs" and surface != "indeed":
+        # any other classified surface is an employer ATS board: its URL is a posting
+        return RESULT_KIND_POSTING, f"{surface_description(surface) or surface} posting path"
+
+    if host == "reed.co.uk" or host.endswith(".reed.co.uk"):
+        segments = [s for s in path.split("/") if s]
+        if segments and segments[-1].isdigit():
+            return RESULT_KIND_POSTING, "Reed posting id path"
+        if re.search(r"-jobs(-in-[^/]*)?/?$", path):
+            return RESULT_KIND_SEARCH_LISTING, "Reed keyword-listing page"
+        return RESULT_KIND_UNKNOWN, "unrecognised Reed path"
+
+    if path.startswith("/jobs/search") or (
+            "/search" in path and any(k in query for k in _LISTING_QUERY_KEYS)):
+        return RESULT_KIND_SEARCH_LISTING, "search/listing path with a query term"
+
+    # keyword-listing slugs ("…-jobs", "…-jobs-in-<place>") used by Reed-style and
+    # other keyword boards to address a search rather than a single posting
+    if re.search(r"-jobs(-in-[^/]*)?/?$", path):
+        return RESULT_KIND_SEARCH_LISTING, "keyword-listing slug path"
+
+    if any(token in path for token in _POSTING_PATH_TOKENS):
+        return RESULT_KIND_POSTING, "posting-shaped path"
+
+    return RESULT_KIND_UNKNOWN, "no search/listing or posting shape detected"
+
+
+
+# --------------------------------------------------------------------------- #
 # role families and regions — the query matrix inputs
 # --------------------------------------------------------------------------- #
 
@@ -764,6 +849,7 @@ def normalise_result(*, result: dict, query_entry: dict, fetch: dict | None,
     """
     raw_url = str(result.get("url") or "").strip()
     surface = classify_surface(raw_url)
+    result_kind, kind_reason = classify_result_kind(raw_url)
     fetch = fetch or {"status": FETCH_DISCOVERED_UNVERIFIED, "url": raw_url,
                       "canonical_url": canonical_url(raw_url)}
     fetch_state = fetch.get("status") or FETCH_DISCOVERED_UNVERIFIED
@@ -803,6 +889,7 @@ def normalise_result(*, result: dict, query_entry: dict, fetch: dict | None,
         "description": fetch.get("meta_description"),
         "source": query_entry.get("surface_scope") or surface,
         "fetch_state": fetch_state,
+        "result_kind": result_kind,
         "_collection_source": "web research",
         "web_research": {
             "discovery_surface": surface,
@@ -818,6 +905,8 @@ def normalise_result(*, result: dict, query_entry: dict, fetch: dict | None,
             "title_source": title_source,
             "source_timestamp": source_timestamp,
             "fetch": fetch,
+            "result_kind": result_kind,
+            "result_kind_reason": kind_reason,
             "missing_fields": missing,
             "present_fields": present,
         },
@@ -829,8 +918,8 @@ def normalise_result(*, result: dict, query_entry: dict, fetch: dict | None,
 # --------------------------------------------------------------------------- #
 
 TELEMETRY_KEYS = ("queries_executed", "results_seen", "candidate_urls", "validated_live",
-                  "validation_failed", "duplicates_collapsed", "semantically_reviewed",
-                  "deterministic_eligibility_pass", "tracker_candidates")
+                  "validation_failed", "duplicates_collapsed", "search_listing_refused",
+                  "semantically_reviewed", "deterministic_eligibility_pass", "tracker_candidates")
 
 
 def run_research(queries: list, provider, *, region: str, limit_per_query: int = 5,
@@ -897,10 +986,17 @@ def run_research(queries: list, provider, *, region: str, limit_per_query: int =
             else:
                 telemetry[FETCH_DISCOVERED_UNVERIFIED] = \
                     telemetry.get(FETCH_DISCOVERED_UNVERIFIED, 0) + 1
+            if candidate.get("result_kind") == RESULT_KIND_SEARCH_LISTING:
+                # A search/listing page is not a vacancy: it is kept with its
+                # provenance but the deterministic gate refuses it tracker handoff.
+                telemetry["search_listing_refused"] += 1
+                rejections["search_result_listing_page"] = \
+                    rejections.get("search_result_listing_page", 0) + 1
             if not candidate.get("url"):
                 rejections["no_url"] = rejections.get("no_url", 0) + 1
             candidates.append(candidate)
             row["results"].append({"url": url, "fetch_state": state,
+                                   "result_kind": candidate.get("result_kind"),
                                    "canonical_url": candidate["web_research"]["canonical_url"]})
         query_rows.append(row)
 
@@ -910,6 +1006,12 @@ def run_research(queries: list, provider, *, region: str, limit_per_query: int =
         zero_reasons.setdefault("results", "the executed queries returned no accessible results")
     if telemetry["validated_live"] == 0 and telemetry["candidate_urls"] and validate:
         zero_reasons.setdefault("validation", "no discovered destination validated as live")
+    if telemetry["search_listing_refused"] and \
+            telemetry["search_listing_refused"] == len(candidates):
+        zero_reasons.setdefault(
+            "vacancy_posting",
+            "every discovered URL was a search/listing page rather than a vacancy posting, so "
+            "none of them can become a tracker candidate")
     if not candidates:
         zero_reasons.setdefault("candidate_urls", "no candidate URL was discovered")
 
@@ -996,10 +1098,13 @@ def policy_document() -> dict:
             "none": "declared zero",
         },
         "fetch_states": list(FETCH_STATES),
+        "result_kinds": list(RESULT_KINDS),
         "rules": [
             "never invent a vacancy from a search snippet: title/company come from the "
             "retrieved page or the observed result title, and unknown fields stay missing",
             "a result is only accepted when the research worker proves a live search happened",
+            "a search/listing page (LinkedIn /jobs/<keywords>, Indeed /q-..., a Google result "
+            "page) is labelled search_listing and never written as a vacancy",
             "destinations are validated with a polite, robots-respecting read-only retrieval; "
             "a posting that cannot be validated stays labelled and is refused tracker handoff",
             "no login, account, cookie/session, CAPTCHA, browser, GUI or stealth scraping",

@@ -134,7 +134,7 @@ def write_json_atomic(path: Path, obj) -> None:
 
 CANDIDATE_FIELDS = ("company", "title", "location", "url", "description", "summary",
                     "posted_date", "salary", "experience_required", "employment_type",
-                    "vendor", "intermediary", "source_detail", "fetch_state")
+                    "vendor", "intermediary", "source_detail", "fetch_state", "result_kind")
 
 
 def normalise_candidate(raw: dict, source: str) -> dict:
@@ -397,13 +397,20 @@ def collect_from_web_research(path: Path, region: str) -> dict:
 
     telemetry = doc.get("telemetry") or {}
     candidates, excluded = [], Counter()
+    undeclared_kind = 0
     for raw in (doc.get("candidates") or []):
         if not isinstance(raw, dict):
             excluded["malformed_candidate"] += 1
             continue
         fetch_state = raw.get("fetch_state") or "discovered_unverified"
+        result_kind = raw.get("result_kind") or (raw.get("web_research") or {}).get("result_kind")
+        if not result_kind:
+            # Never guessed: an export that predates the result-kind contract keeps
+            # its candidates unclassified, and the coverage block says so.
+            undeclared_kind += 1
         rec = normalise_candidate(raw, SOURCE_WEB_RESEARCH)
         rec["fetch_state"] = fetch_state
+        rec["result_kind"] = result_kind
         wr = raw.get("web_research") or {}
         rec["web_research"] = {
             "discovery_surface": wr.get("discovery_surface"),
@@ -417,12 +424,16 @@ def collect_from_web_research(path: Path, region: str) -> dict:
             "title_source": wr.get("title_source"),
             "source_timestamp": wr.get("source_timestamp"),
             "fetch_state": fetch_state,
+            "result_kind": result_kind,
+            "result_kind_reason": wr.get("result_kind_reason"),
             "missing_fields": wr.get("missing_fields"),
         }
         if fetch_state == "validation_failed":
             excluded["destination_not_validated_live"] += 1
         elif fetch_state == "discovered_unverified":
             excluded["destination_not_verified"] += 1
+        if result_kind == "search_listing":
+            excluded["search_listing_page_not_a_vacancy"] += 1
         candidates.append(rec)
 
     provider = doc.get("provider") or {}
@@ -443,11 +454,19 @@ def collect_from_web_research(path: Path, region: str) -> dict:
             "validated_live": telemetry.get("validated_live"),
             "validation_failed": telemetry.get("validation_failed"),
             "duplicates_collapsed": telemetry.get("duplicates_collapsed"),
+            "search_listing_refused": telemetry.get("search_listing_refused"),
             "fetch_states": telemetry.get("fetch_states"),
             "rejections_by_reason": telemetry.get("rejections_by_reason"),
             "zero_attribution": telemetry.get("zero_attribution"),
             "candidates_entering_this_funnel": len(candidates),
             "candidates_excluded_before_the_funnel": dict(sorted(excluded.items())),
+            "candidates_without_a_declared_result_kind": undeclared_kind,
+            "result_kind_note": (
+                "the search/listing-page guard applies only to candidates whose result_kind "
+                "this surface declared; an export that predates the result-kind contract keeps "
+                "its candidates unclassified and is counted above rather than guessed"
+                if undeclared_kind else
+                "every candidate carries the result_kind this surface declared"),
             "note": ("active open-web research (a generated query matrix, not a static provider "
                      "scan). Public/search-index discovery only: no login, no account, no "
                      "cookie or session, no CAPTCHA, no browser or GUI, and no scraping behind "
@@ -670,6 +689,14 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     if fetch_state and fetch_state != "validated_live":
         reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
                        f"discovered-but-unverified or failed destination is never written")
+
+    # Fail-closed result-kind gate (source-agnostic): a discovery result that a
+    # surface declares to be a search/listing page is not a vacancy posting, so it
+    # can never be written as one. A surface that declares no result_kind is
+    # unaffected.
+    if rec.get("result_kind") == "search_listing":
+        reasons.append("discovery result is a search/listing page, not a vacancy posting — "
+                       "a search result page is never written as a job")
 
     hits = tier_b_hits(str(rec.get("title") or ""))
     if hits:
@@ -952,7 +979,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "canonical_candidates": [
             {k: c.get(k) for k in ("candidate_id", "company", "title", "location", "url",
                                    "source", "sources", "duplicate_discoveries",
-                                   "canonical_key", "provenance", "fetch_state")}
+                                   "canonical_key", "provenance", "fetch_state", "result_kind")}
             for c in candidates
         ],
         "source_registry": dict(SOURCE_REGISTRY),

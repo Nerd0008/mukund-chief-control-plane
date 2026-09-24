@@ -227,6 +227,47 @@ def main(argv=None) -> int:
                            ["rejections_by_reason"])
     check("unverified_and_failed_destinations_are_refused_by_the_gate",
           "not validated live" in gate_text, "deterministic gate reason present")
+    blocks = {b["source"]: b for b in unv["collection"]}
+    check("an_export_without_a_declared_result_kind_is_counted_not_guessed",
+          blocks[pipeline.SOURCE_WEB_RESEARCH]["coverage"]
+          ["candidates_without_a_declared_result_kind"] > 0
+          and "predates" in blocks[pipeline.SOURCE_WEB_RESEARCH]["coverage"]["result_kind_note"],
+          "legacy export recorded as unclassified")
+
+    # 6b. a search/listing page is never a vacancy --------------------------- #
+    with tempfile.TemporaryDirectory() as tmp:
+        listing_export = Path(tmp) / "listing-export.json"
+        listing_export.write_text(json.dumps({
+            "schema_version": 1, "kind": wr.EXPORT_KIND, "not_a_real_vacancy": True,
+            "export_id": "webresearch-acceptance-listing",
+            "region": "uk",
+            "provider": {"provider": "codex-web-search", "available": True},
+            "telemetry": {"queries_executed": 1, "results_seen": 1, "candidate_urls": 1,
+                          "validated_live": 1, "validation_failed": 0,
+                          "duplicates_collapsed": 0, "search_listing_refused": 1},
+            "candidates": [{
+                "company": "Listing Page Ltd (NOT A REAL VACANCY)",
+                "title": "900+ Cyber Security Graduate Jobs (NOT A REAL VACANCY)",
+                "location": "London, United Kingdom",
+                "url": "https://uk.linkedin.invalid/jobs/cyber-security-graduate-jobs",
+                "fetch_state": "validated_live", "result_kind": "search_listing",
+                "source": "linkedin_jobs",
+                "web_research": {"discovery_surface": "linkedin_jobs",
+                                 "result_kind": "search_listing",
+                                 "search_query": "site:linkedin.com/jobs graduate cyber security",
+                                 "query_id": "q-acceptance-listing"}}],
+        }, indent=2), encoding="utf-8")
+        lst = run_cli(pipeline, ["run", "--region", "uk",
+                                 "--web-research", str(listing_export),
+                                 "--semantic", "off", "--codex", "off",
+                                 "--out-dir", str(Path(tmp) / "out")])
+    listing_dec = lst["eligibility"]["decisions"][0]
+    check("a_search_listing_page_is_never_written_as_a_vacancy",
+          listing_dec["decision"] == "rejected"
+          and any("not a vacancy posting" in r for r in listing_dec["reasons"])
+          and lst["funnel"]["counts"]["tracker_candidates"] == 0,
+          {"decision": listing_dec["decision"],
+           "tracker_candidates": lst["funnel"]["counts"]["tracker_candidates"]})
 
     # 7. cross-source collapse ---------------------------------------------- #
     with tempfile.TemporaryDirectory() as tmp:

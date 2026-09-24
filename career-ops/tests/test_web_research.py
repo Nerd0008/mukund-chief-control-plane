@@ -714,3 +714,136 @@ def test_policy_document_declares_the_safety_boundary():
     assert "no browser" in text or "browser" in text
     assert "watchlist" in text
     assert "active research" in text
+    assert "search_listing" in text
+
+
+# --------------------------------------------------------------------------- #
+# a search/listing page is not a vacancy
+# --------------------------------------------------------------------------- #
+
+@pytest.mark.parametrize("url,kind", [
+    # postings
+    ("https://uk.linkedin.com/jobs/view/soc-analyst-4012345678", "job_posting"),
+    ("https://uk.indeed.com/viewjob?jk=deadbeef", "job_posting"),
+    ("https://jobs.lever.co/acme/1234", "job_posting"),
+    ("https://overlap-test.invalid/jobs/soc-analyst-l1", "unknown"),
+    # search/listing pages
+    ("https://uk.linkedin.com/jobs/cyber-security-graduate-jobs", "search_listing"),
+    ("https://www.linkedin.com/jobs/search?keywords=graduate", "search_listing"),
+    ("https://uk.indeed.com/q-soc-analyst-junior-cyber-security-jobs", "search_listing"),
+    ("https://uk.indeed.com/jobs?q=graduate+cyber&l=London", "search_listing"),
+    ("https://www.google.com/search?q=cyber+security+graduate+london", "search_listing"),
+    ("https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs", "search_listing"),
+    ("https://www.reed.co.uk/jobs/graduate-cyber-security-analyst-jobs-in-london?isE=1",
+     "search_listing"),
+    ("https://www.reed.co.uk/jobs/cyber-security-analyst/51234567", "job_posting"),
+    (None, "unknown"),
+])
+def test_classify_result_kind_separates_postings_from_search_pages(url, kind):
+    got, why = wr.classify_result_kind(url)
+    assert got == kind, f"{url} -> {got} ({why})"
+    assert why
+
+
+def _listing_capture(tmp_path, *, n: int = 2, listing_every: int = 1) -> Path:
+    """A capture whose results are LinkedIn keyword-listing pages (not vacancies)."""
+    matrix = wr.build_query_matrix("uk")[:n]
+    queries = []
+    for i, q in enumerate(matrix):
+        url = (f"https://uk.linkedin.invalid/jobs/cyber-security-graduate-jobs-{i}"
+               if i % listing_every == 0
+               else f"https://uk.linkedin.invalid/jobs/view/soc-analyst-{i}")
+        queries.append(dict(q, executed=True, web_search_observed=True,
+                            executed_queries=[q["query"]],
+                            results=[{"title": f"900+ Cyber Security Graduate Jobs (NOT REAL) {i}",
+                                      "url": url, "snippet": "London (NOT A REAL VACANCY)"}]))
+    doc = {"kind": wr.EXPORT_KIND, "not_a_real_vacancy": True,
+           "captured_from": "codex-web-search", "captured_at": "2026-09-24T06:00:00Z",
+           "queries": queries}
+    p = Path(tmp_path) / "listing-capture.json"
+    p.write_text(json.dumps(doc), encoding="utf-8")
+    return p
+
+
+def test_a_listing_page_is_labelled_counted_and_attributed(tmp_path):
+    query = [{"query_id": "q-listing", "query": "site:linkedin.com/jobs graduate cyber security",
+              "region": "uk", "role_family": "graduate_new_grad", "surface_scope": "linkedin_jobs"}]
+    capture = _listing_capture(tmp_path, n=1)
+    captured = json.loads(capture.read_text(encoding="utf-8"))
+    query[0] = {k: captured["queries"][0].get(k) for k in
+                ("query_id", "query", "region", "role_family", "surface_scope")}
+    doc = wr.run_research(query, wr.CapturedResultsProvider(capture), region="uk",
+                          validate=False)
+    assert [c["result_kind"] for c in doc["candidates"]] == ["search_listing"]
+    assert doc["candidates"][0]["web_research"]["result_kind_reason"]
+    assert doc["telemetry"]["search_listing_refused"] == 1
+    assert doc["telemetry"]["rejections_by_reason"]["search_result_listing_page"] == 1
+    # every discovered URL was a listing page -> the zero names that stage
+    assert "vacancy_posting" in doc["telemetry"]["zero_attribution"]
+
+
+def test_a_listing_page_never_reaches_a_tracker_candidate(tmp_path):
+    """Even validated-live, a search/listing page is refused by the deterministic gate."""
+    query = [{"query_id": "q-listing", "query": "site:linkedin.com/jobs graduate cyber security",
+              "region": "uk", "role_family": "graduate_new_grad", "surface_scope": "linkedin_jobs"}]
+    capture = _listing_capture(tmp_path, n=2)
+    captured = json.loads(capture.read_text(encoding="utf-8"))
+    query = [{k: captured["queries"][i].get(k) for k in
+              ("query_id", "query", "region", "role_family", "surface_scope")}
+             for i in range(2)]
+    doc = wr.run_research(query, wr.CapturedResultsProvider(capture), region="uk",
+                          validate=True, validate_fn=fake_validate_live)
+    assert all(c["fetch_state"] == "validated_live" for c in doc["candidates"])
+    assert len([c for c in doc["candidates"] if c["result_kind"] == "search_listing"]) >= 1
+    export = tmp_path / "listing-export.json"
+    export.write_text(json.dumps(doc), encoding="utf-8")
+
+    rc, run = run_cli(["run", "--region", "uk", "--web-research", str(export),
+                       "--semantic", "off", "--codex", "off", "--out-dir", str(tmp_path / "out")])
+    assert rc == 0
+    listings = [d for d in run["eligibility"]["decisions"]
+                if "search/listing page" in "; ".join(d["reasons"])]
+    assert listings, "the listing page was not refused by the deterministic gate"
+    for d in listings:
+        assert d["decision"] == "rejected"
+        assert any("not a vacancy posting" in r for r in d["reasons"])
+    accepted_ids = {d["candidate_id"] for d in run["eligibility"]["decisions"]
+                    if d["decision"] == "accepted"}
+    refused_ids = {d["candidate_id"] for d in listings}
+    assert not (accepted_ids & refused_ids)
+    # the collector also accounts for them pre-funnel
+    blocks = {b["source"]: b for b in run["collection"]}
+    coverage = blocks[pipeline.SOURCE_WEB_RESEARCH]["coverage"]
+    assert coverage["candidates_excluded_before_the_funnel"].get(
+        "search_listing_page_not_a_vacancy", 0) >= 1
+    assert coverage["search_listing_refused"] >= 1
+
+
+def test_a_legacy_export_without_result_kind_is_counted_not_guessed(tmp_path):
+    """An export that predates the result-kind contract is recorded, never guessed."""
+    rc, doc = run_cli(["run", "--region", "uk", "--web-research", str(UNVERIFIED_EXPORT),
+                       "--semantic", "off", "--codex", "off", "--out-dir", str(tmp_path / "out")])
+    assert rc == 0
+    coverage = {b["source"]: b for b in doc["collection"]}[pipeline.SOURCE_WEB_RESEARCH]["coverage"]
+    assert coverage["candidates_without_a_declared_result_kind"] == 4
+    assert "predates" in coverage["result_kind_note"]
+
+
+def test_a_listing_only_run_collapses_to_an_attributable_zero(tmp_path):
+    query = [{"query_id": "q-listing", "query": "site:linkedin.com/jobs graduate cyber security",
+              "region": "uk", "role_family": "graduate_new_grad", "surface_scope": "linkedin_jobs"}]
+    capture = _listing_capture(tmp_path, n=1)
+    captured = json.loads(capture.read_text(encoding="utf-8"))
+    query[0] = {k: captured["queries"][0].get(k) for k in
+                ("query_id", "query", "region", "role_family", "surface_scope")}
+    doc = wr.run_research(query, wr.CapturedResultsProvider(capture), region="uk",
+                          validate=True, validate_fn=fake_validate_live)
+    export = tmp_path / "listing-only.json"
+    export.write_text(json.dumps(doc), encoding="utf-8")
+    rc, run = run_cli(["run", "--region", "uk", "--web-research", str(export),
+                       "--semantic", "off", "--codex", "off", "--out-dir", str(tmp_path / "out")])
+    assert rc == 0
+    assert run["funnel"]["counts"]["tracker_candidates"] == 0
+    entry = run["funnel"]["by_source"][pipeline.SOURCE_WEB_RESEARCH]
+    assert entry["zero_attribution"]["first_zero_stage"] == "deterministic_eligibility_pass"
+    assert "not a vacancy posting" in json.dumps(entry["rejections_by_reason"])
