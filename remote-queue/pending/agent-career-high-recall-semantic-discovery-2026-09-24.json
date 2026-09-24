@@ -1,0 +1,43 @@
+{
+  "task_id": "agent-career-high-recall-semantic-discovery-2026-09-24",
+  "created_at": "2026-09-24T04:30:00Z",
+  "objective": "Replace the current intern-only job discovery bottleneck with a high-recall, multi-stage discovery pipeline that keeps deterministic safety/dedupe controls but restores the semantic breadth Mukund previously got from Codex. The target architecture is: broad collection -> light deterministic prefilter -> DeepSeek bulk semantic triage -> Codex review only for ambiguous/high-value candidates -> deterministic eligibility/visa/clearance gates -> shared dedupe -> tracker/Chief brief handoff. Preserve current Career Ops/Company Watch infrastructure; do not rebuild it.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Whole-company local acceptance completed successfully.",
+    "Reuse career-ops/regional_job_search.py, tracker_writer.py, Company Watch, E2/E3 routing/qualification interfaces and current regional schedules.",
+    "Do not require the seven missing provider keys for phase-1 engineering; DeepSeek and Codex are already available/evidenced."
+  ],
+  "allowed_scope": [
+    "Inspect the real Career Ops install portals.yml/title_filter and current regional_policy.json first. Treat the existing positive=[Intern, Internship] rule as a precision filter that currently causes false zero-result outcomes when used as a required discovery gate.",
+    "Implement a TWO-TIER title policy. Tier A high-recall discovery must accept plausible early-career cybersecurity/IT-security role families without requiring the literal words Intern/Internship. Tier B hard negatives must continue rejecting clearly senior/leadership titles. Keep the original strict intern-only policy available as an optional narrow mode, not the default discovery mode.",
+    "Add explicit role-family coverage for at least: graduate/new-grad, junior/associate, analyst/analyst I/L1, SOC/security operations, information security/cybersecurity, GRC/governance/risk/compliance, IAM/identity, vulnerability, technology risk, security consulting graduate/analyst, and closely related entry-level security titles. Do not accept a role solely because it contains the generic word 'security' if another title signal makes it clearly non-cyber or senior.",
+    "Do not make title matching the final eligibility decision. The high-recall deterministic filter should only remove obvious bad matches (senior/principal/director/head/manager where genuinely managerial, explicit multi-year requirements when supplied, hard clearance/citizenship conflicts, wrong geography).",
+    "Create a structured semantic-classification contract with explicit labels such as strong_entry_level_match, plausible_entry_level, ambiguous_review, too_senior, wrong_discipline, hard_eligibility_block. Every classification must carry source fields, reasons, confidence/uncertainty, and model/provider provenance. Never invent JD facts that are absent from the source record.",
+    "Use DeepSeek as the bulk semantic classifier for the candidate pool because it is the high-volume workhorse. Route only ambiguous/high-value candidates to Codex for second-pass review. Codex must NOT be called for every scanned posting. Define deterministic escalation conditions and a bounded per-run Codex budget.",
+    "Where a full JD/description is unavailable, classify only from the fields actually present and mark missing-JD uncertainty explicitly. Do not claim semantic JD analysis without source text.",
+    "Keep hard deterministic eligibility after semantic classification: region/location, work-authorisation state, clearance/citizenship, explicit mandatory experience requirements, and application URL validity remain authoritative and cannot be overridden by AI.",
+    "Preserve shared dedupe against canonical workbooks, cross-month ledgers, Company Watch and regional state before any tracker handoff.",
+    "Expose run metrics that make zero explainable: discovered_raw, after_hard_negative_prefilter, semantically_reviewed, deepseek_accept, codex_escalated, codex_accept, deterministic_eligibility_pass, duplicates_removed, tracker_candidates, plus rejection counts by reason. A zero must say WHERE the funnel went to zero.",
+    "Integrate Company Watch findings into the same semantic/eligibility/dedupe funnel so 19 findings cannot silently become '0 jobs' without an attributable reason.",
+    "Add a safe 'compare modes' acceptance command that can run the old strict intern-only filter and the new high-recall pipeline on the same captured candidate set and report recall deltas without writing canonical trackers.",
+    "Add regression fixtures covering titles that the old policy wrongly rejected: Graduate Cyber Security Analyst, Junior Security Analyst, SOC Analyst L1, Information Security Analyst, Junior GRC Analyst, Cyber Risk Analyst, IAM Analyst, Technology Risk Graduate; and negative fixtures such as Senior Security Manager, Principal Security Architect, Physical Security Guard, Security Sales Director.",
+    "Run isolated tests first, then a bounded live/dry-run evidence pass. Do NOT write canonical trackers during engineering acceptance. If live sources return no candidates, the evidence must still report source/provider coverage and funnel counts rather than asserting no vacancies exist.",
+    "Update Career Daily Brief so it can show funnel counts and top semantic candidates, while preserving that any ranking is a policy output rather than a factual claim about the job.",
+    "Update state/current_company_state.md, state/full_build_tracker.md and README with the new discovery architecture and exact truth boundaries.",
+    "Checkpoint commits in small units. Preserve current canonical workbooks byte-identical through acceptance. External job applications, LinkedIn actions, employer/recruiter contact and account mutations remain forbidden."
+  ],
+  "stop_conditions": [
+    "No fabricated jobs, JDs, eligibility, experience, sponsorship or employer facts.",
+    "No autonomous application submission or outreach.",
+    "No weakening of deterministic work-authorisation, clearance, dedupe or owner-approval gates.",
+    "No browser/GUI automation on the owner's machine.",
+    "Do not spend Codex calls across the whole raw scan; keep Codex escalation bounded and evidence the count.",
+    "Do not edit the owner's external Career Ops install destructively; prefer control-plane overlays/config or a reversible migration with tests.",
+    "If the current scanner/provider cannot expose enough source text for semantic classification, record that limitation and build the contract/fallback path instead of guessing."
+  ],
+  "notes": "Owner-directed change after reviewing why previous job agents returned zero while standalone Codex found roles. Current verified evidence: UK scheduled scan can process ~2861 jobs/run, while Company Watch recently found 19 new postings but 0 tracker-eligible under the current intern-only UK title filter. The objective is not to replace Career Ops with Codex; it is to combine Career Ops collection/state/dedupe with DeepSeek bulk semantic triage and bounded Codex second-pass reasoning."
+}
