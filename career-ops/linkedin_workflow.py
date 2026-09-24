@@ -39,16 +39,21 @@ Truth rules
 Subcommands (each prints exactly one JSON object on stdout)
     intake   --inbox DIR [--record FILE]
     dedupe   --region R [--inbox DIR] [--record FILE]
-    draft    [--inbox DIR] [--stamp S]
-    handoff  --region R [--inbox DIR] [--apply] [--tracker COPY]
+    draft    [--inbox DIR] [--stamp S] [--region R]
+             [--id ID | --url URL | --row N | --pipeline-index N | --job-record REC.json]
     guard    --action NAME
+    handoff  --region R [--inbox DIR] [--apply] [--tracker COPY]
     status
-    run      [--region R] [--stamp S]
+
+``draft`` produces an unsent profile draft, unsent posts and three unsent
+outreach drafts (networking, recruiter, and — only when a job context resolves —
+hiring manager). Passing no job flag simply omits the hiring-manager draft; no
+role or employer is ever guessed.
 
 Usage
     python career-ops/linkedin_workflow.py intake --inbox career-ops/tests/fixtures/linkedin
     python career-ops/linkedin_workflow.py dedupe --region uk --inbox career-ops/tests/fixtures/linkedin
-    python career-ops/linkedin_workflow.py run --region uk
+    python career-ops/linkedin_workflow.py draft --job-record REC.json
 """
 
 from __future__ import annotations
@@ -84,6 +89,36 @@ LINKEDIN_PROVENANCE_PREFIX = "LINKEDIN"
 LINK_RE = re.compile(r"\[([^\]\n]{1,240})\]\((https?://[^)\s]+)\)")
 BARE_URL_RE = re.compile(r"https?://[^\s)\]<>\"']+")
 NAME_SPLIT_RE = re.compile(r"\s+[—–]\s+|\s+-\s+")
+
+# Every line a draft body may contain that is NOT verbatim canonical source text.
+# These are structural connective phrasings only: they introduce canonical text,
+# they never assert anything about the owner. The list is exported so the tests
+# assert against the same definition instead of a copy of it.
+STRUCTURAL_PHRASES = (
+    # profile / post framings
+    "Notes from a recent project:",
+    "Certifications on record:",
+    "Where I am right now:",
+    "Tools I have been working in:",
+    # shared salutation / sign-off
+    "Hello,",
+    "Thank you for your time.",
+    # networking (peer / alumni / community) outreach
+    "I would be glad to connect and hear how you came to work in this area. If you have a "
+    "moment, I would value your view on entering cyber security or IT support in the UK at "
+    "my stage.",
+    # recruiter / agency outreach
+    "I am looking for a first role in cyber security or IT support in the UK, and I would be "
+    "glad to be considered for anything on your books that suits a graduate at my stage.",
+    "I am happy to share my CV on request.",
+    # hiring-manager outreach
+    "I would be glad to know whether this team is likely to suit a graduate at my stage, and "
+    "what would make an application stand out.",
+    # the original generic outreach phrasing, kept for continuity
+    "I am looking for a first role in cyber security or IT support in the UK. "
+    "If you have a moment, I would be glad to know whether anything on your team "
+    "is likely to suit a graduate at that stage.",
+)
 
 emit = cvw.emit
 sha256_file = cvw.sha256_file
@@ -680,7 +715,171 @@ def _source(line: dict, section: str) -> dict:
     return {"source": "cv.md", "line": line["no"], "section": section, "text": line["text"]}
 
 
-def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path) -> dict:
+OUTREACH_VARIANTS = ("networking", "recruiter", "hiring_manager")
+
+
+def build_outreach_drafts(cfg: dict, blocks: dict, *, job: dict | None = None) -> list[dict]:
+    """Networking / recruiter / hiring-manager outreach DRAFTS.
+
+    Every variant is ``draft_unsent``: no recipient is chosen, no connection
+    request is created, no message is queued and nothing is scheduled. The only
+    prose this function contributes is structural connective phrasing from
+    ``STRUCTURAL_PHRASES``; everything substantive is a canonical CV line quoted
+    verbatim with its source line. The hiring-manager variant is only produced
+    when a job context is supplied, and the job reference it carries is
+    attributed to the Career Ops record it came from.
+    """
+    facts = blocks["facts"]
+    profile_section = section_named(blocks, "Profile")
+    cert_section = section_named(blocks, "Certifications")
+    intro_lines = [l for l in (profile_section["lines"] if profile_section else []) if l["text"]]
+    cert_lines = [l for l in (cert_section["lines"] if cert_section else []) if l["text"]]
+    intro = intro_lines[0] if intro_lines else None
+    name = facts.get("full_name", "")
+    voice = cfg.get("voice_sources", [])
+
+    def salutation_and_intro() -> tuple[list[str], list[dict]]:
+        body = ["Hello,", ""]
+        sources: list[dict] = []
+        if intro:
+            body.append(intro["text"])
+            body.append("")
+            sources.append(_source(intro, "Profile"))
+        return body, sources
+
+    drafts: list[dict] = []
+
+    # 1. networking — peer / alumni / community contact ----------------------- #
+    body, sources = salutation_and_intro()
+    body += [
+        "I would be glad to connect and hear how you came to work in this area. If you have a "
+        "moment, I would value your view on entering cyber security or IT support in the UK at "
+        "my stage.",
+        "", "Thank you for your time.", "", name,
+    ]
+    drafts.append({
+        "kind": "outreach",
+        "subtype": "networking",
+        "status": "draft_unsent",
+        "sent": False,
+        "recipient": None,
+        "recipient_kind": "networking contact (peer, alumni or community). No recipient is chosen.",
+        "channel": "LinkedIn message or connection note (owner-sent only)",
+        "body": "\n".join(body).strip(),
+        "sources": sources,
+        "voice_sources": voice,
+        "notes": ["No recipient is chosen, no connection request is generated and nothing is sent.",
+                  "The introduction paragraph is the canonical Profile line verbatim; the rest is "
+                  "structural phrasing that makes no claim about experience."],
+        "publish_requires": "explicit owner authorization",
+    })
+
+    # 2. recruiter / agency outreach ------------------------------------------ #
+    body, sources = salutation_and_intro()
+    body += [
+        "I am looking for a first role in cyber security or IT support in the UK, and I would be "
+        "glad to be considered for anything on your books that suits a graduate at my stage.",
+    ]
+    if cert_lines and cert_lines[0]["text"]:
+        body += ["", "Certifications on record:", cert_lines[0]["text"]]
+        sources.append(_source(cert_lines[0], "Certifications"))
+    body += ["", "I am happy to share my CV on request.",
+             "", "Thank you for your time.", "", name]
+    drafts.append({
+        "kind": "outreach",
+        "subtype": "recruiter",
+        "status": "draft_unsent",
+        "sent": False,
+        "recipient": None,
+        "recipient_kind": "recruiter or agency contact. No recipient is chosen.",
+        "channel": "LinkedIn message (owner-sent only)",
+        "body": "\n".join(body).strip(),
+        "sources": sources,
+        "voice_sources": voice,
+        "notes": ["Nothing is sent, queued or scheduled, and no CV is attached or transmitted.",
+                  "Certification text is the canonical Certifications line verbatim."],
+        "publish_requires": "explicit owner authorization",
+    })
+
+    # 3. hiring manager — only with a job context ----------------------------- #
+    if job:
+        title = (job.get("title") or "").strip()
+        company = (job.get("company") or "").strip()
+        if title and company:
+            opening = f"I am writing about the {title} role at {company}."
+        elif title:
+            opening = f"I am writing about the {title} role."
+        else:
+            opening = "I am writing about a role your team has advertised."
+        body, sources = salutation_and_intro()
+        body += [
+            opening,
+            "I would be glad to know whether this team is likely to suit a graduate at my stage, "
+            "and what would make an application stand out.",
+            "", "Thank you for your time.", "", name,
+        ]
+        drafts.append({
+            "kind": "outreach",
+            "subtype": "hiring_manager",
+            "status": "draft_unsent",
+            "sent": False,
+            "recipient": None,
+            "recipient_kind": "hiring manager for the referenced posting. No recipient is chosen.",
+            "channel": "LinkedIn message (owner-sent only)",
+            "body": "\n".join(body).strip(),
+            "sources": sources,
+            "references_job": {
+                "id": job.get("id"), "title": title or None, "company": company or None,
+                "location": job.get("location"), "region": job.get("_region"),
+                "source_kind": job.get("_source_kind"), "source_path": job.get("_source_path"),
+                "provenance": "job context read from the Career Ops record above; the role and "
+                              "employer names are the record's own values, not inferred",
+            },
+            "voice_sources": voice,
+            "notes": ["No recipient is chosen, nothing is sent and no connection request is created.",
+                      "The role/employer reference comes from the Career Ops job record and is "
+                      "recorded in references_job so it can be checked."],
+            "publish_requires": "explicit owner authorization",
+        })
+    return drafts
+
+
+def _attach_provenance_and_unsent_state(cfg: dict, drafts: list[dict]) -> list[dict]:
+    """Give every draft a provenance block and an explicit unsent state."""
+    cv_paths = cvw.source_paths(cv_config(cfg))
+    canon = {}
+    for key in ("cv_md", "profile", "cv_facts"):
+        path = cv_paths[key]
+        canon[str(path)] = sha256_file(path) if Path(path).exists() else None
+    for draft in drafts:
+        draft["provenance"] = {
+            "generator": "career-ops/linkedin_workflow.py",
+            "generated_at": now_utc(),
+            "canonical_sources": canon,
+            "source_lines": [f"cv.md:{s['line']}" for s in draft.get("sources", [])],
+            "rule": "substantive text is canonical source text verbatim; only structural "
+                    "connective phrasing is generated",
+        }
+        draft["unsent_state"] = {
+            "status": draft["status"],
+            "sent": False,
+            "sent_at": None,
+            "recipient_selected": False,
+            "recipient": None,
+            "channel": draft.get("channel"),
+            "connection_request_created": False,
+            "message_queued": False,
+            "scheduled": False,
+            "attachments_sent": 0,
+            "owner_approval_required": True,
+            "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; "
+                    "the owner sends it manually or not at all.",
+        }
+    return drafts
+
+
+def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path,
+                          job: dict | None = None) -> dict:
     """Profile / post / outreach drafts from canonical facts, fact-gated."""
     blocks = canonical_blocks(cfg)
     max_per_kind = int(cfg.get("max_drafts_per_kind", 4))
@@ -763,43 +962,11 @@ def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path) -> dict:
             "publish_requires": "explicit owner authorization",
         })
 
-    # --- outreach -------------------------------------------------------- #
-    facts = blocks["facts"]
-    intro_lines = []
-    if profile_section:
-        intro_lines.extend(profile_section["lines"])
-    outreach_body = ["Hello,", ""]
-    outreach_sources = []
-    if intro_lines:
-        outreach_body.append(intro_lines[0]["text"])
-        outreach_sources.append(_source(intro_lines[0], "Profile"))
-    outreach_body += [
-        "",
-        "I am looking for a first role in cyber security or IT support in the UK. "
-        "If you have a moment, I would be glad to know whether anything on your team "
-        "is likely to suit a graduate at that stage.",
-        "",
-        "Thank you for your time.",
-        "",
-        facts.get("full_name", ""),
-    ]
-    drafts.append({
-        "kind": "outreach",
-        "status": "draft_unsent",
-        "sent": False,
-        "recipient": None,
-        "channel": "LinkedIn message (owner-sent only)",
-        "body": "\n".join(outreach_body).strip(),
-        "sources": outreach_sources,
-        "voice_sources": cfg.get("voice_sources", []),
-        "notes": ["No recipient is chosen, no connection request is generated and nothing is "
-                  "sent. The owner sends it themselves or not at all.",
-                  "'Looking for a first role in cyber security or IT support in the UK' is the "
-                  "canonical target-role and location statement, not an inferred claim."],
-        "publish_requires": "explicit owner authorization",
-    })
+    # --- outreach (networking / recruiter / hiring manager) --------------- #
+    drafts.extend(build_outreach_drafts(cfg, blocks, job=job))
 
-    drafts = drafts[:1 + max_per_kind + 1]
+    drafts = drafts[:2 + max_per_kind + 3]
+    drafts = _attach_provenance_and_unsent_state(cfg, drafts)
 
     # ---- fact gate over every draft ------------------------------------- #
     combined = "\n\n".join(d.get("body") or d.get("about") or "" for d in drafts)
@@ -811,6 +978,7 @@ def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path) -> dict:
         draft["blocked"] = not gate_ok
         if not gate_ok:
             draft["status"] = "blocked_fact_gate"
+            draft["unsent_state"]["status"] = draft["status"]
 
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "linkedin_drafts.json").write_text(
@@ -821,10 +989,15 @@ def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path) -> dict:
           f"Fact gate: {gate.get('verdict') if gate.get('available') else 'unavailable'}",
           "", "Nothing here has been posted, sent or scheduled.", ""]
     for draft in drafts:
-        md += [f"## {draft['kind']}" + (f" — {draft.get('topic')}" if draft.get("topic") else ""),
-               "", draft.get("body") or draft.get("about") or "", ""]
+        label = draft["kind"] + (f" / {draft['subtype']}" if draft.get("subtype") else "")
+        label += (f" — {draft.get('topic')}" if draft.get("topic") else "")
+        md += [f"## {label}", "", draft.get("body") or draft.get("about") or "", ""]
         if draft.get("headline"):
             md += [f"Headline: {draft['headline']}", ""]
+        if draft.get("references_job"):
+            ref = draft["references_job"]
+            md += [f"References job: {ref.get('title')} @ {ref.get('company')} "
+                   f"(Career Ops record {ref.get('id')})", ""]
         md += ["Sources: " + ", ".join(f"cv.md:{s['line']}" for s in draft.get("sources", [])), ""]
     (out_dir / "linkedin_drafts.md").write_text("\n".join(md), encoding="utf-8")
 
@@ -834,13 +1007,22 @@ def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path) -> dict:
         "counts": {"total": len(drafts),
                    "profile": sum(1 for d in drafts if d["kind"] == "profile"),
                    "post": sum(1 for d in drafts if d["kind"] == "post"),
-                   "outreach": sum(1 for d in drafts if d["kind"] == "outreach")},
+                   "outreach": sum(1 for d in drafts if d["kind"] == "outreach"),
+                   "outreach_networking": sum(1 for d in drafts
+                                              if d.get("subtype") == "networking"),
+                   "outreach_recruiter": sum(1 for d in drafts
+                                             if d.get("subtype") == "recruiter"),
+                   "outreach_hiring_manager": sum(1 for d in drafts
+                                                  if d.get("subtype") == "hiring_manager")},
         "fact_gate": gate,
+        "job_context": ({k: v for k, v in job.items() if not k.startswith("_")} if job else None),
         "drafts_path": str(out_dir / "linkedin_drafts.json"),
         "drafts_markdown": str(out_dir / "linkedin_drafts.md"),
         "drafts": drafts,
         "sends_performed": 0,
         "posts_performed": 0,
+        "messages_queued": 0,
+        "connection_requests_created": 0,
     }
 
 
@@ -895,12 +1077,47 @@ def cmd_dedupe(args) -> int:
     return 0
 
 
+def draft_job_context(cfg: dict, args) -> tuple[dict | None, dict]:
+    """Resolve the optional Career Ops job context for the outreach drafts.
+
+    Returns ``(job, status)``. A resolution failure is reported truthfully and
+    simply omits the hiring-manager draft — no role or employer is ever guessed.
+    """
+    wanted = {"job_record": getattr(args, "job_record", None),
+              "id": getattr(args, "id", None), "url": getattr(args, "url", None),
+              "row": getattr(args, "row", None),
+              "pipeline_index": getattr(args, "pipeline_index", None)}
+    if not any(v is not None for v in wanted.values()):
+        return None, {"requested": False,
+                      "reason": "no job context requested; the hiring-manager outreach draft "
+                                "is omitted rather than invented"}
+    region = getattr(args, "region", None) or "uk"
+    cc = cw_config(cfg)
+    cv_cfg = cvw.load_config(CONTROL_PLANE / cc["cv_workflow_config"]) \
+        if "cv_workflow_config" in cc else cv_config(cfg)
+    profiles = tw.load_profiles(str(CONTROL_PLANE / cv_cfg["regional_profiles"]))
+    resolved = cvw.resolve_job(cv_cfg, profiles, region=region, job_id=wanted["id"],
+                               url=wanted["url"], row=wanted["row"],
+                               pipeline_index=wanted["pipeline_index"],
+                               record_file=wanted["job_record"])
+    if not resolved.get("ok"):
+        return None, {"requested": True, "resolved": False, "region": region,
+                      "reason": resolved.get("reason"),
+                      "note": "no job context available, so no role or employer is named in any "
+                              "draft"}
+    return resolved["job"], {"requested": True, "resolved": True, "region": region,
+                             "source_kind": (resolved["job"] or {}).get("_source_kind"),
+                             "source_path": (resolved["job"] or {}).get("_source_path")}
+
+
 def cmd_draft(args) -> int:
     cfg = load_config(args.config)
     stamp = args.stamp or dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     base = Path(args.out) if args.out else (runtime_dir(cfg) / cfg["drafts_subdir"] / stamp)
-    result = build_linkedin_drafts(cfg, out_dir=base, scratch=base / "factgate")
+    job, job_status = draft_job_context(cfg, args)
+    result = build_linkedin_drafts(cfg, out_dir=base, scratch=base / "factgate", job=job)
     emit({"ok": result["ok"], "generated_at": now_utc(), **result,
+          "job_context_status": job_status,
           "external_actions_taken": []})
     return 0 if result["ok"] else 1
 
@@ -997,6 +1214,9 @@ def main(argv=None) -> int:
 
     p = sub.add_parser("draft")
     p.add_argument("--inbox"); p.add_argument("--out"); p.add_argument("--stamp")
+    p.add_argument("--region", default=None)
+    p.add_argument("--id"); p.add_argument("--url"); p.add_argument("--row", type=int)
+    p.add_argument("--pipeline-index", type=int); p.add_argument("--job-record")
     p.set_defaults(fn=cmd_draft)
 
     p = sub.add_parser("guard")

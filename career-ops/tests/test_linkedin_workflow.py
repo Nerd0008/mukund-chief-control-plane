@@ -387,6 +387,11 @@ def test_drafts_are_unsent_and_fact_gated(tmp_path):
 @needs_install
 @needs_node
 def test_draft_bodies_are_canonical_text_only(tmp_path):
+    """Every draft line is either canonical CV text or a declared structural phrase.
+
+    The structural list is imported from the module rather than copied, so a new
+    generated phrasing can never pass this test without being declared.
+    """
     result = liw.build_linkedin_drafts(CFG, out_dir=tmp_path, scratch=tmp_path / "fg")
     canonical = set()
     for line in cvw.read_text(cvw.source_paths(liw.cv_config(CFG))["cv_md"]).splitlines():
@@ -395,26 +400,91 @@ def test_draft_bodies_are_canonical_text_only(tmp_path):
             canonical.add(s)
             canonical.add(s.lstrip("#").strip())
             canonical.add(s[1:].strip() if s.startswith("-") else s)
-    allowed_framing = {
-        "Notes from a recent project:", "Certifications on record:",
-        "Where I am right now:", "Tools I have been working in:",
-        "Hello,", "Thank you for your time.",
-    }
+    allowed_framing = set(liw.STRUCTURAL_PHRASES)
+    assert allowed_framing, "the structural-phrase contract must not be empty"
     for draft in result["drafts"]:
         body = draft.get("body") or draft.get("about") or ""
         for line in body.splitlines():
             s = line.strip()
             if not s or s in allowed_framing:
                 continue
-            if draft["kind"] == "profile":
-                pass  # about = verbatim CV lines only
-            if draft["kind"] == "outreach" and s.startswith("I am looking for a first role"):
-                continue
-            if draft["kind"] == "outreach" and s.startswith("If you have a moment"):
-                continue
-            if draft["kind"] == "outreach" and s == draft.get("body", "").splitlines()[-1]:
-                continue
+            if draft["kind"] == "outreach" and s == draft["body"].splitlines()[-1]:
+                continue  # the owner's own canonical full name
             assert s in canonical, f"non-canonical line in {draft['kind']} draft: {s!r}"
+
+
+# --------------------------------------------------------------------------- #
+# networking / recruiter / hiring-manager outreach drafts (B21)
+# --------------------------------------------------------------------------- #
+
+JOB_FIXTURE = CAREER_OPS / "tests" / "fixtures" / "job-intelligence" / "job-record-uk.json"
+
+
+def _job() -> dict:
+    return json.loads(JOB_FIXTURE.read_text(encoding="utf-8"))
+
+
+@needs_install
+@needs_node
+def test_outreach_variants_are_drafts_with_explicit_unsent_state(tmp_path):
+    result = liw.build_linkedin_drafts(CFG, out_dir=tmp_path, scratch=tmp_path / "fg")
+    outreach = [d for d in result["drafts"] if d["kind"] == "outreach"]
+    assert result["counts"]["outreach_networking"] == 1
+    assert result["counts"]["outreach_recruiter"] == 1
+    assert result["counts"]["outreach_hiring_manager"] == 0, \
+        "no job context was supplied, so no hiring-manager draft may be produced"
+    for draft in outreach:
+        st = draft["unsent_state"]
+        assert draft["status"] == "draft_unsent"
+        assert draft["sent"] is False and draft["recipient"] is None
+        assert st["sent"] is False and st["sent_at"] is None
+        assert st["recipient_selected"] is False and st["recipient"] is None
+        assert st["connection_request_created"] is False
+        assert st["message_queued"] is False and st["scheduled"] is False
+        assert st["attachments_sent"] == 0
+        assert st["owner_approval_required"] is True
+        assert draft["publish_requires"] == "explicit owner authorization"
+    assert result["messages_queued"] == 0
+    assert result["connection_requests_created"] == 0
+    assert result["sends_performed"] == 0
+
+
+@needs_install
+@needs_node
+def test_every_draft_carries_provenance(tmp_path):
+    result = liw.build_linkedin_drafts(CFG, out_dir=tmp_path, scratch=tmp_path / "fg")
+    paths = cvw.source_paths(liw.cv_config(CFG))
+    for draft in result["drafts"]:
+        prov = draft["provenance"]
+        assert prov["generator"] == "career-ops/linkedin_workflow.py"
+        assert prov["canonical_sources"][str(paths["cv_md"])] == cvw.sha256_file(paths["cv_md"])
+        assert prov["source_lines"] == [f"cv.md:{s['line']}" for s in draft["sources"]]
+        assert all(line.startswith("cv.md:") for line in prov["source_lines"])
+
+
+@needs_install
+@needs_node
+def test_hiring_manager_outreach_is_produced_only_from_a_job_context(tmp_path):
+    job = _job()
+    drafts = liw.build_outreach_drafts(CFG, liw.canonical_blocks(CFG), job=job)
+    hm = [d for d in drafts if d.get("subtype") == "hiring_manager"]
+    assert len(hm) == 1
+    ref = hm[0]["references_job"]
+    assert ref["title"] == job["title"] and ref["company"] == job["company"]
+    assert ref["provenance"].startswith("job context read from the Career Ops record")
+    assert hm[0]["sent"] is False and hm[0]["recipient"] is None
+    assert "No recipient is chosen" in hm[0]["notes"][0]
+
+
+@needs_install
+@needs_node
+def test_outreach_drafts_never_name_a_recipient_or_a_channel_that_sends(tmp_path):
+    drafts = liw.build_outreach_drafts(CFG, liw.canonical_blocks(CFG), job=None)
+    assert {d["subtype"] for d in drafts} == {"networking", "recruiter"}
+    for draft in drafts:
+        assert draft["recipient"] is None
+        assert "owner-sent only" in draft["channel"]
+        assert draft["status"] == "draft_unsent"
 
 
 @needs_install
