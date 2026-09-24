@@ -341,6 +341,16 @@ def _page_confirms_name(page_text: str, registry_variants: list[str]) -> bool:
     return False
 
 
+def page_confirms_name(page_text: str, registry_variants: list[str]) -> bool:
+    """Public alias of :func:`_page_confirms_name`.
+
+    Reused by the priority-watchlist layer (``discovery/watchlist.py``) so a board
+    page confirms a company name by exactly the same rule Company Watch uses —
+    one attribution rule, not two.
+    """
+    return _page_confirms_name(page_text, registry_variants)
+
+
 def resolve_company(company: dict, fetcher: Fetcher | FakeFetcher, *,
                     vendors: tuple[str, ...] = VENDOR_ORDER,
                     verify_page: bool = True) -> dict:

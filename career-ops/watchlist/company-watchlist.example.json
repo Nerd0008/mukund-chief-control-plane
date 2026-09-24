@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "career-ops.company-watchlist",
+  "_readme": "Copy this file to runtime/career-ops/watchlist/company-watchlist.json and put your company names in `companies`. An empty list is valid: the watchlist layer's identity, careers/ATS resolution, query families, funnel route and brief section all run with zero companies, so adding names later is a data edit only. The runtime copy is git-ignored because it names your target companies.",
+  "_row_schema": {
+    "company": "required — the company name as you write it",
+    "careers_url": "optional — the official careers/ATS URL, when you already know it",
+    "aliases": "optional — other spellings/legal names that ARE the same company",
+    "notes": "optional — free text; recorded as provenance, never parsed for facts",
+    "regions": "optional — region codes this company matters in (default: the run's region)",
+    "role_families": "optional — override the role families researched for this company"
+  },
+  "_example_row": {
+    "company": "NOT A COMPANY — example shape only, not read by the loader",
+    "careers_url": "https://example.invalid/careers",
+    "aliases": ["Example Group Ltd", "Example Group Limited"],
+    "notes": "why this company matters to me (recorded as provenance only)",
+    "regions": ["uk"],
+    "role_families": ["graduate_new_grad", "soc_security_operations"]
+  },
+  "regions": ["uk"],
+  "role_families": ["graduate_new_grad", "analyst", "soc_security_operations", "information_security", "grc"],
+  "companies": []
+}

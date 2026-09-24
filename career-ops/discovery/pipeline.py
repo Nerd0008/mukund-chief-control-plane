@@ -95,6 +95,10 @@ SOURCE_COMPANY_WATCH = "company-watch findings"
 SOURCE_RECRUITER_WATCH = "recruiter/intermediary watch findings"
 SOURCE_LINKEDIN_EXPORT = "linkedin job-discovery export"
 SOURCE_WEB_RESEARCH = "open-web research (codex-style)"
+#: The owner's own company short list, resolved to careers/ATS surfaces and
+#: researched by company name. It is an ADDITIVE surface: broad-market discovery
+#: continues unchanged alongside it.
+SOURCE_PRIORITY_WATCHLIST = "owner priority watchlist (company careers/ATS + role-family research)"
 
 #: Every read-only discovery surface routes through the SAME funnel. Adding a
 #: source means adding one collector here — never a second classifier, a second
@@ -106,6 +110,7 @@ SOURCE_REGISTRY = {
     SOURCE_RECRUITER_WATCH: "collect_from_recruiter_watch",
     SOURCE_LINKEDIN_EXPORT: "collect_from_linkedin",
     SOURCE_WEB_RESEARCH: "collect_from_web_research",
+    SOURCE_PRIORITY_WATCHLIST: "collect_from_priority_watchlist",
 }
 
 
@@ -479,6 +484,160 @@ def collect_from_web_research(path: Path, region: str) -> dict:
     }
 
 
+def collect_from_priority_watchlist(path: Path, region: str) -> dict:
+    """Owner priority-watchlist findings as candidates (roster B27).
+
+    Reads a lane export produced by ``career-ops/discovery/watchlist.py``: for each
+    company on the owner's own list, the resolved official careers/ATS surface plus
+    the findings of two query families (official-careers/ATS discovery and
+    company-name + early-career cyber role-family research).
+
+    Every candidate keeps the ``priority_watchlist`` flag and its watchlist
+    provenance, and enters the SAME prefilter, semantic stage, deterministic gates
+    and shared dedupe as every other surface. The flag makes a finding prominent;
+    it never bypasses a gate, so a watchlist finding that fails the gates is
+    rejected exactly like any other.
+
+    A company whose careers infrastructure could not be resolved is reported in the
+    coverage block as ``unavailable``/``unknown`` with its blocking reason — never
+    as "no jobs".
+    """
+    try:
+        doc = read_json(path)
+    except Exception as exc:  # noqa: BLE001 - reported as a limitation, never fatal
+        return {
+            "available": False, "path": str(path), "candidates": [],
+            "coverage": {"kind": "priority watchlist lane export",
+                         "watchlist_present": False,
+                         "limitation": f"export could not be read: {type(exc).__name__}: {exc}",
+                         "note": ("an unreadable watchlist export contributes zero candidates and "
+                                  "is recorded as such rather than being guessed")},
+        }
+
+    raw_candidates = doc.get("candidates") or []
+    health = doc.get("companies") or []
+    health_by_company = {h.get("company"): h for h in health if isinstance(h, dict)}
+    candidates, excluded = [], Counter()
+    per_company: dict = {}
+    for raw in raw_candidates:
+        if not isinstance(raw, dict):
+            excluded["malformed_candidate"] += 1
+            continue
+        fetch_state = raw.get("fetch_state") or "discovered_unverified"
+        result_kind = raw.get("result_kind") or (raw.get("web_research") or {}).get("result_kind")
+        rec = normalise_candidate(raw, SOURCE_PRIORITY_WATCHLIST)
+        rec["priority_watchlist"] = True
+        # The collection source is the watchlist LANE; the ATS/board the finding came from
+        # stays in `discovery_surface`, so provenance is not flattened into one field.
+        rec["discovery_surface"] = (raw.get("discovery_surface")
+                                    or (raw.get("web_research") or {}).get("discovery_surface"))
+        rec["source"] = SOURCE_PRIORITY_WATCHLIST
+        rec["fetch_state"] = fetch_state
+        rec["result_kind"] = result_kind
+        name = raw.get("watchlist_company") or raw.get("company")
+        rec["watchlist_company"] = name
+        wr_block = raw.get("web_research") or {}
+        rec["web_research"] = {
+            "discovery_surface": wr_block.get("discovery_surface"),
+            "search_query": wr_block.get("search_query"),
+            "query_id": wr_block.get("query_id"),
+            "query_family": wr_block.get("query_family") or raw.get("watchlist_query_family"),
+            "role_family": wr_block.get("role_family"),
+            "region": wr_block.get("region"),
+            "result_url": wr_block.get("result_url") or raw.get("url"),
+            "canonical_url": wr_block.get("canonical_url"),
+            "observed": wr_block.get("observed"),
+            "title_source": wr_block.get("title_source"),
+            "source_timestamp": wr_block.get("source_timestamp"),
+            "fetch_state": fetch_state,
+            "result_kind": result_kind,
+            "result_kind_reason": wr_block.get("result_kind_reason"),
+            "missing_fields": wr_block.get("missing_fields"),
+            "priority_watchlist": True,
+            "watchlist_company": name,
+        }
+        rec["watchlist"] = {
+            "company": name,
+            "query_family": raw.get("watchlist_query_family"),
+            "role_family": raw.get("watchlist_role_family"),
+            "careers_source": raw.get("watchlist_careers_source"),
+            "ats_family": raw.get("watchlist_ats_family"),
+            "careers_url": (health_by_company.get(name) or {}).get("careers_url"),
+            "careers_state": (health_by_company.get(name) or {}).get("careers_state"),
+            "priority_watchlist": True,
+        }
+        per_company[name] = per_company.get(name, 0) + 1
+        if fetch_state == "validation_failed":
+            excluded["destination_not_validated_live"] += 1
+        elif fetch_state == "discovered_unverified":
+            excluded["destination_not_verified"] += 1
+        if result_kind == "search_listing":
+            excluded["search_listing_page_not_a_vacancy"] += 1
+        candidates.append(rec)
+
+    unavailable = [{"company": h.get("company"), "state": h.get("careers_state"),
+                    "reason": h.get("access_blocking_reason")}
+                   for h in health if h.get("careers_state") != "found"]
+    findings_by_company = [{"company": h.get("company"),
+                            "careers_source_found": h.get("careers_source_found"),
+                            "careers_state": h.get("careers_state"),
+                            "careers_url": h.get("careers_url"),
+                            "ats_family": h.get("ats_family"),
+                            "attribution_basis": h.get("attribution_basis"),
+                            "queries_executed": h.get("queries_executed"),
+                            "live_vacancies_observed": h.get("live_vacancies_observed"),
+                            "findings": h.get("findings"),
+                            "candidates_after_funnel": h.get("candidates_after_funnel"),
+                            "access_blocking_reason": h.get("access_blocking_reason"),
+                            "next_retry_at": h.get("next_retry_at"),
+                            "last_checked": h.get("last_checked")}
+                           for h in health]
+    telemetry = doc.get("telemetry") or {}
+    zero_note = None
+    if not candidates and health:
+        zero_note = ("zero watchlist findings in this lane export: every company's own state and "
+                     "blocking reason is listed above, so the zero is attributable to the company "
+                     "or the run rather than being read as 'no jobs exist'")
+    return {
+        "available": True,
+        "path": str(path),
+        "candidates": candidates,
+        "coverage": {
+            "kind": "owner priority watchlist lane export",
+            "watchlist_present": True,
+            "lane_id": doc.get("lane_id"),
+            "region": doc.get("region"),
+            "watchlist_empty": (doc.get("watchlist") or {}).get("empty"),
+            "companies_in_watchlist": telemetry.get("companies_in_watchlist"),
+            "companies_checked": telemetry.get("companies_checked"),
+            "companies_with_careers_source": telemetry.get("companies_with_careers_source"),
+            "companies_unavailable_or_unknown": telemetry.get("companies_unavailable_or_unknown"),
+            "duplicate_spellings_collapsed": (doc.get("watchlist") or {}).get(
+                "duplicate_spellings_collapsed"),
+            "queries_executed": telemetry.get("queries_executed"),
+            "live_vacancies_observed": telemetry.get("validated_live"),
+            "findings_total": len(raw_candidates),
+            "findings_entering_this_funnel": len(candidates),
+            "findings_by_company": dict(sorted(per_company.items())),
+            "findings_excluded_before_the_funnel": dict(sorted(excluded.items())),
+            "companies_with_findings": findings_by_company,
+            "companies_unavailable_or_unknown_detail": unavailable,
+            "zero_attribution": zero_note or telemetry.get("zero_attribution"),
+            "provider": doc.get("provider"),
+            "note": ("the owner's own company list, resolved to careers/ATS surfaces and researched "
+                     "by company name. It is ADDITIVE to broad-market discovery, never a "
+                     "replacement. The priority_watchlist flag is provenance for prominence in the "
+                     "brief; it never bypasses the semantic stage or the deterministic gates, and "
+                     "an unresolved careers surface is reported unavailable/unknown, never "
+                     "'no jobs'."),
+            "match_basis": ("posting URL (tracking parameters removed) where present, else "
+                            "company + title; the same vacancy found by the watchlist AND by "
+                            "Company Watch or the open-web research lane collapses to one "
+                            "canonical candidate carrying all surfaces' provenance"),
+        },
+    }
+
+
 # --------------------------------------------------------------------------- #
 # cross-source canonical collapse (one vacancy -> one candidate)
 # --------------------------------------------------------------------------- #
@@ -553,6 +712,28 @@ def collapse_candidates(candidates: list) -> dict:
         out["provenance"] = provenance
         out["duplicate_discoveries"] = len(members) - 1
         out["source"] = sources[0]
+        # The owner-priority-watchlist flag survives the collapse in either
+        # direction: whether the watchlist record was the richest copy or the
+        # thinner one, the merged vacancy stays flagged and keeps every watchlist
+        # discovery in its provenance (so a vacancy found by Company Watch AND by
+        # the watchlist is one candidate that is still visibly on the owner's list).
+        out["priority_watchlist"] = bool(
+            base.get("priority_watchlist")
+            or any(o.get("priority_watchlist") for _i, o in members_sorted[1:]))
+        wl_companies = [o.get("watchlist_company") for _i, o in members_sorted
+                        if o.get("watchlist_company")]
+        out["watchlist_company"] = base.get("watchlist_company") or (
+            wl_companies[0] if wl_companies else None)
+        wl_families: list = []
+        for _i, o in members_sorted:
+            family = o.get("watchlist_query_family") or (o.get("web_research") or {}).get(
+                "query_family")
+            if o.get("priority_watchlist") and family and family not in wl_families:
+                wl_families.append(family)
+        if out["priority_watchlist"]:
+            out["watchlist_query_families"] = wl_families
+            out["priority_watchlist_provenance"] = [
+                e for e in provenance if e["collection_source"] == SOURCE_PRIORITY_WATCHLIST]
         out["canonical_key"] = list(key)
         out["candidate_id"] = candidate_id(out)
         canonical.append(out)
@@ -561,7 +742,9 @@ def collapse_candidates(candidates: list) -> dict:
                               "company": out.get("company"), "title": out.get("title"),
                               "url": tw.extract_url(out.get("url")),
                               "discoveries": len(members), "sources": sources,
-                              "duplicate_discoveries": len(members) - 1})
+                              "duplicate_discoveries": len(members) - 1,
+                              "priority_watchlist": bool(out.get("priority_watchlist")),
+                              "watchlist_company": out.get("watchlist_company")})
 
     shared_by_source: dict = {}
     for entry in collapsed:
@@ -915,6 +1098,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                  "title": rec.get("title"), "location": rec.get("location"),
                  "url": rec.get("url"), "sources": sources, "semantic_label":
                      classifications.get(candidate_id(rec), {}).get("primary_label"),
+                 "priority_watchlist": bool(rec.get("priority_watchlist")),
+                 "watchlist_company": rec.get("watchlist_company"),
                  **verdict}
         gated.append(entry)
         if verdict["decision"] != "accepted":
@@ -979,9 +1164,12 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "canonical_candidates": [
             {k: c.get(k) for k in ("candidate_id", "company", "title", "location", "url",
                                    "source", "sources", "duplicate_discoveries",
-                                   "canonical_key", "provenance", "fetch_state", "result_kind")}
+                                   "canonical_key", "provenance", "fetch_state", "result_kind",
+                                   "priority_watchlist", "watchlist_company",
+                                   "watchlist_query_families")}
             for c in candidates
         ],
+        "priority_watchlist": priority_watchlist_block(candidates, passed),
         "source_registry": dict(SOURCE_REGISTRY),
         "classifications": [classifications[candidate_id(c)] for c in kept
                             if candidate_id(c) in classifications],
@@ -1017,6 +1205,48 @@ def _coverage_notes(collection: list) -> list:
         cov = block.get("coverage") or {}
         notes.append(f"source {block.get('source')}: {json.dumps(cov, ensure_ascii=False)}")
     return notes
+
+
+def priority_watchlist_block(candidates: list, passed: list) -> dict:
+    """The owner-priority-watchlist view of a funnel run.
+
+    Deliberately a *report*, not an override: it lists which canonical candidates
+    came from the owner's own company list, whether each one survived the
+    deterministic gates, and how the flag behaved through the cross-source collapse.
+    The flag grants prominence in the Chief/Career brief and nothing else — no
+    candidate is accepted, promoted or written because it is on the watchlist.
+    """
+    flagged = [c for c in candidates if c.get("priority_watchlist")]
+    passed_ids = {e["candidate_id"] for e in passed}
+    accepted = [e for e in passed if e.get("priority_watchlist")]
+    merged = [c for c in flagged if c.get("duplicate_discoveries")]
+    return {
+        "declared": bool(flagged),
+        "counts": {
+            "canonical_candidates": len(flagged),
+            "deterministic_eligibility_pass": len(accepted),
+            "also_found_by_another_surface": len(merged),
+        },
+        "companies": sorted({c.get("watchlist_company") for c in flagged
+                             if c.get("watchlist_company")}),
+        "query_families": sorted({f for c in flagged
+                                  for f in (c.get("watchlist_query_families") or [])}),
+        "candidates": [{
+            "candidate_id": c.get("candidate_id"), "company": c.get("company"),
+            "title": c.get("title"), "location": c.get("location"), "url": c.get("url"),
+            "watchlist_company": c.get("watchlist_company"),
+            "sources": c.get("sources"),
+            "duplicate_discoveries": c.get("duplicate_discoveries"),
+            "threshold_passed": c.get("candidate_id") in passed_ids,
+            "state": ("reached the deterministic gates" if c.get("candidate_id") in passed_ids
+                      else "did not reach the deterministic gates (see the funnel counters and "
+                           "rejections_by_reason for the stage that refused it)"),
+        } for c in flagged],
+        "note": ("the priority_watchlist flag is provenance from the owner's own company list. It "
+                 "makes a finding prominent in the brief and it NEVER bypasses the semantic stage "
+                 "or the deterministic eligibility gates; an absent block means the owner's "
+                 "watchlist did not run in this funnel, which is not a statement about the market"),
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -1190,6 +1420,10 @@ def collect_sources(args) -> list:
         block = collect_from_web_research(Path(args.web_research), args.region)
         block["source"] = SOURCE_WEB_RESEARCH
         collection.append(block)
+    if getattr(args, "priority_watchlist", None):
+        block = collect_from_priority_watchlist(Path(args.priority_watchlist), args.region)
+        block["source"] = SOURCE_PRIORITY_WATCHLIST
+        collection.append(block)
     return collection
 
 
@@ -1200,7 +1434,7 @@ def cmd_run(args) -> int:
     if not collection:
         emit({"ok": False, "reason": "no candidate source supplied; pass --records, "
                                      "--scan-record, --company-watch, --recruiter-watch, "
-                                     "--linkedin or --web-research",
+                                     "--linkedin, --web-research or --priority-watchlist",
               "run_id": run_id, "region": args.region})
         return 2
 
@@ -1320,6 +1554,9 @@ def main(argv=None) -> int:
                    help="read-only owner-exported LinkedIn job-discovery file (B19)")
     p.add_argument("--web-research",
                    help="open-web research export from discovery/web_research.py (B26)")
+    p.add_argument("--priority-watchlist",
+                   help=("owner priority watchlist lane export from "
+                         "discovery/watchlist.py (B27) — additive to the market search"))
     p.add_argument("--title-mode", choices=list(MODES), default=DEFAULT_MODE)
     p.add_argument("--semantic", choices=("auto", "deepseek", "deterministic", "off"),
                    default=DEFAULT_SEMANTIC)
@@ -1345,6 +1582,7 @@ def main(argv=None) -> int:
     p.add_argument("--recruiter-watch")
     p.add_argument("--linkedin")
     p.add_argument("--web-research")
+    p.add_argument("--priority-watchlist")
     p.add_argument("--semantic", choices=("off", "auto", "deepseek"), default="off")
     p.add_argument("--model", default="deepseek-flash")
     p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)

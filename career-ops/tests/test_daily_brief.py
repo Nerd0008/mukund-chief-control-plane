@@ -541,3 +541,113 @@ def test_discovery_collector_never_writes_and_reports_no_submission(tmp_path):
     df = db.collect_discovery_funnel(cfg, NOW)
     assert sha(evidence_path) == before
     assert df["safety"]["applications_submitted"] == 0
+
+
+# --------------------------------------------------------------------------- #
+# owner priority watchlist section (B27)
+# --------------------------------------------------------------------------- #
+
+WATCHLIST_SOURCE = ("owner priority watchlist (company careers/ATS + "
+                    "role-family research)")
+
+
+def _watchlist_cfg(tmp_path: Path, *, evidence: dict | None, stale_after: float = 48.0) -> dict:
+    cfg = empty_cfg(tmp_path)
+    p = tmp_path / "discovery" / "latest.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if evidence is not None:
+        p.write_text(json.dumps(evidence), encoding="utf-8")
+    cfg["priority_watchlist"] = {"latest": str(p), "stale_after_hours": stale_after,
+                                 "max_items": 10}
+    return cfg
+
+
+WATCHLIST_EVIDENCE = {
+    "run_id": "discovery-watchlist-uk-TEST", "region": "uk",
+    "finished_at": (NOW - dt.timedelta(hours=1)).isoformat(),
+    "collection": [{
+        "source": WATCHLIST_SOURCE,
+        "candidates": [],
+        "coverage": {"kind": "owner priority watchlist lane export", "watchlist_present": True,
+                     "companies_checked": 3, "companies_with_careers_source": 2,
+                     "companies_unavailable_or_unknown": 1, "duplicate_spellings_collapsed": 1,
+                     "zero_attribution": {"first_zero_stage": None}},
+    }],
+    "priority_watchlist": {
+        "declared": True,
+        "counts": {"canonical_candidates": 2, "deterministic_eligibility_pass": 1,
+                   "also_found_by_another_surface": 1},
+        "companies": ["Fixture Security Ltd", "Quiet Roles Ltd"],
+        "query_families": ["official_careers_ats", "company_role_family_research"],
+        "candidates": [
+            {"candidate_id": "wl-1", "company": "Fixture Security Ltd", "title": "SOC Analyst L1",
+             "location": "London", "url": "https://fixture-security.invalid/jobs/soc-analyst-l1",
+             "watchlist_company": "Fixture Security Ltd", "sources": [WATCHLIST_SOURCE],
+             "duplicate_discoveries": 1, "threshold_passed": True,
+             "state": "reached the deterministic gates"},
+            {"candidate_id": "wl-2", "company": "Quiet Roles Ltd", "title": "Keyword listing",
+             "location": None, "url": "https://quiet-roles.invalid/jobs/cyber-security-jobs",
+             "watchlist_company": "Quiet Roles Ltd", "sources": [WATCHLIST_SOURCE],
+             "duplicate_discoveries": 0, "threshold_passed": False,
+             "state": "did not reach the deterministic gates (see the funnel counters)"},
+        ],
+    },
+}
+
+
+def test_priority_watchlist_section_is_independent_of_the_global_ranking(tmp_path):
+    cfg = _watchlist_cfg(tmp_path, evidence=WATCHLIST_EVIDENCE)
+    brief = db.build_brief(cfg, now=NOW)
+    section = brief["priority_watchlist"]
+    assert section["declared"] is True
+    assert section["independent_of_global_rank"] is True
+    assert "NOT sorted by the priority score" in section["section_order"]
+    items = section["items"]
+    assert [i["declared_order"] for i in items] == [0, 1]
+    # The gated item is ranked globally; the one that did not reach the gates is
+    # still visible in the section, with that state.
+    assert items[0]["in_global_ranking"] is True and items[0]["global_rank"] is not None
+    assert items[1]["in_global_ranking"] is False and items[1]["global_rank"] is None
+    assert section["items_not_reaching_gates"] == 1
+    assert section["items_total"] == 2
+
+
+def test_priority_watchlist_section_and_summary_reach_the_chief_brief(tmp_path):
+    cfg = _watchlist_cfg(tmp_path, evidence=WATCHLIST_EVIDENCE)
+    brief = db.build_brief(cfg, now=NOW)
+    assert brief["priority_watchlist"]["health"] == "ok"
+    summary = db.chief_summary(brief, cfg)
+    line = [ln for ln in summary.splitlines() if ln.startswith("Priority watchlist:")][0]
+    assert "company(ies) checked" in line
+    assert "independent of the global ranking" in line
+
+
+def test_missing_watchlist_run_is_unknown_never_no_jobs(tmp_path):
+    cfg = _watchlist_cfg(tmp_path, evidence=None)
+    brief = db.build_brief(cfg, now=NOW)
+    section = brief["priority_watchlist"]
+    assert section["available"] is False
+    assert "never 'the watchlist found nothing'" in section["note"]
+    assert any(u["area"] == "priority_watchlist" for u in brief["unknowns"])
+    assert "Priority watchlist: unavailable" in db.chief_summary(brief, cfg)
+
+
+def test_an_empty_owner_watchlist_is_a_valid_state(tmp_path):
+    evidence = json.loads(json.dumps(WATCHLIST_EVIDENCE))
+    evidence["priority_watchlist"] = {"declared": False, "counts": None, "companies": [],
+                                      "query_families": [], "candidates": []}
+    cfg = _watchlist_cfg(tmp_path, evidence=evidence)
+    brief = db.build_brief(cfg, now=NOW)
+    section = brief["priority_watchlist"]
+    assert section["declared"] is False and section["items"] == []
+    assert "empty owner watchlist is a valid state" in section["reason"]
+    assert "no watchlist finding in this run" in db.chief_summary(brief, cfg)
+
+
+def test_watchlist_collector_is_read_only_over_the_run_evidence(tmp_path):
+    cfg = _watchlist_cfg(tmp_path, evidence=WATCHLIST_EVIDENCE)
+    evidence_path = Path(cfg["priority_watchlist"]["latest"])
+    before = sha(evidence_path)
+    section = db.collect_priority_watchlist(cfg, NOW)
+    assert sha(evidence_path) == before
+    assert section["declared"] is True

@@ -37,6 +37,12 @@
     "max_semantic_candidates": 10,
     "note": "The high-recall discovery funnel's own run evidence (career-ops/discovery/pipeline.py). This brief only reports the pipeline's counters and its top accepted candidates; the ranking is a declared policy output, explicitly not a factual claim about a vacancy. An absent or stale run is UNKNOWN and is never summarised as 'no jobs'. Raw per-posting funnel artifacts stay in the git-ignored runtime path."
   },
+  "priority_watchlist": {
+    "latest": "runtime/career-ops/discovery/latest.json",
+    "stale_after_hours": 48,
+    "max_items": 10,
+    "note": "The owner's OWN company short list (career-ops/discovery/watchlist.py, roster B27), read from the pipeline's own `priority_watchlist` block and the watchlist surface's collection coverage. It is reported as its own section, in the funnel's canonical order and INDEPENDENT of the global priority ranking, so a watchlist vacancy stays visible even when it is not top-ranked. Nothing is re-scored here: an item that did not reach the deterministic gates is still listed, with that state, because the watchlist flag gives prominence and never a bypass. An absent or stale run is UNKNOWN, never 'no jobs'."
+  },
   "terminal_statuses": [
     "not applying",
     "rejected",
@@ -49,7 +55,7 @@
   "owner_flag": {
     "priority_values": ["High"],
     "selected_values": ["Yes"],
-    "note": "owner_flag is TRUE only when an owner-CONTROLLED cell the owner set says so: the region's own priority column (where its schema has one) reads High, or its own selected column reads Yes. These are the owner's own words, not an inference. Where a region has neither column, owner_flag is UNKNOWN for its rows."
+    "note": "owner_flag is TRUE only when an owner-CONTROLLED cell the owner set says so: the region's own priority column (where its schema has one) reads High, or its own selected column reads Yes. These are the owner's own words, not an inference. Where a region has neither column, owner_flag is UNKNOWN for its rows. A finding discovered because it sits on the owner's own priority-watchlist company list also carries owner_flag TRUE: the list is the owner's own declaration, and this flag only feeds the 10-point owner_flag input — it never overrides a semantic or deterministic gate."
   },
   "owner_action_open_tokens": [
     "pending",
@@ -125,7 +131,7 @@
     "urgent_min_class": "P2",
     "owner_action_min_class": "P2",
     "overrides_note": "Three hard overrides are declared, and each one is recorded on the item it fires on: (1) a deadline within `urgent_deadline_days` raises the class to at least `urgent_min_class`; (2) an item whose subject type is `owner_action` - something only the owner can do - is raised to at least `owner_action_min_class`; (3) a candidate with no known policy input at all is reported at `unscoreable_class` with the reason recorded, not silently scored. Overrides change the class only; the underlying score and coverage are always reported unchanged.",
-    "subject_type_order": ["tracker_row", "deadline_item", "application_status_change", "interview_prep", "company_watch_finding", "new_offer_without_url", "owner_action"],
+    "subject_type_order": ["tracker_row", "deadline_item", "application_status_change", "priority_watchlist_vacancy", "interview_prep", "company_watch_finding", "new_offer_without_url", "owner_action"],
     "rank_order": [
       "priority class (P1 first)",
       "score descending",

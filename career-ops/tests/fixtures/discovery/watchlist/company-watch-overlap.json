@@ -1,0 +1,36 @@
+{
+  "_fixture": "Synthetic Company Watch findings for the priority-watchlist overlap test. EVERY company, title and URL is invented; every host uses the reserved .invalid TLD. The vacancy here is deliberately the SAME vacancy the watchlist capture also returns (same posting URL), so the cross-source collapse can be proved to merge Company Watch + watchlist provenance under one canonical candidate that keeps the owner's priority_watchlist flag.",
+  "not_a_real_vacancy": true,
+  "region": "uk",
+  "generated_at": "2026-09-24T06:00:00Z",
+  "findings": [
+    {
+      "company": "Overlap Test Ltd",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1",
+      "decision": "new",
+      "decision_reason": "not previously seen by Company Watch",
+      "region_route": "uk",
+      "owner_filter_eligible": true,
+      "title_rule_pass": true,
+      "tracker_eligible": true,
+      "attribution_confidence": "high",
+      "url_quality": "vendor"
+    },
+    {
+      "company": "Fixture Security Ltd",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1",
+      "decision": "new",
+      "decision_reason": "same posting seen through the employer's own board",
+      "region_route": "uk",
+      "owner_filter_eligible": true,
+      "title_rule_pass": true,
+      "tracker_eligible": true,
+      "attribution_confidence": "high",
+      "url_quality": "vendor"
+    }
+  ]
+}

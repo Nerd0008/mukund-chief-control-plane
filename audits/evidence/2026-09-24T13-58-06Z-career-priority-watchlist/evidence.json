@@ -1,0 +1,375 @@
+{
+  "task": "agent-career-priority-company-watchlist-engine-2026-09-24",
+  "runner": "career-ops/run_watchlist_acceptance.py",
+  "stamp": "2026-09-24T13-58-06Z",
+  "started_at": "2026-09-24T13:58:06+00:00",
+  "finished_at": "2026-09-24T13:58:07+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "watchlist_template_is_a_valid_empty_watchlist",
+      "ok": true,
+      "detail": {
+        "kind": "career-ops.company-watchlist",
+        "companies": 0
+      }
+    },
+    {
+      "check": "an_empty_watchlist_is_valid_and_the_lane_runs_with_zero_companies",
+      "ok": true,
+      "detail": {
+        "empty_lane_companies": 0,
+        "zero_stage": "no_company_in_watchlist"
+      }
+    },
+    {
+      "check": "a_missing_watchlist_file_is_valid_and_says_so",
+      "ok": true,
+      "detail": "no watchlist file at this path — this is valid: the lane runs with zero watchlist companies until the owner supplies the list"
+    },
+    {
+      "check": "names_objects_and_notes_are_accepted_and_malformed_rows_are_reported",
+      "ok": true,
+      "detail": {
+        "companies": [
+          "Bare Name Ltd",
+          "Object Name Ltd"
+        ],
+        "malformed": 2
+      }
+    },
+    {
+      "check": "fixture_aliases__duplicate_spellings_collapse",
+      "ok": true,
+      "detail": {
+        "canonical": [
+          "Fixture Security Ltd",
+          "Fixture Security Group",
+          "Overlap Test Ltd",
+          "No Surface Co",
+          "Quiet Roles Ltd"
+        ],
+        "collapsed": 2
+      }
+    },
+    {
+      "check": "fixture_aliases__distinct_companies_never_merge",
+      "ok": true,
+      "detail": {
+        "merged_from": [
+          "Fixture Security",
+          "fixture security LTD"
+        ],
+        "group_key": "fixturesecuritygroup",
+        "merged_key": "fixturesecurity"
+      }
+    },
+    {
+      "check": "fixture_aliases__every_merge_records_its_basis",
+      "ok": true,
+      "detail": [
+        "legal_form_suffix",
+        "exact_normalised_name"
+      ]
+    },
+    {
+      "check": "identity_is_deterministic_and_order_independent",
+      "ok": true,
+      "detail": "mapping identical for the reversed input"
+    },
+    {
+      "check": "declared_ats_families_include_the_required_set_plus_region_specific",
+      "ok": true,
+      "detail": [
+        "ashby",
+        "bamboohr",
+        "breezy",
+        "greenhouse",
+        "icims",
+        "jobcan_hrmos",
+        "jobvite",
+        "lever",
+        "recruitee",
+        "smartrecruiters",
+        "teamtailor",
+        "workable",
+        "workday"
+      ]
+    },
+    {
+      "check": "every_declared_family_has_a_site_query_host_labels_and_probe_mode",
+      "ok": true,
+      "detail": [
+        "ashby",
+        "bamboohr",
+        "breezy",
+        "greenhouse",
+        "icims",
+        "jobcan_hrmos",
+        "jobvite",
+        "lever",
+        "recruitee",
+        "smartrecruiters",
+        "teamtailor",
+        "workable",
+        "workday"
+      ]
+    },
+    {
+      "check": "fixture_ats_discovery__hosts_classified_on_whole_labels_never_substrings",
+      "ok": true,
+      "detail": "all ok"
+    },
+    {
+      "check": "a_workday_tenant_comes_from_the_url_and_is_never_guessed",
+      "ok": true,
+      "detail": {
+        "tenant": "acme",
+        "no_tenant_host_tenant": null
+      }
+    },
+    {
+      "check": "owner_supplied_careers_url_is_verified_before_it_is_trusted",
+      "ok": true,
+      "detail": {
+        "trusted": "found",
+        "unreachable": "unavailable"
+      }
+    },
+    {
+      "check": "a_structured_board_is_used_only_when_the_payload_names_the_company",
+      "ok": true,
+      "detail": {
+        "attributed": "found",
+        "unattributed": "unknown"
+      }
+    },
+    {
+      "check": "fixture_company_with_no_careers_page_is_unavailable_not_no_jobs",
+      "ok": true,
+      "detail": {
+        "state": "unavailable",
+        "reason": "no structured ATS board was resolved from the deterministic slug guesses (no_vendor_board_resolved_via_slug_guess) — the research lane's careers/ATS discovery query family is what may still resolve the official careers surface; this is UNAVAILABLE/UNKNOWN, not 'no jobs'"
+      }
+    },
+    {
+      "check": "fixture_company_with_a_resolved_surface_and_zero_matching_roles",
+      "ok": true,
+      "detail": {
+        "state": "found",
+        "reason": "no live vacancy destination was observed for this company in this run (results_seen=0, validation_failed=0, listing_pages_refused=0) — a zero observed by this run's own queries, not a market fact"
+      }
+    },
+    {
+      "check": "fixture_ats_discovery__careers_surface_discovered_by_the_research_lane",
+      "ok": true,
+      "detail": {
+        "ats_family": "workday",
+        "source": "discovered_via_research_lane"
+      }
+    },
+    {
+      "check": "both_query_families_are_generated_for_every_company",
+      "ok": true,
+      "detail": {
+        "families": [
+          "official_careers_ats",
+          "company_role_family_research"
+        ]
+      }
+    },
+    {
+      "check": "the_careers_family_covers_every_declared_ats_surface_not_one_board",
+      "ok": true,
+      "detail": [
+        "ashby",
+        "greenhouse",
+        "lever",
+        "smartrecruiters",
+        "teamtailor",
+        "workable",
+        "workday"
+      ]
+    },
+    {
+      "check": "a_query_limit_never_drops_a_whole_family",
+      "ok": true,
+      "detail": {
+        "planned": 20,
+        "kept": 6
+      }
+    },
+    {
+      "check": "per_company_health_record_is_complete",
+      "ok": true,
+      "detail": {
+        "companies": 5,
+        "fields": [
+          "company",
+          "last_checked",
+          "careers_source_found",
+          "careers_state",
+          "queries_executed",
+          "live_vacancies_observed",
+          "findings",
+          "candidates_after_funnel",
+          "access_blocking_reason",
+          "next_retry_at"
+        ]
+      }
+    },
+    {
+      "check": "the_lane_is_published_as_one_more_source_with_the_flag",
+      "ok": true,
+      "detail": {
+        "findings": 6,
+        "companies": 5
+      }
+    },
+    {
+      "check": "the_flag_never_bypasses_the_deterministic_gates",
+      "ok": true,
+      "detail": {
+        "decision": "rejected"
+      }
+    },
+    {
+      "check": "fixture_listing_page_is_never_written_as_a_vacancy",
+      "ok": true,
+      "detail": {
+        "tracker_candidates": 2,
+        "accepted": 4
+      }
+    },
+    {
+      "check": "fixture_duplicate_vacancy_from_company_watch_and_watchlist_collapses_with_both_provenances",
+      "ok": true,
+      "detail": {
+        "duplicates_removed": 2
+      }
+    },
+    {
+      "check": "the_watchlist_is_additive_to_broad_market_search_not_a_replacement",
+      "ok": true,
+      "detail": {
+        "market_only_discovered": 2
+      }
+    },
+    {
+      "check": "fixture_watchlist_vacancy_stays_visible_even_when_not_top_ranked_globally",
+      "ok": true,
+      "detail": {
+        "items": 6,
+        "orders": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "companies": [
+          "Fixture Security Group",
+          "Fixture Security Ltd",
+          "No Surface Co",
+          "Overlap Test Ltd"
+        ]
+      }
+    },
+    {
+      "check": "a_watchlist_item_that_did_not_reach_the_gates_stays_visible_in_the_section",
+      "ok": true,
+      "detail": {
+        "not_ranked": 2,
+        "items_total": 6
+      }
+    },
+    {
+      "check": "the_read_only_manifest_lists_findings_and_writes_no_tracker",
+      "ok": true,
+      "detail": {
+        "companies": 5,
+        "accepted": 4
+      }
+    },
+    {
+      "check": "the_lane_uses_no_browser_gui_or_signed_in_session",
+      "ok": true,
+      "detail": "no browser/session construct present"
+    },
+    {
+      "check": "no_fixture_claims_a_real_employer_or_vacancy",
+      "ok": true,
+      "detail": {
+        "hosts": 5
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical_before_and_after",
+      "ok": true,
+      "detail": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    }
+  ],
+  "counts": {
+    "checks": 32,
+    "passed": 32,
+    "failed": 0
+  },
+  "lane": {
+    "companies": 5,
+    "duplicate_spellings_collapsed": 2,
+    "ats_families": [
+      "ashby",
+      "bamboohr",
+      "breezy",
+      "greenhouse",
+      "icims",
+      "jobcan_hrmos",
+      "jobvite",
+      "lever",
+      "recruitee",
+      "smartrecruiters",
+      "teamtailor",
+      "workable",
+      "workday"
+    ],
+    "query_families": [
+      "official_careers_ats",
+      "company_role_family_research"
+    ]
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40"
+    },
+    "dubai": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "canonical_workbook_writes": 0,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "browser_or_gui_used": false,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "captcha_bypassed": false,
+    "scraping_behind_auth": false
+  },
+  "privacy_note": "the owner's company list and the discovered careers URLs/vacancies are owner-private; they stay under the git-ignored runtime directory and this evidence is aggregate only"
+}

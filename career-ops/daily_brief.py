@@ -605,6 +605,118 @@ def collect_discovery_funnel(cfg: dict, now: dt.datetime | None = None) -> dict:
     }
 
 
+def collect_priority_watchlist(cfg: dict, now: dt.datetime | None = None) -> dict:
+    """The owner's own company priority watchlist, as surfaced by the funnel (read-only).
+
+    Source: the discovery pipeline's own run evidence
+    (``runtime/career-ops/discovery/latest.json``), specifically the
+    ``priority_watchlist`` block the pipeline emits for the watchlist surface
+    (``career-ops/discovery/watchlist.py``, roster B27) and that surface's own
+    coverage counters.
+
+    This collector never re-scores, re-ranks or re-evaluates anything: it reports
+    the pipeline's own counts and lists the flagged candidates in the pipeline's own
+    order, so a watchlist vacancy stays visible **even when it is not top-ranked
+    globally** (the section below the ranked priorities is independent of the
+    priority score). An item that did not reach the deterministic gates is listed
+    with that state rather than being hidden — the watchlist flag never bypasses a
+    gate. An absent or stale run is UNKNOWN, never "no jobs".
+    """
+    now = now or parse_now(None)
+    spec = cfg.get("priority_watchlist") or {}
+    latest = resolve(cfg, spec.get("latest", "runtime/career-ops/discovery/latest.json"))
+    stale_after = float(spec.get("stale_after_hours", 48))
+    limit = int(spec.get("max_items", 10))
+    empty = {"available": False, "declared": False, "path": str(latest), "run_id": None,
+             "region": None, "health": "unknown", "age_hours": None, "counts": None,
+             "companies": [], "query_families": [], "items": [], "items_total": 0,
+             "items_not_reaching_gates": 0, "companies_checked": None,
+             "companies_with_careers_source": None,
+             "companies_unavailable_or_unknown": None,
+             "companies_with_findings": None, "zero_attribution": None}
+    if not latest.exists():
+        return {**empty,
+                "reason": ("no discovery funnel run evidence yet — the pipeline has not run on "
+                           "this machine"),
+                "note": "an absent funnel run is UNKNOWN, never 'the watchlist found nothing'"}
+    doc, err = read_json(latest)
+    if not doc:
+        return {**empty, "reason": f"unreadable discovery run evidence: {err}"}
+
+    finished = parse_iso(doc.get("finished_at"))
+    age_h = round((now - finished).total_seconds() / 3600.0, 2) if finished else None
+    health = "unknown" if age_h is None else ("stale" if age_h > stale_after else "ok")
+    block = doc.get("priority_watchlist") or {}
+    lane_cov = None
+    for collection_block in (doc.get("collection") or []):
+        if str(collection_block.get("source") or "").startswith("owner priority watchlist"):
+            lane_cov = collection_block.get("coverage") or {}
+            break
+
+    if not block.get("declared"):
+        return {**empty, "available": True, "path": str(latest), "run_id": doc.get("run_id"),
+                "region": doc.get("region"), "health": health, "age_hours": age_h,
+                "lane_coverage": lane_cov,
+                "reason": ("this funnel run carried no priority-watchlist candidate: either no "
+                           "watchlist lane export was supplied or it produced no finding — an "
+                           "empty owner watchlist is a valid state and is never reported as a "
+                           "market fact"),
+                "note": ("the owner's watchlist is additive; its absence changes nothing about the "
+                         "market search reported above")}
+
+    items = []
+    for idx, c in enumerate(block.get("candidates") or []):
+        items.append({
+            "declared_order": idx,
+            "candidate_id": c.get("candidate_id"),
+            "company": c.get("company"),
+            "title": c.get("title"),
+            "location": c.get("location"),
+            "url": c.get("url"),
+            "watchlist_company": c.get("watchlist_company"),
+            "sources": c.get("sources") or [],
+            "duplicate_discoveries": c.get("duplicate_discoveries"),
+            "threshold_passed": bool(c.get("threshold_passed")),
+            "state": c.get("state"),
+            "in_priority_ranking": bool(c.get("threshold_passed")),
+        })
+    return {
+        "available": True,
+        "declared": True,
+        "path": str(latest),
+        "run_id": doc.get("run_id"),
+        "region": doc.get("region"),
+        "finished_at": doc.get("finished_at"),
+        "age_hours": age_h,
+        "health": health,
+        "health_rule": (f"ok = a funnel run carrying the watchlist finished within {stale_after}h; "
+                        f"unknown = no readable finish timestamp (never read as healthy)"),
+        "counts": block.get("counts"),
+        "companies": block.get("companies") or [],
+        "query_families": block.get("query_families") or [],
+        "companies_checked": (lane_cov or {}).get("companies_checked"),
+        "companies_with_careers_source": (lane_cov or {}).get("companies_with_careers_source"),
+        "companies_unavailable_or_unknown": (lane_cov or {}).get(
+            "companies_unavailable_or_unknown"),
+        "companies_with_findings": (lane_cov or {}).get("companies_with_findings"),
+        "duplicate_spellings_collapsed": (lane_cov or {}).get("duplicate_spellings_collapsed"),
+        "zero_attribution": (lane_cov or {}).get("zero_attribution"),
+        "lane_coverage": lane_cov,
+        "items": items[:limit],
+        "items_total": len(items),
+        "items_not_reaching_gates": sum(1 for i in items if not i["threshold_passed"]),
+        "ranking_semantics": {
+            "kind": "pipeline_canonical_order (not a claim about the vacancy)",
+            "note": ("the owner's watchlist items are listed in the funnel's own canonical order and "
+                     "are visible independently of the global priority ranking below; the flag "
+                     "gives prominence only and never overrides a semantic or deterministic gate"),
+        },
+        "note": ("reads the pipeline's own priority_watchlist block; nothing is re-scored here, and "
+                 "a company whose careers infrastructure could not be resolved is reported "
+                 "unavailable/unknown rather than as 'no jobs'"),
+    }
+
+
 def collect_application_status(cfg: dict) -> dict:
     """Application-status signals/changes from the read-only Inbox monitor."""
     try:
@@ -861,8 +973,16 @@ def candidate_sort_key(item: dict, policy: dict) -> tuple:
 
 def build_candidates(scan: dict, trackers: dict, watch: dict, status: dict,
                      interviews: dict, owner_actions: dict, cfg: dict,
-                     now: dt.datetime, window_start: dt.datetime) -> list:
-    """Normalise every aggregated item into one candidate shape."""
+                     now: dt.datetime, window_start: dt.datetime,
+                     watchlist: dict | None = None) -> list:
+    """Normalise every aggregated item into one candidate shape.
+
+    ``watchlist`` is the owner's company priority watchlist section (optional). Only
+    a watchlist finding that already passed the funnel's own deterministic gates
+    becomes a ranked candidate here: the flag gives prominence, never a bypass.
+    Every flagged finding, gated or not, stays visible in the brief's own
+    ``priority_watchlist`` section, which is independent of this global ranking.
+    """
     cands = []
     wa_by_region = {r: v.get("work_authorisation", {}) for r, v in (scan.get("regions") or {}).items()}
 
@@ -934,6 +1054,38 @@ def build_candidates(scan: dict, trackers: dict, watch: dict, status: dict,
             "work_authorisation": wa_by_region.get("uk", {}),
             "count": cw_counts.get("tracker_eligible"),
         })
+
+    if watchlist and watchlist.get("declared"):
+        # The owner's own company list, as far as the funnel let it through. Only a
+        # finding that already passed the deterministic gates is ranked here; every
+        # flagged finding (gated or not) stays visible in the brief's dedicated
+        # priority_watchlist section, which is independent of this ranking.
+        seen_urls = {str(c.get("url") or "").strip().casefold() for c in cands if c.get("url")}
+        for item in (watchlist.get("items") or []):
+            if not item.get("threshold_passed"):
+                continue
+            url = item.get("url")
+            if url and str(url).strip().casefold() in seen_urls:
+                continue
+            cands.append({
+                "subject_type": "priority_watchlist_vacancy",
+                "region": watchlist.get("region"),
+                "ref": str(item.get("candidate_id") or url or item.get("title") or "watchlist"),
+                "company": item.get("company") or item.get("watchlist_company"),
+                "title": item.get("title"),
+                "url": url,
+                "application_status": None,
+                "source": (f"owner priority watchlist ({item.get('watchlist_company')}) — "
+                           f"run {watchlist.get('run_id')}"),
+                "deadline": None, "deadline_days": None,
+                "deadline_unknown_reason": "a watchlist research finding carries no deadline value",
+                "freshness_days": None,
+                "owner_flag": True,
+                "work_authorisation": wa_by_region.get(watchlist.get("region") or "", {}),
+                "watchlist_company": item.get("watchlist_company"),
+                "discovery_sources": item.get("sources") or [],
+                "in_priority_ranking": True,
+            })
 
     for change in (status.get("proposed_status_changes") or []):
         cands.append({
@@ -1052,6 +1204,31 @@ def chief_summary(brief: dict, cfg: dict) -> str:
               f"accept(s) — policy output, not a vacancy claim]")
     else:
         lines.append("Discovery funnel: unavailable (no run evidence) — UNKNOWN, never zero jobs")
+    wl = brief.get("priority_watchlist") or {}
+    if wl.get("declared"):
+        c = wl.get("counts") or {}
+        top = wl.get("items") or []
+        lines.append(
+            "Priority watchlist: "
+            f"{wl.get('companies_checked') if wl.get('companies_checked') is not None else 'unknown'}"
+            f" company(ies) checked, "
+            f"{wl.get('companies_with_careers_source') if wl.get('companies_with_careers_source') is not None else 'unknown'}"
+            f" with a resolved careers/ATS source, "
+            f"{c.get('canonical_candidates')} finding(s) at/above canonical, "
+            f"{c.get('deterministic_eligibility_pass')} through the gates"
+            + (f", {c.get('also_found_by_another_surface')} also found by another surface"
+               if c.get("also_found_by_another_surface") else "")
+            + (f"; {wl.get('items_not_reaching_gates')} item(s) shown but not ranked (did not reach "
+               f"the gates)" if wl.get("items_not_reaching_gates") else "")
+            + (f" — first: {top[0].get('company') or top[0].get('watchlist_company')} / "
+               f"{top[0].get('title')}" if top else "")
+            + f" [independent of the global ranking; run {wl.get('run_id')}, {wl.get('health')}]")
+    elif wl.get("available") is False:
+        lines.append("Priority watchlist: unavailable (no funnel run carrying it) — UNKNOWN, "
+                     "never 'no jobs'")
+    else:
+        lines.append("Priority watchlist: no watchlist finding in this run (an empty owner list "
+                     "is valid)")
     lines.append(f"Interviews/follow-ups: {brief['interviews_and_followups']['counts']['packs']} prep pack(s)")
     oa = brief["owner_actions"]["counts"]
     lines.append(f"Owner actions: {oa['open']} open, {oa['unknown_status']} with no readable status")
@@ -1107,6 +1284,7 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     hashes_before = dict(trackers.get("hashes") or {})
     watch = safe(collect_company_watch, cfg, now)
     discovery = safe(collect_discovery_funnel, cfg, now)
+    watchlist = safe(collect_priority_watchlist, cfg, now)
     status = safe(collect_application_status, cfg)
     interviews = safe(collect_interviews, cfg)
     owner_actions = safe(collect_owner_actions, cfg)
@@ -1115,7 +1293,8 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     candidates = []
     try:
         candidates = build_candidates(scan, trackers, watch, status, interviews,
-                                      owner_actions, cfg, now, window_start)
+                                      owner_actions, cfg, now, window_start,
+                                      watchlist=watchlist)
     except Exception as exc:  # noqa: BLE001 - reported, never fatal
         candidates = []
         status.setdefault("candidate_error", f"{type(exc).__name__}: {exc}")
@@ -1124,6 +1303,34 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     candidates.sort(key=lambda c: candidate_sort_key(c, cfg["priority_policy"]))
     for i, cand in enumerate(candidates, start=1):
         cand["rank"] = i
+
+    # The owner's priority watchlist is surfaced as its OWN section, ordered by the
+    # funnel's own canonical order, so a watchlist vacancy stays visible even when
+    # the global priority ranking puts it far down the list (or when it produces no
+    # scoreable input at all). The section records which of its items also appear in
+    # the ranking, so the two views can never be confused.
+    if isinstance(watchlist, dict):
+        watchlist["independent_of_global_rank"] = True
+        watchlist["section_order"] = ("funnel canonical order (declared_order); this section is "
+                                      "NOT sorted by the priority score")
+        ranked = [c for c in candidates if c.get("subject_type") == "priority_watchlist_vacancy"]
+
+        def _rank_of(item: dict):
+            for c in ranked:
+                if item.get("candidate_id") and str(c["ref"]) == str(item["candidate_id"]):
+                    return c["rank"]
+                if item.get("url") and c.get("url") and str(c["url"]) == str(item["url"]):
+                    return c["rank"]
+            return None
+
+        for item in watchlist.get("items") or []:
+            item["global_rank"] = _rank_of(item)
+            item["in_global_ranking"] = item["global_rank"] is not None
+            item["in_global_ranking_reason"] = (
+                "passed the funnel's deterministic gates, so it is also ranked" if
+                item.get("threshold_passed") else
+                "did not reach the deterministic gates — shown here for visibility only, "
+                "deliberately not ranked")
 
     # canonical store hashes re-read after all aggregation
     hashes_after = {}
@@ -1174,6 +1381,20 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     if status.get("available") is False:
         unknowns.append({"area": "application_status", "input": "monitor",
                          "reason": f"Application Inbox summary unavailable: {status.get('error')}"})
+    if watchlist.get("available") is False:
+        unknowns.append({"area": "priority_watchlist", "input": "run_evidence",
+                         "reason": watchlist.get("reason") or "priority watchlist evidence unavailable"})
+    elif watchlist.get("declared") and watchlist.get("health") in ("unknown", "stale"):
+        unknowns.append({"area": "priority_watchlist", "input": "health",
+                         "reason": (f"watchlist funnel run {watchlist.get('run_id')}: "
+                                    f"health={watchlist.get('health')} "
+                                    f"(age_hours={watchlist.get('age_hours')}) — the watchlist "
+                                    f"view does NOT describe the current market")})
+    if watchlist.get("companies_unavailable_or_unknown"):
+        unknowns.append({"area": "priority_watchlist", "input": "company_careers_surface",
+                         "reason": (f"{watchlist['companies_unavailable_or_unknown']} watchlist "
+                                    f"company(ies) have an unresolved careers/ATS surface — that "
+                                    f"is UNKNOWN infrastructure, not 'no jobs'")})
     if owner_actions.get("unknown_status_items"):
         unknowns.append({"area": "owner_actions", "input": "status",
                          "reason": f"{len(owner_actions['unknown_status_items'])} owner action(s) "
@@ -1287,6 +1508,7 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
         },
         "company_watch": watch,
         "discovery_funnel": discovery,
+        "priority_watchlist": watchlist,
         "application_status_changes": asc,
         "interviews_and_followups": {
             "counts": {"packs": interviews.get("pack_count", 0),

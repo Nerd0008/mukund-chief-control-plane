@@ -1121,18 +1121,114 @@ Raw result URLs are owner-private and are written only under the git-ignored
 `runtime/career-ops/web-research/`; the committed evidence is aggregate (counters,
 source classes reached, check results).
 
+## Owner-company priority watchlist (B27)
+
+The owner's own short list — "these companies matter to me" — becomes a first-class
+discovery source. The whole point of the layer is that **dropping in a plain list of
+company names is a data step, not an engineering project**: copy the committed
+template to the git-ignored runtime path and put the names in `companies`.
+
+    career-ops/watchlist/company-watchlist.example.json          # committed template
+    runtime/career-ops/watchlist/company-watchlist.json          # owner-edited (git-ignored)
+
+**The input.** `career-ops/discovery/watchlist.py` `load_watchlist_input()` accepts a
+list of names, a list of row objects (`company`, optional `careers_url`, `aliases`,
+`notes`, `regions`, `role_families`) or an object with a `companies`/`watchlist` list.
+An **empty list, an empty file, and no file at all are all valid** — the identity,
+careers/ATS resolution, both query families, the funnel route and the brief section
+all run with zero companies, so the infrastructure is finished before the owner
+supplies names. A row without a company name is reported as malformed, never skipped
+silently or invented.
+
+**Deterministic identity.** Duplicate spellings collapse (`"Sainsbury's"` =
+`"Sainsburys"`; `"Acme Ltd"` = `"Acme Limited"`; a declared `aliases` entry), and
+**nothing else merges** — there is no prefix, shared-word or similarity rule, because
+merging two distinct companies would attribute one company's vacancies to another.
+Every collapse records its own `basis`.
+
+**Careers / ATS surface, discovered and verified.** Declared families cover Greenhouse,
+Lever, Ashby, Workable and SmartRecruiters (public unauthenticated JSON contracts,
+probed by Company Watch's own `ats_endpoints.py`), plus Workday, Teamtailor, iCIMS,
+BambooHR, Breezy, Jobvite, Recruitee and the region-specific Japanese HRMOS/Jobcan
+surface (resolved only when the research lane actually discovers a URL — no tenant is
+ever guessed). Resolution order: an owner-supplied URL (validated with a polite
+robots-respecting read-only retrieval) → the structured board probe (trusted only when
+the vendor payload or board page names the company) → otherwise **`unavailable`/
+`unknown` with the blocking reason, never "no jobs"**. A surface the research lane
+discovers is promoted only when the fetched page/result actually names the company;
+an unconfirmed surface is recorded as evidence and left UNKNOWN.
+
+**Two complementary query families per company, always.** `official_careers_ats`
+(the company's own careers page and the ATS board it actually uses — one query per
+declared family) and `company_role_family_research` (company name + early-career cyber
+role-family research — the actual vacancies). A single ATS URL is never the whole
+story, and a query budget is split so it can never drop a whole family.
+
+**Same funnel, no bypass.** Every finding carries a `priority_watchlist` provenance
+flag and enters the SAME prefilter → semantic → deterministic eligibility → shared
+dedupe as every other surface (`pipeline.SOURCE_PRIORITY_WATCHLIST` =
+`collect_from_priority_watchlist()`). The flag makes a finding **prominent in the
+brief** and never bypasses a gate: a watchlist vacancy that fails the gates is refused
+exactly like any other, and a vacancy found by Company Watch *and* the watchlist
+collapses to one canonical candidate carrying both provenances. The watchlist is
+**additive** to broad-market discovery, never a replacement.
+
+**Per-company health.** `last_checked`, careers source found/not found, `careers_state`,
+`careers_url`, `ats_family`, attribution basis, queries planned/executed,
+`live_vacancies_observed`, findings, `candidates_after_funnel`, `access_blocking_reason`
+and `next_retry_at` (retry cadence by state: found 24h, unavailable/unknown 6h).
+
+**Brief section.** `daily_brief.py` reports the watchlist as its own section, in the
+funnel's own canonical order and **independent of the global priority ranking**, so a
+watchlist vacancy stays visible even when it is not top-ranked. Nothing is re-scored;
+an item that did not reach the gates is listed with that state.
+
+    python career-ops/discovery/watchlist.py policy
+    python career-ops/discovery/watchlist.py identity
+    python career-ops/discovery/watchlist.py matrix --region uk
+    python career-ops/discovery/watchlist.py run --region uk --provider codex --with-funnel
+    python career-ops/discovery/pipeline.py run --region uk --priority-watchlist <export.json>
+
+**Safety.** No login, account, cookie/session, CAPTCHA, browser, GUI or stealth
+scraping; no application, employer/recruiter contact or account mutation; no careers
+URL or vacancy is fabricated. This lane writes **no canonical tracker** — its handoff
+is a read-only manifest and applying stays `career_ops_cli.py write --apply`.
+
+### Tests
+
+    python -m pytest career-ops/tests/test_watchlist.py -q    # 36 passed
+
+Covers empty/missing/malformed input, alias collapse and non-merge, the declared ATS
+families and whole-label classification, owner-URL and structured-board verification,
+the unavailable/unknown (never "no jobs") rule, both query families and the
+family-preserving limit, the funnel route with the priority flag, the Company Watch +
+watchlist duplicate collapse, per-company health, and that no canonical workbook is
+touched.
+
+### Acceptance runner
+
+    python career-ops/run_watchlist_acceptance.py             # 32/32 checks, fixtures only
+
+The six named acceptance fixtures are checks in the runner: aliases, ATS discovery, a
+company with no careers page, a company with a resolved surface and zero matching
+roles, a duplicate vacancy found by Company Watch + the watchlist, and a watchlist
+vacancy that stays visible even when it is not top-ranked globally. The owner's
+company list and discovered URLs stay under the git-ignored
+`runtime/career-ops/watchlist/`; committed evidence is aggregate only.
+
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 469 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 512 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
-    python -m pytest career-ops/tests/test_daily_brief.py -q    # 28 passed (B23 + discovery funnel section)
+    python -m pytest career-ops/tests/test_daily_brief.py -q    # 33 passed (B23 + discovery funnel + watchlist sections)
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
     python -m pytest career-ops/tests/test_tracker_rollover.py -q  # 32 passed (B09)
     python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed (B11 + B19 funnel)
-    python -m pytest career-ops/tests/test_web_research.py -q  # 70 passed (B26 open-web research lane)
+    python -m pytest career-ops/tests/test_watchlist.py -q  # 36 passed (B27 priority watchlist)
+    python -m pytest career-ops/tests/test_web_research.py -q  # 72 passed (B26 open-web research lane)
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

@@ -1686,3 +1686,49 @@ tests, no provider series re-run.
   writes or a schedule remains an owner decision. A company watchlist file is optional.
 - **Evidence.** `audits/evidence/*-career-open-web-research/` (aggregate only; raw result URLs stay
   under the git-ignored `runtime/career-ops/web-research/`).
+
+## Career owner-company priority watchlist lane — B27 (2026-09-24, `agent-career-priority-company-watchlist-engine-2026-09-24`)
+
+**Status: BUILT / TESTED / EVIDENCED. Read-only, dry-run. No external action, no gate weakened.**
+
+- **What changed.** `career-ops/discovery/watchlist.py` adds the owner's own company short list as ONE
+  more read-only discovery surface in the same unified funnel. A plain list of company names (or an
+  empty list / a missing file — both explicitly valid) is resolved to deterministic company
+  identities, an official careers/ATS surface, and two query families; findings are flagged
+  `priority_watchlist` and routed through the SAME prefilter/semantic/eligibility/dedupe.
+  `pipeline.SOURCE_PRIORITY_WATCHLIST` = `collect_from_priority_watchlist()`. It is **additive** to
+  broad-market discovery, never a replacement.
+- **Identity.** Duplicate spellings collapse on exactly three recorded bases (`exact_normalised_name`,
+  `legal_form_suffix`, `declared_alias`); distinct companies never merge — no prefix/shared-word/
+  similarity rule exists, because merging two distinct companies would attribute one company's
+  vacancies to another.
+- **Careers / ATS, discovered and verified.** Owner-supplied URL validated by a polite
+  robots-respecting retrieval; public structured boards probed with Company Watch's own
+  `ats_endpoints.py` (Greenhouse, Lever, Ashby, Workable, SmartRecruiters) and trusted only on name
+  confirmation; Workday, Teamtailor, iCIMS, BambooHR, Breezy, Jobvite, Recruitee and the
+  region-specific HRMOS/Jobcan surface resolved only when the research lane actually discovers the
+  URL. **A company whose careers infrastructure is unreachable or unattributable is labelled
+  `unavailable`/`unknown` with the blocking reason — never "no jobs".**
+- **Two query families per company.** `official_careers_ats` and `company_role_family_research` are
+  always both generated; a query budget is split so it can never drop a whole family.
+- **Funnel + brief.** The flag makes a finding prominent in the brief and never bypasses a gate; a
+  vacancy found by Company Watch AND the watchlist collapses to one canonical candidate carrying both
+  provenances. The brief reports the watchlist as its own section, in the funnel's canonical order and
+  independent of the global priority ranking, so a watchlist vacancy stays visible even when it is not
+  top-ranked (and even when it did not reach the gates).
+- **Tests.** `career-ops/tests/test_watchlist.py` **36 passed** (new); `career-ops/tests/test_daily_brief.py`
+  **33 passed** (+5 watchlist-section tests); `career-ops/tests` **512 passed**. Acceptance runner
+  `career-ops/run_watchlist_acceptance.py` **32/32** checks fixtures-only, covering the six named
+  acceptance fixtures (aliases, ATS discovery, no careers page, resolved surface with zero matching
+  roles, Company Watch + watchlist duplicate, watchlist vacancy not top-ranked).
+- **Safety.** 0 applications, 0 outreach, 0 employer/recruiter contacts, no login/account, no
+  cookie/session, no CAPTCHA bypass, no browser or GUI automation, no scraping behind auth. The four
+  canonical workbooks are SHA-256 identical before and after every acceptance run; the handoff is a
+  read-only manifest and `--apply` remains the only tracker write.
+- **Owner action.** None yet. When ready, supply the company list by copying
+  `career-ops/watchlist/company-watchlist.example.json` to the git-ignored
+  `runtime/career-ops/watchlist/company-watchlist.json` and adding names — a data edit, not an
+  engineering project.
+- **Evidence.** `audits/evidence/<stamp>-career-priority-watchlist/` (aggregate only; the owner's
+  company list and discovered careers/vacancy URLs stay under the git-ignored
+  `runtime/career-ops/watchlist/`).

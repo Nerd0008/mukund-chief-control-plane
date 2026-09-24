@@ -96,6 +96,15 @@ audits/evidence/**/funnel-records/
 # source classes reached, check results).
 runtime/career-ops/web-research/
 
+# --- Career owner priority watchlist lane (owner-private) --------------------
+# The owner-edited company list names the companies he cares about, and a lane
+# export restates those companies, their resolved careers/ATS URLs and the
+# discovered vacancy URLs — i.e. Mukund's own job-search targets. They stay local;
+# the committed evidence under
+# audits/evidence/<stamp>-career-priority-watchlist/ is aggregate only (counters,
+# declared ATS families, check results).
+runtime/career-ops/watchlist/
+
 # --- Chief operational runtime artifacts (regenerated each run) ---
 # The Morning Chief Brief is a derived aggregate regenerated on every run
 # (queue task ids, health verdicts, owner-action titles). Keep it local; the

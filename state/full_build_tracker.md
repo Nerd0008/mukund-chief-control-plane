@@ -881,3 +881,35 @@ no-progress watchdog, both *after* landing the implementation and evidence; atte
 repository first, re-verified the landed work at HEAD, added the search/listing-page guard and
 completed the commit/push units. Nothing from the earlier attempts was recreated, reverted or redone.
 
+## Career owner-company priority watchlist lane — B27 (2026-09-24, `agent-career-priority-company-watchlist-engine-2026-09-24`)
+
+**Lane: Career Ops / job discovery. Status: BUILT, TESTED, EVIDENCED. No gate weakened, no second
+tracker/classifier/eligibility engine, no account or browser action.**
+
+The owner's own company short list becomes a first-class, **additive** discovery source: dropping in
+a plain list of company names is a data step (edit `runtime/career-ops/watchlist/company-watchlist.json`),
+not an engineering project. The broad-market search is unchanged alongside it.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Owner-editable input | **DONE** | `career-ops/discovery/watchlist.py` `load_watchlist_input()` — names, row objects (`company`, optional `careers_url`/`aliases`/`notes`/`regions`/`role_families`) or a `companies`/`watchlist` object. **An empty list, an empty file and no file at all are all valid**, so infrastructure is finished before the owner supplies names. Malformed rows are reported, never invented. Committed template `career-ops/watchlist/company-watchlist.example.json` |
+| Deterministic identity | **DONE** | `build_identity()` — duplicate spellings collapse on exactly three bases (`exact_normalised_name`, `legal_form_suffix`, `declared_alias`), each recorded; distinct companies never merge (no prefix/shared-word/similarity rule). Order-independent |
+| Careers / ATS resolution | **DONE** | owner URL validated by a polite robots-respecting read-only retrieval; public structured boards probed with Company Watch's own `ats_endpoints.py` (Greenhouse, Lever, Ashby, Workable, SmartRecruiters) and trusted only on name confirmation; Workday, Teamtailor, iCIMS, BambooHR, Breezy, Jobvite, Recruitee and the region-specific HRMOS/Jobcan surface resolved only when the research lane discovers the URL (no tenant guessed). Unreachable ↔ **`unavailable`/`unknown` with the blocking reason, never "no jobs"** |
+| Two query families per company | **DONE** | `official_careers_ats` (the company's own careers page + the board it uses, one query per declared family) AND `company_role_family_research` (company name + early-career cyber role-family research). A query budget is split so it never drops a whole family |
+| Same funnel, no bypass | **DONE** | `pipeline.SOURCE_PRIORITY_WATCHLIST` = `collect_from_priority_watchlist()`; every finding carries the `priority_watchlist` flag and enters the SAME prefilter → semantic → deterministic eligibility → shared dedupe. The flag gives brief prominence only; a watchlist vacancy that fails the gates is refused like any other |
+| Cross-source dedupe / provenance merge | **DONE** | a vacancy found by Company Watch AND the watchlist collapses via the shared `collapse_candidates()` to one canonical candidate whose provenance keeps both surfaces and whose `priority_watchlist` flag survives the collapse |
+| Per-company health | **DONE** | `last_checked`, careers source found/not found, `careers_state`/`careers_url`/`ats_family`, attribution basis, queries planned/executed, `live_vacancies_observed`, findings, `candidates_after_funnel`, `access_blocking_reason`, `next_retry_at` (retry 24h found / 6h unavailable/unknown) |
+| Brief section | **DONE** | `daily_brief.py` `collect_priority_watchlist()` + a dedicated section ordered by the funnel's own canonical order and **independent of the global priority ranking**, so a watchlist vacancy stays visible even when it is not top-ranked (and even when it did not reach the gates). Nothing is re-scored |
+| Tests | **PASS** | `career-ops/tests/test_watchlist.py` **36 passed** (new); `career-ops/tests/test_daily_brief.py` **33 passed** (+5 watchlist-section tests); `career-ops/tests` **512 passed** |
+| Acceptance runner | **PASS** | `career-ops/run_watchlist_acceptance.py` **32/32** checks fixtures-only, incl. the six named acceptance fixtures (aliases, ATS discovery, no careers page, resolved surface with zero matching roles, Company Watch + watchlist duplicate, watchlist vacancy not top-ranked). Evidence `audits/evidence/<stamp>-career-priority-watchlist/` (aggregate only) |
+| Canonical workbooks | **UNTOUCHED** | four workbooks SHA-256 identical before/after acceptance; no canonical tracker write anywhere in this lane — the handoff is a read-only manifest and `--apply` remains the only tracker write |
+| External actions | **NONE** | 0 applications, 0 outreach, 0 employer/recruiter contacts, no login/cookie/session, no CAPTCHA bypass, no browser/GUI automation, no scraping behind auth |
+| Owner-private data | **LOCAL** | the owner's company list and the discovered careers/vacancy URLs stay under the git-ignored `runtime/career-ops/watchlist/`; committed evidence is aggregate only |
+| Owner action | **NONE YET** | the company list is supplied later as a data edit (copy the template, add names). No approval gate is open for this lane |
+
+Attempt history (truthful): attempt 1 (this engine's first run) hit the 1200s dispatch wrapper limit
+*after* landing the implementation, tests and fixtures but before the docs/commit units; attempt 2
+inspected the repository first, kept every landed artifact, added the missing acceptance runner and
+brief-section tests, updated `.gitignore` + README + roster + build tracker + company state, and
+committed/pushed. Nothing from attempt 1 was recreated, reverted or redone.
+

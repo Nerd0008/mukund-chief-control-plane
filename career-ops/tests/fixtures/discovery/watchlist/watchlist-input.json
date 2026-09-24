@@ -1,0 +1,43 @@
+{
+  "_fixture": "Synthetic owner-company watchlist for the priority-watchlist lane (roster B27). EVERY company name here is invented for testing; every host ends in the reserved .invalid TLD. This file is NOT a real owner watchlist and names no real employer. It exists so the identity, careers/ATS resolution, query-family and funnel paths can be exercised offline.",
+  "not_a_real_company": true,
+  "kind": "career-ops.company-watchlist",
+  "schema_version": 1,
+  "regions": ["uk"],
+  "role_families": ["graduate_new_grad", "soc_security_operations"],
+  "companies": [
+    {
+      "company": "Fixture Security Ltd",
+      "careers_url": "https://fixture-security.invalid/careers",
+      "aliases": ["Fixture Security Limited"],
+      "notes": "the canonical spelling of a company that also appears under two other spellings",
+      "regions": ["uk"]
+    },
+    {
+      "company": "Fixture Security",
+      "notes": "same company, shorter spelling — must collapse"
+    },
+    {
+      "company": "fixture security LTD",
+      "notes": "same company, different case and punctuation — must collapse"
+    },
+    {
+      "company": "Fixture Security Group",
+      "notes": "a DIFFERENT company — must NOT merge with Fixture Security Ltd"
+    },
+    {
+      "company": "Overlap Test Ltd",
+      "careers_url": "https://overlap-test.invalid/careers",
+      "notes": "also present in the Company Watch / regional fixtures, so a shared vacancy can be proved to collapse"
+    },
+    {
+      "company": "No Surface Co",
+      "notes": "has no reachable careers infrastructure anywhere — must be labelled unavailable/unknown, never 'no jobs'"
+    },
+    {
+      "company": "Quiet Roles Ltd",
+      "careers_url": "https://quiet-roles.invalid/careers",
+      "notes": "careers surface resolves but this run finds zero matching roles — must not be reported as 'no jobs'"
+    }
+  ]
+}
