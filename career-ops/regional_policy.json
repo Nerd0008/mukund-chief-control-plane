@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "description": "Explicit regional job-search policy for the four regional Career Ops workers. Every value here is either (a) copied verbatim from an existing owner-controlled source, or (b) marked UNKNOWN. Nothing in this file invents an owner fact. `regional_job_search.py eligibility` is the single shared filter all four regions call.",
+  "updated": "2026-09-24",
+  "provenance": {
+    "owner_profile": "C:\\\\Users\\\\mukun\\\\Documents\\\\ChatGPT\\\\CV customizer\\\\career-ops-career-ops-v1.29.0\\\\config\\\\profile.yml",
+    "owner_scan_config": "C:\\\\Users\\\\mukun\\\\Documents\\\\ChatGPT\\\\CV customizer\\\\career-ops-career-ops-v1.29.0\\\\portals.yml",
+    "notes": [
+      "title_policy below is a verbatim copy of the owner's own `title_filter` in the Career Ops install portals.yml (the file the UK lane has always used). regional_job_search.py re-reads it live and career-ops/tests/test_regional_job_search.py fails if a lane file drifts from it.",
+      "location_scope['uk'] is a verbatim copy of the owner's own `location_filter` in that same portals.yml. The dubai/japan/singapore scopes are search-scope terms only (which geography the lane is allowed to return) and are not owner facts.",
+      "work_authorisation for uk is sourced from config/profile.yml. For every other region Mukund has never stated a right to work, so the status is UNKNOWN and must never be presented as authorised."
+    ]
+  },
+  "title_policy": {
+    "source": "career-ops-install:portals.yml#title_filter",
+    "positive": ["Intern", "Internship"],
+    "negative": ["Senior", "Principal", "Lead ", "Manager", "Director", "Head of", "Vice President", "VP ", "Staff Security"]
+  },
+  "experience_policy": {
+    "source": "config/profile.yml#target_roles + candidate.archetypes (internships / graduates eligible)",
+    "note": "The owner's target roles are internships and graduate-eligible entry roles. A posting that states a mandatory multi-year professional experience requirement is out of policy; the scan output does not carry description text, so this is only enforceable when a record supplies `experience_required`."
+  },
+  "clearance_policy": {
+    "source": "config/profile.yml#location.clearance_filter",
+    "reject_tokens": ["SC ", "DV ", " CTC", "NPPV", "UKSV", "BPSS", "security clearance", "national security clearance", "police clearance", "british citizen", "british citizenship", "indefinite leave to remain", "indefinite right to work"],
+    "note": "Copied from the owner's clearance_filter. Applied to every region because a clearance or citizenship requirement is disqualifying wherever the role is."
+  },
+  "regions": {
+    "uk": {
+      "display_name": "United Kingdom",
+      "lane_dir": "C:\\\\Users\\\\mukun\\\\Documents\\\\ChatGPT\\\\CV customizer\\\\career-ops-career-ops-v1.29.0",
+      "lane_kind": "career-ops-install-lane",
+      "lane_note": "The UK lane reuses the owner's existing install files in place (portals.yml, data/pipeline.md, data/scan-history.tsv) and does not need a control-plane lane directory.",
+      "location_scope": {
+        "source": "career-ops-install:portals.yml#location_filter",
+        "always_allow": ["United Kingdom", "UK", "Remote, UK", "UK Remote"],
+        "allow": ["United Kingdom", "England", "Scotland", "Wales", "Northern Ireland", "UK", "Remote, UK"],
+        "block": ["United States", "USA", "Canada", "India", "Singapore", "Australia", "Abu Dhabi", "Sharjah", "Dubai", "United Arab Emirates", "UAE"]
+      },
+      "work_authorisation": {
+        "status": "authorised",
+        "basis": "config/profile.yml#location.visa_status — UK Graduate-visa work authorisation through 23 Dec 2027",
+        "current_permission": true,
+        "sponsorship_now": "not required",
+        "sponsorship_after_expiry": "may be required after 23 Dec 2027; a separate question and never assumed",
+        "tracker_visa_pathway": null
+      },
+      "provider_coverage": {
+        "regional_providers": [],
+        "global_boards": true,
+        "note": "Existing lane: 12 global/remote job boards plus the owner's own ATS tracked_companies. Historically ~2861 postings/run, of which ~130 filtered by the UK location scope."
+      }
+    },
+    "dubai": {
+      "display_name": "Dubai / UAE",
+      "lane_dir": "career-ops/lanes/dubai",
+      "lane_kind": "control-plane-lane",
+      "location_scope": {
+        "source": "regional_policy (search scope only)",
+        "always_allow": ["Dubai", "Abu Dhabi", "Sharjah", "United Arab Emirates", "UAE", "Emirates"],
+        "allow": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "United Arab Emirates", "UAE", "Emirates", "Remote, UAE", "UAE Remote"],
+        "block": ["United States", "USA", "Canada", "India", "Singapore", "Australia", "Japan", "United Kingdom", "UK"],
+        "block_note": "Search scoping, not an owner preference: every entry is either one of the owner's own block entries in the install portals.yml (minus the UAE terms, which are this lane's target) or the name of one of the other three regions. Reduces wrong-region noise in the lane; the shared eligibility filter separately requires an explicit region match."
+      },
+      "work_authorisation": {
+        "status": "UNKNOWN",
+        "basis": "config/profile.yml#location.authorized_in lists only \"United Kingdom\"; Mukund has never stated a UAE right to work",
+        "current_permission": null,
+        "sponsorship_now": "UNKNOWN",
+        "sponsorship_after_expiry": "UNKNOWN",
+        "tracker_visa_pathway": "Visa unknown"
+      },
+      "provider_coverage": {
+        "regional_providers": [],
+        "global_boards": true,
+        "note": "No UAE-specific provider exists in the Career Ops install (checked providers/ on 2026-09-24: none reference UAE/Dubai/Gulf). The lane therefore runs the global/remote boards under the UAE location scope and is expected to yield little; that is recorded as a provider-coverage gap, not as zero real vacancies UAE-wide."
+      }
+    },
+    "japan": {
+      "display_name": "Japan",
+      "lane_dir": "career-ops/lanes/japan",
+      "lane_kind": "control-plane-lane",
+      "location_scope": {
+        "source": "regional_policy (search scope only)",
+        "always_allow": ["Japan", "Tokyo", "Osaka", "Yokohama", "Nagoya"],
+        "allow": ["Japan", "Tokyo", "Osaka", "Yokohama", "Nagoya", "Fukuoka", "Kyoto", "Sapporo", "Kobe", "Remote, Japan", "Japan Remote"],
+        "block": ["United States", "USA", "Canada", "India", "Singapore", "Australia", "United Kingdom", "UK", "United Arab Emirates", "UAE", "Dubai", "Abu Dhabi", "Sharjah"],
+        "block_note": "Search scoping, not an owner preference: the owner's own install block entries plus the other three regions' names. Reduces wrong-region noise in the lane; the shared eligibility filter separately requires an explicit region match."
+      },
+      "work_authorisation": {
+        "status": "UNKNOWN",
+        "basis": "config/profile.yml#location.authorized_in lists only \"United Kingdom\"; no owner-stated Japanese work visa or status",
+        "current_permission": null,
+        "sponsorship_now": "UNKNOWN",
+        "sponsorship_after_expiry": "UNKNOWN",
+        "tracker_visa_pathway": "JAPAN WORK VISA UNKNOWN"
+      },
+      "provider_coverage": {
+        "regional_providers": [],
+        "global_boards": true,
+        "note": "No Japan-specific provider exists in the Career Ops install. The historical Japan shortlist was built from Japanese employer/Hello Work pages reached by the agent-driven search path, not by scan.mjs; the lane's `search_queries` carry those sources for that path. Expected scan.mjs yield is low and is recorded as a provider-coverage gap."
+      }
+    },
+    "singapore": {
+      "display_name": "Singapore",
+      "lane_dir": "career-ops/lanes/singapore",
+      "lane_kind": "control-plane-lane",
+      "location_scope": {
+        "source": "regional_policy (search scope only)",
+        "always_allow": ["Singapore"],
+        "allow": ["Singapore", "Remote, Singapore", "Singapore Remote"],
+        "block": ["United States", "USA", "Canada", "India", "Australia", "Japan", "United Kingdom", "UK", "United Arab Emirates", "UAE", "Dubai", "Abu Dhabi", "Sharjah"],
+        "block_note": "Search scoping, not an owner preference: the owner's own install block entries plus the other three regions' names. This lane's providers are already country-scoped (MyCareersFuture, Glints SG, Jobstreet SG-Main), so the block list is defence in depth."
+      },
+      "work_authorisation": {
+        "status": "UNKNOWN",
+        "basis": "config/profile.yml#location.authorized_in lists only \"United Kingdom\"; no owner-stated Singapore work pass or eligibility",
+        "current_permission": null,
+        "sponsorship_now": "UNKNOWN",
+        "sponsorship_after_expiry": "UNKNOWN",
+        "tracker_visa_pathway": "WORK PASS UNKNOWN"
+      },
+      "provider_coverage": {
+        "regional_providers": ["mycareersfuture", "glints", "jobstreet"],
+        "global_boards": false,
+        "note": "Real regional provider coverage: MyCareersFuture (Singapore's national job bank, no auth, keywords fall back to the owner's profile target_roles from the Career Ops install), Glints (countryCode SG) and Jobstreet/SEEK (siteKey SG-Main)."
+      }
+    }
+  },
+  "safety": {
+    "applications_submitted": 0,
+    "employer_contacts": 0,
+    "canonical_tracker_writes": "only via career_ops_cli.py write --apply, which takes a hash-verified backup and verifies the saved workbook",
+    "scheduled_runs": "bounded dry-run scans only"
+  }
+}

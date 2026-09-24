@@ -1,0 +1,108 @@
+{
+  "run_id": "japan-20260924T001752Z",
+  "region": "japan",
+  "display_name": "Japan",
+  "started_at": "2026-09-24T00:17:52+00:00",
+  "dry_run": true,
+  "applications_submitted": 0,
+  "employer_contacts": 0,
+  "canonical_workbook_written": false,
+  "lane_kind": "control-plane-lane",
+  "lane_ready": true,
+  "lane_missing": [],
+  "scheduled": true,
+  "scan": {
+    "ok": true,
+    "refused": false,
+    "exit_code": 0,
+    "duration_s": 85.3,
+    "dry_run": true,
+    "stdout_capture_ok": true,
+    "command": [
+      "node",
+      "scan.mjs",
+      "--dry-run",
+      "--quiet"
+    ],
+    "lane_env": {
+      "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\japan\\portals.yml",
+      "CAREER_OPS_PROFILE": "config/profile.yml",
+      "CAREER_OPS_PIPELINE": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\japan\\pipeline.md",
+      "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\japan\\scan-history.tsv"
+    },
+    "recorded_to": "runtime\\career-ops\\scan-runs\\scan-japan-20260924T001752Z.json",
+    "warning": null,
+    "counters": {
+      "jobs_found": 2861,
+      "filtered_title": 2725,
+      "filtered_location": 134,
+      "filtered_age": 2,
+      "duplicates": 0,
+      "new_offers_added": 0,
+      "errors": null
+    },
+    "stdout_tail": "Scanning 0 companies; 12 job boards; 0 local parser; 0 skipped — no provider matched via providers\n(dry run — no files will be written)\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPortal Scan — 2026-09-24\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCompanies scanned:     0\nJob boards scanned:    12\nTotal jobs found:      2861\nFiltered by title:     2725 removed\nFiltered by location:  134 removed\nFiltered by age:       2 removed\nFiltered by salary:    0 removed\nDuplicates:            0 skipped\nRecheck eligible:      0 old scan-history URL(s)\nNew offers added:      0\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+    "stderr_tail": ""
+  },
+  "candidates": {
+    "scan_offers_without_url": 0,
+    "url_bearing_candidates": 0,
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\japan\\pipeline.md",
+    "note": "scan offers carry no posting URL, so they are reported for URL resolution and can never become tracker rows on their own; only URL-bearing candidates can be accepted"
+  },
+  "idempotency": {
+    "run_key": "8b6cab84f7730fd0559580e48362c4bf",
+    "previous_run_key": "8b6cab84f7730fd0559580e48362c4bf",
+    "replay_of_previous_run": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "note": "a replayed run marks every accepted candidate duplicate-prior-run; the shared tracker dedupe independently refuses anything already in the workbook or a cross-month ledger"
+  },
+  "eligibility": {
+    "input": 0,
+    "accepted": 0,
+    "accepted_before_idempotency": 0,
+    "rejected": 0,
+    "duplicate_prior_run": 0,
+    "rejected_sample": []
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with the UK lane)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+    "counts": {
+      "input": 0,
+      "appended": 0,
+      "duplicates": 0,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "cross_month_index": {
+      "sources": {
+        "Japan_Cybersecurity_Job_Tracker.backup-20260913-115953.xlsx": 11,
+        "Japan_Cybersecurity_Job_Tracker.backup-20260914-014303.xlsx": 10,
+        "Japan_Cybersecurity_Job_Tracker.backup-20260915-014902.xlsx": 10,
+        "Japan_Cybersecurity_Job_Tracker.xlsx": 10,
+        "ledger:data/japan-shortlist-history.md": 41
+      },
+      "keys": 41
+    },
+    "outcomes": [],
+    "applied": false
+  },
+  "would_append": 0,
+  "manifest_written_to": null,
+  "finished_at": "2026-09-24T00:19:18+00:00",
+  "work_authorisation": {
+    "status": "UNKNOWN",
+    "basis": "config/profile.yml#location.authorized_in lists only \"United Kingdom\"; no owner-stated Japanese work visa or status",
+    "current_permission": null,
+    "sponsorship_now": "UNKNOWN",
+    "tracker_visa_pathway": "JAPAN WORK VISA UNKNOWN"
+  },
+  "status": "ok",
+  "writes": {
+    "canonical_workbook": false,
+    "tracker_dry_run_only": true,
+    "run_health_files": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json"
+  }
+}

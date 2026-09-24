@@ -53,6 +53,31 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 **Blocks:** trust decision for using the laptop as the final production host; does not block safe non-GUI engineering overnight.
 **Safety:** no destructive cleanup or evidence deletion before attribution.
 
+### 6. State your work-authorisation position for Dubai/UAE, Japan and Singapore
+**Status:** PENDING — OWNER FACT REQUIRED (recorded 2026-09-24 by the regional job-search task)
+**Blocks:** nothing mechanically; every Dubai/Japan/Singapore record produced by the regional workers is
+labelled `Visa unknown` / `JAPAN WORK VISA UNKNOWN` / `WORK PASS UNKNOWN` and carries the flag
+"work authorisation UNKNOWN — no owner-stated right to work". No application can be prepared for those
+regions until you say which of these is true.
+**Why owner-only:** `config/profile.yml#location.authorized_in` lists only the United Kingdom. Whether you
+have any right to work in the UAE, Japan or Singapore (or want sponsorship pursued there) is a personal
+legal fact that must never be inferred or invented by the build.
+**Action:** reply with one line per region — e.g. "UAE: would need sponsorship", "Japan: no route,
+drop", "Singapore: open to sponsorship". If a region is a no-go, say so and its lane can be parked
+rather than reporting UNKNOWN rows indefinitely.
+
+### 7. Decide on provider coverage for the Dubai and Japan lanes
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24)
+**Blocks:** only the yield of the Dubai/Japan regional workers. Their lanes are built, scheduled and
+running dry-run scans, but the Career Ops install has no UAE- or Japan-specific provider (checked
+`providers/` exhaustively), so those lanes can only see postings that the global/remote boards happen to
+label with a UAE/Japan location. Expect near-zero.
+**Why owner-only:** closing the gap means either (a) adding/authorising a new regional provider or data
+source (cost, terms, account), or (b) accepting that Dubai/Japan discovery stays a manual/agent-driven
+path. Both are owner decisions, not engineering defaults.
+**Action:** choose one — "add a provider for region X", "keep search_queries (agent-driven path) only",
+or "park the region's scanning".
+
 ## Resolved / no longer owner-blocking
 
 - Hermes primary execution brain: restored via DeepSeek direct API.

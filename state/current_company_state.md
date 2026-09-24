@@ -1,7 +1,15 @@
 # Current Company State
 
-- Timestamp: 2026-09-23T23:45:00Z
-- Latest evidence run: 2026-09-23T23:43:10Z — **CV/cover-letter workflow connected + minimal LinkedIn
+- Timestamp: 2026-09-24T00:14:21Z
+- Latest evidence run: 2026-09-24T00:14:21Z — **four regional job-search workers + deterministic
+  scheduled execution** (task `agent-regional-job-search-agents-and-schedulers-2026-09-23`),
+  `career-ops/evidence/acceptance-20260924T001500Z.json` — one shared implementation for UK, Dubai,
+  Japan and Singapore; all four Windows scheduled tasks registered and `Ready`; bounded dry-run
+  evidence for every region; workbook write proven on a **test copy** and rolled back to the pre-write
+  hash; **all four canonical workbook hashes unchanged**; `applications_submitted: 0`,
+  `external_messages_sent: 0`. New suite `career-ops/tests/test_regional_job_search.py` 32 passed;
+  whole `career-ops/tests/` 120 passed.
+- Previous evidence run: 2026-09-23T23:43:10Z — **CV/cover-letter workflow connected + minimal LinkedIn
   workflow implemented** (task `agent-cv-cover-letter-linkedin-workflows-2026-09-23`),
   `audits/evidence/20260923T234310Z-cv-linkedin-workflows/acceptance.json` (+ `.md`) —
   **23/23 critical checks pass**: representative path Career Ops job → tailored CV/cover-letter draft
@@ -10,7 +18,7 @@
   hash-unchanged**. New suites: `career-ops/tests/test_cv_workflow.py` 21 passed,
   `career-ops/tests/test_linkedin_workflow.py` 34 passed. 0 provider calls, 0 LinkedIn mutations,
   0 applications.
-- Previous evidence run: 2026-09-23T22:53:53Z — E3 Stage 2 readiness gate re-run (credential-triggered
+- Earlier: 2026-09-23T22:53:53Z — E3 Stage 2 readiness gate re-run (credential-triggered
   retry, task `agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24`)
   (`audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/`, 0 provider calls) and
   its regression input (`audits/evidence/2026-09-23T22-52-48Z-e3-stage2-readiness-gate-rerun/`,
@@ -808,6 +816,65 @@ account — only the local read-only/draft interface is proven.
 Successor task: **none staged** — `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`
 (pending) already covers the whole-company local acceptance test, including the LinkedIn draft/read-only
 path and the CV/cover-letter path, so a new task would duplicate it.
+
+## Regional job-search workers + deterministic scheduled execution (2026-09-24T00:14Z) — NEW
+
+Task `agent-regional-job-search-agents-and-schedulers-2026-09-23`. Attempt 1 (00:00–00:20Z) built and
+evidenced this work but was cut off by a 1200 s dispatch timeout before it could update state or
+commit; attempt 2 verified the uncommitted tree, re-confirmed the evidence, updated state and
+committed. No work was recreated or duplicated.
+
+- One implementation, four regions: `career-ops/regional_job_search.py` (sha256 `962d38a9…`). Dedupe,
+  the workbook index, the cross-month index and the write path are the **same code the UK lane already
+  used** (`tracker_writer.py`) — there is no per-region fork.
+- Lane configs for Dubai, Japan and Singapore live in this control plane under
+  `career-ops/lanes/<region>/` and are referenced by absolute path, so the owner's Career Ops
+  installation is **never modified**. `resolve_lane` reports all four regions `ready: true`.
+- Eligibility/policy filtering: `career-ops/regional_policy.json` (sha256 `ed045010…`) applied by
+  `evaluate_record` — owner title policy, an explicit region location scope mirroring the scanner's own
+  tier order, the owner's clearance/citizenship rejection policy from `config/profile.yml`, a
+  multi-year-experience rejection, a mandatory-URL rule, and **fail-closed** behaviour when no region
+  scope can be resolved.
+- Owner facts are never invented: UK authorisation is `authorised` (Graduate visa to 2027-12-23, from
+  `config/profile.yml`); for Dubai/UAE, Japan and Singapore the policy and every accepted record say
+  **UNKNOWN** and carry the region tracker's own `visa_pathway` text verbatim (`Visa unknown` /
+  `JAPAN WORK VISA UNKNOWN` / `WORK PASS UNKNOWN`).
+- Deterministic scheduled execution is **live**: `ChiefCareerScan-UK` 23:45, `-Dubai` 23:50, `-Japan`
+  23:55, `-Singapore` 00:00 — all four reported `Ready` by `install_schedules.py --status`. Every
+  scheduled run is a bounded **dry-run**: it never writes a tracker and never submits anything.
+- Idempotency: `runtime/career-ops/scan-runs/regional-run-state.json` keys each run by a SHA-256 of its
+  accepted candidate set, so a replayed run marks candidates `duplicate-prior-run` and emits an empty
+  manifest; independently, the shared writer refuses anything already in the workbook, a rotated
+  workbook or the cross-month ledger. Dry-run `New offers:` lines carry no URL and are therefore
+  reported as `scan_offers_without_url` — they can never become tracker rows on their own.
+- Bounded dry-run evidence: two full `run-all` passes 2026-09-24T00:06–00:19Z, every region
+  `last_status: ok`, `last_would_append: 0`; UK 93 candidates, Dubai/Japan/Singapore 0 candidates.
+- Safe workbook-write acceptance: the write was applied to a **test copy** with a hash-verified
+  pre-write backup, verified (headers unchanged, owner columns unchanged, no duplicate URLs, no formula
+  errors), and then rolled back to the pre-write hash (`equals_pre_write_hash: true`). Probe rows were
+  labelled `NOT A REAL VACANCY` on the reserved `.invalid` domain and exist only in the test copy.
+- All four canonical workbooks were re-hashed after the run and are **byte-identical** to the
+  acceptance record: UK `84c53dcb…`, Dubai `495edb45…`, Japan `a8c4ef90…`, Singapore `25c7b95b…`.
+  `applications_submitted: 0`, `external_messages_sent: 0`. No employer was contacted.
+- Tests: `career-ops/tests/test_regional_job_search.py` **32 passed**; whole `career-ops/tests/`
+  **120 passed** (re-run in attempt 2 against the final uncommitted tree).
+
+Recorded limitations (truthful): provider coverage is uneven and is stated per region — Singapore is
+the only region with first-party providers in the install (MyCareersFuture, Glints SG,
+Jobstreet/SEEK `SG-Main`); **no UAE- or Japan-specific provider exists**, so those lanes can only see
+postings the global/remote boards happen to label with that location, and a thin Dubai/Japan scan means
+"no provider for that region", never "no vacancies there". Live vacancy verification was **not**
+performed in this run; results are pre-screen only. No application can be prepared for Dubai, Japan or
+Singapore until the owner states a work-authorisation position for those regions.
+
+Owner action recorded (does not block other lanes):
+`tasks-or-issues/overnight-owner-actions-2026-09-24.md` item 6 (work-authorisation position for
+Dubai/UAE, Japan and Singapore) and item 7 (whether to add a UAE/Japan-specific provider or keep the
+agent-driven `search_queries` path).
+
+Successor task: **none staged** — this task's remaining dependencies are owner decisions, not
+engineering, and no equivalent regional task is pending. Staging another regional task would duplicate
+this one.
 
 ## Next non-blocked priority
 

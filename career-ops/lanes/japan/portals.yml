@@ -1,0 +1,145 @@
+# Regional Career Ops lane — Japan (Chief control plane)
+#
+# Used by the scheduled worker `ChiefCareerScan-Japan` via the environment
+# variables CAREER_OPS_PORTALS/PIPELINE/SCAN_HISTORY set in
+# career-ops/regional_schedules.json. Scans through this lane are always
+# bounded --dry-run: the lane never writes a tracker and never submits anything.
+#
+# The file lives in the Chief control plane rather than inside the owner's
+# Career Ops installation so the installation stays untouched and this config is
+# versioned/auditable. The `title_filter` block is a verbatim copy of the
+# owner's own `title_filter` in that installation's portals.yml —
+# career-ops/tests/test_regional_job_search.py fails if the two drift apart.
+#
+# Provider coverage note (honest limitation): the Career Ops install has no
+# Japan-specific provider. The historical Japan shortlist came from Japanese
+# employer pages and Hello Work reached through the agent-driven search path
+# (see search_queries below), not from scan.mjs. The scan lane runs the
+# global/remote boards under an explicit Japan location scope; low scan yield
+# means "no Japan provider in the scanner", NOT "no vacancies in Japan".
+
+scan_history:
+  recheck_after_days: 30
+
+max_posting_age_days: 14
+
+location_filter:
+  always_allow:
+    - "Japan"
+    - "Tokyo"
+    - "Osaka"
+    - "Yokohama"
+    - "Nagoya"
+  allow:
+    - "Japan"
+    - "Tokyo"
+    - "Osaka"
+    - "Yokohama"
+    - "Nagoya"
+    - "Fukuoka"
+    - "Kyoto"
+    - "Sapporo"
+    - "Kobe"
+    - "Remote, Japan"
+    - "Japan Remote"
+  block:
+    - "United States"
+    - "USA"
+    - "Canada"
+    - "India"
+    - "Singapore"
+    - "Australia"
+    - "United Kingdom"
+    - "UK"
+    - "United Arab Emirates"
+    - "UAE"
+    - "Dubai"
+    - "Abu Dhabi"
+    - "Sharjah"
+
+salary_filter:
+  min: 0
+  max: 0
+  currency: "JPY"
+
+trust_filter:
+  enabled: true
+
+title_filter:
+  positive:
+    - "Intern"
+    - "Internship"
+  negative:
+    - "Senior"
+    - "Principal"
+    - "Lead "
+    - "Manager"
+    - "Director"
+    - "Head of"
+    - "Vice President"
+    - "VP "
+    - "Staff Security"
+
+# Agent-driven source path for this region (Japanese employer/Hello Work pages).
+# Not executed by scan.mjs; validated by the install's own validate-portals.mjs.
+search_queries:
+  - name: Japan graduate programmes - HRMOS
+    query: 'site:hrmos.co (cybersecurity OR "information security" OR "security engineer") ("graduate" OR "new graduate" OR "second graduate")'
+    enabled: false
+  - name: Japan entry-level security - HERP
+    query: 'site:herp.careers (cybersecurity OR "security engineer" OR "SOC") (Japan OR Tokyo)'
+    enabled: false
+  - name: Japan entry-level security - Jobcan
+    query: 'site:recruit.jobcan.jp (cybersecurity OR "security engineer" OR "SOC")'
+    enabled: false
+
+tracked_companies: []
+
+job_boards:
+  - name: Remotive
+    provider: remotive
+    careers_url: https://remotive.com/api/remote-jobs
+    enabled: true
+  - name: Jobicy
+    provider: jobicy
+    careers_url: https://jobicy.com/api/v2/remote-jobs
+    enabled: true
+  - name: RemoteOK
+    provider: remoteok
+    careers_url: https://remoteok.com/api
+    enabled: true
+  - name: Working Nomads
+    provider: workingnomads
+    careers_url: https://www.workingnomads.com/api/exposed_jobs/
+    enabled: true
+  - name: Himalayas
+    provider: himalayas
+    enabled: true
+  - name: We Work Remotely
+    provider: weworkremotely
+    enabled: true
+  - name: NoDesk
+    provider: nodesk
+    enabled: true
+  - name: Jobspresso
+    provider: jobspresso
+    enabled: true
+  - name: Landing.jobs
+    provider: landingjobs
+    enabled: true
+  - name: The Muse
+    provider: themuse
+    enabled: true
+  - name: Hacker News Who is hiring
+    provider: hackernews
+    enabled: true
+  - name: Welcome to the Jungle
+    provider: wttj
+    wttj:
+      queries:
+        - "cyber security intern"
+        - "information security internship"
+        - "SOC internship"
+        - "IT support internship"
+      max_hits: 100
+    enabled: true

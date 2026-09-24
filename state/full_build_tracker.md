@@ -307,3 +307,30 @@ Successor task: **no new task staged** — the allowed scope requires exactly on
 `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23` (pending) already covers the
 whole-company local acceptance test and morning handover. Its scope already lists "LinkedIn
 draft/read-only path" and "CV/cover-letter path", so staging another would duplicate it.
+
+## Regional job-search workers + scheduled execution (2026-09-24T00:14Z)
+
+Task `agent-regional-job-search-agents-and-schedulers-2026-09-23` (attempt 2; attempt 1 landed this
+work but was cut off by a 1200 s dispatch timeout before it could update state/commit). One
+implementation, four regions — no per-region codebase forks.
+Acceptance evidence: `career-ops/evidence/acceptance-20260924T001500Z.json`.
+
+| Lane | Item | Status | Evidence |
+|---|---|---|---|
+| Regional | Four regions on one shared scanner/dedupe implementation | **DONE** | `career-ops/regional_job_search.py` (sha256 `962d38a9…`); dedupe, workbook index, cross-month index and write path all reused from `tracker_writer.py` |
+| Regional | Dubai / Japan / Singapore lane configs | **DONE** | `career-ops/lanes/{dubai,japan,singapore}/{portals.yml,pipeline.md,scan-history.tsv}` — held in the control plane so the owner's Career Ops install is **never modified**; `resolve_lane` reports all four regions `ready: true` |
+| Regional | Explicit eligibility/work-authorisation/location filter | **DONE** | `career-ops/regional_policy.json` (sha256 `ed045010…`) + `evaluate_record`: owner title policy, region location scope mirroring the scanner's tier order, clearance/citizenship policy from `config/profile.yml`, multi-year-experience rejection, mandatory-URL rule, **fail-closed** when no region scope resolves |
+| Regional | Owner facts never invented | **ENFORCED** | UK authorisation `authorised` (Graduate visa → 2027-12-23, from `config/profile.yml`); Dubai/UAE, Japan, Singapore are **UNKNOWN** and every accepted record carries the region tracker's own `visa_pathway` text (`Visa unknown` / `JAPAN WORK VISA UNKNOWN` / `WORK PASS UNKNOWN`) plus an UNKNOWN flag. No right to work is inferred for those regions |
+| Regional | Deterministic scheduled execution | **REGISTERED** | `ChiefCareerScan-UK` 23:45, `-Dubai` 23:50, `-Japan` 23:55, `-Singapore` 00:00 — all four `Ready` via `install_schedules.py --status`; staggered, bounded **dry-run only**, never writes a tracker, never submits |
+| Regional | Run-health + idempotency metadata | **DONE** | `runtime/career-ops/scan-runs/regional-run-state.json` keys each run by a SHA-256 of its accepted candidate set; a replay marks candidates `duplicate-prior-run` and emits an empty manifest; the shared writer independently refuses anything already in the workbook / rotated workbook / cross-month ledger |
+| Regional | No fabricated jobs | **ENFORCED** | Dry-run "New offers:" lines carry no URL, so they are reported `scan_offers_without_url` and can never become tracker rows on their own — only URL-bearing candidates can be accepted |
+| Regional | Bounded dry-run evidence, all four regions | **PASS** | Two run-all passes 2026-09-24T00:06–00:19Z; UK 93 candidates, Dubai/Japan/Singapore 0 candidates; every region `last_status: ok`, `last_would_append: 0` |
+| Regional | Safe workbook-write acceptance | **PASS** | Acceptance written to a **test copy** with a hash-verified pre-write backup, 2 labelled probe rows (`NOT A REAL VACANCY`, reserved `.invalid` domain), append verified, verification clean, then rolled back to the pre-write hash (`equals_pre_write_hash: true`) |
+| Regional | Canonical trackers untouched | **VERIFIED** | All four canonical workbook hashes re-read at 2026-09-24T00:20Z and **identical** to the acceptance record: UK `84c53dcb…`, Dubai `495edb45…`, Japan `a8c4ef90…`, Singapore `25c7b95b…`. `applications_submitted: 0`, `external_messages_sent: 0` |
+| Regional | Tests | **PASS** | `career-ops/tests/test_regional_job_search.py` **32 passed**; whole `career-ops/tests/` **120 passed** |
+| Regional | Provider coverage stated honestly | **RECORDED** | Singapore is the only region with first-party providers in the install (MyCareersFuture, Glints SG, Jobstreet/SEEK `SG-Main`). **No UAE or Japan provider exists**, so those lanes run the global/remote boards under their region scope plus the region's `search_queries` agent-driven source list; a thin Dubai/Japan scan means "no provider for that region", never "no vacancies there" |
+
+Owner action required (recorded, does not block the other lanes): `tasks-or-issues/overnight-owner-actions-2026-09-24.md`
+item 6 — state the Dubai/UAE, Japan and Singapore work-authorisation position, because every record
+produced for those regions is labelled UNKNOWN until the owner says otherwise; item 7 — decide whether
+to add a UAE/Japan-specific provider or accept the agent-driven `search_queries` path.

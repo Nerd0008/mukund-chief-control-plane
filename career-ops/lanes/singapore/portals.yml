@@ -1,0 +1,127 @@
+# Regional Career Ops lane — Singapore (Chief control plane)
+#
+# Used by the scheduled worker `ChiefCareerScan-Singapore` via the environment
+# variables CAREER_OPS_PORTALS/PIPELINE/SCAN_HISTORY set in
+# career-ops/regional_schedules.json. Scans through this lane are always
+# bounded --dry-run: the lane never writes a tracker and never submits anything.
+#
+# The file lives in the Chief control plane rather than inside the owner's
+# Career Ops installation so the installation stays untouched and this config is
+# versioned/auditable. The `title_filter` block is a verbatim copy of the
+# owner's own `title_filter` in that installation's portals.yml —
+# career-ops/tests/test_regional_job_search.py fails if the two drift apart.
+#
+# This is the one region with real first-party provider coverage in the
+# Career Ops install:
+#   * mycareersfuture — Singapore's national job bank (WSG/MOM), public
+#     no-auth search endpoint; its keywords fall back to the owner's own
+#     config/profile.yml target_roles when no `mycareersfuture:` block is set,
+#     so the owner's profile is the source of the search terms.
+#   * glints          — countryCode SG.
+#   * jobstreet       — SEEK v5 search with siteKey SG-Main.
+# The global/remote boards are deliberately NOT enabled here: the SEEK/Glints
+# location strings would let worldwide remote postings through, which is noise
+# for a country-scoped lane.
+
+scan_history:
+  recheck_after_days: 30
+
+max_posting_age_days: 14
+
+location_filter:
+  always_allow:
+    - "Singapore"
+  allow:
+    - "Singapore"
+    - "Remote, Singapore"
+    - "Singapore Remote"
+  block:
+    - "United States"
+    - "USA"
+    - "Canada"
+    - "India"
+    - "Australia"
+    - "Japan"
+    - "United Kingdom"
+    - "UK"
+    - "United Arab Emirates"
+    - "UAE"
+    - "Dubai"
+    - "Abu Dhabi"
+    - "Sharjah"
+
+salary_filter:
+  min: 0
+  max: 0
+  currency: "SGD"
+
+trust_filter:
+  enabled: true
+
+title_filter:
+  positive:
+    - "Intern"
+    - "Internship"
+  negative:
+    - "Senior"
+    - "Principal"
+    - "Lead "
+    - "Manager"
+    - "Director"
+    - "Head of"
+    - "Vice President"
+    - "VP "
+    - "Staff Security"
+
+tracked_companies: []
+
+job_boards:
+  - name: MyCareersFuture
+    provider: mycareersfuture
+    max_pages: 3
+    enabled: true
+  - name: Glints — cyber security
+    provider: glints
+    countryCode: "SG"
+    searchKeywords: "cyber security"
+    pageSize: 50
+    maxPages: 3
+    enabled: true
+  - name: Glints — information security
+    provider: glints
+    countryCode: "SG"
+    searchKeywords: "information security"
+    pageSize: 50
+    maxPages: 3
+    enabled: true
+  - name: Glints — IT support
+    provider: glints
+    countryCode: "SG"
+    searchKeywords: "IT support"
+    pageSize: 50
+    maxPages: 3
+    enabled: true
+  - name: Jobstreet SG — cyber security
+    provider: jobstreet
+    siteKey: "SG-Main"
+    searchKeywords: "cyber security"
+    searchLocation: "Singapore"
+    pageSize: 50
+    maxPages: 3
+    enabled: true
+  - name: Jobstreet SG — information security
+    provider: jobstreet
+    siteKey: "SG-Main"
+    searchKeywords: "information security"
+    searchLocation: "Singapore"
+    pageSize: 50
+    maxPages: 3
+    enabled: true
+  - name: Jobstreet SG — IT support
+    provider: jobstreet
+    siteKey: "SG-Main"
+    searchKeywords: "IT support"
+    searchLocation: "Singapore"
+    pageSize: 50
+    maxPages: 3
+    enabled: true

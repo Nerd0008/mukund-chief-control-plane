@@ -1,0 +1,189 @@
+{
+  "run_id": "uk-20260924T000624Z",
+  "region": "uk",
+  "display_name": "United Kingdom",
+  "started_at": "2026-09-24T00:06:24+00:00",
+  "dry_run": true,
+  "applications_submitted": 0,
+  "employer_contacts": 0,
+  "canonical_workbook_written": false,
+  "lane_kind": "career-ops-install-lane",
+  "lane_ready": true,
+  "lane_missing": [],
+  "scheduled": true,
+  "scan": {
+    "ok": true,
+    "refused": false,
+    "exit_code": 0,
+    "duration_s": 88.9,
+    "dry_run": true,
+    "stdout_capture_ok": true,
+    "command": [
+      "node",
+      "scan.mjs",
+      "--dry-run",
+      "--quiet"
+    ],
+    "lane_env": {
+      "CAREER_OPS_PORTALS": "portals.yml",
+      "CAREER_OPS_PROFILE": "config/profile.yml",
+      "CAREER_OPS_PIPELINE": "data/pipeline.md",
+      "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+    },
+    "recorded_to": "runtime\\career-ops\\scan-runs\\scan-uk-20260924T000624Z.json",
+    "warning": null,
+    "counters": {
+      "jobs_found": 2861,
+      "filtered_title": 2725,
+      "filtered_location": 131,
+      "filtered_age": 3,
+      "duplicates": 1,
+      "new_offers_added": 1,
+      "errors": null
+    }
+  },
+  "candidates": {
+    "scan_offers_without_url": 1,
+    "url_bearing_candidates": 93,
+    "source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+    "note": "scan offers carry no posting URL, so they are reported for URL resolution and can never become tracker rows on their own; only URL-bearing candidates can be accepted"
+  },
+  "idempotency": {
+    "run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
+    "previous_run_key": null,
+    "replay_of_previous_run": false,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "note": "a replayed run marks every accepted candidate duplicate-prior-run; the shared tracker dedupe independently refuses anything already in the workbook or a cross-month ledger"
+  },
+  "eligibility": {
+    "input": 93,
+    "accepted": 2,
+    "accepted_before_idempotency": 2,
+    "rejected": 91,
+    "duplicate_prior_run": 0,
+    "rejected_sample": [
+      {
+        "company": "Crown Agents Bank",
+        "title": "Information Security Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "One Big Circle",
+        "title": "IT & Security Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Alpha FMC",
+        "title": "Junior IT Support Engineer",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "City IT / CEF",
+        "title": "IT Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Scottish Government",
+        "title": "IT Service Desk Analyst (4456)",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "The Pensions Regulator",
+        "title": "Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Vp plc",
+        "title": "IT Service Desk Analyst (1st Line)",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Mid Yorkshire Teaching NHS Trust",
+        "title": "Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Silver Birch Care",
+        "title": "IT Support Specialist",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Sherwood Forest Hospitals NHS Foundation Trust",
+        "title": "Service Desk Technician",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      }
+    ]
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with the UK lane)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+    "counts": {
+      "input": 2,
+      "appended": 0,
+      "duplicates": 2,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "cross_month_index": {
+      "sources": {
+        "uk-cyber-job-tracker.xlsx": 34,
+        "ledger:data/scan-history.tsv": 146
+      },
+      "keys": 154
+    },
+    "outcomes": [
+      {
+        "company": "Trumid",
+        "title": "Sales Rotation (2027 Summer Internship)",
+        "url": "https://www.welcometothejungle.com/en/companies/trumid/jobs/sales-rotation-2027-summer-internship_new-york_ftsmg6xp",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Clipboard Health",
+        "title": "Account Executive - Dental - International",
+        "url": "https://www.workingnomads.com/job/go/1864883/",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      }
+    ],
+    "applied": false
+  },
+  "would_append": 0,
+  "manifest_written_to": null,
+  "finished_at": "2026-09-24T00:07:53+00:00",
+  "work_authorisation": {
+    "status": "authorised",
+    "basis": "config/profile.yml#location.visa_status — UK Graduate-visa work authorisation through 23 Dec 2027",
+    "current_permission": true,
+    "sponsorship_now": "not required",
+    "tracker_visa_pathway": null
+  },
+  "status": "ok",
+  "writes": {
+    "canonical_workbook": false,
+    "tracker_dry_run_only": true,
+    "run_health_files": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-24T00:19:24+00:00",
+  "regions": {
+    "uk": {
+      "last_run_id": "uk-20260924T001418Z",
+      "last_run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
+      "last_run_at": "2026-09-24T00:16:12+00:00",
+      "last_status": "ok",
+      "last_candidates": 93,
+      "last_accepted": 0,
+      "last_would_append": 0,
+      "runs": 2
+    },
+    "dubai": {
+      "last_run_id": "dubai-20260924T001612Z",
+      "last_run_key": "291ab87f311bab09ef09fac1791e7958",
+      "last_run_at": "2026-09-24T00:17:52+00:00",
+      "last_status": "ok",
+      "last_candidates": 0,
+      "last_accepted": 0,
+      "last_would_append": 0,
+      "runs": 2
+    },
+    "japan": {
+      "last_run_id": "japan-20260924T001752Z",
+      "last_run_key": "8b6cab84f7730fd0559580e48362c4bf",
+      "last_run_at": "2026-09-24T00:19:18+00:00",
+      "last_status": "ok",
+      "last_candidates": 0,
+      "last_accepted": 0,
+      "last_would_append": 0,
+      "runs": 2
+    },
+    "singapore": {
+      "last_run_id": "singapore-20260924T001918Z",
+      "last_run_key": "e1907bf11f68ebfd1bd3cd58bba3492e",
+      "last_run_at": "2026-09-24T00:19:24+00:00",
+      "last_status": "ok",
+      "last_candidates": 0,
+      "last_accepted": 0,
+      "last_would_append": 0,
+      "runs": 2
+    }
+  }
+}

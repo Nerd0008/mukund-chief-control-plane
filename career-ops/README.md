@@ -99,16 +99,80 @@ scheduled tasks (`ChiefCareerScan-UK`, `-Dubai`, `-Japan`, `-Singapore`).
 
 * Scheduled runs are **bounded dry-run scans only** — they never write a tracker
   and never submit anything, so overlapping runs cannot duplicate rows.
-* The UK lane is wired to the existing `portals.yml`/`data/pipeline.md`/
-  `data/scan-history.tsv` and runs daily at 23:45 local, matching the historical
-  ~23:48 window visible in `data/scan-runs.tsv`.
-* Dubai/Japan/Singapore have **no lane config in the Career Ops install** (only the
-  UK `portals.yml` exists; the other regions were driven by their shortlist-history
-  ledgers). The runner *refuses* rather than scanning UK portals under a regional
-  label and records the dependency. Creating those lanes belongs to the pending
-  `agent-regional-job-search-agents-and-schedulers-2026-09-23` task.
+* Every region has a real lane config (2026-09-24):
+  * `uk` reuses the owner's existing install lane (`portals.yml`,
+    `data/pipeline.md`, `data/scan-history.tsv`) and runs daily at 23:45 local,
+    matching the historical ~23:48 window in `data/scan-runs.tsv`;
+  * `dubai`/`japan`/`singapore` lanes live in this control plane under
+    `career-ops/lanes/<region>/` and are referenced by absolute path, so the
+    owner's Career Ops installation is never modified. `resolve_lane` now reports
+    every region `ready: true`.
 * Registration is idempotent and reversible:
   `install_schedules.py --install` / `--status` / `--remove`.
+
+## Regional job-search workers (2026-09-24)
+
+One implementation, four regions: `career-ops/regional_job_search.py`. UK, Dubai,
+Japan and Singapore never diverge into four codebases.
+
+    lane readiness -> bounded Career Ops scan (dry-run) -> candidate records
+      -> shared eligibility/policy filter -> shared dedupe -> run-health +
+      idempotency state -> optional manifest for the deterministic tracker writer
+
+| Subcommand | Purpose | Writes? |
+|---|---|---|
+| `policy [--region R]` | resolved region policy + provenance + drift check | no |
+| `lanes` | lane readiness, configured scope, provider coverage | no |
+| `eligibility --region R (--manifest\|--records\|--scan-record F)` | per-record decisions | no |
+| `run --region R [--record DIR] [--manifest-out F] [--scheduled]` | one deterministic regional run | run-health + state only |
+| `run-all [--record DIR] [--scheduled]` | all four regions in scheduled order | run-health + state only |
+| `status` | run-health + state per region | no |
+
+**Shared primitives, no per-region forks.** Dedupe, the workbook index, the
+cross-month index and the write path all come from `tracker_writer.py` (the same
+code the UK lane uses). The region's lane `portals.yml` is the single source of
+the location scope, and the owner's own install `portals.yml` is the single
+source of the title policy — `regional_policy.json` mirrors both and a test fails
+if any of them drift.
+
+**Eligibility/policy filtering** (`career-ops/regional_policy.json`, applied by
+`evaluate_record`): owner title policy, explicit region location scope
+(mirroring the scanner's `block_hard`/`always_allow`/`block`/`allow` tier order
+and its remote-title rescue), the owner's clearance/citizenship rejection policy
+from `config/profile.yml`, a multi-year-experience rejection, a mandatory-URL
+rule, and **fail-closed** behaviour when no region scope can be resolved.
+
+**Owner facts are never invented.** Work authorisation is `authorised` for the UK
+only (Graduate visa to 23 Dec 2027, from `config/profile.yml`). For Dubai/UAE,
+Japan and Singapore the file and every accepted record say **UNKNOWN** — the
+owner has never stated a right to work there, so the region's tracker
+`visa_pathway` default (`Visa unknown` / `JAPAN WORK VISA UNKNOWN` /
+`WORK PASS UNKNOWN`) is recorded verbatim instead.
+
+**Provider coverage is stated honestly.** Singapore is the only region with
+first-party providers in the install (MyCareersFuture, Glints SG, Jobstreet
+SEEK `SG-Main`). No UAE or Japan provider exists, so those lanes run the
+global/remote boards under their region scope, and their `search_queries` carry
+the agent-driven Japanese/ATS source list for that path. A thin Dubai/Japan scan
+means "no provider for that region", never "no vacancies there".
+
+**Idempotency.** Each run is keyed by a SHA-256 of its accepted candidate set
+(stored in `runtime/career-ops/scan-runs/regional-run-state.json`). A replayed
+run marks every candidate `duplicate-prior-run` and produces an empty manifest;
+independently, the shared writer refuses anything already in the workbook, in a
+rotated workbook or in the cross-month ledger. A scan's dry-run "New offers:"
+lines carry **no URL**, so they are reported as `scan_offers_without_url` and can
+never become tracker rows on their own — only URL-bearing candidates (lane
+pipeline entries or an explicit records file) can be accepted.
+
+**No applications.** No subcommand submits, messages, or contacts anyone; the
+worker never applies to a workbook. Tracker writes stay the explicit
+`career_ops_cli.py write --apply` step with hash-verified backup + verification.
+
+    python career-ops/regional_job_search.py lanes
+    python career-ops/regional_job_search.py run-all --record runtime/career-ops/scan-runs --scheduled
+    python career-ops/regional_job_search.py run --region singapore --manifest-out /tmp/sg.json
+    python career-ops/regional_job_search.py status
 
 ## Regional profiles
 
@@ -246,6 +310,7 @@ deduped.
     python -m pytest career-ops/tests/ -q                      # 88 passed
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 34 passed
+    python -m pytest career-ops/tests/test_regional_job_search.py -q  # 30 passed
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

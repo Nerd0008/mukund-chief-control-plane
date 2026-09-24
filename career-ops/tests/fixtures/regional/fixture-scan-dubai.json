@@ -1,0 +1,11 @@
+{
+  "region": "dubai",
+  "ok": true,
+  "dry_run": true,
+  "exit_code": 0,
+  "duration_s": 0.0,
+  "stdout_capture_ok": true,
+  "command": ["node", "scan.mjs", "--dry-run", "--quiet"],
+  "_fixture": "SYNTHETIC parser/flow fixture — exercises the offline run path only. Not a real scan result and not a real vacancy.",
+  "stdout_tail": "\nPortal Scan — FIXTURE\nCompanies scanned:     0\nJob boards scanned:    12\nTotal jobs found:      1234\nFiltered by title:     1200 removed\nFiltered by location:  33 removed\nFiltered by age:       0 removed\nDuplicates:            0 skipped\nNew offers added:      1\n\nNew offers:\n  + FIXTURE COMPANY (NOT A REAL VACANCY) | Cybersecurity Intern - FIXTURE | Dubai, UAE [Trust: 90/100]\n\n(dry run — run without --dry-run to save results)\n"
+}

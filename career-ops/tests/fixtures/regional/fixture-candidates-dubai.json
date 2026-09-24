@@ -1,0 +1,37 @@
+{
+  "_fixture": "SYNTHETIC candidate records for offline regional-worker tests. Every URL uses the reserved .invalid TLD so it can never be confused with a real posting or a real application.",
+  "region": "dubai",
+  "records": [
+    {
+      "company": "FIXTURE COMPANY (NOT A REAL VACANCY)",
+      "title": "Cybersecurity Intern - FIXTURE",
+      "location": "Dubai, UAE",
+      "url": "https://regional-fixture.invalid/ae/cyber-security-intern"
+    },
+    {
+      "company": "FIXTURE SENIOR EMPLOYER (NOT A REAL VACANCY)",
+      "title": "Senior Security Manager - FIXTURE",
+      "location": "Dubai, UAE",
+      "url": "https://regional-fixture.invalid/ae/senior-security-manager"
+    },
+    {
+      "company": "FIXTURE WRONG REGION (NOT A REAL VACANCY)",
+      "title": "Cybersecurity Intern - FIXTURE",
+      "location": "London, United Kingdom",
+      "url": "https://regional-fixture.invalid/uk/cyber-security-intern"
+    },
+    {
+      "company": "FIXTURE CLEARED EMPLOYER (NOT A REAL VACANCY)",
+      "title": "Cybersecurity Intern - FIXTURE",
+      "location": "Abu Dhabi, UAE",
+      "url": "https://regional-fixture.invalid/ae/cleared-intern",
+      "summary": "Applicants must hold SC clearance and be a British citizen."
+    },
+    {
+      "company": "FIXTURE NO URL (NOT A REAL VACANCY)",
+      "title": "Cybersecurity Intern - FIXTURE",
+      "location": "Dubai, UAE",
+      "url": ""
+    }
+  ]
+}

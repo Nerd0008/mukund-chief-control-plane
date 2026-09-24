@@ -1,0 +1,141 @@
+# Regional Career Ops lane — Dubai / UAE (Chief control plane)
+#
+# Used by the scheduled worker `ChiefCareerScan-Dubai` via the environment
+# variables CAREER_OPS_PORTALS/PIPELINE/SCAN_HISTORY set in
+# career-ops/regional_schedules.json. Scans through this lane are always
+# bounded --dry-run: the lane never writes a tracker and never submits anything.
+#
+# The file lives in the Chief control plane rather than inside the owner's
+# Career Ops installation so the installation stays untouched and this config is
+# versioned/auditable. The `title_filter` block is a verbatim copy of the
+# owner's own `title_filter` in that installation's portals.yml —
+# career-ops/tests/test_regional_job_search.py fails if the two drift apart.
+#
+# Provider coverage note (honest limitation): the Career Ops install has no
+# UAE/Gulf-specific provider. This lane therefore runs the global/remote boards
+# under an explicit UAE location scope. Low yield here means "no UAE provider",
+# NOT "no vacancies in the UAE".
+
+scan_history:
+  recheck_after_days: 30
+
+max_posting_age_days: 14
+
+location_filter:
+  always_allow:
+    - "Dubai"
+    - "Abu Dhabi"
+    - "Sharjah"
+    - "United Arab Emirates"
+    - "UAE"
+    - "Emirates"
+  allow:
+    - "Dubai"
+    - "Abu Dhabi"
+    - "Sharjah"
+    - "Ajman"
+    - "Ras Al Khaimah"
+    - "Fujairah"
+    - "Umm Al Quwain"
+    - "United Arab Emirates"
+    - "UAE"
+    - "Emirates"
+    - "Remote, UAE"
+    - "UAE Remote"
+  block:
+    - "United States"
+    - "USA"
+    - "Canada"
+    - "India"
+    - "Singapore"
+    - "Australia"
+    - "Japan"
+    - "United Kingdom"
+    - "UK"
+
+salary_filter:
+  min: 0
+  max: 0
+  currency: "AED"
+
+trust_filter:
+  enabled: true
+
+title_filter:
+  positive:
+    - "Intern"
+    - "Internship"
+  negative:
+    - "Senior"
+    - "Principal"
+    - "Lead "
+    - "Manager"
+    - "Director"
+    - "Head of"
+    - "Vice President"
+    - "VP "
+    - "Staff Security"
+
+# Agent-driven source path for this region. Not executed by scan.mjs; validated
+# by the install's own validate-portals.mjs and used by the search workflow.
+search_queries:
+  - name: UAE internships - Greenhouse
+    query: 'site:job-boards.greenhouse.io (intern OR internship) ("cyber security" OR cybersecurity OR "information security" OR "IT support") (Dubai OR "Abu Dhabi" OR UAE OR "United Arab Emirates")'
+    enabled: false
+  - name: UAE internships - Lever
+    query: 'site:jobs.lever.co (intern OR internship) ("cyber security" OR cybersecurity OR "information security" OR "IT support") (Dubai OR "Abu Dhabi" OR UAE)'
+    enabled: false
+  - name: UAE internships - Workday
+    query: 'site:myworkdayjobs.com (intern OR internship) ("cyber security" OR cybersecurity OR "information security" OR "IT support") (Dubai OR "Abu Dhabi" OR UAE)'
+    enabled: false
+
+tracked_companies: []
+
+job_boards:
+  - name: Remotive
+    provider: remotive
+    careers_url: https://remotive.com/api/remote-jobs
+    enabled: true
+  - name: Jobicy
+    provider: jobicy
+    careers_url: https://jobicy.com/api/v2/remote-jobs
+    enabled: true
+  - name: RemoteOK
+    provider: remoteok
+    careers_url: https://remoteok.com/api
+    enabled: true
+  - name: Working Nomads
+    provider: workingnomads
+    careers_url: https://www.workingnomads.com/api/exposed_jobs/
+    enabled: true
+  - name: Himalayas
+    provider: himalayas
+    enabled: true
+  - name: We Work Remotely
+    provider: weworkremotely
+    enabled: true
+  - name: NoDesk
+    provider: nodesk
+    enabled: true
+  - name: Jobspresso
+    provider: jobspresso
+    enabled: true
+  - name: Landing.jobs
+    provider: landingjobs
+    enabled: true
+  - name: The Muse
+    provider: themuse
+    enabled: true
+  - name: Hacker News Who is hiring
+    provider: hackernews
+    enabled: true
+  - name: Welcome to the Jungle
+    provider: wttj
+    wttj:
+      queries:
+        - "cyber security intern"
+        - "information security internship"
+        - "SOC internship"
+        - "IT support internship"
+      max_hits: 100
+    enabled: true
