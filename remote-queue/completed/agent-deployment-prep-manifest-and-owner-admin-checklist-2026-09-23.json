@@ -1,0 +1,87 @@
+{
+  "task_id": "agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23",
+  "created_at": "2026-09-23T21:38:00Z",
+  "objective": "Prepare the system so Mukund's afternoon session is only manual/admin configuration and the evening can be deployment/acceptance: produce a complete deployment manifest, secret/account checklist, backup/restore plan, service definitions, dependency inventory and cutover runbook without choosing or performing the final architecture/cutover.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Use the latest local engineering state; do not block earlier build tasks."
+  ],
+  "allowed_scope": [
+    "Inventory runtime versions, packages, scheduled/background jobs, DB/state paths, secrets by name only, service dependencies and ports/network requirements.",
+    "Prepare laptop-primary and VPS-watchdog/failover-compatible deployment artifacts only where architecture-independent; mark topology-specific steps as pending owner decision.",
+    "Consolidate every required manual key/OAuth/account/admin action into the owner-action TODO in exact order.",
+    "Prepare backup/restore verification, service restart, log rotation/retention, health checks and acceptance commands.",
+    "Prepare cutover rollback criteria and a no-go checklist.",
+    "Do not perform deployment/cutover or expose credentials."
+  ],
+  "stop_conditions": [
+    "No architecture finalization.",
+    "No VPS login/cutover.",
+    "No secrets.",
+    "No irreversible service changes."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-24T02:21:35.842674Z",
+  "result": {
+    "status": "completed",
+    "summary": "Deployment-preparation package built, verified and pushed (9cedda7 on origin/main). Created deployments/ with an 11-part pack: full deployment manifest (host/runtime/state/services/ports, laptop-primary and VPS-primary variants with every topology-specific step marked PENDING OWNER DECISION), access/account checklist (all credentials by store name and env-var name only, zero values), an ordered owner-action TODO, dependency/runtime inventory, backup-restore plan, service definitions with re-importable Task Scheduler XML exports for all 8 Chief tasks, cutover runbook, rollback + no-go checklist, and acceptance/health commands. Added four read-only executable verifiers: deployment_inventory.py, deployment_preflight.py (go/no-go, exit code driven), deployment_backup_restore_drill.py (SQLite-consistent snapshots, integrity + fingerprint verification, restore into a throwaway dir, deployment rollback dry-run), and set_provider_key.py (owner-run, getpass no-echo credential storage so no key ever reaches shell history/logs/chat/GitHub). Real verification on this machine: preflight verdict GO with 0 failures and 1 owner-gated warning; backup/restore drill PASS on 10/10 artifacts with rollback dry-run clean; regression 16/16 suites, 456/456 tests, 0 failed/errors/skipped at SHA b6329b7; E4/E5 drills 33/33 with real_provider_calls=0; eb e3-verify-db PASSED (schema v2). New findings recorded but deliberately NOT changed: 7 of 8 Chief tasks set DisallowStartIfOnBatteries/StopIfGoingOnBatteries=true so they will not run on battery (gateway only exempt); no log rotation/retention configured; no off-site backup; every Chief task is interactive-token only so no unattended topology is possible without an owner-approved service account; no inbound network exposure is required (outbound 443 only). No architecture was finalised, no VPS login, no secrets handled, no service/task/state changed, no reboot. The standing 7/7 missing provider credentials remain the only blocking owner dependency.",
+    "owner_action_required": "Provision the seven missing provider credentials yourself, one command per worker, from the repo root (each prompts with no echo so the key never enters shell history): python scripts/set_provider_key.py --worker mistral-small-4 ; --worker glm-53-flash ; --worker qwen38-27b ; --worker longcat-2.0 ; --worker minimax-m3 ; --worker step-37-flash ; --worker tencent-hunyuan-hy3. Then verify with: python scripts/set_provider_key.py --status (expect credential_present true for all ten workers). Separately, later: choose the deployment topology in writing (laptop-primary vs VPS-primary vs defer) \u2014 that decision, plus VPS host details if a VPS path is chosen, stays open. Do not paste any key into chat, Discord, GitHub, a file or a queue job.",
+    "blocker_category": "credentials",
+    "commits": [
+      "9cedda7 \u2014 deployment: manifest, access/account checklist, backup-restore plan, service defs, cutover runbook (pushed b6329b7..9cedda7 to origin/main)"
+    ],
+    "tests": [
+      "python scripts/deployment_preflight.py -> verdict GO, fail_count 0, warn_count 1 (owner-gated credential presence); evidence audits/evidence/2026-09-24T02-14-49Z-deployment-preflight/ and re-confirmed GO after commit at audits/evidence/2026-09-24T02-21-00Z-deployment-preflight/",
+      "python scripts/deployment_backup_restore_drill.py -> status PASS, 10/10 artifacts integrity_check=ok, restore identical to backup, deploy_e3_runtime.py --dry-run wrote nothing; evidence audits/evidence/2026-09-24T02-15-42Z-deployment-backup-restore-drill/",
+      "python scripts/evidence_runner.py --label deployment-prep-regression -> 16 suites run, 16 passed, 0 failed, 0 unavailable, 456 collected, 456 passed, 0 errors, 0 skipped, code SHA b6329b70a21ff707a7a27fab75692962a3229afb; evidence audits/evidence/2026-09-24T02-18-54Z-deployment-prep-regression/",
+      "python exec-brain/e4e5_drill_harness.py -> checks_passed 33/33, failed_checks [], real_provider_calls 0, stub_dispatches 10, evidence_kind stubbed_provider_failure; evidence audits/evidence/2026-09-24T02-18-21Z-e4e5-real-path-drills/",
+      "python \"%LOCALAPPDATA%/hermes/exec-brain/eb.py\" e3-verify-db -> 'Schema version: 2 / Verification PASSED / All required tables present', exit 0",
+      "python career-ops/dept_run_health.py summary -> structured run-health per job returned, exit 0",
+      "python scripts/e3_credential_presence_probe.py -> 7/7 still missing (mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3); deepseek and gemini-api present, exit 0",
+      "python scripts/set_provider_key.py --status -> all 10 roster workers reported with presence only (never a value): deepseek + gemini + codex present, 7 absent"
+    ],
+    "changed_files": [
+      ".gitignore",
+      "deployments/README.md",
+      "deployments/01-deployment-manifest.md",
+      "deployments/02-access-and-account-checklist.md",
+      "deployments/03-owner-action-todo.md",
+      "deployments/04-dependency-and-runtime-inventory.md",
+      "deployments/05-backup-and-restore-plan.md",
+      "deployments/06-service-definitions.md",
+      "deployments/07-cutover-runbook.md",
+      "deployments/08-rollback-and-no-go-checklist.md",
+      "deployments/09-acceptance-and-health-commands.md",
+      "deployments/inventory-2026-09-24T02-13-33Z.json",
+      "deployments/service-definitions/Hermes_Gateway.xml",
+      "deployments/service-definitions/HermesRemoteQueuePoller.xml",
+      "deployments/service-definitions/ChiefDiscordSync.xml",
+      "deployments/service-definitions/ChiefCareerBrief.xml",
+      "deployments/service-definitions/ChiefCareerScan-UK.xml",
+      "deployments/service-definitions/ChiefCareerScan-Dubai.xml",
+      "deployments/service-definitions/ChiefCareerScan-Japan.xml",
+      "deployments/service-definitions/ChiefCareerScan-Singapore.xml",
+      "scripts/deployment_inventory.py",
+      "scripts/deployment_preflight.py",
+      "scripts/deployment_backup_restore_drill.py",
+      "scripts/set_provider_key.py",
+      "scripts/e3_credential_presence_probe.py (newly tracked: was silently excluded by the .gitignore *credential* rule although referenced by the runbook)",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md (consolidated ordered owner-action list + new deployment findings)",
+      "audits/evidence/2026-09-24T02-14-49Z-deployment-preflight/{preflight.json,preflight.md}",
+      "audits/evidence/2026-09-24T02-15-42Z-deployment-backup-restore-drill/{backup_restore_report.json,backup_restore_report.md}",
+      "audits/evidence/2026-09-24T02-18-54Z-deployment-prep-regression/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T02-18-21Z-e4e5-real-path-drills/{evidence.json,evidence.md}"
+    ],
+    "remaining": [
+      "Owner: configure the seven provider credentials (scripts/set_provider_key.py --worker <id>), then the post-key sequence in deployments/03-owner-action-todo.md Step 2 (credential probe -> Stage 2 readiness gate -> full regression -> bounded execution rehearsal -> E4/E5 drills) which is engineering-run.",
+      "Owner: record the deployment topology decision (laptop-primary vs VPS-primary vs defer) and, if applicable, VPS host/account details outside GitHub; every PENDING OWNER DECISION step in deployments/07-cutover-runbook.md stays blocked until then.",
+      "Owner: clear the remaining no-go items \u2014 owner-attended laptop security audit, reboot-persistence confirmation for HermesRemoteQueuePoller and ChiefDiscordSync, and disposition of the legacy 'Mukund Chief of Staff' task.",
+      "Engineering (not done here, deliberately out of scope): add the battery-gating fix (7 of 8 tasks block on battery) once the topology is chosen, implement log rotation/retention for %LOCALAPPDATA%\\hermes\\logs and remote-queue\\logs, define an off-site backup destination, and add a pinned requirements.txt (openpyxl==3.1.5, PyYAML==6.0.3).",
+      "Engineering/acceptance question for the owner: e4e5_drill_harness.py has no --live mode, so a real provider outage -> real equivalent-worker failover has not been exercised and must not be claimed; the real-provider execution rehearsal does not run while 7/7 credentials are absent.",
+      "Not performed by design (stop conditions): no VPS login or cutover, no architecture finalisation, no secret read/created/exposed, no service or scheduled-task change, no reboot."
+    ]
+  }
+}
