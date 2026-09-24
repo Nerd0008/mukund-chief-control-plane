@@ -228,18 +228,22 @@ deterministic, read-only). Evidence:
 ## Next bounded task
 
 Staged in `remote-queue/pending/` by
-`agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24` (this task):
-`agent-e3-stage2-readiness-gate-after-provider-keys-retry-2-2026-09-24` — a further
-credential-triggered re-check. Its first step is a presence-only credential probe; if the seven
-provider credentials are still missing it records the exact owner action and stops without enabling
-anything. If any are configured it onboards each newly configured provider (bounded identity/model
-discovery, one harmless smoke test, E2 linkage via `governor.record_request()`, `routable=true` only
-from that evidence), re-runs the existing deterministic gate (`scripts/e3_stage2_readiness_gate.py`)
-and enables **LOCAL** Stage 2 only if all three conditions hold (credentials confirmed configured;
-every readiness criterion objectively satisfied; explicit owner authorization for that step). The
-presence probe the retry actually ran (2026-09-23T22:52Z) found **0/7** configured, so Stage 2 remains
-**NOT ENABLED** and the successor is staged so the poller keeps a bounded, cheap re-check available
-the moment the owner configures a key.
+`agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24` (this task):
+`agent-e4-provider-content-stop-pressure-visibility-2026-09-24` — surface the *recorded* provider
+content-side stop pressure (per worker/provider/model: attempts, stops, rate with its sample size,
+last finishReason, and a bounded "content withheld at a measurable rate" flag) through the E4 /
+operator-facing resource-continuity status, using rows already on disk only. It is an observation,
+not an action: no automatic failover or re-dispatch, no gate weakened, no provider call spent, and it
+does not pre-empt the pending whole-company acceptance.
+
+Closed / consumed since the previous staging (deliberately NOT re-staged):
+
+- the credential-triggered Stage-2 gate re-check chain (`…-after-provider-keys-retry*`) is
+  **parked**: the 2026-09-23T22:52Z presence probe found **0/7** provider credentials configured, so
+  Stage 2 remains **NOT ENABLED**, and `agent-blocked-work-final-reconciliation-2026-09-24`
+  classified the retry records as deterministic owner/external blockers with the duplicate retry
+  chain closed. A further credential-triggered re-check is intentionally not staged; the owner
+  configures a key and the deterministic readiness gate is re-run on demand.
 
 Already pending and NOT duplicated or replaced:
 
@@ -668,3 +672,26 @@ Evidence: `audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribu
 | E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion changed |
 | Owner action | **NONE NEW** | unchanged dependencies only |
 
+## Provider content-side stop — operator surface + orchestrator boundary + rehearsal integration — `agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24`
+
+Ran 2026-09-24T03:08Z–03:12Z at code SHA `82ddf0081b1de0503d487f901d8bf294a3eaa223`.
+Evidence: `audits/evidence/2026-09-24T03-08-34Z-e3-content-stop-operator-surface/`.
+Provider-call budget: **0 (stated up front)** — deterministic stub adapters on the real code path
+plus the response recorded by the predecessor task, reused verbatim as a fixture.
+
+| Item | State | Evidence |
+|---|---|---|
+| Operator surface (a) | **DONE** | `exec-brain/e3_commands.py`: new `finish_reason_from_cause()` + `node_failure_view()`; `e3-status` gained a DAG state breakdown and a **Node Failure Attribution** section (`TERMINAL_FAILURE_STATES = ("BLOCKED","FAILED")`, capped at `MAX_STATUS_ATTRIBUTION_NODES = 20` with the full count still printed); `e3-trace` prints the same block; `e3-why <node>` prints the persisted attribution and still reports an unknown node as unknown. Read-only over already-persisted rows — **no new schema, no E1/E2 write** |
+| Operator surface, end to end | **CAPTURED** | `operator_surface_output.txt` / `operator_surface_demo.py` (real execution leg, stub adapter, isolated db): `e3-status` → `Failure attribution: provider_content_stop` / `Provider finish reason: IMAGE_RECITATION` / `Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION`; identical on `e3-trace` (plan) and `e3-why` (node) |
+| CLI JSON | **EXTENDED ADDITIVELY** | `exec-brain/e3_cli.py` forwards `outcome`/`plan_id`/`team_complete`/`team_assignments`/`execution`/`escalation`; the operator surface itself lives in `e3_commands.py` |
+| Orchestrator boundary (b) | **DONE** | `e3_shadow_orchestrator.orchestrate_and_execute` returns `execution_escalations` (the leg's records, verbatim) and `content_stop_escalation` — `trigger=provider_content_stop` with `finish_reasons`, `node_ids`, `worker_ids`, `content_stop_retries`, `execution_escalation_ids`; `null` on a clean run |
+| Existing escalation behaviour | **UNCHANGED** | `out["escalation"]` still `trigger=repeated_failure`, owner gate and escalation-on-incomplete behaviour untouched — the change is additive |
+| Rehearsal driver (c) | **DONE** | `exec-brain/e3_execution_rehearsal.py` scenario **`G_content_stop_terminal`** (`stub_only`, can never spend a provider call) runs the recorded stop (finishReason `IMAGE_RECITATION`, empty part list, no image, 0 candidate tokens) on the real code path and records `content_stop_finish_reason`, `content_stop_retry_budget`, `content_stop_retry_count`, `content_stop_retries_are_identical_requests`, `content_stop_escalation`, `content_stop_terminal_path_recorded`; new checks `content_stop_terminal_path_recorded`, `content_stop_retries_stayed_bounded`; `EXPECTED_BLOCK_SCENARIOS` now covers G |
+| Driver artifact | **PRODUCED, 0 provider calls** | `execution_rehearsal_stub_report.json` via `run_stub_execution_rehearsal.py` (real `run()` path, every adapter factory replaced by a deterministic stub, isolated db): **23/23 checks true**, 3 stub dispatches, `content_stop_retry_count = 2` against `content_stop_retry_budget = 2`, no 4th dispatch, node persisted `BLOCKED` with cause `provider_content_stop_unrecovered:IMAGE_RECITATION`, escalation `trigger=provider_content_stop` / `finish_reason=IMAGE_RECITATION` / `content_stop_retries=2`. The artifact states in-band that `provider_calls_actually_spent = 0` |
+| New offline tests | **PASS, 0 provider calls** | `exec-brain/tests/test_e3_operator_surface.py` **13 passed** (new, registered in `scripts/evidence_runner.py`); `test_e3_shadow_orchestrator.py` **13 → 18** (`TestOrchestrateAndExecuteContentStopEscalation`); `test_e3_execution_rehearsal.py` **22 → 26** (scenario G + `test_bounded_usage_counts_real_dispatches_only` rewritten to filter `adapter_call_log` by `STUB_ONLY_SCENARIOS` so stub-only scenarios can never be miscounted as real dispatches) |
+| Regression | **PASS — baseline beaten** | pre-deploy `--label regression-post-content-stop-operator-surface` → **20 suites / 20 passed / 0 failed / 0 unavailable / 529 tests / exit 0** (`audits/evidence/2026-09-24T03-08-19Z-regression-post-content-stop-operator-surface/`); post-deploy `--label regression-post-content-stop-operator-surface-postdeploy` → **identical, 20 / 529 / exit 0** (`audits/evidence/2026-09-24T03-10-22Z-regression-post-content-stop-operator-surface-postdeploy/`); final frozen re-run after the last test edit `--label regression-post-content-stop-operator-surface-final` → **identical, 20 / 529 / exit 0** (`audits/evidence/2026-09-24T03-13-53Z-regression-post-content-stop-operator-surface-final/`); baseline was 19 suites / 507 tests at `8930572` |
+| Deployment | **DONE, hashes verified** | `scripts/deploy_e3_runtime.py` 2026-09-24T03:10:14Z copied `e3_commands.py`, `e3_cli.py`, `e3_shadow_orchestrator.py`, `e3_execution_rehearsal.py` (backup `…\exec-brain\backups\e3-deploy-20260924T031014Z`, `eb_py` already-patched); deployed vs repo SHA-256 match for all four plus the unchanged `e3_execution.py` (`6f625a0a…`) |
+| E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion changed; the 0/7 credential gate was not re-run, re-parameterised or re-opened; no unbounded retry path created |
+| Still open, deliberately not chased | **RECORDED** | what makes the recitation filter fire on some identical calls and not others; the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it |
+| Successor staged | **ONE** | `remote-queue/pending/agent-e4-provider-content-stop-pressure-visibility-2026-09-24.json` — surface recorded content-side stop pressure through the E4/operator resource-continuity status (observation only, 0 provider calls); the pending whole-company acceptance is neither duplicated nor pre-empted |
+| Owner action | **NONE NEW** | unchanged dependencies only |

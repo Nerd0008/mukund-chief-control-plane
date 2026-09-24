@@ -58,6 +58,19 @@ MULTI_NODE_WORKERS = {
     "integrator": "codex-cli",
 }
 
+# The vision worker used by the image scenario and by the content-stop scenario.
+GOOGLE_IMAGE_WORKER = "google-nano-banana-2"
+
+# Scenarios that exercise the real code path through an *injected* deterministic
+# stub adapter and therefore spend no real provider call. Kept in one place so
+# the bounded-usage accounting can never count a stub call as a real one.
+STUB_ONLY_SCENARIOS = frozenset({"E_non_routable_refusal", "G_content_stop_terminal"})
+
+# Scenarios whose terminal (non-COMPLETE) node is the expected, asserted outcome
+# rather than an unresolved result.
+EXPECTED_BLOCK_SCENARIOS = frozenset(
+    {"E_non_routable_refusal", "G_content_stop_terminal"})
+
 # Real provider calls each scenario needs, and why. Printed before the run so
 # the bound is stated up front rather than discovered afterwards.
 USAGE_PLAN = [
@@ -78,6 +91,11 @@ USAGE_PLAN = [
             "multi-worker real plan."},
     {"scenario": "E_non_routable_refusal", "worker": "mistral-small-4",
      "calls": 0, "why": "credential-missing worker must be refused pre-dispatch."},
+    {"scenario": "G_content_stop_terminal", "worker": "google-nano-banana-2",
+     "calls": 0,
+     "why": "provider content-side stop terminal path exercised on the real "
+            "execution code path with an injected deterministic stub adapter "
+            "(0 real provider calls)."},
 ]
 USAGE_PLAN_TOTAL = sum(s["calls"] for s in USAGE_PLAN)
 
@@ -191,6 +209,45 @@ class CountingAdapterStub:
     def dispatch(self, contract):  # pragma: no cover - must never be reached
         self.calls += 1
         raise AssertionError("a non-routable worker must never be dispatched")
+
+
+class ContentStopStub:
+    """Deterministic stub reproducing the recorded provider content-side stop.
+
+    Every dispatch returns the recorded ``finishReason=IMAGE_RECITATION`` shape
+    (0 candidates returned with content, empty response part list, no image,
+    0 candidate tokens) so the execution leg's bounded identical same-request
+    retry and its non-silent terminal path run on the real code path. This stub
+    makes no network call and no credential is read.
+    """
+
+    FINISH_REASON = "IMAGE_RECITATION"
+
+    def __init__(self):
+        self.calls = 0
+        self.contracts: List[Dict[str, Any]] = []
+
+    def dispatch(self, contract):
+        self.calls += 1
+        self.contracts.append(dict(contract))
+        return {
+            "dispatch_id": f"stub-content-stop-{self.calls}",
+            "status": "FAILED", "provider": "google",
+            "model": "gemini-3.1-flash-image",
+            "requested_model": "gemini-3.1-flash-image",
+            "content": None, "image_b64": None, "image_mime": None,
+            "image_size_bytes": None, "image_dims": None,
+            "image_decode_ok": False,
+            "finish_reason": self.FINISH_REASON,
+            "candidate_count": 1,
+            "candidate_finish_reasons": [self.FINISH_REASON],
+            "response_part_kinds": [], "response_text_chars": None,
+            "response_text_excerpt": None,
+            "usage": {"promptTokenCount": 17, "totalTokenCount": 17},
+            "prompt_feedback": None,
+            "error": "no_image_part_in_response", "exit_code": 200,
+            "runtime_s": 5.8,
+        }
 
 
 class E3ExecutionRehearsal:
@@ -367,6 +424,9 @@ class E3ExecutionRehearsal:
             "final_verification": node_run["final_verification"],
             "blocking_reason": node_run["blocking_reason"],
             "failure_attribution": node_run["failure_attribution"],
+            # The execution leg's non-silent terminal escalations (e.g. an
+            # unrecovered provider content-side stop), surfaced verbatim.
+            "run_escalations": run.get("escalations") or [],
             "e2_request_ids": node_run["e2_request_ids"],
             "evidence_id": node_run["evidence_id"],
             "persisted_node_state": (read_back["node"] or {}).get("state"),
@@ -621,6 +681,78 @@ class E3ExecutionRehearsal:
         )
         return result
 
+    def scenario_content_stop_terminal(self) -> Dict[str, Any]:
+        """Scenario G — the provider content-side stop terminal path.
+
+        A routable vision worker whose provider withholds the content
+        (``finishReason=IMAGE_RECITATION``) is dispatched on the **real**
+        execution code path through an injected deterministic stub adapter, so
+        the recorded provider behaviour is reproduced without spending a real
+        provider call. The leg's bounded identical same-request retry budget is
+        spent, the node terminates ``BLOCKED`` attributed
+        ``provider_content_stop``, and the escalation naming the finish reason
+        is recorded alongside the persisted DAG/evidence rows.
+        """
+        from e3_execution import (
+            DEFAULT_MAX_CONTENT_STOP_RETRIES, ExecutionAdapterRegistry)
+        from worker_registry import WorkerRegistry
+
+        stub = ContentStopStub()
+        registry = ExecutionAdapterRegistry(
+            worker_registry=WorkerRegistry(),
+            adapter_factories={GOOGLE_IMAGE_WORKER: lambda: stub},
+            usage_reporters={GOOGLE_IMAGE_WORKER: lambda r: None},
+        )
+        result = self._run_scenario(
+            "G_content_stop_terminal",
+            ("Rehearsal (execution leg): provider content-side stop terminal "
+             "path."),
+            GOOGLE_IMAGE_WORKER, "vision",
+            test_cases=[
+                {"name": "dispatch completed", "field": "status",
+                 "expected": "COMPLETED"},
+                {"name": "image decoded", "field": "image_decode_ok",
+                 "expected": True},
+            ],
+            max_repair_attempts=0,
+            adapter_registry=registry,
+            require_real_worker=False,
+            notes=("Injected deterministic stub reproducing the recorded "
+                   "provider content-side stop (finishReason=IMAGE_RECITATION, "
+                   "empty response part list, no image, 0 candidate tokens). "
+                   "No real provider call is spent and no credential is read."),
+        )
+        reason = ContentStopStub.FINISH_REASON
+        terminal_cause = f"provider_content_stop_unrecovered:{reason}"
+        escalations = result.get("run_escalations") or []
+        result["stub_dispatch_calls"] = stub.calls
+        result["content_stop_finish_reason"] = reason
+        result["content_stop_retry_budget"] = DEFAULT_MAX_CONTENT_STOP_RETRIES
+        result["content_stop_retry_count"] = len(
+            [r for r in result.get("repairs") or []
+             if r.get("kind") == "same_request_retry"])
+        result["content_stop_retries_are_identical_requests"] = (
+            len({c.get("objective") for c in stub.contracts}) == 1)
+        result["content_stop_escalation"] = next(
+            (e for e in escalations if e.get("trigger") == "provider_content_stop"),
+            None)
+        result["content_stop_terminal_path_recorded"] = bool(
+            stub.calls == 1 + DEFAULT_MAX_CONTENT_STOP_RETRIES
+            and result["node_state"] == "BLOCKED"
+            and result["run_outcome"] == "EXECUTION_BLOCKED"
+            and result["failure_attribution"] == "provider_content_stop"
+            and result["blocking_reason"] == terminal_cause
+            and result["persisted_node_state"] == "BLOCKED"
+            and result["persisted_evidence"]
+            and result["persisted_evidence"][0]["failure_attribution"]
+                == "provider_content_stop"
+            and any(e.get("cause") == terminal_cause
+                    for e in result["persisted_state_events"])
+            and (result["content_stop_escalation"] or {}).get("finish_reason")
+                == reason
+        )
+        return result
+
     # ── isolation / boundary evidence ───────────────────────────────
     def isolation_proof(self) -> Dict[str, Any]:
         """Re-prove that rehearsal/simulated evidence cannot reach the
@@ -845,16 +977,35 @@ class E3ExecutionRehearsal:
         if include_google:
             self.scenario_google_image()
         self.scenario_non_routable_refusal()
+        self.scenario_content_stop_terminal()
 
         after = self.orchestration_db_facts()
         self.live_store_contamination = self.live_store_contamination_check()
         e2_linkage = self.e2_linkage_audit()
 
-        real_calls = [c for c in self.adapter_call_log if c["scenario"] != "E_non_routable_refusal"]
+        real_calls = [c for c in self.adapter_call_log
+                      if c["scenario"] not in STUB_ONLY_SCENARIOS]
+        stub_only_calls = [c for c in self.adapter_call_log
+                           if c["scenario"] in STUB_ONLY_SCENARIOS]
         by_provider: Dict[str, int] = {}
         for c in real_calls:
             key = c["provider"] or "unknown"
             by_provider[key] = by_provider.get(key, 0) + 1
+
+        self._bounded_usage = {
+            "real_provider_calls": len(real_calls),
+            "planned_calls": USAGE_PLAN_TOTAL,
+            "calls_by_provider": by_provider,
+            "usage_exposed_calls": sum(1 for c in real_calls if c["usage_exposed"]),
+            "usage_missing_calls": sum(1 for c in real_calls if not c["usage_exposed"]),
+            "stub_only_scenarios": sorted(STUB_ONLY_SCENARIOS),
+            "stub_only_dispatch_count": len(stub_only_calls),
+            "note": ("Minimum deterministic calls needed to evidence the path, "
+                     "stated up front in usage_plan. Usage is recorded only when "
+                     "the provider returned it. Stub-only scenarios exercise the "
+                     "real code path with injected deterministic adapters and "
+                     "spend no provider call."),
+        }
 
         return {
             "label": "e3-production-execution-rehearsal",
@@ -871,16 +1022,7 @@ class E3ExecutionRehearsal:
             "real_dispatch_log": self.adapter_call_log,
             "usage_plan": USAGE_PLAN,
             "usage_plan_total_calls": USAGE_PLAN_TOTAL,
-            "bounded_usage": {
-                "real_provider_calls": len(real_calls),
-                "planned_calls": USAGE_PLAN_TOTAL,
-                "calls_by_provider": by_provider,
-                "usage_exposed_calls": sum(1 for c in real_calls if c["usage_exposed"]),
-                "usage_missing_calls": sum(1 for c in real_calls if not c["usage_exposed"]),
-                "note": ("Minimum deterministic calls needed to evidence the path, "
-                         "stated up front in usage_plan. Usage is recorded only when "
-                         "the provider returned it."),
-            },
+            "bounded_usage": self._bounded_usage,
             "isolation": self.isolation,
             "live_store_contamination": self.live_store_contamination,
             "e2_linkage": e2_linkage,
@@ -895,7 +1037,7 @@ class E3ExecutionRehearsal:
                     "blocking_reason": n["blocking_reason"],
                     "failure_attribution": n["failure_attribution"],
                     "provider_errors": n["provider_errors"],
-                    "expected_block": s["scenario"] == "E_non_routable_refusal",
+                    "expected_block": s["scenario"] in EXPECTED_BLOCK_SCENARIOS,
                 }
                 for s in self.scenarios for n in normalized_scenario_nodes(s)
                 if n["state"] != "COMPLETE"
@@ -910,6 +1052,7 @@ class E3ExecutionRehearsal:
         multi = by_name.get("F_decomposed_multi_worker")
         google = by_name.get("D_google_image_dispatch")
         refusal = by_name.get("E_non_routable_refusal", {})
+        content_stop = by_name.get("G_content_stop_terminal", {})
 
         def _real(scenario: Optional[Dict[str, Any]], requested: bool):
             """Completeness of an optional real-path scenario.
@@ -976,6 +1119,19 @@ class E3ExecutionRehearsal:
                 and multi.get("persisted_plan_state_log"))),
             "google_image_complete": _real(google, req.get("google_image", False)),
             "non_routable_refused_without_dispatch": refusal.get("refusal_honoured") is True,
+            "content_stop_terminal_path_recorded": (
+                content_stop.get("content_stop_terminal_path_recorded") is True),
+            "content_stop_retries_stayed_bounded": (
+                content_stop.get("content_stop_retry_count")
+                == content_stop.get("content_stop_retry_budget")),
+            "stub_only_scenarios_separated_from_real_usage": (
+                self._bounded_usage.get("stub_only_dispatch_count", 0) >= 1
+                and self._bounded_usage.get("stub_only_dispatch_count", 0)
+                == sum(1 for c in self.adapter_call_log
+                       if c["scenario"] in STUB_ONLY_SCENARIOS)
+                and self._bounded_usage.get("real_provider_calls", 0)
+                == sum(1 for c in self.adapter_call_log
+                       if c["scenario"] not in STUB_ONLY_SCENARIOS)),
             "complete_requires_verification": all(
                 n["state"] != "COMPLETE" or n["final_verification"] == "PASS"
                 for s in self.scenarios for n in normalized_scenario_nodes(s)

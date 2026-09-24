@@ -530,6 +530,15 @@ class E3ShadowOrchestrator:
             store.close()
         out["execution"] = execution
 
+        # The execution leg escalates its own non-silent terminal paths on the
+        # node (currently an unrecovered provider content-side stop). Surface
+        # them verbatim at the orchestrator boundary so a content-side stop is
+        # reported as itself, not only as a generic repeated_failure.
+        execution_escalations = [e for e in (execution.get("escalations") or [])
+                                 if isinstance(e, dict)]
+        out["execution_escalations"] = execution_escalations
+        out["content_stop_escalation"] = None
+
         node_outputs = {n["node_id"]: (n.get("output") or {})
                         for n in execution["nodes"]}
         integration = self.integrator.integrate(
@@ -554,6 +563,61 @@ class E3ShadowOrchestrator:
                 recommended_action="escalate to owner",
             )
             out["escalation"] = {"escalation_id": rec.escalation_id, "trigger": rec.trigger}
+
+            # Additional, specifically-attributed escalation when the leg
+            # reported an unrecovered provider content-side stop. The
+            # escalation-on-incomplete behaviour and the owner gate above are
+            # unchanged; this only stops the content-stop cause from being
+            # reported as a generic repeated failure.
+            content_stops = [e for e in execution_escalations
+                             if e.get("trigger") == "provider_content_stop"]
+            if content_stops:
+                finish_reasons = sorted({str(e.get("finish_reason"))
+                                         for e in content_stops
+                                         if e.get("finish_reason")})
+                content_rec = self.escalator.escalate(
+                    trigger="provider_content_stop",
+                    context=(
+                        "execution leg reported an unrecovered provider "
+                        f"content-side stop for plan {plan.get('plan_id')} "
+                        f"(finishReason(s): {', '.join(finish_reasons) or 'unknown'}); "
+                        "the provider withheld the content and the bounded "
+                        "identical same-request retry did not recover it"),
+                    proposals_considered=[
+                        "bounded identical same-request retry",
+                        "rephrase the request",
+                        "equivalent-worker failover",
+                        "escalate to owner",
+                    ],
+                    why_each_failed=[
+                        "the bounded same-request retry budget was already "
+                        "spent by the execution leg",
+                        "rephrasing the request would change the request being "
+                        "measured without recorded evidence for a better one",
+                        "worker identity is never changed silently; no "
+                        "equivalent worker was auto-selected",
+                    ],
+                    owner_decision_needed=(
+                        "accept the provider content-side stop as a known "
+                        "limitation, or authorise a specific alternative "
+                        "request/worker for this objective"),
+                    recommended_action="escalate to owner",
+                )
+                out["content_stop_escalation"] = {
+                    "escalation_id": content_rec.escalation_id,
+                    "trigger": content_rec.trigger,
+                    "finish_reasons": finish_reasons,
+                    "node_ids": sorted({str(e.get("node_id")) for e in content_stops
+                                        if e.get("node_id")}),
+                    "worker_ids": sorted({str(e.get("worker_id")) for e in content_stops
+                                          if e.get("worker_id")}),
+                    "content_stop_retries": max(
+                        (e.get("content_stop_retries") or 0)
+                        for e in content_stops),
+                    "execution_escalation_ids": [e.get("escalation_id")
+                                                 for e in content_stops],
+                }
+
             if self.replanner.can_replan():
                 replan_record = self.replanner.replan(
                     dag, ReplanTrigger.ASSUMPTION_INVALIDATED,

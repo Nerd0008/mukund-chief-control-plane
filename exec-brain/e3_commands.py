@@ -27,6 +27,159 @@ except ImportError:
     from worker_contract import WorkerContract
 
 
+# ─── persisted failure attribution (operator surface) ───────────────
+#
+# The production execution leg persists a node's terminal failure entirely
+# through the existing schema-v2 columns. These helpers only read that state
+# back for the operator; they never write, infer or fabricate an attribution.
+#
+#   * ``dag_node.state``                   → the terminal node state (BLOCKED/FAILED)
+#   * ``dag_state_event.cause``            → the transition cause, e.g.
+#         ``provider_content_stop_unrecovered:IMAGE_RECITATION``
+#         ``content_stop_same_request_retry_1_after_IMAGE_RECITATION``
+#   * ``performance_evidence.failure_attribution`` → e.g. ``provider_content_stop``
+#   * ``performance_evidence.deterministic_test_results`` → the bounded retry
+#         accounting (``content_stop_retries``, ``content_stop_stops``,
+#         ``content_stop_finish_reasons``)
+
+CONTENT_STOP_UNRECOVERED_CAUSE = "provider_content_stop_unrecovered"
+CONTENT_STOP_RETRY_CAUSE = "content_stop_same_request_retry"
+FAILURE_ATTRIBUTION_PROVIDER_CONTENT_STOP = "provider_content_stop"
+
+# Node states reported as terminal failures by the attribution surface.
+TERMINAL_FAILURE_STATES = ("BLOCKED", "FAILED")
+
+# Cap on the number of attributed nodes printed by ``e3-status`` (a store can
+# hold many historical nodes; the total count is still reported).
+MAX_STATUS_ATTRIBUTION_NODES = 20
+
+
+def finish_reason_from_cause(cause):
+    """The provider finishReason named in a content-stop cause, else ``None``.
+
+    Only values the execution leg actually persisted are returned; an
+    unrecognised cause yields ``None`` rather than a guess.
+    """
+    if not isinstance(cause, str) or not cause:
+        return None
+    if cause.startswith(CONTENT_STOP_UNRECOVERED_CAUSE + ":"):
+        return cause.split(":", 1)[1] or None
+    if cause.startswith(CONTENT_STOP_RETRY_CAUSE):
+        marker = "_after_"
+        idx = cause.find(marker)
+        if idx == -1:
+            return None
+        return cause[idx + len(marker):] or None
+    return None
+
+
+def _deterministic_results(raw):
+    """Parse the evidence row's structured results, tolerating absence."""
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except (TypeError, ValueError):
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def node_failure_view(con, node_id):
+    """Persisted failure/terminal attribution for one DAG node, or ``None``.
+
+    ``None`` means the node is not in this store at all. Every other field is
+    read verbatim from the store; a value the execution leg never persisted is
+    reported as ``None`` (rendered as "none recorded"), never inferred.
+    """
+    node = con.execute(
+        "SELECT node_id, plan_id, state, assigned_worker, objective "
+        "FROM dag_node WHERE node_id=?", (node_id,)).fetchone()
+    if node is None:
+        return None
+    events = con.execute(
+        "SELECT previous_state, new_state, cause FROM dag_state_event "
+        "WHERE node_id=? ORDER BY rowid", (node_id,)).fetchall()
+    evidence = con.execute(
+        "SELECT evidence_id, failure_attribution, verification_outcome, retries, "
+        "corrections, final_success, deterministic_test_results "
+        "FROM performance_evidence WHERE dag_node_id=? ORDER BY timestamp",
+        (node_id,)).fetchall()
+
+    attribution = None
+    verification_outcome = None
+    retries = None
+    stops = None
+    finish_reasons = []
+    for row in evidence:
+        if not attribution and row["failure_attribution"]:
+            attribution = row["failure_attribution"]
+        if verification_outcome is None and row["verification_outcome"]:
+            verification_outcome = row["verification_outcome"]
+        det = _deterministic_results(row["deterministic_test_results"])
+        for reason in det.get("content_stop_finish_reasons") or []:
+            if reason and reason not in finish_reasons:
+                finish_reasons.append(reason)
+        if retries is None and det.get("content_stop_retries") is not None:
+            retries = det["content_stop_retries"]
+        if stops is None and det.get("content_stop_stops") is not None:
+            stops = det["content_stop_stops"]
+
+    state = node["state"]
+    terminal_cause = None
+    if state in TERMINAL_FAILURE_STATES and events:
+        terminal_cause = events[-1]["cause"]
+    # A content-stop cause is recorded on the retry (REWORK) events as well as
+    # on the terminal BLOCKED event, so scan all of them; the terminal cause
+    # wins for reporting when present.
+    cause_reason = None
+    for event in events:
+        reason = finish_reason_from_cause(event["cause"])
+        if reason:
+            cause_reason = reason
+    if cause_reason and cause_reason not in finish_reasons:
+        finish_reasons.append(cause_reason)
+
+    return {
+        "node_id": node["node_id"],
+        "plan_id": node["plan_id"],
+        "state": state,
+        "assigned_worker": node["assigned_worker"],
+        "objective": node["objective"],
+        "failure_attribution": attribution,
+        "verification_outcome": verification_outcome,
+        "provider_finish_reason": finish_reasons[0] if finish_reasons else None,
+        "provider_finish_reasons": finish_reasons,
+        "content_stop_retries": retries,
+        "content_stop_stops": stops,
+        "terminal_cause": terminal_cause,
+        # Derived, for filtering only: a content-stop cause/attribution was
+        # persisted. The verbatim values above are the evidence.
+        "content_stop": bool(finish_reasons) or (
+            attribution == FAILURE_ATTRIBUTION_PROVIDER_CONTENT_STOP),
+    }
+
+
+def _print_failure_view(view):
+    """Render one :func:`node_failure_view` record for the operator."""
+    print(f"  Node: {view['node_id']}  (plan {view['plan_id']})")
+    print(f"    State: {view['state']}")
+    print(f"    Assigned worker: {view['assigned_worker']}")
+    print(f"    Failure attribution: "
+          f"{view['failure_attribution'] or 'none recorded'}")
+    print(f"    Provider finish reason: "
+          f"{view['provider_finish_reason'] or 'none recorded'}")
+    print(f"    Verification outcome: "
+          f"{view['verification_outcome'] or 'none recorded'}")
+    if view["content_stop_retries"] is not None:
+        print(f"    Content-stop retries used: {view['content_stop_retries']} "
+              f"(stops recorded: {view['content_stop_stops']})")
+    if len(view["provider_finish_reasons"]) > 1:
+        print("    Provider finish reasons recorded: "
+              + ", ".join(view["provider_finish_reasons"]))
+    if view["terminal_cause"]:
+        print(f"    Terminal transition cause: {view['terminal_cause']}")
+
+
 class E3Commands:
     """E3 command implementations."""
 
@@ -139,6 +292,31 @@ class E3Commands:
                 print(f"  {row[0]}: {row[1]}")
         except Exception:
             print("  (empty)")
+
+        # Persisted terminal failure attribution (e.g. a provider content-side
+        # stop). Read back from the existing store; nothing new is written.
+        print("\n--- Node Failure Attribution ---")
+        try:
+            node_ids = [r[0] for r in con.execute(
+                "SELECT node_id FROM dag_node WHERE state IN ('BLOCKED','FAILED') "
+                "UNION "
+                "SELECT dag_node_id FROM performance_evidence "
+                "WHERE failure_attribution IS NOT NULL "
+                "AND dag_node_id IS NOT NULL "
+                "ORDER BY node_id").fetchall()]
+        except Exception:
+            node_ids = []
+        shown = 0
+        for node_id in node_ids[:MAX_STATUS_ATTRIBUTION_NODES]:
+            view = node_failure_view(con, node_id)
+            if view and (view["failure_attribution"] or view["content_stop"]
+                         or view["state"] in TERMINAL_FAILURE_STATES):
+                _print_failure_view(view)
+                shown += 1
+        if not node_ids or shown == 0:
+            print("  (none)")
+        elif len(node_ids) > MAX_STATUS_ATTRIBUTION_NODES:
+            print(f"  ... {len(node_ids) - MAX_STATUS_ATTRIBUTION_NODES} more")
 
     def plan(self, args):
         """Plan a task (shadow only)."""
@@ -301,15 +479,39 @@ class E3Commands:
 
         if not rows:
             print("No decisions found for this task.")
-            return
+        else:
+            for i, row in enumerate(rows, 1):
+                print(f"Step {i}: {row[2]} decided {row[1]}")
+                print(f"  Action: {row[3]}")
+                print(f"  Confidence: {row[4]}")
+                print(f"  Gate: {row[5]}")
+                print(f"  Time: {row[6]}")
+                print()
 
-        for i, row in enumerate(rows, 1):
-            print(f"Step {i}: {row[2]} decided {row[1]}")
-            print(f"  Action: {row[3]}")
-            print(f"  Confidence: {row[4]}")
-            print(f"  Gate: {row[5]}")
-            print(f"  Time: {row[6]}")
-            print()
+        # Execution-leg nodes persist their outcome in the DAG/evidence tables
+        # rather than as a decision rationale event, so surface the persisted
+        # terminal failure attribution for this task id / plan id here too.
+        self._print_node_attributions(con, "plan_id=? OR node_id=?",
+                                      (task_id, task_id))
+
+    def _print_node_attributions(self, con, where, params):
+        """Print persisted failure attribution for the matching DAG nodes."""
+        try:
+            node_ids = [r[0] for r in con.execute(
+                f"SELECT node_id FROM dag_node WHERE {where} ORDER BY node_id",
+                params).fetchall()]
+        except Exception:
+            return
+        views = []
+        for node_id in node_ids:
+            view = node_failure_view(con, node_id)
+            if view and (view["failure_attribution"] or view["content_stop"]
+                         or view["state"] in TERMINAL_FAILURE_STATES):
+                views.append(view)
+        if views:
+            print("--- Node failure attribution ---")
+            for view in views:
+                _print_failure_view(view)
 
     def why(self, args):
         """Show why a node was decided a certain way."""
@@ -328,6 +530,8 @@ class E3Commands:
             (node_id,)
         ).fetchone()
 
+        view = node_failure_view(con, node_id)
+
         if row:
             print(f"=== Why: {node_id} ===")
             print(f"Objective: {row[5]}")
@@ -337,8 +541,23 @@ class E3Commands:
             print(f"Confidence: {row[3]}")
             print(f"Gate: {row[4]}")
             print(f"Assigned worker: {row[6]}")
+        elif view:
+            # A production execution-leg node records its outcome in the DAG
+            # state/evidence tables, not as a decision rationale event.
+            print(f"=== Why: {node_id} ===")
+            print(f"Objective: {view['objective']}")
+            print("Decision: none recorded for this node (execution-leg node)")
+            print(f"State: {view['state']}")
+            print(f"Assigned worker: {view['assigned_worker']}")
         else:
             print(f"No decision found for node: {node_id}")
+            return
+
+        if view and (view["failure_attribution"] or view["content_stop"]
+                     or view["state"] in TERMINAL_FAILURE_STATES):
+            print()
+            print("--- Persisted failure attribution ---")
+            _print_failure_view(view)
 
     def verify_db(self, args):
         """Verify orchestration.db integrity."""

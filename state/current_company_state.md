@@ -1257,3 +1257,62 @@ failed / 0 unavailable / 507 tests collected / 507 passed / exit 0**
 482-test baseline at `d9d1a7f`. E3 Stage 2 remains DISABLED; no production dispatch; no VPS cutover;
 no readiness/qualification criterion changed. Owner action required: **none new** (unchanged
 dependencies only).
+
+---
+
+## Content-side stop made operationally visible — operator surface, orchestrator boundary, rehearsal
+
+`agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24`, 2026-09-24T03:08Z–03:12Z
+at code SHA `82ddf0081b1de0503d487f901d8bf294a3eaa223`, authority
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. Evidence:
+`audits/evidence/2026-09-24T03-08-34Z-e3-content-stop-operator-surface/`. **0 real provider calls** —
+deterministic stub adapters on the real code path plus the response recorded by the predecessor task,
+reused verbatim as a fixture.
+
+The attribution described above was previously reachable only through the execution leg's run result
+and its unit suite. It is now reachable where an operator actually looks, and the orchestrator boundary
+carries it too:
+
+- **Operator surface.** `e3-status` prints a DAG state breakdown plus a **Node Failure Attribution**
+  section for every `BLOCKED`/`FAILED` node — state, `failure_attribution`, provider finish reason,
+  content-stop retries and the terminal transition cause; `e3-trace` prints the same block for a plan's
+  terminal nodes; `e3-why <node>` prints it for one node and still reports an unknown node as unknown.
+  Read-only over already-persisted rows: no new schema, no E1/E2 write. Output is capped at 20
+  attributed nodes (full count still printed) so a large historical store cannot flood the operator.
+  Captured end to end (real execution leg, stub adapter, isolated db) in
+  `operator_surface_output.txt`: `Failure attribution: provider_content_stop`, `Provider finish
+  reason: IMAGE_RECITATION`, `Terminal transition cause:
+  provider_content_stop_unrecovered:IMAGE_RECITATION`.
+- **Orchestrator boundary.** `e3_shadow_orchestrator.orchestrate_and_execute` now returns
+  `execution_escalations` (the execution leg's escalation records, verbatim) and a clearly attributed
+  `content_stop_escalation` (`trigger=provider_content_stop`, `finish_reasons`, `node_ids`,
+  `worker_ids`, `content_stop_retries`, `execution_escalation_ids`), `null` on a clean run. The
+  existing `trigger=repeated_failure` escalation, the escalation-on-incomplete behaviour and the owner
+  gate are unchanged — the change is additive.
+- **Rehearsal driver.** `e3_execution_rehearsal.py` scenario `G_content_stop_terminal` (declared
+  `stub_only`, so it can never spend a provider call) runs the recorded stop on the real code path and
+  records the terminal path, the finish reason and the bounded retry accounting in its artifact:
+  `execution_rehearsal_stub_report.json` (produced with stub adapters, isolated db) shows **23/23
+  checks true**, 3 stub dispatches, `content_stop_retry_count = 2` against `content_stop_retry_budget
+  = 2`, no 4th dispatch, node persisted `BLOCKED` with cause
+  `provider_content_stop_unrecovered:IMAGE_RECITATION`, and the escalation
+  `trigger=provider_content_stop` / `finish_reason=IMAGE_RECITATION`. The artifact states in-band that
+  `provider_calls_actually_spent = 0`.
+
+Tests: new offline suite `exec-brain/tests/test_e3_operator_surface.py` (13 tests, registered in
+`scripts/evidence_runner.py`); `test_e3_shadow_orchestrator.py` 13 → 18 (`TestOrchestrateAndExecute
+ContentStopEscalation`); `test_e3_execution_rehearsal.py` 22 → 26. Full regression, pre-deploy
+`scripts/evidence_runner.py --label regression-post-content-stop-operator-surface` → **20 suites / 20
+passed / 0 failed / 0 unavailable / 529 tests / exit 0**
+(`audits/evidence/2026-09-24T03-08-19Z-regression-post-content-stop-operator-surface/`), and after
+`scripts/deploy_e3_runtime.py` (2026-09-24T03:10:14Z; 4 modules copied, per-file SHA-256 verified
+against the repo) the post-deploy re-run was identical: **20 / 20 / 529 / exit 0**
+(`audits/evidence/2026-09-24T03-10-22Z-regression-post-content-stop-operator-surface-postdeploy/`), and
+a final frozen re-run after the last test edit was identical again: **20 / 20 / 529 / exit 0**
+(`audits/evidence/2026-09-24T03-13-53Z-regression-post-content-stop-operator-surface-final/`).
+Baseline beaten: 19 suites / 507 tests at `8930572`. E3 Stage 2 remains **NOT ENABLED**; no production
+dispatch; no VPS cutover; the 0/7 provider-credential gate was not re-run or re-opened; no readiness,
+qualification or verification criterion changed; no unbounded retry path created. One successor is
+staged in `remote-queue/pending/` (`agent-e4-provider-content-stop-pressure-visibility-2026-09-24`)
+without duplicating or pre-empting the pending whole-company acceptance. Owner action required:
+**none new** (unchanged dependencies only).

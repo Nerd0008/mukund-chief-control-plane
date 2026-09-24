@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for E3 Shadow Orchestrator — validates component composition."""
 
+import shutil
 import sqlite3
 import tempfile
 import unittest
@@ -211,6 +212,147 @@ class TestShadowOrchestrator(unittest.TestCase):
         # Normal rehearsal should pass — cycles are caught by decomposition review
         result = self.orchestrator.rehearse("Cyclic task", fp)
         self.assertIsNotNone(result.decomposition_review)
+
+
+# ─── orchestrate_and_execute: content-side stop escalation ──────────
+
+GOOGLE_WORKER = "google-nano-banana-2"
+CONTENT_STOP_FINISH_REASON = "IMAGE_RECITATION"
+
+
+class _AlwaysContentStopAdapter:
+    """Deterministic stub: the provider withholds the content every time.
+
+    Reproduces the recorded provider-returned shape only (finishReason +
+    empty response part list, no image, 0 candidate tokens). No network call,
+    no credential.
+    """
+
+    def __init__(self):
+        self.calls = 0
+        self.contracts = []
+
+    def dispatch(self, contract):
+        self.calls += 1
+        self.contracts.append(dict(contract))
+        return {
+            "dispatch_id": f"stub-content-stop-{self.calls}",
+            "status": "FAILED", "provider": "google",
+            "model": "gemini-3.1-flash-image",
+            "content": None, "image_dims": None, "image_decode_ok": False,
+            "finish_reason": CONTENT_STOP_FINISH_REASON,
+            "candidate_count": 1,
+            "candidate_finish_reasons": [CONTENT_STOP_FINISH_REASON],
+            "response_part_kinds": [], "usage": {"promptTokenCount": 17,
+                                                 "totalTokenCount": 17},
+            "prompt_feedback": None, "error": "no_image_part_in_response",
+            "exit_code": 200, "runtime_s": 5.8,
+        }
+
+
+class _PassingAdapter:
+    """Deterministic stub delivering an output that verifies first time."""
+
+    def __init__(self):
+        self.calls = 0
+
+    def dispatch(self, contract):
+        self.calls += 1
+        return {"dispatch_id": f"stub-ok-{self.calls}", "status": "COMPLETED",
+                "provider": "google", "model": "gemini-3.1-flash-image",
+                "content": "ok", "usage": None, "error": None,
+                "exit_code": 0, "runtime_s": 0.1}
+
+
+class TestOrchestrateAndExecuteContentStopEscalation(unittest.TestCase):
+    """The orchestrator boundary must return the content-stop escalation.
+
+    The existing escalation-on-incomplete behaviour (a ``repeated_failure``
+    escalation) and the owner gate are unchanged; the content-side stop is
+    additionally reported as itself, naming the provider finish reason.
+    """
+
+    def setUp(self):
+        self.temp = tempfile.mkdtemp(prefix="e3-orch-content-stop-")
+        self.addCleanup(shutil.rmtree, self.temp, ignore_errors=True)
+        self.db_path = Path(self.temp) / "orch.db"
+        self.orchestrator = E3ShadowOrchestrator(db_path=self.db_path)
+        registry = CapabilityRegistry(self.orchestrator.con)
+        registry.register_worker(
+            GOOGLE_WORKER, "google", "gemini-3.1-flash-image",
+            roles=["vision"], state="EVALUATING", task_family="code")
+        self.fingerprint = TaskFingerprint(
+            task_family="code", reasoning_depth=1, risk_class="R1",
+            required_roles=["vision"], verification_type="deterministic")
+        self.plan = self.orchestrator.planner.plan(
+            "orchestrator content stop escalation test", self.fingerprint)
+        self.node_id = self.plan["nodes"][0]["node_id"]
+
+    def _adapter_registry(self, adapter):
+        from e3_execution import ExecutionAdapterRegistry
+        from worker_registry import WorkerRegistry
+        return ExecutionAdapterRegistry(
+            worker_registry=WorkerRegistry(),
+            adapter_factories={GOOGLE_WORKER: lambda: adapter},
+            usage_reporters={GOOGLE_WORKER: lambda r: None},
+        )
+
+    def _execute(self, adapter):
+        return self.orchestrator.orchestrate_and_execute(
+            "orchestrator content stop escalation test", self.fingerprint,
+            plan=self.plan,
+            verification_test_cases_by_node={self.node_id: [
+                {"name": "dispatch completed", "field": "status",
+                 "expected": "COMPLETED"}]},
+            max_repair_attempts=0, dispatch_timeout=5,
+            adapter_registry=self._adapter_registry(adapter),
+        )
+
+    def test_content_stop_escalation_is_returned_not_only_repeated_failure(self):
+        adapter = _AlwaysContentStopAdapter()
+        out = self._execute(adapter)
+        self.assertEqual(out["outcome"], "EXECUTION_BLOCKED")
+        self.assertIsNotNone(out["content_stop_escalation"])
+        cs = out["content_stop_escalation"]
+        self.assertEqual(cs["trigger"], "provider_content_stop")
+        self.assertEqual(cs["finish_reasons"], [CONTENT_STOP_FINISH_REASON])
+        self.assertEqual(cs["worker_ids"], [GOOGLE_WORKER])
+        self.assertEqual(cs["node_ids"], [self.node_id])
+        self.assertTrue(cs["escalation_id"])
+
+    def test_repeated_failure_escalation_behaviour_is_unchanged(self):
+        out = self._execute(_AlwaysContentStopAdapter())
+        self.assertIsNotNone(out["escalation"])
+        self.assertEqual(out["escalation"]["trigger"], "repeated_failure")
+
+    def test_execution_leg_escalation_is_surfaced_verbatim(self):
+        out = self._execute(_AlwaysContentStopAdapter())
+        leg = out["execution_escalations"]
+        self.assertEqual(len(leg), 1)
+        self.assertEqual(leg[0]["trigger"], "provider_content_stop")
+        self.assertEqual(leg[0]["finish_reason"], CONTENT_STOP_FINISH_REASON)
+        self.assertEqual(
+            out["content_stop_escalation"]["execution_escalation_ids"],
+            [leg[0]["escalation_id"]])
+        # the orchestrator-level escalation is a distinct record
+        self.assertNotEqual(
+            out["content_stop_escalation"]["escalation_id"],
+            leg[0]["escalation_id"])
+
+    def test_content_stop_retry_accounting_is_bounded(self):
+        out = self._execute(_AlwaysContentStopAdapter())
+        node = out["execution"]["nodes"][0]
+        self.assertEqual(node["failure_attribution"], "provider_content_stop")
+        self.assertEqual(node["content_stop_retries"], 2)
+        self.assertEqual(len(node["dispatch_attempts"]), 3)
+        self.assertEqual(out["content_stop_escalation"]["content_stop_retries"], 2)
+
+    def test_successful_run_has_no_content_stop_escalation(self):
+        out = self._execute(_PassingAdapter())
+        self.assertEqual(out["outcome"], "EXECUTION_COMPLETE")
+        self.assertIsNone(out["content_stop_escalation"])
+        self.assertEqual(out["execution_escalations"], [])
+        self.assertNotIn("escalation", out)
 
 
 if __name__ == "__main__":

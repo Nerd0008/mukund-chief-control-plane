@@ -19,9 +19,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import e3_execution  # noqa: E402
 from e3_execution_rehearsal import (  # noqa: E402
-    REQUIRED_RUNTIME_MODULES, TOKEN_CODEX, TOKEN_FIRSTPASS, TOKEN_NODE_BUILDER,
-    TOKEN_NODE_INTEGRATOR, TOKEN_REPAIR, E3ExecutionRehearsal,
-    normalized_scenario_nodes,
+    REQUIRED_RUNTIME_MODULES, STUB_ONLY_SCENARIOS, TOKEN_CODEX, TOKEN_FIRSTPASS,
+    TOKEN_NODE_BUILDER, TOKEN_NODE_INTEGRATOR, TOKEN_REPAIR,
+    E3ExecutionRehearsal, normalized_scenario_nodes,
 )
 
 TOKENS = (TOKEN_REPAIR, TOKEN_FIRSTPASS, TOKEN_CODEX,
@@ -134,18 +134,64 @@ class RehearsalDriverTest(unittest.TestCase):
         s = self.by_name["E_non_routable_refusal"]
         self.assertEqual(s["persisted_node_state"], "BLOCKED")
 
+    # ── provider content-side stop terminal path (stub providers only) ──
+    def test_content_stop_terminal_scenario_is_recorded(self):
+        s = self.by_name["G_content_stop_terminal"]
+        self.assertTrue(s["content_stop_terminal_path_recorded"])
+        self.assertEqual(s["content_stop_finish_reason"], "IMAGE_RECITATION")
+        self.assertEqual(s["node_state"], "BLOCKED")
+        self.assertEqual(s["run_outcome"], "EXECUTION_BLOCKED")
+        self.assertEqual(s["failure_attribution"], "provider_content_stop")
+        self.assertEqual(s["blocking_reason"],
+                         "provider_content_stop_unrecovered:IMAGE_RECITATION")
+
+    def test_content_stop_retry_accounting_is_bounded_and_identical(self):
+        s = self.by_name["G_content_stop_terminal"]
+        self.assertEqual(s["content_stop_retry_budget"], 2)
+        self.assertEqual(s["content_stop_retry_count"], 2)
+        # initial dispatch + exactly the bounded retries, no more
+        self.assertEqual(s["stub_dispatch_calls"], 1 + s["content_stop_retry_budget"])
+        self.assertEqual(len(s["dispatch_attempts"]), s["stub_dispatch_calls"])
+        # every attempt was the identical request (never a reworded repair)
+        self.assertTrue(s["content_stop_retries_are_identical_requests"])
+        self.assertTrue(all(r.get("kind") == "same_request_retry"
+                            for r in s["repairs"]))
+
+    def test_content_stop_terminal_path_is_persisted_and_escalated(self):
+        s = self.by_name["G_content_stop_terminal"]
+        self.assertEqual(s["persisted_node_state"], "BLOCKED")
+        causes = [e["cause"] for e in s["persisted_state_events"]]
+        self.assertIn("provider_content_stop_unrecovered:IMAGE_RECITATION", causes)
+        self.assertEqual(s["persisted_evidence"][0]["failure_attribution"],
+                         "provider_content_stop")
+        self.assertEqual(s["persisted_evidence"][0]["final_success"], 0)
+        escalation = s["content_stop_escalation"]
+        self.assertIsNotNone(escalation)
+        self.assertEqual(escalation["trigger"], "provider_content_stop")
+        self.assertEqual(escalation["finish_reason"], "IMAGE_RECITATION")
+
+    def test_content_stop_scenario_spends_no_real_provider_call(self):
+        usage = self.report["bounded_usage"]
+        self.assertIn("G_content_stop_terminal", usage["stub_only_scenarios"])
+        self.assertTrue(self.report["checks"]
+                        ["content_stop_terminal_path_recorded"])
+
     def test_bounded_usage_counts_real_dispatches_only(self):
         usage = self.report["bounded_usage"]
-        expected = sum(n["dispatch_count"]
-                       for s in self.report["scenarios"]
-                       for n in normalized_scenario_nodes(s))
-        self.assertEqual(usage["real_provider_calls"], expected)
+        real = [c for c in self.rehearsal.adapter_call_log
+                if c["scenario"] not in STUB_ONLY_SCENARIOS]
+        stub = [c for c in self.rehearsal.adapter_call_log
+                if c["scenario"] in STUB_ONLY_SCENARIOS]
+        # Stub-only scenarios exercise the real code path but spend no provider
+        # call, so they are excluded from the bounded real-call accounting.
+        self.assertEqual(usage["real_provider_calls"], len(real))
         self.assertGreater(usage["real_provider_calls"], 0)
-        # The stated plan covers everything except the optional Google scenario.
-        without_google = sum(n["dispatch_count"] for s in self.report["scenarios"]
-                             if s["scenario"] != "D_google_image_dispatch"
-                             for n in normalized_scenario_nodes(s))
-        self.assertEqual(usage["planned_calls"], without_google)
+        self.assertEqual(usage["stub_only_dispatch_count"], len(stub))
+        self.assertGreater(usage["stub_only_dispatch_count"], 0)
+        # The stated plan covers exactly the real scenarios.
+        planned = sum(s["calls"] for s in self.report["usage_plan"]
+                      if s["scenario"] not in STUB_ONLY_SCENARIOS)
+        self.assertEqual(usage["planned_calls"], planned)
 
     def test_no_node_completes_without_a_verification_pass(self):
         for s in self.report["scenarios"]:

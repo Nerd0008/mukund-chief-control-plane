@@ -1,0 +1,73 @@
+run_outcome: EXECUTION_BLOCKED
+node_state: BLOCKED
+failure_attribution: provider_content_stop
+failure_finish_reason: IMAGE_RECITATION
+stub_dispatch_calls: 3
+===== e3-status =====
+=== E3 Orchestration Status ===
+Database: C:\Users\mukun\AppData\Local\Temp\e3-operator-demo-7qti0wzh\orchestration.db
+
+Schema version: 2
+
+--- Worker Pool ---
+  LOCKED: 6 workers
+    - codex-cli (openai/codex-cli) [routable]
+    - mistral-small-4 (mistral/mistral-small-4) [NOT routable]
+    - google-nano-banana-2 (google/gemini-3.1-flash-image) [routable]
+    - deepseek-v41-flash (deepseek/deepseek-flash) [routable]
+    - glm-53-flash (glm/glm-5.3-flash) [NOT routable]
+    - qwen38-27b (qwen/qwen3.8-27b) [NOT routable]
+  EVALUATE: 1 workers
+    - longcat-2.0 (nous/longcat-2.0) [NOT routable]
+  BENCHMARK: 3 workers
+    - minimax-m3 (minimax/minimax-m3) [NOT routable]
+    - step-37-flash (step/step-3.7-flash) [NOT routable]
+    - tencent-hunyuan-hy3 (tencent/hunyuan-hy3) [NOT routable]
+
+--- Capability Registry ---
+
+--- DAG Nodes ---
+  BLOCKED: 1
+
+--- Node Failure Attribution ---
+  Node: node-operator-demo  (plan plan-operator-demo)
+    State: BLOCKED
+    Assigned worker: google-nano-banana-2
+    Failure attribution: provider_content_stop
+    Provider finish reason: IMAGE_RECITATION
+    Verification outcome: FAIL
+    Content-stop retries used: 2 (stops recorded: 3)
+    Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION
+
+===== e3-trace =====
+=== Decision Trace: plan-operator-demo ===
+
+No decisions found for this task.
+--- Node failure attribution ---
+  Node: node-operator-demo  (plan plan-operator-demo)
+    State: BLOCKED
+    Assigned worker: google-nano-banana-2
+    Failure attribution: provider_content_stop
+    Provider finish reason: IMAGE_RECITATION
+    Verification outcome: FAIL
+    Content-stop retries used: 2 (stops recorded: 3)
+    Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION
+
+===== e3-why =====
+=== Why: node-operator-demo ===
+Objective: operator surface demo
+Decision: none recorded for this node (execution-leg node)
+State: BLOCKED
+Assigned worker: google-nano-banana-2
+
+--- Persisted failure attribution ---
+  Node: node-operator-demo  (plan plan-operator-demo)
+    State: BLOCKED
+    Assigned worker: google-nano-banana-2
+    Failure attribution: provider_content_stop
+    Provider finish reason: IMAGE_RECITATION
+    Verification outcome: FAIL
+    Content-stop retries used: 2 (stops recorded: 3)
+    Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION
+
+note: Stub adapter only: 0 real provider calls, no credential read, no network use. The store is an isolated scratch DB.

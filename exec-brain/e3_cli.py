@@ -128,6 +128,8 @@ def cmd_e3_execute(args):
         "team_assignments": out.get("team_assignments"),
         "execution": out.get("execution"),
         "escalation": out.get("escalation"),
+        "execution_escalations": out.get("execution_escalations"),
+        "content_stop_escalation": out.get("content_stop_escalation"),
     }, indent=2, default=str))
 
 

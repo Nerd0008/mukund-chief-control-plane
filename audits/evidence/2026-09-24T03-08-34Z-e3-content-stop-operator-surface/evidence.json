@@ -1,0 +1,181 @@
+{
+  "label": "e3-content-stop-operator-surface",
+  "task_id": "agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "date_utc": "2026-09-24",
+  "code_sha_at_run": "82ddf0081b1de0503d487f901d8bf294a3eaa223",
+  "stated_provider_call_budget": {
+    "real_provider_calls_planned": 0,
+    "real_provider_calls_performed": 0,
+    "reason": "every scenario is driven by an injected deterministic stub adapter on the real code path, or reads evidence recorded by agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24 (which itself made 0 provider calls); the recorded response (finishReason=IMAGE_RECITATION, empty part list, no image, 0 candidate tokens) is reused verbatim as the fixture",
+    "hard_rule": "no real provider call is made by this task, its tests, or its evidence runs"
+  },
+  "consumed_evidence": {
+    "attribution_task": "agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24",
+    "attribution_dir": "audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/",
+    "source_commit": "8930572",
+    "recorded_finish_reason": "IMAGE_RECITATION",
+    "swallowed_by_previous_rehearsal_series": false,
+    "not_repeated": [
+      "2026-09-24T01:44:32Z repeat series",
+      "2026-09-24T01:46:56Z qualification run",
+      "2026-09-23T21:32:41Z decomposed multi-worker rehearsal",
+      "2026-09-23T21-10-00Z production rehearsal",
+      "2026-09-23T21-49-21Z single-call image diagnosis"
+    ]
+  },
+  "deliverables": {
+    "a_operator_surface": {
+      "state": "DONE",
+      "module": "exec-brain/e3_commands.py",
+      "commands": ["e3-status", "e3-trace", "e3-why"],
+      "exposes": ["node state", "failure_attribution", "provider finishReason", "content-stop retries", "terminal transition cause", "escalation rows"],
+      "source_of_truth": "read-only over the already-persisted dag_node / dag_node_state_event / dispatch attempt / performance_evidence / e3_escalation rows",
+      "new_store_schema": false,
+      "direct_write_to_e1_or_e2": false,
+      "helpers_added": ["finish_reason_from_cause()", "node_failure_view()"],
+      "constants_added": {"TERMINAL_FAILURE_STATES": ["BLOCKED", "FAILED"], "MAX_STATUS_ATTRIBUTION_NODES": 20},
+      "cli_forwarding": "exec-brain/e3_cli.py forwards outcome / plan_id / team_complete / team_assignments / execution / escalation in its JSON dump only",
+      "end_to_end_capture": "operator_surface_output.txt (produced by operator_surface_demo.py, real execution leg, stub adapter, isolated db)"
+    },
+    "b_orchestrator_boundary": {
+      "state": "DONE",
+      "module": "exec-brain/e3_shadow_orchestrator.py",
+      "function": "orchestrate_and_execute",
+      "returns": {
+        "execution_escalations": "the execution leg's own escalation records, verbatim",
+        "content_stop_escalation": {
+          "trigger": "provider_content_stop",
+          "fields": ["escalation_id", "trigger", "finish_reasons", "node_ids", "worker_ids", "content_stop_retries", "execution_escalation_ids"],
+          "null_when_no_content_stop": true
+        }
+      },
+      "repeated_failure_escalation": "unchanged (still returned as out['escalation'])",
+      "owner_gate": "unchanged",
+      "escalation_on_incomplete_behaviour": "unchanged"
+    },
+    "c_rehearsal_driver": {
+      "state": "DONE",
+      "module": "exec-brain/e3_execution_rehearsal.py",
+      "scenario": "G_content_stop_terminal",
+      "scenario_class": "stub_only",
+      "recorded_in_artifact": [
+        "run_outcome",
+        "node_state",
+        "failure_attribution",
+        "content_stop_finish_reason",
+        "content_stop_retry_budget",
+        "content_stop_retry_count",
+        "content_stop_retries_are_identical_requests",
+        "content_stop_escalation",
+        "content_stop_terminal_path_recorded"
+      ],
+      "new_checks": ["content_stop_terminal_path_recorded", "content_stop_retries_stayed_bounded"],
+      "artifact": "execution_rehearsal_stub_report.json",
+      "artifact_producer": "run_stub_execution_rehearsal.py",
+      "artifact_facts": {
+        "checks_true": 23,
+        "checks_total": 23,
+        "injected_stub_adapters": true,
+        "provider_calls_actually_spent": 0,
+        "stub_dispatches_scenario_g": 3,
+        "content_stop_retry_count": 2,
+        "content_stop_retry_budget": 2,
+        "fourth_dispatch_made": false,
+        "node_state": "BLOCKED",
+        "blocking_reason": "provider_content_stop_unrecovered:IMAGE_RECITATION",
+        "failure_attribution": "provider_content_stop",
+        "escalation_trigger": "provider_content_stop",
+        "escalation_finish_reason": "IMAGE_RECITATION",
+        "persisted_state_events": [
+          "PLANNED->READY:dependencies_satisfied",
+          "READY->RUNNING:dispatch_attempt_1",
+          "RUNNING->VERIFYING:verify_attempt_1",
+          "VERIFYING->REWORK:content_stop_same_request_retry_1_after_IMAGE_RECITATION",
+          "REWORK->RUNNING:dispatch_attempt_2",
+          "RUNNING->VERIFYING:verify_attempt_2",
+          "VERIFYING->REWORK:content_stop_same_request_retry_2_after_IMAGE_RECITATION",
+          "REWORK->RUNNING:dispatch_attempt_3",
+          "RUNNING->VERIFYING:verify_attempt_3",
+          "VERIFYING->BLOCKED:provider_content_stop_unrecovered:IMAGE_RECITATION"
+        ],
+        "note": "bounded_usage.real_provider_calls counts dispatches routed through the injected stubs, NOT provider calls spent; provider_calls_actually_spent is 0"
+      }
+    }
+  },
+  "tests_added": {
+    "exec-brain/tests/test_e3_operator_surface.py": {"new": true, "count": 13, "real_provider_calls": 0},
+    "exec-brain/tests/test_e3_shadow_orchestrator.py": {"before": 13, "after": 18, "added_class": "TestOrchestrateAndExecuteContentStopEscalation", "real_provider_calls": 0},
+    "exec-brain/tests/test_e3_execution_rehearsal.py": {"before": 22, "after": 26, "real_provider_calls": 0},
+    "registered_in_runner": "exec-brain/tests/test_e3_operator_surface.py added to scripts/evidence_runner.py"
+  },
+  "regression": {
+    "baseline": {"suites": 19, "tests": 507, "exit_code": 0, "code_sha": "8930572"},
+    "pre_deploy": {
+      "command": "python scripts/evidence_runner.py --label regression-post-content-stop-operator-surface",
+      "artifact": "audits/evidence/2026-09-24T03-08-19Z-regression-post-content-stop-operator-surface/",
+      "suites_run": 20,
+      "suites_passed": 20,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 529,
+      "tests_passed": 529,
+      "exit_code": 0
+    },
+    "post_deploy": {
+      "command": "python scripts/evidence_runner.py --label regression-post-content-stop-operator-surface-postdeploy",
+      "artifact": "audits/evidence/2026-09-24T03-10-22Z-regression-post-content-stop-operator-surface-postdeploy/",
+      "suites_run": 20,
+      "suites_passed": 20,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 529,
+      "tests_passed": 529,
+      "exit_code": 0
+    },
+    "final_frozen_run": {
+      "command": "python scripts/evidence_runner.py --label regression-post-content-stop-operator-surface-final",
+      "artifact": "audits/evidence/2026-09-24T03-13-53Z-regression-post-content-stop-operator-surface-final/",
+      "suites_run": 20,
+      "suites_passed": 20,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 529,
+      "tests_passed": 529,
+      "exit_code": 0,
+      "note": "re-run after the last test-file edit so the recorded regression matches the committed source exactly"
+    },
+    "baseline_beaten": true
+  },
+  "deployment": {
+    "script": "scripts/deploy_e3_runtime.py",
+    "deployed_at_utc": "2026-09-24T03:10:14+00:00",
+    "runtime_root": "C:/Users/mukun/AppData/Local/hermes/exec-brain",
+    "backup_dir": "C:/Users/mukun/AppData/Local/hermes/exec-brain/backups/e3-deploy-20260924T031014Z",
+    "copied": ["e3_commands.py", "e3_cli.py", "e3_shadow_orchestrator.py", "e3_execution_rehearsal.py"],
+    "eb_py": "already-patched",
+    "deployed_sha256_matches_repo": {
+      "e3_commands.py": "79ecb6bca428461022753c3223278cdd1358836d05547ee63ec5113c85033dce",
+      "e3_cli.py": "7f8744fe9a7e8c7fb7953d11ee14b4a095e9e2cd8b55a7be096b7be7ac33e551",
+      "e3_shadow_orchestrator.py": "808b092a59b2a1e848ab653ce2c8579b0af4b340707653c15d55282367746185",
+      "e3_execution_rehearsal.py": "b482775f732eb105e2b85bb8d49e098720e6a25cb3c4a8f3ec2234fdb4461b2b",
+      "e3_execution.py": "6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3"
+    },
+    "e3_execution_module_changed_by_this_task": false
+  },
+  "boundaries": {
+    "e3_stage2_enabled": false,
+    "production_dispatch": false,
+    "vps_cutover": false,
+    "deployment_architecture_changed": false,
+    "provider_credential_gate_reopened": false,
+    "readiness_qualification_verification_criteria_changed": false,
+    "complete_requires_independent_deterministic_verification_pass": true,
+    "unbounded_retry_path": false,
+    "secrets_or_credentials_read": false,
+    "raw_runtime_database_content_committed": false
+  },
+  "still_open_deliberately_not_chased": [
+    "what makes the recitation filter fire on some identical calls and not others; the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it"
+  ]
+}
