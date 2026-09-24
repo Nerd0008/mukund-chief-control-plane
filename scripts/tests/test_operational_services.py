@@ -275,5 +275,245 @@ class TestOwnerActionsAndBriefs(TempRoot):
         self.assertIn("Operational health snapshot", ops.render_health_markdown(snapshot))
 
 
+class TestContentStopPressureSurface(TempRoot):
+    """The recorded content-side stop pressure view on the operator surfaces.
+
+    Offline and read-only: every store is a disposable temp database and every
+    "provider series" is a hand-written recorded artifact. No provider call, no
+    live store, no automatic action — the view is an observation only.
+    """
+
+    CLEAN_LEDGER = {"attempts": [{"attempt": i + 1} for i in range(5)],
+                    "content_stop_stops": 0, "content_stop_finish_reasons": []}
+    LEGACY_LEDGER = {"attempts": [{"attempt": 1, "outcome": "FAIL"}],
+                     "rejections": 1, "repairs": 0}
+    ZERO_ATTEMPT_LEDGER = {"attempts": [], "content_stop_stops": 0,
+                           "content_stop_finish_reasons": []}
+
+    def _store(self, name="orchestration.db", rows=()):
+        """A disposable store holding exactly the columns the view reads."""
+        p = self.root / name
+        con = sqlite3.connect(str(p))
+        con.execute(
+            "CREATE TABLE performance_evidence (evidence_id TEXT PRIMARY KEY, "
+            "worker_id TEXT, provider TEXT, model TEXT, "
+            "deterministic_test_results TEXT, failure_attribution TEXT, "
+            "retries INTEGER, timestamp TEXT, dag_node_id TEXT)")
+        con.executemany(
+            "INSERT INTO performance_evidence VALUES (?,?,?,?,?,?,?,?,?)", rows)
+        con.commit()
+        con.close()
+        return p
+
+    @staticmethod
+    def _row(evidence_id, ledger, worker_id="fixture-worker", provider="fixture",
+             model="fixture-model", timestamp="2026-09-24 01:44:32"):
+        return (evidence_id, worker_id, provider, model, json.dumps(ledger),
+                None, 0, timestamp, None)
+
+    def _series(self, stops=2, total=9, label="fixture-series"):
+        """A recorded provider series artifact (never produced by a provider here)."""
+        d = self.root / "series" / label
+        d.mkdir(parents=True, exist_ok=True)
+        observations = [
+            {"executed": True, "requested_model": "fixture-model",
+             "finish_reason": "IMAGE_RECITATION" if i < stops else "STOP",
+             "candidate_finish_reasons": []}
+            for i in range(total)
+        ]
+        path = d / "observations.json"
+        path.write_text(json.dumps({
+            "worker_id": "fixture-worker", "label": label,
+            "run_started_utc": "2026-09-24T01:44:32+00:00",
+            "observations": observations}), encoding="utf-8")
+        return path
+
+    def _status(self, db, series=()):
+        import operational_services as ops
+        return ops.content_stop_pressure_status(
+            db_paths=[("e3-orchestration", db)], series_paths=series)
+
+    def _snapshot(self, db, series=()):
+        import operational_services as ops
+        return ops.build_health_snapshot(
+            repo_root=self.root, db_paths=[("e3-orchestration", db)],
+            queue_root=self.root / "remote-queue", log_paths=[],
+            check_tasks=False, pressure_series=series)
+
+    def test_clean_provider_raises_no_warning(self):
+        import operational_services as ops
+        db = self._store(rows=[self._row("ev-clean", self.CLEAN_LEDGER)])
+        rec = self._status(db)
+        group = rec["groups"][0]
+        self.assertEqual(group["attempts_classified"], 5)
+        self.assertEqual(group["sample_size"], 5)
+        self.assertEqual(group["content_stops_observed"], 0)
+        self.assertEqual(group["content_stop_rate"], 0.0)
+        self.assertFalse(group["content_withheld_at_measurable_rate"])
+        self.assertFalse(rec["detected"])
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_PASS)
+        self.assertEqual(ops.pressure_escalations(rec), [])
+
+        snap = self._snapshot(db)
+        check = [c for c in snap["checks"] if c["check"] == ops.PRESSURE_CHECK][0]
+        self.assertEqual(check["status"], "PASS")
+        self.assertEqual([e for e in snap["escalations"]
+                          if e["category"] == ops.PRESSURE_ESCALATION_CATEGORY], [])
+
+    def test_pre_classification_store_reports_unknown_not_clear(self):
+        """A row recorded before the content-stop classification carries no count."""
+        import operational_services as ops
+        db = self._store(rows=[self._row("ev-legacy", self.LEGACY_LEDGER)])
+        rec = self._status(db)
+        group = rec["groups"][0]
+        self.assertEqual(group["attempts_observed"], 1)
+        self.assertEqual(group["attempts_classified"], 0)
+        self.assertEqual(group["attempts_unclassified"], 1)
+        self.assertIsNone(group["content_stop_rate"])
+        self.assertIsNone(group["content_withheld_at_measurable_rate"])
+        self.assertEqual(group["status"], "unknown")
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_UNKNOWN)
+        self.assertFalse(rec["detected"])
+        self.assertIn("unknown, not clear", rec["detail"])
+        self.assertEqual(ops.pressure_escalations(rec), [])
+        # The operator surface reports UNKNOWN, never PASS/"clear".
+        snap = self._snapshot(db)
+        check = [c for c in snap["checks"] if c["check"] == ops.PRESSURE_CHECK][0]
+        self.assertEqual(check["status"], "UNKNOWN")
+
+    def test_zero_attempts_never_yield_a_fabricated_rate(self):
+        import operational_services as ops
+        db = self._store(rows=[self._row("ev-zero", self.ZERO_ATTEMPT_LEDGER)])
+        rec = self._status(db)
+        group = rec["groups"][0]
+        self.assertEqual(group["attempts_observed"], 0)
+        self.assertEqual(group["sample_size"], 0)
+        self.assertIsNone(group["content_stop_rate"])
+        self.assertIsNone(group["content_withheld_at_measurable_rate"])
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_UNKNOWN)
+        rendered = "\n".join(ops.render_pressure_lines(rec))
+        self.assertIn("no rate is reported from zero attempts", rendered)
+        self.assertIn("unknown", rendered)
+        self.assertNotIn("stop rate 0", rendered)
+        self.assertEqual(ops.pressure_escalations(rec), [])
+
+    def test_a_crossing_recorded_rate_is_a_warning_grade_observation(self):
+        import operational_services as ops
+        series = self._series(stops=2, total=9)
+        db = self._store()
+        rec = self._status(db, series=[series])
+        self.assertTrue(rec["detected"])
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_ATTENTION)
+        flagged = [g for g in rec["groups"]
+                   if g["content_withheld_at_measurable_rate"]]
+        self.assertEqual(len(flagged), 1)
+        self.assertEqual(flagged[0]["attempts_classified"], 9)
+        self.assertEqual(flagged[0]["sample_size"], 9)
+        self.assertEqual(flagged[0]["content_stops_observed"], 2)
+        self.assertAlmostEqual(flagged[0]["content_stop_rate"], 2 / 9)
+        self.assertEqual(flagged[0]["last_finish_reason"], "IMAGE_RECITATION")
+
+        escalations = ops.pressure_escalations(rec)
+        self.assertEqual(len(escalations), 1)
+        item = escalations[0]
+        self.assertEqual(item["severity"], "warning")
+        self.assertEqual(item["category"], ops.PRESSURE_ESCALATION_CATEGORY)
+        self.assertIn("0.222", item["item"])
+        self.assertIn("sample size 9", item["item"])
+        self.assertIn("IMAGE_RECITATION", item["item"])
+        self.assertIn("no automatic worker swap", item["item"])
+        self.assertIn("explicit E4/owner decision", item["item"])
+
+    def test_health_snapshot_escalation_list_carries_the_crossing_group(self):
+        import operational_services as ops
+        series = self._series(stops=2, total=9)
+        db = self._store()
+        snap = self._snapshot(db, series=[series])
+        check = [c for c in snap["checks"] if c["check"] == ops.PRESSURE_CHECK][0]
+        self.assertEqual(check["status"], "ATTENTION")
+        self.assertEqual(snap["fail_count"], 0)
+        pressure_escalations_ = [e for e in snap["escalations"]
+                                 if e["category"] == ops.PRESSURE_ESCALATION_CATEGORY]
+        self.assertEqual(len(pressure_escalations_), 1)
+        self.assertEqual(pressure_escalations_[0]["severity"], "warning")
+        md = ops.render_health_markdown(snap)
+        self.assertIn("Provider content-side stop pressure", md)
+        self.assertIn("content withheld at a measurable rate: yes", md)
+        self.assertIn("sample size 9", md)
+
+    def test_morning_brief_carries_and_renders_the_pressure_view(self):
+        import operational_services as ops
+        series = self._series(stops=2, total=9)
+        db = self._store()
+        brief = ops.build_morning_brief(
+            repo_root=self.root, db_paths=[("e3-orchestration", db)],
+            queue_root=self.root / "remote-queue", log_paths=[],
+            check_tasks=False, pressure_series=[series],
+            owner_actions_file=self.root / "absent-actions.md")
+        pressure = brief["resource_status"]["content_stop_pressure"]
+        self.assertEqual(pressure["status"], "ATTENTION")
+        self.assertTrue(pressure["detected"])
+        self.assertIn("no automatic worker swap", pressure["decision"])
+        self.assertEqual([e["category"] for e in brief["escalations"]
+                          if e["category"] == ops.PRESSURE_ESCALATION_CATEGORY],
+                         [ops.PRESSURE_ESCALATION_CATEGORY])
+        md = ops.render_morning_markdown(brief)
+        self.assertIn("content withheld at a measurable rate: yes", md)
+        self.assertIn("IMAGE_RECITATION", md)
+
+    def test_the_pressure_view_never_writes_the_store(self):
+        import operational_services as ops
+        db = self._store(rows=[self._row("ev-readonly", self.CLEAN_LEDGER)])
+        before = ops.sha256_file(db)
+        rec = self._status(db)
+        self.assertEqual(ops.sha256_file(db), before)
+        self.assertFalse((self.root / "orchestration.db-journal").exists())
+        self.assertFalse((self.root / "orchestration.db-wal").exists())
+        self.assertTrue(rec["observation_only"])
+        self.assertEqual(rec["provider_calls_spent"], 0)
+        self.assertEqual(rec["network_calls_spent"], 0)
+        self.assertFalse(rec["live_state_modified"])
+        self.assertIn("no automatic worker swap", rec["decision"])
+
+    def test_an_absent_or_undeclared_store_reports_unknown(self):
+        import operational_services as ops
+        rec = ops.content_stop_pressure_status(
+            db_paths=[("other", self.root / "t.db")], series_paths=())
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_UNKNOWN)
+        self.assertIn("no orchestration store declared", rec["detail"])
+        self.assertEqual(ops.pressure_escalations(rec), [])
+
+        missing = self.root / "absent.db"
+        rec2 = ops.content_stop_pressure_status(
+            db_paths=[("e3-orchestration", missing)], series_paths=())
+        self.assertEqual(rec2["status"], ops.PRESSURE_STATUS_UNKNOWN)
+        self.assertIn("absent", rec2["detail"])
+
+    def test_declared_recorded_series_is_consumed_by_default(self):
+        """The default path consumes the declared recorded artifact (never re-run)."""
+        import operational_services as ops
+        series = self._series(stops=2, total=9)
+        original = ops.RECORDED_PRESSURE_SERIES
+        ops.RECORDED_PRESSURE_SERIES = [series]
+        self.addCleanup(setattr, ops, "RECORDED_PRESSURE_SERIES", original)
+        db = self._store()
+        rec = ops.content_stop_pressure_status(
+            db_paths=[("e3-orchestration", db)])
+        self.assertEqual(rec["status"], ops.PRESSURE_STATUS_ATTENTION)
+        self.assertEqual(rec["source_errors"], [])
+        self.assertTrue(any(g["content_stops_observed"] == 2 for g in rec["groups"]))
+
+    def test_unreadable_series_artifact_is_recorded_not_fabricated(self):
+        import operational_services as ops
+        db = self._store(rows=[self._row("ev-clean", self.CLEAN_LEDGER)])
+        rec = self._status(db, series=[self.root / "gone" / "observations.json"])
+        self.assertTrue(rec["source_errors"])
+        self.assertIn("gone", rec["source_errors"][0])
+        # The readable store row is still reported; nothing is invented for the
+        # unreadable artifact.
+        self.assertEqual(len(rec["groups"]), 1)
+        self.assertEqual(rec["groups"][0]["sample_size"], 5)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

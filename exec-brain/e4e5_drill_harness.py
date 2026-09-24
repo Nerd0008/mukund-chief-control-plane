@@ -35,6 +35,10 @@ Truth rules (non-negotiable)
 * Qualification rows used by the failover drill are a **labelled fixture** in the
   disposable DB, mirrored from what the live registry actually records read-only.
   They are not new qualification evidence.
+* The E4 provider content-side stop pressure view is recorded over the *same*
+  isolated store (D7) exactly like the continuity/outage/convergence drills are:
+  a read-only observation built from already-recorded rows, with no dispatch, no
+  provider call, no store write and no automatic action on a flagged group.
 * Stage 2 is not enabled, nothing is deployed, and no owner-gated action is taken.
 
 Usage::
@@ -949,6 +953,57 @@ class E4E5DrillHarness:
         finally:
             con.close()
 
+    # ── D7: recorded content-side stop pressure over the isolated store ──
+    def observe_content_stop_pressure(self) -> Dict[str, Any]:
+        """Record the E4 pressure view over this harness's isolated drill store.
+
+        Mirrors the continuity/outage/convergence drills: what is recorded here is
+        what the real E4 resource-continuity view reports over the *isolated*
+        drill store. Nothing is dispatched, no provider is called, no row is
+        written (``total_changes`` is compared before/after) and no action is
+        taken on a flagged group — a flagged group stays an explicit E4/owner
+        decision.
+        """
+        from resource_monitor import (render_content_stop_pressure,
+                                      ResourceMonitor)
+
+        con = self._con()
+        try:
+            rows_before = con.execute(
+                "SELECT COUNT(*) FROM performance_evidence").fetchone()[0]
+            changes_before = con.total_changes
+            view = ResourceMonitor(con).get_content_stop_pressure()
+            changes_after = con.total_changes
+            rows_after = con.execute(
+                "SELECT COUNT(*) FROM performance_evidence").fetchone()[0]
+        finally:
+            con.close()
+
+        result = {
+            "drill": "D7_content_stop_pressure_observation",
+            "view": view.get("view"),
+            "observation_only": view.get("observation_only"),
+            "decision": view.get("decision"),
+            "rate_threshold": view.get("rate_threshold"),
+            "minimum_sample": view.get("minimum_sample"),
+            "content_stop_pressure_detected":
+                view.get("content_stop_pressure_detected"),
+            "evidence_rows_before": rows_before,
+            "evidence_rows_after": rows_after,
+            "store_rows_written_by_observation": changes_after - changes_before,
+            "provider_calls_spent": 0,
+            "sources": view.get("sources") or [],
+            "source_errors": view.get("source_errors") or [],
+            "operator_lines": list(render_content_stop_pressure(view)),
+            "note": (
+                "read-only observation over this harness's isolated drill store "
+                "(no live store is read; every value is read from already-recorded "
+                "rows); no dispatch, no provider call, no store write and no "
+                "automatic action on a flagged group"),
+        }
+        self.drills["D7"] = result
+        return result
+
     # ── orchestration ───────────────────────────────────────────────
     def run(self) -> Dict[str, Any]:
         before = hash_live_stores(self.runtime_root)
@@ -960,6 +1015,7 @@ class E4E5DrillHarness:
         self.drill_malformed_output()
         self.drill_convergence_cap()
         self.drill_safe_mode_override_and_recovery()
+        self.observe_content_stop_pressure()
 
         after = hash_live_stores(self.runtime_root)
         moved = sorted(k for k in before if before.get(k) != after.get(k))
@@ -994,7 +1050,7 @@ class E4E5DrillHarness:
             "adapter_call_log": self.adapter_call_log,
             "drills": {
                 key: self.drills.get(key) for key in
-                ("D1", "D2", "D3", "D4", "D5", "D6") if key in self.drills
+                ("D1", "D2", "D3", "D4", "D5", "D6", "D7") if key in self.drills
             },
             "checks": checks,
             "checks_passed": sum(1 for v in checks.values() if v),
@@ -1010,6 +1066,7 @@ class E4E5DrillHarness:
         d4 = d.get("D4", {})
         d5 = d.get("D5", {})
         d6 = d.get("D6", {})
+        d7 = d.get("D7", {})
 
         cp = d1.get("checkpoint", {})
         primary = d1.get("primary_dispatch", {})
@@ -1078,6 +1135,27 @@ class E4E5DrillHarness:
             "isolation_live_stores_untouched": (
                 self.isolation.get("live_stores_changed") == []
                 and self.isolation.get("isolated_db_exists") is True),
+            "D7_pressure_view_recorded_over_isolated_store":
+                d7.get("view") == "e4_provider_content_stop_pressure"
+                and isinstance(d7.get("sources"), list)
+                and bool(d7.get("operator_lines")),
+            "D7_no_rate_without_a_recorded_sample": all(
+                (g.get("content_stop_rate") is None
+                 and not g.get("sample_size"))
+                or (g.get("sample_size")
+                    and abs(g.get("content_stop_rate")
+                            - g.get("content_stops_observed")
+                            / g.get("sample_size")) < 1e-9
+                    and g.get("content_stop_rate_basis"))
+                for s in d7.get("sources") or []
+                for g in s.get("groups") or []),
+            "D7_observation_only_no_action":
+                d7.get("observation_only") is True
+                and d7.get("provider_calls_spent") == 0
+                and d7.get("store_rows_written_by_observation") == 0
+                and d7.get("evidence_rows_before") == d7.get("evidence_rows_after")
+                and d7.get("source_errors") == []
+                and "explicit E4/owner decision" in (d7.get("decision") or ""),
             "no_real_provider_calls": self.real_provider_calls == 0,
         }
 

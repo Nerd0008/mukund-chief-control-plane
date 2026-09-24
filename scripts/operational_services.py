@@ -417,6 +417,236 @@ def log_status(log_paths=None) -> list:
 
 
 # --------------------------------------------------------------------------- #
+# E4 recorded provider content-side stop pressure (observation only)
+# --------------------------------------------------------------------------- #
+#
+# The health snapshot / Morning Chief Brief measured capacity and brief
+# availability but not *content-side* provider pressure: a provider (or
+# provider/model pair) that repeatedly withholds content while still consuming
+# prompt tokens looked healthy. This surface carries the E4 resource-continuity
+# pressure view (``resource_monitor.build_content_stop_pressure_view``) into the
+# owner's operator surfaces.
+#
+# Rules, identical to the E4 view it delegates to:
+# * read-only — the orchestration store is opened ``mode=ro`` and nothing writes;
+# * observation only — a flagged group is information for the owner and an
+#   explicit E4/owner decision, never an automatic worker swap, re-dispatch,
+#   failover, retry or safe-mode entry;
+# * no provider/network call and 0 real provider calls — every value comes from
+#   rows/artifacts already recorded on disk;
+# * no fabricated rate — a rate is reported with its sample size and is
+#   ``unknown`` when no classified attempt was recorded (never a rate from zero
+#   attempts, and an unclassified sample is never reported as clear).
+
+PRESSURE_CHECK = "resource.content_stop_pressure"
+PRESSURE_ESCALATION_CATEGORY = "provider_content_stop_pressure"
+PRESSURE_STATUS_UNKNOWN = "UNKNOWN"
+PRESSURE_STATUS_ATTENTION = "ATTENTION"
+PRESSURE_STATUS_PASS = "PASS"
+
+PRESSURE_DECISION_NOTE = (
+    "observation only — no automatic worker swap, re-dispatch, failover, retry "
+    "or safe-mode entry; any failover or re-request stays an explicit E4/owner "
+    "decision")
+
+# Already-recorded provider series artifacts, consumed verbatim and never
+# re-run. Declared so the owner sees the bounded recorded measurement without
+# passing a flag; a path that is absent is recorded as a source error and is
+# never replaced by an invented sample.
+RECORDED_PRESSURE_SERIES = [
+    REPO_ROOT / "audits" / "evidence"
+    / "2026-09-24T01-44-32Z-e3-google-image-repeat-series" / "observations.json",
+]
+
+
+def _orchestration_store_path(db_paths=None) -> "Path | None":
+    """The declared orchestration store path, or ``None`` when not declared."""
+    for label, path in (db_paths if db_paths is not None else OPERATIONAL_DATABASES):
+        if label == "e3-orchestration":
+            return Path(path)
+    return None
+
+
+def _pressure_group_record(source: str, group: dict) -> dict:
+    """A flat, operator-readable record of one pressure group (nothing inferred)."""
+    return {
+        "source": source,
+        "worker_id": group.get("worker_id"),
+        "provider": group.get("provider"),
+        "model": group.get("model"),
+        "attempts_observed": group.get("attempts_observed"),
+        "attempts_classified": group.get("attempts_classified"),
+        "attempts_unclassified": group.get("attempts_unclassified"),
+        "content_stops_observed": group.get("content_stops_observed"),
+        "sample_size": group.get("sample_size"),
+        "content_stop_rate": group.get("content_stop_rate"),
+        "content_stop_rate_basis": group.get("content_stop_rate_basis"),
+        "content_withheld_at_measurable_rate":
+            group.get("content_withheld_at_measurable_rate"),
+        "last_finish_reason": group.get("last_finish_reason"),
+        "last_stop_at": group.get("last_stop_at"),
+        "status": group.get("status"),
+    }
+
+
+def content_stop_pressure_status(*, db_paths=None, pressure_con=None,
+                                 series_paths=None) -> dict:
+    """Recorded provider content-side stop pressure for the operator surfaces.
+
+    Read-only and observation-only. ``pressure_con`` injects an already-open
+    orchestration-store connection (tests); otherwise the declared
+    ``e3-orchestration`` database is opened ``mode=ro``. ``series_paths``
+    optionally adds recorded provider series artifacts; ``None`` means the
+    declared :data:`RECORDED_PRESSURE_SERIES`, ``()`` means none.
+
+    Status vocabulary: ``ATTENTION`` when a provider/model pair's recorded
+    content-side stop rate crosses the bounded threshold, ``UNKNOWN`` when no
+    classified dispatch attempt was recorded for at least one group (reported
+    as unknown, never as clear), ``PASS`` otherwise. Nothing is ever fabricated:
+    an unreadable store, a missing series artifact or an unimportable E4 module
+    yields ``UNKNOWN`` with an explicit reason.
+    """
+    rec: dict = {
+        "artifact": "E4 provider content-side stop pressure (recorded evidence)",
+        "source": "orchestration_store.performance_evidence",
+        "observation_only": True,
+        "provider_calls_spent": 0,
+        "network_calls_spent": 0,
+        "live_state_modified": False,
+        "decision": PRESSURE_DECISION_NOTE,
+        "status": PRESSURE_STATUS_UNKNOWN,
+        "detected": None,
+        "groups": [],
+        "rate_threshold": None,
+        "minimum_sample": None,
+        "source_errors": [],
+        "detail": None,
+        "reason": None,
+    }
+    try:
+        from resource_monitor import build_content_stop_pressure_view
+    except Exception as exc:  # noqa: BLE001 — report, never invent a view
+        rec["reason"] = (f"E4 resource-continuity module not importable "
+                         f"({type(exc).__name__}) — pressure unknown, not clear")
+        rec["detail"] = rec["reason"]
+        return rec
+
+    paths = list(RECORDED_PRESSURE_SERIES if series_paths is None else series_paths)
+
+    con = pressure_con
+    owned = False
+    if con is None:
+        store = _orchestration_store_path(db_paths)
+        if store is None:
+            rec["reason"] = ("no orchestration store declared in the state set — "
+                            "pressure unknown, not clear")
+            rec["detail"] = rec["reason"]
+            return rec
+        if not store.exists():
+            rec["reason"] = (f"orchestration store absent ({store.name}) — "
+                            "pressure unknown, not clear")
+            rec["detail"] = rec["reason"]
+            return rec
+        try:
+            con = sqlite3.connect(f"file:{store}?mode=ro", uri=True)
+            owned = True
+        except Exception as exc:  # noqa: BLE001
+            rec["reason"] = (f"orchestration store unreadable "
+                            f"({type(exc).__name__}) — pressure unknown, not clear")
+            rec["detail"] = rec["reason"]
+            return rec
+
+    try:
+        view = build_content_stop_pressure_view(con, series_paths=paths)
+    except Exception as exc:  # noqa: BLE001
+        rec["reason"] = (f"pressure view unavailable ({type(exc).__name__}: {exc}) "
+                        "— pressure unknown, not clear")
+        rec["detail"] = rec["reason"]
+        return rec
+    finally:
+        if owned:
+            con.close()
+
+    groups = []
+    for source in view.get("sources") or []:
+        for group in source.get("groups") or []:
+            groups.append(_pressure_group_record(source.get("source"), group))
+
+    rec["rate_threshold"] = view.get("rate_threshold")
+    rec["minimum_sample"] = view.get("minimum_sample")
+    rec["detected"] = view.get("content_stop_pressure_detected")
+    rec["groups"] = groups
+    rec["source_errors"] = [str(e) for e in (view.get("source_errors") or [])]
+
+    flagged = [g for g in groups
+               if g["content_withheld_at_measurable_rate"] is True]
+    unclassified = [g for g in groups
+                    if g["content_withheld_at_measurable_rate"] is None]
+    below_bound = [g for g in groups
+                   if g["content_stops_observed"]
+                   and g["content_withheld_at_measurable_rate"] is False]
+
+    if flagged:
+        rec["status"] = PRESSURE_STATUS_ATTENTION
+        rec["detail"] = "; ".join(
+            f"{g['provider']}/{g['model']} recorded content-side stop rate "
+            f"{g['content_stop_rate']:.3f} at sample size {g['sample_size']} "
+            f"(threshold {rec['rate_threshold']}, minimum sample "
+            f"{rec['minimum_sample']}); last finishReason "
+            f"{g['last_finish_reason'] or 'none recorded'}; "
+            f"{PRESSURE_DECISION_NOTE}"
+            for g in flagged)
+    elif not groups:
+        rec["reason"] = ("no recorded dispatch-attempt row was readable — "
+                        "pressure unknown, not clear")
+        rec["detail"] = rec["reason"]
+        return rec
+    elif unclassified:
+        rec["reason"] = (
+            f"{len(unclassified)} worker/provider group(s) have no classified "
+            "dispatch attempt recorded (pre-classification rows) — reported as "
+            "unknown, not clear; no rate is reported from zero attempts")
+        rec["detail"] = rec["reason"]
+        return rec
+    else:
+        rec["status"] = PRESSURE_STATUS_PASS
+        classified = sum(g["attempts_classified"] or 0 for g in groups)
+        detail = (f"no worker/provider pair crossed the bounded content-side stop "
+                  f"threshold (threshold {rec['rate_threshold']}, minimum sample "
+                  f"{rec['minimum_sample']}) over {classified} classified "
+                  f"recorded dispatch attempts")
+        if below_bound:
+            detail += ("; stops recorded below the bound: " + ", ".join(
+                f"{g['provider']}/{g['model']} {g['content_stops_observed']}/"
+                f"{g['sample_size']}" for g in below_bound))
+        rec["detail"] = detail
+    return rec
+
+
+def pressure_escalations(pressure: dict) -> list:
+    """Warning-grade observations for a crossing pressure group (observation only)."""
+    items = []
+    for group in pressure.get("groups") or []:
+        if group["content_withheld_at_measurable_rate"] is not True:
+            continue
+        items.append({
+            "severity": "warning",
+            "category": PRESSURE_ESCALATION_CATEGORY,
+            "item": (
+                "provider content-side stop pressure (recorded evidence, "
+                f"observation only): {group['provider']}/{group['model']} "
+                f"[worker {group['worker_id']}] stop rate "
+                f"{group['content_stop_rate']:.3f} at sample size "
+                f"{group['sample_size']} classified recorded dispatch attempts "
+                f"(bounds: rate >= {pressure.get('rate_threshold')} AND sample >= "
+                f"{pressure.get('minimum_sample')}); last finishReason "
+                f"{group['last_finish_reason'] or 'none recorded'}. "
+                f"{PRESSURE_DECISION_NOTE}"),
+        })
+    return items
+
+
+# --------------------------------------------------------------------------- #
 # Health snapshot
 # --------------------------------------------------------------------------- #
 
@@ -425,7 +655,9 @@ def build_health_snapshot(*, repo_root: Path = REPO_ROOT,
                           db_paths=None,
                           queue_root=None,
                           log_paths=None,
-                          check_tasks: bool = True) -> dict:
+                          check_tasks: bool = True,
+                          pressure_con=None,
+                          pressure_series=None) -> dict:
     started = utc_now()
     dbs = db_status(db_paths)
     queue = queue_summary(queue_root)
@@ -433,6 +665,10 @@ def build_health_snapshot(*, repo_root: Path = REPO_ROOT,
     res_brief = resource_brief_status(repo_root=repo_root)
     career = career_brief_status(repo_root=repo_root)
     logs = log_status(log_paths)
+    pressure = content_stop_pressure_status(
+        db_paths=db_paths, pressure_con=pressure_con,
+        series_paths=pressure_series)
+
 
     tasks = {}
     if check_tasks:
@@ -453,6 +689,9 @@ def build_health_snapshot(*, repo_root: Path = REPO_ROOT,
                    "detail": res_brief.get("error") or "renders from live governor state"})
     checks.append({"check": "brief.career", "status": career.get("status", "UNKNOWN"),
                    "detail": f"latest.json exists={career.get('exists')}"})
+    checks.append({"check": PRESSURE_CHECK,
+                   "status": pressure.get("status", PRESSURE_STATUS_UNKNOWN),
+                   "detail": pressure.get("detail")})
     if check_tasks:
         missing = [n for n, t in tasks.items() if not t.get("exists")]
         checks.append({"check": "tasks.present", "status": "PASS" if not missing else "FAIL",
@@ -484,6 +723,9 @@ def build_health_snapshot(*, repo_root: Path = REPO_ROOT,
     if career.get("status") == "UNKNOWN":
         escalations.append({"severity": "warning", "category": "career_brief",
                             "item": "Career Daily Brief artifact absent"})
+    # Provider content-side stop pressure: warning-grade observation only. It
+    # never triggers an automatic swap/re-dispatch/failover/retry/safe-mode entry.
+    escalations.extend(pressure_escalations(pressure))
     if check_tasks:
         for n, t in tasks.items():
             if not t.get("exists"):
@@ -510,10 +752,44 @@ def build_health_snapshot(*, repo_root: Path = REPO_ROOT,
         "queue": queue,
         "credentials": creds,
         "resource_brief": res_brief,
+        "content_stop_pressure": pressure,
         "career_brief": career,
         "logs": logs,
         "scheduled_tasks": tasks,
     }
+
+
+def render_pressure_lines(pressure: "dict | None", prefix: str = "  - ") -> list:
+    """Operator lines for the recorded content-side stop pressure (observation only).
+
+    A rate is never printed without its sample size, and a group with no
+    classified attempt is printed as ``unknown`` rather than as clear.
+    """
+    p = pressure or {}
+    lines = [f"{prefix}Status: {p.get('status')} — {p.get('detail')}"]
+    for g in p.get("groups") or []:
+        rate = g.get("content_stop_rate")
+        rate_text = ("unknown (sample size 0 — no classified attempt recorded; no "
+                     "rate is reported from zero attempts)"
+                     if rate is None else
+                     f"{rate:.3f} (sample size {g.get('sample_size')} classified "
+                     f"attempts; {g.get('content_stop_rate_basis')})")
+        flag = g.get("content_withheld_at_measurable_rate")
+        flag_text = "unknown" if flag is None else ("yes" if flag else "no")
+        lines.append(
+            f"{prefix}  {g.get('source')} {g.get('provider')}/{g.get('model')} "
+            f"[worker {g.get('worker_id')}]: attempts observed "
+            f"{g.get('attempts_observed')} ({g.get('attempts_classified')} classified, "
+            f"{g.get('attempts_unclassified')} without the content-stop ledger), "
+            f"content-side stops observed {g.get('content_stops_observed')}, stop rate "
+            f"{rate_text}, last finishReason "
+            f"{g.get('last_finish_reason') or 'none recorded'}, last stop recorded at "
+            f"{g.get('last_stop_at') or 'none recorded'}, content withheld at a "
+            f"measurable rate: {flag_text} (status {g.get('status')})")
+    for err in p.get("source_errors") or []:
+        lines.append(f"{prefix}  source error (recorded evidence only): {err}")
+    lines.append(f"{prefix}{PRESSURE_DECISION_NOTE}")
+    return lines
 
 
 def render_health_markdown(report: dict) -> str:
@@ -543,6 +819,13 @@ def render_health_markdown(report: dict) -> str:
             lines.append(f"- [{e['severity']}/{e['category']}] {e['item']}")
     else:
         lines.append("- none")
+    lines += [
+        "",
+        "## Provider content-side stop pressure (recorded evidence, observation only)",
+        "",
+    ]
+    lines += render_pressure_lines(report.get("content_stop_pressure"),
+                                   prefix="- ")
     lines += [
         "",
         "## Safety properties",
@@ -604,10 +887,14 @@ def build_morning_brief(*, repo_root: Path = REPO_ROOT,
                         queue_root=None,
                         log_paths=None,
                         check_tasks: bool = True,
-                        owner_actions_file: Path = OWNER_ACTIONS_FILE) -> dict:
+                        owner_actions_file: Path = OWNER_ACTIONS_FILE,
+                        pressure_con=None,
+                        pressure_series=None) -> dict:
     health = build_health_snapshot(repo_root=repo_root, task_runner=task_runner,
                                    db_paths=db_paths, queue_root=queue_root,
-                                   log_paths=log_paths, check_tasks=check_tasks)
+                                   log_paths=log_paths, check_tasks=check_tasks,
+                                   pressure_con=pressure_con,
+                                   pressure_series=pressure_series)
     queue = health["queue"]
     owner_actions = parse_owner_actions(owner_actions_file)
 
@@ -630,6 +917,15 @@ def build_morning_brief(*, repo_root: Path = REPO_ROOT,
             "briefs_logged": health["resource_brief"].get("briefs_logged"),
             "renders": health["resource_brief"].get("renders"),
             "unknown_preserved": health["resource_brief"].get("unknown_preserved"),
+            # Recorded provider content-side stop pressure next to the E2
+            # resource status: observation/warning only, never an automatic action.
+            "content_stop_pressure": {
+                "status": health["content_stop_pressure"].get("status"),
+                "detected": health["content_stop_pressure"].get("detected"),
+                "detail": health["content_stop_pressure"].get("detail"),
+                "groups": health["content_stop_pressure"].get("groups"),
+                "decision": health["content_stop_pressure"].get("decision"),
+            },
         },
         "system_health": {
             "verdict": health["verdict"],
@@ -669,6 +965,11 @@ def render_morning_markdown(brief: dict) -> str:
         f"- E2 Daily Resource Brief: {brief['resource_status'].get('brief_status')} "
         f"(renders={brief['resource_status'].get('renders')}, "
         f"logged={brief['resource_status'].get('briefs_logged')})",
+        "",
+    ]
+    lines += render_pressure_lines(
+        brief["resource_status"].get("content_stop_pressure"), prefix="- ")
+    lines += [
         "",
         "## System health",
         "",
@@ -1010,11 +1311,21 @@ def main(argv=None) -> int:
     p.add_argument("--json", action="store_true")
     p.add_argument("--no-tasks", action="store_true",
                    help="skip scheduled-task queries (sandbox/tests)")
+    p.add_argument("--pressure-series", action="append", default=None,
+                   metavar="OBSERVATIONS_JSON",
+                   help="recorded provider series artifact(s) to include in the "
+                        "read-only content-side stop pressure view (repeatable; "
+                        "defaults to the declared recorded series)")
 
     p = sub.add_parser("morning-brief")
     p.add_argument("--out-dir", default=None)
     p.add_argument("--json", action="store_true")
     p.add_argument("--no-tasks", action="store_true")
+    p.add_argument("--pressure-series", action="append", default=None,
+                   metavar="OBSERVATIONS_JSON",
+                   help="recorded provider series artifact(s) to include in the "
+                        "read-only content-side stop pressure view (repeatable; "
+                        "defaults to the declared recorded series)")
 
     p = sub.add_parser("backup")
     p.add_argument("--out-dir", default=None)
@@ -1034,7 +1345,8 @@ def main(argv=None) -> int:
     stamp = _stamp()
 
     if args.command == "health-snapshot":
-        report = build_health_snapshot(check_tasks=not args.no_tasks)
+        report = build_health_snapshot(check_tasks=not args.no_tasks,
+                                       pressure_series=args.pressure_series)
         out_dir = Path(args.out_dir) if args.out_dir else (
             REPO_ROOT / "audits" / "evidence" / f"{stamp}-health-snapshot")
         _write_report(out_dir, "health_snapshot", report, render_health_markdown)
@@ -1048,7 +1360,8 @@ def main(argv=None) -> int:
         return 0 if report["fail_count"] == 0 else 1
 
     if args.command == "morning-brief":
-        brief = build_morning_brief(check_tasks=not args.no_tasks)
+        brief = build_morning_brief(check_tasks=not args.no_tasks,
+                                    pressure_series=args.pressure_series)
         out_dir = Path(args.out_dir) if args.out_dir else (
             REPO_ROOT / "runtime" / "chief" / "morning-brief")
         _write_report(out_dir, "latest", brief, render_morning_markdown)

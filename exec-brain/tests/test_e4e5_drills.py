@@ -275,6 +275,138 @@ class TestEvidenceWriter(HarnessFixture):
             self.assertIn("| Check | Result |", md)
 
 
+class TestContentStopPressureObservation(HarnessFixture):
+    """D7: the recorded content-side stop pressure view over the isolated store."""
+
+    def test_the_pressure_view_is_recorded_over_the_isolated_store(self):
+        d7 = self.report["drills"]["D7"]
+        self.assertEqual(d7["view"], "e4_provider_content_stop_pressure")
+        self.assertTrue(d7["observation_only"])
+        self.assertEqual(d7["rate_threshold"], 0.2)
+        self.assertEqual(d7["minimum_sample"], 5)
+        self.assertEqual(d7["evidence_rows_before"], d7["evidence_rows_after"])
+        self.assertTrue(d7["operator_lines"])
+        self.assertIn("content_stop_pressure_detected:", "\n".join(d7["operator_lines"]))
+
+    def test_the_clean_drill_store_raises_no_warning(self):
+        d7 = self.report["drills"]["D7"]
+        groups = [g for s in d7["sources"] for g in s["groups"]]
+        self.assertTrue(groups, "the drill store holds recorded evidence rows")
+        self.assertFalse(d7["content_stop_pressure_detected"])
+        for group in groups:
+            self.assertEqual(group["content_stops_observed"], 0)
+            self.assertFalse(group["content_withheld_at_measurable_rate"])
+            self.assertNotEqual(group["status"], "pressured")
+
+    def test_no_rate_is_reported_without_a_recorded_sample(self):
+        d7 = self.report["drills"]["D7"]
+        for source in d7["sources"]:
+            for group in source["groups"]:
+                if not group["sample_size"]:
+                    self.assertIsNone(group["content_stop_rate"])
+                    self.assertIsNone(group["content_withheld_at_measurable_rate"])
+                    continue
+                self.assertAlmostEqual(
+                    group["content_stop_rate"],
+                    group["content_stops_observed"] / group["sample_size"])
+                self.assertTrue(group["content_stop_rate_basis"])
+
+    def test_the_observation_writes_nothing_and_acts_on_nothing(self):
+        d7 = self.report["drills"]["D7"]
+        self.assertEqual(d7["store_rows_written_by_observation"], 0)
+        self.assertEqual(d7["provider_calls_spent"], 0)
+        self.assertEqual(d7["source_errors"], [])
+        self.assertIn("explicit E4/owner decision", d7["decision"])
+        self.assertIn("no store write", d7["note"])
+        for key in d7:
+            self.assertNotIn(key, ("worker_swap", "failover", "re_dispatch", "retry",
+                                   "safe_mode_entry"))
+
+    def test_operator_lines_never_print_a_rate_without_a_sample(self):
+        lines = "\n".join(self.report["drills"]["D7"]["operator_lines"])
+        for source in self.report["drills"]["D7"]["sources"]:
+            for group in source["groups"]:
+                if group["sample_size"]:
+                    self.assertIn(f"sample size {group['sample_size']}", lines)
+                else:
+                    self.assertIn("no rate is reported from zero attempts", lines)
+
+
+class TestPressureObservationTruthRules(unittest.TestCase):
+    """D7 truth rules over hand-built isolated stores (no provider, no live store)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="e4e5-d7-truth-")
+        self.addCleanup(self.tmp.cleanup)
+        self.harness = E4E5DrillHarness(scratch_root=Path(self.tmp.name))
+
+    def _record_evidence(self, ledger, evidence_id="ev-d7"):
+        from e3_execution import OrchestrationStore
+        store = OrchestrationStore(self.harness.db_path)
+        try:
+            store.record_evidence({
+                "evidence_id": evidence_id,
+                "worker_id": "google-nano-banana-2", "provider": "google",
+                "model": "gemini-3.1-flash-image", "role": "vision",
+                "verification_outcome": "FAIL", "final_success": False,
+                "failure_attribution": "verification_fail",
+                "deterministic_test_results": ledger,
+                "dag_node_id": "node-d7-1",
+            })
+        finally:
+            store.close()
+
+    def test_pre_classification_store_reports_unknown_not_clear(self):
+        self._record_evidence({"attempts": [{"attempt": 1, "outcome": "FAIL"}],
+                               "rejections": 1, "repairs": 0})
+        record = self.harness.observe_content_stop_pressure()
+        groups = [g for s in record["sources"] for g in s["groups"]]
+        self.assertTrue(groups)
+        for group in groups:
+            self.assertEqual(group["attempts_classified"], 0)
+            self.assertIsNone(group["content_stop_rate"])
+            self.assertIsNone(group["content_withheld_at_measurable_rate"])
+            self.assertEqual(group["status"], "unknown")
+        self.assertFalse(record["content_stop_pressure_detected"])
+        self.assertNotIn("content withheld at a measurable rate: yes",
+                         "\n".join(record["operator_lines"]))
+
+    def test_zero_attempt_row_never_yields_a_rate(self):
+        self._record_evidence({"attempts": [], "content_stop_stops": 0,
+                               "content_stop_finish_reasons": []})
+        record = self.harness.observe_content_stop_pressure()
+        groups = [g for s in record["sources"] for g in s["groups"]]
+        self.assertTrue(groups)
+        group = groups[0]
+        self.assertEqual(group["attempts_observed"], 0)
+        self.assertEqual(group["sample_size"], 0)
+        self.assertIsNone(group["content_stop_rate"])
+        self.assertIsNone(group["content_withheld_at_measurable_rate"])
+        lines = "\n".join(record["operator_lines"])
+        self.assertIn("no rate is reported from zero attempts", lines)
+        self.assertNotIn("stop rate: 0", lines)
+
+    def test_clean_classified_row_raises_no_warning(self):
+        self._record_evidence({"attempts": [{"attempt": i} for i in range(6)],
+                               "content_stop_stops": 0,
+                               "content_stop_finish_reasons": []})
+        record = self.harness.observe_content_stop_pressure()
+        group = [g for s in record["sources"] for g in s["groups"]][0]
+        self.assertEqual(group["sample_size"], 6)
+        self.assertEqual(group["content_stop_rate"], 0.0)
+        self.assertFalse(group["content_withheld_at_measurable_rate"])
+        self.assertEqual(group["status"], "clean")
+        self.assertFalse(record["content_stop_pressure_detected"])
+        self.assertEqual(record["store_rows_written_by_observation"], 0)
+
+    def test_empty_isolated_store_reports_unknown_not_clear(self):
+        record = self.harness.observe_content_stop_pressure()
+        self.assertEqual(record["sources"], [])
+        self.assertEqual(record["evidence_rows_before"], 0)
+        self.assertIn("pressure unknown, not clear",
+                      "\n".join(record["operator_lines"]))
+
+
 class TestSafeModeRecoveryUnit(unittest.TestCase):
     """Direct unit coverage of the E5 recovery/override additions."""
 
