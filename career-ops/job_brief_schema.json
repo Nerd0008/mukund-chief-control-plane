@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "career-ops/job_brief_schema.json",
+  "title": "JobBrief",
+  "description": "Structured, provenance-carrying brief for one job posting. Produced by career-ops/job_intelligence.py (roster B13). Every extracted field is verbatim posting text with a source line number; nothing is summarised or invented, no employer preference is turned into a fact, and no claim about the candidate is ever written here.",
+  "type": "object",
+  "required": [
+    "schema_version", "brief_id", "generated_at", "generator", "job", "provenance",
+    "requirements", "responsibilities", "eligibility", "preferences", "keywords",
+    "risks_unknowns", "company_facts", "research", "source_supported_facts",
+    "candidate_claims", "not_performed", "external_actions_taken"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "brief_id": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "generator": {"type": "string"},
+    "job": {
+      "type": "object",
+      "description": "The source job record exactly as Career Ops holds it (never edited by this module).",
+      "required": ["company", "title"],
+      "properties": {
+        "id": {"type": ["string", "integer", "null"]},
+        "company": {"type": ["string", "null"]},
+        "title": {"type": ["string", "null"]},
+        "location": {"type": ["string", "null"]},
+        "url": {"type": ["string", "null"]},
+        "region": {"type": ["string", "null"]},
+        "source_kind": {"type": ["string", "null"]},
+        "source_path": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["job_record", "job_description"],
+      "properties": {
+        "job_record": {"type": "object"},
+        "job_description": {
+          "type": "object",
+          "required": ["available", "source", "chars"],
+          "properties": {
+            "available": {"type": "boolean"},
+            "source": {"type": ["string", "null"]},
+            "kind": {"type": ["string", "null"]},
+            "sha256": {"type": ["string", "null"]},
+            "chars": {"type": "integer"},
+            "lines": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "description": "Posting-stated requirements. kind is 'essential' or 'desirable' exactly as the posting presents it.",
+      "items": {
+        "type": "object",
+        "required": ["text", "kind", "source_line", "source_section"],
+        "properties": {
+          "text": {"type": "string", "description": "VERBATIM posting line."},
+          "kind": {"enum": ["essential", "desirable"]},
+          "kind_source": {"type": "string"},
+          "source_line": {"type": "integer"},
+          "source_section": {"type": ["string", "null"]},
+          "category": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "responsibilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "source_line"],
+        "properties": {
+          "text": {"type": "string", "description": "VERBATIM posting line."},
+          "source_line": {"type": "integer"},
+          "source_section": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "eligibility": {
+      "type": "array",
+      "description": "Conditions the posting states about who may apply. status is 'satisfied_by_owner_source' only when a canonical owner source states it; otherwise 'unknown'.",
+      "items": {
+        "type": "object",
+        "required": ["text", "source_line", "status"],
+        "properties": {
+          "text": {"type": "string", "description": "VERBATIM posting line."},
+          "source_line": {"type": "integer"},
+          "category": {"type": "string"},
+          "status": {"enum": ["satisfied_by_owner_source", "unknown", "not_stated"]},
+          "owner_source": {"type": ["string", "null"]},
+          "owner_source_line": {"type": ["integer", "null"]},
+          "note": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "preferences": {
+      "type": "array",
+      "description": "Employer-stated preferences. These are properties of the POSTING, never facts about the candidate.",
+      "items": {
+        "type": "object",
+        "required": ["text", "source_line", "note"],
+        "properties": {
+          "text": {"type": "string"},
+          "source_line": {"type": "integer"},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "description": "The posting's own vocabulary. A ranking aid only — NOT evidence that the candidate has the skill.",
+      "items": {
+        "type": "object",
+        "required": ["term", "occurrences", "sources"],
+        "properties": {
+          "term": {"type": "string"},
+          "occurrences": {"type": "integer"},
+          "sources": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "risks_unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "detail", "action"],
+        "properties": {
+          "kind": {"type": "string"},
+          "detail": {"type": "string"},
+          "action": {"type": "string"},
+          "severity": {"enum": ["info", "major", "blocker"]}
+        }
+      }
+    },
+    "company_facts": {
+      "type": "array",
+      "description": "Company/role facts ONLY from an approved research provider, each with a citation. Empty when research is unavailable.",
+      "items": {
+        "type": "object",
+        "required": ["claim", "value", "source", "citation", "provider"],
+        "properties": {
+          "claim": {"type": "string"},
+          "value": {"type": "string"},
+          "source": {"type": "string"},
+          "citation": {"type": "string"},
+          "provider": {"type": "string"},
+          "retrieved_at": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "research": {
+      "type": "object",
+      "required": ["status", "requested", "providers"],
+      "properties": {
+        "status": {"enum": ["research_needed", "provided", "partial"]},
+        "requested": {"type": "array", "items": {"type": "string"}},
+        "providers": {"type": "object"},
+        "rejected_facts": {"type": "array"},
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "source_supported_facts": {
+      "type": "array",
+      "description": "The ONLY content handed to the CV / cover-letter workflows: verbatim posting lines with provenance. Nothing else from this brief is forwarded.",
+      "items": {
+        "type": "object",
+        "required": ["text", "source_line", "source_section", "role"],
+        "properties": {
+          "text": {"type": "string"},
+          "source_line": {"type": "integer"},
+          "source_section": {"type": ["string", "null"]},
+          "role": {"enum": ["requirement", "responsibility", "eligibility"]}
+        }
+      }
+    },
+    "candidate_claims": {
+      "type": "array",
+      "maxItems": 0,
+      "description": "MUST be empty. A JobBrief never asserts anything about the candidate; candidate truth lives in the canonical owner sources only."
+    },
+    "not_performed": {"type": "array", "items": {"type": "string"}},
+    "external_actions_taken": {"type": "array", "maxItems": 0}
+  }
+}

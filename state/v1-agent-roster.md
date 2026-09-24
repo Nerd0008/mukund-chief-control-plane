@@ -117,3 +117,19 @@ to be added and no locally discovered owner-relevant workflow was left unmapped.
 - Owner-only dependencies discovered by the audit are recorded in
   `tasks-or-issues/overnight-owner-actions-2026-09-24.md`.
 
+## Status update — 2026-09-24 (job intelligence + application pack task)
+
+Task `agent-job-intelligence-and-application-pack-2026-09-23`. Evidence:
+`audits/evidence/2026-09-24T00-46-02Z-job-intelligence-and-application-pack/`.
+
+| ID | Worker / service | Status now | Evidence |
+|---|---|---|---|
+| B13 | Job Description Analyzer / requirement extractor | **BUILT + EVIDENCED** | `career-ops/job_intelligence.py` + `career-ops/job_brief_schema.json`; extractive only, every line verbatim with `source_line`; desirable items recorded as preferences and never promoted to essential; `candidate_claims: []` with a first-person scanner |
+| B14 | Company / Role Research Brief Agent | **BUILT + EVIDENCED (sources owner-gated)** | `job_intelligence.research_brief()`; cited facts accepted, uncited facts rejected, no provider -> `research_needed`; `http` provider disabled (no owner-approved endpoint), `browser` provider disabled by the owner GUI-safety directive |
+| B17 | Application Pack Reviewer / truth & completeness gate | **BUILT + EVIDENCED** | `career-ops/application_pack_review.py`; separate module, own re-derivation; truthfulness / coverage / consistency / formatting / unknowns; blocks a deliberately tampered pack |
+| B18 | Submission Gate / owner-approval handoff | **BUILT + EVIDENCED — no autonomous submit** | `career-ops/submission_gate.py`; every external action refused; approval must be owner-supplied from outside the repository and bound to `pack_id` + `pack_sha256`; `external_action_performed: false` on every decision |
+
+Not claimed: any live company research (no approved provider), any live vacancy, any
+submission, and any "independent AI opinion" — B17 is independent deterministic
+re-derivation, not a second model.
+

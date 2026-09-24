@@ -334,3 +334,30 @@ Owner action required (recorded, does not block the other lanes): `tasks-or-issu
 item 6 — state the Dubai/UAE, Japan and Singapore work-authorisation position, because every record
 produced for those regions is labelled UNKNOWN until the owner says otherwise; item 7 — decide whether
 to add a UAE/Japan-specific provider or accept the agent-driven `search_queries` path.
+
+## Job intelligence + application pack: JobBrief, research brief, reviewer, submission gate (2026-09-24T00:46Z)
+
+Task `agent-job-intelligence-and-application-pack-2026-09-23` (roster B13, B14, B17, B18).
+Acceptance evidence: `audits/evidence/2026-09-24T00-46-02Z-job-intelligence-and-application-pack/`
+(`acceptance.json` + `acceptance.md`).
+
+| Lane | Item | Status | Evidence |
+|---|---|---|---|
+| B13 | Structured JobBrief schema | **DONE** | `career-ops/job_brief_schema.json` (JSON Schema, required keys + per-bucket `source_line`); `validate_brief()` enforces it and `brief` exits non-zero if it fails |
+| B13 | Extractive JD analysis, no invention | **ENFORCED** | every requirement/responsibility/eligibility line is a verbatim posting line with its 1-based `source_line`; acceptance re-checks each cited line against the posting file (0 mismatches) |
+| B13 | Preferences are never facts | **ENFORCED** | desirable/preferred lines (section or inline marker) carry `kind: "desirable"` and are mirrored into `preferences` with an explicit note; the acceptance asserts the desirable set and the essential set are disjoint and that `Location:`/`Right to work:` lines never enter the requirements bucket; a 5/4 essential/desirable split is asserted |
+| B13 | No candidate claim can enter the brief | **ENFORCED** | `candidate_claims: []`, `external_actions_taken: []`, and a first-person-claim scanner over every string in the brief; schema validation includes both |
+| B13 | Eligibility is never assumed | **ENFORCED** | `satisfied_by_owner_source` requires a canonical owner source and cites file + line; the UAE fixture posting is `unknown` and raises a blocker risk; the owner profile lists only the United Kingdom |
+| B14 | Research brief interface | **BUILT; sources owner-gated** | cited provider file -> facts carried; an uncited fact is rejected and listed; no provider -> `research.status = "research_needed"` + the exact requested list; `http` provider disabled (no owner-approved endpoint), `browser` provider disabled by the owner GUI-safety directive, and `--allow-network` with no enabled provider fetches nothing |
+| Handoff | Only source-supported facts reach CV/cover-letter | **ENFORCED** | `handoff_jd_text()` joins `source_supported_facts` verbatim in source order; the acceptance asserts every handoff line exists in the posting |
+| B17 | Independent Application Pack Reviewer | **BUILT + EVIDENCED** | `career-ops/application_pack_review.py` — separate module, re-reads artifacts + posting + canonical sources; truthfulness / requirement_coverage (essential vs desirable separate) / consistency / formatting / unresolved_unknowns; `pass`, `pass_with_owner_input_required`, `block` |
+| B17 | Independence is real, not declared | **PROVEN** | a deliberately tampered pack (invented CV line, invented metric, invented first-person CISSP claim) is blocked on `cv_draft_not_verbatim` + `cover_letter_free_text` + `candidate_claim_not_canonical`; the honest pack is not blocked |
+| B18 | Submission gate always requires owner approval | **BUILT + EVIDENCED** | `career-ops/submission_gate.py`; refuses a blocked review, unverified truthfulness, no approval, an approval not bound to `pack_id`+`pack_sha256`, a pack changed after approval, unacknowledged unknowns, and an approval located inside the repository |
+| B18 | No autonomous submission | **ENFORCED** | 14 external actions all refused and logged; a valid external approval yields `approved_pending_owner_manual_submission` + an owner checklist, with `external_action_performed: false` on every decision |
+| Safety | Canonical sources + trackers untouched | **VERIFIED** | `cv.md` / `config/profile.yml` / `config/cv-facts.json` SHA-256 identical before and after the acceptance run; `applications_submitted: 0`, `external_messages_sent: 0`, `browser_launched: false`, `network_research_calls: 0` |
+| Tests | New suite + no regressions | **PASS** | `career-ops/tests/test_job_intelligence.py` **38 passed**; whole `career-ops/tests/` **245 passed** (was 207); acceptance runner **42/42 checks, 0 critical failures** |
+
+Not claimed (deliberately): any live company research (no approved provider exists, so
+every brief carries `research_needed`), any live vacancy (the fixture posting is
+synthetic), any submission, and any "independent AI opinion" — B17 is independent
+deterministic re-derivation and its own output records that limitation.

@@ -373,6 +373,97 @@ separately and **no live-mailbox evidence is claimed**.
     python -m pytest career-ops/tests/test_application_inbox.py -q   # 87 passed
     python -m pytest career-ops/tests/ -q                            # 207 passed
 
+## JobBrief + company/role research (2026-09-24)
+
+Roster **B13** (Job Description Analyzer) and **B14** (Company/Role Research Brief).
+
+    python career-ops/job_intelligence.py schema
+    python career-ops/job_intelligence.py brief --record REC.json --jd-file JD.txt \
+        [--research-file RESEARCH.json] [--out DIR] [--stamp S]
+    python career-ops/job_intelligence.py research --brief JOB_BRIEF.json [--research-file F]
+    python career-ops/job_intelligence.py validate --brief JOB_BRIEF.json
+
+`job_brief_schema.json` is the committed JobBrief contract; `brief` refuses to
+report success unless the brief validates against it and contains no
+first-person candidate claim.
+
+Truthfulness rules the analyzer enforces:
+
+* **Extractive only.** Every requirement, responsibility, eligibility condition
+  and keyword is a verbatim posting line with its 1-based `source_line` and the
+  section it came from. Lines the posting presents in a desirable/preferred
+  section (or marks inline) become `kind: "desirable"`, are mirrored into
+  `preferences` with an explicit note, and can never appear as an essential
+  requirement. Labelled posting terms (`Location: …`, `Right to work: …`) are
+  routed out of the requirements bucket entirely.
+* **No candidate claims.** The brief carries `candidate_claims: []`, a
+  first-person-claim scanner, and no candidate data except provenance hashes of
+  the canonical `cv.md` / `config/profile.yml`.
+* **Eligibility is never assumed.** A posted right-to-work/clearance/degree
+  condition is `satisfied_by_owner_source` only when a canonical owner source
+  states it (citing that file and line); anything else is `unknown` and raises a
+  blocker risk. A region the owner has not stated (e.g. a UAE work permit) stays
+  unknown.
+* **Research never guesses.** Company facts are accepted only from a provider
+  file and only with `source` + `citation`; uncited facts are rejected and
+  listed. With no provider the brief records `research.status =
+  "research_needed"` plus the exact list of what it wanted. The `http` provider
+  is disabled (no owner-approved endpoint) and the `browser` provider is
+  disabled by the owner's GUI-safety directive, and neither is ever launched.
+* **Handoff is explicit.** `source_supported_facts` is the only content handed
+  to the CV / cover-letter workflows; `handoff_jd_text()` joins those verbatim
+  lines in source order.
+
+## Application Pack Reviewer + Submission Gate (2026-09-24)
+
+Roster **B17** (independent truth & completeness gate) and **B18** (deterministic
+owner submission gate).
+
+    python career-ops/application_pack_review.py review --brief JOB_BRIEF.json \
+        --cv-draft CV.md --cover-payload PAYLOAD.json [--cover-html HTML] \
+        [--draft-result JSON] [--jd-file JD.txt] [--handoff-text T.txt] [--out DIR]
+
+    python career-ops/submission_gate.py actions
+    python career-ops/submission_gate.py guard --action submit_application
+    python career-ops/submission_gate.py status --review PACK_REVIEW.json [--approval F]
+
+The reviewer is a **separate module** that re-reads the artifacts, the posting
+file and the canonical sources and re-derives every verdict itself. It is
+independent *re-derivation*, not a second model or an independent AI opinion, and
+not a substitute for owner review — that limit is recorded in its own output.
+It reports five areas: truthfulness (verbatim-only drafts, no invented metric or
+first-person claim, install fact-gate verdicts), requirement coverage
+(essential vs desirable kept separate), consistency (job identity, every posting
+citation re-checked against the posting, handoff composition, candidate name),
+formatting/export readiness, and unresolved unknowns. Verdict is `pass`,
+`pass_with_owner_input_required` or `block`; only truthfulness / consistency /
+formatting defects can block.
+
+The submission gate implements **no submission path**. It refuses on a blocked
+review, on unverified truthfulness, on a missing approval, on an approval that
+does not bind this exact pack (`pack_id` + `pack_sha256`), on a pack that changed
+after approval, on an unacknowledged unresolved unknown, and on an approval file
+located inside the repository (a committed file is not an owner action). A valid
+approval from outside the repository yields
+`approved_pending_owner_manual_submission` plus an owner checklist — and
+`external_action_performed: false` on every decision. Every decision is appended
+to `runtime/career-ops/job-intelligence/submission-gate-log.jsonl`.
+
+### Acceptance runner
+
+    python career-ops/run_job_intelligence_acceptance.py [--stamp S]
+
+Runs the whole path on labelled synthetic fixtures: job record -> JobBrief ->
+research (no provider / cited / uncited) -> handoff -> CV + cover-letter drafts
+-> reviewer -> tamper proof (a deliberately falsified pack must be blocked) ->
+submission gate (no approval / forged in-repo / stale / valid external). It
+writes `audits/evidence/<stamp>-job-intelligence-and-application-pack/` and fails
+unless every critical check holds.
+
+### Tests
+
+    python -m pytest career-ops/tests/test_job_intelligence.py -q   # 38 passed
+
 ## Acceptance runner
 
     python career-ops/run_cv_linkedin_acceptance.py [--region uk] [--stamp S]
@@ -397,10 +488,11 @@ deduped.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 88 passed
+    python -m pytest career-ops/tests/ -q                      # 245 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
+    python -m pytest career-ops/tests/test_job_intelligence.py -q  # 38 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 34 passed
-    python -m pytest career-ops/tests/test_regional_job_search.py -q  # 30 passed
+    python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

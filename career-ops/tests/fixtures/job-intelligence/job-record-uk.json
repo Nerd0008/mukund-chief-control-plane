@@ -1,0 +1,686 @@
+{
+  "schema_version": 1,
+  "brief_id": "jb-20260924T004618Z-2105e710",
+  "generated_at": "2026-09-24T00:46:18+00:00",
+  "generator": "career-ops/job_intelligence.py",
+  "job": {
+    "id": "FIXTURE-UK-0001",
+    "company": "Crown Agents Bank",
+    "title": "Information Security Analyst",
+    "location": "London, United Kingdom",
+    "url": "https://example.invalid/fixture/information-security-analyst",
+    "region": "uk",
+    "source_kind": "synthetic-fixture-job-record",
+    "source_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\job-record-uk.json"
+  },
+  "provenance": {
+    "job_record": {
+      "source_kind": "synthetic-fixture-job-record",
+      "source_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\job-record-uk.json",
+      "region": "uk",
+      "tracker": null,
+      "workbook_row": null
+    },
+    "job_description": {
+      "available": true,
+      "source": "explicit file C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\jd-information-security-analyst.txt",
+      "kind": "provided posting text",
+      "sha256": "2105e7106ee123f3feeebba73acccbeb4d5f6aa5a1c150d363e488fa669bd16c",
+      "chars": 1372,
+      "lines": 29
+    },
+    "canonical_owner_sources": {
+      "cv.md": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md",
+        "sha256": "99e8785a2503e2a06d8a1c6ac19d23050f8fb4fc2ffcda8af96203461d8043c8"
+      },
+      "config/profile.yml": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml",
+        "sha256": "eb99bd2c210412a9e2d591cff58aad93ec9fc00ea6907a57856884d94956be94"
+      }
+    },
+    "extraction": "deterministic, extractive, verbatim lines with source_line"
+  },
+  "requirements": [
+    {
+      "text": "A degree in information security, cyber security or a related discipline.",
+      "source_line": 16,
+      "source_section": "Essential requirements",
+      "kind": "essential",
+      "kind_source": "essential section"
+    },
+    {
+      "text": "Understanding of phishing analysis, endpoint assessment and network security.",
+      "source_line": 17,
+      "source_section": "Essential requirements",
+      "kind": "essential",
+      "kind_source": "essential section"
+    },
+    {
+      "text": "Scripting or automation ability in Python or PowerShell.",
+      "source_line": 18,
+      "source_section": "Essential requirements",
+      "kind": "essential",
+      "kind_source": "essential section"
+    },
+    {
+      "text": "Familiarity with regular expressions and log analysis.",
+      "source_line": 19,
+      "source_section": "Essential requirements",
+      "kind": "essential",
+      "kind_source": "essential section"
+    },
+    {
+      "text": "Strong written communication and attention to detail.",
+      "source_line": 20,
+      "source_section": "Essential requirements",
+      "kind": "essential",
+      "kind_source": "essential section"
+    },
+    {
+      "text": "Experience with Splunk or another SIEM platform.",
+      "source_line": 23,
+      "source_section": "Desirable",
+      "kind": "desirable",
+      "kind_source": "desirable section"
+    },
+    {
+      "text": "Experience working in a Security Operations Centre (SOC).",
+      "source_line": 24,
+      "source_section": "Desirable",
+      "kind": "desirable",
+      "kind_source": "desirable section"
+    },
+    {
+      "text": "Knowledge of ISO 27001 and GDPR.",
+      "source_line": 25,
+      "source_section": "Desirable",
+      "kind": "desirable",
+      "kind_source": "desirable section"
+    },
+    {
+      "text": "CompTIA Security+ or equivalent certification.",
+      "source_line": 26,
+      "source_section": "Desirable",
+      "kind": "desirable",
+      "kind_source": "desirable section"
+    }
+  ],
+  "responsibilities": [
+    {
+      "text": "We are looking for an Information Security Analyst to join our London security team.",
+      "source_line": 4,
+      "source_section": "About the role"
+    },
+    {
+      "text": "You will support the monitoring, triage and investigation of security events and",
+      "source_line": 5,
+      "source_section": "About the role"
+    },
+    {
+      "text": "contribute to the bank's cyber risk and assurance activities.",
+      "source_line": 6,
+      "source_section": "About the role"
+    },
+    {
+      "text": "Monitor security alerts and support incident response triage.",
+      "source_line": 9,
+      "source_section": "Key responsibilities"
+    },
+    {
+      "text": "Investigate phishing reports and map observed behaviour to MITRE ATT&CK.",
+      "source_line": 10,
+      "source_section": "Key responsibilities"
+    },
+    {
+      "text": "Support vulnerability management and remediation tracking.",
+      "source_line": 11,
+      "source_section": "Key responsibilities"
+    },
+    {
+      "text": "Help maintain security policies, standards and control documentation.",
+      "source_line": 12,
+      "source_section": "Key responsibilities"
+    },
+    {
+      "text": "Produce clear written reporting for technical and non-technical readers.",
+      "source_line": 13,
+      "source_section": "Key responsibilities"
+    }
+  ],
+  "eligibility": [
+    {
+      "text": "Right to work: applicants must already hold the right to work in the United Kingdom.",
+      "source_line": 29,
+      "source_section": "Desirable",
+      "category": "right_to_work",
+      "status": "satisfied_by_owner_source",
+      "owner_source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml#location.authorized_in",
+      "owner_source_line": 51,
+      "note": "The posting's right-to-work condition names only locations the owner's own profile lists as authorised. This is an owner-stated fact, not an inference; the CV/cover letter may not claim more than the owner source states."
+    }
+  ],
+  "preferences": [
+    {
+      "text": "Experience with Splunk or another SIEM platform.",
+      "source_line": 23,
+      "note": "Employer preference/desirable item. A property of the posting, never a fact about the candidate."
+    },
+    {
+      "text": "Experience working in a Security Operations Centre (SOC).",
+      "source_line": 24,
+      "note": "Employer preference/desirable item. A property of the posting, never a fact about the candidate."
+    },
+    {
+      "text": "Knowledge of ISO 27001 and GDPR.",
+      "source_line": 25,
+      "note": "Employer preference/desirable item. A property of the posting, never a fact about the candidate."
+    },
+    {
+      "text": "CompTIA Security+ or equivalent certification.",
+      "source_line": 26,
+      "note": "Employer preference/desirable item. A property of the posting, never a fact about the candidate."
+    }
+  ],
+  "keywords": [
+    {
+      "term": "security",
+      "occurrences": 9,
+      "sources": [
+        "requirements",
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "analysis",
+      "occurrences": 2,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "cyber",
+      "occurrences": 2,
+      "sources": [
+        "requirements",
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "information",
+      "occurrences": 2,
+      "sources": [
+        "requirements",
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "phishing",
+      "occurrences": 2,
+      "sources": [
+        "requirements",
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "triage",
+      "occurrences": 2,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "written",
+      "occurrences": 2,
+      "sources": [
+        "requirements",
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "activities",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "alerts",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "analyst",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "another",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "assessment",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "assurance",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "att",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "attention",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "automation",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "bank",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "behaviour",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "centre",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "certification",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "clear",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "communication",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "comptia",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "contribute",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "control",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "degree",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "detail",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "discipline",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "documentation",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "endpoint",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "equivalent",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "events",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "expressions",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "familiarity",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "gdpr",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "incident",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "investigate",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "investigation",
+      "occurrences": 1,
+      "sources": [
+        "responsibilities"
+      ]
+    },
+    {
+      "term": "iso",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    },
+    {
+      "term": "log",
+      "occurrences": 1,
+      "sources": [
+        "requirements"
+      ]
+    }
+  ],
+  "risks_unknowns": [
+    {
+      "kind": "desirable_items_present",
+      "severity": "info",
+      "detail": "4 posting lines are desirable/preferred, not essential. They are recorded as preferences and must never be presented as met.",
+      "action": "Report coverage separately from essential requirements."
+    }
+  ],
+  "company_facts": [
+    {
+      "claim": "company_legal_name",
+      "value": "Crown Agents Bank Ltd (fixture value)",
+      "source": "fixture:example.invalid/company-register",
+      "citation": "https://example.invalid/company-register/fixture-0001",
+      "provider": "file",
+      "retrieved_at": "2026-09-24T00:00:00Z"
+    },
+    {
+      "claim": "careers_channel",
+      "value": "Own careers page listed in the posting footer (fixture value)",
+      "source": "fixture:example.invalid/careers",
+      "citation": "https://example.invalid/careers/fixture-0001",
+      "provider": "file",
+      "retrieved_at": "2026-09-24T00:00:00Z"
+    }
+  ],
+  "research": {
+    "status": "provided",
+    "requested": [
+      "official company careers/ATS presence",
+      "company registration/legal identity",
+      "recent material company news",
+      "role-specific expectations not stated in the posting",
+      "company legal/registered identity for Crown Agents Bank",
+      "role-specific expectations for Information Security Analyst not stated in the posting"
+    ],
+    "providers": {
+      "file": {
+        "enabled": true,
+        "kind": "owner-or-fixture-provided structured evidence file (JSON)",
+        "reason": "Each fact must carry a source and a citation; facts without them are rejected and listed under rejected_facts."
+      },
+      "http": {
+        "enabled": false,
+        "kind": "structured HTTP/API fetch",
+        "reason": "disabled by default: no owner-approved research endpoint is configured. Enable per-source only with an owner-approved endpoint list."
+      },
+      "browser": {
+        "enabled": false,
+        "kind": "interactive browser / GUI research",
+        "reason": "disabled: the owner's 2026-09-23 late-night directive forbids launching or controlling an interactive browser, Windows Search or another visible GUI application from this machine unless the immutable task explicitly requires that exact UI action."
+      }
+    },
+    "sources": [
+      {
+        "provider": "file",
+        "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\research-cited.json",
+        "sha256": "abefd7a890a78d53f39cddc979c286055c2ad8a0450fbffd381277a939c5f816",
+        "facts_accepted": 2,
+        "facts_rejected": 0
+      }
+    ],
+    "rejected_facts": [],
+    "notes": [
+      "provider 'http' is disabled: disabled by default: no owner-approved research endpoint is configured. Enable per-source only with an owner-approved endpoint list.",
+      "provider 'browser' is disabled: disabled: the owner's 2026-09-23 late-night directive forbids launching or controlling an interactive browser, Windows Search or another visible GUI application from this machine unless the immutable task explicitly requires that exact UI action."
+    ]
+  },
+  "source_supported_facts": [
+    {
+      "text": "A degree in information security, cyber security or a related discipline.",
+      "source_line": 16,
+      "source_section": "Essential requirements",
+      "role": "requirement"
+    },
+    {
+      "text": "Understanding of phishing analysis, endpoint assessment and network security.",
+      "source_line": 17,
+      "source_section": "Essential requirements",
+      "role": "requirement"
+    },
+    {
+      "text": "Scripting or automation ability in Python or PowerShell.",
+      "source_line": 18,
+      "source_section": "Essential requirements",
+      "role": "requirement"
+    },
+    {
+      "text": "Familiarity with regular expressions and log analysis.",
+      "source_line": 19,
+      "source_section": "Essential requirements",
+      "role": "requirement"
+    },
+    {
+      "text": "Strong written communication and attention to detail.",
+      "source_line": 20,
+      "source_section": "Essential requirements",
+      "role": "requirement"
+    },
+    {
+      "text": "Experience with Splunk or another SIEM platform.",
+      "source_line": 23,
+      "source_section": "Desirable",
+      "role": "requirement"
+    },
+    {
+      "text": "Experience working in a Security Operations Centre (SOC).",
+      "source_line": 24,
+      "source_section": "Desirable",
+      "role": "requirement"
+    },
+    {
+      "text": "Knowledge of ISO 27001 and GDPR.",
+      "source_line": 25,
+      "source_section": "Desirable",
+      "role": "requirement"
+    },
+    {
+      "text": "CompTIA Security+ or equivalent certification.",
+      "source_line": 26,
+      "source_section": "Desirable",
+      "role": "requirement"
+    },
+    {
+      "text": "We are looking for an Information Security Analyst to join our London security team.",
+      "source_line": 4,
+      "source_section": "About the role",
+      "role": "responsibility"
+    },
+    {
+      "text": "You will support the monitoring, triage and investigation of security events and",
+      "source_line": 5,
+      "source_section": "About the role",
+      "role": "responsibility"
+    },
+    {
+      "text": "contribute to the bank's cyber risk and assurance activities.",
+      "source_line": 6,
+      "source_section": "About the role",
+      "role": "responsibility"
+    },
+    {
+      "text": "Monitor security alerts and support incident response triage.",
+      "source_line": 9,
+      "source_section": "Key responsibilities",
+      "role": "responsibility"
+    },
+    {
+      "text": "Investigate phishing reports and map observed behaviour to MITRE ATT&CK.",
+      "source_line": 10,
+      "source_section": "Key responsibilities",
+      "role": "responsibility"
+    },
+    {
+      "text": "Support vulnerability management and remediation tracking.",
+      "source_line": 11,
+      "source_section": "Key responsibilities",
+      "role": "responsibility"
+    },
+    {
+      "text": "Help maintain security policies, standards and control documentation.",
+      "source_line": 12,
+      "source_section": "Key responsibilities",
+      "role": "responsibility"
+    },
+    {
+      "text": "Produce clear written reporting for technical and non-technical readers.",
+      "source_line": 13,
+      "source_section": "Key responsibilities",
+      "role": "responsibility"
+    },
+    {
+      "text": "Right to work: applicants must already hold the right to work in the United Kingdom.",
+      "source_line": 29,
+      "source_section": "Desirable",
+      "role": "eligibility"
+    }
+  ],
+  "candidate_claims": [],
+  "sections_detected": {
+    "benefits": [],
+    "about_company": [],
+    "location": [
+      {
+        "text": "Location: London, United Kingdom (hybrid).",
+        "source_line": 28,
+        "source_section": "Desirable"
+      }
+    ],
+    "other": [
+      {
+        "text": "Information Security Analyst — Crown Agents Bank (fixture posting text)",
+        "source_line": 1,
+        "source_section": null
+      }
+    ]
+  },
+  "not_performed": [
+    "Any interactive browser, GUI application or Windows Search launch",
+    "Any employer, recruiter or candidate-facing message",
+    "Any application submission",
+    "Any claim about the candidate that is not present verbatim in a canonical source"
+  ],
+  "external_actions_taken": [],
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "schema": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\job_brief_schema.json",
+    "schema_id": "career-ops/job_brief_schema.json"
+  },
+  "candidate_claim_violations": [],
+  "brief_path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\cli-smoke\\brief\\job_brief.json",
+  "handoff_jd_text_path": null,
+  "ok": true
+}

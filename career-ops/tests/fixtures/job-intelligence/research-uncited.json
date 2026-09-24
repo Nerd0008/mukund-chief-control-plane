@@ -1,0 +1,21 @@
+{
+  "_fixture": {
+    "kind": "SYNTHETIC partially-cited research payload",
+    "note": "Exercises citation enforcement: the third fact has no source and no citation, so it MUST be rejected and must never reach the brief."
+  },
+  "provider": "file",
+  "facts": [
+    {
+      "claim": "company_legal_name",
+      "value": "Crown Agents Bank Ltd (fixture value)",
+      "source": "fixture:example.invalid/company-register",
+      "citation": "https://example.invalid/company-register/fixture-0001"
+    },
+    {
+      "claim": "recent_news",
+      "value": "Uncited assertion (fixture value)",
+      "source": "",
+      "citation": ""
+    }
+  ]
+}

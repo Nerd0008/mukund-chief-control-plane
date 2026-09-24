@@ -126,6 +126,48 @@ the tracker to read.
 Dubai, `Rejected` for Japan) status added to the relevant tracker's validation
 list, or whether you prefer these to keep arriving as owner decisions.
 
+### 11. Optional — authorise a company/role research provider
+
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the job-intelligence task)
+**Blocks:** nothing. Every JobBrief produced today carries `research.status = "research_needed"`
+and zero company facts, because no research provider is approved.
+**Why owner-only:** enabling a research source is a decision about *which* source and on
+what terms (an ATS/company endpoint, a paid API, a terms-of-service question). The build
+will not pick one on your behalf, and it will not guess a company fact.
+**Two providers are deliberately disabled and recorded as such:** `http`
+(`research.providers.http.enabled = false`, "no owner-approved research endpoint is
+configured") and `browser` (disabled by your own 2026-09-23 GUI-safety directive — the
+system never launches an interactive browser).
+**Safe interim:** supply a cited research file and the same interface accepts it —
+`python career-ops/job_intelligence.py brief … --research-file RESEARCH.json` where each
+fact carries `claim`, `value`, `source`, `citation`. Facts without a citation are rejected.
+**Action (optional):** name one research source you are happy with, or say "keep the
+cited-file path only".
+
+### 12. How to approve an application pack (the B18 gate's exact interface)
+
+**Status:** DOCUMENTED PROCEDURE — no action needed now (recorded 2026-09-24)
+**Blocks:** nothing. It exists so that when a pack IS ready, you know the exact step, and
+so the approval is a real owner action rather than a file the build could write itself.
+
+The submission gate refuses to call a pack submission-eligible until an approval record
+exists **outside the repository** and binds this exact pack:
+
+1. Read the pack yourself (CV draft, rendered cover letter, the reviewer's findings).
+2. Create, outside the repository, e.g.
+   `C:\Users\mukun\AppData\Local\hermes\secrets\application-approvals\<pack>.json`:
+   `{"approved_by": "Mukund", "approved_at": "<ISO8601>", "pack_id": "<pack-…>",
+   "pack_sha256": "<full hash>", "approved_action": "submit_application",
+   "acknowledged_unknowns": true}`
+   (`acknowledged_unknowns` is only required when the reviewer left unresolved owner-input
+   items; set it true only after reading them.)
+3. `python career-ops/submission_gate.py status --review <pack_review.json> --approval <that file>`
+
+A valid approval returns `approved_pending_owner_manual_submission` plus an owner
+checklist — and still performs **no** external action. You submit manually. An approval
+stored inside the repository, or one whose `pack_sha256` no longer matches (the pack
+changed), is refused.
+
 ## Resolved / no longer owner-blocking
 
 - Hermes primary execution brain: restored via DeepSeek direct API.

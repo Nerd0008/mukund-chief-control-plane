@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "description": "Chief <-> Career Ops job-intelligence configuration (roster B13 Job Description Analyzer, B14 Company/Role Research Brief). The analyzer is DETERMINISTIC and extractive: every requirement, responsibility, keyword and eligibility condition it emits is a verbatim line of the posting text with its source line number. It never turns an employer preference into a fact, never invents a requirement the posting does not state, and never records a claim about the candidate. The research brief interface consumes cited evidence from an approved provider when one is available and otherwise records research_needed — it never guesses a company fact.",
+  "career_ops_dir": "career-ops",
+  "cv_workflow_config": "career-ops/cv_workflow_config.json",
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "runtime_dir": "runtime/career-ops/job-intelligence",
+  "evidence_dir": "audits/evidence",
+  "brief_schema": "career-ops/job_brief_schema.json",
+  "extraction": {
+    "note": "Section headings are matched deterministically. A line is emitted verbatim with its 1-based source line number and the section it came from; nothing is summarised, merged, reworded or added.",
+    "section_rules": [
+      {"kind": "responsibilities", "label": "responsibilities", "pattern": "responsibilit|what you.?ll do|what you will do|the role|duties|day to day|day-to-day|about the role|your role|key tasks|main tasks"},
+      {"kind": "requirements", "label": "requirements", "pattern": "essential|requirements?|must have|must-have|qualification|what we.?re looking for|what we are looking for|who you are|skills? (and|&) experience|your profile"},
+      {"kind": "desirable", "label": "desirable", "pattern": "desirable|nice to have|preferred|advantageous|bonus|plus"},
+      {"kind": "eligibility", "label": "eligibility", "pattern": "right to work|visa|sponsor|eligib|clearance|security check|background check|dbs"},
+      {"kind": "benefits", "label": "benefits", "pattern": "benefit|we offer|what we offer|package|salary|compensation|perks"},
+      {"kind": "about_company", "label": "about_company", "pattern": "about us|about the company|who we are|our company|the company"},
+      {"kind": "location", "label": "location", "pattern": "location|work model|working pattern|office|hybrid|remote"}
+    ],
+    "inline_desirable_markers": ["desirable", "nice to have", "advantageous", "preferred", "a plus", "bonus"],
+    "eligibility_markers": ["right to work", "work permit", "visa", "sponsorship", "sponsor a", "security clearance", "sc clearance", "dbs", "background check", "must be eligible", "eligible to work"],
+    "max_requirements": 80,
+    "max_responsibilities": 80,
+    "max_keywords": 40
+  },
+  "preference_policy": "Lines that the posting marks as desirable/preferred/nice-to-have are recorded with kind='desirable' and mirrored into 'preferences' with an explicit note. They are NEVER recorded as essential requirements and NEVER converted into a claim about what the candidate has.",
+  "eligibility_policy": "Eligibility lines are recorded as the posting states them. A condition is marked 'satisfied_by_owner_source' only when a canonical owner source (config/profile.yml, cv.md) states it; otherwise it is 'unknown' and appears in risks_unknowns. The analyzer never assumes a visa, sponsorship, clearance or degree position the owner has not stated.",
+  "keyword_policy": "Keywords are the posting's own vocabulary (tokens of length >= 3, minus a generic stop list). They are search/ranking aids only and are never treated as evidence that the candidate has the skill.",
+  "generic_terms_config_key": "tailoring.generic_terms",
+  "generic_terms_fallback": ["and", "the", "for", "with", "you", "your", "our", "are", "will", "have", "has", "that", "this", "from", "all", "any", "can", "who", "not", "but", "job", "role", "work", "team", "teams", "about", "into", "more", "than", "must", "should", "would", "their", "they", "them", "also", "able", "using", "use", "used", "new", "well", "other", "such", "when", "what", "which", "where", "while", "been", "were", "was", "does", "doing", "each", "some", "most", "over", "under", "within", "across", "including", "include", "includes", "support", "supporting", "help", "helping", "ensure", "ensuring", "provide", "providing", "assist", "join", "looking", "opportunity", "candidate", "candidates", "company", "business", "environment", "experience", "skills", "knowledge", "understanding", "ability", "strong", "good", "excellent", "ideal", "desirable", "essential", "required", "requirements", "responsibilities", "duties", "apply", "application", "applications", "position", "location", "salary", "benefits", "hybrid", "remote", "onsite", "office"],
+  "research": {
+    "note": "The research brief interface accepts evidence ONLY from an approved provider and only with a citation. When no provider is available it returns status='research_needed' and lists exactly what it wanted — it never writes a company fact it cannot cite.",
+    "providers": {
+      "file": {
+        "enabled": true,
+        "kind": "owner-or-fixture-provided structured evidence file (JSON)",
+        "note": "Each fact must carry a source and a citation; facts without them are rejected and listed under rejected_facts."
+      },
+      "http": {
+        "enabled": false,
+        "kind": "structured HTTP/API fetch",
+        "reason": "disabled by default: no owner-approved research endpoint is configured. Enable per-source only with an owner-approved endpoint list."
+      },
+      "browser": {
+        "enabled": false,
+        "kind": "interactive browser / GUI research",
+        "reason": "disabled: the owner's 2026-09-23 late-night directive forbids launching or controlling an interactive browser, Windows Search or another visible GUI application from this machine unless the immutable task explicitly requires that exact UI action."
+      }
+    },
+    "requested_defaults": ["official company careers/ATS presence", "company registration/legal identity", "recent material company news", "role-specific expectations not stated in the posting"]
+  },
+  "not_performed": [
+    "Any interactive browser, GUI application or Windows Search launch",
+    "Any employer, recruiter or candidate-facing message",
+    "Any application submission",
+    "Any claim about the candidate that is not present verbatim in a canonical source"
+  ]
+}
