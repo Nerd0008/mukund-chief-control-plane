@@ -39,5 +39,26 @@
     "Do not edit the owner's external Career Ops install destructively; prefer control-plane overlays/config or a reversible migration with tests.",
     "If the current scanner/provider cannot expose enough source text for semantic classification, record that limitation and build the contract/fallback path instead of guessing."
   ],
-  "notes": "Owner-directed change after reviewing why previous job agents returned zero while standalone Codex found roles. Current verified evidence: UK scheduled scan can process ~2861 jobs/run, while Company Watch recently found 19 new postings but 0 tracker-eligible under the current intern-only UK title filter. The objective is not to replace Career Ops with Codex; it is to combine Career Ops collection/state/dedupe with DeepSeek bulk semantic triage and bounded Codex second-pass reasoning."
+  "notes": "Owner-directed change after reviewing why previous job agents returned zero while standalone Codex found roles. Current verified evidence: UK scheduled scan can process ~2861 jobs/run, while Company Watch recently found 19 new postings but 0 tracker-eligible under the current intern-only UK title filter. The objective is not to replace Career Ops with Codex; it is to combine Career Ops collection/state/dedupe with DeepSeek bulk semantic triage and bounded Codex second-pass reasoning.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T05:12:06.311129Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
