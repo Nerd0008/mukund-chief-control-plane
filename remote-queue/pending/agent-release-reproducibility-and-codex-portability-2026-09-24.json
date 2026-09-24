@@ -1,0 +1,32 @@
+{
+  "task_id": "agent-release-reproducibility-and-codex-portability-2026-09-24",
+  "created_at": "2026-09-24T12:40:00Z",
+  "objective": "Remediate the independent audit's release-reproducibility and fresh-smoke-test findings. Make the repository reproducible from a clean clone/archive with pinned dependencies, explicit setup/verification instructions, release identity/hashes, and a portable Codex identity contract; then prove the current acceptance suite in an isolated environment without weakening evidence standards.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Preserve all currently running/pending Career discovery work; inspect main before editing and do not race overlapping files unnecessarily.",
+    "Treat the audit result (isolated E3 baseline 53/54 because Codex doctor provider became unknown) as a reproducibility failure to diagnose, not permission to suppress the test."
+  ],
+  "allowed_scope": [
+    "Inventory every Python/runtime dependency actually imported by the repo (including openpyxl, PyYAML/yaml, pytest and test/runtime support) and produce a top-level reproducible dependency manifest plus pinned lock/constraints artifact appropriate for Python 3.11.16.",
+    "Add clean-clone/setup instructions that distinguish repository dependencies from machine-local Hermes runtime, Codex CLI, credentials and Windows scheduled-task provisioning.",
+    "Add a release manifest generator that records repository commit SHA, dirty/clean state, supported Python version, dependency-lock hash, important deployable artifact hashes and acceptance-evidence identifiers; never include secrets or private runtime databases.",
+    "Add archive/release verification tooling so an exported ZIP can prove which commit and dependency set it represents even though ZIPs do not carry .git history.",
+    "Reproduce the Codex identity failure in an isolated environment. Inspect the current codex doctor --json contract and make the test assert the truthful contract: configured provider/model, observed provider identity when actually reported, and UNKNOWN when the CLI does not report it. Do not convert UNKNOWN into openai or weaken routability/qualification requirements.",
+    "Add a compatibility fixture/test for at least both provider=openai and provider=unknown doctor payloads, with explicit provenance semantics.",
+    "Build a clean isolated Python environment from the new pinned dependency artifacts and run the E3 baseline plus the full repository acceptance/evidence runner there. Record exact collected/passed/failed counts and environment identity.",
+    "If 579 is no longer the current collected count because later engineering added tests, report the new count truthfully; do not force the old number.",
+    "Document which parts cannot be reproduced from a source archive alone because they are deliberately machine-local (credentials, Hermes state DBs, owner data, Codex login) and provide deterministic probes for those dependencies.",
+    "Update deployment/release docs and state with the isolated-environment evidence. Commit/push checkpointed changes."
+  ],
+  "stop_conditions": [
+    "No secrets, credential values, auth.json, cookies, private databases or owner application data in release artifacts.",
+    "Do not fake Git history inside an archive; record commit identity and hashes instead.",
+    "Do not skip or xfail the Codex test merely to get green.",
+    "Do not claim portable acceptance unless it was actually executed in the pinned isolated environment."
+  ],
+  "notes": "Independent audit found no top-level lock/setup/release identity and a fresh isolated E3 baseline of 53/54 due to Codex doctor returning provider=unknown where a test expected openai. This task should close those engineering gaps before calling the project reproducibly release-ready."
+}
