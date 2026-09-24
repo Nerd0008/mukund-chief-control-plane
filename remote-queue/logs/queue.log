@@ -834,3 +834,5 @@ error: Please commit or stash them.
 [2026-09-24T22:02:04.096167Z] Invalid task agent-post-stage2-integrations-and-production-hardening-2026-09-24: ["priority must be one of {'low', 'critical', 'high', 'medium'}"]
 [2026-09-24T22:04:03.990669Z] git pull: success (with stash/restore)
 [2026-09-24T22:06:04.594930Z] git pull: success (with stash/restore)
+[2026-09-24T22:06:07.138067Z] Claimed task: agent-provider-debug-qwen-tencent-entitlement-2026-09-24
+[2026-09-24T22:06:07.140145Z] Handling task: agent-provider-debug-qwen-tencent-entitlement-2026-09-24 (attempt 1)

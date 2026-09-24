@@ -1,0 +1,76 @@
+{
+  "task_id": "agent-provider-debug-qwen-tencent-entitlement-2026-09-24",
+  "created_at": "2026-09-24T22:05:00Z",
+  "objective": "Debug the post-key provider failures using the already-captured live evidence, correct the Qwen model-selection reconciliation bug, and run the minimum bounded real calls needed to distinguish Hermes configuration faults from provider account/quota/credential blockers. Produce a concise evidence-backed result for each provider without weakening Stage 2 gates.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "No real agent currently owns the shared worktree; the full-operational-build record is an umbrella placeholder only.",
+    "All ten credentials are present locally; never print, log, commit or expose any secret value.",
+    "Use the newest provider verification evidence and current main as the starting point."
+  ],
+  "allowed_scope": [
+    "Qwen: inspect the 2026-09-24 live DashScope international catalogue evidence. Treat the owner's selected model qwen3.7-plus as authoritative intent. Verify that qwen3.7-plus and/or its dated alias are actually present in the captured live catalogue. If present, correct generic_openai_adapter.py and worker_registry.py from qwen3.8-27b to qwen3.7-plus while preserving the existing worker_id qwen38-27b only if required for credential compatibility.",
+    "Qwen: deploy the corrected E3 runtime with scripts/deploy_e3_runtime.py, then perform exactly one bounded real chat smoke call to qwen3.7-plus (max_tokens <= 16, one attempt, no retry). Record HTTP status, provider error code/message, returned model field and usage if any. Never log the credential.",
+    "Qwen: if qwen3.7-plus succeeds, mark only the directly proven routing/identity fields accordingly; qualification remains evidence-driven. If it returns AccessDenied.Unpurchased, record that as a genuine account entitlement blocker for the intended model.",
+    "Mistral: do not spend repeated calls. Inspect the two existing 429 responses and adapter evidence. If one additional diagnostic call can capture non-secret rate-limit headers (Retry-After / x-ratelimit style headers) within the same <=16-token one-attempt budget, do so once; otherwise classify the evidence without another call. Distinguish transient request-rate limiting from account/tier/monthly quota only where headers/provider evidence supports it.",
+    "GLM, LongCat, MiniMax and StepFun: verify the live model catalogue evidence, endpoint correctness and provider-returned billing/quota messages. Do not re-spend calls merely to reproduce deterministic 402/429 balance failures.",
+    "Tencent Hy3: inspect the exact TokenHub endpoint/key-product evidence. Re-probe GET /v1/models at most once using the stored key, with no chat completion call unless authentication succeeds. If 401 code 401002 repeats, classify as TokenHub credential/product/account mismatch and leave owner re-issuance as the next step.",
+    "Google image: use existing 9-call series only. Audit whether IMAGE_RECITATION is a provider content stop rather than transport/auth failure, and whether the current Stage-2 criterion is intentionally conservative. Do not generate additional images in this task.",
+    "Run only the focused tests needed for changed Qwen adapter/registry/deployment behavior plus status consistency if canonical state is updated. Do not run a full paid provider suite.",
+    "Update canonical status/TODO only where the debug establishes a changed fact. Preserve unresolved external blockers truthfully.",
+    "Commit and push the Qwen correction, focused tests and debug evidence."
+  ],
+  "stop_conditions": [
+    "Do not purchase, recharge, enable billing, alter provider plans, or create/reissue API keys; those are owner/provider actions.",
+    "Do not expose credentials or secret-derived values.",
+    "Do not enable Stage 2 in this task.",
+    "Do not repeat deterministic failed provider calls merely to get the same error.",
+    "Do not change the Google readiness criterion just to make Stage 2 pass.",
+    "Do not claim Qwen entitlement failure until the intended qwen3.7-plus model itself has been tested.",
+    "Do not use browser/GUI automation or signed-in browser sessions."
+  ],
+  "notes": "This task exists because the prior closeout claimed qwen3.7-plus was absent while its own committed live catalogue evidence lists qwen3.7-plus and qwen3.7-plus-2026-05-26. The user requested a live debug and results.",
+  "completed_at": "2026-09-24T22:13:19.075718Z",
+  "result": {
+    "status": "completed",
+    "summary": "Live provider debug + Qwen reconciliation done. ROOT BUG CONFIRMED AND FIXED: the prior closeout claimed the owner's intended `qwen3.7-plus` was absent from the account catalogue, but its own committed live evidence (audits/evidence/2026-09-24T21-06-25Z-e3-provider-live-identity-probe) lists BOTH `qwen3.7-plus` and `qwen3.7-plus-2026-05-26` among 172 ids; the model was wrongly set to `qwen3.8-27b`. Corrected `generic_openai_adapter.py` and `worker_registry.py` to `qwen3.7-plus` (display Qwen3.7-Plus); worker_id `qwen38-27b` preserved as the stable credential-registry key because the credential resolves via credential_target `qwen` (verified via `set_provider_key.py --status`: target is `qwen`, not the worker id), and the owner handover records the credential was provisioned under that key. Deployed the corrected E3 runtime via scripts/deploy_e3_runtime.py, then made exactly ONE bounded real call to the corrected `qwen3.7-plus` (max_tokens=16, one attempt, no retry): model present in live catalogue, HTTP 403 code=AccessDenied.Unpurchased, returned model field null, usage null, E2 row obs-20260924-c378d692 -> genuine ACCOUNT ENTITLEMENT blocker for the intended model, not a Hermes config fault. Tencent Hy3: one bounded GET /v1/models re-probe -> HTTP 401 code 401002, no chat call attempted -> TokenHub credential/product/account mismatch. Mistral: one bounded diagnostic call captured the 429 response headers; provider exposed NO Retry-After/x-ratelimit headers, so transient request-rate limiting cannot be separated from account/tier/monthly quota from provider evidence (the authenticated GET /models still returns 200, so not an auth/adapter fault). GLM, LongCat, MiniMax, StepFun classified from existing committed catalogue + deterministic 402/429-billing evidence with ZERO new calls. Google image: audited the existing 9-call series only - every no-image recurrence carried the provider's own finishReason IMAGE_RECITATION (provider content-side stop, not transport/auth/adapter), and the Stage-2 criterion 'resolved (not intermittent)' is intentionally conservative and was NOT changed; no images generated. Net: no provider became execution-ready; Stage 2 remains NOT ENABLED and no gate was weakened.",
+    "owner_action_required": "Fund/enable the provider accounts so the stored keys serve traffic, and re-issue the Tencent key: (1) Qwen international DashScope - purchase/enable the intended `qwen3.7-plus` (403 AccessDenied.Unpurchased); (2) Mistral - 429 rate limit (provider exposes no rate-limit headers); (3) GLM/Z.ai - 429 insufficient balance; (4) LongCat - 402 insufficient token quota; (5) MiniMax - 402 insufficient balance (1008); (6) StepFun - 402 quota/billing; (7) Tencent TokenHub - re-issue an API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002 = credential/product/account mismatch). No purchase/recharge/key action was taken by this task.",
+    "blocker_category": "external_provider",
+    "commits": [
+      "af87625 - e3: correct Qwen model selection to qwen3.7-plus + bounded provider debug evidence (pushed main, 299422e..af87625)"
+    ],
+    "tests": [
+      "exec-brain/tests/test_e3.py -> 59 passed (includes new focused test_qwen_model_selection_matches_owner_intent)",
+      "exec-brain/tests/test_e3.py + test_e3_execution.py + test_e3_operator_surface.py -> 94 passed",
+      "scripts/tests/test_status_consistency.py -> 23 passed",
+      "scripts/status_verify.py -> PASSED (as_of 2026-09-24T21:10:44Z; 10 production blockers; 0 warnings)"
+    ],
+    "changed_files": [
+      "exec-brain/generic_openai_adapter.py",
+      "exec-brain/worker_registry.py",
+      "exec-brain/tests/test_e3.py",
+      "scripts/e3_provider_live_identity_probe.py",
+      "scripts/e3_provider_rate_limit_diagnostic.py",
+      "scripts/e3_tencent_endpoint_reprobe.py",
+      "status/canonical-status.json",
+      "status/executive-tracker.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "handovers/2026-09-24-e3-provider-verification-and-stage2-closeout.md",
+      "handovers/2026-09-24-provider-debug-qwen-tencent-reconciliation.md",
+      "audits/evidence/2026-09-24T22-08-43Z-e3-provider-bounded-smoke/",
+      "audits/evidence/2026-09-24T22-08-59Z-e3-provider-rate-limit-diagnostic/",
+      "audits/evidence/2026-09-24T22-09-28Z-e3-tencent-endpoint-reprobe/"
+    ],
+    "remaining": [
+      "Owner funds/entitles the providers (esp. purchase/enable qwen3.7-plus) and re-issues the Tencent TokenHub key; no provider will be execution-ready until then.",
+      "Mistral transient-vs-quota distinction stays unresolved because the provider exposes no rate-limit headers.",
+      "Tencent hy3 model id remains documentation-derived only (credential rejected, catalogue unreadable).",
+      "Google image Stage-2 criterion 'resolved (not intermittent)' still unmet (2/9 recorded IMAGE_RECITATION); owner must decide whether to re-scope it - not changed here.",
+      "Stage 2 remains NOT ENABLED pending the readiness gate conditions plus provider entitlement.",
+      "Deployment/VPS cutover remains owner-gated and not authorised."
+    ]
+  }
+}
