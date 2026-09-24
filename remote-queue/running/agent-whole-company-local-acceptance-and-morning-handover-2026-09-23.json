@@ -26,5 +26,26 @@
     "No deployment cutover.",
     "No hidden unresolved agent/workflow."
   ],
-  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work. Owner directive 2026-09-24: run final blocked-work recovery/reconciliation before whole-company acceptance so historical execution_error records are either superseded by evidence, recovered, or truthfully left owner/external-gated. Do not declare acceptance while a recoverable non-owner gap remains."
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work. Owner directive 2026-09-24: run final blocked-work recovery/reconciliation before whole-company acceptance so historical execution_error records are either superseded by evidence, recovered, or truthfully left owner/external-gated. Do not declare acceptance while a recoverable non-owner gap remains.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T04:02:59.443393Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes returned an unstructured final response (sha256=72005c9ba8703af51af20757e3cd8b68991462a181d6755368ad15acc28e9959, bytes=758). Inspect locally; raw response was not committed.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes returned an unstructured final response (sha256=72005c9ba8703af51af20757e3cd8b68991462a181d6755368ad15acc28e9959, bytes=758). Inspect locally; raw response was not committed.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
