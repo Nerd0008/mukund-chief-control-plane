@@ -530,3 +530,9 @@ names and the LinkedIn app credentials. None of these was auto-activated or assu
 **Discipline applied:** no fixture or dry-run result was recorded as a live PASS; no credential
 value was read, printed, logged or committed; the laptop was not rebooted, signed out or
 power-cycled; no VPS/off-site vendor was chosen; the legacy task was not deleted.
+
+## Owner decision update — 2026-09-25
+
+Mukund accepted the Google image worker's attributed provider-side `IMAGE_RECITATION` intermittency for the **local E3 readiness criterion**. Preserve the observed 2/9 recurrence, provider attribution, bounded retry/fallback evidence and the worker's unqualified/stability status; this decision does not fabricate a stability result or bypass provider-execution evidence. The remaining Stage 2 blocker is live execution readiness for the text-provider roster, and Stage 2 remains disabled until its objective gates pass.
+
+Mukund also directed the project to remain **local-only for now**. VPS architecture, access, deployment and cutover are deferred to a future owner decision. Continue local engineering, qualification, verification, evidence and reversible deployment preparation only.

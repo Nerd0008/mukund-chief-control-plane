@@ -364,3 +364,9 @@ Policy:
 - this retry policy must never create an infinite loop.
 
 The Stage-2 missing-key gate remains subject to the anti-loop directive above: 0/7 keys is a deterministic blocker, not a retryable execution failure.
+
+## Owner directive update — 2026-09-25
+
+The owner accepts the Google image worker's provider-attributed `IMAGE_RECITATION` intermittency for the local readiness criterion, retaining all observed evidence and without asserting stability or qualification. E3 Stage 2 remains disabled pending objective provider-execution readiness.
+
+The owner directs local-only operation for now. VPS architecture, access, deployment and cutover are deferred; continue only local implementation, verification, evidence and reversible deployment preparation.

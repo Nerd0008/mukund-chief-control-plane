@@ -189,3 +189,8 @@ Decide later whether to keep it indefinitely or delete it after Hermes is fully 
 - Legacy Chief task disabled, not deleted.
 - Hardening successor worker completed.
 - E3 Stage 2 remains OFF until the objective gates pass.
+
+## Decision update — 2026-09-25
+
+- Google image: owner accepts the provider-attributed `IMAGE_RECITATION` intermittency as a re-scoped **local readiness** condition. Preserve the 2/9 evidence, bounded retry/fallback policy, attribution and non-stability claim. This does not make the worker stable or qualified by assertion, and it does not enable E3 Stage 2 while provider execution remains blocked.
+- Topology: owner selected **local-only for now**. Do not request VPS access, select a VPS vendor, deploy, cut over or treat the deferred topology as approved.
