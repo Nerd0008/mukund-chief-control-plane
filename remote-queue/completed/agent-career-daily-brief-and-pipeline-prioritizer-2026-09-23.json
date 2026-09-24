@@ -1,0 +1,90 @@
+{
+  "task_id": "agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23",
+  "created_at": "2026-09-23T21:36:00Z",
+  "objective": "Build the Career Daily Brief / Pipeline Prioritizer so Chief can summarize new eligible jobs, tracker changes, Company Watch findings, application-status changes, deadlines/follow-ups and owner actions without duplicating source-of-truth state.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "At least the Career Ops/tracker interface must exist; gracefully mark unavailable inputs rather than guessing."
+  ],
+  "allowed_scope": [
+    "Aggregate read-only from canonical trackers/status stores and workflow outputs.",
+    "Prioritize by explicit deterministic policy inputs (deadline, eligibility certainty, application stage, freshness, owner flags); label unknowns and do not invent scores as facts.",
+    "Include regional scan health, newly added jobs, duplicates suppressed, application status changes, interview/follow-up items and owner actions.",
+    "Produce a machine-readable brief plus concise Chief-facing summary.",
+    "Make it schedulable for morning delivery but do not assume an external delivery channel is healthy until verified.",
+    "Test idempotency and empty/partial-input behavior."
+  ],
+  "stop_conditions": [
+    "No application submission or outreach.",
+    "No fabricated priority facts.",
+    "Do not overwrite canonical career state."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T01:26:52.618110Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes CLI exited with code 1 (output_bytes=7208).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes CLI exited with code 1 (output_bytes=7208).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T01:37:08.142724Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 1 had already committed and pushed the Career Daily Brief worker (911fd9c) and then died with one uncommitted change and a failing test. This retry finished only that outstanding unit and verified it. Outcome: the as-of/window clock is floored to a declared quantum (career-ops/daily_brief_config.json window.quantize_minutes=60; 0 = documented opt-out), so the brief's identity is 'the state as of the end of a quantum' rather than the instant the process ran, with generated_at keeping the true run instant. While verifying on the real scheduled path (career-ops/run_scheduled_brief.cmd) I found a second defect of the same class: brief_id was still stamped with the raw run clock, so two runs over an identical content digest published different ids (cdb-...T013130Z-62b8de90 vs cdb-...T013136Z-62b8de90); the id is now stamped with the brief's own as_of. Both defects are fixed at root and pinned by tests and acceptance checks. One harness defect was found and fixed inside the retry: the first version of the new stage-4 check compared the append-only run-log.jsonl and reported a false failure; that run is preserved (not deleted) under audits/evidence/superseded/ with a SUPERSEDED.md explaining it, as is an interim passing run taken before the brief_id fix. Scope, stop conditions and behaviour are otherwise unchanged: read-only aggregation, canonical workbook hashes identical before/after, zero submissions/messages/canonical writes, external_channel_health still not_verified, morning schedule ChiefCareerBrief unchanged (queried Ready, next run 24-09-2026 07:00). Attempt 1's evidence and commits were left untouched; nothing was recreated or re-run as new work.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "9b414f1 career-ops: quantized as-of clock for the Career Daily Brief (B23 retry completion)",
+      "6a95660 audit: Career Daily Brief quantized-identity acceptance (B23 retry evidence)",
+      "521773e docs: state the brief-identity fixed point for stored artifacts",
+      "pushed to origin/main (origin/main == HEAD, 0 ahead / 0 behind)"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_daily_brief.py -q -> 22 passed (was 21 at attempt 1)",
+      "python -m pytest career-ops/tests/ -q -> 300 passed (was 299)",
+      "python career-ops/run_daily_brief_acceptance.py -> 34/34 checks passed, 0 critical failures, code SHA 9b414f1, canonical workbook SHA-256s identical before/after (audits/evidence/20260924T013238Z-career-daily-brief/)",
+      "python scripts/evidence_runner.py --label b23-daily-brief-attempt2 -> 15/15 suites, 438/438 tests (audits/evidence/2026-09-24T01-34-06Z-b23-daily-brief-attempt2/)",
+      "live scheduled path run twice (run_scheduled_brief.cmd, same quantum): second run wrote [] and reported idempotent: true with an identical brief_id in both run-log entries",
+      "schtasks /Query /TN ChiefCareerBrief -> registered, Status Ready, next run 24-09-2026 07:00"
+    ],
+    "changed_files": [
+      "career-ops/daily_brief.py",
+      "career-ops/daily_brief_config.json",
+      "career-ops/tests/test_daily_brief.py",
+      "career-ops/run_daily_brief_acceptance.py",
+      "career-ops/README.md",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "state/v1-agent-roster.md",
+      "remote-queue/logs/queue.log",
+      "audits/evidence/20260924T013238Z-career-daily-brief/acceptance.json",
+      "audits/evidence/20260924T013238Z-career-daily-brief/acceptance.md",
+      "audits/evidence/2026-09-24T01-34-06Z-b23-daily-brief-attempt2/evidence.json",
+      "audits/evidence/2026-09-24T01-34-06Z-b23-daily-brief-attempt2/evidence.md",
+      "audits/evidence/superseded/20260924T012854Z-career-daily-brief-interim-check-bug/{acceptance.json,acceptance.md,SUPERSEDED.md}",
+      "audits/evidence/superseded/20260924T012926Z-career-daily-brief-superseded-by-brief-id-stability-run/{acceptance.json,acceptance.md,SUPERSEDED.md}"
+    ],
+    "remaining": [
+      "Owner decision (pre-existing, item 14 in tasks-or-issues/overnight-owner-actions-2026-09-24.md, not blocking): keep the brief local-file only, or name a messaging surface to deliver it to. external_channel_health stays not_verified and no channel is assumed healthy until that is decided and verified.",
+      "On-disk runtime artifacts under runtime/career-ops/daily-brief/ written by the pre-fix revision keep their original rendering (digest-named file plus latest.* pointers) by design; the next content change rewrites them with the corrected brief_id. Documented in career-ops/README.md.",
+      "Untracked audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ belongs to the separate company-watch recovery task and was deliberately left untouched."
+    ]
+  }
+}
