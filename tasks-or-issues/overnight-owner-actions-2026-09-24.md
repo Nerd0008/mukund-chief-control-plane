@@ -16,6 +16,20 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 6. Do not weaken safety, qualification, privacy, evidence, deployment, or Stage 2 gates to avoid an owner dependency.
 7. When Mukund returns, work this list top-to-bottom by critical-path impact.
 
+## Live owner-action summary — current priority
+
+The historical detail below is preserved, but the active order is now:
+
+1. **NOW / Stage-2 critical:** resolve Tencent first, then Qwen, GLM, LongCat, MiniMax, StepFun and Mistral provider-account blockers one at a time.
+2. **AFTER providers:** decide the Google image `IMAGE_RECITATION` Stage-2 criterion and whether v1 requires a real live-provider E4/E5 failover drill.
+3. **BEFORE production trust:** perform the owner-attended laptop security audit, verify persistence after an owner-initiated reboot, and choose an off-machine backup destination/retention.
+4. **AFTER local proof:** choose final laptop/VPS/hybrid topology; provide VPS details locally only if that path is selected.
+5. **CAREER OPS, non-Stage-2:** Gmail read-only OAuth, company watchlist names, tracker vocabulary, monthly-rollover policy, and Dubai/Japan discovery-source choice.
+6. **OPTIONAL integrations:** LinkedIn live OAuth/publishing, company/role research provider, recruiter feed, and Career Daily Brief delivery channel.
+7. **NOT an active proactive TODO:** visa/sponsorship/right-to-work wording. Only handle it when an application/employer explicitly asks, using accurate owner-grounded facts.
+
+Canonical concise view: `deployments/03-owner-action-todo.md`.
+
 ## Current owner actions
 
 ### 1. Configure all remaining provider credentials
