@@ -5,7 +5,7 @@
   "verified_by": "scripts/status_verify.py",
   "maintenance": "Regenerate with `python scripts/status_render.py`; verify with `python scripts/status_verify.py` (also run as the suite `python scripts/tests/test_status_consistency.py`). This file is the single canonical project-status source. The executive tracker and the derived status summary blocks in README.md / state/current_company_state.md / state/full_build_tracker.md are GENERATED from it and must never be hand-edited as the maintenance path.",
   "as_of": "2026-09-24T21:10:44Z",
-  "as_of_note": "Newest *committed* incorporated evidence run (run_finished_utc of the canonical-status verification run). Local-only credential-presence evidence is referenced separately and never required to exist in a clean clone. Evidence directories whose stamp is later than `as_of` and that are not referenced here are reported as unincorporated by scripts/status_verify.py.",
+  "as_of_note": "Newest *committed* incorporated evidence run (run_finished_utc of the canonical-status verification run). Local-only credential-presence evidence is referenced separately and never required to exist in a clean clone. Evidence directories whose stamp is later than `as_of` and that are not referenced here are reported as unincorporated by scripts/status_verify.py. Newer evidence belonging to another lane (for example the E3 credential-presence probes) is never absorbed or re-attributed here — see `evidence_ownership`. The scheduled-cutover lane's newer committed acceptance record (run finished 2026-09-24T21:34:00Z) is referenced without moving `as_of`, exactly as the 2026-09-24T21-21-21Z Stage-2 verdict is.",
   "truth_rules": [
     "Every figure below is copied from a recorded evidence artifact named in `source`; nothing is inferred or extrapolated.",
     "UNKNOWN stays UNKNOWN. No owner-gated unknown is ever rendered as PASS or as complete.",
@@ -210,16 +210,38 @@
         "evidence": "career-ops/evidence/acceptance-20260924T001500Z.json"
       },
       "scheduled_orchestrator_cutover": {
-        "task_id": "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24",
+        "task_id": "agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24",
         "state": "COMPLETE / PASS",
         "blocker_category": null,
         "attempts": 1,
         "attempts_permitted": 1,
-        "evidence": "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json",
-        "result": "PASS (23/23 checks): the scheduled launcher invokes the unified high-recall orchestrator with a live-web requirement, four regions covered by one run, one unified candidate manifest, canonical workbooks byte-identical before and after, and no browser/GUI action.",
+        "implementation_landed_by": "0e676f5",
+        "code_sha": "9042ab57b30168d891a9354e9297a0ecb9fd8c3d",
+        "evidence": "audits/evidence/2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover/evidence.json",
+        "result": "PASS (39/39 checks) at committed revision 9042ab5: 23 offline structural/whole-company checks (including launcher_keeps_crlf_line_endings) plus a bounded live pass over all four regions. The scheduled launcher invokes the unified high-recall orchestrator with --require-live-web; one unified candidate manifest covers uk/dubai/japan/singapore; canonical workbooks byte-identical before and after every run; no browser/GUI action.",
+        "live_acceptance": {
+          "attempted": true,
+          "mechanism": "codex-web-search - the non-GUI Codex CLI native web_search tool; a live web_search event was observed in the execution stream at probe time and per region",
+          "budget": "2 bounded queries per region, broad pass not run",
+          "regions_production_ready": [
+            "dubai",
+            "japan",
+            "singapore",
+            "uk"
+          ],
+          "linkedin_public_discovery": {
+            "uk": "reached",
+            "dubai": "reached",
+            "japan": "reached",
+            "singapore": "searched_no_results"
+          },
+          "note": "Inside the bounded per-region budget the round-robin reaches only the first source classes; web_index and ats_employer_careers are recorded not_applicable, which is not a claim that they are empty. The four-class broad pass was NOT run on this revision. No blocked or unavailable class is reported as empty."
+        },
+        "committed_revision_note": "The acceptance is bound to bytes (code_sha), not to a date, so a reader can check out that SHA and re-run it.",
         "previous_state": "NOT COMPLETE / BLOCKED",
         "previous_evidence": "audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/evidence.json",
-        "note": "Recorded from the recovery worker's committed evidence; supersedes the earlier parked/blocked record."
+        "recovery_evidence": "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json",
+        "note": "Recorded from this lane's final acceptance run. Supersedes the recovery worker's offline-only record (live.attempted=false) and the earlier parked/blocked record; both stay committed and are referenced here. The predecessor's live codex-web-search pass at 2026-09-24T14-39-12Z ran on pre-CRLF-fix bytes and is historical proof only, never proof for this revision. Two bounded offline records are preserved under audits/evidence/superseded/: the pre-live pre-flight of revision 9042ab5 (2026-09-24T21-26-53Z-career-scheduled-orchestrator-cutover-offline-preflight-superseded-by-live-acceptance/) and a pre-commit structural re-verification bound to HEAD 5d7edae (2026-09-24T21-51-05Z-career-scheduled-orchestrator-cutover-offline-reverification-at-head/, PASS 23/23 including launcher_keeps_crlf_line_endings); both are subsumed into the single live acceptance record above. No owner scheduled task was registered, enabled, disabled, replaced or triggered: a read-only query confirmed ChiefCareerScan-UK/Dubai/Japan/Singapore and ChiefCareerBrief all Ready with advancing next-run times, so no schedule change was needed."
       }
     },
     "truth_boundaries": [
@@ -580,6 +602,12 @@
   ],
   "history": [
     {
+      "at": "2026-09-24T21:34:00Z",
+      "id": "2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover",
+      "result": "PASS 39/39 (23 offline structural/whole-company + 16 live)",
+      "what": "Final scheduled-cutover acceptance bound to committed revision 9042ab5 (code_sha recorded in the artifact): the offline structural and whole-company checks pass, including launcher_keeps_crlf_line_endings, and a bounded live pass (--live --live-queries 2, broad pass not run) ran over all four regions. The non-GUI Codex CLI web_search mechanism was probed operational before the run and its live search events were observed per region; all four regions recorded production_ready; canonical workbooks byte-identical before and after; 0 workbook writes, 0 applications, 0 employer/recruiter contacts, no LinkedIn mutation, no browser/GUI, no login/cookie/session. Live acceptance on this committed revision is PASS; the predecessor's codex-web-search evidence at 2026-09-24T14-39-12Z stays historical proof on pre-CRLF-fix bytes and the recovery record at 2026-09-24T20-33-25Z was offline-only (live.attempted=false)."
+    },
+    {
       "at": "2026-09-24T21:21:21Z",
       "id": "2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict",
       "result": "NOT ENABLED (a=PASS 10/10 credentials, b=FAIL Google image criterion, c=FAIL)",
@@ -726,5 +754,24 @@
       "result": "PASS",
       "what": "Formal production-rehearsal re-run on the real path: decomposed multi-worker plan, rejection to repair to re-verification, 7 bounded real provider calls."
     }
-  ]
+  ],
+  "evidence_ownership": {
+    "rule": "An evidence directory that belongs to another lane is never silently absorbed, moved or re-attributed by a lane performing a status reconciliation. It is either referenced truthfully by the lane that owns it, or recorded here as that lane's responsibility and left for it to incorporate.",
+    "reconciled_at": "2026-09-24T21:34:00Z",
+    "unincorporated_at_reconciliation": [],
+    "other_lane_evidence": [
+      {
+        "prefix": "audits/evidence/*-e3-credential-presence-probe/",
+        "owner": "the E3 provider-verification lane (agent-e3-provider-verification-stage2-closeout-2026-09-24 and its gated successor agent-e3-stage2-enable-after-provider-verification-2026-09-24)",
+        "note": "Presence-only credential probes; several are local-only (git-ignored) artifacts. Their incorporation and any provider-side status reconciliation belong to the E3 provider-verification closeout task. The scheduled-cutover acceptance lane did not modify, move or re-attribute any of them."
+      }
+    ],
+    "this_lane": [
+      "audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/",
+      "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/",
+      "audits/evidence/2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover/",
+      "audits/evidence/superseded/2026-09-24T21-26-53Z-career-scheduled-orchestrator-cutover-offline-preflight-superseded-by-live-acceptance/",
+      "audits/evidence/superseded/2026-09-24T21-51-05Z-career-scheduled-orchestrator-cutover-offline-reverification-at-head/"
+    ]
+  }
 }
