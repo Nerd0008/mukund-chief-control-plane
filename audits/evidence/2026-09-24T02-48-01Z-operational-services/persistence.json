@@ -1,0 +1,466 @@
+{
+  "artifact": "restart/boot persistence validation",
+  "run_utc": "2026-09-24T02:49:30+00:00",
+  "code_sha": "5440f08dc6e38593d8fd656620a2c5bce5b3a21a",
+  "changed_tasks": [],
+  "live_state_modified": false,
+  "network_calls_spent": 0,
+  "tasks": {
+    "Hermes_Gateway": {
+      "task": "Hermes_Gateway",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "logon"
+        ],
+        "restart_on_failure": true,
+        "start_when_available": true,
+        "disallow_on_batteries": false,
+        "stop_on_batteries": false,
+        "execution_time_limit": "PT0S",
+        "start_boundary": null,
+        "repetition_interval": "PT1M"
+      },
+      "state": "Enabled",
+      "last_result": "0",
+      "next_run_time": "N/A"
+    },
+    "HermesRemoteQueuePoller": {
+      "task": "HermesRemoteQueuePoller",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": "HighestAvailable",
+        "triggers": [
+          "time"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-23T21:08:00",
+        "repetition_interval": "PT2M"
+      },
+      "state": "Enabled",
+      "last_result": "-2147020576",
+      "next_run_time": "24-09-2026 03:50:00"
+    },
+    "ChiefDiscordSync": {
+      "task": "ChiefDiscordSync",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "time"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-21T21:06:00",
+        "repetition_interval": "PT30M"
+      },
+      "state": "Enabled",
+      "last_result": "0",
+      "next_run_time": "24-09-2026 04:06:00"
+    },
+    "ChiefCareerBrief": {
+      "task": "ChiefCareerBrief",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "calendar"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-24T07:00:00",
+        "repetition_interval": null
+      },
+      "state": "Enabled",
+      "last_result": "267011",
+      "next_run_time": "24-09-2026 07:00:00"
+    },
+    "ChiefCareerScan-UK": {
+      "task": "ChiefCareerScan-UK",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "calendar"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-23T23:45:00",
+        "repetition_interval": null
+      },
+      "state": "Enabled",
+      "last_result": "0",
+      "next_run_time": "24-09-2026 23:45:00"
+    },
+    "ChiefCareerScan-Dubai": {
+      "task": "ChiefCareerScan-Dubai",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "calendar"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-23T23:50:00",
+        "repetition_interval": null
+      },
+      "state": "Enabled",
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:50:00"
+    },
+    "ChiefCareerScan-Japan": {
+      "task": "ChiefCareerScan-Japan",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "calendar"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-23T23:55:00",
+        "repetition_interval": null
+      },
+      "state": "Enabled",
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:55:00"
+    },
+    "ChiefCareerScan-Singapore": {
+      "task": "ChiefCareerScan-Singapore",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "calendar"
+        ],
+        "restart_on_failure": false,
+        "start_when_available": false,
+        "disallow_on_batteries": true,
+        "stop_on_batteries": true,
+        "execution_time_limit": null,
+        "start_boundary": "2026-09-23T00:00:00",
+        "repetition_interval": null
+      },
+      "state": "Enabled",
+      "last_result": "2",
+      "next_run_time": "25-09-2026 00:00:00"
+    },
+    "Mukund Chief of Staff": {
+      "task": "Mukund Chief of Staff",
+      "exists": true,
+      "definition": {
+        "enabled_xml": true,
+        "logon_type": "InteractiveToken",
+        "run_level": null,
+        "triggers": [
+          "logon"
+        ],
+        "restart_on_failure": true,
+        "start_when_available": true,
+        "disallow_on_batteries": false,
+        "stop_on_batteries": false,
+        "execution_time_limit": "PT0S",
+        "start_boundary": null,
+        "repetition_interval": "PT1M"
+      },
+      "state": "Enabled",
+      "last_result": "-1073741510",
+      "next_run_time": "N/A"
+    }
+  },
+  "verdicts": {
+    "Hermes_Gateway": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "logon"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": true,
+      "disallow_on_batteries": false,
+      "last_result": "0",
+      "next_run_time": "N/A",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    },
+    "HermesRemoteQueuePoller": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "-2147020576",
+      "next_run_time": "24-09-2026 03:50:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefDiscordSync": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "time"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "0",
+      "next_run_time": "24-09-2026 04:06:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefCareerBrief": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "267011",
+      "next_run_time": "24-09-2026 07:00:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefCareerScan-UK": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "0",
+      "next_run_time": "24-09-2026 23:45:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefCareerScan-Dubai": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:50:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefCareerScan-Japan": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "2",
+      "next_run_time": "24-09-2026 23:55:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "ChiefCareerScan-Singapore": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "calendar"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": false,
+      "restart_on_failure": false,
+      "disallow_on_batteries": true,
+      "last_result": "2",
+      "next_run_time": "25-09-2026 00:00:00",
+      "survives_boot": "no",
+      "reason": "no boot/logon trigger and StartWhenAvailable not set"
+    },
+    "Mukund Chief of Staff": {
+      "exists": true,
+      "state": "Enabled",
+      "triggers": [
+        "logon"
+      ],
+      "logon_type": "InteractiveToken",
+      "start_when_available": true,
+      "restart_on_failure": true,
+      "disallow_on_batteries": false,
+      "last_result": "-1073741510",
+      "next_run_time": "N/A",
+      "survives_boot": "yes",
+      "reason": "has boot/logon trigger; StartWhenAvailable=true"
+    }
+  },
+  "owner_checklist": [
+    {
+      "task": "Hermes_Gateway",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "HermesRemoteQueuePoller",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "HermesRemoteQueuePoller",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "HermesRemoteQueuePoller",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefDiscordSync",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefDiscordSync",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefDiscordSync",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefCareerBrief",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerBrief",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefCareerBrief",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefCareerScan-UK",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-UK",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefCareerScan-UK",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefCareerScan-Dubai",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Dubai",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefCareerScan-Dubai",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefCareerScan-Japan",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Japan",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefCareerScan-Japan",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    },
+    {
+      "task": "ChiefCareerScan-Singapore",
+      "action": "keep_signed_in",
+      "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+    },
+    {
+      "task": "ChiefCareerScan-Singapore",
+      "action": "battery_gating",
+      "detail": "DisallowStartIfOnBatteries=true \u2014 will not run on battery; owner-aware re-import needed for laptop-primary topology"
+    },
+    {
+      "task": "ChiefCareerScan-Singapore",
+      "action": "add_logon_trigger",
+      "detail": "no boot/logon trigger and StartWhenAvailable not set \u2014 persistence after reboot is unverified; add a logon trigger (small, reversible schtasks /Create /XML re-import)"
+    }
+  ],
+  "unverified_after_reboot": [
+    "HermesRemoteQueuePoller",
+    "ChiefDiscordSync",
+    "ChiefCareerBrief",
+    "ChiefCareerScan-UK",
+    "ChiefCareerScan-Dubai",
+    "ChiefCareerScan-Japan",
+    "ChiefCareerScan-Singapore"
+  ]
+}

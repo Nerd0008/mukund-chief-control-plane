@@ -41,6 +41,22 @@ python scripts/deployment_backup_restore_drill.py
   `deploy_e3_runtime.py --dry-run` clean (wrote nothing).
 - Evidence: `audits/evidence/2026-09-24T02-15-42Z-deployment-backup-restore-drill/`.
 
+### Operational services (health, briefs, backup/retention, persistence)
+
+```bash
+python scripts/operational_services.py health-snapshot     # deterministic acceptance snapshot
+python scripts/operational_services.py morning-brief       # Morning Chief Brief
+python scripts/operational_services.py backup --rotate-logs   # operational backup + retention (plan)
+python scripts/operational_services.py validate-persistence   # scheduler/boot persistence
+```
+
+- **Verified 2026-09-24:** health snapshot `verdict: ATTENTION`, `fail_count: 0`;
+  operational backup `status: PASS`; persistence recorded 7 tasks with reboot
+  persistence UNVERIFIED (config-only, no reboot performed). Full detail and
+  evidence paths: `10-operational-services.md`.
+- All four are read-only against live state (the backup snapshots read-only into
+  a directory outside the repository).
+
 ## 3. Credential and provider health
 
 ```bash
@@ -104,8 +120,13 @@ python scripts/evidence_runner.py --label <name> [--only SUBSTR]
   16 suites run, 16 passed, 0 failed, 0 unavailable, 456 tests collected,
   456 passed, 0 errors, 0 skipped, every suite exit 0.**
   Evidence: `audits/evidence/2026-09-24T02-18-54Z-deployment-prep-regression/`.
-- Historical baseline to beat: 438 tests / 15 suites (as of 2026-09-24T23:55Z);
-  the suite count has since grown, so compare *pass/fail*, not the raw total.
+- Historical baseline to beat: 438 tests / 15 suites (as of 2026-09-24T23:55Z;
+  the suite count has since grown, so compare *pass/fail*, not the raw total).
+- A 17th suite was added 2026-09-24 by
+  `agent-operational-brief-health-backup-persistence-2026-09-23`:
+  `scripts/tests/test_operational_services.py` (17 tests, isolated). It was run
+  green in isolation (`--only operational`): 1 suite, 17/17 passed, exit 0 —
+  `audits/evidence/2026-09-24T02-49-47Z-operational-services-tests/`.
 - `--only` runs a subset; use it for a fast smoke before a full run.
 
 ## 8. Career Ops / Company Watch health

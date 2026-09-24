@@ -127,10 +127,12 @@ Do **not** touch `Mukund Chief of Staff`: its disposition is an owner decision.
 | Daily brief | `runtime\career-ops\daily-brief\latest.{md,json}` | overwritten per run |
 | Cron executions | `%LOCALAPPDATA%\hermes\cron\executions.db` | DB, no pruning configured |
 
-Log rotation/retention is **not** implemented by this package. It is a
-deployment checklist item before the node is left unattended for long periods,
-and it is owned by `agent-operational-brief-health-backup-persistence-2026-09-23`
-(this document only records the gap).
+Log rotation/retention is **not** configured by this package. It is implemented
+by `agent-operational-brief-health-backup-persistence-2026-09-23` as
+`scripts/operational_services.py backup --rotate-logs` (plan) / `--apply-logs`
+(apply) — see `10-operational-services.md` §5 — but it is not yet scheduled; that
+remains a small engineering step before the node is left unattended for long
+periods (this document records the state, it does not change it).
 
 ## 6. Service dependencies
 

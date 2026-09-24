@@ -218,16 +218,21 @@ can make them run for a signed-out user without an owner-approved credential/ser
 build window (as recorded in `handovers/2026-09-21-chief-os-sprint-handover.md`).
 
 ### 6. Confirm task persistence after a reboot (owner-gated verification)
-**Status:** UNVERIFIED — requires an action this contract prohibits
+**Status:** VALIDATED READ-ONLY 2026-09-24 — reboot itself still unverified (prohibited by task stop conditions)
 **Blocks:** the v1 "service survives restart/reboot" acceptance criterion only.
-**Exact facts:** `Hermes_Gateway` has an at-logon trigger, restart-on-failure and
-`StartWhenAvailable: true` (expected to survive a reboot). `HermesRemoteQueuePoller` and
-`ChiefDiscordSync` have a one-time time trigger with unlimited repetition and **no** logon/boot
-trigger and no `StartWhenAvailable`; whether they resume after a reboot is therefore **not verified**.
-Rebooting was prohibited by this task's stop conditions, so no claim is made either way.
-**Action:** after the next owner-initiated reboot, confirm both tasks return to `Ready`/`Running`
-with advancing `Next Run Time`; if either does not, add a logon trigger (engineering, small,
-reversible) — this is the minimum action the owner needs to unlock.
+**Exact facts (re-verified read-only 2026-09-24 by
+`scripts/operational_services.py validate-persistence`, evidence in
+`audits/evidence/2026-09-24T02-48-01Z-operational-services/persistence.json`):**
+`Hermes_Gateway` has a logon trigger + `StartWhenAvailable` → configured to survive a
+reboot. **Seven** tasks — `HermesRemoteQueuePoller`, `ChiefDiscordSync`, `ChiefCareerBrief`
+and the four `ChiefCareerScan-*` — have time/calendar triggers with **no** logon/boot trigger
+and **no** `StartWhenAvailable`, so their survival across a reboot is **UNVERIFIED**.
+No reboot was performed (this task's stop conditions prohibit it), so no claim is made
+either way.
+**Action:** after the next owner-initiated reboot, confirm all eight tasks return to
+`Ready`/`Running` with advancing `Next Run Time`; if any of the seven does not, ask
+engineering to add a logon trigger (small, reversible `schtasks /Create /XML` re-import —
+the remediating step is already recorded in the validator's `owner_checklist`).
 
 ### 7. Decide the disposition of the legacy `Mukund Chief of Staff` logon task
 **Status:** PENDING OWNER DECISION (recorded, not changed — no destructive cleanup was performed)
@@ -300,6 +305,24 @@ under whose account.
    broken channel can never make the brief look unhealthy.
 **Note:** the schedule makes the brief *available* in the morning; it does not deliver it anywhere.
 
+### 15. Approve scheduling the operational services (backup, log rotation, briefs)
+
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the operational-services task)
+**Blocks:** only unattended *regular cadence*; nothing is blocked mechanically — every
+service already runs on demand.
+**What exists now (built, tested 17/17, evidenced,
+`scripts/operational_services.py`, see `deployments/10-operational-services.md`):**
+a deterministic health snapshot, the Morning Chief Brief, an operational backup with a
+7-snapshot retention policy, log-rotation/retention, and read-only scheduler/boot
+persistence validation. The backup snapshot root is outside the repository
+(`%LOCALAPPDATA%\hermes\backups\operational\`), so no raw database is published.
+**Why owner-only:** adding scheduled tasks is a service change, and you asked that the
+system not create/modify tasks without approval. The cadence (e.g. daily backup + weekly
+log rotation + 06:30 morning brief) is a decision about your machine.
+**Action (optional):** reply with the cadence you want, or "run them on demand only"; if
+you want them scheduled, engineering will register the tasks with the same
+interactive-token/retention conventions and record them in `deployments/06`.
+
 
 
 ## Consolidated owner-action order (added 2026-09-24 by the deployment-prep task)
@@ -319,7 +342,7 @@ ordered execution list, produced while preparing the deployment package
    locally, never via GitHub.
 5. **Owner-attended laptop security audit** (item 5).
 6. **Reboot-persistence confirmation** (item 6).
-7. Optional, non-blocking: items 10, 11, 13, 14, the regional work-authorisation
+7. Optional, non-blocking: items 10, 11, 13, 14, 15, the regional work-authorisation
    answer (item 6) and Dubai/Japan provider choice (item 7), the E4/E5 acceptance
    question in item 8, and the legacy `Mukund Chief of Staff` task disposition.
 

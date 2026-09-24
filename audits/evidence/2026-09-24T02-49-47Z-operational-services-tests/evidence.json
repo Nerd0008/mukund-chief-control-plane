@@ -1,0 +1,39 @@
+{
+  "label": "operational-services",
+  "run_started_utc": "2026-09-24T02:49:47+00:00",
+  "run_finished_utc": "2026-09-24T02:49:47+00:00",
+  "code_sha": "5440f08dc6e38593d8fd656620a2c5bce5b3a21a",
+  "working_directory": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "python_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
+  "python_version": "3.11.16",
+  "platform": "win32",
+  "unittest_summary": {
+    "suites_run": 1,
+    "suites_passed": 1,
+    "suites_failed": 0,
+    "suites_unavailable": 0,
+    "tests_collected": 17,
+    "tests_passed": 17
+  },
+  "suites": [
+    {
+      "suite": "Operational services (health snapshot, morning brief, backup/retention, persistence; isolated: temp roots, injected inputs)",
+      "script": "scripts/tests/test_operational_services.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\tests\\test_operational_services.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts)",
+      "status": "pass",
+      "counts": {
+        "collected": 17,
+        "passed": 17,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    }
+  ]
+}

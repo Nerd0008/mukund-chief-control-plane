@@ -1,0 +1,146 @@
+{
+  "artifact": "operational backup",
+  "started_utc": "2026-09-24T02:49:28+00:00",
+  "snapshot_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational",
+  "snapshot_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20260924T024928Z",
+  "dry_run": false,
+  "retention_keep": 7,
+  "artifacts": [
+    {
+      "label": "e1-e2-exec-brain",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 77824,
+        "sha256": "75625249ec3e83c979579b138371532bb587b8b5d4b8b781f8fe4236fcb977b4"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e2-governor",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 81920,
+        "sha256": "efbb086813c6af7afb7fb19dd923b36b19037169f462123427567856a8277cd5"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e3-orchestration",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 217088,
+        "sha256": "692b2938065b38ef4255451818ea1a9d76fc00b888606a35b3d667df6ec2e154"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 50364416,
+        "sha256": "4b4b150717c8ecc9f00d35468bc5ce4bd32635ab746269f849b26c9833b4a29c"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-kanban",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 118784,
+        "sha256": "b7985707317a7d745a241e4a4c07efa76c779739d50791156ee54a231bec4aa6"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-shared-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 155648,
+        "sha256": "cb97dd3a26c50e0bec1429d3c98ec487d6ac94094a2e2e25275dea2bfc724042"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-cron-executions",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "snapshot": {
+        "integrity_check": "ok",
+        "size_bytes": 24576,
+        "sha256": "8d7f34d7722951059ba50edb6a9c46251163d5460fe3b6037da9f8c5332995e5"
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e1-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\chain-head.json",
+      "snapshot": {
+        "sha256": "7d3ced6e2341d6de80744a1b206420c9f5b6e36aa8a844d79cc423ffb5d2475f",
+        "size_bytes": 49
+      },
+      "status": "PASS"
+    },
+    {
+      "label": "e2-gov-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\gov-chain-head.json",
+      "snapshot": {
+        "sha256": "dbd9e3bb4c956f655f00f3006c9f99f3aa5747005bd4c4e740d9311dfabb18fe",
+        "size_bytes": 109
+      },
+      "status": "PASS"
+    }
+  ],
+  "pruned": [],
+  "live_state_modified": false,
+  "network_calls_spent": 0,
+  "provider_calls_spent": 0,
+  "failure_labels": [],
+  "status": "PASS",
+  "finished_utc": "2026-09-24T02:49:29+00:00",
+  "log_rotation": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 2676495,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 337091,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 69263,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 24901,
+      "action": "no_rotation_needed"
+    }
+  ]
+}

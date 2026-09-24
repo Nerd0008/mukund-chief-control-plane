@@ -79,6 +79,13 @@ audits/evidence/**/status-store/
 runtime/career-ops/daily-brief/
 runtime/career-ops/daily-brief-*/
 
+# --- Chief operational runtime artifacts (regenerated each run) ---
+# The Morning Chief Brief is a derived aggregate regenerated on every run
+# (queue task ids, health verdicts, owner-action titles). Keep it local; the
+# committed evidence is audits/evidence/<stamp>-health-snapshot/ and
+# audits/evidence/<stamp>-operational-backup/.
+runtime/chief/
+
 # --- Owner-private evidence artifacts (never committed) ---
 # Raw tracker backups, raw ATS findings and raw resolution dumps name Mukund's
 # companies, postings and application history. Committed evidence stays

@@ -112,6 +112,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "Operational services (health snapshot, morning brief, backup/retention, persistence; isolated: temp roots, injected inputs)",
+        "script": "scripts/tests/test_operational_services.py",
+        "pythonpath": [REPO_ROOT / "scripts"],
+        "guard": None,
+    },
+    {
         "name": "Remote queue (isolated: disposable roots, mocked/live-free boundaries)",
         "script": "remote_queue/tests/test_queue.py",
         "pythonpath": [],

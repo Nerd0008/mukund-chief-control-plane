@@ -84,6 +84,7 @@ ACCEPTANCE_TARGETS = [
     "scripts/evidence_runner.py",
     "scripts/e3_stage2_readiness_gate.py",
     "scripts/e3_credential_presence_probe.py",
+    "scripts/operational_services.py",
     "exec-brain/e3_production_rehearsal.py",
     "exec-brain/e3_execution_rehearsal.py",
     "exec-brain/e4e5_drill_harness.py",

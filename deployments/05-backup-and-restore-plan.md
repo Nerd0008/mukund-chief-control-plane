@@ -7,8 +7,9 @@ Evidence: `audits/evidence/2026-09-24T02-15-42Z-deployment-backup-restore-drill/
 
 Ownership note: this document covers the **deployment-time** backup/restore path.
 The scheduled operational backup service, its retention policy and the health
-snapshot are owned by `agent-operational-brief-health-backup-persistence-2026-09-23`;
-this package deliberately does not duplicate that work.
+snapshot are owned by `agent-operational-brief-health-backup-persistence-2026-09-23`
+and are now implemented in `10-operational-services.md`
+(`scripts/operational_services.py backup`); this package does not duplicate it.
 
 ---
 
