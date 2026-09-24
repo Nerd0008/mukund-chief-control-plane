@@ -1,0 +1,91 @@
+{
+  "task_id": "agent-blocked-work-final-reconciliation-2026-09-24",
+  "created_at": "2026-09-23T23:35:15Z",
+  "objective": "Near the end of the build, reconcile every historical blocked task that does not require owner action. Distinguish superseded/resolved historical failures from genuinely unfinished recoverable work, complete any remaining bounded engineering gap, and ensure no non-owner recoverable blocker is silently left behind before whole-company acceptance.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Current high-priority v1 engineering queue should reach truthful terminal states first.",
+    "agent-company-watch-recovery-final-pass-2026-09-24 should be completed or blocked with fresh evidence.",
+    "Do not rerun provider-key/Stage-2 tasks while the seven owner-local credentials are unchanged."
+  ],
+  "allowed_scope": [
+    "Audit every file in remote-queue/blocked/ against current main, completed successors, evidence, and current pending/running tasks.",
+    "Classify each blocked record as: superseded/resolved by verified successor evidence; deterministic owner/external blocker; or unresolved recoverable engineering work.",
+    "For superseded/resolved records, preserve them as historical evidence and document the successor/evidence that makes a rerun unnecessary. Do not rerun old broad tasks merely because the old record still says blocked.",
+    "For deterministic owner/external blockers (credentials, required owner approval, architecture choice, irreversible action, unchanged provider blocker), leave them parked and add only a concise owner TODO if still relevant.",
+    "For unresolved recoverable engineering work that needs no owner action, inspect partial work first and complete the smallest unfinished unit directly. If it cannot safely fit in this task, stage one unique bounded successor with no higher than medium priority and explicit resume evidence; never create duplicate retry chains.",
+    "Specifically verify historical queue-recovery/UTF-8/QuickEdit failures are superseded by the completed DeepSeek UTF-8 recovery and QuickEdit/two-retry hardening before deciding any rerun is needed.",
+    "Specifically verify historical E3 integration/rehearsal failures against completed production-execution, image-diagnosis, readiness-gate and later evidence; do not repeat real provider calls whose evidence is already sufficient.",
+    "Specifically verify Career Ops historical timeout against the completed company-registry/runtime audit and the tracker-writer/monthly-rollover task before deciding whether anything remains.",
+    "Run only bounded tests needed to close an identified gap; preserve landed commits/evidence, update state/tracker truthfully, and return strict terminal JSON."
+  ],
+  "stop_conditions": [
+    "Do not requeue Stage-2 credential-gate retries while provider credential state is unchanged.",
+    "Do not redo superseded work or repeat expensive/live provider rehearsals without a concrete missing-evidence reason.",
+    "Do not perform owner-gated external mutations, deployment cutover, account actions, or secret handling.",
+    "No infinite retries; use the hardened bounded recovery policy."
+  ],
+  "notes": "Pre-queue research found 12 historical blocked records. Most appear to be historical execution failures already superseded by later verified work: queue-isolation/live-recovery failures are covered by completed agent-live-queue-recovery-deepseek-utf8; E3 integration/truth and rehearsal failures have later production-execution/readiness evidence; Career Ops broad timeout preserved a committed 33-test interface and has a dedicated tracker-writer/monthly-rollover task pending; Stage-2 retry records are deterministic 0/7 credential blockers and must stay parked. Company Watch is the clearest unresolved recoverable block, so it has its own medium-priority recovery task immediately before this sweep. This task exists to verify that classification against live repo truth and catch any remaining non-owner gap before acceptance.",
+  "completed_at": "2026-09-24T02:42:21.721084Z",
+  "result": {
+    "status": "completed",
+    "summary": "Audited all 12 remote-queue/blocked/ records against current main, completed successors, landed evidence and live pending/running contracts: 10 are superseded/resolved by verified successor evidence (no rerun performed or needed) and 2 are deterministic owner/external credential blockers parked unchanged. Every record was preserved in blocked/ and given an additive final_reconciliation_2026_09_24 note; a programmatic check proved all 12 edits are strictly additive (parsed JSON at HEAD equals parsed JSON now once the added key is removed). Contract-required verifications all CONFIRMED: (1) queue-recovery/UTF-8/QuickEdit failures superseded by the completed DeepSeek UTF-8 recovery (e643fd16) and QuickEdit+audited two-retry hardening (85f604aa); (2) E3 integration/rehearsal failures superseded by the built production-execution leg, the bounded Google image diagnosis + 9-call repeat series (2/9 IMAGE_RECITATION) and the readiness-gate rerun (12 suites/364 tests/exit 0 at 56d923b) with its rehearsal evidence consumed, not repeated - this task spent 0 provider calls; (3) the Career Ops broad timeout is closed by the committed Career Ops<->Chief interface (33 tests, encoding fix live-confirmed via Task Scheduler) plus B09 monthly rollover (career-ops suite 332 passing, canonical workbooks SHA-256 unchanged). Two non-owner recoverable gaps found outside blocked/ were closed: GAP-1 (high) poller.handle_task matched the substring 'operational' before the agent- dispatch branch and had silently swallowed agent-operational-brief-health-backup-persistence-2026-09-23 at 2026-09-24T01:38:05Z (claimed, never executed, no terminal transition) - the agent- dispatch now precedes all legacy placeholder routers, the swallowed task was restored to pending/ with the SAME task_id (no duplicate chain) and is verified valid, next in claim order and DISPATCHED by the corrected router, with 9 new regression tests; the non-agent umbrella placeholder behaviour is preserved. GAP-2 (medium) the E1 static gate failed 31/32 on SQLite -wal/-shm sidecars of an already-allowed database left by an earlier uncleanly-exited worker - T13 now accepts only sidecars of allowed databases, with a negative proof (an unexpected file still fails the check) recorded and the probe deleted; E1 then ran 32/32. Final regression: 17 suites / 465 collected / 465 passed / 0 failed. Committed and pushed; origin/main = local HEAD 67bda71. No owner-gated external mutation, deployment cutover, account action or secret handling was performed, and no Stage-2 credential-gate retry was requeued.",
+    "owner_action_required": "Configure the seven owner-local provider credentials (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0/Nous, MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3) via Windows Credential Manager targets (mistral, glm, qwen, nous, minimax, stepfun, hunyuan) or the matching env vars - never via GitHub/chat/logs. This is an UNCHANGED dependency, not a blocker on this task: only after it is done may the post-key Stage-2 readiness gate be re-staged. Two smaller unchanged items: decide the Career Ops monthly rollover policy before month-end (no canonical workbook has been rotated), and the pre-existing laptop-asleep / scheduled-task admin items.",
+    "blocker_category": null,
+    "commits": [
+      "67bda71 queue: reconcile all 12 blocked records; fix agent-task routing swallow + E1 sidecar gate (pushed origin/main 9bc20a7..67bda71; git ls-remote origin main = 67bda71)"
+    ],
+    "tests": [
+      "python scripts/evidence_runner.py --label blocked-work-final-reconciliation-final -> 17 suites, 465 collected / 465 passed, 0 failed, 0 errors, 0 unavailable, every suite exit 0 (audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation-final/)",
+      "exec-brain/tests/test_eb.py (E1, after T13 fix) -> Ran 32 tests, OK, 32/32 passed, exit 0",
+      "E1 T13 negative proof -> with an unexpected file (__reconciliation_probe__.tmp) in the runtime root the check FAILS; 1 passed after the probe was removed; probe deleted",
+      "python -m unittest remote_queue.tests.test_poller_routing -> 9/9 passed, exit 0 (agent tasks containing 'operational'/'e2e-test'/'remote-e2e'/'hardened-*'/'bridge-validation' all dispatch; umbrella placeholder preserved; unknown non-agent still raises; source-order guard)",
+      "python -m unittest discover -s remote_queue/tests -> Ran 87 tests, OK (isolated, no live queue mutation)",
+      "verify_additive check over all 12 blocked records -> ALL_ADDITIVE_AND_PRESERVED (parsed JSON at HEAD == parsed JSON now minus the added key)",
+      "verify_restored_task -> restored task validation errors: [] ; next in claim order (high before medium/low) ; handle_task routing verdict DISPATCHED to Hermes",
+      "First evidence run (preserved under audits/evidence/superseded/): E1 31/32 fail recorded as the GAP-2 discovery, then superseded by the T13 fix"
+    ],
+    "changed_files": [
+      "remote_queue/poller.py",
+      "remote_queue/tests/test_poller_routing.py",
+      "exec-brain/tests/test_eb.py",
+      "scripts/evidence_runner.py",
+      "remote-queue/blocked/agent-autonomous-nonblocked-continuation-2026-09-23.json",
+      "remote-queue/blocked/agent-career-ops-integration-and-tracker-automation-2026-09-23.json",
+      "remote-queue/blocked/agent-company-watch-job-search-integration-2026-09-23.json",
+      "remote-queue/blocked/agent-e3-integration-and-truth-reconciliation-2026-09-23.json",
+      "remote-queue/blocked/agent-e3-local-production-rehearsal-2026-09-23.json",
+      "remote-queue/blocked/agent-e3-local-production-rehearsal-retry-2026-09-23.json",
+      "remote-queue/blocked/agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24.json",
+      "remote-queue/blocked/agent-e3-stage2-readiness-gate-after-provider-keys-retry-2-2026-09-24.json",
+      "remote-queue/blocked/agent-live-queue-recovery-2026-09-23.json",
+      "remote-queue/blocked/agent-live-queue-recovery-deepseek-2026-09-23.json",
+      "remote-queue/blocked/agent-queue-isolation-and-evidence-recovery-2026-09-23.json",
+      "remote-queue/blocked/agent-queue-isolation-and-evidence-recovery-retry-2026-09-23.json",
+      "remote-queue/running/agent-operational-brief-health-backup-persistence-2026-09-23.json (removed; moved to pending/)",
+      "remote-queue/pending/agent-operational-brief-health-backup-persistence-2026-09-23.json (restored, same task_id + reconciliation note)",
+      "remote-queue/running/full-operational-build-2026-09-24.json (additive truth note only; contract text unchanged)",
+      "remote-queue/logs/queue.log",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "audits/evidence/2026-09-24T02-45-00Z-blocked-work-reconciliation-audit/reconciliation.json",
+      "audits/evidence/2026-09-24T02-45-00Z-blocked-work-reconciliation-audit/reconciliation.md",
+      "audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation-final/evidence.json",
+      "audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation-final/evidence.md",
+      "audits/evidence/superseded/2026-09-24T02-32-23Z-blocked-work-final-reconciliation-superseded-by-e1-sidecar-fix/evidence.json",
+      "audits/evidence/superseded/2026-09-24T02-32-23Z-blocked-work-final-reconciliation-superseded-by-e1-sidecar-fix/evidence.md"
+    ],
+    "remaining": [
+      "No unresolved non-owner recoverable blocker remains; whole-company local acceptance (pending agent-whole-company-local-acceptance-and-morning-handover-2026-09-23) may proceed.",
+      "Live confirmation that the queue dispatches the restored task could not be observed from inside this task: the poller is a singleton and its current cycle is occupied dispatching THIS task. Verified deterministically instead (routing tests + valid, highest-priority, DISPATCHED). Expected claim order on the next cycle: agent-operational-brief-health-backup-persistence (high) before agent-e3-provider-content-stop-attribution (medium) and whole-company acceptance (low).",
+      "Two parked deterministic blockers stay parked: both Stage-2 credential-gate retry records; no same-family retry may be staged while the credential state is 0/7 (authority anti-loop directive).",
+      "remote-queue/logs/queue.log is live poller-owned telemetry and will be committed by the poller's next transition, not by this task.",
+      "Untracked audits/evidence/2026-09-24T02-21-00Z-deployment-preflight/ belongs to the completed agent-deployment-prep-manifest-and-owner-admin-checklist-2026-09-23 (its own record also left it uncommitted); deliberately not adopted here to avoid a false attribution claim - it is a genuine orphaned artifact for whoever owns deployment evidence.",
+      "The non-agent umbrella record remote-queue/running/full-operational-build-2026-09-24.json deliberately remains in running/ with its hardcoded placeholder behaviour; its listed completed_items and blockers must still be re-derived from evidence by whoever retires it (its additive note says so explicitly).",
+      "Owner TODOs recorded in the audit artifact and blocked records: seven provider credentials; Career Ops monthly rollover policy; pre-existing laptop/scheduled-task admin items."
+    ]
+  }
+}
