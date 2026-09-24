@@ -118,26 +118,54 @@ class GeminiImageExecutionAdapter:
     # ─── Interface: dispatch / retrieve / cancel ──────────────────
 
     def dispatch(self, contract: Dict[str, Any]) -> Dict[str, Any]:
-        """Dispatch an image-generation request. Synchronous."""
+        """Dispatch an image-generation request. Synchronous.
+
+        The request *shape* is contract-declared when present, otherwise the
+        adapter default. ``response_modalities`` accepts the provider's
+        ``generationConfig.responseModalities`` list and ``image_config`` an
+        optional ``generationConfig.imageConfig`` object, so the shape can be
+        varied deliberately (and recorded) instead of being hard-coded:
+
+        * default (no contract keys) — ``responseModalities=['IMAGE']``, no image
+          output configuration;
+        * ``response_modalities=['TEXT','IMAGE']`` — text plus image modality;
+        * ``image_config={'imageSize': ...}`` — explicit output-size control
+          through the provider's supported parameter.
+
+        Whatever the contract declares is echoed in ``dispatch_metadata`` and in
+        the result as ``requested_response_modalities`` / ``requested_image_config``
+        so a response can never be attributed to the wrong request shape.
+        """
         dispatch_id = f"gem-{uuid.uuid4().hex[:12]}"
         contract_id = contract.get("contract_id", "unknown")
         objective = contract.get("objective", "")
         model = contract.get("model", self.model)
         timeout = contract.get("timeout", 120)
 
+        response_modalities = [str(m) for m in
+                               (contract.get("response_modalities") or ["IMAGE"])]
+        image_config = contract.get("image_config") or None
+        if image_config is not None:
+            image_config = dict(image_config)
+
+        generation_config: Dict[str, Any] = {
+            "responseModalities": response_modalities,
+        }
+        if image_config:
+            generation_config["imageConfig"] = image_config
+
         payload = {
             "contents": [
                 {"parts": [{"text": objective}]}
             ],
-            "generationConfig": {
-                "responseModalities": ["IMAGE"],
-            },
+            "generationConfig": generation_config,
         }
 
         key = gk.get_gemini_key()
         if not key:
             return self._error_result(dispatch_id, contract_id, objective,
-                                      model, "credential_absent", timeout)
+                                      model, "credential_absent", timeout,
+                                      response_modalities, image_config)
 
         headers = {
             "x-goog-api-key": key,
@@ -150,7 +178,8 @@ class GeminiImageExecutionAdapter:
         elapsed = time.time() - start
 
         return self._build_result(dispatch_id, contract_id, objective, model,
-                                  status, body, resp_headers, elapsed, timeout)
+                                  status, body, resp_headers, elapsed, timeout,
+                                  response_modalities, image_config)
 
     def retrieve(self, dispatch_id: str) -> Optional[Dict[str, Any]]:
         """Synchronous API — results returned inline by dispatch()."""
@@ -163,7 +192,8 @@ class GeminiImageExecutionAdapter:
     # ─── Result construction ──────────────────────────────────────
 
     def _build_result(self, dispatch_id, contract_id, objective, model,
-                      status, body, resp_headers, elapsed, timeout):
+                      status, body, resp_headers, elapsed, timeout,
+                      response_modalities=None, image_config=None):
         usage = None
         image_b64 = None
         image_mime = None
@@ -277,6 +307,8 @@ class GeminiImageExecutionAdapter:
             "response_text_excerpt": response_text_excerpt,
             "usage": usage,
             "prompt_feedback": prompt_feedback,
+            "requested_response_modalities": response_modalities,
+            "requested_image_config": image_config,
             "error": error,
             "exit_code": 0 if status == 200 else status,
             "runtime_s": elapsed,
@@ -287,12 +319,13 @@ class GeminiImageExecutionAdapter:
             },
             "dispatch_metadata": self._sanitized_metadata(
                 dispatch_id, contract_id, objective, model, elapsed,
-                status, timeout
+                status, timeout, response_modalities, image_config
             ),
         }
 
     def _sanitized_metadata(self, dispatch_id, contract_id, objective,
-                            model, elapsed, status, timeout):
+                            model, elapsed, status, timeout,
+                            response_modalities=None, image_config=None):
         """Sanitized dispatch metadata — no raw objective, no secrets."""
         objective_hash = hashlib.sha256(objective.encode()).hexdigest()[:12]
         summary = objective[:50] + "..." if len(objective) > 50 else objective
@@ -304,7 +337,8 @@ class GeminiImageExecutionAdapter:
             "objective_hash": objective_hash,
             "objective_summary": summary,
             "api_endpoint": "generateContent",
-            "response_modalities": ["IMAGE"],
+            "response_modalities": response_modalities or ["IMAGE"],
+            "image_config": image_config,
             "auth_source": self.auth_source,
             "timeout": timeout,
             "elapsed_seconds": elapsed,
@@ -313,7 +347,8 @@ class GeminiImageExecutionAdapter:
         }
 
     def _error_result(self, dispatch_id, contract_id, objective, model,
-                      reason, timeout):
+                      reason, timeout=None, response_modalities=None,
+                      image_config=None):
         objective_hash = hashlib.sha256(objective.encode()).hexdigest()[:12]
         return {
             "dispatch_id": dispatch_id,
@@ -334,6 +369,8 @@ class GeminiImageExecutionAdapter:
             "response_text_chars": None,
             "response_text_excerpt": None,
             "usage": None,
+            "requested_response_modalities": response_modalities,
+            "requested_image_config": image_config,
             "error": reason,
             "exit_code": -1,
             "runtime_s": 0.0,
@@ -343,6 +380,8 @@ class GeminiImageExecutionAdapter:
                 "provider": "google",
                 "model": model,
                 "objective_hash": objective_hash,
+                "response_modalities": response_modalities or ["IMAGE"],
+                "image_config": image_config,
                 "auth_source": "none",
                 "timeout": timeout,
                 "exit_status": reason,

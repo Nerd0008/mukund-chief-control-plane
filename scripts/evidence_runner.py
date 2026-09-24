@@ -94,6 +94,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E3 Google image request-protocol conformance + repeat-series accounting (offline: stubbed HTTP layer, isolated db)",
+        "script": "exec-brain/tests/test_e3_google_image_protocol.py",
+        "pythonpath": [REPO_ROOT / "exec-brain", REPO_ROOT / "scripts"],
+        "guard": None,
+    },
+    {
         "name": "E4 resource continuity + E5 safe mode (combined suite)",
         "script": "exec-brain/tests/test_e4e5.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],

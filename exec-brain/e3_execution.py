@@ -427,6 +427,16 @@ def normalize_dispatch_output(worker_id: str, result: Dict[str, Any],
         "error": result.get("error"),
         "runtime_s": result.get("runtime_s"),
         "e2_usage_linkage": result.get("e2_usage_linkage"),
+        # Request shape actually sent (adapter-echoed) and the provider's
+        # sanitized response shape. Recorded per attempt so an outcome can never
+        # be attributed to a different request shape than the one sent.
+        "requested_response_modalities": result.get("requested_response_modalities"),
+        "requested_image_config": result.get("requested_image_config"),
+        "candidate_count": result.get("candidate_count"),
+        "candidate_finish_reasons": result.get("candidate_finish_reasons"),
+        "response_part_kinds": result.get("response_part_kinds"),
+        "response_text_chars": result.get("response_text_chars"),
+        "response_text_excerpt": result.get("response_text_excerpt"),
         "timestamp": datetime.utcnow().isoformat(),
     }
     return output
@@ -504,6 +514,14 @@ class E3ProductionExecutor:
         working_directory = node.get("working_directory")
         if working_directory:
             contract["working_directory"] = working_directory
+        # Node-declared request shape (optional). Passed through verbatim so a
+        # caller can vary e.g. the image response modalities / image output
+        # config deliberately; an adapter that does not consume them ignores
+        # them, and adapters that do echo them back in the recorded attempt.
+        if node.get("response_modalities"):
+            contract["response_modalities"] = list(node["response_modalities"])
+        if node.get("image_config"):
+            contract["image_config"] = dict(node["image_config"])
         result = adapter.dispatch(contract)
         return result
 
@@ -682,6 +700,11 @@ class E3ProductionExecutor:
                 "response_part_kinds": dispatch_result.get("response_part_kinds"),
                 "response_text_chars": dispatch_result.get("response_text_chars"),
                 "response_text_excerpt": dispatch_result.get("response_text_excerpt"),
+                # Request shape actually sent on this attempt (adapter-echoed).
+                "requested_response_modalities": dispatch_result.get(
+                    "requested_response_modalities"),
+                "requested_image_config": dispatch_result.get(
+                    "requested_image_config"),
             })
 
             self._transition(dag, node_id, plan_id, "VERIFYING",
