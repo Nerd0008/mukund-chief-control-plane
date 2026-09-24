@@ -1,0 +1,41 @@
+{
+  "task_id": "agent-career-codex-style-open-web-job-research-2026-09-24",
+  "created_at": "2026-09-24T11:55:00Z",
+  "objective": "Make Hermes job discovery behave like the owner's successful Codex workflow: actively research the open web for current entry-level cybersecurity opportunities, not merely scan a fixed provider list. Add a bounded, read-only web-research lane that searches broad web results (including public LinkedIn Jobs/Indeed/Google-indexed job results and employer ATS/career pages when discoverable), validates source URLs, normalizes findings into the existing unified discovery schema, and sends them through the already-built semantic triage -> deterministic eligibility -> dedupe -> tracker/Chief handoff funnel.",
+  "authority": "owner instruction in current chat; tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Reuse the completed high-recall/unified-discovery implementation already on main.",
+    "Do not modify or weaken the existing deterministic eligibility, dedupe, owner-approval or no-external-mutation gates.",
+    "Respect the 2026-09-23 safety directive: no local interactive browser/GUI automation, no signed-in browser profiles/cookies/sessions."
+  ],
+  "allowed_scope": [
+    "First inspect the earlier Codex-driven job-search workflow/config/prompts still present on disk/repo and determine how it obtained web results; preserve useful query patterns rather than guessing.",
+    "Implement a Web Research discovery collector as another SOURCE_REGISTRY surface feeding the exact same unified candidate schema; do not create a parallel tracker, classifier or eligibility engine.",
+    "Primary behavior must be active research, not a static provider scan: generate/search a query matrix across role families (graduate/new-grad/junior/associate/analyst/L1/SOC/GRC/IAM/technology risk/security operations/information security/cybersecurity) and configured regions.",
+    "Use Codex as the research worker when its available runtime can perform current web research; test this capability explicitly. If Codex CLI cannot browse/search in the installed runtime, fail truthfully and implement a provider interface/fallback rather than pretending it searched.",
+    "Search the open web broadly enough to discover public job-result URLs from LinkedIn Jobs, Indeed and Google-indexed job pages/search results where accessible, plus direct employer careers/ATS domains such as Greenhouse, Lever, Workday, Ashby, SmartRecruiters, Teamtailor, Workable, HRMOS/HERP/Jobcan and other source URLs found by the research worker.",
+    "Do not log into LinkedIn/Indeed/Google, do not use cookies/session state, do not scrape behind authentication, do not solve CAPTCHAs, and do not drive a local browser. Public/search-index discovery only.",
+    "For each discovered vacancy preserve provenance: search query, discovery surface, result URL, canonical URL if resolved, employer/title/location as observed, fetched/validated state, source timestamp and any missing fields. Never invent a vacancy from a search snippet.",
+    "Where safe HTTP retrieval is available, validate that the destination exists and extract only source-supported fields; otherwise keep it as a discovered-but-unverified candidate and label that status explicitly.",
+    "Resolve cross-source duplicates so a vacancy seen on LinkedIn, Indeed, Google/search, an ATS and Company Watch becomes one canonical candidate with all provenance retained.",
+    "Use the existing DeepSeek bulk semantic triage and bounded Codex second pass after collection. Do not spend Codex review calls over the entire raw web-result universe; web research and semantic review are separate budgeted stages.",
+    "Add per-source/funnel telemetry: queries_executed, results_seen, candidate_urls, validated_live, validation_failed, duplicates_collapsed, semantically_reviewed, deterministic_eligibility_pass, tracker_candidates, and zero attribution. A zero result must distinguish search-source failure, no accessible results, validation failure, filtering, eligibility and dedupe.",
+    "Add company-watchlist hooks so an owner-provided list of companies can later be searched explicitly by company + cybersecurity role family in addition to the general market search. Do not require the list to exist to finish the generic search agent.",
+    "Keep schedules dry-run/read-only initially. Do not enable canonical workbook writes automatically. Produce a candidate manifest + Chief summary for review.",
+    "Add tests with captured public-search fixtures proving LinkedIn/Indeed/ATS result normalization, source provenance, cross-source collapse and fail-closed behavior for inaccessible/unverified results.",
+    "Run a bounded live research acceptance if the available Codex/web path supports it. Record exact queries, source classes, candidate counts and URLs privately/safely; no fabricated PASS if web access is unavailable.",
+    "Update Career Ops README, roster/state/tracker and acceptance docs. Commit and push in checkpointed units."
+  ],
+  "stop_conditions": [
+    "No job applications, employer/recruiter outreach, LinkedIn posts/messages/connections or account mutations.",
+    "No interactive browser/GUI automation and no use of signed-in browser profiles/cookies/session secrets.",
+    "No claim that LinkedIn/Indeed/Google Jobs were searched unless the actual live research evidence proves those source classes were reached.",
+    "No fabricated jobs, titles, employers, URLs, JDs, eligibility or sponsorship facts.",
+    "Do not bypass robots/auth/CAPTCHA/access controls or implement stealth/evasion scraping.",
+    "If a source blocks public access, record it as unavailable and continue other sources."
+  ],
+  "notes": "This is intentionally different from the existing provider scanner. The owner wants the successful Codex behavior: active, broad web research for jobs, while retaining the new Career Ops reliability, semantic filtering, provenance, dedupe and tracker controls."
+}
