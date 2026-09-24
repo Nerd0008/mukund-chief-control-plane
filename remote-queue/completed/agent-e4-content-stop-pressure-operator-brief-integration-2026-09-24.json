@@ -1,0 +1,87 @@
+{
+  "task_id": "agent-e4-content-stop-pressure-operator-brief-integration-2026-09-24",
+  "created_at": "2026-09-24T03:32:00Z",
+  "objective": "Make the recorded provider content-side stop pressure visible where the owner actually looks, without adding any automatic action. agent-e4-provider-content-stop-pressure-visibility-2026-09-24 made the pressure view available in exec-brain/resource_monitor.py and printed it through e3-status (including the bounded `content_withheld_at_measurable_rate` flag, the rate with its sample size, the last observed finishReason and stop time, all read from already-recorded rows/artifacts), but the owner only sees it by running e3-status by hand. Carry the same read-only view into the operator surfaces that already aggregate status: (a) the operational-services health snapshot / Morning Chief Brief escalation list (scripts/operational_services.py), so a provider/model pair whose recorded content-side stop rate crosses the bounded threshold is reported as a warning-grade observation next to the E2 resource status; and (b) the E4/E5 real-path drill harness evidence (exec-brain/e4e5_drill_harness.py), so the drill artifact records the pressure view over its isolated store the same way it records continuity/outage/convergence. Observation only: no automatic worker swap, re-dispatch, failover, retry, safe-mode entry or Stage 2 enablement; any failover stays an explicit E4/owner decision. No new store schema, no E1/E2 write, and 0 real provider calls (consume recorded rows and artifacts; never re-run a provider series).",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "agent-e4-provider-content-stop-pressure-visibility-2026-09-24 is terminal: the pressure view exists in exec-brain/resource_monitor.py (ResourceMonitor.get_content_stop_pressure / build_content_stop_pressure_view / render_content_stop_pressure), is printed by e3-status, and its tests are registered in scripts/evidence_runner.py",
+    "resource_monitor.py is deployed to the runtime root by scripts/deploy_e3_runtime.py (E3_MODULES) with a verified SHA-256 match",
+    "the recorded provider series artifact audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/observations.json is committed and must be consumed, never re-run"
+  ],
+  "allowed_scope": [
+    "Read scripts/operational_services.py (build_health_snapshot / build_morning_brief / render_*), exec-brain/e4e5_drill_harness.py, the E4 pressure view, and the existing evidence/state surfaces before changing anything.",
+    "Surface the read-only content-side stop pressure view through the existing operational-services health snapshot and Morning Chief Brief escalation list (observation/warning only, with the rate, its sample size, the last finishReason and the bounded flag), and through the E4/E5 drill harness artifact for its isolated store.",
+    "Add deterministic offline tests (stub adapters / recorded fixtures / isolated db; 0 real provider calls) for both surfaces, including: a clean provider raises no warning, an unclassified/pre-classification store reports unknown rather than clear, and a provider with zero attempts never yields a fabricated rate.",
+    "Re-run the full E1/E2/E3/E4/E5 plus queue and bridge suites through scripts/evidence_runner.py and record exact commands, counts, exit codes and artifact paths; do not regress the 21-suite / 560-test baseline established by agent-e4-provider-content-stop-pressure-visibility-2026-09-24.",
+    "Deploy through scripts/deploy_e3_runtime.py if any runtime module changes, and update state/current_company_state.md and state/full_build_tracker.md with verified facts only."
+  ],
+  "stop_conditions": [
+    "No automatic worker swap, re-dispatch, failover, retry or safe-mode entry \u2014 the pressure view is an observation and any action stays an explicit E4/owner decision.",
+    "Do not enable E3 Stage 2 or production dispatch; do not re-open, re-run or re-parameterise the 0/7 provider-credential gate.",
+    "Do not spend any real provider call; consume recorded rows/artifacts and use stubs or fixtures only; never re-run a provider series.",
+    "Do not fabricate provider behaviour, finish reasons, stop rates, usage, latency or evidence; a rate is never reported from zero attempts and an unclassified sample is reported as unknown, not clear.",
+    "Do not weaken, skip or re-parameterise any readiness, qualification, verification or E1 gate criterion.",
+    "Do not add a new store schema and do not write to E1/E2 stores.",
+    "Do not perform VPS cutover or finalise deployment architecture."
+  ],
+  "notes": "Staged by agent-e4-provider-content-stop-pressure-visibility-2026-09-24 immediately before exit, per the owner standing directive to hand off to exactly one next bounded task. READ FIRST: owner commit 1310440 ('owner: prioritize completion over token conservation', authority file, 2026-09-23T22:50Z) - for this sprint do NOT optimise engineering for token conservation or provider cost; priority order is correctness/truthfulness, then completion/deployment readiness, then speed and unattended continuity, then reliability/recoverability, then token efficiency; it does not authorise weakening gates or fabricating completion. Verified state at staging (recorded evidence only): exec-brain/resource_monitor.py exposes content_stop_pressure / evidence_row_ledgers / recorded_series_ledger / render_content_stop_pressure / build_content_stop_pressure_view and ResourceMonitor.get_content_stop_pressure(series_paths=()); e3-status prints an 'E4 Resource Continuity: provider content-side stop pressure' section and accepts --pressure-series (repeatable); the bounded flag is MEASURABLE_CONTENT_STOP_RATE = 0.2 with MEASURABLE_CONTENT_STOP_MIN_SAMPLE = 5; over a read-only copy of the live store the view reports 29 attempts observed / 0 classified (codex-cli 5, deepseek-v41-flash 13, google-nano-banana-2 11) -> unknown for all three, and the recorded series source reports the google pair at 9 attempts / 2 stops -> rate 0.222 (sample size 9) / finishReason IMAGE_RECITATION / content_withheld_at_measurable_rate = yes. Evidence: audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/ (evidence.md, evidence.json, operator_pressure_output.txt, deployed_surface_output.txt, deployed_hash_verification.txt - ALL_MATCH). Regression: 21 suites / 560 tests / exit 0 pre-deploy (audits/evidence/2026-09-24T03-23-28Z-regression-pre-content-stop-pressure/) and post-deploy (audits/evidence/2026-09-24T03-29-37Z-regression-post-content-stop-pressure-final/, runner exit code 0 captured); baseline was 20 suites / 529 tests at 82ddf0. Deployed modules (sha256 matching the repo source): e3_commands.py bcd1276896f7db12286c8e4f51c28eea550bd908b9b4e0bf15e702f4c3a89f96, e3_cli.py 8c50a33c93b55262987a3cd1e89bc52628e83786217293b8e72e514aabc5bf85, resource_monitor.py c138c0ecdce5011c8bc889a429cbf6cd5917311f778fe5b6f8148616f29e2688; e3_execution.py 6f625a0a..., e3_shadow_orchestrator.py 808b092a..., e3_execution_rehearsal.py b482775f... unchanged. The E1 runtime-root allow-list (exec-brain/tests/test_eb.py test_t13_no_gateway_modification) was extended additively by exactly resource_monitor.py, with a negative proof that any other unexpected file still fails the gate. Do NOT repeat the recorded provider series (2026-09-24T01:44:32Z), the 2026-09-24T01:46:56Z qualification run, the 2026-09-23T21:32:41Z decomposed multi-worker rehearsal, the 2026-09-23T21-10-00Z production rehearsal, or the 2026-09-23T21-49-21Z single-call image diagnosis - consume them. Already pending and NOT duplicated or replaced: agent-whole-company-local-acceptance-and-morning-handover-2026-09-23 (whole-company local acceptance + morning handover, which this task must not pre-empt). Still open and deliberately not chased: what makes the provider's recitation filter fire on some identical calls and not others; the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it.",
+  "completed_at": "2026-09-24T03:45:55.702090Z",
+  "result": {
+    "status": "completed",
+    "summary": "Carried the existing read-only E4 provider content-side stop pressure view into the operator surfaces the owner actually reads, observation only: 0 real provider calls, no automatic action, no new store schema, no E1/E2 write, Stage 2 not enabled. (a) scripts/operational_services.py gained content_stop_pressure_status() (reuses resource_monitor.build_content_stop_pressure_view; orchestration store opened mode=ro; the declared recorded series artifact audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/observations.json consumed verbatim, overridable with repeatable --pressure-series), pressure_escalations() and render_pressure_lines(); build_health_snapshot now emits check resource.content_stop_pressure plus exactly one warning-grade escalation (category provider_content_stop_pressure) for a provider/model pair whose recorded content-side stop rate crosses the bounded threshold (rate + sample size + last finishReason + bounded flag), and build_morning_brief carries the same view in resource_status next to the E2 resource status; both render_* print it. Live read-only run: check ATTENTION, one warning for google/gemini-3.1-flash-image [worker google-nano-banana-2] stop rate 0.222 at sample size 9 classified recorded dispatch attempts (bounds rate >= 0.2 AND sample >= 5), last finishReason IMAGE_RECITATION, labelled observation only / explicit E4-owner decision; unclassified store rows still report unknown (29 attempts observed / 0 classified: codex-cli 5, deepseek-v41-flash 13, google-nano-banana-2 11), never clear; verdict ATTENTION with fail_count 0. (b) exec-brain/e4e5_drill_harness.py gained D7_content_stop_pressure_observation recording the same view over its isolated drill store the way continuity/outage/convergence are recorded, proving it wrote nothing (Connection.total_changes before/after = 0, performance_evidence row count unchanged) and dispatched nothing (provider_calls_spent 0): 36/36 checks pass (was 33), real_provider_calls 0, no source errors; the drill store classifies clean so D7 raises no warning. No deployment was required or performed (resource_monitor.py c138c0ec... byte-identical to the deployed runtime copy; deploy dry-run copied: []), and no provider series was re-run.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "ed390db e4: carry recorded provider content-side stop pressure into the operator surfaces (scripts/operational_services.py, scripts/tests/test_operational_services.py, exec-brain/e4e5_drill_harness.py, exec-brain/tests/test_e4e5_drills.py)",
+      "7580a30 evidence: E4 content-side stop pressure on the operator surfaces (21 suites / 579 tests / exit 0)",
+      "83cb487 evidence: final frozen exitcheck of the pressure-on-operator-surfaces change (21 suites / 579 tests / exit 0 at 7580a30); all three pushed, origin/main = 83cb487",
+      "read-only consumed, not modified: c138c0ec... (exec-brain/resource_monitor.py, identical in repo and deployed runtime)"
+    ],
+    "tests": [
+      "scripts/tests/test_operational_services.py: 27 passed / exit 0 (was 17; +10 TestContentStopPressureSurface)",
+      "exec-brain/tests/test_e4e5_drills.py: 47 passed / exit 0 (was 38; +5 TestContentStopPressureObservation, +4 TestPressureObservationTruthRules)",
+      "scripts/evidence_runner.py --label e4-operator-pressure-integration-final: 21 suites / 21 passed / 0 failed / 0 unavailable / 579 collected / 579 passed / exit 0 -> audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/regression/",
+      "scripts/evidence_runner.py --label e4-operator-pressure-integration-final-exitcheck (after 7580a30): 21 / 21 / 0 failed / 0 unavailable / 579 / 579 / exit 0 -> .../regression-final-exitcheck/",
+      "scripts/evidence_runner.py --label regression-operator-brief-pressure-integration (pre-commit from 13634b3 with the same working-tree change): 21 / 21 / 579 / 579 / exit 0 -> audits/evidence/2026-09-24T03-38-51Z-regression-operator-brief-pressure-integration/",
+      "python scripts/operational_services.py health-snapshot --no-tasks --out-dir <evidence dir>: exit 0; resource.content_stop_pressure = ATTENTION with one warning escalation (0 provider calls, live_state_modified false)",
+      "python scripts/operational_services.py morning-brief --no-tasks --out-dir <evidence dir>: exit 0; same view under Resource status and same warning in Failure escalation",
+      "python exec-brain/e4e5_drill_harness.py --out-dir <evidence dir> --json: exit 0; checks_passed 36 / checks_total 36, real_provider_calls 0, stub_dispatches 10, D7 store_rows_written_by_observation 0, source_errors []",
+      "python scripts/deploy_e3_runtime.py --dry-run: exit 0, copied: [] (no runtime module changed)",
+      "named required cases covered offline (0 provider calls): clean provider raises no warning (PASS, no escalation); unclassified/pre-classification store reports UNKNOWN not clear; zero attempts never yields a rate",
+      "baseline not regressed: 21 suites / 560 tests at 03ebc74 -> 21 suites / 579 tests exit 0; no suite lost tests (only the two touched suites grew)"
+    ],
+    "changed_files": [
+      "scripts/operational_services.py",
+      "scripts/tests/test_operational_services.py",
+      "exec-brain/e4e5_drill_harness.py",
+      "exec-brain/tests/test_e4e5_drills.py",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/integration_evidence.md",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/operator_surface_output.txt",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/health_snapshot.json",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/health_snapshot.md",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/latest.json",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/latest.md",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/evidence.json",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/evidence.md",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/deploy_dry_run.json",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/source_and_deployed_hashes.txt",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/regression/",
+      "audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/regression-final-exitcheck/",
+      "audits/evidence/2026-09-24T03-38-51Z-regression-operator-brief-pressure-integration/",
+      "audits/evidence/2026-09-24T03-40-27Z-e4-content-stop-pressure-operator-brief/"
+    ],
+    "remaining": [
+      "remote-queue/running/agent-e4-content-stop-pressure-operator-brief-integration-2026-09-24.json was left untouched for the poller to move to completed/ (this task's allowed scope does not include queue housekeeping or staging a successor)",
+      "Owner configures provider credentials (0/7 configured, presence-only probe unchanged) - the deterministic Stage-2 readiness gate keeps stopping without enabling anything; the gate was not run, re-parameterised or re-opened",
+      "Pending agent-whole-company-local-acceptance-and-morning-handover-2026-09-23 must still run the whole-company local acceptance and morning handover; this task neither duplicated nor pre-empted it",
+      "Still open and deliberately not chased: what makes the provider recitation filter fire on some identical calls and not others - the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it",
+      "The pressure warning is informational only: any failover or re-dispatch remains an explicit E4/owner decision; no automatic swap/retry/safe-mode path was added",
+      "Owner-gated and untouched: E4/E5 live-provider drill (needs Stage 2 + credentials), VPS access/details, and the deferred deployment-architecture decision"
+    ]
+  }
+}
