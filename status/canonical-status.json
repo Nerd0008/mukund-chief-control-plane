@@ -1,0 +1,356 @@
+{
+  "schema_version": "1.0",
+  "artifact": "canonical project status",
+  "generated_by": "scripts/status_render.py",
+  "verified_by": "scripts/status_verify.py",
+  "maintenance": "Regenerate with `python scripts/status_render.py`; verify with `python scripts/status_verify.py` (also run as the suite `python scripts/tests/test_status_consistency.py`). This file is the single canonical project-status source. The executive tracker and the derived status summary blocks in README.md / state/current_company_state.md / state/full_build_tracker.md are GENERATED from it and must never be hand-edited as the maintenance path.",
+  "as_of": "2026-09-24T15:36:57Z",
+  "as_of_note": "Newest evidence run incorporated into this artifact (run_finished_utc of the canonical-status verification run). Evidence directories whose stamp is later than `as_of` are reported as unincorporated by scripts/status_verify.py.",
+  "truth_rules": [
+    "Every figure below is copied from a recorded evidence artifact named in `source`; nothing is inferred or extrapolated.",
+    "UNKNOWN stays UNKNOWN. No owner-gated unknown is ever rendered as PASS or as complete.",
+    "Implementation/verification completion, Stage 2 enablement and production deployment are three separate states and are never collapsed into one.",
+    "Production blockers are listed separately from implementation completion and from optional/feature-gated owner decisions.",
+    "No secret, credential value, token, cookie or private runtime database is stored or rendered here; only presence booleans and store names that the recording probe already published."
+  ],
+  "code_identity": {
+    "repository": "https://github.com/Nerd0008/mukund-chief-control-plane.git",
+    "branch": "main",
+    "authoring_head_sha": "63cda9b9c86a8b492c8c1cfad0e5e362da0b1660",
+    "verified_evidence_sha": "63cda9b9c86a8b492c8c1cfad0e5e362da0b1660",
+    "supported_python": "3.11.16",
+    "unsupported_python": "3.14.x",
+    "dependency_manifest": "requirements.txt",
+    "dependency_lock": "requirements.lock",
+    "release_identity_doc": "docs/RELEASE.md",
+    "source": {
+      "path": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "field": "code_sha",
+      "note": "authoring_head_sha is the HEAD recorded by `git rev-parse HEAD` when this status was authored; verified_evidence_sha is the commit the newest verification evidence actually ran against. The isolated pinned-interpreter reproducibility run at SHA e9d2195 is preserved as the prior verification."
+    }
+  },
+  "latest_evidence": {
+    "id": "2026-09-24T15-35-35Z-canonical-status-verification",
+    "run_started_utc": "2026-09-24T15:35:35Z",
+    "run_finished_utc": "2026-09-24T15:36:57Z",
+    "code_sha": "63cda9b9c86a8b492c8c1cfad0e5e362da0b1660",
+    "verdict": "PASS",
+    "what": "Canonical status verification: the full repository acceptance suite (now 22 suites, including the new canonical-status consistency suite) re-run after the canonical status source, generator and generated documents were introduced, plus the generated-output verification command."
+  },
+  "executive_brain": {
+    "E1": {
+      "name": "Intake, classification, immutable quality floors, owner overrides, audit integrity",
+      "state": "ACTIVE",
+      "implementation": "verified",
+      "verified_evidence": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "test_counts": "32 collected / 32 passed (suite \"E1 executive brain runtime matrix\")",
+      "notes": "E1 passes only because this host's machine-local Hermes runtime root is present; on a bare clone it is truthfully recorded `unavailable`."
+    },
+    "E2": {
+      "name": "Resource Governor telemetry, provider capacity/state tracking, deterministic Daily Resource Brief",
+      "state": "ACTIVE",
+      "implementation": "verified",
+      "verified_evidence": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "test_counts": "45 collected / 45 passed (suite \"E2 governor / provider adapters\")",
+      "notes": "Same machine-local runtime-root caveat as E1."
+    },
+    "E3": {
+      "name": "Intelligent multi-model orchestration, team assembly, qualification, execution DAGs, verification, rationale audit",
+      "state": "IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED",
+      "implementation": "verified",
+      "stage2_enabled": false,
+      "production_dispatch_enabled": false,
+      "verified_evidence": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "isolated_reproducibility_evidence": "audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json",
+      "real_path_rehearsal_evidence": "audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/evidence.json",
+      "stage2_gate_verdict": "audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/",
+      "test_counts": "E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run",
+      "notes": "E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) is gated on the seven absent provider credentials plus the owner's explicit step; the anti-loop directive forbids re-staging the credential-triggered gate while the credential count is 0/7."
+    },
+    "E4": {
+      "name": "Predictive exhaustion, protected reserves, resource-driven checkpointing, handover, equivalent-worker failover",
+      "state": "IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES)",
+      "implementation": "verified",
+      "verified_evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/e4e5-drills/evidence.json",
+      "test_counts": "36 checks passed / 36 total, real_provider_calls = 0, live stores byte-identical",
+      "notes": "evidence_kind = stubbed_provider_failure. A real provider outage -> real equivalent-worker failover has NOT been exercised and is not claimed (see production blocker `live-provider-failover-gap`)."
+    },
+    "E5": {
+      "name": "Safe/degraded mode, failure drills, outage and malformed-output handling, convergence enforcement, owner override UX and recovery",
+      "state": "IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES)",
+      "implementation": "verified",
+      "verified_evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/e4e5-drills/evidence.json",
+      "test_counts": "36 checks passed / 36 total; safe-mode entry, owner override audit, recovery refusal/success and the bounded 3-dispatch convergence cap all asserted",
+      "notes": "The recovery health probe in the drill is a labelled local stub; the real provider-health probe into SafeModeRecovery is not wired and stays owner-gated."
+    }
+  },
+  "roster": {
+    "total": 50,
+    "pass": 47,
+    "ready_needs_owner_config": 3,
+    "blocked_external": 0,
+    "unaccounted": 0,
+    "non_pass_items": [
+      {"id": "B12", "worker": "Application Inbox / Status Monitor", "status": "READY_NEEDS_OWNER_CONFIG", "reason": "built + acceptance-passing on fixtures/local export; only the live mailbox feed needs the owner's Gmail read-only OAuth"},
+      {"id": "B14", "worker": "Company / Role Research Brief Agent", "status": "READY_NEEDS_OWNER_CONFIG", "reason": "built; every brief reports research_needed until an owner-approved research provider exists"},
+      {"id": "C03", "worker": "Deployment Prep / Manifest / Restore Agent", "status": "READY_NEEDS_OWNER_CONFIG", "reason": "manifest/preflight/backup-restore prepared and verified; the cutover itself is owner-gated"}
+    ],
+    "source": {
+      "path": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/roster_account.json",
+      "note": "roster_account.json is generated by scripts/whole_company_acceptance.py (roster C01). Roster definition: state/v1-agent-roster.md."
+    }
+  },
+  "regressions": {
+    "suites_run": 22,
+    "suites_passed": 22,
+    "suites_failed": 0,
+    "suites_unavailable": 0,
+    "tests_collected": 606,
+    "tests_passed": 606,
+    "tests_failed": 0,
+    "code_sha": "63cda9b9c86a8b492c8c1cfad0e5e362da0b1660",
+    "python": "3.11.16 (CPython; the isolated pinned-interpreter reproducibility run remains recorded below)",
+    "source": {
+      "path": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "field": "unittest_summary",
+      "note": "Prior runs, reported as measured and never silently rewritten: 21 suites / 583 collected / 583 passed at SHA e9d2195 in a clean isolated CPython 3.11.16 built from requirements.lock (audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json), and 21 suites / 579 collected / 579 passed at SHA 31eecdb (audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json). The count grew 579 -> 583 because the Codex identity contract replaced one incorrect exact-match test with five truthful-contract tests, and 583 -> 606 because this task added the 23-test canonical-status consistency suite."
+    }
+  },
+  "career_discovery": {
+    "unified_funnel": {
+      "id": "B25",
+      "state": "BUILT + EVIDENCED",
+      "what": "High-recall semantic discovery is the single funnel for every read-only discovery surface: light deterministic prefilter (title_policy.py) -> DeepSeek bulk semantic triage (classifiers.py) -> bounded Codex second pass -> deterministic eligibility (region/location, work authorisation, clearance/citizenship, mandatory experience, application URL) -> shared dedupe -> tracker manifest.",
+      "evidence": ["audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/", "audits/evidence/20260924T053909Z-career-high-recall-discovery-acceptance/"],
+      "code": "career-ops/discovery/pipeline.py, career-ops/discovery/classifiers.py, career-ops/discovery/title_policy.py, career-ops/discovery/funnel.py"
+    },
+    "surfaces": [
+      {"id": "B11", "name": "Recruiter / intermediary Watch Agent", "state": "BUILT + EVIDENCED (fixtures only, read-only intake)", "note": "collect_from_recruiter_watch(); no live recruiter/intermediary watch feed exists yet", "code": "career-ops/discovery/pipeline.py"},
+      {"id": "B19", "name": "LinkedIn Job Discovery Agent", "state": "BUILT + EVIDENCED (owner-exported local files only)", "note": "collect_from_linkedin() reuses the single LinkedIn parser; no account, session, cookie, API or scraping path exists", "code": "career-ops/discovery/pipeline.py, career-ops/linkedin_workflow.py"},
+      {"id": "B20", "name": "LinkedIn Profile / Post Draft Agent", "state": "BUILT + EVIDENCED (drafts only, no posting)", "code": "career-ops/linkedin_workflow.py"},
+      {"id": "B21", "name": "Networking / Recruiter Outreach Draft Agent", "state": "BUILT + EVIDENCED (unsent drafts only, no sending)", "code": "career-ops/linkedin_workflow.py"},
+      {"id": "B22", "name": "Interview Prep Agent", "state": "BUILT + EVIDENCED", "code": "career-ops/interview_prep.py"},
+      {"id": "B26", "name": "Open-Web Research Agent", "state": "BUILT + EVIDENCED (one bounded live read-only pass reached public LinkedIn Jobs, Indeed and employer-careers result classes)", "note": "robots-respecting HTTP validation; search/listing pages are labelled search_listing and refused tracker handoff; no login, cookie, session or browser used", "code": "career-ops/discovery/web_research.py", "evidence": ["audits/evidence/2026-09-24T13-22-22Z-career-open-web-research/"]},
+      {"id": "B27", "name": "Owner-Company Priority Watchlist Agent", "state": "BUILT + EVIDENCED (fixtures only; owner's real list not supplied)", "note": "additive discovery surface in the same funnel; flag gives prominence, never a bypass", "code": "career-ops/discovery/watchlist.py", "evidence": ["audits/evidence/2026-09-24T13-58-06Z-career-priority-watchlist/"]}
+    ],
+    "regional_and_schedule": {
+      "regional_workers": {"id": "B02-B05", "state": "BUILT + EVIDENCED", "note": "UK/Dubai/Japan/Singapore; all four Windows scheduled tasks registered and Ready; canonical workbook hashes unchanged; applications_submitted 0", "evidence": "career-ops/evidence/acceptance-20260924T001500Z.json"},
+      "scheduled_orchestrator_cutover": {
+        "task_id": "agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24",
+        "state": "NOT COMPLETE / BLOCKED",
+        "blocker_category": "execution_error",
+        "attempts": 3,
+        "attempts_permitted": 3,
+        "evidence": "audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/evidence.json",
+        "result": "status FAIL (whole-company regression completed and most checks passed; the launcher line-ending check failed)",
+        "committed_effect": "none — the committed scheduled launcher path is unchanged; partial work from the parked attempt remains uncommitted in the worktree and is not part of the committed status",
+        "note": "Recorded here as an evidenced open item, not as completed schedule work."
+      }
+    },
+    "truth_boundaries": [
+      "Title matching is a prefilter, never an eligibility decision; the authoritative gates run after semantic classification and cannot be overridden by a model.",
+      "A model label is evidence about a posting, never a fact about the owner's eligibility.",
+      "No application, message, employer/recruiter contact, browser/GUI action or account mutation is performed by any discovery path.",
+      "Canonical workbooks stay byte-identical through engineering acceptance (hash-verified before and after)."
+    ]
+  },
+  "queue_service": {
+    "remote_queue": {
+      "state": "OPERATIONAL",
+      "note": "Hermes remote queue + agent-* dispatch; poller task HermesRemoteQueuePoller at a 2-minute cadence.",
+      "current_queue": {"running": ["agent-canonical-status-generated-tracker-and-doc-drift-2026-09-24", "full-operational-build-2026-09-24"], "pending": 0},
+      "known_open": [
+        "The umbrella record `full-operational-build-2026-09-24` remains in running/ with no associated worker process, and poller.handle_task routes any task id containing \"operational\" to a handler that returns a hardcoded status with no execution evidence — it must not be read as evidence that its steps ran.",
+        "agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 is parked in blocked/ after exhausting its 3 permitted attempts."
+      ]
+    },
+    "scheduled_tasks": {
+      "owned_tasks": 8,
+      "names": ["Hermes_Gateway", "HermesRemoteQueuePoller", "ChiefDiscordSync", "ChiefCareerBrief", "ChiefCareerScan-UK", "ChiefCareerScan-Dubai", "ChiefCareerScan-Japan", "ChiefCareerScan-Singapore"],
+      "logon_type": "InteractiveToken (all eight run only while Mukund is signed in)",
+      "source": {"path": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json"}
+    },
+    "operational_services": {
+      "state": "BUILT + TESTED 17/17, ON DEMAND ONLY",
+      "what": "deterministic health snapshot, Morning Chief Brief, operational backup with 7-snapshot retention, log rotation/retention, read-only scheduler/boot persistence validation",
+      "code": "scripts/operational_services.py",
+      "doc": "deployments/10-operational-services.md",
+      "not_scheduled_reason": "registering a scheduled task is a service change requiring owner approval (owner-action item 15)"
+    }
+  },
+  "provider_credentials": {
+    "roster_workers": 10,
+    "credentials_absent": 7,
+    "credentials_present": 3,
+    "absent_workers": ["mistral-small-4", "glm-53-flash", "qwen38-27b", "longcat-2.0", "minimax-m3", "step-37-flash", "tencent-hunyuan-hy3"],
+    "present_interfaces": ["codex-cli (auth mode chatgpt)", "deepseek-v41-flash (direct API)", "google image worker / gemini (intermittent)"],
+    "source": {
+      "path": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/credential-presence/evidence.json",
+      "field": "still_missing_count",
+      "note": "Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-confirmed at 2026-09-24T03:59:44Z."
+    },
+    "routable_workers": ["codex-cli", "deepseek-v41-flash"],
+    "routable_note": "Google image worker is routable but intermittent (one identical request returned no image part, the next returned a decodable 1024x1024 JPEG); the vision role is EVALUATING, not qualified. The seven generic API workers are routable=false and are refused by the execution leg with 0 provider calls."
+  },
+  "stage2": {
+    "state": "NOT ENABLED",
+    "gate": "scripts/e3_stage2_readiness_gate.py",
+    "verdict_evidence": "audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/",
+    "verdict_utc": "2026-09-23T22:53:53Z",
+    "failing_conditions": ["0/7 provider credentials configured", "Google image worker intermittency unresolved", "owner authorization is conditional on the first two"],
+    "anti_loop": "While the credential count is 0/7 this is a deterministic owner/external blocker. The credential-triggered readiness gate must not be re-staged until a verified credential-state change or an explicit owner instruction."
+  },
+  "deployment": {
+    "state": "NOT DEPLOYED",
+    "cutover": "not authorised",
+    "architecture": "DEFERRED BY OWNER — no final architecture decision recorded. Recorded preference only: laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, explicitly not a decision.",
+    "vps_details": "NOT PROVIDED (owner dependency)",
+    "preflight": {
+      "verdict": "GO",
+      "checks": {"pass": 10, "warn": 1, "fail": 0},
+      "sole_warning": "credentials.presence (owner-gated): 7 API worker credential(s) absent",
+      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/deployment-preflight/preflight.json",
+      "note": "Preflight GO means the preparation is complete and no technical check fails; it is not a readiness-to-cut-over verdict, which remains owner-gated."
+    },
+    "backup_restore_drill": {"result": "PASS", "artifacts": 10, "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/backup-restore/backup_restore_report.json"},
+    "service_definitions": "deployments/06-service-definitions.md",
+    "cutover_runbook": "deployments/07-cutover-runbook.md",
+    "rollback_checklist": "deployments/08-rollback-and-no-go-checklist.md",
+    "inbound_network": "none required by any Chief/Hermes component (outbound 443 only)"
+  },
+  "production_blockers": [
+    {
+      "id": "provider-credentials-absent",
+      "title": "Seven of ten roster provider credentials are absent",
+      "category": "credentials",
+      "state": "OPEN",
+      "blocks": "live onboarding/verification of seven E3 provider workers and local Stage 2 completion",
+      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/credential-presence/evidence.json",
+      "owner_action_required": true,
+      "owner_action": "Provision locally, using approved local secret storage (never GitHub/chat/logs): Mistral, GLM, Qwen, LongCat, MiniMax, Step, Tencent Hunyuan. Use `python scripts/set_provider_key.py --worker <id>`; verify with `python scripts/set_provider_key.py --status` (expect 10/10 present)."
+    },
+    {
+      "id": "stage2-not-enabled",
+      "title": "E3 Stage 2 (production enablement) is not enabled",
+      "category": "owner_approval",
+      "state": "OPEN",
+      "blocks": "production dispatch through the Executive Brain; the live-provider E4/E5 drill",
+      "evidence": "audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/",
+      "owner_action_required": true,
+      "owner_action": "Configure the seven provider credentials first, then approve/execute the recorded post-key verification sequence and run the deterministic readiness gate; complete local Stage 2 only if every gate passes."
+    },
+    {
+      "id": "live-provider-failover-gap",
+      "title": "No live-provider E4 failover / E5 provider-health recovery has been exercised",
+      "category": "architecture",
+      "state": "OPEN",
+      "blocks": "the claim that real provider-outage failover and real provider-health recovery work; the v1 E4/E5 acceptance question",
+      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/e4e5-drills/evidence.json",
+      "owner_action_required": true,
+      "owner_action": "Decide whether the stubbed-failure drills (36/36) plus the real-path execution rehearsal are sufficient E4/E5 evidence for v1, or whether a live-provider failover drill is required before cutover. The harness has no live-provider mode and the real provider-health probe is not wired; both are deliberately out of the recorded scope."
+    },
+    {
+      "id": "deployment-cutover-decision",
+      "title": "Deployment architecture and VPS cutover are undecided and unauthorised",
+      "category": "owner_approval",
+      "state": "OPEN",
+      "blocks": "any production deployment; every deployment acceptance criterion",
+      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (items 3 and 4)",
+      "owner_action_required": true,
+      "owner_action": "Record one written line choosing the deployment architecture, and supply VPS host/account details locally if a VPS path is chosen."
+    },
+    {
+      "id": "offsite-backup-absent",
+      "title": "No off-site backup exists",
+      "category": "architecture",
+      "state": "OPEN",
+      "blocks": "treating any node as production; both recorded deployment topologies need one before cutover",
+      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (deployment-time facts)",
+      "owner_action_required": true,
+      "owner_action": "Choose the off-site backup destination and retention, then authorise engineering to implement it (local backup/restore is already drilled and passing)."
+    },
+    {
+      "id": "battery-gating",
+      "title": "7 of 8 Chief scheduled tasks will not run on battery",
+      "category": "architecture",
+      "state": "OPEN",
+      "blocks": "unattended laptop-primary operation on battery",
+      "evidence": "deployments/06-service-definitions.md (section 2); audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json",
+      "owner_action_required": true,
+      "owner_action": "Approve re-importing the task definitions with DisallowStartIfOnBatteries/StopIfGoingOnBatteries set to false (or confirm the laptop will always be on mains power)."
+    },
+    {
+      "id": "reboot-persistence-unverified",
+      "title": "Reboot survival of 7 of 8 Chief tasks is unverified",
+      "category": "owner_approval",
+      "state": "UNKNOWN",
+      "blocks": "the v1 \"service survives restart/reboot\" acceptance criterion",
+      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json",
+      "owner_action_required": true,
+      "owner_action": "After the next owner-initiated reboot, confirm all eight tasks return to Ready/Running with advancing Next Run Time; if any of the seven does not, ask engineering to add a logon trigger (small, reversible task re-import)."
+    },
+    {
+      "id": "laptop-trust-audit",
+      "title": "Owner-attended laptop UI-event attribution audit not performed",
+      "category": "safety",
+      "state": "OPEN",
+      "blocks": "the trust decision for using the laptop as the final production host",
+      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (item 5)",
+      "owner_action_required": true,
+      "owner_action": "Perform the recorded audit with Mukund present. Do not clear Edge/shell/Windows Event/Task Scheduler/Defender/Hermes logs or browser artifacts before attribution."
+    },
+    {
+      "id": "unattended-interactive-token",
+      "title": "Every Chief task runs only under the interactive user token",
+      "category": "architecture",
+      "state": "OPEN",
+      "blocks": "any unattended topology (the laptop must be powered and signed in)",
+      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (laptop availability precondition); persistence.json owner_checklist",
+      "owner_action_required": true,
+      "owner_action": "Decide whether to keep the laptop powered and signed in, or approve a service-account/credential change for the scheduled tasks."
+    },
+    {
+      "id": "log-rotation-retention",
+      "title": "Log rotation/retention is not implemented for all live log paths",
+      "category": "architecture",
+      "state": "OPEN",
+      "blocks": "production log hygiene on the eventual host",
+      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (deployment-time facts)",
+      "owner_action_required": false,
+      "owner_action": null
+    }
+  ],
+  "optional_gated": [
+    {"id": "gmail-readonly-oauth", "title": "Gmail read-only OAuth for the Application Inbox / Status Monitor (B12)", "classification": "feature_gated_optional", "release_scope": false, "state": "READY_NEEDS_OWNER_CONFIG", "why_not_a_release_blocker": "The monitor is built, tested and acceptance-evidenced on an owner-provided local export; only the automatic live mailbox retrieval needs the grant. No documented v1 release criterion requires a live mailbox feed.", "owner_action": "Optionally authorise the read-only OAuth grant (about 10 minutes) following the recorded steps."},
+    {"id": "research-provider", "title": "Company/role research provider (B14)", "classification": "feature_gated_optional", "release_scope": false, "state": "READY_NEEDS_OWNER_CONFIG", "why_not_a_release_blocker": "Every JobBrief still works and truthfully reports research_needed; the cited-file path is fully functional. Enabling a source is a terms-of-service decision, not a release gate.", "owner_action": "Optionally name an approved research source, or keep the cited-file path only."},
+    {"id": "linkedin-live-account", "title": "Live LinkedIn account access", "classification": "feature_gated_optional", "release_scope": false, "state": "UNTESTED AGAINST THE REAL ACCOUNT (owner-gated by design)", "why_not_a_release_blocker": "The whole LinkedIn layer (B19/B20/B21) is built and evidenced on owner-exported local files and canonical CV text; posting, messaging, connecting and applying are owner-gated by design and no code path performs them.", "owner_action": "Optionally decide whether the live surface should ever have account access, or keep the owner-export path."},
+    {"id": "recruiter-live-feed", "title": "Live recruiter/intermediary watch feed (B11)", "classification": "feature_gated_optional", "release_scope": false, "state": "FIXTURES ONLY", "why_not_a_release_blocker": "The intake collector is built and evidenced against a declared read-only findings export; no live producer exists and none is required by the recorded v1 scope.", "owner_action": "Optionally provide a read-only export or name a source."},
+    {"id": "regional-work-authorisation", "title": "Work-authorisation facts for UAE / Japan / Singapore", "classification": "owner_fact_required", "release_scope": false, "state": "UNKNOWN (never inferred)", "why_not_a_release_blocker": "The UK lane is unaffected and every non-UK record is explicitly labelled UNKNOWN; nothing mechanically blocks release.", "owner_action": "Optionally state one line per region (for example \"UAE: would need sponsorship\")."},
+    {"id": "dubai-japan-provider-coverage", "title": "Regional provider coverage for the Dubai and Japan lanes", "classification": "feature_gated_optional", "release_scope": false, "state": "OWNER DECISION PENDING", "why_not_a_release_blocker": "The lanes are built, scheduled and running bounded read-only dry-run scans; they simply see few region-labelled postings.", "owner_action": "Optionally choose to add a regional provider, keep the agent-driven search path only, or park a region."},
+    {"id": "career-brief-delivery", "title": "External delivery channel for the Career Daily Brief (B23)", "classification": "feature_gated_optional", "release_scope": false, "state": "LOCAL ONLY, external_channel_health = not_verified", "why_not_a_release_blocker": "The brief is built, tested, acceptance-evidenced and scheduled at 07:00 local; delivery somewhere is a separate, unverified step by design.", "owner_action": "Optionally name a delivery channel, or keep it local."},
+    {"id": "ops-scheduling-cadence", "title": "Scheduling cadence for operational backup / log rotation / briefs", "classification": "feature_gated_optional", "release_scope": false, "state": "ON DEMAND ONLY", "why_not_a_release_blocker": "Every operational service runs on demand and is tested; only regular cadence needs owner approval because it changes scheduled tasks.", "owner_action": "Optionally approve a cadence."},
+    {"id": "tracker-vocabulary", "title": "Tracker status-vocabulary gaps (assessment invite / Japan rejection / Dubai offer)", "classification": "feature_gated_optional", "release_scope": false, "state": "OWNER DECISION PENDING", "why_not_a_release_blocker": "Affects only what the monitor may propose; such items arrive as owner decisions instead of proposals.", "owner_action": "Optionally extend the relevant tracker validation lists."},
+    {"id": "monthly-rollover-policy", "title": "Rotating 2026-09 out of the live workbooks (owner-column rows blocked)", "classification": "owner_approval", "release_scope": false, "state": "REFUSED, NOT DELETED", "why_not_a_release_blocker": "The rollover worker is built and evidenced on copies; the live workbooks contain owner-state rows (uk 26 / dubai 8 / singapore 4) and are deliberately left untouched.", "owner_action": "Optionally decide the rollover disposition for those owner-state rows."},
+    {"id": "legacy-chief-task", "title": "Disposition of the legacy `Mukund Chief of Staff` logon task", "classification": "owner_approval", "release_scope": false, "state": "RECORDED, NOT CHANGED", "why_not_a_release_blocker": "Operational-hygiene and conflict risk only; it is recorded as a donor and was not deleted or revived.", "owner_action": "Optionally confirm whether the legacy task should be disabled/removed or kept as a donor."},
+    {"id": "e4e5-acceptance-question", "title": "Is the stubbed-failure drill sufficient E4/E5 evidence for v1 acceptance?", "classification": "owner_approval", "release_scope": false, "state": "OPEN QUESTION", "why_not_a_release_blocker": "The recorded state does not assume an answer; it is the acceptance framing of `live-provider-failover-gap`.", "owner_action": "Optionally answer the recorded acceptance question."}
+  ],
+  "unknowns": [
+    "The trigger of the intermittent Google image no-image response is unknown; no stability claim is made and the vision role is not qualified.",
+    "Reboot survival of the 7 non-Hermes_Gateway Chief tasks is UNKNOWN (a reboot was prohibited by the task stop conditions).",
+    "The Codex CLI served-model identity is UNKNOWN (provider reported as unknown; configured provider/model are recorded separately) and it exposes no usage figures.",
+    "Whether the scheduled-orchestrator cutover lane can be completed is unknown; it is parked after 3 permitted attempts.",
+    "The live-provider failover behaviour is unknown — never exercised."
+  ],
+  "history": [
+    {"at": "2026-09-24T15:36:57Z", "id": "2026-09-24T15-35-35Z-canonical-status-verification", "result": "PASS", "what": "Canonical status verification: 22 suites / 606 collected / 606 passed at SHA 63cda9b, including the new 23-test canonical-status consistency suite; the generated executive tracker and the derived status blocks verified against the canonical status source."},
+    {"at": "2026-09-24T15:17:52Z", "id": "2026-09-24T15-45-00Z-isolated-release-reproducibility", "result": "PASS", "what": "Release reproducibility + Codex identity portability; 21 suites / 583 collected / 583 passed at SHA e9d2195."},
+    {"at": "2026-09-24T14:45:37Z", "id": "2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover", "result": "FAIL (parked, execution_error)", "what": "Scheduled orchestrator cutover acceptance; one launcher line-ending check failed; no committed effect."},
+    {"at": "2026-09-24T13:58:06Z", "id": "2026-09-24T13-58-06Z-career-priority-watchlist", "result": "PASS (fixtures only)", "what": "B27 owner-company priority watchlist agent: 32/32 checks."},
+    {"at": "2026-09-24T13:22:22Z", "id": "2026-09-24T13-22-22Z-career-open-web-research", "result": "PASS (bounded live read-only pass)", "what": "B26 open-web research agent: 21/21 fixture checks and 24/24 with a bounded live Codex pass."},
+    {"at": "2026-09-24T05:29:54Z", "id": "2026-09-24T05-29-54Z-unified-discovery-followup-step-verification", "result": "PASS", "what": "Unified discovery surfaces (B11 + B19) re-verified at HEAD; canonical_workbooks_unchanged true."},
+    {"at": "2026-09-24T04:58:25Z", "id": "2026-09-24T04-58-25Z-career-high-recall-discovery", "result": "PASS", "what": "B25 high-recall semantic discovery pipeline."},
+    {"at": "2026-09-24T03:59:44Z", "id": "2026-09-24T03-57-34Z-whole-company-acceptance-final", "result": "PASS (33 PASS, 0 FAIL, 1 owner-gated, 0 unavailable)", "what": "Whole-company local acceptance run at SHA 31eecdb: regression 21 suites / 579 passed, E4/E5 drills 36/36, deployment preflight GO (0 FAIL, 1 WARN), backup/restore PASS, roster 50/50."},
+    {"at": "2026-09-23T22:53:53Z", "id": "2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict", "result": "NOT ENABLED", "what": "E3 Stage 2 readiness gate (credential-triggered retry, 0 provider calls): 0/7 credentials, Google image intermittency unresolved."},
+    {"at": "2026-09-23T21:32:41Z", "id": "2026-09-23T21-32-41Z-e3-production-execution-rehearsal", "result": "PASS", "what": "Formal production-rehearsal re-run on the real path: decomposed multi-worker plan, rejection to repair to re-verification, 7 bounded real provider calls."}
+  ]
+}

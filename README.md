@@ -23,17 +23,30 @@ The long-term goal is not a single chatbot. It is an AI management system capabl
 - learning from real execution outcomes,
 - escalating to the human owner when uncertainty or failure cannot be resolved safely.
 
+<!-- BEGIN GENERATED: executive-status (scripts/status_render.py) -->
 ## Current Executive Brain roadmap
 
-The Executive Brain is being implemented in staged phases.
+_Generated from the canonical status source (`status/canonical-status.json`, as of 2026-09-24T15:36:57Z). Regenerate with `python scripts/status_render.py`._
+
+The Executive Brain is implemented in five layers. **Implementation completion,
+Stage 2 enablement and production deployment are three different states.**
+
+| Phase | State now | Implementation | Stage 2 | Production deployed |
+|---|---|---|---|---|
+| **E1** | ACTIVE | verified | n/a | no |
+| **E2** | ACTIVE | verified | n/a | no |
+| **E3** | IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED | verified | **NOT ENABLED** | no |
+| **E4** | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | verified | n/a | no |
+| **E5** | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | verified | n/a | no |
 
 - **E1 — ACTIVE:** task classification, immutable quality floors, routing discipline, owner overrides, audit integrity.
 - **E2 — ACTIVE:** Resource Governor telemetry, provider capacity/state tracking, deterministic Daily Resource Brief.
-- **E3 — PLANNED / next:** intelligent multi-model orchestration, dynamic team assembly, worker qualification, execution DAGs, integration/verification, and decision-rationale audit trails.
-- **E4 — future:** predictive exhaustion, protected reserves, checkpointing, resource-driven handover.
-- **E5 — future:** safe mode, resilience drills, and mature owner-override UX.
+- **E3 — IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED:** multi-model orchestration, dynamic team assembly, evidence-backed worker qualification, execution DAGs, deterministic verification gates, decision-rationale audit trails. Stage 2 (production enablement) is gated on the seven absent provider credentials and an explicit owner step.
+- **E4 — IMPLEMENTED AND DRILL-VERIFIED:** predictive exhaustion, protected reserves, resource-driven checkpointing, checkpoint/state handover and equivalent-worker failover. Drills use injected (stubbed) provider failures; real-provider failover is **not** claimed.
+- **E5 — IMPLEMENTED AND DRILL-VERIFIED:** safe/degraded mode, failure drills, outage and malformed-output handling, bounded convergence enforcement, mature owner-override UX and a recovery path. The real provider-health probe before leaving safe mode is **not** wired.
 
-See `state/current_company_state.md` for the current live status rather than relying on this summary.
+**Production blockers remain open (10): the system is not production-deployed and no cutover is authorised.** See `status/executive-tracker.md` (section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.
+<!-- END GENERATED: executive-status (scripts/status_render.py) -->
 
 ## Multi-model worker pool
 
@@ -123,6 +136,7 @@ The design explicitly avoids storing raw private chain-of-thought or secrets. Th
 
 | Directory | Contents |
 |---|---|
+| `status/` | **Canonical machine-readable project status** + the generated executive tracker |
 | `state/` | Current company state snapshot |
 | `docs/` | Setup and release/reproducibility documentation |
 | `conversations/` | Curated conversation summaries |
@@ -144,11 +158,17 @@ The design explicitly avoids storing raw private chain-of-thought or secrets. Th
 
 When documents disagree, use the following priority:
 
-1. latest owner-approved architecture / decision record,
-2. `state/current_company_state.md`,
-3. live implementation verification,
-4. latest handover,
-5. pending proposals / older planning documents.
+1. `status/canonical-status.json` for every project-status figure (phase state, roster
+   accounting, regression counts, credential readiness, Stage 2, deployment and blockers) —
+   it is the machine-readable source from which the executive tracker
+   (`status/executive-tracker.md`) and the status blocks in `README.md`,
+   `state/current_company_state.md` and `state/full_build_tracker.md` are generated and
+   verified (`python scripts/status_verify.py`),
+2. latest owner-approved architecture / decision record,
+3. `state/current_company_state.md`,
+4. live implementation verification,
+5. latest handover,
+6. pending proposals / older planning documents.
 
 Always check recent commits before assuming a handover is still current.
 
@@ -217,6 +237,12 @@ release archive.
   fails if any third-party import is missing from `requirements.txt`.
 - Codex worker identity contract and its offline fixtures:
   `scripts/codex_identity_contract_check.py`.
+- Canonical project status + generated executive tracker:
+  `status/canonical-status.json` (source), `scripts/status_render.py` (generator),
+  `scripts/status_verify.py` (verification), suite
+  `scripts/tests/test_status_consistency.py`. The tracker and the derived status
+  blocks in this README, `state/current_company_state.md` and
+  `state/full_build_tracker.md` are regenerated, never hand-edited.
 
 A release archive deliberately carries **no Git history** — it proves which
 commit and dependency set it represents through the recorded commit SHA and

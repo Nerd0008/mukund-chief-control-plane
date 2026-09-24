@@ -1,5 +1,22 @@
 # Full-Build Tracker
 
+<!-- BEGIN GENERATED: executive-status (scripts/status_render.py) -->
+> **Status header is GENERATED** from `status/canonical-status.json` by `python scripts/status_render.py` — do not hand-edit this block.
+
+- **Canonical status as of:** 2026-09-24T15:36:57Z (newest evidence `2026-09-24T15-35-35Z-canonical-status-verification`).
+- **Regeneration command:** `python scripts/status_render.py`; **verification:** `python scripts/status_verify.py`.
+- **Executive tracker (generated):** `status/executive-tracker.md`.
+- **Code identity at authoring:** `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660` (verified evidence SHA `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660`).
+- **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
+- **Provider credentials:** 3 / 10 present.
+- **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED; cutover not authorised.
+- **Production blockers (10):** `provider-credentials-absent`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `battery-gating`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`, `log-rotation-retention`.
+- **Latest regression:** 22 suites / 606 tests, 606 passed, 0 failed, 0 unavailable.
+
+The narrative lanes, truth defects and per-task detail below remain the historical record and are
+not regenerated.
+<!-- END GENERATED: executive-status (scripts/status_render.py) -->
+
 Status: ACTIVE. Authority: `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`.
 
 Evidence source for every test figure below (supersedes the 22:40:55Z run):

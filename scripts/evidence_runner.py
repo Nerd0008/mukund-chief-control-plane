@@ -136,6 +136,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "Canonical status consistency (generated executive tracker + derived summaries verified against the canonical status source and its recorded evidence; offline, no secrets)",
+        "script": "scripts/tests/test_status_consistency.py",
+        "pythonpath": [REPO_ROOT / "scripts"],
+        "guard": None,
+    },
+    {
         "name": "Remote queue (isolated: disposable roots, mocked/live-free boundaries)",
         "script": "remote_queue/tests/test_queue.py",
         "pythonpath": [],
