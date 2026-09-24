@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "completed",
   "prerequisites": [
     "Whole-company local acceptance completed successfully.",
     "Reuse career-ops/regional_job_search.py, tracker_writer.py, Company Watch, E2/E3 routing/qualification interfaces and current regional schedules.",
@@ -60,5 +60,47 @@
     "last_summary": "Hermes dispatch exceeded 1200 seconds.",
     "next_action": "retry",
     "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T05:18:03.728064Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt-2 resume closed the two units attempt 1 left open; all allowed-scope engineering was already landed and committed by attempt 1. Repository inspected first (no work recreated or reverted). Outstanding units completed: (1) the uncommitted acceptance re-run artifacts and runtime state, and (2) the push that had been rejected at 05:12Z. Fresh fixtures-only acceptance at HEAD: PASS 14/14 (32/32 title fixtures; the 8 wrongly-rejected titles accepted by high_recall default; Senior Security Manager / Principal Security Architect / Physical Security Guard / Security Sales Director still rejected; intern_only narrow mode still reproduces the owner's portals.yml rule verbatim; contract guard rejects an invented year/clearance fact; Codex escalation budgeted 2/4 dropped; all nine declared funnel counters present; every rejection attributed; zero attributed to a stage; compare-modes recall delta positive with nothing written). The newly registered whole-company step C career_high_recall_discovery was exercised end-to-end for the first time (PASS, canonical_workbooks_unchanged=true). Full career-ops suite 374 passed + scripts/tests 27 passed = 401; test_discovery_pipeline 36; test_daily_brief 28. Owner's external Career Ops install verified read-only (portals.yml mtime unchanged; title_filter positive=[Intern,Internship] confirmed). Four canonical workbooks provably byte-identical: uk 84c53dcb\u20263f40, dubai 495edb45\u202645ca, japan a8c4ef90\u202689, singapore 25c7b95b\u2026bf1 \u2014 unchanged before and after my runs, and matching the hashes recorded inside the acceptance evidence. No applications, outreach, employer/recruiter contact, browser/GUI automation or account mutation. Working tree clean; origin/main == local HEAD 767e01c. Recorded limitations inherited/unchanged: the Career Ops scan exposes no JD text or posting URL for offers, so those semantic labels are title/company/location based and explicitly not JD analysis; wiring the pipeline into the live scheduled scan is an owner decision that has not been made.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "ca3bba7 acceptance: re-verify high-recall discovery pipeline at HEAD (14/14) + runtime state (created locally as ec40b60, rebased onto origin/main)",
+      "767e01c acceptance: exercise registered whole-company step C career_high_recall_discovery (PASS, workbooks unchanged)",
+      "Attempt-1 commits preserved and pushed (rebased SHAs): 08044be two-tier title policy + semantic contract + DeepSeek bulk triage with bounded Codex second pass; ba648f1 bounded live evidence pass + truthful zero attribution; 5c000ea daily-brief funnel counts/zero attribution/top semantic candidates; fe481d8 fixtures-only acceptance runner (14 checks) registered as step C + roster B25; 96dcba0 docs architecture/truth boundaries",
+      "3175516 (queue, dispatcher): attempt 1/3 retry record"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_discovery_pipeline.py -q -> 36 passed",
+      "python -m pytest career-ops/tests/ -q -> 374 passed in 109.62s",
+      "python -m pytest scripts/tests -q -> 27 passed (401 total with career-ops/tests, matching the documented figure)",
+      "python -m pytest career-ops/tests/test_daily_brief.py -q -> 28 passed",
+      "python career-ops/run_discovery_acceptance.py -> PASS 14/14, evidence audits/evidence/20260924T051624Z-career-high-recall-discovery-acceptance/",
+      "python scripts/whole_company_acceptance.py --only career_high_recall_discovery -> PASS, 1 step, 0 fail, canonical_workbooks_unchanged=true",
+      "canonical workbook SHA-256 before/after all runs: unchanged and equal to the hashes recorded in the acceptance evidence",
+      "git push origin main; git ls-remote origin main -> 767e01cfcb2f78aef52b0ee5d57dbfd734cbcf9a (remote == local HEAD, working tree clean)"
+    ],
+    "changed_files": [
+      "audits/evidence/20260924T051624Z-career-high-recall-discovery-acceptance/evidence.json",
+      "audits/evidence/20260924T051624Z-career-high-recall-discovery-acceptance/evidence.md",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/results.json",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/acceptance.md",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/roster_account.json",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/roster_account.md",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/career-discovery/evidence.json",
+      "audits/evidence/2026-09-24T05-17-23Z-discovery-step-c-verification/career-discovery/evidence.md",
+      "remote-queue/logs/queue.log",
+      "runtime/career-ops/run-health/tracker-writer.json",
+      "audits/evidence/20260924T050730Z-career-high-recall-discovery-acceptance/ (restored to its committed content: an interrupted re-run had overwritten it with a later run_id, so dir name and run_id disagreed)"
+    ],
+    "remaining": [
+      "Owner decision, not an engineering gap: enabling career-ops/discovery on the live schedule instead of on demand (the scheduled regional scan still applies the unchanged owner portals.yml intern-only title filter).",
+      "Open recorded limitation: the Career Ops scan source exposes no JD text or posting URL for offers, so semantic labels from that source remain title/company/location based and are explicitly not JD analysis; the contract/fallback path exists rather than guessing.",
+      "The full 34-step whole-company acceptance bundle was not re-executed in this attempt (dispatch-time bounded); only the newly registered step C career_high_recall_discovery was exercised, and it passed with canonical workbooks unchanged.",
+      "Successor queue task remote-queue/pending/agent-career-unified-discovery-surfaces-followup-2026-09-24.json (owner-created) extends the same funnel to Recruiter Watch, LinkedIn read-only intake and future sources; it was preserved untouched and is not part of this contract."
+    ]
   }
 }
