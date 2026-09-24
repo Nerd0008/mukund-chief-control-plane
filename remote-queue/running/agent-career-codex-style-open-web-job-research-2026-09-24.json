@@ -47,16 +47,25 @@
       "summary": "Hermes dispatch exceeded 1200 seconds.",
       "will_retry": true,
       "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    },
+    {
+      "attempt": 2,
+      "recorded_at": "2026-09-24T13:06:49.080100Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=2108).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled"
     }
   ],
   "retry_state": {
-    "attempts_used": 1,
-    "retries_used": 0,
+    "attempts_used": 2,
+    "retries_used": 1,
     "max_attempts": 3,
     "max_retries": 2,
     "last_blocker_category": "execution_error",
-    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=2108).",
     "next_action": "retry",
-    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    "reason": "recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled"
   }
 }
