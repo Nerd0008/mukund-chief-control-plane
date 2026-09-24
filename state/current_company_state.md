@@ -411,9 +411,18 @@ the evidence-backed qualification section above.
 - `agent-*` tasks are dispatched into the Hermes CLI through `remote_queue/hermes_dispatch.py`
 - Queue tests are isolated (`remote_queue/tests/test_queue.py`: 30/30, exit 0)
 - Scheduler: `HermesRemoteQueuePoller` registered and Ready (2-minute cadence)
-- Recorded, deliberately unfixed defect: `poller.handle_task` routes any task id containing
-  "operational" to `handle_operational_build()`, which returns a hardcoded status with no
-  execution evidence. It must not be read as evidence of executed work.
+- Recorded defect, now **FIXED** (2026-09-24T02:45Z): `poller.handle_task` used to route any task id
+  containing "operational" to `handle_operational_build()`, which returns a hardcoded status with no
+  execution evidence. It silently swallowed the genuine agent task
+  `agent-operational-brief-health-backup-persistence-2026-09-23` (claimed 2026-09-24T01:38:05Z, never
+  dispatched). The `agent-` dispatch branch now precedes every legacy placeholder router, the
+  swallowed task was restored to `pending/` with the same task_id, and
+  `remote_queue/tests/test_poller_routing.py` (9 tests) guards the contract. The non-agent umbrella
+  `full-operational-build-2026-09-24` deliberately keeps the placeholder. Evidence:
+  `audits/evidence/2026-09-24T02-45-00Z-blocked-work-reconciliation-audit/`.
+- Historical blocked-work reconciliation (2026-09-24T02:45Z): all 12 `remote-queue/blocked/` records
+  classified — 10 superseded/resolved by verified successor evidence (no rerun needed), 2 parked as
+  deterministic owner/external credential blockers. 0 unresolved non-owner recoverable blockers remain.
 - `full-operational-build-2026-09-24` remains the umbrella record in `running/` (no worker).
 - This run: `agent-e3-local-production-rehearsal-retry-2026-09-23` claimed and worked the formal
   production-rehearsal re-run (see the 21:32:41Z section above); the Google image diagnosis and the
@@ -1130,3 +1139,69 @@ dispatch ceiling). Inspected first, rebuilt nothing: the integration had already
 - **No external action:** read-only public ATS GETs only; no applications, messages, recruiter or
   company contact, account or LinkedIn mutation. Nothing was pushed to any tracker other than a copy;
   no canonical workbook was modified.
+
+## Historical blocked-work final reconciliation (2026-09-24T02:45Z)
+
+Task `agent-blocked-work-final-reconciliation-2026-09-24`. Authority:
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. Code SHA at audit: `9bc20a7`.
+
+Every one of the **12** records in `remote-queue/blocked/` was audited against current `main`, the
+completed successor records, landed evidence under `audits/evidence/`, and the current pending/running
+contracts, then classified. Each record stayed in `blocked/` as preserved historical evidence and
+gained an additive `final_reconciliation_2026_09_24` note; a programmatic check confirmed all 12 edits
+are strictly additive (parsed JSON at `HEAD` equals parsed JSON now once the added key is removed).
+
+- **10 superseded / resolved** by verified successor evidence — **no rerun needed, none performed**:
+  `agent-autonomous-nonblocked-continuation` (617e69cb/aae7d036 + deepseek-utf8 re-verification + later
+  E3 tasks), `agent-career-ops-integration-and-tracker-automation` (company-registry audit + B09
+  rollover task), `agent-company-watch-job-search-integration` (company-watch-recovery-final-pass),
+  `agent-e3-integration-and-truth-reconciliation` (orphaned record, already reconciled),
+  `agent-e3-local-production-rehearsal` and `-retry` (execution leg built/executed; rehearsal evidence
+  consumed by the readiness gate rerun, sha256 `88212b70…`), `agent-live-queue-recovery` (Nous 429 —
+  superseded after the DeepSeek switch), `agent-live-queue-recovery-deepseek` (bridge stream-decode
+  failure; hardening `e643fd16`), and both `agent-queue-isolation-and-evidence-recovery*` records
+  (deepseek-utf8 recovery + QuickEdit/two-retry hardening `85f604aa`).
+- **2 deterministic owner/external blockers, parked**: both
+  `agent-e3-stage2-readiness-gate-after-provider-keys-retry*` records. 0/7 provider credentials are
+  configured, so Stage 2 remains NOT ENABLED and no same-family retry may be staged while that state
+  is unchanged (authority anti-loop directive). Their duplicate retry chain is now closed.
+
+Contract-required verifications, all CONFIRMED: (1) the queue-recovery/UTF-8/QuickEdit failure class is
+superseded by the completed DeepSeek UTF-8 recovery and the QuickEdit + audited two-retry hardening;
+(2) the E3 integration/rehearsal failures are superseded by the built production-execution leg, the
+bounded Google image diagnosis + 9-call repeat series (2/9 `IMAGE_RECITATION`), and the readiness gate
+rerun (12 suites / 364 tests / exit 0 at SHA `56d923b`) — **no live or expensive provider rehearsal was
+repeated**; (3) the Career Ops broad timeout is closed by the committed interface (33 tests, encoding
+fix live-confirmed through the real Task Scheduler path) and the B09 monthly rollover work
+(career-ops suite 332 passing, canonical workbooks SHA-256 unchanged).
+
+### Gaps found outside `blocked/` and closed
+
+1. **High — a genuine agent task was silently swallowed.** `poller.handle_task` matched the substring
+   `operational` before the `agent-` dispatch branch, so
+   `agent-operational-brief-health-backup-persistence-2026-09-23` was claimed at 2026-09-24T01:38:05Z
+   and immediately returned `handle_operational_build()`'s hardcoded `in_progress` status: no dispatch,
+   no work, no terminal transition. A sweep of every queue id confirmed exactly one genuine agent task
+   was affected. Fixed in `remote_queue/poller.py` (agent- dispatch now precedes all legacy placeholder
+   routers; unknown non-agent objects still fail closed). New suite
+   `remote_queue/tests/test_poller_routing.py` (9 tests, registered in `scripts/evidence_runner.py`).
+   The swallowed task was restored to `pending/` with the **same task_id** — no duplicate retry chain.
+2. **Medium — the E1 static gate failed on normal runtime debris.** The first evidence run reported E1
+   31/32 because the deployed runtime root held `orchestration.db-shm` and a 0-byte
+   `orchestration.db-wal` left by an earlier uncleanly-exited worker. `test_t13_no_gateway_modification`
+   now accepts only the `-wal`/`-shm` sidecars of databases already on its allow-list; a negative proof
+   (a deliberately unexpected file still fails the check) was recorded and the probe deleted. E1 then
+   ran **32/32 exit 0**.
+
+### Result
+
+`0` unresolved non-owner recoverable blockers remain; `0` blocked records are left unreconciled.
+Whole-company local acceptance (`agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`,
+pending) may proceed. Evidence:
+`audits/evidence/2026-09-24T02-45-00Z-blocked-work-reconciliation-audit/` (`reconciliation.json`,
+`reconciliation.md`) plus the test evidence from `scripts/evidence_runner.py --label
+blocked-work-final-reconciliation-final` (17 suites, 465 collected / 465 passed, 0 failed, exit 0,
+artifact `audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation-final/`).
+
+Owner action required (unchanged dependencies only, no new ones): the seven provider credentials, the
+Career Ops rollover-policy decision, and the pre-existing laptop/scheduled-task admin items.

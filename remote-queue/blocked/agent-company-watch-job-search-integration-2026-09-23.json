@@ -33,5 +33,14 @@
     "category": "execution_error",
     "owner_action_required": "Hermes dispatch exceeded 1200 seconds.",
     "continue_without": "Independent safe work may continue"
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "resolved_by_verified_successor",
+    "successor_evidence": "agent-company-watch-recovery-final-pass-2026-09-24 (completed 2026-09-24T02:29:00Z, commits 1e107ec + 9961288 which is origin/main HEAD at that time). It verified the integration had already reached main in commit 42a2bec, closed the real evidence gap (regional write + refusal tests, company-watch suite 31 -> 35 passing offline), and produced fresh bounded live evidence (12 companies, 58 HTTP requests, 19 findings, 0 tracker-eligible under the owner's intern-only UK filter; canonical workbook SHA-256 unchanged).",
+    "rerun_needed": false,
+    "note": "This recovery task explicitly deferred closing this blocked record to agent-blocked-work-final-reconciliation-2026-09-24, which owns it. The record is now reconciled and stays in blocked/ as historical evidence."
   }
 }

@@ -1,0 +1,85 @@
+{
+  "audit": "blocked-work-final-reconciliation",
+  "task_id": "agent-blocked-work-final-reconciliation-2026-09-24",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "audited_at": "2026-09-24T02:45:00Z",
+  "code_sha_at_audit": "9bc20a74842535bf41e403654265034f4cd3d199",
+  "records_audited": 12,
+  "classification_totals": {
+    "superseded_resolved_rerun_not_needed": 10,
+    "deterministic_owner_or_external_blocker_parked": 2,
+    "unresolved_recoverable_engineering_work": 0
+  },
+  "method": [
+    "Every file in remote-queue/blocked/ read as source of truth and compared against current main, the completed successor records in remote-queue/completed/, the landed evidence under audits/evidence/, and the current pending/running contracts.",
+    "No historical broad task was rerun. Each superseded record cites the successor and the concrete evidence that makes a rerun unnecessary.",
+    "Deterministic blockers were left parked with a single concise owner TODO.",
+    "One live non-owner recoverable gap was found outside the blocked/ set and closed (see gaps_closed), plus one brittle regression gate repaired."
+  ],
+  "records": [
+    {"task_id": "agent-autonomous-nonblocked-continuation-2026-09-23", "blocker": "execution_error (unstructured final response)", "classification": "superseded", "superseded_by": "617e69cb/aae7d036 + agent-live-queue-recovery-deepseek-utf8-2026-09-23 + later E3 tasks"},
+    {"task_id": "agent-career-ops-integration-and-tracker-automation-2026-09-23", "blocker": "execution_error (1200s dispatch timeout)", "classification": "superseded", "superseded_by": "agent-company-registry-gap-audit-and-runtime-services-2026-09-23 + agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23"},
+    {"task_id": "agent-company-watch-job-search-integration-2026-09-23", "blocker": "execution_error (1200s dispatch timeout)", "classification": "superseded", "superseded_by": "agent-company-watch-recovery-final-pass-2026-09-24 (1e107ec, 9961288)"},
+    {"task_id": "agent-e3-integration-and-truth-reconciliation-2026-09-23", "blocker": "execution_error (orphaned running record)", "classification": "superseded", "superseded_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 (per-suite re-verification)"},
+    {"task_id": "agent-e3-local-production-rehearsal-2026-09-23", "blocker": "execution_error (0xC000013A)", "classification": "superseded", "superseded_by": "agent-e3-production-execution-leg-2026-09-23 + rehearsal retry + agent-e3-stage2-readiness-gate-rerun-2026-09-24"},
+    {"task_id": "agent-e3-local-production-rehearsal-retry-2026-09-23", "blocker": "execution_error (>1200s)", "classification": "superseded", "superseded_by": "evidence 2026-09-23T21-32-41Z consumed by readiness gate rerun (sha256 88212b70)"},
+    {"task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-retry-2026-09-24", "blocker": "execution_error + 0/7 credentials", "classification": "deterministic_owner_external_blocker", "parked": true},
+    {"task_id": "agent-e3-stage2-readiness-gate-after-provider-keys-retry-2-2026-09-24", "blocker": "execution_error + 0/7 credentials", "classification": "deterministic_owner_external_blocker", "parked": true, "note": "closes the duplicate credential-gate retry chain"},
+    {"task_id": "agent-live-queue-recovery-2026-09-23", "blocker": "external_provider (Nous OAuth refresh-token expiry then HTTP 429)", "classification": "superseded", "superseded_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 after the DeepSeek provider switch"},
+    {"task_id": "agent-live-queue-recovery-deepseek-2026-09-23", "blocker": "execution_error (bridge stream decoding failure)", "classification": "superseded", "superseded_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23; bridge hardening e643fd16"},
+    {"task_id": "agent-queue-isolation-and-evidence-recovery-2026-09-23", "blocker": "execution_error (orphaned running record)", "classification": "superseded", "superseded_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 (isolated queue suite + evidence runner)"},
+    {"task_id": "agent-queue-isolation-and-evidence-recovery-retry-2026-09-23", "blocker": "execution_error (Hermes CLI exit 1)", "classification": "superseded", "superseded_by": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 + agent-visible-worker-console-quickedit-hardening-2026-09-23 (85f604aa)"}
+  ],
+  "specific_verifications_required_by_the_contract": {
+    "queue_recovery_utf8_quickedit_failures_superseded": {
+      "verdict": "CONFIRMED SUPPERSEDED",
+      "evidence": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 (completed) isolated remote_queue/tests/test_queue.py, fixed four reproduced lifecycle defects and produced reproducible per-suite evidence; bridge UTF-8 hardening e643fd16 (force UTF-8 with replacement fallback, fail closed); agent-visible-worker-console-quickedit-hardening-2026-09-23 (completed, 7439acd3 + 85f604aa) cleared ENABLE_QUICK_EDIT_MODE per-process, moved the watchdog to its own thread, and installed the audited MAX_RETRIES=2 bounded retry policy. No rerun of any historical queue-recovery record is required."
+    },
+    "e3_integration_and_rehearsal_failures": {
+      "verdict": "CONFIRMED SUPERSEDED WITHOUT REPEATING PROVIDER CALLS",
+      "evidence": "agent-e3-production-execution-leg-2026-09-23 built/deployed/really executed the production execution leg; agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23 diagnosed the Google image failure with exactly one bounded call and produced evidence-backed qualification; agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23 ran the bounded 9-call repeat series (recurrence 2/9, finishReason IMAGE_RECITATION); agent-e3-stage2-readiness-gate-rerun-2026-09-24 recorded 12 suites / 364 tests / exit 0 at SHA 56d923b, consumed (not repeated) the decomposed multi-worker rehearsal evidence, and re-proved isolation and the E1/E2 boundary. No expensive or live provider rehearsal was repeated by this task."
+    },
+    "career_ops_historical_timeout": {
+      "verdict": "CONFIRMED CLOSED",
+      "evidence": "agent-company-registry-gap-audit-and-runtime-services-2026-09-23 committed the Career Ops <-> Chief interface that had existed only in the working tree (33 tests) and fixed the scheduled-scan UnicodeEncodeError on the real Task Scheduler path; agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23 (completed) built roster B09 and recorded department run-health (career-ops suite 332 passing, canonical workbooks SHA-256 unchanged). Nothing remains except the owner rotation-policy decision."
+    }
+  },
+  "gaps_found_and_closed": [
+    {
+      "id": "GAP-1-poller-routing-swallowed-agent-task",
+      "severity": "high",
+      "category": "unresolved_recoverable_engineering_work",
+      "found": "poller.handle_task matched the substring 'operational' BEFORE the agent- dispatch branch, so agent-operational-brief-health-backup-persistence-2026-09-23 was claimed at 2026-09-24T01:38:05Z and immediately returned handle_operational_build()'s hardcoded 'in_progress' status. No Hermes dispatch, no work, no terminal transition: a high-priority v1 task silently stuck in running/.",
+      "scope_check": "Systematic sweep of every queue id (pending/running/completed/blocked) confirmed exactly one genuine agent task was affected; only the intentional non-agent umbrella 'full-operational-build-2026-09-24' relied on the placeholder, and that behaviour is preserved.",
+      "fix": "remote_queue/poller.py: the agent- dispatch branch now precedes all legacy placeholder routers, so every agent-* task (including ids containing 'operational', 'e2e-test', 'remote-e2e', 'hardened-*', 'bridge-validation') reaches Hermes. Unknown non-agent queue objects still fail closed with ValueError.",
+      "regression": "remote_queue/tests/test_poller_routing.py (new, 9 tests) proves agent tasks are dispatched, the umbrella placeholder still works, unknown non-agent objects still raise, and a source-order guard prevents regression.",
+      "recovery": "The swallowed task was restored to remote-queue/pending/ with the SAME task_id (no duplicate retry chain) plus resume evidence, so the corrected poller dispatches it to Hermes on the next cycle."
+    },
+    {
+      "id": "GAP-2-e1-static-gate-failing-on-sqlite-sidecars",
+      "severity": "medium",
+      "category": "brittle_verification_gate",
+      "found": "E1 test_t13_no_gateway_modification failed 31/32 in the first reconciliation evidence run (preserved at audits/evidence/superseded/2026-09-24T02-32-23Z-blocked-work-final-reconciliation-superseded-by-e1-sidecar-fix/): the deployed runtime root contained orchestration.db-shm (and a 0-byte orchestration.db-wal), left behind by an earlier uncleanly-exited worker. The allow-list enumerated only db basenames.",
+      "impact": "A false E1 failure would block the authority's 'E1 audit PASS' acceptance item and the Stage-2 readiness criterion for no real reason.",
+      "fix": "exec-brain/tests/test_eb.py T13 accepts only the -wal/-shm sidecars of databases already on the allow-list. Every other unexpected file still fails the check.",
+      "regression": "Negative proof recorded: with a deliberately unexpected file (__reconciliation_probe__.tmp) present in the runtime root the check FAILS, and passes once it is removed; the probe file was deleted. E1 then ran 32/32 exit 0."
+    }
+  ],
+  "owner_todos": [
+    "Configure the seven owner-local provider credentials (Mistral Small 4, GLM-5.3 Flash, Qwen3.8-27B, LongCat 2.0/Nous, MiniMax M3, Step 3.7 Flash, Tencent Hunyuan Hy3) via Windows Credential Manager targets (mistral, glm, qwen, nous, minimax, stepfun, hunyuan) or the matching env vars - never via GitHub/chat/logs. Only then may the post-key Stage-2 readiness gate be re-staged (it must not be requeued while the state is unchanged).",
+    "Decide the Career Ops monthly rollover policy before month-end (whether to rotate a closed month at all, and how to treat rows carrying owner application state). No canonical workbook has been rotated.",
+    "Pre-existing owner-admin items carried forward unchanged from the company-registry audit: keep the laptop powered/signed-in (scheduled tasks run under the interactive user token); after the next reboot confirm HermesRemoteQueuePoller and ChiefDiscordSync resume; decide the disposition of the superseded legacy 'Mukund Chief of Staff' logon task."
+  ],
+  "not_done_and_why": [
+    "No Stage-2 credential-gate retry was requeued (0/7 credential state unchanged; forbidden by the authority's anti-loop directive).",
+    "No historical broad task was rerun and no live/expensive provider rehearsal was repeated (successor evidence was sufficient in every case).",
+    "No owner-gated external mutation, deployment cutover, account action or secret handling was performed.",
+    "The Google image provider-content-stop attribution and retry policy remains owned by the pending agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24; it was not duplicated here.",
+    "The non-agent umbrella record 'full-operational-build-2026-09-24' deliberately stays in running/ as a placeholder (it is not an agent-* id, so dispatching it would turn it into an immediate execution_error). Its status must be re-derived from evidence by whoever retires it."
+  ],
+  "result": {
+    "unresolved_non_owner_recoverable_blockers_remaining": 0,
+    "blocked_records_left_unreconciled": 0,
+    "ready_for_whole_company_acceptance": true
+  }
+}

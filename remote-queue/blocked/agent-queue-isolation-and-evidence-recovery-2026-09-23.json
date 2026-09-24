@@ -33,5 +33,14 @@
   "recovery_observation": {
     "checked_at": "2026-09-23T19:13:45Z",
     "finding": "Poller scheduler reports Ready with successful recurring runs and queue.log shows pulls through 19:12Z; no process command matched poller.py, visible_worker.py, hermes_dispatch, or Hermes CLI. The only Hermes process predates this task. No completion evidence exists."
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "resolved_by_verified_successor_lineage",
+    "successor_evidence": "Lineage retry -> deepseek -> deepseek-utf8. Final successor agent-live-queue-recovery-deepseek-utf8-2026-09-23 (completed) delivered exactly the bounded deliverable: remote_queue/tests/test_queue.py isolated from the live checkout (30 tests, guard assertions, no live commits/pushes/kill-switch/mutex contention), an evidence runner recording SHA/command/import-root/counts/exit code, and truthfully reconciled state. The suite has since grown to 87 isolated tests across five files.",
+    "rerun_needed": false,
+    "note": "The recorded blocker was an orphaned running record with no worker; the delivered isolation supersedes the old unisolated behaviour the task was raised to fix."
   }
 }

@@ -29,5 +29,13 @@
     "category": "execution_error",
     "owner_action_required": "Hermes CLI exited with code 1 (output_bytes=54).",
     "continue_without": "Independent safe work may continue"
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "resolved_by_verified_successor_lineage",
+    "successor_evidence": "Same lineage as its predecessor: agent-live-queue-recovery-deepseek-utf8-2026-09-23 (completed 2026-09-23T20:31:09Z) delivered the isolation and evidence. The console-stall class behind the repeated dispatch failures was separately closed by agent-visible-worker-console-quickedit-hardening-2026-09-23 (completed; commits 7439acd3 + 85f604aa: per-process ENABLE_QUICK_EDIT_MODE cleared, independent watchdog thread, persisted attempt state, MAX_RETRIES=2 bound; 14 suites / 400 tests / exit 0).",
+    "rerun_needed": false
   }
 }

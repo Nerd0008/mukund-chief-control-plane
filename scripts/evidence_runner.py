@@ -135,6 +135,12 @@ SUITES = [
         "pythonpath": [],
         "guard": None,
     },
+    {
+        "name": "Poller dispatch routing: agent tasks always reach Hermes (isolated: stubbed dispatch, disposable queue root)",
+        "script": "remote_queue/tests/test_poller_routing.py",
+        "pythonpath": [],
+        "guard": None,
+    },
 ]
 
 

@@ -198,6 +198,18 @@ def handle_task(task: dict, attempt: int = 1) -> dict:
     task_id = task["task_id"]
     log_event(f"Handling task: {task_id} (attempt {attempt})")
 
+    # Real agent-to-agent execution path. Agent tasks ALWAYS dispatch to Hermes.
+    # This check must come first: the legacy placeholder routers below match on
+    # substrings ('operational', 'bridge-validation', 'e2e', ...) and previously
+    # swallowed a genuine agent task whose id contained one of them -- e.g.
+    # agent-operational-brief-health-backup-persistence-2026-09-23 was claimed,
+    # matched "operational", and returned handle_operational_build()'s hardcoded
+    # 'in_progress' status, so it sat in running/ with no real execution and no
+    # terminal transition. Only explicitly prefixed agent tasks reach Hermes;
+    # arbitrary unknown non-agent queue objects still fail closed.
+    if task_id.startswith("agent-"):
+        return dispatch_task(task, attempt=attempt)
+
     if "full-operational-build" in task_id or "operational" in task_id.lower():
         return handle_operational_build(task)
     if "bridge-validation" in task_id:
@@ -214,11 +226,6 @@ def handle_task(task: dict, attempt: int = 1) -> dict:
         return handle_e2e_test(task)
     if "remote-e2e" in task_id:
         return handle_e2e_test(task)
-
-    # Real agent-to-agent execution path. Only explicitly prefixed agent tasks
-    # reach Hermes; arbitrary unknown queue objects still fail closed.
-    if task_id.startswith("agent-"):
-        return dispatch_task(task, attempt=attempt)
 
     raise ValueError(f"No handler for task: {task_id}")
 

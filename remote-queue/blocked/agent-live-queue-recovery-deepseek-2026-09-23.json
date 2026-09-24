@@ -45,5 +45,14 @@
   "recovery_observation": {
     "observed_at": "2026-09-23T20:22:00Z",
     "finding": "Terminal state confirmed from the queue record and local evidence. The successor continued the bounded scope (queue-test isolation, lifecycle reconciliation, reproducible evidence, state/tracker truth) rather than re-doing the predecessor's transport diagnosis."
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "terminal_reconciliation_recorded_by_verified_successor",
+    "successor_evidence": "Its own 'terminal_reconciliation' block records verdict 'interrupted_by_bridge_stream_decoding_failure' with empty partial_work_found and bridge hardening commit e643fd16. The successor agent-live-queue-recovery-deepseek-utf8-2026-09-23 then completed the whole bounded scope and shipped the isolated suite (30 tests) plus per-suite evidence.",
+    "rerun_needed": false,
+    "note": "Existing 'terminal_reconciliation' block left untouched; this note is additive."
   }
 }

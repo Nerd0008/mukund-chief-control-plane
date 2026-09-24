@@ -41,5 +41,11 @@
       "poller.handle_task routes any task id containing 'operational' to handle_operational_build(), which returns a hardcoded status without any real execution evidence. This is recorded as a known truth defect; it was NOT changed in the recovery task because the umbrella id is not an 'agent-' id, so re-routing it would turn the umbrella into an immediate execution_error block. The record therefore stays in running/ as the umbrella and must not be read as evidence that its listed steps were executed.",
       "Its status must be re-derived from evidence by whoever retires the umbrella."
     ]
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "additive_note": "No existing text above was changed. Truth update only: the routing truth defect recorded in recovery_findings ('poller.handle_task routes any task id containing operational to handle_operational_build() ... it was NOT changed in the recovery task') has now been fixed. The agent- dispatch branch precedes the legacy placeholder routers, so agent tasks always reach Hermes. This umbrella (a non-agent id) intentionally keeps the hardcoded placeholder, because dispatching a non-agent id would turn it into an immediate execution_error block. One genuine agent task had been silently swallowed by the old routing (agent-operational-brief-health-backup-persistence-2026-09-23, claimed 2026-09-24T01:38:05Z with no execution); it has been restored to pending/ with the same task_id. Evidence: audits/evidence/2026-09-24T02-45-00Z-blocked-work-reconciliation-audit/ and remote_queue/tests/test_poller_routing.py.",
+    "this_record_still_requires": "Its listed completed_items and blockers must still be re-derived from evidence by whoever retires this umbrella; nothing in this note endorses them as executed."
   }
 }

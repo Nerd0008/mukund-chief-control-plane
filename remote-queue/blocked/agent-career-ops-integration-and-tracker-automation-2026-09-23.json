@@ -32,5 +32,14 @@
     "category": "execution_error",
     "owner_action_required": "Hermes dispatch exceeded 1200 seconds.",
     "continue_without": "Independent safe work may continue"
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "resolved_by_verified_successors",
+    "successor_evidence": "agent-company-registry-gap-audit-and-runtime-services-2026-09-23 preserved and committed the Career Ops <-> Chief deterministic interface (career-ops/, 33 tests) and fixed the scheduled-scan UnicodeEncodeError; agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23 (completed) built the B09 Monthly Rollover worker and recorded department run-health (career-ops suite 300 -> 332 passing, canonical workbooks SHA-256 unchanged); agent-regional-job-search-agents-and-schedulers-2026-09-23 owns/closed the regional lanes; agent-company-watch-recovery-final-pass-2026-09-24 closed Company Watch.",
+    "rerun_needed": false,
+    "owner_todo": "Decide the monthly rollover policy before month-end (whether to rotate a closed month at all, and how to treat rows already carrying owner application state). Recorded in the completed rollover task's owner_action_required; no canonical workbook has been rotated."
   }
 }

@@ -337,8 +337,22 @@ class TestMatrix(EBTest):
                    "e3_production_rehearsal.py", "e3_execution.py",
                    "e3_execution_rehearsal.py",
                    "__pycache__")
+        # SQLite WAL sidecars are runtime artifacts of an ALREADY-allowed
+        # project database, not newly deployed files. They are created and
+        # left behind whenever a process opens one of these dbs in WAL mode
+        # and exits uncleanly (a killed/timed-out worker), so enumerating only
+        # the db basename made this static check fail on normal runtime debris
+        # rather than on a real live-system modification. Accept exactly the
+        # sidecars of allowed databases; every other unexpected file still
+        # fails the check.
+        sidecars = {
+            f"{name}-wal" for name in allowed if name.endswith(".db")
+        } | {
+            f"{name}-shm" for name in allowed if name.endswith(".db")
+        }
+        allowed_names = set(allowed) | sidecars
         for f in eb_dir.iterdir():
-            self.assertIn(f.name, allowed, f"unexpected file {f}")
+            self.assertIn(f.name, allowed_names, f"unexpected file {f}")
 
     # T14 curated summary excludes raw text
     def test_t14_summary_no_raw_text(self):

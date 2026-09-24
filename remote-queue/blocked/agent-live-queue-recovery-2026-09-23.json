@@ -36,5 +36,14 @@
   "recovery_observation": {
     "observed_at": "2026-09-23T20:50:11Z",
     "finding": "Visible Hermes worker launched successfully, reported model meituan/longcat-2.0:free, then failed before any tool work because refresh token exchange failed. Fresh Nous device-code login was rate-limited with HTTP 429. No implementation changes were produced by this task."
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "resolved_by_verified_successor_after_provider_switch",
+    "successor_evidence": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 (completed 2026-09-23T20:31:09Z) completed the same bounded scope after the owner switched Hermes to the DeepSeek direct API: queue-test isolation with disposable roots, four reproduced-and-fixed lifecycle defects (claim destruction on failed publish, platform-default codec UnicodeDecodeError, non-fast-forward push with no retry, invalid pending task unreachable terminal state), reproducible per-suite evidence, and truthful state reconciliation.",
+    "rerun_needed": false,
+    "note": "The recorded blocker was external (Nous OAuth refresh-token expiry then HTTP 429). Nous is no longer the runtime provider (Hermes runs provider=deepseek, model=deepseek-flash), so the blocker no longer exists and no rerun is required."
   }
 }

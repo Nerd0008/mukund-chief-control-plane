@@ -20,15 +20,15 @@
     "Shadow orchestrator module created: e3_shadow_orchestrator.py (composes all 14 E3 components into a rehearsal pipeline)",
     "13/13 shadow orchestrator tests pass",
     "Full regression: 207 tests pass (32 E1 + 45 E2 + 50 E3 baseline + 60 E3 extended + 13 E3 shadow + 37 E4/E5 + 15 queue)",
-    "2 Codex adapter tests fail \u2014 environmental (Codex CLI binary not installed on this machine)",
-    "test_governor.py \u2014 pre-existing import error (governor/adapters modules not in repo)",
+    "2 Codex adapter tests fail — environmental (Codex CLI binary not installed on this machine)",
+    "test_governor.py — pre-existing import error (governor/adapters modules not in repo)",
     "State file corrected: timestamp, test counts, E3 shadow suite added, E4/E5 combined count clarified, provider truth preserved (LongCat/Nous not replaced)"
   ],
   "exact_remaining_blockers": [
-    "E3 Stage 2 production \u2014 NOT APPROVED",
-    "Seven provider credentials \u2014 owner dependent",
-    "Codex usage-limit reset \u2014 external",
-    "VPS access/architecture decision \u2014 unresolved"
+    "E3 Stage 2 production — NOT APPROVED",
+    "Seven provider credentials — owner dependent",
+    "Codex usage-limit reset — external",
+    "VPS access/architecture decision — unresolved"
   ],
   "stop_conditions": [
     "explicit E3 Stage 2 production approval required",
@@ -69,5 +69,14 @@
       "State/tracker correction completed by this successor.",
       "E3 shadow orchestration rejection/repair and executable rehearsal evidence remain open as a bounded follow-up task."
     ]
+  },
+  "final_reconciliation_2026_09_24": {
+    "reconciled_at": "2026-09-24T02:45:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "classification": "superseded",
+    "verdict": "already_reconciled_by_verified_successor",
+    "successor_evidence": "agent-live-queue-recovery-deepseek-utf8-2026-09-23 (completed 2026-09-23T20:31:09Z) recorded reconciliation verdict 'orphaned_running_record_no_worker_no_terminal_transition', preserved commits 617e69cb/aae7d036, and independently re-verified the per-suite evidence (E3 extended 60/60, E3 shadow 13/13, E4/E5 37/37, E3 baseline 48/50 with 2 environmental Codex CLI errors).",
+    "rerun_needed": false,
+    "note": "Existing 'reconciliation' block left untouched; this note is additive. The '207 tests' aggregate it carried is superseded and not reproducible."
   }
 }

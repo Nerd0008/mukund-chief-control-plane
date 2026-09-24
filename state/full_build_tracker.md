@@ -626,3 +626,23 @@ Truth boundaries recorded, not glossed over:
   2026-09-24` owns (it lists this recovery as its prerequisite, so the blocked JSON was deliberately
   left in place).
 
+## Historical blocked-work final reconciliation — `agent-blocked-work-final-reconciliation-2026-09-24`
+
+Audited 2026-09-24T02:45Z at code SHA `9bc20a7`. Authority:
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`.
+
+| Item | State | Evidence |
+|---|---|---|
+| `remote-queue/blocked/` records audited | **DONE — 12/12** | each file read against current `main`, the completed successor records, `audits/evidence/`, and the pending/running contracts |
+| Records classified superseded/resolved (rerun NOT needed) | **10** | successor + concrete evidence recorded per record in an additive `final_reconciliation_2026_09_24` note (all 12 edits programmatically proven strictly additive) |
+| Records classified deterministic owner/external blocker (parked) | **2** | both `agent-e3-stage2-readiness-gate-after-provider-keys-retry*`; 0/7 credentials unchanged, Stage 2 NOT ENABLED, duplicate retry chain closed |
+| Records left unreconciled | **0** | — |
+| Contract verification 1: queue-recovery / UTF-8 / QuickEdit failure class | **SUPERSEDED — CONFIRMED** | deepseek-utf8 recovery completed (isolated queue suite, 4 lifecycle defects fixed) + bridge UTF-8 hardening `e643fd16` + QuickEdit/two-retry hardening `85f604aa` |
+| Contract verification 2: E3 integration/rehearsal failures | **SUPERSEDED — CONFIRMED, no provider calls repeated** | production execution leg built/deployed/executed; bounded Google image diagnosis + 9-call series (2/9 `IMAGE_RECITATION`); readiness gate rerun 12 suites / 364 tests / exit 0 at `56d923b`, rehearsal evidence consumed (sha256 `88212b70…`) |
+| Contract verification 3: Career Ops historical timeout | **CLOSED — CONFIRMED** | committed Career Ops⇄Chief interface (33 tests, encoding fix live-confirmed via Task Scheduler) + B09 monthly rollover (career-ops suite 332 passing, canonical workbooks SHA-256 unchanged) |
+| GAP-1 (high): genuine agent task silently swallowed by poller routing | **FIXED** | `remote_queue/poller.py` — `agent-` dispatch now precedes all legacy substring placeholder routers; `agent-operational-brief-health-backup-persistence-2026-09-23` (claimed 2026-09-24T01:38:05Z, never executed) restored to `pending/` with the same task_id; new `remote_queue/tests/test_poller_routing.py` (9 tests) |
+| GAP-2 (medium): E1 static gate failing on SQLite sidecars | **FIXED** | `exec-brain/tests/test_eb.py` T13 accepts only `-wal`/`-shm` sidecars of already-allowed databases; negative proof recorded (unexpected file still fails, probe deleted); E1 **32/32 exit 0** |
+| Regression evidence | **PASS** | `scripts/evidence_runner.py --label blocked-work-final-reconciliation-final` → **17 suites, 465 collected / 465 passed, 0 failed, 0 errors, 0 unavailable, every suite exit 0** (`audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation-final/`); the new routing suite was added to the runner; isolated queue discovery 87/87 |
+| Owner action | **NONE NEW** | unchanged dependencies only: seven provider credentials, Career Ops rollover policy, pre-existing laptop/scheduled-task admin items |
+| Ready for whole-company acceptance | **YES** | 0 unresolved non-owner recoverable blockers |
+
