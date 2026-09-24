@@ -646,6 +646,13 @@ digest — and the second writes no bytes; `generated_at` keeps the true run
 instant and is excluded from the digest. Crossing a quantum boundary moves the
 window, which is genuinely different content and therefore a new brief.
 
+The digest-named file and the `latest.*` pointers keep the rendering (and so the
+`brief_id`/`generated_at`) of the run that first produced a given content digest:
+a re-run over the same content recognises it as the same brief and restamps
+nothing. Under the current revision that is a fixed point — identical content
+implies an identical id — so a stored brief never names a brief the code would no
+longer produce.
+
 **Delivery.** Local file only, verified by sha256 read-back: `brief-<digest>.json`
 (machine-readable), `chief-summary-<digest>.md`, plus `latest.json` / `latest.md`.
 `delivery.external_channel_health` is `not_verified` — nothing sends, posts or
