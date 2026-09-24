@@ -630,3 +630,11 @@ hint: have locall
 error: Please commit or stash them.
 [2026-09-24T14:36:55.813177Z] Task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 attempt 2/3: retry (recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled)
 [2026-09-24T14:36:55.814169Z] Handling task: agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 (attempt 3)
+[2026-09-24T14:56:58.402221Z] CRITICAL: git push failed: To https://github.com/Nerd0008/mukund-chief-control-plane.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/Nerd0008/mukund-chief-control-plane.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locall
+[2026-09-24T14:56:58.534365Z] CRITICAL: push recovery rebase failed: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+[2026-09-24T14:56:58.534365Z] Task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 attempt 3/3: park (retry budget exhausted after 3 of 3 permitted attempts)

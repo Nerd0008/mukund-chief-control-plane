@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "high",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "prerequisites": [
     "agent-career-codex-style-open-web-job-research-2026-09-24 completed truthfully.",
     "agent-career-priority-company-watchlist-engine-2026-09-24 completed truthfully or has a valid empty-watchlist mode.",
@@ -71,5 +71,11 @@
     "last_summary": "Hermes dispatch exceeded 1200 seconds.",
     "next_action": "park",
     "reason": "retry budget exhausted after 3 of 3 permitted attempts"
+  },
+  "blocked_at": "2026-09-24T14:56:58.550480Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes dispatch exceeded 1200 seconds.",
+    "continue_without": "Independent safe work may continue"
   }
 }
