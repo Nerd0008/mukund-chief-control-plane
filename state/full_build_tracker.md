@@ -827,3 +827,19 @@ The high-recall semantic contract (`career-ops/discovery/`) is now the single fu
 | Canonical workbooks | **UNTOUCHED** | the four workbooks are SHA-256 identical before and after the acceptance run *and* across the full 461-test suite; `--apply` remains the only tracker write |
 | External actions | **NONE** | 0 applications, 0 employer/agency/intermediary contacts, 0 LinkedIn actions, no browser/GUI, no account/session, no scraping; the LinkedIn path is read-only owner-export only |
 | Not claimed | **HONEST BOUNDARY** | no live recruiter/intermediary watch feed and no live LinkedIn surface was scanned; the collectors' evidence is fixture-only, and the LinkedIn live surface remains owner-gated and untested against a real account |
+
+Attempt-2 resume (2026-09-24T05:40-05:44Z) — the attempt-1 dispatch hit the 1200s wrapper limit
+*after* landing the work above. Repository state was inspected first and nothing was recreated,
+reverted or redone; only independent re-verification at HEAD `3c8082b` was outstanding. No code
+changed: `career-ops/run_discovery_acceptance.py` → **PASS 22/22** at
+`audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/` (same 22 checks,
+including `multi_source_run_counts_every_surface` `discovered_raw=6 → canonical 4 →
+cross_source_duplicates_removed 2`, `same_vacancy_dedupes_to_one_canonical_candidate_with_provenance`
+with 3 provenance entries, and `every_source_has_its_own_funnel_counters_and_zero_attribution`);
+`python -m pytest career-ops/tests company-watch/tests scripts/tests -q` → **461 passed**;
+registered whole-company step `career_high_recall_discovery` → **PASS**,
+`canonical_workbooks_unchanged: true`
+(`audits/evidence/2026-09-24T05-43-11Z-whole-company-acceptance/`). The four canonical workbooks
+were re-hashed independently by this attempt and are unchanged
+(uk `84c53dcb…3f40`, dubai `495edb45…45ca`, japan `a8c4ef90…c89`, singapore `25c7b95b…bf1`).
+External mutations: 0; provider calls: 0.

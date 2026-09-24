@@ -1648,3 +1648,7 @@ tests, no provider series re-run.
   (fixtures-only acceptance, 22/22 checks) and
   `audits/evidence/2026-09-24T05-29-54Z-unified-discovery-followup-step-verification/`
   (registered whole-company step `career_high_recall_discovery` re-run at HEAD → PASS).
+  Attempt-2 resume re-verified the same at HEAD `3c8082b` without changing code:
+  `audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/` (22/22 PASS) and
+  `audits/evidence/2026-09-24T05-43-11Z-whole-company-acceptance/` (step PASS,
+  `canonical_workbooks_unchanged: true`); 461 tests passed; workbooks re-hashed unchanged.
