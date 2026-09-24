@@ -75,10 +75,21 @@ def _git(root: Path, *args) -> str:
 
 
 def export_committed_tree(root: Path, revision: str, dest: Path) -> None:
-    """Write the committed tree (no .git) into `dest`."""
+    """Write the committed tree (no .git) into `dest`.
+
+    Line endings are pinned to the committed bytes. `git archive` otherwise
+    applies the host's `core.autocrlf`/`core.eol` settings, which rewrote CRLF
+    on Windows and made the exported bytes (and therefore every content hash in
+    the manifest) differ from the repository's committed blobs. Forcing
+    `core.autocrlf=false -c core.eol=lf` keeps the archive byte-identical to the
+    committed blobs on every platform, so a verifier can bind an archive to
+    `git show <commit>:<path>` hashes. The repository `.gitattributes` also pins
+    `eol=lf`; this flag makes the guarantee independent of local git config.
+    """
     archive = dest.parent / "git-archive.zip"
     subprocess.run(
-        ["git", "archive", "--format=zip", f"--output={archive}", revision],
+        ["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf",
+         "archive", "--format=zip", f"--output={archive}", revision],
         cwd=str(root), check=True, capture_output=True,
     )
     dest.mkdir(parents=True, exist_ok=True)

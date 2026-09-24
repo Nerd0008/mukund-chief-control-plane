@@ -1,0 +1,33 @@
+# Line-ending policy for reproducible release artifacts.
+#
+# `release-manifest.json` records content hashes (dependency files, deployable
+# artifacts and an aggregate source-tree hash) as the identity of a release
+# archive. Without a policy, `core.autocrlf=true` makes `git checkout` and
+# `git archive` rewrite line endings on Windows only, so the same commit would
+# produce DIFFERENT artifact hashes on Windows and Linux, and an exported ZIP
+# could not be checked against the repository's committed blobs.
+#
+# Pin every text file to LF in the repository and in the worktree so the
+# committed blob, a fresh working copy and the exported archive are
+# byte-identical on every platform. `scripts/make_release_archive.py` also
+# forces `core.autocrlf=false -c core.eol=lf` so the archive guarantee does not
+# depend on a host's git configuration.
+* text=auto eol=lf
+
+# Binary assets are never converted and never diffed as text.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.zip  binary
+*.xlsx binary
+*.xlsm binary
+*.xls  binary
+*.db   binary
+*.sqlite binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.exe  binary

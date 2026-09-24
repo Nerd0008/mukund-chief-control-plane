@@ -30,6 +30,12 @@ python scripts/release_manifest.py --verify --out release/release-manifest.json
 `release/` is git-ignored: the manifest is a **build output**. The durable
 identity record for an accepted run lives under `audits/evidence/`.
 
+`scripts/release_manifest.py` hashes the files it finds in the tree it is
+pointed at, so run it from a clean clone or checkout (line endings are pinned by
+`.gitattributes`). `scripts/make_release_archive.py` instead computes the
+manifest from the **exported committed bytes**, which is the authoritative path
+for a shipped archive.
+
 ## 2. Archive guarantees
 
 ```bash
@@ -44,10 +50,19 @@ How the archive is produced:
    files, no ignored files. Private runtime data (owner application data,
    Hermes state databases, credential stores) therefore cannot be packaged even
    by accident.
-2. The release manifest is computed **from the exported tree itself**, so every
+2. Line endings are pinned to the **committed bytes**: the export forces
+   `core.autocrlf=false -c core.eol=lf`, and `.gitattributes` sets
+   `* text=auto eol=lf`. Without this, `git archive` inherited a Windows host's
+   `core.autocrlf=true` and rewrote CRLF, so the exported bytes — and therefore
+   every content hash recorded in the manifest — differed from the repository's
+   committed blobs and from an export made on Linux. With it, an archive's
+   `requirements.lock` hash equals `git show <commit>:requirements.lock | sha256`
+   on any platform, so `--expect-lock-sha256` (or any blob-derived hash) can
+   actually bind an archive to a commit.
+3. The release manifest is computed **from the exported tree itself**, so every
    hash provably describes bytes that are inside the archive.
-3. `release-manifest.json` and `ARCHIVE-README.txt` are injected into the ZIP.
-4. The finished ZIP is re-opened, extracted to a temporary directory and
+4. `release-manifest.json` and `ARCHIVE-README.txt` are injected into the ZIP.
+5. The finished ZIP is re-opened, extracted to a temporary directory and
    re-verified before the command reports success.
 
 Verification is independent of the archive's own claims: hashes are recomputed
