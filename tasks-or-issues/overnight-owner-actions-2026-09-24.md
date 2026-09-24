@@ -19,17 +19,41 @@ When Hermes/Luna reaches a blocker that genuinely requires Mukund:
 ## Current owner actions
 
 ### 1. Configure all remaining provider credentials
-**Status:** PENDING — OWNER PLANS TO DO THIS ON 2026-09-24  
-**Blocks:** live onboarding/verification of the remaining seven E3 provider workers and, by direct owner instruction, final local Stage 2 completion.  
-**Action:** provision credentials locally for Mistral, GLM, Qwen, LongCat, MiniMax, Step, and Tencent Hunyuan using approved local secret storage. Never paste keys into ChatGPT, Discord, GitHub, source files, queue jobs, or logs.  
-**Continue without owner:** qualification harness, orchestration, Google-image diagnosis, multi-worker execution evidence, E4/E5 integration, tests, evidence, bridge hardening, deployment preparation.
+**Status:** ✅ COMPLETE — all ten roster credentials present (verified 2026-09-24T20:54:33Z)  
+**Verification:** the presence-only probe now reports `still_missing_count = 0` (10/10 roster workers have a stored credential). No credential value was read, printed, logged or committed.  
+**Blocks:** nothing on the credential-absence side any more — but see the new item 1b: every newly-credentialed provider still refuses live dispatch.  
+**Action (historical):** credentials were provisioned locally for Mistral, GLM, Qwen, LongCat, MiniMax, Step, and Tencent Hunyuan using approved local secret storage.  
+**Continue without owner:** qualification harness, orchestration, multi-worker execution evidence, E4/E5 integration, tests, evidence, bridge hardening, deployment preparation.
+
+### 1b. Fund / enable the seven provider accounts so the stored keys can serve traffic
+**Status:** PENDING — OWNER ACTION REQUIRED (recorded 2026-09-24 after the post-key verification)  
+**Blocks:** live execution of the seven generic API workers, provider-diverse E3 routing, and the live-provider E4/E5 failover drill.  
+**What was verified:** endpoint + API model ID live-verified for 6/7 (Tencent documentation-derived because its key is rejected); every one of the seven bounded smoke completions was refused by the provider itself.  
+**Action:** the six working keys need account-level billing/quota/entitlement; Tencent needs a re-issued TokenHub key:
+- mistral — HTTP 429 `Rate limit exceeded`
+- GLM / Z.ai — HTTP 429 `Insufficient balance or no resource package`
+- Qwen (intl dashscope) — HTTP 403 `AccessDenied.Unpurchased` (purchase `qwen3.8-27b`)
+- LongCat — HTTP 402 `Insufficient token quota`
+- MiniMax — HTTP 402 `insufficient balance (1008)`
+- StepFun (global) — HTTP 402 `exceeded your current quota`
+- Tencent Hunyuan/Hy3 — HTTP 401 `code 401002` invalid API key; re-issue at https://console.tencentcloud.com/tokenhub/apikey
+**Safest next action for Mukund:** fund/enable the six provider accounts and re-issue the Tencent TokenHub key, then re-run `python scripts/e3_provider_bounded_smoke.py` followed by the readiness gate.
 
 ### 2. Complete E3 Stage 2 after all provider keys are configured
-**Status:** DEFERRED BY OWNER UNTIL AFTER KEY CONFIGURATION ON 2026-09-24  
-**Blocks:** final local Stage 2 enablement only; independent engineering and evidence work must continue.  
-**Owner directive:** Mukund will complete local Stage 2 after he configures all remaining provider keys tomorrow. Do not enable Stage 2 overnight before those keys are configured. Once the keys are configured, re-run the full readiness checks and then complete local Stage 2 if all objective gates pass.  
-**Readiness conditions before enabling:** all intended provider credentials configured and truthfully verified; local E1/E2/E3/E4/E5 regressions pass; production rehearsal passes; no unresolved critical integrity/privacy/safety defect; worker routing/qualification state remains evidence-driven; rollback/recovery exists; state/evidence is updated truthfully.  
+**Status:** ATTEMPTED — NOT ENABLED (post-key verification executed 2026-09-24; see item 2b)  
+**Blocks:** final local Stage 2 enablement only; independent engineering and evidence work continues.  
+**Owner directive (historical):** complete local Stage 2 after configuring all remaining provider keys; do not enable overnight before the keys exist; once configured, re-run the full readiness checks and then complete local Stage 2 if all objective gates pass.  
+**Outcome of that sequence:** the post-key sequence ran in full (presence probe → live identity reconciliation → bounded smoke → adapter/registry corrections → deploy → full regression → bounded real-provider rehearsal → E4/E5 drills → readiness gate). Stage 2 was **not** enabled because a recorded readiness criterion is unmet and every newly-credentialed provider refused live dispatch — the gate was not weakened to force a pass.  
 **Scope:** local Stage 2 only. This does not authorize VPS cutover or a final deployment-architecture choice.
+
+### 2b. Resolve or re-scope the two Stage-2 readiness conditions
+**Status:** PENDING — OWNER DECISION REQUIRED  
+**Blocks:** local E3 Stage 2 enablement (production dispatch through the Executive Brain).  
+**Conditions still unmet:**
+1. *Google image worker real-dispatch resolved (not intermittent).* The bounded repeat series observed 2/9 recurrences, each carrying the provider's own `finishReason = IMAGE_RECITATION`; the trigger is provider-side and unknown. The vision role is therefore not qualified and no stability claim is made. Owner decision: accept the attributed provider-side intermittency (re-scoping the criterion) or fund a stability investigation.
+2. *Provider execution.* See item 1b — all seven newly-credentialed workers are `routable=false`.
+3. *(preserved, not blocking Stage 2)* the live-provider E4/E5 failover/recovery drill has no real mode in the harness; only stubbed-failure evidence exists. That gap is recorded explicitly and is never claimed as live evidence.
+**Safest next action for Mukund:** complete item 1b, then decide on condition 1; then re-run `python scripts/e3_stage2_readiness_gate.py`.
 
 ### 3. Deployment architecture decision
 **Status:** DEFERRED UNTIL LOCAL SYSTEM IS PROVEN  
@@ -246,13 +270,27 @@ donor. Engineering will not change it without that decision.
 
 ### 8. After the provider keys are configured — run the exact post-key verification sequence (owner + engineering)
 
-**Provider adapter verification TODO added 2026-09-24:** before the Mistral smoke/qualification run, re-check the live Mistral model catalogue and update the adapter's configured API model id if needed. The current control-plane adapter still uses `mistral-small-4`; the verification run must confirm the provider-accepted id (for example the current Small 4 alias/version exposed by Mistral) from live provider evidence rather than assuming the old string is valid. Do not change qualification state until the corrected id, endpoint, credential and smoke test all pass.
+**EXECUTED 2026-09-24 (task `agent-e3-provider-verification-stage2-closeout-2026-09-24`).** The
+sequence below was run in full. Outcome: Stage 2 was **not** enabled, because a recorded readiness
+criterion is unmet and every newly-credentialed provider refused live dispatch. The gate was not
+weakened. See items 1b and 2b for the remaining owner actions.
 
-**Qwen adapter verification TODO added 2026-09-24:** the owner has provisioned the Qwen/Alibaba Model Studio credential successfully. The current worker/adapter name remains `qwen38-27b` for credential lookup compatibility, but the intended live model selected during setup is `qwen3.7-plus`. During the post-key verification run, confirm the live Singapore-region model id and endpoint from provider evidence, update the adapter mapping if required, and qualify it only after credential, endpoint and smoke test all pass.
+**Provider adapter verification TODOs (all three RESOLVED 2026-09-24 by live-provider evidence):**
+- **Mistral** — confirmed `mistral-small-latest` against the live catalogue; the stale
+  `mistral-small-4` string was corrected in the adapter and worker registry. Smoke call then refused
+  by the provider itself (HTTP 429 `Rate limit exceeded`).
+- **Qwen** — the live Singapore/international id observed in the provider catalogue is `qwen3.8-27b`
+  (the previously intended `qwen3.7-plus` does **not** appear in the catalogue for this account), and
+  the endpoint was corrected from the CN DashScope host to the international host. Smoke call refused
+  by the provider (HTTP 403 `AccessDenied.Unpurchased` — the model must be purchased).
+- **GLM** — endpoint corrected to the current Z.ai API host and the live `glm-5.3-flash` id confirmed
+  from the provider catalogue. Smoke call refused by the provider (HTTP 429 `Insufficient balance or
+  no resource package`).
+- No worker was marked qualified: qualification stayed `UNPROVEN` for all seven because the smoke
+  tests failed at the provider.
 
-**GLM adapter verification TODO added 2026-09-24:** during the post-key verification run, verify and update the legacy GLM provider endpoint to the current Z.ai API endpoint for the owner's account, confirm the live `glm-5.3-flash` model identifier, and only mark the provider qualified after credential, endpoint and smoke-test checks pass.
-
-**Status:** OWNER-GATED — cannot be run before the seven credentials exist and Stage 2 is enabled.
+**Status:** SEQUENCE EXECUTED; Stage 2 still OWNER-GATED on the two conditions in item 2b. The
+live-provider E4/E5 drill (the *only* remaining E4/E5 item) is still not runnable.
 **Blocks:** the *only* remaining E4/E5 item — a drill on the **live provider** path (a real provider
 failure actually failing a node, and real provider-health re-verification before leaving safe mode).
 Everything that can be proven without a real provider is already done and evidenced.

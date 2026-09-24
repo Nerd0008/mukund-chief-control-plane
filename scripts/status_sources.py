@@ -37,7 +37,7 @@ MARKER_END = "<!-- END GENERATED: executive-status (scripts/status_render.py) --
 # The production blockers the authority file requires to be represented
 # explicitly and separately from implementation completion.
 REQUIRED_PRODUCTION_BLOCKERS = {
-    "provider-credentials-absent",
+    "provider-execution-blocked",
     "stage2-not-enabled",
     "live-provider-failover-gap",
     "deployment-cutover-decision",

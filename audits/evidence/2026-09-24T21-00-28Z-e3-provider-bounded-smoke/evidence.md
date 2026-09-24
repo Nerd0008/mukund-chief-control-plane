@@ -1,0 +1,281 @@
+# E3 bounded real-provider smoke + live model identity
+
+- Started (UTC): 2026-09-24T21:00:28+00:00
+- Finished (UTC): 2026-09-24T21:00:35+00:00
+- Budget: {'max_tokens_per_worker': 16, 'timeout_s': 90, 'attempts_per_worker': 1}
+- Credential handling: resolved in-process, used only as an Authorization header; never printed, logged, stored or passed as a shell argument
+- Completed: []
+- Failed: ['mistral-small-4', 'glm-53-flash', 'qwen38-27b', 'longcat-2.0', 'minimax-m3', 'step-37-flash', 'tencent-hunyuan-hy3']
+- Skipped: []
+
+| Worker | Endpoint | HTTP | Model sent | Returned model field | Identity confirmed | Tokens (in/out) | E2 linkage | Error |
+|---|---|---|---|---|---|---|---|---|
+| mistral-small-4 | mistral | 429 | `mistral-small-latest` | `None` | False | None/None | recorded_failure | Rate limit exceeded |
+| glm-53-flash | glm | 429 | `glm-5.3-flash` | `None` | False | None/None | recorded_failure | Insufficient balance or no resource package. Please recharge. |
+| qwen38-27b | qwen | 403 | `qwen3.8-27b` | `None` | False | None/None | recorded_failure | code=AccessDenied.Unpurchased |
+| longcat-2.0 | longcat | 402 | `LongCat-2.0` | `None` | False | None/None | recorded_failure | Call failed: Insufficient token quota. |
+| minimax-m3 | minimax | 402 | `MiniMax-M3` | `None` | False | None/None | recorded_failure | insufficient balance (1008) |
+| step-37-flash | stepfun | 402 | `step-3.7-flash` | `None` | False | None/None | recorded_failure | You exceeded your current quota, please check your plan and billing details |
+| tencent-hunyuan-hy3 | hunyuan | 401 | `hy3` | `None` | False | None/None | recorded_failure | code=401002 |
+
+## Per-worker detail
+
+### mistral-small-4
+
+```json
+{
+  "worker_id": "mistral-small-4",
+  "adapter_created": true,
+  "provider_key": "mistral",
+  "display_name": "Mistral Small 4",
+  "configured_api_model_id": "mistral-small-latest",
+  "chat_endpoint": "https://api.mistral.ai/v1/chat/completions",
+  "models_endpoint": "https://api.mistral.ai/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 429,
+  "configured_model_sent": "mistral-small-latest",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "http_429",
+  "provider_error_body": "Rate limit exceeded",
+  "runtime_s": 0.319,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-3db12e3a"
+  },
+  "catalogue": {
+    "observed_model_count": 46,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### glm-53-flash
+
+```json
+{
+  "worker_id": "glm-53-flash",
+  "adapter_created": true,
+  "provider_key": "glm",
+  "display_name": "GLM-5.3 Flash",
+  "configured_api_model_id": "glm-5.3-flash",
+  "chat_endpoint": "https://api.z.ai/api/paas/v4/chat/completions",
+  "models_endpoint": "https://api.z.ai/api/paas/v4/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 429,
+  "configured_model_sent": "glm-5.3-flash",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "Insufficient balance or no resource package. Please recharge.",
+  "provider_error_body": "Insufficient balance or no resource package. Please recharge.",
+  "runtime_s": 0.413,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-c87241eb"
+  },
+  "catalogue": {
+    "observed_model_count": 11,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### qwen38-27b
+
+```json
+{
+  "worker_id": "qwen38-27b",
+  "adapter_created": true,
+  "provider_key": "qwen",
+  "display_name": "Qwen3.8-27B",
+  "configured_api_model_id": "qwen3.8-27b",
+  "chat_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+  "models_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 403,
+  "configured_model_sent": "qwen3.8-27b",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "Access to model denied. Please make sure you are eligible for using the model.",
+  "provider_error_body": "code=AccessDenied.Unpurchased",
+  "runtime_s": 0.902,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-85e21e86"
+  },
+  "catalogue": {
+    "observed_model_count": 172,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### longcat-2.0
+
+```json
+{
+  "worker_id": "longcat-2.0",
+  "adapter_created": true,
+  "provider_key": "longcat",
+  "display_name": "LongCat 2.0",
+  "configured_api_model_id": "LongCat-2.0",
+  "chat_endpoint": "https://api.longcat.chat/openai/v1/chat/completions",
+  "models_endpoint": "https://api.longcat.chat/openai/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 402,
+  "configured_model_sent": "LongCat-2.0",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "Call failed: Insufficient token quota.",
+  "provider_error_body": "Call failed: Insufficient token quota.",
+  "runtime_s": 0.417,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-7f5c7fce"
+  },
+  "catalogue": {
+    "observed_model_count": 1,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### minimax-m3
+
+```json
+{
+  "worker_id": "minimax-m3",
+  "adapter_created": true,
+  "provider_key": "minimax",
+  "display_name": "MiniMax M3",
+  "configured_api_model_id": "MiniMax-M3",
+  "chat_endpoint": "https://api.minimax.io/v1/chat/completions",
+  "models_endpoint": "https://api.minimax.io/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 402,
+  "configured_model_sent": "MiniMax-M3",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "insufficient balance (1008)",
+  "provider_error_body": "insufficient balance (1008)",
+  "runtime_s": 0.686,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-5af88a42"
+  },
+  "catalogue": {
+    "observed_model_count": 8,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### step-37-flash
+
+```json
+{
+  "worker_id": "step-37-flash",
+  "adapter_created": true,
+  "provider_key": "stepfun",
+  "display_name": "Step 3.7 Flash",
+  "configured_api_model_id": "step-3.7-flash",
+  "chat_endpoint": "https://api.stepfun.ai/v1/chat/completions",
+  "models_endpoint": "https://api.stepfun.ai/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 402,
+  "configured_model_sent": "step-3.7-flash",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "You exceeded your current quota, please check your plan and billing details",
+  "provider_error_body": "You exceeded your current quota, please check your plan and billing details",
+  "runtime_s": 0.634,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-f05452e1"
+  },
+  "catalogue": {
+    "observed_model_count": 16,
+    "configured_model_in_catalogue": true
+  }
+}
+```
+
+### tencent-hunyuan-hy3
+
+```json
+{
+  "worker_id": "tencent-hunyuan-hy3",
+  "adapter_created": true,
+  "provider_key": "hunyuan",
+  "display_name": "Tencent Hunyuan Hy3",
+  "configured_api_model_id": "hy3",
+  "chat_endpoint": "https://tokenhub-intl.tencentcloudmaas.com/v1/chat/completions",
+  "models_endpoint": "https://tokenhub-intl.tencentcloudmaas.com/v1/models",
+  "credential_present": true,
+  "auth_source": "credential_manager",
+  "dispatch_status": "FAILED",
+  "http_status": 401,
+  "configured_model_sent": "hy3",
+  "provider_returned_model_field": null,
+  "model_identity_confirmed_by_provider": false,
+  "finish_reason": null,
+  "usage": null,
+  "usage_source": "provider-returned usage object (never estimated)",
+  "content_preview": null,
+  "error": "The API Key does not exist or signature verification failed. Please check whether the API Key is correct. See: https://console.cloud.tencent.com/tokenhub/apikey",
+  "provider_error_body": "code=401002",
+  "runtime_s": 0.407,
+  "max_tokens_requested": 16,
+  "e2_linkage": {
+    "result": "recorded_failure",
+    "request_row_id": "obs-20260924-242e4937"
+  },
+  "catalogue": {
+    "observed_model_count": 0,
+    "configured_model_in_catalogue": false
+  }
+}
+```
+

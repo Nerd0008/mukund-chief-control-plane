@@ -118,7 +118,7 @@ class GeneratedOutputs(unittest.TestCase):
     def test_23_generated_tracker_covers_later_career_discovery_work(self):
         tracker = self.outputs["executive-tracker"]
         for marker in ("B25", "B26", "B27", "B19", "B11",
-                       "Scheduled orchestrator cutover", "NOT COMPLETE / BLOCKED"):
+                       "Scheduled orchestrator cutover", "COMPLETE / PASS"):
             self.assertIn(marker, tracker, f"generated tracker omits {marker}")
 
 
@@ -136,7 +136,11 @@ class DriftDetection(unittest.TestCase):
     def test_31_tampered_credential_count_fails(self):
         canonical = src.load_canonical()
         broken = copy.deepcopy(canonical)
-        broken["provider_credentials"]["credentials_absent"] = 0
+        # The probe now reports 0 absent, so the tamper must invent absences the
+        # probe never recorded; a wrong-and-nonzero figure has to be caught.
+        broken["provider_credentials"]["credentials_absent"] = 3
+        broken["provider_credentials"]["absent_workers"] = [
+            "minimax-m3", "step-37-flash", "tencent-hunyuan-hy3"]
         problems = src.check_credentials(broken)
         self.assertTrue(any(level == "FAIL" for level, _ in problems),
                         "a wrong credential-readiness figure was not detected")

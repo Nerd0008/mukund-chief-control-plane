@@ -62,6 +62,29 @@ CREDENTIAL_MISSING_WORKERS = [
 ]
 CONFIGURED_WORKERS = ["codex-cli", "google-nano-banana-2", "deepseek-v41-flash"]
 
+# The authority file and the immutable task contract are the only sources that
+# can grant owner authorization for local Stage 2 enablement. The gate verifies
+# the authorization is actually recorded there rather than assuming it.
+AUTHORITY_PATH = (REPO_ROOT / "tasks-or-issues"
+                  / "2026-09-24-full-operational-vps-cutover.md")
+TASK_CONTRACT_PATH = (REPO_ROOT / "remote-queue" / "running"
+                      / "agent-e3-provider-verification-stage2-closeout-2026-09-24.json")
+
+AUTHORIZATION_MARKERS = [
+    (AUTHORITY_PATH,
+     "STANDING CONDITIONAL APPROVAL granted 2026-09-23 for local enablement "
+     "once objective local readiness gates pass"),
+    (AUTHORITY_PATH,
+     "After those credentials are configured and truthfully verified, re-run "
+     "the complete local Stage 2 readiness gates and complete local Stage 2 if "
+     "they pass"),
+    (AUTHORITY_PATH,
+     "complete local E3 Stage 2 if all gates pass"),
+    (TASK_CONTRACT_PATH,
+     "Owner authorization for LOCAL E3 Stage 2 is now explicit"),
+]
+
+
 PRODUCTION_STORES = {
     "orchestration": RUNTIME_ROOT / "orchestration.db",
     "governor": RUNTIME_ROOT / "governor.db",
@@ -160,6 +183,121 @@ def check_credentials() -> dict:
         "previously_configured_workers": configured,
         "all_seven_configured": all(m["credential_present"] for m in missing),
     }
+
+
+# ── 1b. recorded owner authorization (read, never assumed) ─────────
+
+def check_owner_authorization() -> dict:
+    """Verify the owner's Stage 2 authorization is actually recorded.
+
+    The gate never enables Stage 2 on its own authority. It requires the
+    authorization to be present in the authority file / immutable task contract,
+    and it requires the precondition those documents attach to that
+    authorization (all intended provider credentials configured) to hold.
+    """
+    found = []
+    missing = []
+    for path, marker in AUTHORIZATION_MARKERS:
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        if marker in text:
+            found.append({"path": str(path.relative_to(REPO_ROOT)),
+                          "marker": marker})
+        else:
+            missing.append({"path": str(path.relative_to(REPO_ROOT)),
+                            "marker": marker})
+    return {
+        "authorization_recorded": not missing,
+        "markers_found": found,
+        "markers_missing": missing,
+        "note": ("read from the authority file and the immutable task contract; "
+                 "the gate does not invent authorization and fails closed if the "
+                 "recorded authorization is absent"),
+    }
+
+
+# ── 1c. provider identity + worker execution readiness (post-key) ───
+
+def _latest_evidence_dirs(label: str) -> list:
+    base = REPO_ROOT / "audits" / "evidence"
+    return sorted(base.glob(f"*-{label}"), reverse=True)
+
+
+def check_provider_identity_and_readiness() -> dict:
+    """Consume this task's live-identity and bounded-smoke evidence.
+
+    Identity criterion: every intended provider's configured endpoint + API model
+    ID must be backed by evidence — a live ``GET /models`` catalogue where the
+    credential is accepted, or the provider's own authoritative documentation
+    where it is not. A mapping that exists only because it was typed is a FAIL.
+
+    Readiness criterion: every intended worker is either execution-ready, or its
+    non-readiness is recorded as an explicit external blocker with an owner
+    action. A silently non-executing worker is a FAIL.
+    """
+    probe_dirs = _latest_evidence_dirs("e3-provider-live-identity-probe")
+    smoke_dirs = _latest_evidence_dirs("e3-provider-bounded-smoke")
+    out = {
+        "identity_probe_evidence": str(probe_dirs[0]) if probe_dirs else None,
+        "bounded_smoke_evidence": str(smoke_dirs[0]) if smoke_dirs else None,
+        "found": bool(probe_dirs and smoke_dirs),
+    }
+    if not out["found"]:
+        out.update({"identity_verified": False, "readiness_recorded": False,
+                    "note": "no live-identity / bounded-smoke evidence bundle found"})
+        return out
+
+    probe = json.loads((probe_dirs[0] / "evidence.json").read_text(encoding="utf-8"))
+    smoke = json.loads((smoke_dirs[0] / "evidence.json").read_text(encoding="utf-8"))
+
+    providers = []
+    identity_ok = True
+    for key, entry in (probe.get("providers") or {}).items():
+        live = bool(entry.get("configured_endpoint_reachable")
+                    and entry.get("configured_model_observed"))
+        doc_backed = entry.get("authoritative_documentation_backed", False)
+        ok = live or doc_backed
+        identity_ok = identity_ok and ok
+        providers.append({
+            "provider": key,
+            "configured_endpoint": entry.get("configured_models_endpoint"),
+            "configured_api_model_id": entry.get("configured_api_model_id"),
+            "endpoint_reachable": entry.get("configured_endpoint_reachable"),
+            "model_observed_in_live_catalogue": entry.get("configured_model_observed"),
+            "documentation_backed": doc_backed,
+            "identity_verified": ok,
+        })
+
+    workers = []
+    from worker_registry import WorkerRegistry
+    roster = WorkerRegistry()
+    readiness_ok = True
+    for wid in CREDENTIAL_MISSING_WORKERS:
+        w = roster.get_worker(wid) or {}
+        v = w.get("verified_2026_09_24") or {}
+        recorded = bool(v.get("routable_reason"))
+        readiness_ok = readiness_ok and recorded
+        workers.append({
+            "worker_id": wid,
+            "routable": bool(w.get("routable")),
+            "smoke_test": w.get("smoke_test"),
+            "smoke_http_status": v.get("smoke_http_status"),
+            "provider_error": v.get("provider_error"),
+            "external_blocker_recorded": recorded,
+            "routable_reason": v.get("routable_reason"),
+        })
+
+    out.update({
+        "identity_verified": identity_ok,
+        "readiness_recorded": readiness_ok,
+        "providers": providers,
+        "workers": workers,
+        "completed_workers": smoke.get("completed"),
+        "failed_workers": smoke.get("failed"),
+        "note": ("credential presence alone is never treated as routable or "
+                 "qualified: a provider whose credential is rejected is recorded "
+                 "as a documentation-backed identity with an external blocker"),
+    })
+    return out
 
 
 # ── 2. regression suites (consumes evidence_runner output) ──────────
@@ -267,6 +405,63 @@ def check_google_image(evidence_dir: Path) -> dict:
                  "vision role is qualified only from recorded evidence"),
     })
     return out
+
+
+# ── 4b. Google image real-dispatch resolution (evidence-derived) ────
+
+GOOGLE_REPEAT_SERIES = (REPO_ROOT / "audits" / "evidence"
+                        / "2026-09-24T01-44-32Z-e3-google-image-repeat-series")
+
+
+def check_google_image_resolution() -> dict:
+    """Derive the Google image criterion from recorded evidence.
+
+    Criterion text (unchanged): *Google image worker real-dispatch failure
+    resolved (not intermittent)*. The literal reading is used: the criterion is
+    satisfied only if the recorded repeat series observed no recurrence.
+    """
+    ev = GOOGLE_REPEAT_SERIES / "evidence.json"
+    if not ev.exists():
+        return {"found": False, "path": str(ev),
+                "criterion_satisfied": False,
+                "note": "repeat-series evidence not found — criterion fails closed"}
+    report = json.loads(ev.read_text(encoding="utf-8"))
+    summary = report.get("summary") or {}
+    outcomes = summary.get("outcome_counts") or {}
+    no_image = summary.get("no_image_part_in_response_count")
+    if no_image is None:
+        no_image = outcomes.get("no_image_part_in_response", 0)
+    executed = summary.get("calls_attempted")
+    rate = summary.get("no_image_part_in_response_rate") or {}
+    if isinstance(rate, dict):
+        rate = rate.get("rate")
+    finish_reasons = ((report.get("diagnosis") or {})
+                      .get("provider_signals_on_recurrence") or {}) \
+        .get("finish_reason_counts") or {}
+    return {
+        "found": True,
+        "path": str(ev),
+        "evidence_sha256": _sha256_file(ev),
+        "dispatches_executed": executed,
+        "outcome_counts": outcomes,
+        "observed_recurrences": no_image,
+        "observed_rate": rate,
+        "recurrence_finish_reasons": finish_reasons,
+        "root_cause_attributed": bool(finish_reasons),
+        "root_cause_note": ("every recurrence carried the provider's own "
+                            "finishReason IMAGE_RECITATION with an empty part list "
+                            "— a provider content-side stop, not an adapter or "
+                            "transport failure"),
+        "criterion_text": "Google image worker real-dispatch failure resolved (not intermittent)",
+        "criterion_satisfied": no_image == 0,
+        "note": ("the literal criterion is NOT satisfied while a recurrence is "
+                 "observed. The recurrence is attributed and bounded, the adapter "
+                 "request shape is protocol-conformant, and a bounded retry policy "
+                 "exists — but 'not intermittent' is a factual claim the evidence "
+                 "does not support, so the criterion stays unmet and is reported "
+                 "to the owner as a re-scoping question rather than silently "
+                 "relaxed."),
+    }
 
 
 # ── 5. worker qualification (evidence-derived, read-only) ───────────
@@ -467,13 +662,20 @@ def main() -> int:
                 else _latest_regression_evidence())
 
     credentials = check_credentials()
+    authorization = check_owner_authorization()
+    provider_state = check_provider_identity_and_readiness()
     regression = check_regression_evidence(reg_path)
     rehearsal = check_rehearsal_evidence(
         REPO_ROOT / "audits" / "evidence"
         / "2026-09-23T21-32-41Z-e3-production-execution-rehearsal")
+    rehearsal_latest = check_rehearsal_evidence(
+        _latest_evidence_dirs("e3-production-execution-rehearsal")[0]
+        if _latest_evidence_dirs("e3-production-execution-rehearsal")
+        else REPO_ROOT / "audits" / "evidence" / "(none)")
     google = check_google_image(
         REPO_ROOT / "audits" / "evidence"
         / "2026-09-23T21-49-21Z-e3-google-image-diagnosis")
+    google_resolution = check_google_image_resolution()
     qualification = check_qualification(RUNTIME_ROOT / "orchestration.db")
     isolation = check_isolation_and_boundary()
     rollback = check_rollback()
@@ -481,15 +683,21 @@ def main() -> int:
     # ── enablement rule (contract §enablement) ──────────────────────
     condition_a = credentials["all_seven_configured"]
     # criterion (b): every readiness criterion objectively satisfied by evidence
-    # from this run. Evaluated on the criteria that are within this task's power
-    # to satisfy now; the Google image worker is recorded as NOT SETTLED, which
-    # keeps (b) unmet.
+    # from this run.
     criteria = {
         "E1/E2/E3/E4/E5 + queue/bridge regressions pass": regression["all_suites_pass"],
-        "real-path production rehearsal evidenced (multi-worker, consumed)":
+        "real-path production rehearsal evidenced (multi-worker)":
             rehearsal["found"] and not rehearsal["checks_failed"],
+        "latest real-path production rehearsal (this task) has no failed check":
+            rehearsal_latest["found"] and not rehearsal_latest["checks_failed"],
+        "provider identity verified for every intended provider "
+        "(live catalogue or authoritative documentation)":
+            provider_state.get("identity_verified") is True,
+        "every non-executing provider worker recorded as an explicit external "
+        "blocker (no silent gap)":
+            provider_state.get("readiness_recorded") is True,
         "Google image worker real-dispatch failure resolved (not intermittent)":
-            False,  # recorded as intermittent with an open trigger
+            google_resolution["criterion_satisfied"],
         "no unresolved critical integrity/privacy/safety defect":
             isolation["stores_unchanged_including_wal_sidecars"]
             and isolation["all_production_writes_refused"]
@@ -499,19 +707,24 @@ def main() -> int:
         "rollback/recovery available": rollback["rollback_available"],
     }
     condition_b = all(criteria.values())
-    # criterion (c): explicit owner authorization for enablement at this point.
-    # The authority defers local Stage 2 completion until after the remaining
-    # provider credentials are configured and the gates are re-run, and the
-    # immutable task contract states the standing conditional approval applies
-    # only once credentials are confirmed configured.
-    condition_c_satisfied = False
+    # criterion (c): explicit owner authorization for enablement at this point,
+    # read from the authority file / immutable task contract (never assumed), and
+    # only applicable once the recorded precondition (all intended provider
+    # credentials configured) holds.
+    condition_c_satisfied = bool(authorization["authorization_recorded"]
+                                 and condition_a)
     condition_c_note = (
-        "explicit owner authorization to enable at this point is recorded only "
-        "conditional on the provider credentials being confirmed configured; "
-        "the authority defers local Stage 2 completion until after the remaining "
-        "provider credentials are configured on 2026-09-24 and the gates are "
-        "re-run. Since none of the seven provider credentials is configured, "
-        "the authorization does not yet apply and the condition is NOT satisfied")
+        "the authority records the owner's standing conditional approval plus the "
+        "instruction to re-run the gates after the credentials are configured and "
+        "complete local Stage 2 if they pass, and this task's immutable contract "
+        "records that the owner authorization for LOCAL E3 Stage 2 is now explicit "
+        "and applies if and only if every objective readiness gate passes. "
+        "Authorization markers found: " + str(len(authorization["markers_found"])) +
+        "/" + str(len(AUTHORIZATION_MARKERS)) + ". Precondition (all intended "
+        "provider credentials configured) satisfied: " + str(condition_a) + ".")
+    if authorization["markers_missing"]:
+        condition_c_note += (" MISSING MARKERS: " +
+                             str(authorization["markers_missing"]))
 
     enable = bool(condition_a and condition_b and condition_c_satisfied)
     blocked_reasons = []
@@ -524,7 +737,21 @@ def main() -> int:
         unmet = [k for k, v in criteria.items() if not v]
         blocked_reasons.append("condition (b) failed: unmet readiness "
                                "criteria: " + "; ".join(unmet))
-    blocked_reasons.append("condition (c) not satisfied: " + condition_c_note)
+    if not condition_c_satisfied:
+        blocked_reasons.append("condition (c) not satisfied: " + condition_c_note)
+    # Non-gating external provider blockers are recorded even when they do not
+    # trip a readiness criterion: they are owner/resolver work, and recording
+    # them keeps the surface honest.
+    external_blockers = [
+        {"worker_id": w["worker_id"], "http_status": w.get("smoke_http_status"),
+         "provider_error": w.get("provider_error"),
+         "routable_reason": w.get("routable_reason")}
+        for w in (provider_state.get("workers") or []) if not w.get("routable")]
+    if external_blockers:
+        blocked_reasons.append(
+            "EXTERNAL PROVIDER BLOCKERS (non-gating readiness findings): " +
+            "; ".join(f"{b['worker_id']}: HTTP {b['http_status']} "
+                      f"{b['provider_error']}" for b in external_blockers))
 
     finished = datetime.now(timezone.utc)
     report = {
@@ -539,9 +766,13 @@ def main() -> int:
         "orchestration_db": str(RUNTIME_ROOT / "orchestration.db"),
         "checks": {
             "credentials": credentials,
+            "owner_authorization": authorization,
+            "provider_identity_and_readiness": provider_state,
             "regression_suites": regression,
             "production_rehearsal_evidence": rehearsal,
+            "latest_production_rehearsal_evidence": rehearsal_latest,
             "google_image_worker": google,
+            "google_image_resolution": google_resolution,
             "worker_qualification": qualification,
             "rehearsal_evidence_isolation_and_boundary": isolation,
             "rollback_and_recovery": rollback,
@@ -549,10 +780,11 @@ def main() -> int:
         "enablement_rule": {
             "condition_a_credentials_configured": condition_a,
             "condition_b_all_readiness_criteria_satisfied": condition_b,
-            "condition_c_explicit_owner_authorization_for_this_step": False,
+            "condition_c_explicit_owner_authorization_for_this_step": condition_c_satisfied,
             "condition_c_note": condition_c_note,
             "criteria": criteria,
         },
+        "external_provider_blockers": external_blockers,
         "stage2_enabled": enable,
         "stage2_state": "ENABLED" if enable else "NOT ENABLED",
         "remaining_conditions": blocked_reasons,
@@ -572,7 +804,17 @@ def main() -> int:
         "stage2_state": report["stage2_state"],
         "condition_a_credentials": condition_a,
         "condition_b_criteria": condition_b,
+        "condition_c_owner_authorization": condition_c_satisfied,
         "still_missing_workers": credentials["still_missing_workers"],
+        "provider_identity_verified": provider_state.get("identity_verified"),
+        "provider_workers_execution_ready": [
+            w["worker_id"] for w in (provider_state.get("workers") or [])
+            if w.get("routable")],
+        "provider_workers_blocked": [
+            w["worker_id"] for w in (provider_state.get("workers") or [])
+            if not w.get("routable")],
+        "google_image_criterion_satisfied":
+            google_resolution["criterion_satisfied"],
         "regression_all_pass": regression["all_suites_pass"],
         "remaining_conditions": blocked_reasons,
     }, indent=2))
@@ -642,8 +884,70 @@ def _render_md(report: dict) -> str:
         "|---|---|---|---|",
     ]
     for m in cred["previously_configured_workers"]:
-        lines.append(f"| {m['worker_id']} | {m['provider']} | "
+        lines.append(f"| {m['worker_id']} | {m.get('provider')} | "
                      f"{m['credential_present']} | {m['auth_source']} |")
+
+    ps = c.get("provider_identity_and_readiness") or {}
+    lines += [
+        "",
+        "## 1b. Provider identity + live execution readiness (post-key)",
+        "",
+        f"- identity-probe evidence: `{ps.get('identity_probe_evidence')}`",
+        f"- bounded-smoke evidence: `{ps.get('bounded_smoke_evidence')}`",
+        f"- provider identity verified for every intended provider: "
+        f"**{ps.get('identity_verified')}**",
+        f"- every non-executing worker recorded as an explicit external blocker: "
+        f"**{ps.get('readiness_recorded')}**",
+        f"- workers that returned a real completion: `{ps.get('completed_workers')}`",
+        f"- workers refused by their provider: `{ps.get('failed_workers')}`",
+        "",
+        "| Provider | Configured endpoint | Configured API model id | Endpoint reachable | "
+        "Model in live catalogue | Documentation-backed | Identity verified |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for p in ps.get("providers") or []:
+        lines.append(f"| {p['provider']} | `{p['configured_endpoint']}` | "
+                     f"`{p['configured_api_model_id']}` | {p['endpoint_reachable']} | "
+                     f"{p['model_observed_in_live_catalogue']} | "
+                     f"{p['documentation_backed']} | {p['identity_verified']} |")
+    lines += [
+        "",
+        "| Worker | Routable | Smoke | HTTP | Provider error | Blocker recorded |",
+        "|---|---|---|---|---|---|",
+    ]
+    for w in ps.get("workers") or []:
+        lines.append(f"| {w['worker_id']} | {w['routable']} | {w['smoke_test']} | "
+                     f"{w.get('smoke_http_status')} | {w.get('provider_error')} | "
+                     f"{w.get('external_blocker_recorded')} |")
+
+    oa = c.get("owner_authorization") or {}
+    lines += [
+        "",
+        "## 1c. Recorded owner authorization (read from the authority, never assumed)",
+        "",
+        f"- authorization recorded: **{oa.get('authorization_recorded')}**",
+        f"- markers found: {len(oa.get('markers_found') or [])} / "
+        f"{len(AUTHORIZATION_MARKERS)}",
+    ]
+    for m in oa.get("markers_found") or []:
+        lines.append(f"  - `{m['path']}`: \"{m['marker']}\"")
+
+    gr = c.get("google_image_resolution") or {}
+    lines += [
+        "",
+        "## 1d. Google image real-dispatch resolution (evidence-derived)",
+        "",
+        f"- evidence: `{gr.get('path')}` (sha256 `{gr.get('evidence_sha256')}`)",
+        f"- dispatches executed: {gr.get('dispatches_executed')}; "
+        f"outcomes: `{gr.get('outcome_counts')}`",
+        f"- observed recurrences: {gr.get('observed_recurrences')} "
+        f"(rate {gr.get('observed_rate')})",
+        f"- recurrence finish reasons: `{gr.get('recurrence_finish_reasons')}`",
+        f"- root cause attributed: **{gr.get('root_cause_attributed')}**",
+        f"- criterion `{gr.get('criterion_text')}` satisfied: "
+        f"**{gr.get('criterion_satisfied')}**",
+        f"- {gr.get('note')}",
+    ]
 
     lines += [
         "",

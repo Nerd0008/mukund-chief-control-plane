@@ -8,8 +8,8 @@
 - Canonical source: `status/canonical-status.json` (schema v1.0)
 - Generation command: `python scripts/status_render.py`
 - Verification command: `python scripts/status_verify.py`
-- Status as of (newest incorporated evidence): **2026-09-24T15:36:57Z**
-- Newest evidence run: `2026-09-24T15-35-35Z-canonical-status-verification` — **PASS**
+- Status as of (newest incorporated evidence): **2026-09-24T21:10:44Z**
+- Newest evidence run: `2026-09-24T21-09-18Z-e3-provider-verification-regression` — **PASS (22 suites / 606 collected / 606 passed / 0 failed)**
 
 ## 1. Code and release identity
 
@@ -17,8 +17,8 @@
 |---|---|
 | Repository | https://github.com/Nerd0008/mukund-chief-control-plane.git |
 | Branch | main |
-| Authoring HEAD | `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660` |
-| Verified evidence SHA | `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660` |
+| Authoring HEAD | `6cbb573aaaf90cd32bd69b819c96d38a1cae642e` |
+| Verified evidence SHA | `6cbb573aaaf90cd32bd69b819c96d38a1cae642e` |
 | Supported Python | 3.11.16 |
 | Unsupported | 3.14.x |
 | Dependency manifest / lock | `requirements.txt` / `requirements.lock` |
@@ -42,7 +42,7 @@ separate states and are never collapsed into one.
 - **E2** — 45 collected / 45 passed (suite "E2 governor / provider adapters").
   - Same machine-local runtime-root caveat as E1.
 - **E3** — E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run.
-  - E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) is gated on the remaining absent provider credentials plus the owner's explicit step; the post-key readiness gate must not be re-staged until all intended credentials are present or the owner explicitly instructs.
+  - E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) remains gated: a recorded readiness criterion (Google image real-dispatch settled) is unmet and every newly-credentialed provider refused live dispatch at the billing/entitlement/auth layer, so provider-diverse routing cannot execute.
 - **E4** — 36 checks passed / 36 total, real_provider_calls = 0, live stores byte-identical.
   - evidence_kind = stubbed_provider_failure. A real provider outage -> real equivalent-worker failover has NOT been exercised and is not claimed (see production blocker `live-provider-failover-gap`).
 - **E5** — 36 checks passed / 36 total; safe-mode entry, owner override audit, recovery refusal/success and the bounded 3-dispatch convergence cap all asserted.
@@ -64,10 +64,10 @@ Source: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/ros
 
 - Suites: **22 run / 22 passed / 0 failed / 0 unavailable**
 - Tests: **606 collected / 606 passed / 0 failed**
-- Code SHA: `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660`
+- Code SHA: `6cbb573aaaf90cd32bd69b819c96d38a1cae642e`
 - Interpreter: 3.11.16 (CPython; the isolated pinned-interpreter reproducibility run remains recorded below)
-- Source: `audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json`
-- Prior runs, reported as measured and never silently rewritten: 21 suites / 583 collected / 583 passed at SHA e9d2195 in a clean isolated CPython 3.11.16 built from requirements.lock (audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json), and 21 suites / 579 collected / 579 passed at SHA 31eecdb (audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json). The count grew 579 -> 583 because the Codex identity contract replaced one incorrect exact-match test with five truthful-contract tests, and 583 -> 606 because this task added the 23-test canonical-status consistency suite.
+- Source: `audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json`
+- Current run: 22 suites / 606 collected / 606 passed / 0 failed at SHA 6cbb573 (this task's post-adapter-correction, post-reconciliation run). Prior runs, reported as measured and never silently rewritten: 22 suites / 606 / 606 at SHA 63cda9b9 (audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json), 21 suites / 583 collected / 583 passed at SHA e9d2195 in a clean isolated CPython 3.11.16 built from requirements.lock (audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json), and 21 suites / 579 collected / 579 passed at SHA 31eecdb (audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json). The count grew 579 -> 583 because the Codex identity contract replaced one incorrect exact-match test with five truthful-contract tests, and 583 -> 606 because the canonical-status consistency suite (23 tests) was added.
 
 ## 5. Career discovery state
 
@@ -85,8 +85,8 @@ Source: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/ros
 | B27 | Owner-Company Priority Watchlist Agent | BUILT + EVIDENCED (fixtures only; owner's real list not supplied) | additive discovery surface in the same funnel; flag gives prominence, never a bypass |
 
 - **Regional workers (B02-B05)** — BUILT + EVIDENCED: UK/Dubai/Japan/Singapore; all four Windows scheduled tasks registered and Ready; canonical workbook hashes unchanged; applications_submitted 0
-- **Scheduled orchestrator cutover** — **NOT COMPLETE / BLOCKED** (execution_error, 3/3 attempts): Recorded here as an evidenced open item, not as completed schedule work.
-  - Evidence: `audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/evidence.json`
+- **Scheduled orchestrator cutover** — **COMPLETE / PASS** (None, 1/1 attempts): Recorded from the recovery worker's committed evidence; supersedes the earlier parked/blocked record.
+  - Evidence: `audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json`
 
 Truth boundaries that hold:
 - Title matching is a prefilter, never an eligibility decision; the authoritative gates run after semantic classification and cannot be overridden by a model.
@@ -103,29 +103,27 @@ Truth boundaries that hold:
 
 Known open items:
 - The umbrella record `full-operational-build-2026-09-24` remains in running/ with no associated worker process, and poller.handle_task routes any task id containing "operational" to a handler that returns a hardcoded status with no execution evidence — it must not be read as evidence that its steps ran.
-- agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 is parked in blocked/ after exhausting its 3 permitted attempts.
+- agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 completed the scheduled cutover (23/23 checks); the earlier parked record is superseded.
 
 ## 7. Provider credential readiness
 
 - Roster workers: **10**
-- Credentials configured: **6 / 10** (4 absent)
-- Absent workers: `longcat-2.0`, `minimax-m3`, `step-37-flash`, `tencent-hunyuan-hy3`
-- Present interfaces: codex-cli (auth mode chatgpt), deepseek-v41-flash (direct API), google image worker / gemini (intermittent), mistral-small-4 (credential present 2026-09-24, model id unverified), glm-53-flash (credential present 2026-09-24, endpoint/model unverified), qwen38-27b (credential present 2026-09-24, live model id unverified)
-- Routable: `codex-cli`, `deepseek-v41-flash`
-- Google image worker is routable but intermittent (one identical request returned no image part, the next returned a decodable 1024x1024 JPEG); the vision role is EVALUATING, not qualified. The four still-credential-less generic API workers are routable=false and are refused by the execution leg with 0 provider calls; the three newly credentialed workers (mistral-small-4, glm-53-flash, qwen38-27b) are not routable until their smoke test, live model-id/endpoint verification and qualification pass.
-- Owner record: `handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md` — Owner handover recording the manual configuration: Mistral (mistral-small-4), Qwen/Alibaba Model Studio (qwen38-27b) and GLM/Z.ai (glm-53-flash) stored in Windows Credential Manager; MiniMax, LongCat, StepFun and Tencent Hunyuan still to configure. Adapter model-id/endpoint corrections are explicitly deferred to the post-key verification run.
-- Source: `audits/evidence/2026-09-24T15-38-57Z-e3-credential-presence-probe/evidence.json` — Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-run at 2026-09-24T15:38:57Z after the owner's manual configuration; the earlier 2026-09-24T03:59:44Z probe recorded 7 absent. This artifact is deliberately git-ignored by the repository credential policy, so it is corroboration on the authoring host and is never required to exist in a clean clone; the committed owner record below is the durable evidence of the change. 'Credential present' is never read as routable, verified or qualified: the three newly credentialed workers have not had a smoke test, live model-id/endpoint verification or qualification, so they stay out of the routable set.
+- Credentials configured: **10 / 10** (0 absent)
+- Absent workers: 
+- Present interfaces: codex-cli (auth mode chatgpt), deepseek-v41-flash (direct API, live-verified), google image worker / gemini (routable; content-side intermittency attributed), mistral-small-4 (present; endpoint+model live-verified; provider refuses dispatch HTTP 429), glm-53-flash (present; Z.ai endpoint+model live-verified; provider refuses dispatch HTTP 429 balance), qwen38-27b (present; dashscope-intl endpoint+model live-verified; provider refuses dispatch HTTP 403 Unpurchased), longcat-2.0 (present; direct endpoint+model live-verified; provider refuses dispatch HTTP 402 quota), minimax-m3 (present; endpoint+model live-verified; provider refuses dispatch HTTP 402 balance), step-37-flash (present; StepFun global endpoint+model live-verified; provider refuses dispatch HTTP 402 quota), tencent-hunyuan-hy3 (present; TokenHub international endpoint+model documentation-derived; provider REJECTS the credential HTTP 401 code 401002)
+- Routable: `codex-cli`, `deepseek-v41-flash`, `google-nano-banana-2`
+- Routable = execution access + implemented adapter + passing smoke test. The three pre-existing workers are routable. All seven newly-credentialed generic API workers are routable=false with smoke_test='FAILED' and qualification='UNPROVEN': credential presence was never treated as routable or qualified, and each refusal is recorded with its exact provider-returned error. E2 linkage was exercised for all seven through the public governor.record_request() interface and every row was read back (status 'error').
+- Owner record: `handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md` — Owner handover recording the manual credential configuration. It is superseded on the credential count by the 2026-09-24T20:54:33Z presence probe (10/10 present) and is preserved as the historical record of the setup plus the explicitly deferred adapter corrections.
+- Source: `audits/evidence/2026-09-24T20-54-33Z-e3-credential-presence-probe/evidence.json` — Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-run at 2026-09-24T20:54:33Z: all seven remaining provider credentials are now present (still_missing_count = 0). This artifact is git-ignored by the repository credential policy, so it is corroboration on the authoring host and is never required to exist in a clean clone. The committed live-identity and bounded-smoke evidence below is the durable record.
 
 ## 8. Stage 2 state
 
-**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-23T22:53:53Z)
+**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:11:06Z)
 
 Failing conditions at the last verdict:
-- 4 of the 7 remaining provider credentials are still absent (3 configured 2026-09-24T15:38Z: mistral-small-4, glm-53-flash, qwen38-27b; absent: longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3)
-- Google image worker intermittency unresolved
-- owner authorization is conditional on the credential state and a fresh readiness run
+- condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)
 
-The credential state changed on 2026-09-24 (3 of 7 configured), so the earlier 0/7 deterministic park no longer describes the state. The post-key readiness sequence must not be re-staged until all intended credentials are present or the owner explicitly instructs; Stage 2 stays disabled meanwhile, and the earlier 0/7 park record is preserved rather than rewritten.
+The post-key sequence was executed in full on 2026-09-24 and the gate was re-run with the clean 22-suite regression. Conditions (a) all credentials configured and (c) recorded owner authorization are now SATISFIED (10/10 credentials present). Condition (b) is still unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') — the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. Re-staging requires that criterion to be resolved or explicitly re-scoped by the owner, and the provider accounts to serve traffic. The gate was not weakened to force a pass.
 
 ## 9. Deployment state
 
@@ -144,7 +142,7 @@ The credential state changed on 2026-09-24 (3 of 7 configured), so the earlier 0
 
 | ID | Blocker | Category | State | Owner action |
 |---|---|---|---|---|
-| `provider-credentials-absent` | Four of ten roster provider credentials are absent (3 of the 7 were configured by the owner on 2026-09-24) | credentials | OPEN | required |
+| `provider-execution-blocked` | All ten roster credentials are present but the seven newly-credentialed providers refuse live dispatch (billing / entitlement / quota / invalid key) | external_provider | OPEN | required |
 | `stage2-not-enabled` | E3 Stage 2 (production enablement) is not enabled | owner_approval | OPEN | required |
 | `live-provider-failover-gap` | No live-provider E4 failover / E5 provider-health recovery has been exercised | architecture | OPEN | required |
 | `deployment-cutover-decision` | Deployment architecture and VPS cutover are undecided and unauthorised | owner_approval | OPEN | required |
@@ -155,17 +153,17 @@ The credential state changed on 2026-09-24 (3 of 7 configured), so the earlier 0
 | `unattended-interactive-token` | Every Chief task runs only under the interactive user token | architecture | OPEN | required |
 | `log-rotation-retention` | Log rotation/retention is not implemented for all live log paths | architecture | OPEN | engineering |
 
-### `provider-credentials-absent` — Four of ten roster provider credentials are absent (3 of the 7 were configured by the owner on 2026-09-24)
+### `provider-execution-blocked` — All ten roster credentials are present but the seven newly-credentialed providers refuse live dispatch (billing / entitlement / quota / invalid key)
 
-- Blocks: live onboarding/verification of the remaining E3 provider workers and local Stage 2 completion
-- Evidence: `audits/evidence/2026-09-24T15-38-57Z-e3-credential-presence-probe/evidence.json`
-- Owner action: Provision the four remaining credentials locally, using approved local secret storage (never GitHub/chat/logs): longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3. Use `python scripts/set_provider_key.py --worker <id>`; verify with `python scripts/set_provider_key.py --check <id>` (or `--status` for 10/10).
+- Blocks: live execution of the seven generic API workers and therefore provider-diverse E3 routing; Tencent/Hy3 provider identity stays documentation-derived only
+- Evidence: `audits/evidence/2026-09-24T21-00-28Z-e3-provider-bounded-smoke/evidence.json`
+- Owner action: Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded'; GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased (purchase qwen3.8-27b); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002). Each worker stays routable=false meanwhile.
 
 ### `stage2-not-enabled` — E3 Stage 2 (production enablement) is not enabled
 
 - Blocks: production dispatch through the Executive Brain; the live-provider E4/E5 drill
 - Evidence: `audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/`
-- Owner action: Finish the remaining provider credentials first, then approve/execute the recorded post-key verification sequence (presence probe, readiness gate, full regression, bounded real-provider rehearsal, E4/E5 drills) and complete local Stage 2 only if every gate passes.
+- Owner action: The post-key verification sequence has now been executed (presence probe, live identity reconciliation, bounded smoke, full regression, bounded real-provider rehearsal, E4/E5 drills, readiness gate). Stage 2 stays disabled because a recorded readiness criterion is unmet (Google image real-dispatch not settled) and every newly-credentialed provider refused live dispatch. Owner decision required: resolve or re-scope the Google-image criterion and fund the provider accounts, then re-run the gate.
 
 ### `live-provider-failover-gap` — No live-provider E4 failover / E5 provider-health recovery has been exercised
 
@@ -261,16 +259,26 @@ unless the documented product scope requires it.
 
 ## 12. Unresolved unknowns
 
-- The trigger of the intermittent Google image no-image response is unknown; no stability claim is made and the vision role is not qualified.
+- The Google image no-image response recurred 2/9 with the provider's own finishReason IMAGE_RECITATION; what makes the provider's recitation filter fire on some identical prompts is unknown. No stability claim is made and the vision role is not qualified.
 - Reboot survival of the 7 non-Hermes_Gateway Chief tasks is UNKNOWN (a reboot was prohibited by the task stop conditions).
 - The Codex CLI served-model identity is UNKNOWN (provider reported as unknown; configured provider/model are recorded separately) and it exposes no usage figures.
-- Whether the scheduled-orchestrator cutover lane can be completed is unknown; it is parked after 3 permitted attempts.
 - The live-provider failover behaviour is unknown — never exercised.
+- Whether the six provider accounts can be funded/entitled so the stored keys serve traffic, and whether the Tencent key belongs to the correct TokenHub product, are owner/provider questions.
 
 ## 13. Evidence chronology (newest first)
 
 | At (UTC) | Evidence | Result | What |
 |---|---|---|---|
+| 2026-09-24T21:11:06Z | `2026-09-24T21-11-06Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (condition a PASS, condition b FAIL, condition c PASS) | E3 Stage 2 readiness gate re-run with the clean 22-suite regression: credentials 10/10 present; provider identity verified for every intended provider (6/7 live catalogue, 1/7 authoritative documentation); bounded real-provider rehearsal and E4/E5 drills consumed; regressions all pass; integrity isolation and rollback checks pass. Sole unmet criterion is the Google image real-dispatch condition. All seven newly-credentialed provider refusals are recorded as external blockers with their exact provider errors. |
+| 2026-09-24T21:10:44Z | `2026-09-24T21-09-18Z-e3-provider-verification-regression` | PASS 22 suites / 606 collected / 606 passed / 0 failed | Clean post-key regression at SHA 6cbb573: every E1/E2/E3/E4/E5 suite, the queue/bridge suites and the canonical-status consistency suite passed after the provider adapter and worker-registry corrections and the canonical-status reconciliation. |
+| 2026-09-24T21:06:25Z | `2026-09-24T21-06-25Z-e3-provider-live-identity-probe` | 6/7 LIVE-VERIFIED, 1/7 DOCUMENTATION-DERIVED | Bounded GET /models reconciliation: corrected the stale mappings (mistral-small-4 -> mistral-small-latest, lower-case minimax-m3 -> MiniMax-M3, CN dashscope -> dashscope-intl, api.stepfun.com -> api.stepfun.ai, BigModel CN -> Z.ai international, hunyuan-hy3 -> TokenHub international 'hy3'); LongCat direct API preserved as already correct. Read-only, 0 completion calls. |
+| 2026-09-24T21:04:19Z | `2026-09-24T21-04-19Z-e3-production-execution-rehearsal` | PASS - no failed check (7 bounded real provider calls) | Bounded real-provider E3 production rehearsal on the real execution leg at HEAD: planner-decomposed multi-worker plan, per-node deterministic verification, rejection -> repair -> re-verify, dependency-gated dispatch, content-stop stub scenario, production stores isolated. |
+| 2026-09-24T21:04:31Z | `2026-09-24T21-04-31Z-e4e5-real-path-drills` | PASS 36/36 (stubbed provider failures, real_provider_calls = 0) | E4/E5 real-path drill harness re-run: checkpoint -> failover -> handover, provider outage, malformed output, convergence enforcement, safe-mode entry, owner override and recovery. The harness has no live-provider mode, so no live-provider failover/recovery is claimed. |
+| 2026-09-24T21:02:05Z | `2026-09-24T21-02-05Z-post-keys-regression` | 22 suites / 21 passed (superseded by the clean post-update run) | First post-key regression run after the adapter corrections. The single failure was the status-consistency suite reporting that the new evidence bundles were not yet incorporated into the canonical status source - an authoring step, not a code regression. |
+| 2026-09-24T21:00:28Z | `2026-09-24T21-00-28Z-e3-provider-bounded-smoke` | 0/7 EXECUTION-READY - every provider refused dispatch | One bounded real completion per generic API worker (max_tokens=16, single attempt, no retries). All seven FAILED at the provider: mistral 429 rate limit, GLM 429 balance, Qwen 403 Unpurchased, LongCat 402 quota, MiniMax 402 balance, StepFun 402 quota, Tencent 401 invalid key. E2 rows recorded for all seven via governor.record_request(). No credential value printed, logged or stored. |
+| 2026-09-24T20:33:25Z | `2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover` | PASS 23/23 | Career recovery worker: scheduled launcher now invokes the unified high-recall orchestrator with a live-web requirement; the earlier parked cutover lane is superseded. |
+| 2026-09-24T20:54:33Z | `2026-09-24T20-54-33Z-e3-credential-presence-probe` | 7 OF 7 CONFIGURED - 0 STILL MISSING | Presence-only credential probe: all seven remaining provider credentials present in Windows Credential Manager. 0 network calls, 0 provider calls, no credential value read or stored. |
+| 2026-09-24T20:47:43Z | `2026-09-24T20-47-43Z-e3-credential-presence-probe` | 5 OF 7 CONFIGURED - 2 STILL MISSING | Presence-only credential probe during this task: mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0 and minimax-m3 present; step-37-flash and tencent-hunyuan-hy3 absent. 0 network calls, 0 provider calls, no credential value read or stored. |
 | 2026-09-24T15:38:58Z | `2026-09-24T15-38-57Z-e3-credential-presence-probe` | 3 OF 7 CONFIGURED — 4 STILL MISSING | Presence-only credential probe after the owner's manual configuration: mistral-small-4, glm-53-flash and qwen38-27b present; longcat-2.0, minimax-m3, step-37-flash and tencent-hunyuan-hy3 absent. 0 network calls, 0 provider calls, no credential value read or stored. Local-only artifact (git-ignored by the repository credential policy); the durable record is the owner handover referenced by provider_credentials.owner_record. |
 | 2026-09-24T15:36:57Z | `2026-09-24T15-35-35Z-canonical-status-verification` | PASS | Canonical status verification: 22 suites / 606 collected / 606 passed at SHA 63cda9b, including the new 23-test canonical-status consistency suite; the generated executive tracker and the derived status blocks verified against the canonical status source. |
 | 2026-09-24T15:17:52Z | `2026-09-24T15-45-00Z-isolated-release-reproducibility` | PASS | Release reproducibility + Codex identity portability; 21 suites / 583 collected / 583 passed at SHA e9d2195. |

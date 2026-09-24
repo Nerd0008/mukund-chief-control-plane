@@ -27,23 +27,35 @@ GOV_DIR = Path(__file__).parent
 # ─── Provider registry ───────────────────────────────────────────
 # Base URLs and model IDs. Auth is resolved per-worker at runtime
 # through the key_resolver callback (credential manager / env).
+#
+# 2026-09-24 (post-credential reconciliation): every endpoint and model ID below
+# is now backed by bounded live evidence — a GET /models discovery run recorded
+# in audits/evidence/*-e3-provider-live-identity-probe. Nothing here is derived
+# from a marketing name. See each provider's `identity_evidence` note.
 
 PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
     "mistral": {
         "base_url": "https://api.mistral.ai/v1",
         "models_endpoint": "https://api.mistral.ai/v1/models",
         "chat_endpoint": "https://api.mistral.ai/v1/chat/completions",
-        "api_model_id": "mistral-small-4",
+        # Correction 2026-09-24: "mistral-small-4" is NOT an API model ID — it
+        # does not appear in the live catalogue (46 models observed).
+        # `mistral-small-latest` is observed and is the current Small 4 family
+        # alias chosen during owner setup; `mistral-small-2603` is the dated pin.
+        "api_model_id": "mistral-small-latest",
         "display_name": "Mistral Small 4",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "MISTRAL_API_KEY",
         "credential_target": "mistral",
     },
     "glm": {
-        "base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "models_endpoint": "https://open.bigmodel.cn/api/paas/v4/models",
-        "chat_endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        "api_model_id": "glm-5.3-flash",
+        # Correction 2026-09-24: Z.ai international (api.z.ai) is the platform
+        # for this account; the legacy BigModel CN endpoint also answered 200,
+        # but international is the intended route for a UK operator.
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "models_endpoint": "https://api.z.ai/api/paas/v4/models",
+        "chat_endpoint": "https://api.z.ai/api/paas/v4/chat/completions",
+        "api_model_id": "glm-5.3-flash",  # observed in the live catalogue
         "display_name": "GLM-5.3 Flash",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "GLM_API_KEY",
@@ -53,43 +65,58 @@ PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "base_url": "https://api.minimax.io/v1",
         "models_endpoint": "https://api.minimax.io/v1/models",
         "chat_endpoint": "https://api.minimax.io/v1/chat/completions",
-        "api_model_id": "minimax-m3",
+        # Correction 2026-09-24: the live model ID is case-sensitive
+        # `MiniMax-M3`; the lower-case "minimax-m3" was not in the catalogue.
+        "api_model_id": "MiniMax-M3",
         "display_name": "MiniMax M3",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "MINIMAX_API_KEY",
         "credential_target": "minimax",
     },
     "stepfun": {
-        "base_url": "https://api.stepfun.com/v1",
-        "models_endpoint": "https://api.stepfun.com/v1/models",
-        "chat_endpoint": "https://api.stepfun.com/v1/chat/completions",
-        "api_model_id": "step-3.7-flash",
+        # Correction 2026-09-24: the stored credential is a StepFun *global*
+        # account key. api.stepfun.com (CN) rejected it with invalid_api_key;
+        # api.stepfun.ai answered 200 with 16 models.
+        "base_url": "https://api.stepfun.ai/v1",
+        "models_endpoint": "https://api.stepfun.ai/v1/models",
+        "chat_endpoint": "https://api.stepfun.ai/v1/chat/completions",
+        "api_model_id": "step-3.7-flash",  # observed in the live catalogue
         "display_name": "Step 3.7 Flash",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "STEP_API_KEY",
         "credential_target": "stepfun",
     },
     "qwen": {
-        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-        "models_endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
-        "chat_endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-        "api_model_id": "qwen3.8-27b",
+        # Correction 2026-09-24: the stored credential is an Alibaba Model
+        # Studio *international* key. The CN dashscope host rejected it with
+        # 401 invalid_api_key; dashscope-intl answered 200 with 172 models.
+        "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        "models_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
+        "chat_endpoint": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "api_model_id": "qwen3.8-27b",  # observed in the live catalogue
         "display_name": "Qwen3.8-27B",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "DASHSCOPE_API_KEY",
         "credential_target": "qwen",
     },
     "hunyuan": {
-        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
-        "models_endpoint": "https://api.hunyuan.cloud.tencent.com/v1/models",
-        "chat_endpoint": "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
-        "api_model_id": "hunyuan-hy3",
+        # Correction 2026-09-24: Tencent's international LLM gateway is
+        # TokenHub (documented base https://tokenhub-intl.tencentcloudmaas.com/v1,
+        # Singapore/global scope). The legacy api.hunyuan.cloud.tencent.com and
+        # api.lkeap.cloud.tencent.com hosts are the deprecated CN routes and did
+        # not accept this credential. Documented Hy3 model ID is `hy3`.
+        "base_url": "https://tokenhub-intl.tencentcloudmaas.com/v1",
+        "models_endpoint": "https://tokenhub-intl.tencentcloudmaas.com/v1/models",
+        "chat_endpoint": "https://tokenhub-intl.tencentcloudmaas.com/v1/chat/completions",
+        "api_model_id": "hy3",
         "display_name": "Tencent Hunyuan Hy3",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "HUNYUAN_API_KEY",
         "credential_target": "hunyuan",
     },
     "longcat": {
+        # Verified correct 2026-09-24 and intentionally preserved: the direct
+        # LongCat platform endpoint answered 200 with `LongCat-2.0` observed.
         "base_url": "https://api.longcat.chat/openai",
         "models_endpoint": "https://api.longcat.chat/openai/v1/models",
         "chat_endpoint": "https://api.longcat.chat/openai/v1/chat/completions",
@@ -184,6 +211,49 @@ def _read_from_credential_manager(target: str):
                 return None
     finally:
         advapi32.CredFree(cred_ptr)
+
+
+def _sanitize_error_body(body: str, status) -> Optional[str]:
+    """Short, credential-free excerpt of a provider error body.
+
+    Authentication failures are never persisted verbatim: some providers echo a
+    partially masked key back in the message. For those statuses only the
+    provider's own short error code/type is kept.
+    """
+    if not body:
+        return None
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError:
+        return None
+
+    err = data.get("error")
+    if status in (401, 403):
+        if isinstance(err, dict):
+            for field in ("code", "type"):
+                val = err.get(field)
+                if isinstance(val, str) and val:
+                    return f"code={val}"[:120]
+            return "auth_error"
+        return "auth_error"
+    if isinstance(err, dict):
+        msg = err.get("message") or err.get("code") or err.get("type")
+    elif isinstance(err, str):
+        msg = err
+    else:
+        msg = data.get("message") or data.get("msg")
+    if not msg:
+        return None
+    text = str(msg).replace("\n", " ").strip()
+    # mask any token that mixes letters and digits at length (credential-shaped)
+    safe = []
+    for token in text.split(" "):
+        if len(token) > 12 and any(c.isdigit() for c in token) \
+                and any(c.isalpha() for c in token):
+            safe.append("[redacted]")
+        else:
+            safe.append(token)
+    return " ".join(safe)[:300] or None
 
 
 class GenericOpenAIAdapter:
@@ -360,10 +430,15 @@ class GenericOpenAIAdapter:
             "status": "COMPLETED" if status == 200 and content is not None else "FAILED",
             "provider": self.provider_key,
             "model": response_model or model,
+            # raw provider-returned model field: None means the provider did not
+            # confirm the served model (e.g. the request failed), so it must never
+            # be treated as identity confirmation.
+            "provider_returned_model": response_model,
             "content": content,
             "finish_reason": finish_reason,
             "usage": usage,
             "error": error,
+            "provider_error_body": _sanitize_error_body(body, status),
             "exit_code": 0 if status == 200 else status,
             "runtime_s": elapsed,
             "response_headers": {
