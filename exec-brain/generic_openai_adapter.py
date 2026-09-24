@@ -90,14 +90,14 @@ PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "credential_target": "hunyuan",
     },
     "longcat": {
-        "base_url": "https://inference-api.nousresearch.com/v1",
-        "models_endpoint": "https://inference-api.nousresearch.com/v1/models",
-        "chat_endpoint": "https://inference-api.nousresearch.com/v1/chat/completions",
-        "api_model_id": "longcat-2.0",
+        "base_url": "https://api.longcat.chat/openai",
+        "models_endpoint": "https://api.longcat.chat/v1/models",
+        "chat_endpoint": "https://api.longcat.chat/openai/v1/chat/completions",
+        "api_model_id": "LongCat-2.0",
         "display_name": "LongCat 2.0",
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
-        "env_var": "NOUS_API_KEY",
-        "credential_target": "nous",
+        "env_var": "LONGCAT_API_KEY",
+        "credential_target": "longcat",
     },
 }
 
