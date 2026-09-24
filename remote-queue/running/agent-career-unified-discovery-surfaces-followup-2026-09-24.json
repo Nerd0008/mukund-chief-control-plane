@@ -25,5 +25,26 @@
     "No fabricated jobs or source provenance.",
     "Do not weaken deterministic owner/eligibility gates."
   ],
-  "notes": "Owner clarified that the redesign should apply to all job-search agents. The running prerequisite already covers UK/Dubai/Japan/Singapore regional agents and Company Watch. This successor closes the remaining discovery surfaces without modifying the running contract."
+  "notes": "Owner clarified that the redesign should apply to all job-search agents. The running prerequisite already covers UK/Dubai/Japan/Singapore regional agents and Company Watch. This successor closes the remaining discovery surfaces without modifying the running contract.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T05:40:05.889472Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
