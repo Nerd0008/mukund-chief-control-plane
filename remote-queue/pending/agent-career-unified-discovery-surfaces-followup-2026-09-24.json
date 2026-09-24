@@ -1,0 +1,29 @@
+{
+  "task_id": "agent-career-unified-discovery-surfaces-followup-2026-09-24",
+  "created_at": "2026-09-24T04:54:00Z",
+  "objective": "After the high-recall semantic discovery task completes, extend the same discovery/funnel contract to every remaining job-discovery surface not explicitly owned by that running contract: Recruiter/Intermediary Watch (B11), LinkedIn Job Discovery intake (B19), and any future read-only discovery source. All sources must normalize into one candidate schema and pass through the same semantic triage, deterministic eligibility, dedupe, provenance and funnel-metrics layers before tracker/Chief handoff.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-career-high-recall-semantic-discovery-2026-09-24 must reach a truthful terminal state.",
+    "Do not edit or race the currently running high-recall discovery task."
+  ],
+  "allowed_scope": [
+    "Reuse the semantic-discovery contract and common candidate schema produced by the prerequisite task; do not fork a second classifier.",
+    "Route Recruiter/Intermediary Watch findings through the same high-recall -> semantic triage -> hard eligibility -> dedupe -> handoff funnel.",
+    "Route LinkedIn read-only/exported job discoveries through the same funnel. Do not add LinkedIn account automation, scraping, browser control, posting, messaging or applications.",
+    "Make source provenance explicit so the same job from regional scan, Company Watch, recruiter watch or LinkedIn collapses to one canonical candidate.",
+    "Expose per-source funnel metrics and rejection reasons so zero results are attributable by source and stage.",
+    "Add regression fixtures proving the same vacancy discovered by multiple sources dedupes to one candidate and that source provenance is preserved.",
+    "Keep canonical trackers unchanged during engineering acceptance and update state/tracker docs truthfully."
+  ],
+  "stop_conditions": [
+    "No external mutations, applications, messages or recruiter contact.",
+    "No browser/GUI automation or LinkedIn account/session access.",
+    "No fabricated jobs or source provenance.",
+    "Do not weaken deterministic owner/eligibility gates."
+  ],
+  "notes": "Owner clarified that the redesign should apply to all job-search agents. The running prerequisite already covers UK/Dubai/Japan/Singapore regional agents and Company Watch. This successor closes the remaining discovery surfaces without modifying the running contract."
+}
