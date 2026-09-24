@@ -8,7 +8,7 @@
 - **Executive tracker (generated):** `status/executive-tracker.md`.
 - **Code identity at authoring:** `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660` (verified evidence SHA `63cda9b9c86a8b492c8c1cfad0e5e362da0b1660`).
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
-- **Provider credentials:** 3 / 10 present.
+- **Provider credentials:** 6 / 10 present.
 - **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED; cutover not authorised.
 - **Production blockers (10):** `provider-credentials-absent`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `battery-gating`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`, `log-rotation-retention`.
 - **Latest regression:** 22 suites / 606 tests, 606 passed, 0 failed, 0 unavailable.

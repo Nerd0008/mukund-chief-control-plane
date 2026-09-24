@@ -9,7 +9,7 @@ _Generated from `status/canonical-status.json` at as-of **2026-09-24T15:36:57Z**
 - **Newest evidence run:** `2026-09-24T15-35-35Z-canonical-status-verification` — **PASS** (finished 2026-09-24T15:36:57Z); regression **22 suites / 606 collected / 606 passed / 0 failed / 0 unavailable**.
 - **Executive Brain:** E1 ACTIVE; E2 ACTIVE; E3 IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED; E4 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES); E5 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES).
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
-- **Provider credentials:** 3 / 10 present (7 absent).
+- **Provider credentials:** 6 / 10 present (4 absent).
 - **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED (cutover not authorised; preflight GO with 1 owner-gated WARN).
 - **Production blockers (10), separate from implementation completion:** `provider-credentials-absent`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `battery-gating`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`, `log-rotation-retention`.
 - **Optional / feature-gated owner decisions (not release blockers):** 12 items — see `status/executive-tracker.md` section 11.

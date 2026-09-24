@@ -183,6 +183,8 @@ def render_executive_tracker(c: dict) -> str:
     add(f"- Present interfaces: {', '.join(pv['present_interfaces'])}")
     add(f"- Routable: {', '.join('`' + w + '`' for w in pv['routable_workers'])}")
     add(f"- {pv['routable_note']}")
+    if pv.get("owner_record"):
+        add(f"- Owner record: `{pv['owner_record']['path']}` — {pv['owner_record']['note']}")
     add(f"- Source: `{pv['source']['path']}` — {pv['source']['note']}")
     add("")
 

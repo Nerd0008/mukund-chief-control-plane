@@ -42,7 +42,7 @@ separate states and are never collapsed into one.
 - **E2** — 45 collected / 45 passed (suite "E2 governor / provider adapters").
   - Same machine-local runtime-root caveat as E1.
 - **E3** — E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run.
-  - E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) is gated on the seven absent provider credentials plus the owner's explicit step; the anti-loop directive forbids re-staging the credential-triggered gate while the credential count is 0/7.
+  - E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) is gated on the remaining absent provider credentials plus the owner's explicit step; the post-key readiness gate must not be re-staged until all intended credentials are present or the owner explicitly instructs.
 - **E4** — 36 checks passed / 36 total, real_provider_calls = 0, live stores byte-identical.
   - evidence_kind = stubbed_provider_failure. A real provider outage -> real equivalent-worker failover has NOT been exercised and is not claimed (see production blocker `live-provider-failover-gap`).
 - **E5** — 36 checks passed / 36 total; safe-mode entry, owner override audit, recovery refusal/success and the bounded 3-dispatch convergence cap all asserted.
@@ -108,23 +108,24 @@ Known open items:
 ## 7. Provider credential readiness
 
 - Roster workers: **10**
-- Credentials configured: **3 / 10** (7 absent)
-- Absent workers: `mistral-small-4`, `glm-53-flash`, `qwen38-27b`, `longcat-2.0`, `minimax-m3`, `step-37-flash`, `tencent-hunyuan-hy3`
-- Present interfaces: codex-cli (auth mode chatgpt), deepseek-v41-flash (direct API), google image worker / gemini (intermittent)
+- Credentials configured: **6 / 10** (4 absent)
+- Absent workers: `longcat-2.0`, `minimax-m3`, `step-37-flash`, `tencent-hunyuan-hy3`
+- Present interfaces: codex-cli (auth mode chatgpt), deepseek-v41-flash (direct API), google image worker / gemini (intermittent), mistral-small-4 (credential present 2026-09-24, model id unverified), glm-53-flash (credential present 2026-09-24, endpoint/model unverified), qwen38-27b (credential present 2026-09-24, live model id unverified)
 - Routable: `codex-cli`, `deepseek-v41-flash`
-- Google image worker is routable but intermittent (one identical request returned no image part, the next returned a decodable 1024x1024 JPEG); the vision role is EVALUATING, not qualified. The seven generic API workers are routable=false and are refused by the execution leg with 0 provider calls.
-- Source: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/credential-presence/evidence.json` — Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-confirmed at 2026-09-24T03:59:44Z.
+- Google image worker is routable but intermittent (one identical request returned no image part, the next returned a decodable 1024x1024 JPEG); the vision role is EVALUATING, not qualified. The four still-credential-less generic API workers are routable=false and are refused by the execution leg with 0 provider calls; the three newly credentialed workers (mistral-small-4, glm-53-flash, qwen38-27b) are not routable until their smoke test, live model-id/endpoint verification and qualification pass.
+- Owner record: `handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md` — Owner handover recording the manual configuration: Mistral (mistral-small-4), Qwen/Alibaba Model Studio (qwen38-27b) and GLM/Z.ai (glm-53-flash) stored in Windows Credential Manager; MiniMax, LongCat, StepFun and Tencent Hunyuan still to configure. Adapter model-id/endpoint corrections are explicitly deferred to the post-key verification run.
+- Source: `audits/evidence/2026-09-24T15-38-57Z-e3-credential-presence-probe/evidence.json` — Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-run at 2026-09-24T15:38:57Z after the owner's manual configuration; the earlier 2026-09-24T03:59:44Z probe recorded 7 absent. This artifact is deliberately git-ignored by the repository credential policy, so it is corroboration on the authoring host and is never required to exist in a clean clone; the committed owner record below is the durable evidence of the change. 'Credential present' is never read as routable, verified or qualified: the three newly credentialed workers have not had a smoke test, live model-id/endpoint verification or qualification, so they stay out of the routable set.
 
 ## 8. Stage 2 state
 
 **NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-23T22:53:53Z)
 
 Failing conditions at the last verdict:
-- 0/7 provider credentials configured
+- 4 of the 7 remaining provider credentials are still absent (3 configured 2026-09-24T15:38Z: mistral-small-4, glm-53-flash, qwen38-27b; absent: longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3)
 - Google image worker intermittency unresolved
-- owner authorization is conditional on the first two
+- owner authorization is conditional on the credential state and a fresh readiness run
 
-While the credential count is 0/7 this is a deterministic owner/external blocker. The credential-triggered readiness gate must not be re-staged until a verified credential-state change or an explicit owner instruction.
+The credential state changed on 2026-09-24 (3 of 7 configured), so the earlier 0/7 deterministic park no longer describes the state. The post-key readiness sequence must not be re-staged until all intended credentials are present or the owner explicitly instructs; Stage 2 stays disabled meanwhile, and the earlier 0/7 park record is preserved rather than rewritten.
 
 ## 9. Deployment state
 
@@ -143,7 +144,7 @@ While the credential count is 0/7 this is a deterministic owner/external blocker
 
 | ID | Blocker | Category | State | Owner action |
 |---|---|---|---|---|
-| `provider-credentials-absent` | Seven of ten roster provider credentials are absent | credentials | OPEN | required |
+| `provider-credentials-absent` | Four of ten roster provider credentials are absent (3 of the 7 were configured by the owner on 2026-09-24) | credentials | OPEN | required |
 | `stage2-not-enabled` | E3 Stage 2 (production enablement) is not enabled | owner_approval | OPEN | required |
 | `live-provider-failover-gap` | No live-provider E4 failover / E5 provider-health recovery has been exercised | architecture | OPEN | required |
 | `deployment-cutover-decision` | Deployment architecture and VPS cutover are undecided and unauthorised | owner_approval | OPEN | required |
@@ -154,17 +155,17 @@ While the credential count is 0/7 this is a deterministic owner/external blocker
 | `unattended-interactive-token` | Every Chief task runs only under the interactive user token | architecture | OPEN | required |
 | `log-rotation-retention` | Log rotation/retention is not implemented for all live log paths | architecture | OPEN | engineering |
 
-### `provider-credentials-absent` — Seven of ten roster provider credentials are absent
+### `provider-credentials-absent` — Four of ten roster provider credentials are absent (3 of the 7 were configured by the owner on 2026-09-24)
 
-- Blocks: live onboarding/verification of seven E3 provider workers and local Stage 2 completion
-- Evidence: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/credential-presence/evidence.json`
-- Owner action: Provision locally, using approved local secret storage (never GitHub/chat/logs): Mistral, GLM, Qwen, LongCat, MiniMax, Step, Tencent Hunyuan. Use `python scripts/set_provider_key.py --worker <id>`; verify with `python scripts/set_provider_key.py --status` (expect 10/10 present).
+- Blocks: live onboarding/verification of the remaining E3 provider workers and local Stage 2 completion
+- Evidence: `audits/evidence/2026-09-24T15-38-57Z-e3-credential-presence-probe/evidence.json`
+- Owner action: Provision the four remaining credentials locally, using approved local secret storage (never GitHub/chat/logs): longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3. Use `python scripts/set_provider_key.py --worker <id>`; verify with `python scripts/set_provider_key.py --check <id>` (or `--status` for 10/10).
 
 ### `stage2-not-enabled` — E3 Stage 2 (production enablement) is not enabled
 
 - Blocks: production dispatch through the Executive Brain; the live-provider E4/E5 drill
 - Evidence: `audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/`
-- Owner action: Configure the seven provider credentials first, then approve/execute the recorded post-key verification sequence and run the deterministic readiness gate; complete local Stage 2 only if every gate passes.
+- Owner action: Finish the remaining provider credentials first, then approve/execute the recorded post-key verification sequence (presence probe, readiness gate, full regression, bounded real-provider rehearsal, E4/E5 drills) and complete local Stage 2 only if every gate passes.
 
 ### `live-provider-failover-gap` — No live-provider E4 failover / E5 provider-health recovery has been exercised
 
@@ -270,6 +271,7 @@ unless the documented product scope requires it.
 
 | At (UTC) | Evidence | Result | What |
 |---|---|---|---|
+| 2026-09-24T15:38:58Z | `2026-09-24T15-38-57Z-e3-credential-presence-probe` | 3 OF 7 CONFIGURED — 4 STILL MISSING | Presence-only credential probe after the owner's manual configuration: mistral-small-4, glm-53-flash and qwen38-27b present; longcat-2.0, minimax-m3, step-37-flash and tencent-hunyuan-hy3 absent. 0 network calls, 0 provider calls, no credential value read or stored. Local-only artifact (git-ignored by the repository credential policy); the durable record is the owner handover referenced by provider_credentials.owner_record. |
 | 2026-09-24T15:36:57Z | `2026-09-24T15-35-35Z-canonical-status-verification` | PASS | Canonical status verification: 22 suites / 606 collected / 606 passed at SHA 63cda9b, including the new 23-test canonical-status consistency suite; the generated executive tracker and the derived status blocks verified against the canonical status source. |
 | 2026-09-24T15:17:52Z | `2026-09-24T15-45-00Z-isolated-release-reproducibility` | PASS | Release reproducibility + Codex identity portability; 21 suites / 583 collected / 583 passed at SHA e9d2195. |
 | 2026-09-24T14:45:37Z | `2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover` | FAIL (parked, execution_error) | Scheduled orchestrator cutover acceptance; one launcher line-ending check failed; no committed effect. |

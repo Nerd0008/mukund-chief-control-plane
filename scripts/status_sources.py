@@ -78,6 +78,7 @@ REFERENCED_EVIDENCE_PATHS = [
     "audits/evidence/2026-09-23T21-32-41Z-e3-production-execution-rehearsal/evidence.json",
     "career-ops/evidence/acceptance-20260924T001500Z.json",
     "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+    "handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md",
 ]
 
 SECRET_PATTERNS = [
@@ -229,6 +230,8 @@ def check_evidence_references() -> list[tuple[str, str]]:
         if not repo_path(rel).exists():
             problems.append(("FAIL", f"referenced evidence path does not exist: {rel}"))
     for entry in load_canonical().get("history", []):
+        if entry.get("local_only"):
+            continue
         rel = f"audits/evidence/{entry['id']}"
         if not repo_path(rel).exists():
             problems.append(("FAIL", f"history entry evidence directory does not exist: {rel}"))
@@ -250,17 +253,19 @@ def check_code_identity(canonical: dict) -> list[tuple[str, str]]:
 
 def check_latest_evidence(canonical: dict) -> list[tuple[str, str]]:
     problems: list[tuple[str, str]] = []
-    ev = read_json(canonical["code_identity"]["source"]["path"])
     latest = canonical["latest_evidence"]
-    if ev.get("code_sha") != latest.get("code_sha"):
-        problems.append(("FAIL", "latest_evidence.code_sha disagrees with the evidence artifact"))
-    if ev.get("code_sha") != canonical["code_identity"]["verified_evidence_sha"]:
-        problems.append(("FAIL", "code_identity.verified_evidence_sha disagrees with the evidence artifact"))
+    ev = read_json(latest["source"]["path"])
     finished = (ev.get("run_finished_utc") or "")[:19] + "Z"
     if finished != canonical["as_of"]:
         problems.append(("FAIL", f"as_of {canonical['as_of']} != newest evidence run_finished {finished}"))
     if latest.get("run_finished_utc") != canonical["as_of"]:
         problems.append(("FAIL", "latest_evidence.run_finished_utc disagrees with as_of"))
+    if latest.get("code_sha") and ev.get("code_sha") != latest["code_sha"]:
+        problems.append(("FAIL", "latest_evidence.code_sha disagrees with the evidence artifact"))
+    # The release identity is tied to its own evidence artifact.
+    civ = read_json(canonical["code_identity"]["source"]["path"])
+    if civ.get("code_sha") != canonical["code_identity"]["verified_evidence_sha"]:
+        problems.append(("FAIL", "code_identity.verified_evidence_sha disagrees with the evidence artifact"))
     return problems
 
 
@@ -305,8 +310,16 @@ def check_roster(canonical: dict) -> list[tuple[str, str]]:
 
 def check_credentials(canonical: dict) -> list[tuple[str, str]]:
     problems: list[tuple[str, str]] = []
-    ev = read_json(canonical["provider_credentials"]["source"]["path"])
     creds = canonical["provider_credentials"]
+    src_path = creds["source"]["path"]
+    if not repo_path(src_path).exists():
+        # The presence-probe artifact is deliberately local-only (the repository
+        # credential policy keeps it out of git), so a clean clone cannot check
+        # the numbers. That is a warning, never a silent pass.
+        problems.append(("WARN", f"credential-presence evidence is not present on this clone "
+                                 f"({src_path}); credential counts are unverified here"))
+        return problems
+    ev = read_json(src_path)
     if ev.get("still_missing_count") != creds["credentials_absent"]:
         problems.append(("FAIL", "credentials_absent disagrees with the presence probe"))
     if sorted(ev.get("still_missing_workers", [])) != sorted(creds["absent_workers"]):
