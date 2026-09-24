@@ -1,0 +1,74 @@
+{
+  "task_id": "agent-canonical-status-generated-tracker-and-doc-drift-2026-09-24",
+  "created_at": "2026-09-24T12:41:00Z",
+  "objective": "Eliminate status/PDF/document drift by introducing one canonical machine-readable project-status source and generating/verifying the executive tracker plus current documentation from it. Reconcile the stale README E3/E4/E5 roadmap, stale current_company_state evidence header, later Career discovery completions, and all real production blockers without erasing historical evidence.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Inspect current main after the three Career discovery tasks ahead of this task have reached a terminal state so the generated status includes their final evidence.",
+    "Reuse existing roster, acceptance evidence, deployment preflight and owner-action files as inputs; do not create a competing truth hierarchy."
+  ],
+  "allowed_scope": [
+    "Design a canonical machine-readable status artifact (JSON/YAML) containing: current code/release identity, E1-E5 state, roster accounting, latest evidence timestamp(s), regression counts, Career discovery state, queue/service state, provider credential readiness, Stage2 state, deployment state, owner-gated items and production blockers.",
+    "Populate it only from verifiable repository/runtime evidence with source references and timestamps; UNKNOWN must remain UNKNOWN.",
+    "Create a deterministic generator/renderer for the executive tracker from that canonical status source. The generated output must include later high-recall semantic discovery and unified recruiter/LinkedIn discovery work, plus subsequent open-web/watchlist/schedule work if completed by then.",
+    "Add a verification command/test that fails when the committed/generated tracker or derived status summaries are stale relative to the canonical status artifact.",
+    "Update README's Executive Brain roadmap so it no longer says E3 planned / E4-E5 future when current evidence says otherwise. Preserve nuance between implemented/verified, Stage2 enabled, and production deployed.",
+    "Reconcile state/current_company_state.md so its header/latest-evidence metadata reflects the newest incorporated evidence while preserving the historical evidence chronology below it.",
+    "Represent production blockers explicitly and separately from implementation completion: seven remaining provider credentials absent, Stage2 disabled, live-provider failover gap, deployment/cutover decision, off-site backup, battery gating, reboot persistence, laptop trust audit, and other owner-gated optional integrations as currently evidenced.",
+    "Do not label Gmail OAuth, research provider, LinkedIn live account access, recruiter live feed or regional work-authorisation decisions as core production blockers unless the documented product scope actually requires them; distinguish optional/feature-gated coverage from release blockers.",
+    "Add CI/local verification to compare generated artifacts/status against source evidence without accessing secrets.",
+    "Commit/push generated artifacts and generator sources with exact generation command and evidence timestamp."
+  ],
+  "stop_conditions": [
+    "Do not overwrite historical acceptance evidence.",
+    "Do not turn owner-gated UNKNOWNs into PASS.",
+    "Do not claim production-ready while deployment blockers remain.",
+    "Do not hand-edit the generated tracker as the primary maintenance path once the generator exists."
+  ],
+  "notes": "Independent audit found the PDF visually sound but statically drifting, README roadmap stale, and current_company_state header older than later work. Goal is one project-level view that can be regenerated and verified rather than manually synchronized.",
+  "completed_at": "2026-09-24T15:43:31.089546Z",
+  "result": {
+    "status": "completed",
+    "summary": "Introduced one canonical machine-readable project-status source (status/canonical-status.json) and made the executive tracker and the drift-prone status surfaces generated + verified from it, rather than hand-synchronised. New: scripts/status_sources.py (evidence reader/validator), scripts/status_render.py (deterministic renderer), scripts/status_verify.py (verification command), scripts/tests/test_status_consistency.py (23 tests, registered as suite 22 in scripts/evidence_runner.py). Generated outputs: status/executive-tracker.md (full tracker) plus generated status blocks injected between markers into README.md (Executive Brain roadmap), state/current_company_state.md (status header) and state/full_build_tracker.md (status header) \u2014 historical chronology and narrative below each block preserved verbatim. README no longer says E3 planned / E4-E5 future; implemented+verified, Stage 2 enabled and production deployed are kept as three distinct states (E1/E2 ACTIVE and verified; E3 implemented+verified with Stage 2 NOT ENABLED; E4/E5 implemented and drill-verified against stubbed provider failures only). Verification fails when a generated surface is stale or when a figure disagrees with the evidence artifact it names (regression counts, roster accounting, credential presence, deployment preflight, E4/E5 drill results, persistence) and warns on evidence newer than the status as_of; drift was proven detectable by injecting a tampered figure (verify exited 1) and regenerating (exited 0). Ten production blockers are represented separately from implementation completion (provider credentials absent, Stage 2 disabled, live-provider failover gap, deployment/cutover decision, off-site backup absent, battery gating, reboot persistence unverified, laptop trust audit, unattended interactive-token constraint, log rotation/retention), while Gmail read-only OAuth, research provider, live LinkedIn account access, recruiter live feed and regional work-authorisation are recorded as optional/feature-gated, not release blockers. Later Career discovery work is included (B25 high-recall funnel, B11 recruiter-watch, B19/B20/B21 LinkedIn, B22, B26 open-web research with its bounded live pass, B27 priority watchlist), and the scheduled-orchestrator cutover is recorded truthfully as NOT COMPLETE / BLOCKED (execution_error, 3/3 attempts, no committed effect). While executing, an owner handover appeared on the remote recording that 3 of the 7 previously absent credentials (Mistral, Qwen, GLM) were configured; the presence-only probe was re-run read-only (0 network calls, 0 provider calls, no credential value read) confirming 3 of 7 configured and 4 still absent, and the canonical status was updated to that measured state without promoting 'credential present' to routable/qualified and without enabling Stage 2. Generation command: `python scripts/status_render.py`; verification: `python scripts/status_verify.py`; evidence timestamp at as_of 2026-09-24T15:36:57Z. Committed and pushed to origin/main.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "500a4fe \u2014 status: canonical machine-readable status source + generated executive tracker + drift verification",
+      "fdbdd88 \u2014 status: incorporate the owner's 2026-09-24 provider credential work",
+      "pushed: origin/main c7b587d..fdbdd88"
+    ],
+    "tests": [
+      "python scripts/status_verify.py -> PASS (as_of 2026-09-24T15:36:57Z; 10 production blockers recorded; 0 warnings)",
+      "python scripts/tests/test_status_consistency.py -> Ran 23 tests, OK (source checks, generated-output freshness, secret scan, no-ready-claim, plus drift-injection mutation tests)",
+      "python scripts/evidence_runner.py (full acceptance suite) -> 22 suites run / 22 passed / 0 failed / 0 unavailable; 606 collected / 606 passed",
+      "evidence: audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification (evidence.json + evidence.md) at code SHA 63cda9b",
+      "drift drill: injected a wrong figure into status/executive-tracker.md -> status_verify.py exit 1; regenerated -> exit 0"
+    ],
+    "changed_files": [
+      "status/canonical-status.json",
+      "status/executive-tracker.md",
+      "status/README.md",
+      "scripts/status_sources.py",
+      "scripts/status_render.py",
+      "scripts/status_verify.py",
+      "scripts/tests/test_status_consistency.py",
+      "scripts/evidence_runner.py",
+      "README.md",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
+      "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.md"
+    ],
+    "remaining": [
+      "Owner-gated (critical path): provision the 4 remaining provider credentials \u2014 longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3 \u2014 via `python scripts/set_provider_key.py --worker <id>`; then run the recorded post-key sequence (presence probe, `scripts/e3_stage2_readiness_gate.py`, `scripts/evidence_runner.py --label post-keys-regression`, bounded real-provider rehearsal, E4/E5 drills) and complete local Stage 2 only if every gate passes.",
+      "After the credentials exist: verify and correct the deferred live model-id/endpoint mappings for the newly credentialed workers (Mistral `mistral-small-4`, Qwen `qwen38-27b` -> qwen3.7-plus, GLM `glm-53-flash` -> current Z.ai endpoint) before any qualification claim.",
+      "Owner decisions still open and unchanged: deployment architecture + VPS details, off-site backup destination, battery-gating re-import, reboot-persistence confirmation, owner-attended laptop trust audit, live-provider E4/E5 acceptance question.",
+      "Engineering, not owner: log rotation/retention for all live log paths; the live-provider failover drill mode that the harness deliberately lacks.",
+      "Uncommitted working-tree changes from the parked task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 (career-ops scheduled-orchestrator files, deployments/06, runtime artifacts) were deliberately not staged or committed by this task and remain awaiting that task's own resolution.",
+      "Regenerate with `python scripts/status_render.py` after any new incorporated evidence; `status_verify.py` will fail if a generated surface is left stale."
+    ]
+  }
+}
