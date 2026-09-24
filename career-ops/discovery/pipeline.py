@@ -94,6 +94,7 @@ SOURCE_SCAN_RECORD = "regional run-health scan record"
 SOURCE_COMPANY_WATCH = "company-watch findings"
 SOURCE_RECRUITER_WATCH = "recruiter/intermediary watch findings"
 SOURCE_LINKEDIN_EXPORT = "linkedin job-discovery export"
+SOURCE_WEB_RESEARCH = "open-web research (codex-style)"
 
 #: Every read-only discovery surface routes through the SAME funnel. Adding a
 #: source means adding one collector here — never a second classifier, a second
@@ -104,6 +105,7 @@ SOURCE_REGISTRY = {
     SOURCE_COMPANY_WATCH: "collect_from_company_watch",
     SOURCE_RECRUITER_WATCH: "collect_from_recruiter_watch",
     SOURCE_LINKEDIN_EXPORT: "collect_from_linkedin",
+    SOURCE_WEB_RESEARCH: "collect_from_web_research",
 }
 
 
@@ -132,7 +134,7 @@ def write_json_atomic(path: Path, obj) -> None:
 
 CANDIDATE_FIELDS = ("company", "title", "location", "url", "description", "summary",
                     "posted_date", "salary", "experience_required", "employment_type",
-                    "vendor", "intermediary", "source_detail")
+                    "vendor", "intermediary", "source_detail", "fetch_state")
 
 
 def normalise_candidate(raw: dict, source: str) -> dict:
@@ -369,6 +371,95 @@ def collect_from_linkedin(path: Path, region: str) -> dict:
     }
 
 
+def collect_from_web_research(path: Path, region: str) -> dict:
+    """Open-web research discoveries (roster B26) as candidates.
+
+    Reads a web-research export produced by ``career-ops/discovery/web_research.py``
+    — the result of an *active* query-matrix search, not a static provider scan.
+    Every result keeps its provenance (search query, discovery surface, result URL,
+    canonical URL, observed fields, fetch/validation state, source timestamp and
+    missing fields) and enters the SAME funnel as every other surface.
+
+    A destination that could not be validated live is kept as a candidate but
+    labelled with its ``fetch_state``; the deterministic gates refuse tracker
+    handoff for anything that is not ``validated_live`` (fail-closed).
+    """
+    try:
+        doc = read_json(path)
+    except Exception as exc:  # noqa: BLE001 - reported as a limitation, never fatal
+        return {
+            "available": False, "path": str(path), "candidates": [],
+            "coverage": {"kind": "open-web research export",
+                         "limitation": f"export could not be read: {type(exc).__name__}: {exc}",
+                         "note": ("an unreadable research export contributes zero candidates and "
+                                  "is recorded as such rather than being guessed")},
+        }
+
+    telemetry = doc.get("telemetry") or {}
+    candidates, excluded = [], Counter()
+    for raw in (doc.get("candidates") or []):
+        if not isinstance(raw, dict):
+            excluded["malformed_candidate"] += 1
+            continue
+        fetch_state = raw.get("fetch_state") or "discovered_unverified"
+        rec = normalise_candidate(raw, SOURCE_WEB_RESEARCH)
+        rec["fetch_state"] = fetch_state
+        wr = raw.get("web_research") or {}
+        rec["web_research"] = {
+            "discovery_surface": wr.get("discovery_surface"),
+            "search_query": wr.get("search_query"),
+            "query_id": wr.get("query_id"),
+            "role_family": wr.get("role_family"),
+            "region": wr.get("region"),
+            "result_url": wr.get("result_url") or raw.get("url"),
+            "canonical_url": wr.get("canonical_url"),
+            "observed": wr.get("observed"),
+            "title_source": wr.get("title_source"),
+            "source_timestamp": wr.get("source_timestamp"),
+            "fetch_state": fetch_state,
+            "missing_fields": wr.get("missing_fields"),
+        }
+        if fetch_state == "validation_failed":
+            excluded["destination_not_validated_live"] += 1
+        elif fetch_state == "discovered_unverified":
+            excluded["destination_not_verified"] += 1
+        candidates.append(rec)
+
+    provider = doc.get("provider") or {}
+    return {
+        "available": True,
+        "path": str(path),
+        "candidates": candidates,
+        "coverage": {
+            "kind": "open-web research export (codex-style active search)",
+            "export_id": doc.get("export_id"),
+            "region": doc.get("region"),
+            "provider": provider.get("provider"),
+            "provider_available": provider.get("available"),
+            "provider_limitation": provider.get("limitation"),
+            "queries_executed": telemetry.get("queries_executed"),
+            "results_seen": telemetry.get("results_seen"),
+            "candidate_urls": telemetry.get("candidate_urls"),
+            "validated_live": telemetry.get("validated_live"),
+            "validation_failed": telemetry.get("validation_failed"),
+            "duplicates_collapsed": telemetry.get("duplicates_collapsed"),
+            "fetch_states": telemetry.get("fetch_states"),
+            "rejections_by_reason": telemetry.get("rejections_by_reason"),
+            "zero_attribution": telemetry.get("zero_attribution"),
+            "candidates_entering_this_funnel": len(candidates),
+            "candidates_excluded_before_the_funnel": dict(sorted(excluded.items())),
+            "note": ("active open-web research (a generated query matrix, not a static provider "
+                     "scan). Public/search-index discovery only: no login, no account, no "
+                     "cookie or session, no CAPTCHA, no browser or GUI, and no scraping behind "
+                     "authentication. A result is only accepted when the research worker proves "
+                     "a live search happened."),
+            "match_basis": ("posting URL (tracking parameters removed) where present, else "
+                            "company + title; the same vacancy found by search, on an ATS board "
+                            "and in another surface collapses to one canonical candidate"),
+        },
+    }
+
+
 # --------------------------------------------------------------------------- #
 # cross-source canonical collapse (one vacancy -> one candidate)
 # --------------------------------------------------------------------------- #
@@ -570,6 +661,15 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append("no usable application URL — a posting without a URL is not writable state")
     else:
         flags.append("application URL present")
+
+    # Fail-closed validation gate (source-agnostic): a surface that declares a
+    # fetch/validation state may only reach the tracker when its destination was
+    # actually validated live. A surface that declares no fetch_state (the
+    # regional scan, Company Watch, …) is unaffected.
+    fetch_state = rec.get("fetch_state")
+    if fetch_state and fetch_state != "validated_live":
+        reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
+                       f"discovered-but-unverified or failed destination is never written")
 
     hits = tier_b_hits(str(rec.get("title") or ""))
     if hits:
@@ -852,7 +952,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "canonical_candidates": [
             {k: c.get(k) for k in ("candidate_id", "company", "title", "location", "url",
                                    "source", "sources", "duplicate_discoveries",
-                                   "canonical_key", "provenance")}
+                                   "canonical_key", "provenance", "fetch_state")}
             for c in candidates
         ],
         "source_registry": dict(SOURCE_REGISTRY),
@@ -1059,6 +1159,10 @@ def collect_sources(args) -> list:
         block = collect_from_linkedin(Path(args.linkedin), args.region)
         block["source"] = SOURCE_LINKEDIN_EXPORT
         collection.append(block)
+    if getattr(args, "web_research", None):
+        block = collect_from_web_research(Path(args.web_research), args.region)
+        block["source"] = SOURCE_WEB_RESEARCH
+        collection.append(block)
     return collection
 
 
@@ -1068,8 +1172,8 @@ def cmd_run(args) -> int:
     candidates = [c for b in collection for c in b["candidates"]]
     if not collection:
         emit({"ok": False, "reason": "no candidate source supplied; pass --records, "
-                                     "--scan-record, --company-watch, --recruiter-watch or "
-                                     "--linkedin",
+                                     "--scan-record, --company-watch, --recruiter-watch, "
+                                     "--linkedin or --web-research",
               "run_id": run_id, "region": args.region})
         return 2
 
@@ -1187,6 +1291,8 @@ def main(argv=None) -> int:
                    help="read-only recruiter/intermediary watch findings export (B11)")
     p.add_argument("--linkedin",
                    help="read-only owner-exported LinkedIn job-discovery file (B19)")
+    p.add_argument("--web-research",
+                   help="open-web research export from discovery/web_research.py (B26)")
     p.add_argument("--title-mode", choices=list(MODES), default=DEFAULT_MODE)
     p.add_argument("--semantic", choices=("auto", "deepseek", "deterministic", "off"),
                    default=DEFAULT_SEMANTIC)
@@ -1211,6 +1317,7 @@ def main(argv=None) -> int:
     p.add_argument("--company-watch")
     p.add_argument("--recruiter-watch")
     p.add_argument("--linkedin")
+    p.add_argument("--web-research")
     p.add_argument("--semantic", choices=("off", "auto", "deepseek"), default="off")
     p.add_argument("--model", default="deepseek-flash")
     p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)

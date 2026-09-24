@@ -88,6 +88,14 @@ runtime/career-ops/daily-brief-*/
 runtime/career-ops/discovery/
 audits/evidence/**/funnel-records/
 
+# --- Career open-web research lane (owner-private) ---
+# A live research export restates the exact search queries run, the result URLs
+# and the observed employer/title/location of Mukund's job-search targets. It
+# stays local; the committed evidence under
+# audits/evidence/<stamp>-career-open-web-research/ is aggregate only (counters,
+# source classes reached, check results).
+runtime/career-ops/web-research/
+
 # --- Chief operational runtime artifacts (regenerated each run) ---
 # The Morning Chief Brief is a derived aggregate regenerated on every run
 # (queue task ids, health verdicts, owner-action titles). Keep it local; the

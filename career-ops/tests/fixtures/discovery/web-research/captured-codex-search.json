@@ -1,0 +1,111 @@
+{
+  "_fixture": "Synthetic capture of a Codex web-search research run for the open-web research lane. EVERY company, title and URL here is invented and EVERY host ends in the reserved .invalid TLD; the surface tokens in the hostnames (linkedin., indeed., greenhouse.io) exist only so surface classification can be tested without referencing a real posting. This is NOT a real search result and NOT a real vacancy.",
+  "not_a_real_vacancy": true,
+  "kind": "career-ops.web-research-export",
+  "schema_version": 1,
+  "export_id": "webresearch-fixture0001",
+  "captured_from": "codex-web-search",
+  "captured_at": "2026-09-24T06:00:00Z",
+  "cli_version": "codex-cli fixture",
+  "provider": {
+    "provider": "codex-web-search",
+    "available": true,
+    "limitation": null,
+    "requests": 4,
+    "cli_version": "codex-cli fixture",
+    "web_search_observed_queries": 4,
+    "queries_without_observed_search": 0
+  },
+  "queries": [
+    {
+      "query_id": "q-fixture-linkedin",
+      "query": "site:linkedin.com/jobs (SOC OR security operations) (cyber security) (UK OR London)",
+      "region": "uk",
+      "role_family": "soc_security_operations",
+      "surface_scope": "linkedin_jobs",
+      "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+      "executed": true,
+      "web_search_observed": true,
+      "executed_queries": ["site:linkedin.com/jobs (SOC OR security operations) (cyber security) (UK OR London)"],
+      "results": [
+        {
+          "title": "SOC Analyst L1 | Fixture Security Ltd (NOT A REAL VACANCY)",
+          "url": "https://uk.linkedin.invalid/jobs/view/soc-analyst-l1-4012345678",
+          "snippet": "Fixture Security Ltd is hiring a SOC Analyst L1 in London, United Kingdom."
+        },
+        {
+          "title": "Junior Security Analyst | Overlap Test Ltd (NOT A REAL VACANCY)",
+          "url": "https://overlap-test.invalid/jobs/soc-analyst-l1",
+          "snippet": "Overlap Test Ltd, London, United Kingdom - SOC Analyst L1 role (also found by the regional scan and the LinkedIn export)."
+        }
+      ]
+    },
+    {
+      "query_id": "q-fixture-indeed",
+      "query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior) (cyber security) (UK OR London)",
+      "region": "uk",
+      "role_family": "graduate_new_grad",
+      "surface_scope": "indeed",
+      "query_provenance": "broad public job-result surface added for the Codex-style open-web research lane",
+      "executed": true,
+      "web_search_observed": true,
+      "executed_queries": ["site:uk.indeed.com OR site:indeed.com (graduate OR junior) (cyber security) (UK OR London)"],
+      "results": [
+        {
+          "title": "Graduate Cyber Security Analyst - Fixture Advisory (NOT A REAL VACANCY)",
+          "url": "https://uk.indeed.invalid/viewjob?jk=deadbeefdeadbeef",
+          "snippet": "Graduate Cyber Security Analyst, London, United Kingdom. Fixture Advisory (NOT A REAL VACANCY)."
+        },
+        {
+          "title": "SOC Analyst L1 | Fixture Security Ltd (duplicate listing, NOT A REAL VACANCY)",
+          "url": "https://uk.linkedin.invalid/jobs/view/soc-analyst-l1-4012345678",
+          "snippet": "Same posting resurfaced on a second query; the lane must collapse it to one candidate."
+        }
+      ]
+    },
+    {
+      "query_id": "q-fixture-greenhouse",
+      "query": "site:job-boards.greenhouse.io (analyst) (information security OR GRC) (UK OR London)",
+      "region": "uk",
+      "role_family": "information_security",
+      "surface_scope": "greenhouse",
+      "query_provenance": "owner portals.yml search_queries (site: pattern preserved)",
+      "executed": true,
+      "web_search_observed": true,
+      "executed_queries": ["site:job-boards.greenhouse.io (analyst) (information security OR GRC) (UK OR London)"],
+      "results": [
+        {
+          "title": "Information Security Analyst @ Fixture Fintech (NOT A REAL VACANCY)",
+          "url": "https://job-boards.greenhouse.io.invalid/fixturefintech/jobs/5365280008",
+          "snippet": "Fixture Fintech - Information Security Analyst, London, United Kingdom."
+        }
+      ]
+    },
+    {
+      "query_id": "q-fixture-google",
+      "query": "(GRC OR IAM OR technology risk) (graduate OR junior OR analyst) (UK OR London)",
+      "region": "uk",
+      "role_family": "grc",
+      "surface_scope": "google_index",
+      "query_provenance": "role-family matrix (allowed scope)",
+      "executed": true,
+      "web_search_observed": true,
+      "executed_queries": ["(GRC OR IAM OR technology risk) (graduate OR junior OR analyst) (UK OR London)"],
+      "results": [
+        {
+          "title": "Graduate Technology Risk Analyst — Fixture Bank (NOT A REAL VACANCY)",
+          "url": "https://fixture-bank-careers.invalid/roles/graduate-technology-risk-analyst",
+          "snippet": "Fixture Bank is recruiting a Graduate Technology Risk Analyst in London, United Kingdom."
+        }
+      ]
+    }
+  ],
+  "safety": {
+    "read_only": true,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "browser_or_gui_used": false,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0
+  }
+}

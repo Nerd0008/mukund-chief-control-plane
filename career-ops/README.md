@@ -975,9 +975,128 @@ source and no provider call.
     python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed
     python -m pytest career-ops/tests/test_discovery_pipeline.py -q  # 36 passed
 
+## Open-web research lane — Codex-style active job discovery (B26, 2026-09-24)
+
+**Why it exists.** The high-recall funnel above turns a *given* candidate set into
+good decisions, but its collection step still depended on what an existing surface
+happened to supply. The owner's successful standalone Codex workflow did something
+different: it *actively researched the open web*. That behaviour is documented in
+the owner's own Career Ops install — `portals.yml#search_queries` says "Each query
+triggers a WebSearch", and `modes/scan.md` describes the Level-3 agent workflow
+(`site:` queries against the ATS portals, results treated as *unverified* until
+liveness is confirmed, title/company extracted from the result title with a
+documented regex). `career-ops/discovery/web_research.py` restores that behaviour as
+one more **read-only discovery surface feeding the exact same unified funnel** — no
+second tracker, classifier or eligibility engine.
+
+```
+generated query matrix (role families × regions × surfaces, + optional watchlist)
+  -> research worker (Codex native web_search; captured replay; or declared none)
+  -> per-result normalisation into the ONE candidate schema, with provenance
+  -> polite, robots-respecting HTTP validation of each destination
+  -> discovery.pipeline  (prefilter -> semantic triage -> deterministic gates ->
+                          shared dedupe -> tracker manifest)
+```
+
+**Primary behaviour is active research, not a static scan.** `build_query_matrix`
+generates queries across the role families named in the task scope
+(graduate/new-grad/junior/associate/analyst/L1/SOC/GRC/IAM/technology-risk/
+information-security/cybersecurity) × configured regions × surfaces, and preserves
+the owner's existing `site:` query shapes verbatim (`OWNER_ATS_SITE_QUERIES` records
+each one's provenance as the owner's `portals.yml`). Broad public surfaces
+(LinkedIn Jobs, Indeed, plain open-web/Google-index discovery) are added on top.
+`owner_ats_site_queries`/`broad_surfaces` are data, so the matrix is inspectable:
+
+    python career-ops/discovery/web_research.py policy
+    python career-ops/discovery/web_research.py matrix --region uk
+    python career-ops/discovery/web_research.py matrix --region uk --watchlist wl.json
+
+**Providers (the research-worker interface).**
+
+| Provider | Behaviour |
+|---|---|
+| `codex-web-search` | invokes the Codex CLI non-interactively and asks it to run the query with its native `web_search` tool. **A result is accepted only when the execution stream contains a `web_search` item for that query** — the runtime must *prove* a live search happened. |
+| `captured` | replays a previously captured search-result document (the same shape `CodexWebSearchProvider` emits). This is the offline/test path and the declared fallback. |
+| `none` | a declared zero: no query executed, with the reason recorded. |
+
+The anti-fabrication rule is the important one: a model answer recalled from memory
+produces **no `web_search` event**, so it is recorded as
+`search_not_observed` and contributes zero results. A memory recall is never
+mistaken for a search result. If the installed CLI cannot search at all, the
+provider says so and `probe` exits non-zero — it never pretends it searched.
+
+**Measured capability (2026-09-24, bounded live pass).** `codex-cli
+0.155.0-alpha.16.3`, model `gpt-5.6-terra`. `codex exec --json` executed real
+`web_search` calls and returned live ATS/LinkedIn/Indeed results. The explicit
+`exec --search` flag is *not* accepted by this CLI build; the native tool is
+available to `exec` without it. Evidence:
+`audits/evidence/2026-09-24T12-50-00Z-career-open-web-research/`.
+
+**Provenance per discovery.** Every result keeps the search query, query id and
+provenance, role family, region, discovery surface, result URL, canonical URL,
+employer/title/location *as observed* (from the fetched page title when one was
+retrieved, otherwise from the result title — never invented), the fetch/validation
+state, the source timestamp, and the list of missing fields.
+
+**Validation and fail-closed.** `fetch_validate` retrieves a destination with a
+declared user-agent, obeys `robots.txt` (`Disallow` → refused), reads a bounded
+body and extracts only source-supported fields (page `<title>`, meta description),
+and detects closed-posting markers. A destination that is not `validated_live`
+stays in the funnel as a labelled candidate but the **deterministic gate refuses
+tracker handoff** for it (`source URL not validated live (fetch_state=…)`). The gate
+is source-agnostic: it only fires when a surface declares a `fetch_state`, so the
+regional scan, Company Watch and LinkedIn paths are unaffected.
+
+**Telemetry.** `queries_executed`, `results_seen`, `candidate_urls`,
+`validated_live`, `validation_failed`, `duplicates_collapsed`, plus the funnel's
+`semantically_reviewed`, `deterministic_eligibility_pass` and `tracker_candidates`
+(carried into the same document by `--with-funnel`), with `rejections_by_reason` and
+a `zero_attribution` block that names the first empty stage — search-source failure,
+no accessible results, validation failure, filtering, eligibility or dedupe are
+distinguished.
+
+**Company watchlist hook.** An owner-provided company list adds
+`"<company>" + role family + region` and `site:<ats> "<company>"` queries. The file
+is optional: the generic market search is complete without it.
+
+**Schedules stay dry-run/read-only.** Nothing here writes a canonical workbook; the
+handoff is a candidate manifest, and applying stays `career_ops_cli.py write
+--apply`.
+
+    python career-ops/discovery/web_research.py probe --provider codex
+    python career-ops/discovery/web_research.py run --region uk --provider codex \
+        --limit-queries 3 --with-funnel --semantic off --codex off --manifest-out m.json
+    python career-ops/discovery/pipeline.py run --region uk --web-research <export.json>
+
+**Safety.** No login, account, cookie/session, CAPTCHA, browser, GUI or stealth
+scraping; public/search-index discovery plus robots-respecting HTTP retrieval only;
+no application, outreach, posting or messaging anywhere in the path.
+
+### Tests
+
+    python -m pytest career-ops/tests/test_web_research.py -q    # 55 passed
+
+Covers fixture privacy (reserved `.invalid` hosts), the surface classifier against
+real LinkedIn/Indeed/ATS hostnames and the synthetic ones, the documented
+title/company extraction, matrix coverage and the optional watchlist hook, provider
+honesty (captured / null / Codex-absent), the anti-fabrication rule, per-result
+provenance, the two-query duplicate collapse, the faked-HTTP validation paths
+(live / dead link / expired marker / robots disallow / non-http), the collector's
+normalisation and exclusion accounting, cross-source collapse with the regional
+lane, fail-closed gate behaviour, and that no canonical workbook is touched.
+
+### Acceptance runner
+
+    python career-ops/run_web_research_acceptance.py          # 19/19 checks, fixtures only
+    python career-ops/run_web_research_acceptance.py --live   # + a bounded live Codex pass
+
+Raw result URLs are owner-private and are written only under the git-ignored
+`runtime/career-ops/web-research/`; the committed evidence is aggregate (counters,
+source classes reached, check results).
+
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 399 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 454 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
     python -m pytest career-ops/tests/test_daily_brief.py -q    # 28 passed (B23 + discovery funnel section)
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
@@ -986,6 +1105,7 @@ source and no provider call.
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
     python -m pytest career-ops/tests/test_tracker_rollover.py -q  # 32 passed (B09)
     python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed (B11 + B19 funnel)
+    python -m pytest career-ops/tests/test_web_research.py -q  # 55 passed (B26 open-web research lane)
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

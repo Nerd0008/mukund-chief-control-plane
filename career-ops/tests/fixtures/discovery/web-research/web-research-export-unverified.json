@@ -1,0 +1,145 @@
+{
+  "_fixture": "Synthetic web-research EXPORT used to prove the lane's fail-closed behaviour. It carries one destination validated live, one discovered-but-unverified, one whose validation failed and one with no usable URL. EVERY company, title and URL is invented and every host ends in the reserved .invalid TLD; this is not a real search result or vacancy.",
+  "not_a_real_vacancy": true,
+  "kind": "career-ops.web-research-export",
+  "schema_version": 1,
+  "export_id": "webresearch-fixture0002",
+  "region": "uk",
+  "generated_at": "2026-09-24T06:05:00Z",
+  "provider": {
+    "provider": "codex-web-search",
+    "available": true,
+    "limitation": null,
+    "requests": 1,
+    "cli_version": "codex-cli fixture",
+    "web_search_observed_queries": 1,
+    "queries_without_observed_search": 0
+  },
+  "queries": [
+    {
+      "query_id": "q-fixture-failclosed",
+      "query": "(SOC) (cyber security) (UK OR London)",
+      "region": "uk",
+      "role_family": "soc_security_operations",
+      "surface_scope": "employer_careers",
+      "query_provenance": "role-family matrix (allowed scope)",
+      "executed": true,
+      "web_search_observed": true,
+      "executed_queries": ["(SOC) (cyber security) (UK OR London)"],
+      "results_seen": 4,
+      "results": [
+        {"url": "https://validated-test.invalid/jobs/soc-analyst-l1", "fetch_state": "validated_live"},
+        {"url": "https://unverified-test.invalid/jobs/soc-analyst-l1", "fetch_state": "discovered_unverified"},
+        {"url": "https://deadlink-test.invalid/jobs/soc-analyst-l1", "fetch_state": "validation_failed"},
+        {"url": "https://nourl-test.invalid/jobs/soc-analyst-l1", "fetch_state": "validated_live"}
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "company": "Validated Live Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://validated-test.invalid/jobs/soc-analyst-l1",
+      "fetch_state": "validated_live",
+      "source": "employer_careers",
+      "web_research": {
+        "discovery_surface": "employer_careers",
+        "search_query": "(SOC) (cyber security) (UK OR London)",
+        "query_id": "q-fixture-failclosed",
+        "region": "uk",
+        "role_family": "soc_security_operations",
+        "result_url": "https://validated-test.invalid/jobs/soc-analyst-l1",
+        "canonical_url": "https://validated-test.invalid/jobs/soc-analyst-l1",
+        "title_source": "fetched_page_title",
+        "source_timestamp": "2026-09-24T06:05:00Z",
+        "missing_fields": ["description", "posted_date", "salary", "employment_type"]
+      }
+    },
+    {
+      "company": "Unverified Ltd (NOT A REAL VACANCY)",
+      "title": "Junior Security Analyst",
+      "location": "London, United Kingdom",
+      "url": "https://unverified-test.invalid/jobs/junior-security-analyst",
+      "fetch_state": "discovered_unverified",
+      "source": "employer_careers",
+      "web_research": {
+        "discovery_surface": "employer_careers",
+        "search_query": "(SOC) (cyber security) (UK OR London)",
+        "query_id": "q-fixture-failclosed",
+        "region": "uk",
+        "role_family": "junior_associate",
+        "result_url": "https://unverified-test.invalid/jobs/junior-security-analyst",
+        "canonical_url": "https://unverified-test.invalid/jobs/junior-security-analyst",
+        "title_source": "search_result_title",
+        "source_timestamp": "2026-09-24T06:05:00Z",
+        "missing_fields": ["description", "posted_date", "salary", "employment_type"]
+      }
+    },
+    {
+      "company": "Deadlink Ltd (NOT A REAL VACANCY)",
+      "title": "Graduate Cyber Security Analyst",
+      "location": "London, United Kingdom",
+      "url": "https://deadlink-test.invalid/jobs/graduate-cyber-security-analyst",
+      "fetch_state": "validation_failed",
+      "source": "employer_careers",
+      "web_research": {
+        "discovery_surface": "employer_careers",
+        "search_query": "(SOC) (cyber security) (UK OR London)",
+        "query_id": "q-fixture-failclosed",
+        "region": "uk",
+        "role_family": "graduate_new_grad",
+        "result_url": "https://deadlink-test.invalid/jobs/graduate-cyber-security-analyst",
+        "canonical_url": "https://deadlink-test.invalid/jobs/graduate-cyber-security-analyst",
+        "title_source": "search_result_title",
+        "source_timestamp": "2026-09-24T06:05:00Z",
+        "missing_fields": ["description", "posted_date", "salary", "employment_type"]
+      }
+    },
+    {
+      "company": "No Url Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": null,
+      "fetch_state": "validated_live",
+      "source": "employer_careers",
+      "web_research": {
+        "discovery_surface": "employer_careers",
+        "search_query": "(SOC) (cyber security) (UK OR London)",
+        "query_id": "q-fixture-failclosed",
+        "region": "uk",
+        "role_family": "soc_security_operations",
+        "result_url": null,
+        "canonical_url": null,
+        "title_source": "search_result_title",
+        "source_timestamp": "2026-09-24T06:05:00Z",
+        "missing_fields": ["url"]
+      }
+    }
+  ],
+  "telemetry": {
+    "queries_executed": 1,
+    "results_seen": 4,
+    "candidate_urls": 4,
+    "validated_live": 2,
+    "validation_failed": 1,
+    "duplicates_collapsed": 0,
+    "fetch_states": {
+      "validated_live": 2,
+      "discovered_unverified": 1,
+      "validation_failed": 1,
+      "not_attempted": 0
+    },
+    "rejections_by_reason": {"validation_failed": 1},
+    "zero_attribution": {}
+  },
+  "safety": {
+    "read_only": true,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "browser_or_gui_used": false,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "canonical_workbook_written": false
+  }
+}

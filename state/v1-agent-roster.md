@@ -62,6 +62,8 @@ This roster is the completeness checklist for v1. "Agent" means a managed worker
 | B22 | Interview Prep Agent | AI using job/company/application context | build |
 | B23 | Career Daily Brief / Pipeline Prioritizer | deterministic ranking + Chief summary | build |
 | B24 | Regional Scheduler / run-health monitor | deterministic scheduled-task manager | build/validate |
+| B25 | High-recall semantic discovery funnel | AI + deterministic multi-stage pipeline | build |
+| B26 | Open-Web Research Agent | bounded read-only web research worker | build |
 
 ## C. Release / acceptance
 
