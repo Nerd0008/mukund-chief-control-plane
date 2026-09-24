@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "description": "Title-policy regression fixtures. The 'positive' block is the set of titles the owner's intern-only policy wrongly rejected (verified loss of recall: Company Watch found 19 new postings and 0 were tracker-eligible under positive=[Intern, Internship]). The 'negative' block must keep being rejected. All titles are synthetic role names, not real vacancies.",
+  "titles": [
+    {"title": "Graduate Cyber Security Analyst", "expect": "pass", "family": "graduate + infosec", "mode": "high_recall"},
+    {"title": "Junior Security Analyst", "expect": "pass", "family": "junior + infosec", "mode": "high_recall"},
+    {"title": "SOC Analyst L1", "expect": "pass", "family": "soc + analyst L1", "mode": "high_recall"},
+    {"title": "Information Security Analyst", "expect": "pass", "family": "infosec", "mode": "high_recall"},
+    {"title": "Junior GRC Analyst", "expect": "pass", "family": "grc", "mode": "high_recall"},
+    {"title": "Cyber Risk Analyst", "expect": "pass", "family": "technology risk", "mode": "high_recall"},
+    {"title": "IAM Analyst", "expect": "pass", "family": "iam", "mode": "high_recall"},
+    {"title": "Technology Risk Graduate", "expect": "pass", "family": "technology risk", "mode": "high_recall"},
+    {"title": "Graduate Security Consultant", "expect": "pass", "family": "security consulting", "mode": "high_recall"},
+    {"title": "Junior Vulnerability Analyst", "expect": "pass", "family": "vulnerability", "mode": "high_recall"},
+    {"title": "Graduate IT Support Analyst", "expect": "pass", "family": "it support", "mode": "high_recall"},
+    {"title": "Cyber Security Apprentice", "expect": "pass", "family": "apprentice + infosec", "mode": "high_recall"},
+    {"title": "SOC Analyst", "expect": "pass", "family": "soc", "mode": "high_recall"},
+    {"title": "Information Security Intern", "expect": "pass", "family": "internship", "mode": "high_recall"},
+
+    {"title": "Senior Security Manager", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+    {"title": "Principal Security Architect", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+    {"title": "Physical Security Guard", "expect": "reject", "family": "non-cyber", "mode": "high_recall"},
+    {"title": "Security Sales Director", "expect": "reject", "family": "non-cyber + leadership", "mode": "high_recall"},
+    {"title": "Head of Cyber Security", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+    {"title": "Chief Information Security Officer", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+    {"title": "Security Operations Manager", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+    {"title": "Regional Security Officer", "expect": "reject", "family": "non-cyber", "mode": "high_recall"},
+    {"title": "Cyber Security Marketing Executive", "expect": "reject", "family": "non-cyber", "mode": "high_recall"},
+    {"title": "Credit Risk Analyst", "expect": "reject", "family": "wrong discipline", "mode": "high_recall"},
+    {"title": "Business Development Representative", "expect": "reject", "family": "no signal", "mode": "high_recall"},
+    {"title": "Warehouse Operative", "expect": "reject", "family": "no signal", "mode": "high_recall"},
+    {"title": "Marketing Analyst", "expect": "reject", "family": "wrong discipline", "mode": "high_recall"},
+    {"title": "Senior Cyber Security Analyst", "expect": "reject", "family": "too senior", "mode": "high_recall"},
+
+    {"title": "Cyber Security Intern", "expect": "pass", "family": "intern-only mode", "mode": "intern_only"},
+    {"title": "Graduate Cyber Security Analyst", "expect": "reject", "family": "intern-only mode rejects it (the old false negative)", "mode": "intern_only"},
+    {"title": "SOC Analyst L1", "expect": "reject", "family": "intern-only mode rejects it (the old false negative)", "mode": "intern_only"},
+    {"title": "Senior Cyber Security Intern", "expect": "reject", "family": "intern-only mode keeps the owner's negative list", "mode": "intern_only"}
+  ]
+}

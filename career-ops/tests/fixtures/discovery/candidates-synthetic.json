@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "description": "Synthetic candidate records for the discovery-pipeline regression tests. EVERY title/company is invented for testing, EVERY URL uses the reserved .invalid TLD, and no record describes a real vacancy, employer or person. These records are never written to a canonical tracker by any test.",
+  "not_a_real_vacancy": true,
+  "records": [
+    {"company": "Testco Graduate Schemes (NOT A REAL VACANCY)", "title": "Graduate Cyber Security Analyst", "location": "London, United Kingdom", "url": "https://testco-grad.invalid/jobs/graduate-cyber-security-analyst"},
+    {"company": "Testcorp SOC (NOT A REAL VACANCY)", "title": "SOC Analyst L1", "location": "Manchester, United Kingdom", "url": "https://testcorp-soc.invalid/jobs/soc-analyst-l1"},
+    {"company": "Testbank Risk (NOT A REAL VACANCY)", "title": "Technology Risk Graduate", "location": "Edinburgh, Scotland", "url": "https://testbank-risk.invalid/jobs/technology-risk-graduate"},
+    {"company": "Testiam Ltd (NOT A REAL VACANCY)", "title": "IAM Analyst", "location": "Remote, UK", "url": "https://testiam.invalid/jobs/iam-analyst"},
+    {"company": "Testgrc Ltd (NOT A REAL VACANCY)", "title": "Junior GRC Analyst", "location": "Leeds, England", "url": "https://testgrc.invalid/jobs/junior-grc-analyst"},
+    {"company": "Testclear Ltd (NOT A REAL VACANCY)", "title": "Information Security Analyst", "location": "Bristol, United Kingdom", "url": "https://testclear.invalid/jobs/information-security-analyst", "summary": "Applicants must hold UK security clearance (SC) and be a British citizen."},
+    {"company": "Testsenior Ltd (NOT A REAL VACANCY)", "title": "Senior Security Manager", "location": "London, United Kingdom", "url": "https://testsenior.invalid/jobs/senior-security-manager"},
+    {"company": "Testguard Ltd (NOT A REAL VACANCY)", "title": "Physical Security Guard", "location": "London, United Kingdom", "url": "https://testguard.invalid/jobs/physical-security-guard"},
+    {"company": "Testoffshore Ltd (NOT A REAL VACANCY)", "title": "Junior Security Analyst", "location": "Bengaluru, India", "url": "https://testoffshore.invalid/jobs/junior-security-analyst"},
+    {"company": "Testnourl Ltd (NOT A REAL VACANCY)", "title": "Cyber Risk Analyst", "location": "London, United Kingdom", "url": null}
+  ]
+}
