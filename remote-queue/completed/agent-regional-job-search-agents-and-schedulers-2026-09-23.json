@@ -1,0 +1,92 @@
+{
+  "task_id": "agent-regional-job-search-agents-and-schedulers-2026-09-23",
+  "created_at": "2026-09-23T21:32:00Z",
+  "objective": "Build/restore the four regional job-search workers (UK, Dubai, Japan, Singapore), shared eligibility/policy filtering, dedupe/application-state handling, and deterministic scheduled execution on top of the integrated Career Ops foundation.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "agent-career-ops-integration-and-tracker-automation-2026-09-23 should be terminal or its stable interfaces must exist."
+  ],
+  "allowed_scope": [
+    "Inspect existing portals.yml/profile.yml/search queries/providers and regional tracker formats before modifying.",
+    "Implement or restore UK, Dubai, Japan and Singapore scheduled scans using shared scanner/dedupe primitives rather than four divergent codebases.",
+    "Keep region-specific eligibility/work-authorisation/location filters explicit and sourced from the existing Career Ops profile/policies; do not invent owner facts.",
+    "Use the deterministic tracker writer for accepted results; preserve provenance, timestamps and cross-region/company/job dedupe.",
+    "Create schedule/run-health metadata and safe retry/idempotency so repeated runs cannot duplicate rows.",
+    "Run bounded dry-run evidence for each region and a safe workbook-write acceptance against backup/test copies.",
+    "Do not submit applications or contact employers.",
+    "Update state/tracker and commit/push."
+  ],
+  "stop_conditions": [
+    "No fabricated jobs.",
+    "No destructive tracker mutation.",
+    "No external submissions.",
+    "If owner-specific policy is missing, mark UNKNOWN and continue other regions."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T00:20:07.309584Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T00:22:54.713230Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 1 built and evidenced the four regional job-search workers (UK, Dubai, Japan, Singapore) but was killed by a 1200s dispatch timeout before it could update state or commit; its uncommitted tree was fully preserved. Attempt 2 verified that tree against the current revision (last code change 2026-09-24T00:13:58Z, acceptance evidence 00:14:21Z), re-confirmed every acceptance fact, updated the state trackers, committed and pushed. One shared implementation (career-ops/regional_job_search.py) serves all four regions using the existing tracker_writer dedupe/index/write primitives - no per-region forks. Dubai/Japan/Singapore lane configs live in the control plane under career-ops/lanes/ so the owner's Career Ops install is untouched. All four Windows scheduled tasks are registered and Ready (23:45/23:50/23:55/00:00, bounded dry-run only). Work authorisation is 'authorised' for the UK only; Dubai/UAE, Japan and Singapore are UNKNOWN and recorded verbatim from each region tracker's own visa_pathway text. Acceptance proved a workbook write on a test copy with a hash-verified backup then rolled back to the pre-write hash; all four canonical workbooks re-hashed and byte-identical; 0 applications submitted, 0 employers contacted. No work was recreated or duplicated.",
+    "owner_action_required": "State your work-authorisation position for Dubai/UAE, Japan and Singapore (one line per region, e.g. 'UAE: would need sponsorship', 'Japan: no route, drop', 'Singapore: open to sponsorship'). config/profile.yml lists only the United Kingdom, so every record produced for those three regions is labelled UNKNOWN ('Visa unknown' / 'JAPAN WORK VISA UNKNOWN' / 'WORK PASS UNKNOWN') and no application can be prepared for them until you say. Recorded as item 6 of tasks-or-issues/overnight-owner-actions-2026-09-24.md; item 7 there asks whether to add a UAE/Japan-specific provider or keep the agent-driven search_queries path.",
+    "blocker_category": null,
+    "commits": [
+      "d8ec198 career: regional job-search workers (UK/Dubai/Japan/Singapore) + deterministic scheduled execution - pushed, origin/main == d8ec198 verified"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_regional_job_search.py -q -> 32 passed",
+      "python -m pytest career-ops/tests/ -q -> 120 passed",
+      "python career-ops/regional_job_search.py lanes -> all 4 regions ready: true, missing: []",
+      "python career-ops/regional_job_search.py status -> uk/dubai/japan/singapore last_status 'ok', last_would_append 0, work_authorisation UNKNOWN for dubai/japan/singapore",
+      "python career-ops/install_schedules.py --status -> 4/4 tasks registered, Status Ready (ChiefCareerScan-UK/Dubai/Japan/Singapore)",
+      "sha256 re-read of all 4 canonical workbooks matches career-ops/evidence/acceptance-20260924T001500Z.json final_canonical_hashes exactly (UK 84c53dcb..., Dubai 495edb45..., Japan a8c4ef90..., Singapore 25c7b95b...) -> no destructive mutation"
+    ],
+    "changed_files": [
+      "career-ops/regional_job_search.py",
+      "career-ops/regional_policy.json",
+      "career-ops/lanes/dubai/{portals.yml,pipeline.md,scan-history.tsv}",
+      "career-ops/lanes/japan/{portals.yml,pipeline.md,scan-history.tsv}",
+      "career-ops/lanes/singapore/{portals.yml,pipeline.md,scan-history.tsv}",
+      "career-ops/tests/test_regional_job_search.py",
+      "career-ops/tests/fixtures/regional/{fixture-candidates-dubai.json,fixture-scan-dubai.json}",
+      "career-ops/evidence/acceptance-20260924T001500Z.json",
+      "career-ops/regional_schedules.json",
+      "career-ops/run_scheduled_scan.cmd",
+      "career-ops/README.md",
+      "runtime/career-ops/scan-runs/ (regional run-health records, run state, last-stdout files)",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "remote-queue/logs/queue.log"
+    ],
+    "remaining": [
+      "Owner decisions only: work-authorisation position for Dubai/UAE, Japan and Singapore (item 6) and the UAE/Japan provider-coverage choice (item 7). No engineering item is outstanding for this task.",
+      "Truthful limitation: no UAE- or Japan-specific provider exists in the Career Ops install, so those lanes only see global/remote postings labelled with that region - a thin Dubai/Japan scan means 'no provider', never 'no vacancies'. Singapore is the only region with first-party providers (MyCareersFuture, Glints SG, Jobstreet/SEEK SG-Main).",
+      "Truthful limitation: live vacancy verification was not performed - results are pre-screen only.",
+      "Left untouched as out of scope: untracked audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ belongs to the blocked agent-company-watch-job-search-integration-2026-09-23 task and was not committed or altered."
+    ]
+  }
+}
