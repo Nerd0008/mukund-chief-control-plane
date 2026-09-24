@@ -45,7 +45,7 @@ Stage 2 enablement and production deployment are three different states.**
 - **E4 — IMPLEMENTED AND DRILL-VERIFIED:** predictive exhaustion, protected reserves, resource-driven checkpointing, checkpoint/state handover and equivalent-worker failover. Drills use injected (stubbed) provider failures; real-provider failover is **not** claimed.
 - **E5 — IMPLEMENTED AND DRILL-VERIFIED:** safe/degraded mode, failure drills, outage and malformed-output handling, bounded convergence enforcement, mature owner-override UX and a recovery path. The real provider-health probe before leaving safe mode is **not** wired.
 
-**Production blockers remain open (10): the system is not production-deployed and no cutover is authorised.** See `status/executive-tracker.md` (section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.
+**Production blockers remain open (8): the system is not production-deployed and no cutover is authorised.** See `status/executive-tracker.md` (section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.
 <!-- END GENERATED: executive-status (scripts/status_render.py) -->
 
 ## Multi-model worker pool

@@ -52,9 +52,9 @@ Applies either way; safe once 1.1–1.5 are done.
 | 2.4 | Provision secrets **into the destination secret store** | owner action; names in `02` §A/§D. Never via GitHub |
 | 2.5 | Copy/initialise state | new node: initialise fresh DBs and verify integrity; migrating node: use `05` §3 |
 | 2.6 | Register services | `schtasks /Create /XML deployments/service-definitions/*.xml` (`06` §3) |
-| 2.7 | Apply the battery gating fix if the node is a laptop | re-import XML with `DisallowStartIfOnBatteries`/`StopIfGoingOnBatteries` = false (`06` §2a) |
+| 2.7 | Apply the battery gating fix if the node is a laptop | **done on the laptop 2026-09-24** (`06` §2a); on a new node re-import XML with `DisallowStartIfOnBatteries`/`StopIfGoingOnBatteries` = false |
 | 2.8 | Apply firewall policy | outbound 443 allow, inbound deny (`01` §5) |
-| 2.9 | Configure log rotation/retention | **gap — not yet implemented**; see `06` §5. Must be closed before long unattended operation |
+| 2.9 | Configure log rotation/retention | **implemented 2026-09-24** (`06` §5, `10` §7); scheduled daily 03:00 |
 | 2.10 | Re-run Phase 0.2/0.3/0.5 on the destination node | evidence on the destination, not the laptop |
 
 ## Phase 3 — Cutover (direction depends on 1.1)
@@ -100,9 +100,9 @@ owner escalation path.
 
 | Gap | Owner/task |
 |---|---|
-| Log rotation/retention not implemented | operational-services task |
-| Reboot persistence unverified for poller + Discord sync | owner reboot (actions item 6) |
-| Battery gating blocks 7 of 8 tasks on battery | decision/topology (finding recorded) |
+| ~~Log rotation/retention not implemented~~ — **closed 2026-09-24** (scheduled daily 03:00) | done |
+| Reboot persistence configured 2026-09-24; reboot still unobserved | owner reboot checklist (`deployments/11-owner-reboot-acceptance-checklist.md`) |
+| ~~Battery gating blocks 7 of 8 tasks on battery~~ — **closed 2026-09-24** | done |
 | Interactive-token tasks: no signed-out operation | owner-approved service account needed for unattended topology |
 | No off-site backup | owner decision |
 | Live-provider E4/E5 failover drill not built (`e4e5_drill_harness.py` has no `--live` mode) | recorded in actions item 8; acceptance question for the owner |

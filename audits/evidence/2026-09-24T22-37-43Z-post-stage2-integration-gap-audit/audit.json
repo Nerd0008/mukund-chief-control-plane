@@ -1,0 +1,302 @@
+{
+  "artifact": "built-but-not-live integration gap audit",
+  "task_id": "agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24",
+  "generated_utc": "2026-09-24T22:42:40+00:00",
+  "code_sha": "47899c2cd45a8551ca22b89d8943e92ee6792502",
+  "read_only": true,
+  "no_credential_value_read": true,
+  "no_live_pass_from_dry_run": true,
+  "items": [
+    {
+      "id": "gmail-readonly-oauth",
+      "title": "Gmail read-only OAuth live feed (B12 Application Inbox)",
+      "measure": "inbox_adapters",
+      "owner_action": "Optionally authorise a read-only Gmail OAuth grant (about 10 minutes) following the recorded steps in the owner-action TODO; until then the monitor runs on an owner-provided local export.",
+      "state": "READY_NEEDS_OWNER_CONFIG",
+      "owner_gated": true,
+      "measured": {
+        "enabled": false,
+        "available": false,
+        "credentials_present": false,
+        "evidence_mode": null,
+        "read_only": null,
+        "owner_action_required": true
+      },
+      "source": "career-ops/application_inbox.py adapters (live)",
+      "live_pass": false
+    },
+    {
+      "id": "research-provider",
+      "title": "JobBrief company/role research provider (B14)",
+      "measure": "canonical_optional",
+      "state": "READY_NEEDS_OWNER_CONFIG",
+      "owner_gated": true,
+      "classification": "feature_gated_optional",
+      "release_blocker": false,
+      "owner_action": "Optionally name an approved research source, or keep the cited-file path only.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "recruiter-live-feed",
+      "title": "Live recruiter/intermediary feed (B11)",
+      "measure": "canonical_optional",
+      "state": "FIXTURES ONLY",
+      "owner_gated": true,
+      "classification": "feature_gated_optional",
+      "release_blocker": false,
+      "owner_action": "Optionally provide a read-only export or name a source.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "career-brief-delivery",
+      "title": "Career Daily Brief external delivery channel (B23)",
+      "measure": "canonical_optional",
+      "state": "LOCAL ONLY, external_channel_health = not_verified",
+      "owner_gated": true,
+      "classification": "feature_gated_optional",
+      "release_blocker": false,
+      "owner_action": "Optionally name a delivery channel, or keep it local.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "tracker-vocabulary",
+      "title": "Tracker vocabulary gaps (Assessment / Japan Rejected / Dubai Offer)",
+      "measure": "canonical_optional",
+      "state": "OWNER DECISION PENDING",
+      "owner_gated": true,
+      "classification": "feature_gated_optional",
+      "release_blocker": false,
+      "owner_action": "Optionally extend the relevant tracker validation lists.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "monthly-rollover-policy",
+      "title": "Current-month tracker rollover policy (owner-state rows)",
+      "measure": "canonical_optional",
+      "state": "REFUSED, NOT DELETED",
+      "owner_gated": true,
+      "classification": "owner_approval",
+      "release_blocker": false,
+      "owner_action": "Optionally decide the rollover disposition for those owner-state rows.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "owner-watchlist-names",
+      "title": "Owner company watchlist names",
+      "measure": "watchlist",
+      "owner_action": "Optionally supply the short target-company list at runtime/career-ops/watchlist/company-watchlist.json (owner-edited, git-ignored); the lane stays honest and empty until then.",
+      "state": "AWAITING_OWNER_INPUT",
+      "owner_gated": true,
+      "measured": {
+        "owner_input_path": "runtime/career-ops/watchlist/company-watchlist.json (git-ignored)",
+        "owner_input_present": false,
+        "company_count": 0,
+        "note": "lane runs with zero watchlist companies until the owner supplies the list; it never invents a company relationship"
+      },
+      "source": "runtime/career-ops/watchlist/company-watchlist.json",
+      "live_pass": false
+    },
+    {
+      "id": "dubai-japan-provider-coverage",
+      "title": "UAE / Japan provider coverage",
+      "measure": "canonical_optional",
+      "state": "OWNER DECISION PENDING",
+      "owner_gated": true,
+      "classification": "feature_gated_optional",
+      "release_blocker": false,
+      "owner_action": "Optionally choose to add a regional provider, keep the agent-driven search path only, or park a region.",
+      "source": "status/canonical-status.json#optional_gated",
+      "live_pass": false
+    },
+    {
+      "id": "linkedin-live-account",
+      "title": "LinkedIn live account OAuth/publishing integration",
+      "measure": "linkedin",
+      "owner_action": "To go live: create a LinkedIn developer app, store the client id/secret + a member OAuth token/refresh token in Windows Credential Manager under the chief-linkedin-* targets (never in chat, GitHub or logs), then publish a reviewed draft with an explicit approval + confirm-token. Dry-run is the default and nothing posts without that owner approval.",
+      "state": "READY_NEEDS_OWNER_CONFIG",
+      "owner_gated": true,
+      "measured": {
+        "provider": "linkedin-official-api",
+        "store": "Windows Credential Manager (generic credentials) / CHIEF_LINKEDIN_* env",
+        "scope_requested": [
+          "openid",
+          "profile",
+          "w_member_social"
+        ],
+        "credential_presence": {
+          "client_id": false,
+          "client_secret": false,
+          "refresh_token": false,
+          "access_token": false
+        },
+        "any_credential_present": false,
+        "code_paths_built": [
+          "career-ops/linkedin_auth.py (OAuth credential/token layer, presence-only status)",
+          "career-ops/linkedin_publish.py (official REST posts publish path: guards, duplicate ledger, bounded retries, dry-run default)",
+          "career-ops/linkedin_workflow.py (generate/review stay independent; publish delegates to the publish module; 'post' guard unchanged)"
+        ],
+        "live_pass_claimed": false
+      },
+      "source": "career-ops/linkedin_auth.py status (live)",
+      "live_pass": false
+    },
+    {
+      "id": "offsite-backup-absent",
+      "title": "Off-machine backup destination",
+      "measure": "canonical_blocker",
+      "state": "OPEN",
+      "owner_gated": true,
+      "owner_action": "Choose the off-site backup destination and retention, then authorise engineering to implement it (local backup/restore is already drilled and passing).",
+      "source": "status/canonical-status.json#production_blockers",
+      "live_pass": false
+    },
+    {
+      "id": "laptop-trust-audit",
+      "title": "Owner-attended laptop trust audit",
+      "measure": "canonical_blocker",
+      "state": "OPEN",
+      "owner_gated": true,
+      "owner_action": "Perform the recorded audit with Mukund present. Do not clear Edge/shell/Windows Event/Task Scheduler/Defender/Hermes logs or browser artifacts before attribution.",
+      "source": "status/canonical-status.json#production_blockers",
+      "live_pass": false
+    },
+    {
+      "id": "deployment-cutover-decision",
+      "title": "Final deployment topology / VPS decision",
+      "measure": "canonical_blocker",
+      "state": "OPEN",
+      "owner_gated": true,
+      "owner_action": "Record one written line choosing the deployment architecture, and supply VPS host/account details locally if a VPS path is chosen.",
+      "source": "status/canonical-status.json#production_blockers",
+      "live_pass": false
+    },
+    {
+      "id": "live-provider-failover-gap",
+      "title": "Live-provider E4/E5 evidence",
+      "measure": "canonical_blocker",
+      "state": "OPEN",
+      "owner_gated": true,
+      "owner_action": "Decide whether the stubbed-failure drills (36/36) plus the real-path execution rehearsal are sufficient E4/E5 evidence for v1, or whether a live-provider failover drill is required before cutover. The harness has no live-provider mode and the real provider-health probe is not wired; both are deliberately out of the recorded scope.",
+      "source": "status/canonical-status.json#production_blockers",
+      "live_pass": false
+    }
+  ],
+  "operational_hardening": {
+    "battery-gating": {
+      "state": "RESOLVED (applied + verified live)",
+      "detail": "DisallowStartIfOnBatteries/StopIfGoingOnBatteries are false on every owned task; reversible byte-exact pre-change backups exist under deployments/service-definitions/backups/.",
+      "still_battery_gated": [],
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/"
+    },
+    "ops-scheduling-cadence": {
+      "state": "SCHEDULED (owner-approved) \u2014 verified live",
+      "detail": "ChiefOperationalBackup 02:30, ChiefLogRotation 03:00, ChiefMorningBrief 06:30, ChiefHealthSnapshot 08:00; staggered away from the 23:45-00:00 scans and the 07:00 career brief. Local artifacts only \u2014 no external delivery destination invented.",
+      "tasks_measured": {
+        "HermesRemoteQueuePoller": "Enabled",
+        "ChiefDiscordSync": "Enabled",
+        "ChiefCareerBrief": "Enabled",
+        "ChiefCareerScan-UK": "Enabled",
+        "ChiefCareerScan-Dubai": "Enabled",
+        "ChiefCareerScan-Japan": "Enabled",
+        "ChiefCareerScan-Singapore": "Enabled",
+        "Hermes_Gateway": "Enabled",
+        "ChiefOperationalBackup": "Enabled",
+        "ChiefLogRotation": "Enabled",
+        "ChiefMorningBrief": "Enabled",
+        "ChiefHealthSnapshot": "Enabled",
+        "Mukund Chief of Staff": "Disabled"
+      }
+    },
+    "legacy-chief-task": {
+      "state": "DISABLED (verified live; kept as rollback donor, not deleted)",
+      "measured": {
+        "exists": true,
+        "state": "Disabled",
+        "deleted": false,
+        "note": "kept in place as a rollback donor; never deleted by this task"
+      }
+    },
+    "log-rotation-retention": {
+      "state": "IMPLEMENTED (dry-run then bounded apply evidenced)",
+      "detail": "python scripts/operational_services.py rotate-logs [--apply]; archive above 5 MB, keep newest 5 archives per log; only declared live Hermes/Chief log paths are touched; Hermes-managed JSON record stores are recorded out of scope and never pruned.",
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/log-rotation/"
+    },
+    "reboot-persistence-unconfigured": {
+      "state": "CONFIGURED \u2014 reboot itself still UNVERIFIED (owner action)",
+      "detail": "StartWhenAvailable is set and StopOnIdleEnd cleared on the owned tasks; the two light periodic tasks (queue poller, Discord sync) additionally carry a logon trigger. No reboot was performed (prohibited).",
+      "unverified_after_reboot": [],
+      "owner_checklist": [
+        {
+          "task": "Hermes_Gateway",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "HermesRemoteQueuePoller",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefDiscordSync",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefCareerBrief",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefCareerScan-UK",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefCareerScan-Dubai",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefCareerScan-Japan",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefCareerScan-Singapore",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefOperationalBackup",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefLogRotation",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefMorningBrief",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        },
+        {
+          "task": "ChiefHealthSnapshot",
+          "action": "keep_signed_in",
+          "detail": "runs under the interactive user token; it does not run for a signed-out user (owner-side precondition for unattended operation)"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "total_items": 13,
+    "live_pass": 0,
+    "owner_gated": 13
+  }
+}

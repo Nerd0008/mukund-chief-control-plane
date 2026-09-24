@@ -239,6 +239,20 @@ def render_executive_tracker(c: dict) -> str:
             add(f"- Owner action: {b['owner_action']}")
         add("")
 
+    # -- resolved blockers --------------------------------------------------- #
+    resolved = c.get("resolved_blockers", [])
+    if resolved:
+        add(f"### Resolved blockers ({len(resolved)} — recorded, not deleted)")
+        add("")
+        add("| ID | Item | State |")
+        add("|---|---|---|")
+        for b in resolved:
+            add(f"| `{b['id']}` | {b['title']} | {b['state']} |")
+        add("")
+        for b in resolved:
+            add(f"- **`{b['id']}`** — {b.get('resolution', '')} Evidence: `{b['evidence']}`")
+        add("")
+
     # -- optional ------------------------------------------------------------ #
     add("## 11. Optional / feature-gated owner decisions (NOT release blockers)")
     add("")

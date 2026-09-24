@@ -11,7 +11,7 @@ _Generated from `status/canonical-status.json` at as-of **2026-09-24T21:10:44Z**
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
 - **Provider credentials:** 10 / 10 present (0 absent).
 - **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED (cutover not authorised; preflight GO with 1 owner-gated WARN).
-- **Production blockers (10), separate from implementation completion:** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `battery-gating`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`, `log-rotation-retention`.
+- **Production blockers (8), separate from implementation completion:** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`.
 - **Optional / feature-gated owner decisions (not release blockers):** 12 items — see `status/executive-tracker.md` section 11.
 
 Full regenerated view: `status/executive-tracker.md`.

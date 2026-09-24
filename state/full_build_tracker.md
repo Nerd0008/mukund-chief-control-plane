@@ -10,7 +10,7 @@
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
 - **Provider credentials:** 10 / 10 present.
 - **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED; cutover not authorised.
-- **Production blockers (10):** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `battery-gating`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`, `log-rotation-retention`.
+- **Production blockers (8):** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`.
 - **Latest regression:** 22 suites / 606 tests, 606 passed, 0 failed, 0 unavailable.
 
 The narrative lanes, truth defects and per-task detail below remain the historical record and are

@@ -5,47 +5,77 @@ it should be executed. This is the deployment-package view; the authoritative
 running list (with full context for every item) remains
 `tasks-or-issues/overnight-owner-actions-2026-09-24.md`.
 
-Estimated total for the critical path: **~45–60 minutes**, of which the seven
-provider keys are ~30 minutes.
+Last reconciled: 2026-09-24 (task
+`agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24`)
+against measured live state. See
+`audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.md`
+for the built-but-not-live gap audit behind this list.
+
+Estimated total for the critical path: **~45–60 minutes**, of which the provider
+account funding step is ~30 minutes.
 
 ---
 
-## Step 1 — Configure the seven provider credentials (the only blocking work)
+## Resolved since the previous revision (no owner action needed)
 
-```bash
-# from the repository root, one command per worker; it prompts with no echo
-python scripts/set_provider_key.py --worker mistral-small-4
-python scripts/set_provider_key.py --worker glm-53-flash
-python scripts/set_provider_key.py --worker qwen38-27b
-python scripts/set_provider_key.py --worker longcat-2.0
-python scripts/set_provider_key.py --worker minimax-m3
-python scripts/set_provider_key.py --worker step-37-flash
-python scripts/set_provider_key.py --worker tencent-hunyuan-hy3
-```
+- **Provider credentials** — all ten roster credentials are present (10/10,
+  verified 2026-09-24T20:54:33Z). No key value was read, logged or committed.
+- **Battery gating** — removed from all seven affected tasks; every owned task
+  now also has `StartWhenAvailable`, `StopOnIdleEnd` cleared, and the two light
+  periodic tasks have a logon trigger. Reversible backups exist.
+- **Operational services scheduling** — backup (02:30), log rotation (03:00),
+  morning brief (06:30) and health snapshot (08:00) are registered and Enabled,
+  local artifacts only.
+- **Log rotation/retention** — implemented and evidenced over every declared
+  live log path.
+- **Legacy `Mukund Chief of Staff` task** — confirmed `Disabled` and kept in
+  place as a rollback donor (not deleted).
+- **LinkedIn publishing path** — now built (OAuth + owner-gated publish). It
+  needs credentials before it can go live (see Step 8).
+
+---
+
+## Step 1 — Fund / enable the seven provider accounts so the stored keys serve traffic
+
+The keys are configured; the accounts refuse live dispatch. Verified errors
+(provider-side, no further narrowing possible from here):
+
+- mistral — HTTP 429 `Rate limit exceeded`
+- GLM / Z.ai — HTTP 429 `Insufficient balance or no resource package`
+- Qwen (intl dashscope) — HTTP 403 `AccessDenied.Unpurchased` on `qwen3.7-plus`
+  (purchase/enable that model id for this account)
+- LongCat — HTTP 402 `Insufficient token quota`
+- MiniMax — HTTP 402 `insufficient balance (1008)`
+- StepFun (global) — HTTP 402 `exceeded your current quota`
+- Tencent Hunyuan/Hy3 — HTTP 401 `code 401002`; re-issue a TokenHub key at
+  https://console.tencentcloud.com/tokenhub/apikey
 
 - Why owner-only: provider accounts/billing and the key material are yours; no
   automation may create, hold or transmit them.
 - Do **not** paste any key into chat, Discord, GitHub, a queue job or a file.
-- Verify: `python scripts/set_provider_key.py --status` must show
-  `credential_present: True` for all ten workers.
+- Verify: `python scripts/set_provider_key.py --status` (expect 10/10 present),
+  then `python scripts/e3_provider_bounded_smoke.py`.
+- Full per-provider detail: `overnight-owner-actions-2026-09-24.md` item 1b.
 
-## Step 2 — Confirm the credential state, then run the post-key sequence
+## Step 2 — Post-key verification sequence (engineering-run)
 
-Full sequence, roles and expected results: `09-acceptance-and-health-commands.md`
-and `overnight-owner-actions-2026-09-24.md` item 8. In order:
+The sequence already ran once (2026-09-24) and Stage 2 was **not** enabled
+because a recorded readiness criterion is unmet and every newly-credentialed
+provider refused live dispatch. Re-run after Step 1:
 
 1. `python scripts/e3_credential_presence_probe.py` — expect 0/7 missing.
 2. `python scripts/e3_stage2_readiness_gate.py` — expect readiness conditions MET.
-3. `python scripts/evidence_runner.py --label post-keys-regression` — expect
-   **438 collected / 438 passed / 0 failed / 0 errors / 0 skipped**, every suite
-   exit 0 (15 suites; figure to beat as of 2026-09-24T23:55Z).
+3. `python scripts/evidence_runner.py --label post-keys-regression` — every suite
+   must pass; the figure to beat is recorded in
+   `overnight-owner-actions-2026-09-24.md` item 8.
 4. `python exec-brain/e3_execution_rehearsal.py` — bounded real-provider rehearsal.
-5. `python exec-brain/e4e5_drill_harness.py` — expect 33/33, real provider calls 0.
+5. `python exec-brain/e4e5_drill_harness.py` — expect the full drill pass with
+   `real_provider_calls = 0` (it has no live-provider mode by design).
 6. Only then complete local E3 Stage 2.
 
-Steps 1–6 are **engineering-run** once the keys exist; you only need to run step 1.
-`TODO: 2026-09-24` — the queue executes these automatically after a verified
-credential-state change (per the documented anti-loop rule).
+Steps 1–6 are **engineering-run** once Step 1 is done. Two remaining
+owner decisions also gate Stage 2: the Google-image criterion (item 2b) and the
+live-provider E4/E5 acceptance question.
 
 ## Step 3 — Deployment architecture decision (after local proof)
 
@@ -73,10 +103,12 @@ recorded in `overnight-owner-actions-2026-09-24.md` item 5.
 
 ## Step 6 — Reboot-persistence confirmation
 
-After your next reboot, confirm `HermesRemoteQueuePoller` and `ChiefDiscordSync`
-return to `Ready`/`Running` with an advancing next-run time. They currently have
-no logon/boot trigger, so survival is unverified. If they do not come back, the
-fix is a small, reversible logon-trigger addition (engineering).
+**Updated 2026-09-24:** all eleven owned tasks now carry `StartWhenAvailable` and
+the two light periodic tasks carry a logon trigger, so they are *configured* to
+survive a reboot (read-only assessment: `unverified_after_reboot = []`).
+Engineering must not reboot your laptop, so the reboot itself is still
+unobserved. Run the short checklist after your next reboot:
+`deployments/11-owner-reboot-acceptance-checklist.md`.
 
 ## Step 7 — Optional, non-blocking decisions (answer whenever convenient)
 
@@ -84,12 +116,31 @@ fix is a small, reversible logon-trigger addition (engineering).
 |---|---|---|
 | Tracker vocabulary | add `Assessment` / `Offer` (Dubai) / `Rejected` (Japan) statuses, or keep them as owner decisions? | owner-actions item 10 |
 | Company/role research provider | name an approved source, or keep the cited-file path only? | item 11 |
-| LinkedIn live account | keep the owner-export path (recommended), name another read-only source, or keep it owner-only forever? | item 13 |
+| LinkedIn live account | create a LinkedIn app + store OAuth credentials (Step 8), or keep drafting/review only? | item 13 |
 | Career Daily Brief delivery | keep it local, or name a channel to deliver it to? | item 14 |
 | Regional work authorisation (UAE / Japan / Singapore) | one line per region — sponsorship needed / no route / open | item 6 |
 | Dubai + Japan discovery providers | add a regional provider, keep agent-driven search only, or park those lanes? | item 7 |
-| Acceptance question | is the stubbed-failure E4/E5 drill (33/33) plus the real-path execution rehearsal enough for v1, or is a live-provider failover drill required before cutover? | item 8 |
-| Legacy `Mukund Chief of Staff` task | disable/remove, or keep as a donor? | item 7 (legacy task) |
+| Acceptance question | is the stubbed-failure E4/E5 drill plus the real-path execution rehearsal enough for v1, or is a live-provider failover drill required before cutover? | item 8 |
+| Company watchlist | supply your short target-company list, or leave the lane empty? | `runtime/career-ops/watchlist/company-watchlist.json` |
+| Off-machine backup | choose a destination + retention, or accept local-only backup for now? | owner-actions (deployment-time facts) |
+| Legacy `Mukund Chief of Staff` task | it is now `Disabled` and kept as a donor; confirm whether it should eventually be removed | item 7 (legacy task) |
+
+## Step 8 — Optional: take the LinkedIn publishing path live
+
+The owner-authenticated publishing path is **built but not live** — no LinkedIn
+app or OAuth credential set exists, so nothing can be (and was not) published.
+
+1. Create a LinkedIn developer app; request the `openid profile w_member_social`
+   scopes through the official API path (do not bypass LinkedIn review).
+2. Store the client id, client secret and a member access/refresh token in
+   Windows Credential Manager under the `chief-linkedin-*` targets (never in
+   chat, GitHub, a queue job or a log).
+3. `python career-ops/linkedin_auth.py status` must then report them present.
+4. Authorise one specific post: publishing needs both an owner approval flag and
+   a confirm-token equal to the sha256 of the exact draft body. Dry-run is the
+   default; duplicates are refused against a local body-hash ledger.
+
+See `career-ops/linkedin-live-publish.md`.
 
 ## What is explicitly NOT owner work
 

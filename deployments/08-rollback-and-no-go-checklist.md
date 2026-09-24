@@ -38,9 +38,9 @@ Cutover must not start (and must be aborted mid-run) if **any** box is unclear.
 
 ### Soft no-go (documented risk; owner may accept explicitly, in writing)
 
-- [ ] Battery gating (`06` §2a) not fixed and the node may run on battery.
-- [ ] Log rotation/retention still unimplemented.
-- [ ] Reboot persistence unverified for the poller and Discord sync.
+- [x] Battery gating (`06` §2a) fixed 2026-09-24 on the laptop; re-check on any new node.
+- [x] Log rotation/retention implemented 2026-09-24 and scheduled daily 03:00.
+- [ ] Reboot persistence configured for every owned task, but the reboot itself is still unobserved — run `deployments/11-owner-reboot-acceptance-checklist.md`.
 - [ ] No off-site backup.
 - [ ] Live-provider failover drill not performed (only the stubbed-failure drill
       plus the real-path rehearsal exist).

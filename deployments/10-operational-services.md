@@ -120,28 +120,45 @@ Read-only. Records, per task: enabled state, triggers, logon type, battery
 settings, `StartWhenAvailable`, restart-on-failure, last result and next run
 time, plus a `survives_boot` verdict and the exact owner checklist.
 
-- **Verified 2026-09-24 — recorded, nothing changed:**
-  - `Hermes_Gateway`: logon trigger + `StartWhenAvailable` → survives boot.
-  - `HermesRemoteQueuePoller`, `ChiefDiscordSync` and the four
-    `ChiefCareerScan-*` + `ChiefCareerBrief` (7 tasks total): time/calendar
-    triggers, **no** boot/logon trigger, `StartWhenAvailable` not set →
-    **persistence after a reboot is UNVERIFIED**. The exact remediating action
-    (a small, reversible logon-trigger re-import) is item 6 in
-    `tasks-or-issues/overnight-owner-actions-2026-09-24.md`.
-  - 7 of 8 tasks set `DisallowStartIfOnBatteries` → will not run on battery.
-  - All 8 run under the interactive user token → they do not run for a
-    signed-out user.
-  - Legacy `Mukund Chief of Staff` task: recorded, **not** touched (its
-    disposition is an owner decision).
+- **Verified 2026-09-24 (after the owner-approved hardening):**
+  - All eleven owned tasks carry `StartWhenAvailable`, and the two light periodic
+    tasks (`HermesRemoteQueuePoller`, `ChiefDiscordSync`) additionally carry a
+    logon trigger → read-only assessment `unverified_after_reboot = []`.
+  - Battery gating removed: `still_battery_gated = []` (was 7 of 8 tasks).
+  - The reboot itself is **still unobserved** (engineering is prohibited from
+    rebooting the laptop). Owner checklist:
+    `deployments/11-owner-reboot-acceptance-checklist.md`.
+  - All tasks run under the interactive user token → they do not run for a
+    signed-out user (deliberately preserved so the owner's credential store
+    stays readable).
+  - Legacy `Mukund Chief of Staff` task: **Disabled**, kept in place as a
+    rollback donor (never deleted).
 
-## 7. Remaining truthful gaps
+## 7. Scheduling (owner-approved 2026-09-24)
+
+The four operational services are now registered as scheduled tasks, all
+`InteractiveToken`, all with `StartWhenAvailable`, local artifacts only:
+
+| Task | Cadence | Service |
+|---|---|---|
+| `ChiefOperationalBackup` | daily 02:30 | `backup` |
+| `ChiefLogRotation` | daily 03:00 | `logs` |
+| `ChiefMorningBrief` | daily 06:30 | `brief` |
+| `ChiefHealthSnapshot` | daily 08:00 | `health` |
+
+The cadence is staggered away from the 23:45–00:00 career scans and the 07:00
+career brief. Register / re-register with
+`python scripts/harden_scheduled_tasks.py --apply` (write), and inspect with
+`--verify` (read-only).
+
+## 8. Remaining truthful gaps
 
 - **Reboot persistence is verified by configuration, not by a reboot** — a
   reboot is prohibited by this task's stop conditions, so the finding is
-  "configured to survive" for the gateway and "unverified" for the other seven,
-  never a claimed PASS.
+  "configured to survive" for every owned task, never a claimed PASS, until the
+  owner runs the checklist.
 - **No off-site backup exists** (see `05` §5); the destination is an owner
-  decision.
+  decision. The scheduled backup writes to a local snapshot root only.
 - **E2 brief publication to `resource-status/` is not wired** (§2).
-- Log rotation is implemented but **not yet scheduled**; scheduling it is a
-  small engineering step, not an owner blocker.
+- **No external delivery destination exists for the morning/career briefs** and
+  none was invented; delivery is an owner decision.

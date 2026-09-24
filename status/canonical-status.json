@@ -270,7 +270,7 @@
       ]
     },
     "scheduled_tasks": {
-      "owned_tasks": 8,
+      "owned_tasks": 12,
       "names": [
         "Hermes_Gateway",
         "HermesRemoteQueuePoller",
@@ -279,19 +279,30 @@
         "ChiefCareerScan-UK",
         "ChiefCareerScan-Dubai",
         "ChiefCareerScan-Japan",
-        "ChiefCareerScan-Singapore"
+        "ChiefCareerScan-Singapore",
+        "ChiefOperationalBackup",
+        "ChiefLogRotation",
+        "ChiefMorningBrief",
+        "ChiefHealthSnapshot"
       ],
-      "logon_type": "InteractiveToken (all eight run only while Mukund is signed in)",
+      "logon_type": "InteractiveToken (all twelve run only while Mukund is signed in; preserved deliberately so the user-scoped Windows Credential Manager secrets stay readable)",
+      "hardening": "2026-09-24: DisallowStartIfOnBatteries/StopIfGoingOnBatteries false on all; StopOnIdleEnd cleared; StartWhenAvailable set on all; logon trigger on the two light periodic tasks. Read-only verification: still_battery_gated=[], unverified_after_reboot=[]. Legacy `Mukund Chief of Staff` Disabled (kept as donor, not deleted).",
       "source": {
-        "path": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json"
+        "path": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/persistence/persistence.json"
       }
     },
     "operational_services": {
-      "state": "BUILT + TESTED 17/17, ON DEMAND ONLY",
+      "state": "BUILT + TESTED 17/17, SCHEDULED (4 owner-approved daily tasks, verified live)",
       "what": "deterministic health snapshot, Morning Chief Brief, operational backup with 7-snapshot retention, log rotation/retention, read-only scheduler/boot persistence validation",
       "code": "scripts/operational_services.py",
       "doc": "deployments/10-operational-services.md",
-      "not_scheduled_reason": "registering a scheduled task is a service change requiring owner approval (owner-action item 15)"
+      "scheduled_tasks": {
+        "ChiefOperationalBackup": "daily 02:30",
+        "ChiefLogRotation": "daily 03:00",
+        "ChiefMorningBrief": "daily 06:30",
+        "ChiefHealthSnapshot": "daily 08:00"
+      },
+      "delivery": "local artifacts only; no external delivery destination exists or was invented"
     }
   },
   "provider_credentials": {
@@ -445,24 +456,14 @@
       "owner_action": "Choose the off-site backup destination and retention, then authorise engineering to implement it (local backup/restore is already drilled and passing)."
     },
     {
-      "id": "battery-gating",
-      "title": "7 of 8 Chief scheduled tasks will not run on battery",
-      "category": "architecture",
-      "state": "OPEN",
-      "blocks": "unattended laptop-primary operation on battery",
-      "evidence": "deployments/06-service-definitions.md (section 2); audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json",
-      "owner_action_required": true,
-      "owner_action": "Approve re-importing the task definitions with DisallowStartIfOnBatteries/StopIfGoingOnBatteries set to false (or confirm the laptop will always be on mains power)."
-    },
-    {
       "id": "reboot-persistence-unverified",
-      "title": "Reboot survival of 7 of 8 Chief tasks is unverified",
+      "title": "Reboot survival is configured on every owned task; the reboot itself is still unobserved",
       "category": "owner_approval",
       "state": "UNKNOWN",
       "blocks": "the v1 \"service survives restart/reboot\" acceptance criterion",
-      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json",
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/persistence/persistence.json",
       "owner_action_required": true,
-      "owner_action": "After the next owner-initiated reboot, confirm all eight tasks return to Ready/Running with advancing Next Run Time; if any of the seven does not, ask engineering to add a logon trigger (small, reversible task re-import)."
+      "owner_action": "StartWhenAvailable is now set and StopOnIdleEnd cleared on all eleven owned tasks, and the two light periodic tasks (queue poller, Discord sync) additionally carry a logon trigger, so all eleven are configured to survive a reboot (read-only assessment, `unverified_after_reboot = []`). Engineering must not reboot the laptop, so the reboot itself is unobserved. After your next reboot, run the checklist in `deployments/11-owner-reboot-acceptance-checklist.md` and record the result."
     },
     {
       "id": "laptop-trust-audit",
@@ -479,20 +480,28 @@
       "title": "Every Chief task runs only under the interactive user token",
       "category": "architecture",
       "state": "OPEN",
-      "blocks": "any unattended topology (the laptop must be powered and signed in)",
-      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (laptop availability precondition); persistence.json owner_checklist",
+      "blocks": "any unattended topology where the laptop is not powered and signed in",
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/verify_after_apply.json",
       "owner_action_required": true,
-      "owner_action": "Decide whether to keep the laptop powered and signed in, or approve a service-account/credential change for the scheduled tasks."
+      "owner_action": "Decide whether to keep the laptop powered and signed in, or approve a service-account/credential change for the scheduled tasks. The 2026-09-24 hardening deliberately did NOT switch any task to SYSTEM or another account, because the seven provider keys live in the owner's user-scoped Windows Credential Manager and a different account could not read them."
+    }
+  ],
+  "resolved_blockers": [
+    {
+      "id": "battery-gating",
+      "title": "Battery gating removed from the seven affected Chief tasks",
+      "category": "architecture",
+      "state": "RESOLVED 2026-09-24 (applied + verified live)",
+      "resolution": "DisallowStartIfOnBatteries and StopIfGoingOnBatteries are false on every owned task, so an unattended run is no longer blocked on battery. Applied by scripts/harden_scheduled_tasks.py with byte-exact reversible pre-change backups under deployments/service-definitions/backups/20260924T221712Z-pre-hardening.",
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/verify_after_apply.json"
     },
     {
       "id": "log-rotation-retention",
-      "title": "Log rotation/retention is not implemented for all live log paths",
+      "title": "Bounded log rotation/retention over every declared live log path",
       "category": "architecture",
-      "state": "OPEN",
-      "blocks": "production log hygiene on the eventual host",
-      "evidence": "tasks-or-issues/overnight-owner-actions-2026-09-24.md (deployment-time facts)",
-      "owner_action_required": false,
-      "owner_action": null
+      "state": "RESOLVED 2026-09-24 (dry-run then bounded apply evidenced)",
+      "resolution": "python scripts/operational_services.py rotate-logs [--apply]: archive a log above 5 MB, keep the newest 5 archives per log, over the live Hermes/Chief log paths only. Hermes-managed JSON record stores are recorded out of scope and never pruned. Scheduled daily at 03:00 (ChiefLogRotation).",
+      "evidence": "audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/log-rotation/log_rotation.json"
     }
   ],
   "optional_gated": [
@@ -516,12 +525,12 @@
     },
     {
       "id": "linkedin-live-account",
-      "title": "Live LinkedIn account access",
+      "title": "Live LinkedIn account access + owner-gated publishing",
       "classification": "feature_gated_optional",
       "release_scope": false,
-      "state": "UNTESTED AGAINST THE REAL ACCOUNT (owner-gated by design)",
-      "why_not_a_release_blocker": "The whole LinkedIn layer (B19/B20/B21) is built and evidenced on owner-exported local files and canonical CV text; posting, messaging, connecting and applying are owner-gated by design and no code path performs them.",
-      "owner_action": "Optionally decide whether the live surface should ever have account access, or keep the owner-export path."
+      "state": "READY_NEEDS_OWNER_CONFIG (OAuth/publish path built 2026-09-24; no credential set exists)",
+      "why_not_a_release_blocker": "The whole LinkedIn layer (B19/B20/B21) is built and evidenced on owner-exported local files and canonical CV text. An owner-authenticated OAuth publishing path now exists around the B20/B21 drafts (official REST posts endpoint, dry-run by default, duplicate ledger, bounded retries, post-id/timestamp logging) but no LinkedIn app/OAuth credential set exists, so nothing was published and no live PASS is claimed. Posting, messaging, connecting and applying remain owner-gated by design and no code path performs them without a distinct owner-approved action.",
+      "owner_action": "Optionally create a LinkedIn developer app and store the client id/secret + member token in Windows Credential Manager under the chief-linkedin-* targets (never in chat, GitHub or logs). Until then B20/B21 stay generation/review only. See career-ops/linkedin-live-publish.md and the evidence bundle audits/evidence/2026-09-24T22-35-00Z-linkedin-live-publish-integration/."
     },
     {
       "id": "recruiter-live-feed",
@@ -564,9 +573,9 @@
       "title": "Scheduling cadence for operational backup / log rotation / briefs",
       "classification": "feature_gated_optional",
       "release_scope": false,
-      "state": "ON DEMAND ONLY",
-      "why_not_a_release_blocker": "Every operational service runs on demand and is tested; only regular cadence needs owner approval because it changes scheduled tasks.",
-      "owner_action": "Optionally approve a cadence."
+      "state": "SCHEDULED 2026-09-24 (owner-approved; verified live)",
+      "why_not_a_release_blocker": "The owner approved a bounded cadence, so the four operational service schedules are now registered and Enabled: ChiefOperationalBackup 02:30, ChiefLogRotation 03:00, ChiefMorningBrief 06:30, ChiefHealthSnapshot 08:00, staggered away from the 23:45-00:00 career scans and the 07:00 career brief. All four write local artifacts only - no external delivery destination was invented.",
+      "owner_action": "Optionally adjust the cadence or disable a schedule. Evidence: audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/."
     },
     {
       "id": "tracker-vocabulary",
@@ -591,9 +600,9 @@
       "title": "Disposition of the legacy `Mukund Chief of Staff` logon task",
       "classification": "owner_approval",
       "release_scope": false,
-      "state": "RECORDED, NOT CHANGED",
-      "why_not_a_release_blocker": "Operational-hygiene and conflict risk only; it is recorded as a donor and was not deleted or revived.",
-      "owner_action": "Optionally confirm whether the legacy task should be disabled/removed or kept as a donor."
+      "state": "DISABLED (verified live 2026-09-24; kept as a rollback donor, not deleted)",
+      "why_not_a_release_blocker": "Operational-hygiene and conflict risk only. The task is now confirmed Disabled in Task Scheduler and is retained in place as a donor; it was not deleted and not revived. The superseded stack stays suspended as the owner directed.",
+      "owner_action": "Optionally confirm whether the legacy task should eventually be removed or kept indefinitely as a donor. Evidence: audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/verify_after_apply.json."
     },
     {
       "id": "e4e5-acceptance-question",
@@ -607,12 +616,30 @@
   ],
   "unknowns": [
     "The Google image no-image response recurred 2/9 with the provider's own finishReason IMAGE_RECITATION; what makes the provider's recitation filter fire on some identical prompts is unknown. No stability claim is made and the vision role is not qualified.",
-    "Reboot survival of the 7 non-Hermes_Gateway Chief tasks is UNKNOWN (a reboot was prohibited by the task stop conditions).",
+    "Reboot survival of the owned Chief tasks is configured-not-observed: StartWhenAvailable is set and StopOnIdleEnd cleared on all twelve, and the two light periodic tasks carry a logon trigger (read-only assessment unverified_after_reboot=[]), but no reboot was performed (prohibited), so survival is still unverified until the owner runs deployments/11-owner-reboot-acceptance-checklist.md.",
     "The Codex CLI served-model identity is UNKNOWN (provider reported as unknown; configured provider/model are recorded separately) and it exposes no usage figures.",
     "The live-provider failover behaviour is unknown — never exercised.",
     "Whether the six provider accounts can be funded/entitled so the stored keys serve traffic, and whether the Tencent key belongs to the correct TokenHub product, are owner/provider questions."
   ],
   "history": [
+    {
+      "at": "2026-09-24T22:37:43Z",
+      "id": "2026-09-24T22-37-43Z-post-stage2-integration-gap-audit",
+      "result": "13 built-but-not-live integration items accounted for; 0 live PASS; operational hardening confirmed",
+      "what": "Successor task agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24 (attempt 2) produced a deterministic, read-only built-but-not-live gap audit (`scripts/integration_gap_audit.py`) measuring live state for all thirteen items the authority requires: Gmail read-only OAuth (READY_NEEDS_OWNER_CONFIG, gmail_readonly adapters enabled=false/available=false/credentials_present=false), JobBrief research provider (READY_NEEDS_OWNER_CONFIG), live recruiter/intermediary feed (FIXTURES ONLY), Career Daily Brief external delivery (LOCAL ONLY, not_verified), tracker vocabulary gaps (OWNER DECISION PENDING), current-month rollover (REFUSED, NOT DELETED — owner-state rows), owner company watchlist (AWAITING_OWNER_INPUT), UAE/Japan provider coverage (OWNER DECISION PENDING), LinkedIn live account (READY_NEEDS_OWNER_CONFIG — OAuth/publish path built, no credential set), off-machine backup destination (OPEN, owner decision), laptop trust audit (OPEN, owner-attended), final deployment topology/VPS (OPEN, owner decision), live-provider E4/E5 evidence (OPEN, stubbed drills only). No fixture or dry-run pass was recorded as a live PASS, no credential value was read, and every open item carries its exact next owner step. Owner reboot acceptance checklist added at deployments/11-owner-reboot-acceptance-checklist.md."
+    },
+    {
+      "at": "2026-09-24T22:35:00Z",
+      "id": "2026-09-24T22-35-00Z-linkedin-live-publish-integration",
+      "result": "BUILT — no live PASS claimed (no LinkedIn app/OAuth credential set exists)",
+      "what": "Owner-authenticated LinkedIn publishing path added around the existing B20/B21 draft generators (career-ops/linkedin_auth.py, linkedin_publish.py, linkedin_workflow.py): OAuth credential/token layer keeping client id/secret/refresh/access tokens in Windows Credential Manager (presence-only status) or CHIEF_LINKEDIN_* env on non-Windows — never the repository, argv or a log; an official REST `api.linkedin.com/rest/posts` publish path with guards (credentials present, owner approval flag AND a confirm-token equal to the sha256 of the exact draft body, the B20 review verdict/blocked flag, a local body-hash ledger for duplicate prevention), dry-run by default, and bounded retries on 429/5xx/transport only (a 4xx is never retried). Publication records post URN/URL/timestamp/status/attempts and never a token. No browser automation, session-cookie reuse, CAPTCHA bypass or scraping behind authentication anywhere in the path. 22 new offline tests; a live drill over a real B20 draft recorded. State READY_NEEDS_OWNER_CONFIG: nothing was published and no live PASS is claimed (a dry-run pass is not a live PASS)."
+    },
+    {
+      "at": "2026-09-24T22:22:00Z",
+      "id": "2026-09-24T22-21-49Z-task-hardening-and-operational-schedules",
+      "result": "APPLIED + VERIFIED — battery gating removed, operational services scheduled, log rotation live, legacy task disabled",
+      "what": "scripts/harden_scheduled_tasks.py applied the owner-approved service-definition change with byte-exact reversible backups under deployments/service-definitions/backups/20260924T221712Z-pre-hardening and a verified round-trip restore: DisallowStartIfOnBatteries/StopIfGoingOnBatteries set false on the seven affected tasks, StopOnIdleEnd cleared, StartWhenAvailable set, and a logon trigger added to the two light periodic tasks (queue poller, Discord sync). The owner's InteractiveToken principal was preserved on every task — nothing was switched to SYSTEM or another account, so the user-scoped Windows Credential Manager secrets stay readable. Four owner-approved operational schedules were registered and are Enabled (ChiefOperationalBackup 02:30, ChiefLogRotation 03:00, ChiefMorningBrief 06:30, ChiefHealthSnapshot 08:00; local artifacts only, no external delivery destination). Log rotation/retention runs dry-run then bounded apply over every declared live log path (archive above 5 MB, keep newest 5 archives; Hermes-managed JSON record stores recorded out of scope, never pruned). Read-only post-verification recorded still_battery_gated=[] and unverified_after_reboot=[] for all eleven owned tasks. The legacy `Mukund Chief of Staff` task is Disabled and was NOT deleted (kept as a rollback donor). No reboot was performed."
+    },
     {
       "at": "2026-09-24T22:09:28Z",
       "id": "2026-09-24T22-08-43Z-e3-provider-bounded-smoke",

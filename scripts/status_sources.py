@@ -35,16 +35,25 @@ MARKER_BEGIN = "<!-- BEGIN GENERATED: executive-status (scripts/status_render.py
 MARKER_END = "<!-- END GENERATED: executive-status (scripts/status_render.py) -->"
 
 # The production blockers the authority file requires to be represented
-# explicitly and separately from implementation completion.
+# explicitly and separately from implementation completion.  An item that has
+# been *resolved* moves to `resolved_blockers` (see REQUIRED_RESOLVED_BLOCKERS)
+# so the open-blocker list stays literally open.
 REQUIRED_PRODUCTION_BLOCKERS = {
     "provider-execution-blocked",
     "stage2-not-enabled",
     "live-provider-failover-gap",
     "deployment-cutover-decision",
     "offsite-backup-absent",
-    "battery-gating",
     "reboot-persistence-unverified",
     "laptop-trust-audit",
+}
+
+# Items that were production blockers and are now resolved.  Kept explicit so a
+# resolution is *recorded*, never silently deleted, and so a resolved item can
+# never reappear as an open blocker without the record being updated.
+REQUIRED_RESOLVED_BLOCKERS = {
+    "battery-gating",
+    "log-rotation-retention",
 }
 
 # Owner-gated / feature-gated items that must NOT be labelled core production
@@ -213,7 +222,8 @@ def check_required_keys(canonical: dict) -> list[tuple[str, str]]:
         "schema_version", "as_of", "code_identity", "latest_evidence",
         "executive_brain", "roster", "regressions", "career_discovery",
         "queue_service", "provider_credentials", "stage2", "deployment",
-        "production_blockers", "optional_gated", "unknowns", "history",
+        "production_blockers", "resolved_blockers", "optional_gated", "unknowns",
+        "history",
     ]
     for key in required:
         if key not in canonical:
@@ -376,10 +386,21 @@ def check_persistence(canonical: dict) -> list[tuple[str, str]]:
 def check_blockers(canonical: dict) -> list[tuple[str, str]]:
     problems: list[tuple[str, str]] = []
     blocker_ids = {b["id"] for b in canonical["production_blockers"]}
+    resolved_ids = {b["id"] for b in canonical.get("resolved_blockers", [])}
     optional_ids = {o["id"] for o in canonical["optional_gated"]}
     missing = REQUIRED_PRODUCTION_BLOCKERS - blocker_ids
     if missing:
         problems.append(("FAIL", f"required production blockers missing: {sorted(missing)}"))
+    missing_resolved = REQUIRED_RESOLVED_BLOCKERS - resolved_ids
+    if missing_resolved:
+        problems.append(("FAIL", f"required resolved blockers missing: {sorted(missing_resolved)}"))
+    # A resolution must be *recorded*, not a silent drop, and a resolved item
+    # must not simultaneously sit in the open list.
+    both = resolved_ids & blocker_ids
+    if both:
+        problems.append(("FAIL", f"items recorded as both open and resolved: {sorted(both)}"))
+    if not missing_resolved and (REQUIRED_RESOLVED_BLOCKERS & blocker_ids):
+        problems.append(("FAIL", "a resolved blocker is still listed as an open production blocker"))
     missing_optional = REQUIRED_OPTIONAL_GATED - optional_ids
     if missing_optional:
         problems.append(("FAIL", f"required optional/feature-gated items missing: {sorted(missing_optional)}"))
@@ -389,6 +410,9 @@ def check_blockers(canonical: dict) -> list[tuple[str, str]]:
     for entry in canonical["production_blockers"]:
         if not entry.get("evidence"):
             problems.append(("FAIL", f"production blocker `{entry['id']}` has no evidence reference"))
+    for entry in canonical.get("resolved_blockers", []):
+        if not entry.get("evidence"):
+            problems.append(("FAIL", f"resolved blocker `{entry['id']}` has no evidence reference"))
     return problems
 
 

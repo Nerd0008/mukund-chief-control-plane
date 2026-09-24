@@ -194,13 +194,16 @@ changed), is refused.
 
 ### 13. Decide whether the live LinkedIn surface should ever have account access
 
-**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the LinkedIn
-outreach / interview-prep task)
+**Status:** PARTIALLY IMPLEMENTED 2026-09-24 — an owner-authenticated publishing path now
+exists; still needs an owner credential set before it can go live.
 **Blocks:** nothing. The LinkedIn layer (B19 job discovery, B20 profile/post
 drafts, B21 networking/recruiter/hiring-manager outreach drafts) is built, tested
 and acceptance-evidenced **entirely on owner-exported local files and canonical CV
-text**. No LinkedIn account, session, cookie, API key or scraping path exists in
-this runtime, so the live surface is untested against the real account.
+text**. As of 2026-09-24 there is also a built-but-not-live OAuth publishing path
+around the B20/B21 drafts (`career-ops/linkedin_auth.py`, `linkedin_publish.py`,
+`linkedin_workflow.py`; official REST `api.linkedin.com/rest/posts`, owning only
+`posts`), but **no LinkedIn app or OAuth credential set exists**, so nothing was
+published and no live PASS is claimed.
 
 **Why owner-only:** whether the build may touch the real account at all is a
 decision about your own account's terms and risk. No read-only personal-job-data
@@ -216,9 +219,20 @@ driving an interactive browser from this machine, so the honest options are:
 3. **say the live surface stays owner-only forever** and the drafts remain
    copy-paste material for you to send by hand.
 
+**To take publishing live (optional, separate from generation):** create a LinkedIn
+developer app through the official API path, store the client id/secret + a member
+token in Windows Credential Manager under the `chief-linkedin-*` targets (never in
+chat, GitHub, a queue job or a log), then authorise one specific post — publishing
+requires both an owner approval flag and a confirm-token equal to the sha256 of the
+exact draft body. Dry-run is the default and a duplicate body is refused.
+See `career-ops/linkedin-live-publish.md` and the evidence bundle
+`audits/evidence/2026-09-24T22-35-00Z-linkedin-live-publish-integration/`.
+
 **Continue without owner:** everything in the layer is complete; nothing else is
 blocked. Posting, messaging, connecting and applying are owner-gated by design and
-no code path performs them (`guard` refuses and logs each one).
+no code path performs them without a distinct owner-approved action (`guard`
+refuses and logs each one). No browser automation, session-cookie reuse, CAPTCHA
+bypass or scraping behind authentication exists anywhere in the path.
 
 ## Resolved / no longer owner-blocking
 
@@ -242,30 +256,30 @@ can make them run for a signed-out user without an owner-approved credential/ser
 build window (as recorded in `handovers/2026-09-21-chief-os-sprint-handover.md`).
 
 ### 6. Confirm task persistence after a reboot (owner-gated verification)
-**Status:** VALIDATED READ-ONLY 2026-09-24 — reboot itself still unverified (prohibited by task stop conditions)
+**Status:** CONFIGURED 2026-09-24 — the reboot itself is still unobserved (prohibited by task stop conditions)
 **Blocks:** the v1 "service survives restart/reboot" acceptance criterion only.
 **Exact facts (re-verified read-only 2026-09-24 by
+`scripts/harden_scheduled_tasks.py --verify` and
 `scripts/operational_services.py validate-persistence`, evidence in
-`audits/evidence/2026-09-24T02-48-01Z-operational-services/persistence.json`):**
-`Hermes_Gateway` has a logon trigger + `StartWhenAvailable` → configured to survive a
-reboot. **Seven** tasks — `HermesRemoteQueuePoller`, `ChiefDiscordSync`, `ChiefCareerBrief`
-and the four `ChiefCareerScan-*` — have time/calendar triggers with **no** logon/boot trigger
-and **no** `StartWhenAvailable`, so their survival across a reboot is **UNVERIFIED**.
-No reboot was performed (this task's stop conditions prohibit it), so no claim is made
-either way.
-**Action:** after the next owner-initiated reboot, confirm all eight tasks return to
-`Ready`/`Running` with advancing `Next Run Time`; if any of the seven does not, ask
-engineering to add a logon trigger (small, reversible `schtasks /Create /XML` re-import —
-the remediating step is already recorded in the validator's `owner_checklist`).
+`audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/`):**
+every owned task now carries `StartWhenAvailable` and `StopOnIdleEnd` is cleared; the two
+light periodic tasks (`HermesRemoteQueuePoller`, `ChiefDiscordSync`) additionally carry a
+logon trigger. The read-only assessment is therefore `unverified_after_reboot = []`. This is
+a **configuration** assessment: no reboot was performed (this task's stop conditions prohibit
+it), so no survival claim is made either way.
+**Action:** after the next owner-initiated reboot, run
+`deployments/11-owner-reboot-acceptance-checklist.md` (seven short checks) and record the result.
 
 ### 7. Decide the disposition of the legacy `Mukund Chief of Staff` logon task
-**Status:** PENDING OWNER DECISION (recorded, not changed — no destructive cleanup was performed)
+**Status:** DISABLED 2026-09-24 (verified live) — kept in place as a rollback donor, **not deleted**
 **Blocks:** nothing immediately; it is an operational-hygiene and conflict risk.
-**Exact facts:** the task still starts the superseded new-custom-Chief Telegram/API/tunnel stack at
-sign-in (`…\ChatGPT\CV customizer\mukund-chief-of-staff\…\scr…`), last result `-1073741510`
-(terminated). Hermes is the Chief layer now.
-**Action:** confirm whether the legacy task should be disabled/removed, or deliberately kept as a
-donor. Engineering will not change it without that decision.
+**Exact facts:** the task previously started the superseded new-custom-Chief Telegram/API/tunnel
+stack at sign-in (`…\ChatGPT\CV customizer\mukund-chief-of-staff\…\scr…`), last result
+`-1073741510` (terminated). It now reports `Scheduled Task State: Disabled`,
+`Next Run Time: N/A`. Hermes is the Chief layer now. The task was **not** deleted — it remains
+available as a donor for rollback.
+**Action:** confirm whether the legacy task should eventually be removed, or kept indefinitely as
+a donor. Engineering will not delete it without that decision.
 
 
 ### 8. After the provider keys are configured — run the exact post-key verification sequence (owner + engineering)
@@ -356,21 +370,14 @@ under whose account.
 
 ### 15. Approve scheduling the operational services (backup, log rotation, briefs)
 
-**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the operational-services task)
-**Blocks:** only unattended *regular cadence*; nothing is blocked mechanically — every
-service already runs on demand.
-**What exists now (built, tested 17/17, evidenced,
-`scripts/operational_services.py`, see `deployments/10-operational-services.md`):**
-a deterministic health snapshot, the Morning Chief Brief, an operational backup with a
-7-snapshot retention policy, log-rotation/retention, and read-only scheduler/boot
-persistence validation. The backup snapshot root is outside the repository
-(`%LOCALAPPDATA%\hermes\backups\operational\`), so no raw database is published.
-**Why owner-only:** adding scheduled tasks is a service change, and you asked that the
-system not create/modify tasks without approval. The cadence (e.g. daily backup + weekly
-log rotation + 06:30 morning brief) is a decision about your machine.
-**Action (optional):** reply with the cadence you want, or "run them on demand only"; if
-you want them scheduled, engineering will register the tasks with the same
-interactive-token/retention conventions and record them in `deployments/06`.
+**Status:** DONE 2026-09-24 — owner-approved and registered (verified live); this is no longer an open owner action.
+**Cadence registered** (staggered away from the 23:45–00:00 career scans and the 07:00 career brief):
+`ChiefOperationalBackup` 02:30, `ChiefLogRotation` 03:00, `ChiefMorningBrief` 06:30,
+`ChiefHealthSnapshot` 08:00. All `InteractiveToken` + `StartWhenAvailable`, local artifacts only —
+**no external delivery destination exists and none was invented**.
+**Evidence:** `audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/`.
+**Action (optional):** adjust the cadence or disable a schedule at any time; the uninstall path is
+`schtasks /Delete /TN <TaskName> /F`.
 
 
 
@@ -474,3 +481,38 @@ handover: `handovers/2026-09-24-morning-handover.md`.
 - Roster account: **50/50 items accounted for** — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG (B12 Gmail
   read-only OAuth = item 9; B14 research provider = item 11; C03 cutover owner-gated = items 3/4),
   0 BLOCKED_EXTERNAL, 0 unmapped (`state/v1-agent-roster.md` § "Final account").
+
+---
+
+## Reconciliation — post-Stage-2 integrations and production hardening (2026-09-24T22:37Z)
+
+Task `agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24`. Evidence:
+`audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.md` (read-only gap
+audit), `audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/`
+(task hardening + schedules), `audits/evidence/2026-09-24T22-35-00Z-linkedin-live-publish-integration/`
+(LinkedIn publish path). This section is measured against live state; no historical evidence was
+removed.
+
+**Closed / changed by this task (no owner action needed):**
+
+- **Battery gating**: removed from all seven affected tasks; every owned task also gained
+  `StartWhenAvailable`, `StopOnIdleEnd` cleared, and the two light periodic tasks a logon trigger.
+  Byte-exact reversible backups + a verified round-trip restore exist.
+- **Operational service schedules**: registered and Enabled (item 15 above is now DONE).
+- **Log rotation/retention**: implemented + scheduled (03:00) and evidenced dry-run then bounded apply.
+- **Legacy `Mukund Chief of Staff` task**: verified `Disabled`, kept as a rollback donor (item 7).
+- **Reboot persistence**: configured on every owned task; the reboot itself remains unobserved —
+  see `deployments/11-owner-reboot-acceptance-checklist.md` (item 6).
+- **LinkedIn**: owner-authenticated publish path built around the B20/B21 drafts; no credential set
+  exists, so it is READY_NEEDS_OWNER_CONFIG and **no live PASS is claimed** (item 13).
+
+**Still owner-gated (unchanged, exact next step recorded):** provider account funding (1b), the
+Google-image / E4-E5 acceptance conditions (2b), deployment architecture + VPS detail (3, 4),
+owner-attended laptop trust audit (5), regional work-authorisation facts (6), Dubai/Japan provider
+coverage (7), Gmail read-only OAuth (9), tracker vocabulary (10), research provider (11), Career
+Daily Brief delivery (14), plus the off-machine backup destination, the owner company watchlist
+names and the LinkedIn app credentials. None of these was auto-activated or assumed complete.
+
+**Discipline applied:** no fixture or dry-run result was recorded as a live PASS; no credential
+value was read, printed, logged or committed; the laptop was not rebooted, signed out or
+power-cycled; no VPS/off-site vendor was chosen; the legacy task was not deleted.

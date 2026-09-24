@@ -21,6 +21,8 @@ exercise — **without** choosing or performing the final architecture/cutover.
 | `07-cutover-runbook.md` | Ordered cutover runbook, with topology-specific steps marked PENDING OWNER DECISION |
 | `08-rollback-and-no-go-checklist.md` | Rollback criteria/commands and the no-go list |
 | `09-acceptance-and-health-commands.md` | Health checks, acceptance commands, expected results |
+| `10-operational-services.md` | Health snapshot, morning brief, backup, log rotation/retention, scheduler/boot persistence validation + their schedules |
+| `11-owner-reboot-acceptance-checklist.md` | Owner-only reboot acceptance checklist for the scheduled tasks (engineering must not reboot the laptop) |
 | `inventory-<stamp>.json` | Machine-generated read-only inventory evidence (`scripts/deployment_inventory.py`) |
 
 ## Executable parts (run these; they are the evidence)

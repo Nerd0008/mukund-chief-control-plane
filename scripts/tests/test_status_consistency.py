@@ -65,6 +65,17 @@ class CanonicalStatusSource(unittest.TestCase):
         ids = {b["id"] for b in self.canonical["production_blockers"]}
         self.assertTrue(src.REQUIRED_PRODUCTION_BLOCKERS.issubset(ids))
 
+    def test_11b_required_resolved_blockers_are_recorded_not_deleted(self):
+        # A resolved blocker must be *recorded* in resolved_blockers, must carry
+        # evidence, and must no longer appear as an open production blocker.
+        resolved = {b["id"] for b in self.canonical.get("resolved_blockers", [])}
+        self.assertTrue(src.REQUIRED_RESOLVED_BLOCKERS.issubset(resolved))
+        open_ids = {b["id"] for b in self.canonical["production_blockers"]}
+        self.assertEqual(src.REQUIRED_RESOLVED_BLOCKERS & open_ids, set())
+        for b in self.canonical["resolved_blockers"]:
+            self.assertTrue(b.get("evidence"), f"resolved blocker {b['id']} has no evidence")
+            self.assertTrue(b.get("resolution"), f"resolved blocker {b['id']} has no resolution")
+
     def test_12_optional_items_are_not_promoted_to_release_blockers(self):
         optional_ids = {o["id"] for o in self.canonical["optional_gated"]}
         blocker_ids = {b["id"] for b in self.canonical["production_blockers"]}

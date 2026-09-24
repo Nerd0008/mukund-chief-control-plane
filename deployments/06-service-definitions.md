@@ -21,14 +21,18 @@ either, but the `.cmd` launchers they reference require CRLF).
 | Task | Action | Trigger | Repetition | Restart on failure | Runs on battery | Start when available |
 |---|---|---|---|---|---|---|
 | `Hermes_Gateway` | `wscript.exe //B //Nologo %LOCALAPPDATA%\hermes\gateway-service\Hermes_Gateway.vbs` | **logon** (+30 s delay) | — | **yes**, every 1 min, count 999 | **yes** (allowed) | **yes** |
-| `HermesRemoteQueuePoller` | `wscript.exe //B remote_queue\run_poller_hidden.vbs` → `poller.py --once` | time 21:08 | every **2 min** | no | **no** (blocked) | no |
-| `ChiefDiscordSync` | `venv\Scripts\python.exe scripts\scheduled_sync_chief.py` | time 21:06 | every **30 min** | no | **no** | no |
-| `ChiefCareerBrief` | `career-ops\run_scheduled_brief.cmd` | daily 07:00 | 1 day | no | **no** | no |
-| `ChiefCareerScan-UK` | `career-ops\run_scheduled_scan.cmd uk` | daily 23:45 | 1 day | no | **no** | no |
-| `ChiefCareerScan-Dubai` | `career-ops\run_scheduled_scan.cmd dubai` | daily 23:50 | 1 day | no | **no** | no |
-| `ChiefCareerScan-Japan` | `career-ops\run_scheduled_scan.cmd japan` | daily 23:55 | 1 day | no | **no** | no |
-| `ChiefCareerScan-Singapore` | `career-ops\run_scheduled_scan.cmd singapore` | daily 00:00 | 1 day | no | **no** | no |
-| `Mukund Chief of Staff` | legacy superseded stack | logon | — | — | — | — |
+| `HermesRemoteQueuePoller` | `wscript.exe //B remote_queue\run_poller_hidden.vbs` → `poller.py --once` | time 21:08 + **logon** | every **2 min** | no | **yes** (allowed, since 2026-09-24) | **yes** |
+| `ChiefDiscordSync` | `venv\Scripts\python.exe scripts\scheduled_sync_chief.py` | time 21:06 + **logon** | every **30 min** | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefCareerBrief` | `career-ops\run_scheduled_brief.cmd` | daily 07:00 | 1 day | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefCareerScan-UK` | `career-ops\run_scheduled_scan.cmd uk` | daily 23:45 | 1 day | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefCareerScan-Dubai` | `career-ops\run_scheduled_scan.cmd dubai` | daily 23:50 | 1 day | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefCareerScan-Japan` | `career-ops\run_scheduled_scan.cmd japan` | daily 23:55 | 1 day | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefCareerScan-Singapore` | `career-ops\run_scheduled_scan.cmd singapore` | daily 00:00 | 1 day | no | **yes** (since 2026-09-24) | **yes** |
+| `ChiefOperationalBackup` | `scripts\run_scheduled_ops.cmd backup` | daily 02:30 | 1 day | no | **yes** | **yes** |
+| `ChiefLogRotation` | `scripts\run_scheduled_ops.cmd logs` | daily 03:00 | 1 day | no | **yes** | **yes** |
+| `ChiefMorningBrief` | `scripts\run_scheduled_ops.cmd brief` | daily 06:30 | 1 day | no | **yes** | **yes** |
+| `ChiefHealthSnapshot` | `scripts\run_scheduled_ops.cmd health` | daily 08:00 | 1 day | no | **yes** | **yes** |
+| `Mukund Chief of Staff` | legacy superseded stack | logon | — | — | — | — (**Disabled**, kept as donor) |
 
 All run as `mukun` with `<LogonType>InteractiveToken</LogonType>`
 (`Interactive only`) and `MultipleInstancesPolicy: IgnoreNew`. The poller runs
@@ -48,28 +52,33 @@ A run without an operational current-web search mechanism exits 3 (recorded
 blocker, no fixture fallback), which Task Scheduler reports as a non-zero last
 result by design.
 
-## 2. Two material deployment findings (recorded, not changed)
+## 2. Deployment findings (state after the 2026-09-24 hardening)
 
-**(a) Battery gating.** Seven of eight tasks have
-`DisallowStartIfOnBatteries = true` and `StopIfGoingOnBatteries = true`. On a
-laptop running on battery, the queue poller, Discord sync, the daily brief and
-all four regional scans will not start, and will stop if the machine goes on
-battery while they run. Only `Hermes_Gateway` is exempt. For any unattended
-laptop-primary topology this must be changed to `false` (a small, reversible
-`schtasks /Create /XML` re-import) — it is **not** changed here because it is a
-service change and the topology is undecided.
+**(a) Battery gating — RESOLVED 2026-09-24.** Seven of eight tasks had
+`DisallowStartIfOnBatteries = true` and `StopIfGoingOnBatteries = true`, so on a
+laptop running on battery the queue poller, Discord sync, the daily brief and
+all four regional scans would not start, and would stop if the machine went on
+battery while they ran. The owner approved the service change and
+`scripts/harden_scheduled_tasks.py --apply` set both to `false` on all seven,
+cleared `StopOnIdleEnd` and added `StartWhenAvailable`; the two light periodic
+tasks also gained a logon trigger. Byte-exact pre-change definitions are kept
+under `deployments/service-definitions/backups/20260924T221712Z-pre-hardening/`
+and the round-trip restore was verified, so the change is fully reversible
+(`python scripts/harden_scheduled_tasks.py --restore --backup-dir <dir>`).
 
-**(b) Reboot persistence is unverified for everything but the gateway.** Only
-`Hermes_Gateway` has a logon trigger; `HermesRemoteQueuePoller` and
-`ChiefDiscordSync` have time triggers with no logon/boot trigger and no
-`StartWhenAvailable`, so their survival across a reboot is **not verified**.
-Proving it needs an owner-initiated reboot, which this task's stop conditions
-prohibit. Recorded as owner-actions item 6.
+**(b) Reboot persistence — configured 2026-09-24; the reboot itself is still
+unobserved.** Every owned task now has `StartWhenAvailable` and the two light
+periodic tasks have a logon trigger, so a read-only assessment reports
+`unverified_after_reboot = []`. Engineering must not reboot the owner's laptop,
+so no survival claim is made. Owner checklist:
+`deployments/11-owner-reboot-acceptance-checklist.md`.
 
-**(c) Interactive-token constraint.** Every task runs under the owner's
-interactive logon. None of them runs for a signed-out user. No engineering change
-can alter that without an owner-approved service-account/credential change — this
-is a hard constraint on unattended operation.
+**(c) Interactive-token constraint — deliberately preserved.** Every task runs
+under the owner's interactive logon. None of them runs for a signed-out user.
+The hardening deliberately did **not** switch any task to SYSTEM or another
+account, because the provider keys live in the owner's user-scoped Windows
+Credential Manager and a different account could not read them. Changing this is
+an owner decision (canonical blocker `unattended-interactive-token`).
 
 ## 3. Re-provisioning (idempotent, reversible)
 
