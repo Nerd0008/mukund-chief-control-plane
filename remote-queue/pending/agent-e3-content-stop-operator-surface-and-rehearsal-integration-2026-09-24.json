@@ -1,0 +1,34 @@
+{
+  "task_id": "agent-e3-content-stop-operator-surface-and-rehearsal-integration-2026-09-24",
+  "created_at": "2026-09-24T03:00:00Z",
+  "objective": "Make the new provider content-side stop outcome operationally visible. agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24 gave an unrecovered content-side stop a truthful attribution (provider_content_stop) and a non-silent terminal path (node BLOCKED + an E3 escalation carrying the provider finishReason), but that evidence currently surfaces only through the execution leg's run result and the unit suite. Surface it through the operator/audit path and confirm it end-to-end at the orchestrator boundary, using stub providers only (0 real provider calls): (a) e3-status / e3-trace / e3-why must expose a node's failure_attribution and provider finishReason for a BLOCKED content-stop node, (b) e3_shadow_orchestrator.orchestrate_and_execute must return the content-stop escalation (not only a generic repeated_failure escalation), and (c) the E3 production-execution rehearsal driver must record the content-stop terminal path in its evidence. Do not enable E3 Stage 2 or production dispatch and do not weaken any readiness, qualification or verification criterion.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "medium",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24 is terminal and its commit is on origin/main (code, tests, evidence and state committed; e3_execution.py deployed via scripts/deploy_e3_runtime.py with a backup manifest)",
+    "the E3 production execution leg separates provider_content_stop / provider_error / verification_fail and records the provider finishReason (see audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/)",
+    "the offline fixture suite exec-brain/tests/test_e3_provider_content_stop.py is registered in scripts/evidence_runner.py"
+  ],
+  "allowed_scope": [
+    "Read the content-stop implementation, the E3 CLI/commands surface (e3_cli.py, e3_commands.py), the shadow orchestrator (e3_shadow_orchestrator.py, orchestrate_and_execute), the execution rehearsal driver and the existing evidence/state surfaces before changing anything.",
+    "Expose the provider_content_stop attribution and the provider finishReason (already persisted on the node, the DAG transition cause, the dispatch attempts and the evidence row) through the operator-facing status/trace surfaces; do not add a new store schema or write directly to E1/E2 stores.",
+    "Return the content-stop escalation from orchestrate_and_execute (e.g. surfaced alongside the existing repeated_failure escalation, clearly attributed), without changing the escalation-on-incomplete behaviour or the owner gate.",
+    "Have the E3 production-execution rehearsal driver record the content-side stop terminal path (stub providers only) on the real code path, with the finishReason and the bounded retry accounting in its artifact.",
+    "Add deterministic offline tests (stub transports/fixtures; 0 real provider calls) for the new operator surface and the orchestrator-level escalation.",
+    "Re-run the full E1/E2/E3/E4/E5 plus queue and bridge suites through scripts/evidence_runner.py and record exact commands, counts, exit codes and artifact paths; do not regress the 19-suite / 507-test baseline at 8930572.",
+    "Deploy through scripts/deploy_e3_runtime.py if any runtime module changes, and update state/current_company_state.md and state/full_build_tracker.md with verified facts only.",
+    "Return a strict terminal JSON result and create exactly one successor agent-* task in remote-queue/pending/ before exiting, unless an equivalent pending or running task already exists."
+  ],
+  "stop_conditions": [
+    "Do not enable E3 Stage 2 or production dispatch.",
+    "Do not spend any real provider call; consume the recorded evidence and use stubs/fixtures only.",
+    "Do not weaken, skip or re-parameterise any readiness, qualification or verification criterion.",
+    "Do not fabricate provider behaviour, finish reasons, retry outcomes, usage, latency or evidence.",
+    "Do not expose secrets, credential values, raw chain-of-thought or private runtime database content.",
+    "Do not create an unbounded retry path or re-open a deterministic owner/external blocker (the 0/7 provider-credential Stage-2 gate must still stop immediately).",
+    "Do not perform VPS cutover or finalise deployment architecture."
+  ],
+  "notes": "Staged by agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24 immediately before exit, per the owner standing directive to hand off to exactly one next bounded task. READ FIRST: owner commit 1310440 ('owner: prioritize completion over token conservation', authority file, 2026-09-23T22:50Z) - for this sprint do NOT optimise engineering for token conservation or provider cost; priority order is correctness/truthfulness, then completion/deployment readiness, then speed and unattended continuity, then reliability/recoverability, then token efficiency; it does not authorise weakening gates or fabricating completion. Verified state at staging (recorded evidence only): provider_content_stop attribution implemented in exec-brain/e3_execution.py (commit 8930572) with DEFAULT_MAX_CONTENT_STOP_RETRIES=2 (identical same-request retry, at most 3 identical single-shot calls per node), a hard bound 1 + max_repair_attempts + max_content_stop_retries, a defensive attempt_budget_exhausted guard, a BLOCKED terminal state carrying provider_content_stop_unrecovered:<finishReason> and an E3 escalation (trigger=provider_content_stop); provider_error and verification_fail are now separately attributed; the deterministic verification contract and E4/E5 behaviour are unchanged. Evidence: audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/ (0 real provider calls; recorded responses used verbatim as fixtures). Regression: 19 suites / 507 tests / exit 0 at 8930572, post-deploy re-run identical (audits/evidence/2026-09-24T02-59-27Z-regression-post-content-stop-postdeploy/); deployed e3_execution.py sha256 6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3 matches the repo source. Do NOT repeat the 2026-09-24T01:44:32Z series, the 2026-09-24T01:46:56Z qualification run, the 2026-09-23T21:32:41Z decomposed multi-worker rehearsal, the 2026-09-23T21-10-00Z production rehearsal, or the 2026-09-23T21-49-21Z single-call image diagnosis - consume them. Still open and deliberately not chased: what makes the recitation filter fire on some calls and not others for the identical prompt; the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it."
+}

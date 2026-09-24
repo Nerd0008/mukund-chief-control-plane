@@ -84,7 +84,38 @@
       "tests_passed": 507,
       "exit_code": 0,
       "baseline": {"sha": "d9d1a7f9972f65d1367c7ca4d79f7bf367aace52", "suites": 18, "tests": 482, "exit_code": 0}
+    },
+    "post_deploy_runner": {
+      "label": "regression-post-content-stop-postdeploy",
+      "command": "python scripts/evidence_runner.py --label regression-post-content-stop-postdeploy",
+      "artifact": "audits/evidence/2026-09-24T02-59-27Z-regression-post-content-stop-postdeploy/",
+      "code_sha": "8930572",
+      "suites_run": 19,
+      "suites_passed": 19,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 507,
+      "tests_passed": 507,
+      "exit_code": 0
+    },
+    "deployed_runtime_verification": {
+      "command": "python audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/verify_deployed_runtime.py",
+      "deployed_e3_execution_sha256": "6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3",
+      "repo_source_sha256": "6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3",
+      "matches": true,
+      "default_max_content_stop_retries": 2,
+      "content_stop_class": "provider_content_stop",
+      "transport_error_class": "provider_error",
+      "contract_class": "verification_fail",
+      "provider_calls": 0
     }
+  },
+  "deployment": {
+    "script": "scripts/deploy_e3_runtime.py",
+    "source_git_sha": "8930572",
+    "deployed_modules": ["e3_execution.py"],
+    "backup_dir": "%LOCALAPPDATA%\\hermes\\exec-brain\\backups\\e3-deploy-20260924T025913Z",
+    "deployed_at_utc": "2026-09-24T02:59:13+00:00"
   },
   "not_claimed": [
     "the fixtures reproduce the recorded response shape/values that drive attribution; the image payload is a minimal valid PNG, not the recorded JPEG bytes",

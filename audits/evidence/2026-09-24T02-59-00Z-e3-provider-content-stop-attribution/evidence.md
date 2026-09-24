@@ -124,8 +124,31 @@ transports):
 - import root: `exec-brain/`
 - result: `Ran 25 tests` — `OK`; exit code **0**
 
+Post-deploy regression (after `scripts/deploy_e3_runtime.py`):
+
+- command: `python scripts/evidence_runner.py --label regression-post-content-stop-postdeploy`
+- artifact: `audits/evidence/2026-09-24T02-59-27Z-regression-post-content-stop-postdeploy/`
+- result: **19 suites / 19 passed / 0 failed / 0 unavailable — 507 tests
+  collected / 507 passed**; runner exit code **0**
+- code SHA at run: `8930572` (committed)
+
+Deployed-runtime verification (live runtime root, not the checkout):
+
+- command:
+  `python audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/verify_deployed_runtime.py`
+- deployed `e3_execution.py` sha256
+  `6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3` **equals**
+  the repository source sha256
+- deployed module reports `DEFAULT_MAX_CONTENT_STOP_RETRIES = 2` and classifies
+  the recorded `IMAGE_RECITATION` response as `provider_content_stop`, an
+  `http_503` as `provider_error`, and a `COMPLETE`-with-`STOP` delivery as
+  `verification_fail`
+- deployment manifest: source sha `8930572`; backup
+  `%LOCALAPPDATA%\hermes\exec-brain\backups\e3-deploy-20260924T025913Z`
+
 The full per-suite table and exact commands are in
-`audits/evidence/2026-09-24T02-56-57Z-regression-post-content-stop/evidence.md`.
+`audits/evidence/2026-09-24T02-56-57Z-regression-post-content-stop/evidence.md`
+(identical suite set to the post-deploy run).
 
 ## Limitations / not claimed
 
