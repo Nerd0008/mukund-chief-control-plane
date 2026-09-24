@@ -1,0 +1,32 @@
+{
+  "task_id": "agent-e3-stage2-enable-after-provider-verification-2026-09-24",
+  "created_at": "2026-09-24T21:05:00Z",
+  "objective": "Complete the owner-authorized LOCAL E3 Stage 2 enablement immediately after the provider-verification closeout task reaches a terminal state, but only if its fresh evidence proves all required credentials, provider identities, regressions, rehearsals, integrity and safety gates pass. If any required gate is not green, do not enable Stage 2; record the exact blocker and leave the system unchanged.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-e3-provider-verification-stage2-closeout-2026-09-24 must be terminal and its evidence/commits must be present on main.",
+    "Mukund has already explicitly authorized LOCAL Stage 2 after all provider credentials are stored and objective readiness gates pass.",
+    "Do not race any active agent in the shared worktree. Inspect queue state, git status, canonical status and newest provider/readiness evidence before editing.",
+    "This successor exists because the active provider-verification task carries a live-run stop condition that forbids Stage 2 enablement in that task itself."
+  ],
+  "allowed_scope": [
+    "Read and validate the newest credential-presence, provider identity/smoke, regression, production-rehearsal, E4/E5 and Stage-2 readiness evidence produced by the predecessor.",
+    "Re-run only bounded deterministic/local checks needed to confirm evidence freshness or status consistency; do not repeat paid provider calls unnecessarily.",
+    "If and only if every mandatory readiness condition is green and there is no unresolved critical integrity/privacy/safety defect, perform the documented LOCAL E3 Stage 2 enablement procedure.",
+    "Verify the resulting Stage 2 state from the live local runtime and repository state; record evidence truthfully.",
+    "Regenerate canonical status/executive tracker and reconcile the owner TODO so Stage 2 reflects the measured result.",
+    "Commit and push the minimal truthful state/evidence changes attributable to this activation."
+  ],
+  "stop_conditions": [
+    "Do not enable Stage 2 if any mandatory provider identity, credential, routing, qualification, regression, rehearsal, integrity or safety gate is failed, stale, unknown where required, or contradictory.",
+    "Do not perform VPS cutover, production deployment, final topology selection or remote infrastructure provisioning.",
+    "Do not expose or read out provider secret values.",
+    "Do not weaken or bypass a readiness gate to obtain a PASS.",
+    "Do not claim live-provider failover coverage unless real-provider evidence actually exists; a remaining live-failover evidence gap may stay explicit if it is not a mandatory Stage-2 gate.",
+    "If the predecessor ends blocked/failed or leaves ambiguous evidence, leave Stage 2 OFF and record the precise blocker instead of retry-looping."
+  ],
+  "notes": "Owner intent is local Stage 2 after successful post-key verification. The active predecessor was later constrained to verification-only by an active-run coordinator override, so this separate successor preserves that safety boundary while ensuring the authorized activation is not forgotten."
+}
