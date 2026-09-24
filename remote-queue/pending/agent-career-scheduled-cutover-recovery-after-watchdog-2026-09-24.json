@@ -2,7 +2,7 @@
   "task_id": "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24",
   "created_at": "2026-09-24T15:58:00Z",
   "objective": "Recover the unfinished Career scheduled research cutover by inspecting the exhausted predecessor's partial changes and completing only the smallest remaining non-destructive engineering/verification unit. The predecessor exhausted its bounded attempts on execution_error; this is a new recovery task, not a blind retry.",
-  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md; remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json; handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "high",
   "requires_owner_approval": false,
   "status": "pending",
@@ -29,5 +29,9 @@
     "Do not enable E3 Stage 2, choose deployment architecture, or perform VPS cutover/deployment.",
     "Do not duplicate completed work or exceed bounded retry/time policy; if the same deterministic watchdog failure recurs, preserve partial evidence and report the exact remaining blocker."
   ],
-  "notes": "The predecessor task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 exhausted 3/3 attempts (1 no-progress watchdog, 2 hard timeouts). Its terminal record says career-ops scheduled-orchestrator, deployments/06 and runtime changes remain uncommitted, and launcher CRLF preservation was one acceptance gap. Canonical status marks the scheduled-orchestrator cutover NOT COMPLETE/BLOCKED. This recovery task owns inspection and safe salvage; do not race the predecessor's dirty worktree if any process/worktree is still active."
+  "notes": "The predecessor task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 exhausted 3/3 attempts (1 no-progress watchdog, 2 hard timeouts). Its terminal record says career-ops scheduled-orchestrator, deployments/06 and runtime changes remain uncommitted, and launcher CRLF preservation was one acceptance gap. Canonical status marks the scheduled-orchestrator cutover NOT COMPLETE/BLOCKED. This recovery task owns inspection and safe salvage; do not race the predecessor's dirty worktree if any process/worktree is still active.",
+  "references": [
+    "remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json",
+    "handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md"
+  ]
 }
