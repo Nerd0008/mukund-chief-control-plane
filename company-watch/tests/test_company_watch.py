@@ -104,11 +104,11 @@ def copy_uk_tracker(tmp_path: Path) -> Path:
 
 
 def write_manifest_cli(tmp_path: Path, records: list[dict], tracker: Path,
-                       archive_dir: Path, apply: bool) -> dict:
-    manifest = tmp_path / "manifest.json"
+                       archive_dir: Path, apply: bool, region: str = "uk") -> dict:
+    manifest = tmp_path / f"manifest-{region}.json"
     manifest.write_text(json.dumps({"records": records}), encoding="utf-8")
     cmd = [sys.executable, str(REPO_ROOT / "career-ops" / "career_ops_cli.py"),
-           "write", "--region", "uk", "--manifest", str(manifest),
+           "write", "--region", region, "--manifest", str(manifest),
            "--tracker", str(tracker), "--backup-dir", str(tmp_path / "backups"),
            "--archive-dir", str(archive_dir)]
     if apply:
@@ -566,6 +566,122 @@ def test_region_trackers_receive_provenance_without_touching_owner_columns():
         owner_keys = set(targets["owner_column_keys_excluded"])
         assert "notes" in owner_keys
         assert targets["prior_signal"] is None
+
+
+# Regional end-to-end handoff: a region-routed finding must actually land in that
+# region's workbook (provenance in `Source`, owner columns untouched) and must
+# dedupe on repeat. Only workbook COPIES are written; the canonical regional
+# trackers are opened read-only and their hash is re-checked afterwards.
+REGIONAL_CASES = {
+    "dubai": {"location": "Dubai, United Arab Emirates",
+              "allow": ["Dubai", "United Arab Emirates", "Abu Dhabi"]},
+    "japan": {"location": "Tokyo, Japan", "allow": ["Japan", "Tokyo"]},
+    "singapore": {"location": "Singapore, Singapore", "allow": ["Singapore"]},
+}
+
+
+def regional_filters(allow: list[str]) -> dict:
+    return {
+        "available": True,
+        "location_always_allow": allow,
+        "location_allow": allow,
+        "location_block": [],
+        "title_positive": ["Intern", "Internship"],
+        "title_negative": ["Senior", "Principal", "Lead ", "Manager", "Director", "Head of"],
+        "max_posting_age_days": 14,
+        "path": "portals.yml",
+    }
+
+
+@pytest.mark.parametrize("region", sorted(REGIONAL_CASES))
+def test_regional_handoff_writes_provenance_to_a_tracker_copy(region, tmp_path):
+    case = REGIONAL_CASES[region]
+    tw, _profiles, region_cfg = cw.resolve_region_config(CFG, region)
+    canonical = Path(region_cfg["tracker"])
+    if not canonical.exists():
+        pytest.skip(f"canonical {region} tracker unavailable")
+
+    copy_path = tmp_path / canonical.name
+    shutil.copy2(canonical, copy_path)
+    archive_dir = tmp_path / "copies"
+    archive_dir.mkdir()
+
+    dedupe = cw.build_shared_dedupe(CFG, region, tracker_override=str(copy_path))
+    jobs = [{"job_id": f"cw-{region}-1", "title": "Security Operations Intern",
+             "location": case["location"],
+             "url": f"https://job-boards.greenhouse.io/testco/jobs/cw-{region}-1",
+             "posted_at": "2026-09-21T00:00:00+00:00", "url_source": "vendor"}]
+    doc = cw.build_findings(synthetic_resolution(jobs), region=region, cfg=CFG, dedupe=dedupe,
+                            tw=tw, filters=regional_filters(case["allow"]), now=NOW)
+    assert doc["counts"]["findings"] == 1
+    assert doc["counts"]["routed_in_scope"] == 1
+    assert doc["findings"][0]["tracker_eligible"] is True
+
+    manifest = cw.build_manifest(doc, region=region, region_cfg=region_cfg, cfg=CFG)
+    assert manifest["provenance_column"] == "source"
+    assert manifest["counts"]["selected"] == 1
+    record = manifest["records"][0]
+    assert record["source"].startswith(f"{cw.PROVENANCE_PREFIX} — ")
+    assert "notes" not in record and "discovery" not in record
+    assert record["last_checked"] == NOW.date().isoformat()
+
+    tr = tw.Tracker(copy_path, region_cfg)
+    before_owned = tr.owned_snapshot()
+    last_before = tr.last_data_row()
+    tr.wb.close()
+    canonical_before = tw.sha256_file(canonical)
+
+    dry = write_manifest_cli(tmp_path, manifest["records"], copy_path, archive_dir,
+                             apply=False, region=region)
+    assert dry["applied"] is False
+    assert dry["counts"]["appended"] == 1
+    assert tw.sha256_file(copy_path) == dedupe["tracker_sha256"]
+
+    applied = write_manifest_cli(tmp_path, manifest["records"], copy_path, archive_dir,
+                                 apply=True, region=region)
+    assert applied["applied"] is True
+    assert applied["counts"]["appended"] == 1
+    assert applied["verification"]["ok"] is True
+
+    tr = tw.Tracker(copy_path, region_cfg)
+    last = tr.last_data_row()
+    assert last == last_before + 1
+    assert tr.ws[f"X{last}"].value.startswith(cw.PROVENANCE_PREFIX)
+    assert tr.ws[f"Z{last}"].value in (None, "")          # owner notes never automated
+    after_owned = tr.owned_snapshot()
+    for row, cols in before_owned.items():
+        for col, value in cols.items():
+            assert after_owned[row][col] == value, f"{region} owner column {col}{row} changed"
+    # the appended row carries only the writer's own documented defaults
+    assert after_owned[last]["R"] == region_cfg["defaults"]["application_status"]
+    tr.wb.close()
+
+    # shared dedupe: the same region-routed finding must not append twice
+    repeat = write_manifest_cli(tmp_path, manifest["records"], copy_path, archive_dir,
+                                apply=True, region=region)
+    assert repeat["counts"]["appended"] == 0
+    assert repeat["counts"]["duplicates"] == 1
+
+    # the canonical regional workbook was never written
+    assert tw.sha256_file(canonical) == canonical_before
+    assert tw.sha256_file(canonical) != tw.sha256_file(copy_path)
+
+
+def test_regional_handoff_requires_an_explicit_region(tmp_path):
+    """A finding routed to another region is never handed off implicitly."""
+    tw, _profiles, uk_cfg = cw.resolve_region_config(CFG, "uk")
+    tracker = copy_uk_tracker(tmp_path)
+    dedupe = cw.build_shared_dedupe(CFG, "uk", tracker_override=str(tracker))
+    jobs = [{"job_id": "1", "title": "SOC Analyst Intern", "location": "Tokyo, Japan",
+             "url": "https://job-boards.greenhouse.io/testco/jobs/tokyo-1",
+             "posted_at": "2026-09-21T00:00:00+00:00", "url_source": "vendor"}]
+    doc = cw.build_findings(synthetic_resolution(jobs), region="uk", cfg=CFG, dedupe=dedupe,
+                            tw=tw, filters=FULL_FILTERS, now=NOW)
+    assert doc["findings"][0]["region_route"] == "japan"
+    assert doc["counts"]["routed_other_region"] == 1
+    manifest = cw.build_manifest(doc, region="uk", region_cfg=uk_cfg, cfg=CFG)
+    assert manifest["counts"]["selected"] == 0
+    assert manifest["records"] == []
 
 
 # --------------------------------------------------------------------------- #

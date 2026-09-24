@@ -478,6 +478,11 @@ def route_region(location: str | None, cfg: dict, filters: dict | None = None,
 
 PROVENANCE_PREFIX = "COMPANY WATCH"
 
+# The task that specified this integration. Evidence produced by a later
+# acceptance/recovery run passes its own id via `run --task-id` so the evidence
+# header names the run that actually produced it.
+DEFAULT_TASK_ID = "agent-company-watch-job-search-integration-2026-09-23"
+
 
 def provenance_targets(region_cfg: dict) -> dict:
     """Which canonical columns carry Company Watch provenance for this region.
@@ -1074,7 +1079,7 @@ def cmd_run(args) -> int:
 
     finished = dt.datetime.now(dt.timezone.utc)
     evidence = {
-        "task": "agent-company-watch-job-search-integration-2026-09-23",
+        "task": args.task_id,
         "run_id": run_id,
         "started_at": started.replace(microsecond=0).isoformat(),
         "finished_at": finished.replace(microsecond=0).isoformat(),
@@ -1301,6 +1306,10 @@ def main(argv=None) -> int:
     p.add_argument("--acceptance-rows", type=int, default=3)
     p.add_argument("--archive-dir", action="append")
     p.add_argument("--rebuild-registry", action="store_true")
+    p.add_argument("--task-id", default=DEFAULT_TASK_ID,
+                   help="task id recorded in the evidence header (default: the task that "
+                        "specified this integration; pass the recovery/acceptance task id "
+                        "when this run is its evidence)")
     p.set_defaults(fn=cmd_run)
 
     args = ap.parse_args(argv)

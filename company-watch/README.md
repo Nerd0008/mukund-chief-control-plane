@@ -26,7 +26,7 @@ an organisation.
 | `company_watch.py` | CLI: `registry`, `resolve`, `scan`, `handoff`, `workbook`, `run` |
 | `company_watch_config.json` | Watch configuration (paths, bounds, routing, workbook) |
 | `registry/company_watch_registry_summary.json` | Committable aggregate view (counts + source hash, no company names) |
-| `tests/test_company_watch.py` | 30 offline tests (all network paths stubbed) |
+| `tests/test_company_watch.py` | 35 offline tests (all network paths stubbed) |
 
 Owner-private data policy: the **full company-level registry** and per-posting
 findings name Mukund's job-search history, so they are written to
@@ -87,7 +87,10 @@ verification results are committed.
 
 `resolve`/`scan`/`run` are the only commands that touch the network, they are bounded
 by `--budget-s` (a run that hits the budget reports `budget_exhausted: true`), and
-every request is recorded in the run's HTTP call log.
+every request is recorded in the run's HTTP call log. `run --task-id <id>` records
+which task the evidence belongs to (defaults to the task that specified the
+integration), so a later acceptance/recovery run can produce evidence under its own
+id without editing the module.
 
 ## Sweep order
 
@@ -114,6 +117,10 @@ index. Excel regional trackers stay authoritative.
 * Dubai/Japan/Singapore: provenance goes to `Source` (X). Those trackers have no
   non-owner prior-signal column, so the prior signal is recorded in the handoff
   manifest and this workbook instead of being written into an owner column.
+  `test_regional_handoff_writes_provenance_to_a_tracker_copy` proves this end to end
+  per region against a workbook copy: the finding appends once with provenance in
+  `Source`, re-applying appends nothing, existing owner columns (R,S,T,U,V,Z) are
+  byte-identical, and the canonical regional workbook hash is unchanged.
 * Regional scan/schedule lanes are **not** Company Watch's to build — they belong to
   `agent-regional-job-search-agents-and-schedulers-2026-09-23`. A non-UK finding is
   routed (`region_route`) but is not handed off unless its region is explicitly
@@ -121,7 +128,7 @@ index. Excel regional trackers stay authoritative.
 
 ## Tests
 
-    python -m pytest company-watch/tests/test_company_watch.py -v     # 30 passed, offline
+    python -m pytest company-watch/tests/test_company_watch.py -v     # 35 passed, offline
 
 Covers: registry parsing/verification and mismatch detection, "never invents a
 company", real-source counts (203/18/221), name variants and slug candidates,
@@ -131,5 +138,7 @@ budget stop, owner filters + age, API-endpoint refusal, unattributed-board disca
 shared dedupe (URL, company+title, cross-month ledger), manifest has no application
 state, provenance refusal when a region has no non-owner provenance column, the full
 handoff→append→verify→repeat-dedupe cycle on a workbook copy with the canonical file
-proven untouched, monthly workbook creation/conflict refusal, and deterministic sweep
-ordering.
+proven untouched, **the same end-to-end regional handoff per region (dubai/japan/
+singapore) including owner-column immutability and refusal to hand a finding to a
+region that was not requested**, monthly workbook creation/conflict refusal, and
+deterministic sweep ordering.
