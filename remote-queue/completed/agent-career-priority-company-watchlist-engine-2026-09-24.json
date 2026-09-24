@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "high",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "completed",
   "prerequisites": [
     "agent-career-codex-style-open-web-job-research-2026-09-24 must reach a truthful terminal state.",
     "Reuse the unified discovery schema/funnel and web-research collector from the prerequisite."
@@ -49,5 +49,49 @@
     "last_summary": "Hermes dispatch exceeded 1200 seconds.",
     "next_action": "retry",
     "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T13:59:25.364632Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 1 had already landed the B27 implementation (career-ops/discovery/watchlist.py with owner-editable input, deterministic identity, careers/ATS resolution, two query families, per-company health; pipeline collector + priority_watchlist provenance; the brief section; ats_endpoints name-confirmation alias; test_watchlist.py; fixtures; the committed template) but timed out at the 1200s dispatch limit before the acceptance runner, brief-section tests, docs and commits. Resume kept every landed artifact and completed only the outstanding units: added career-ops/run_watchlist_acceptance.py (32/32 checks, fixtures only, covering all six named acceptance fixtures), added 5 watchlist-section tests to test_daily_brief.py, and updated .gitignore + career-ops/README.md + state/v1-agent-roster.md + state/full_build_tracker.md + state/current_company_state.md. Allowed scope is satisfied: empty/missing watchlist is valid; duplicate spellings collapse without merging distinct companies; ATS families cover Greenhouse/Lever/Workday/Ashby/SmartRecruiters/Teamtailor/Workable plus region-specific HRMOS/Jobcan; unreachable careers infrastructure is labelled unavailable/unknown (never 'no jobs'); watchlist findings carry the priority_watchlist flag and go through the same funnel without bypassing gates; Company Watch + watchlist duplicates merge provenance; no fabricated careers URLs or vacancies; no browser/session/contact/application; no canonical tracker write. Full suite 512 passed. Committed and pushed (origin/main = 97aee9a). The owner's company list remains a later data edit at the git-ignored runtime path.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "1cae464 discovery: owner-company priority watchlist lane (B27) \u2014 additive company-list discovery source",
+      "97aee9a runtime: queue log and tracker-writer run-health bookkeeping (dry-run, no workbook write)"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests/test_watchlist.py -q -> 36 passed",
+      "python -m pytest career-ops/tests/test_daily_brief.py -q -> 33 passed (5 new watchlist-section tests)",
+      "python -m pytest career-ops/tests/ -q -> 512 passed",
+      "python career-ops/run_watchlist_acceptance.py -> PASS 32/32 checks (fixtures only)",
+      "evidence: audits/evidence/2026-09-24T13-58-06Z-career-priority-watchlist/ (aggregate only)"
+    ],
+    "changed_files": [
+      ".gitignore",
+      "career-ops/discovery/watchlist.py",
+      "career-ops/discovery/pipeline.py",
+      "career-ops/run_watchlist_acceptance.py",
+      "career-ops/daily_brief.py",
+      "career-ops/daily_brief_config.json",
+      "career-ops/tests/test_watchlist.py",
+      "career-ops/tests/test_daily_brief.py",
+      "career-ops/tests/watchlist_fixtures.py",
+      "career-ops/tests/fixtures/discovery/watchlist/watchlist-input.json",
+      "career-ops/tests/fixtures/discovery/watchlist/company-watch-overlap.json",
+      "career-ops/watchlist/company-watchlist.example.json",
+      "company-watch/ats_endpoints.py",
+      "career-ops/README.md",
+      "state/v1-agent-roster.md",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "audits/evidence/2026-09-24T13-58-06Z-career-priority-watchlist/evidence.json",
+      "audits/evidence/2026-09-24T13-58-06Z-career-priority-watchlist/evidence.md",
+      "remote-queue/logs/queue.log",
+      "runtime/career-ops/run-health/tracker-writer.json"
+    ],
+    "remaining": [
+      "Owner supplies the actual company list later: copy career-ops/watchlist/company-watchlist.example.json to the git-ignored runtime/career-ops/watchlist/company-watchlist.json and add names (a data edit, not an engineering project). No engineering work is outstanding."
+    ]
   }
 }
