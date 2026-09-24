@@ -1,0 +1,33 @@
+{
+  "task_id": "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24",
+  "created_at": "2026-09-24T15:58:00Z",
+  "objective": "Recover the unfinished Career scheduled research cutover by inspecting the exhausted predecessor's partial changes and completing only the smallest remaining non-destructive engineering/verification unit. The predecessor exhausted its bounded attempts on execution_error; this is a new recovery task, not a blind retry.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md; remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json; handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Confirm this task is the only agent-* worker running; the umbrella full-operational-build record has no worker and is not execution evidence.",
+    "Inspect current main, git status, worker/process and scheduler state before editing; recover usable predecessor changes without overwriting active Hermes work.",
+    "Preserve predecessor history and all committed evidence; do not modify the blocked predecessor record except for an additive reconciliation note if justified."
+  ],
+  "allowed_scope": [
+    "Inspect the partial Career scheduled-orchestrator, launcher, deployment, test and evidence changes from the blocked predecessor; record exact changed paths and distinguish committed from uncommitted state.",
+    "Resume existing implementation with minimal patches; do not rebuild already completed discovery, watchlist, recruiter/LinkedIn intake, Company Watch, or tracker-writer components.",
+    "Use disposable/copy fixtures for integration acceptance. Prove the unified scheduler invokes the high-recall orchestrator and produces a unified manifest/brief with region/source funnel attribution; preserve intern_only only as explicit diagnostic mode.",
+    "Repair launcher line-ending or portability defects with repository-native deterministic rules, and test the exact launcher bytes on the supported Windows path without launching GUI/browser applications.",
+    "Run bounded, read-only live web acceptance only if the required non-GUI search interface is already available in the environment. Otherwise precisely record unavailable sources; do not infer live source coverage from fixtures.",
+    "Keep schedules disabled or run against isolated test configuration only; do not register, enable, replace, or trigger real owner scheduled tasks.",
+    "Confirm canonical workbook and tracker hashes remain unchanged; perform no tracker apply, application submission, outreach, LinkedIn mutation, account login, or cookie/session access.",
+    "Run focused Career tests and relevant regression suites with explicit progress output and bounded timeouts. Commit and push only the recovered implementation, tests, and truthful evidence attributable to this task.",
+    "Before returning terminal JSON, create exactly one unique authorized successor only if a concrete independent gap remains and no equivalent task is pending/running; otherwise return terminal without a successor."
+  ],
+  "stop_conditions": [
+    "Do not use local interactive browser/GUI, Edge, signed-in sessions, cookies, or owner browser profile.",
+    "Do not claim a source is live, empty, or validated without direct evidence; preserve UNKNOWN/unavailable distinctions.",
+    "Do not enable owner schedules, write canonical trackers, send external messages, apply for jobs, or mutate external accounts.",
+    "Do not enable E3 Stage 2, choose deployment architecture, or perform VPS cutover/deployment.",
+    "Do not duplicate completed work or exceed bounded retry/time policy; if the same deterministic watchdog failure recurs, preserve partial evidence and report the exact remaining blocker."
+  ],
+  "notes": "The predecessor task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 exhausted 3/3 attempts (1 no-progress watchdog, 2 hard timeouts). Its terminal record says career-ops scheduled-orchestrator, deployments/06 and runtime changes remain uncommitted, and launcher CRLF preservation was one acceptance gap. Canonical status marks the scheduled-orchestrator cutover NOT COMPLETE/BLOCKED. This recovery task owns inspection and safe salvage; do not race the predecessor's dirty worktree if any process/worktree is still active."
+}
