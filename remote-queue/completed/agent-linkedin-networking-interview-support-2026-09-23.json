@@ -1,0 +1,82 @@
+{
+  "task_id": "agent-linkedin-networking-interview-support-2026-09-23",
+  "created_at": "2026-09-23T21:35:00Z",
+  "objective": "Complete the career-facing people/network layer: LinkedIn read-only job/company intake, LinkedIn profile/post drafting, networking/recruiter outreach drafts, and interview-prep packs linked to canonical Career Ops job/application context.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Career Ops and the LinkedIn/CV workflow interfaces should be stable enough to consume canonical records."
+  ],
+  "allowed_scope": [
+    "Use LinkedIn only through supported authenticated/read-only capabilities available to the runtime; if account/API access is owner-only, implement/test the interface with fixtures and record exact setup steps.",
+    "Deduplicate LinkedIn jobs/companies against Career Ops/Company Watch before tracker mutation.",
+    "Build profile/post draft generation with owner-truth constraints and no automatic posting.",
+    "Build recruiter/networking outreach drafting with provenance and explicit unsent state.",
+    "Build an Interview Prep Agent that consumes JobBrief + company research + owner CV/project sources and produces role-specific technical/behavioural prep, likely questions, evidence-backed talking points and unknowns.",
+    "External posting, messages, connections or applications remain owner-gated.",
+    "Run local acceptance on safe fixtures and update state/tracker."
+  ],
+  "stop_conditions": [
+    "No LinkedIn mutation/send/post/connect/apply.",
+    "No fabricated profile or interview claims.",
+    "No credential exposure."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "completed_at": "2026-09-24T01:08:30.829222Z",
+  "result": {
+    "status": "completed",
+    "summary": "Completed the career-facing people/network layer (roster B19-B22) on top of the existing Career Ops integration. LinkedIn outreach drafting (B21): linkedin_workflow.build_outreach_drafts() now emits three unsent variants (networking, recruiter, hiring_manager), each with an explicit unsent_state block (sent/sent_at/recipient_selected/connection_request_created/message_queued/scheduled all false or null, attachments_sent 0, owner_approval_required true) and a per-draft provenance block (generator, canonical cv.md/profile.yml/cv-facts.json SHA-256s, exact cv.md:<line> refs). The hiring-manager variant names the role/employer ONLY from the resolved Career Ops record (references_job) and is omitted when no job context resolves. Built the Interview Prep Agent (B22) as career-ops/interview_prep.py + interview_prep_schema.json: it consumes a canonical JobBrief (career-ops/job_intelligence.py), an optional cited research file via the briefing module's own provider interface, and the canonical cv.md/profile.yml/cv-facts.json, and produces technical prep, behavioural prep, a likely-question list, evidence-backed talking points and an explicit unknown list. Every question is a deterministic template marked employer_supplied=false with the verbatim posting line and source_line it came from; every talking point quotes a canonical CV line verbatim at a checked cv.md line; a requirement with no canonical evidence becomes owner_input_required with an explicit owner action; candidate_claims and external_actions_taken are always empty and interview_scheduled/attended are false. External posting/messaging/connecting/applying remain owner-gated (guard refuses and logs every one). A truthfulness defect was found by test and fixed: the first evidence matcher scored any term overlap, so a mainframe-RACF requirement was reported evidence_backed off the word 'security' alone; evidence_matching.general_terms now strips domain words before scoring and qualification requirements resolve to the canonical qualification headings instead. Acceptance: 27/27 checks on labelled synthetic fixtures, re-run and recorded against code SHA bc6391c.",
+    "owner_action_required": "Optional owner decision (does not block anything, recorded as item 13 in tasks-or-issues/overnight-owner-actions-2026-09-24.md): say whether the live LinkedIn surface should ever have account access. No LinkedIn account/session/API/browser path exists in this runtime, so the live surface is untested and stays owner-gated. Options: keep the current owner-export path (no action needed - export saved jobs/alerts/followed companies to e.g. runtime/linkedin/inbox/ as .json/.jsonl/.csv/.md/.txt and the workflow parses it read-only); authorise a different named read-only source; or confirm the live surface stays owner-only forever so the drafts remain copy-paste material.",
+    "blocker_category": null,
+    "commits": [
+      "37e59c8 career-ops: LinkedIn networking/recruiter/hiring-manager outreach drafts (B21)",
+      "55b6082 career-ops: Interview Prep Agent (B22) with deterministic, quote-only prep packs",
+      "5f5222e state: record LinkedIn outreach + Interview Prep Agent (27/27 acceptance) and the live-LinkedIn owner decision",
+      "bc6391c career-ops: schema contract test for interview prep packs; acceptance records its code SHA",
+      "b7f2b4f audit: LinkedIn outreach + interview prep acceptance on code SHA bc6391c (27/27)",
+      "pushed: origin/main == b7f2b4f"
+    ],
+    "tests": [
+      "python -m pytest career-ops/tests -q -> 278 passed (was 248)",
+      "python -m pytest career-ops/tests/test_interview_prep.py -q -> 26 passed (new suite)",
+      "python -m pytest career-ops/tests/test_linkedin_workflow.py -q -> 38 passed (was 34)",
+      "python -m pytest career-ops/tests company-watch/tests -q -> 308 passed",
+      "python career-ops/run_interview_prep_acceptance.py --stamp 20260924T020000Z -> ok true, 27/27 checks passed, 0 critical failures, code_sha bc6391c",
+      "python career-ops/run_interview_prep_acceptance.py --stamp 20260924T013000Z / 20260924T014000Z -> 27/27 each (earlier revisions, preserved)",
+      "python career-ops/run_cv_linkedin_acceptance.py --stamp 20260924T014100Z -> ok true, 23/23 critical checks pass (no regression in the pre-existing LinkedIn/CV acceptance)",
+      "acceptance internals: tampered quote detected; injected first-person claim detected; employer-supplied-question pack rejected; independent re-read of cv.md confirms every quoted line; canonical source SHA-256s identical before/after; canonical trackers untouched; no message queued, no connection created, nothing sent"
+    ],
+    "changed_files": [
+      "career-ops/interview_prep.py",
+      "career-ops/interview_prep_config.json",
+      "career-ops/interview_prep_schema.json",
+      "career-ops/run_interview_prep_acceptance.py",
+      "career-ops/tests/test_interview_prep.py",
+      "career-ops/linkedin_workflow.py",
+      "career-ops/tests/test_linkedin_workflow.py",
+      "career-ops/README.md",
+      "state/full_build_tracker.md",
+      "state/v1-agent-roster.md",
+      "state/current_company_state.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/acceptance.json",
+      "audits/evidence/20260924T013000Z-linkedin-outreach-interview-prep/acceptance.md",
+      "audits/evidence/20260924T014000Z-linkedin-outreach-interview-prep/acceptance.json",
+      "audits/evidence/20260924T014000Z-linkedin-outreach-interview-prep/acceptance.md",
+      "audits/evidence/20260924T015000Z-linkedin-outreach-interview-prep/acceptance.json",
+      "audits/evidence/20260924T015000Z-linkedin-outreach-interview-prep/acceptance.md",
+      "audits/evidence/20260924T020000Z-linkedin-outreach-interview-prep/acceptance.json",
+      "audits/evidence/20260924T020000Z-linkedin-outreach-interview-prep/acceptance.md",
+      "audits/evidence/20260924T014100Z-cv-linkedin-workflows/acceptance.json",
+      "audits/evidence/20260924T014100Z-cv-linkedin-workflows/acceptance.md"
+    ],
+    "remaining": [
+      "Owner decision on live LinkedIn access (item 13) - the only unimplemented part of the LinkedIn surface, and it is owner-gated by design.",
+      "The whole-company local acceptance task (agent-whole-company-local-acceptance-and-morning-handover-2026-09-23, pending) lists the LinkedIn draft/read-only path but not the interview-prep path; the gap is recorded in state/full_build_tracker.md rather than duplicated in a new agent-* task.",
+      "Recorded limitation: interview-prep evidence matching is deliberately conservative - a requirement is only evidence_backed when it shares a term outside the configured general-domain list (or is a qualification resolved to the canonical qualification headings), so a genuine match on a general word alone becomes owner_input_required instead of a claim.",
+      "Left untouched deliberately (outside this task's scope): untracked audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ from the Company Watch integration task and the poller-owned remote-queue/logs/queue.log modification."
+    ]
+  }
+}
