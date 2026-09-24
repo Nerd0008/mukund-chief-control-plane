@@ -47,16 +47,25 @@
       "summary": "Hermes dispatch exceeded 1200 seconds.",
       "will_retry": true,
       "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    },
+    {
+      "attempt": 2,
+      "recorded_at": "2026-09-24T21:17:56.927069Z",
+      "status": "blocked",
+      "blocker_category": "external_provider",
+      "summary": "Resumed the attempt-1 work (already landed and pushed as 42f3fd4 + c82cbab) instead of repeating it: verified the whole post-key verification is present at HEAD and re-checked only the decisive datum. Presence-only probe at 2026-09-24T21:14:50Z: still_missing_count = 0 (10/10 roster credentials present, no value read/printed/stored). Bounded smoke re-run at 2026-09-24T21:14:53Z (one minimal completion per worker, max_tokens=16, single attempt, no retries): 0/7 dispatched - the external provider state is UNCHANGED, every provider refused again with the same class (mistral 429 rate limit; GLM/Z.ai 429 balance; Qwen 403 Unpurchased; LongCat 402 quota; MiniMax 402 balance; StepFun 402 quota; Tencent 401 code 401002), no usage figures exposed. Readiness gate re-run at HEAD (2026-09-24T21:16:01Z) with the newest smoke evidence and the same clean 22-suite regression: NOT ENABLED, identical verdict - condition (a) PASS (10/10 credentials, provider identity verified for every intended provider), condition (b) FAIL on the sole Google image real-dispatch criterion (2/9 recurrences, provider finishReason IMAGE_RECITATION), condition (c) FAIL because the live coordinator override appended to the running contract forbids local E3 Stage 2 / production dispatch for this execution; 0/7 newly-credentialed workers execution-ready. Routable/qualification truth preserved: 3 pre-existing workers routable; all 7 newly-credentialed workers routable=false, qualification=UNPROVEN. Live-provider failover/recovery is still NOT evidenced (e4e5_drill_harness stubs transport; evidence_kind=stubbed_provider_failure) and the gap is preserved. Canonical status/executive tracker regenerated and reconciled (status_verify PASSED, 0 warnings; status-consistency 23/23 OK). Because the unchanged provider refusal is a deterministic external blocker with a standing coordinator override against enablement, this task is parked per the owner's 2026-09-24 retry policy rather than retried again. Nothing was weakened, no secret was exposed, and no fabricated evidence was produced.",
+      "will_retry": false,
+      "reason": "blocker_category='external_provider' is deterministic; park until the blocking state changes"
     }
   ],
   "retry_state": {
-    "attempts_used": 1,
-    "retries_used": 0,
+    "attempts_used": 2,
+    "retries_used": 1,
     "max_attempts": 3,
     "max_retries": 2,
-    "last_blocker_category": "execution_error",
-    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
-    "next_action": "retry",
-    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    "last_blocker_category": "external_provider",
+    "last_summary": "Resumed the attempt-1 work (already landed and pushed as 42f3fd4 + c82cbab) instead of repeating it: verified the whole post-key verification is present at HEAD and re-checked only the decisive datum. Presence-only probe at 2026-09-24T21:14:50Z: still_missing_count = 0 (10/10 roster credentials present, no value read/printed/stored). Bounded smoke re-run at 2026-09-24T21:14:53Z (one minimal completion per worker, max_tokens=16, single attempt, no retries): 0/7 dispatched - the external provider state is UNCHANGED, every provider refused again with the same class (mistral 429 rate limit; GLM/Z.ai 429 balance; Qwen 403 Unpurchased; LongCat 402 quota; MiniMax 402 balance; StepFun 402 quota; Tencent 401 code 401002), no usage figures exposed. Readiness gate re-run at HEAD (2026-09-24T21:16:01Z) with the newest smoke evidence and the same clean 22-suite regression: NOT ENABLED, identical verdict - condition (a) PASS (10/10 credentials, provider identity verified for every intended provider), condition (b) FAIL on the sole Google image real-dispatch criterion (2/9 recurrences, provider finishReason IMAGE_RECITATION), condition (c) FAIL because the live coordinator override appended to the running contract forbids local E3 Stage 2 / production dispatch for this execution; 0/7 newly-credentialed workers execution-ready. Routable/qualification truth preserved: 3 pre-existing workers routable; all 7 newly-credentialed workers routable=false, qualification=UNPROVEN. Live-provider failover/recovery is still NOT evidenced (e4e5_drill_harness stubs transport; evidence_kind=stubbed_provider_failure) and the gap is preserved. Canonical status/executive tracker regenerated and reconciled (status_verify PASSED, 0 warnings; status-consistency 23/23 OK). Because the unchanged provider refusal is a deterministic external blocker with a standing coordinator override against enablement, this task is parked per the owner's 2026-09-24 retry policy rather than retried again. Nothing was weakened, no secret was exposed, and no fabricated evidence was produced.",
+    "next_action": "park",
+    "reason": "blocker_category='external_provider' is deterministic; park until the blocking state changes"
   }
 }
