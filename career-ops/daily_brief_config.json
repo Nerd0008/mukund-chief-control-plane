@@ -31,6 +31,12 @@
     "company_watch_stale_after_hours": 48,
     "note": "Thresholds for labelling a source healthy/stale. A missing timestamp or a missing file is UNKNOWN, never healthy."
   },
+  "discovery": {
+    "latest": "runtime/career-ops/discovery/latest.json",
+    "stale_after_hours": 48,
+    "max_semantic_candidates": 10,
+    "note": "The high-recall discovery funnel's own run evidence (career-ops/discovery/pipeline.py). This brief only reports the pipeline's counters and its top accepted candidates; the ranking is a declared policy output, explicitly not a factual claim about a vacancy. An absent or stale run is UNKNOWN and is never summarised as 'no jobs'. Raw per-posting funnel artifacts stay in the git-ignored runtime path."
+  },
   "terminal_statuses": [
     "not applying",
     "rejected",

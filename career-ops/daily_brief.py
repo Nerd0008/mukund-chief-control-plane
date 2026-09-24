@@ -510,6 +510,101 @@ def collect_company_watch(cfg: dict, now: dt.datetime | None = None) -> dict:
     }
 
 
+def collect_discovery_funnel(cfg: dict, now: dt.datetime | None = None) -> dict:
+    """High-recall discovery funnel metrics + top semantic candidates (read-only).
+
+    Source: the discovery pipeline's own run evidence
+    (``runtime/career-ops/discovery/latest.json``). The funnel counters are the
+    pipeline's; this collector never recomputes or reinterprets them, and an
+    absent/stale run is reported as UNKNOWN rather than as "no jobs".
+
+    ``top_semantic_candidates`` is the pipeline's declared ranking (accepted
+    label, then confidence, then candidate id). It is a POLICY OUTPUT for owner
+    review — not a factual claim about the vacancy.
+    """
+    now = now or parse_now(None)
+    spec = cfg.get("discovery") or {}
+    latest = resolve(cfg, spec.get("latest", "runtime/career-ops/discovery/latest.json"))
+    empty = {"available": False, "path": str(latest), "counts": None,
+             "zero_attribution": None, "top_semantic_candidates": [],
+             "classifications_total": 0}
+    if not latest.exists():
+        return {**empty,
+                "reason": ("no discovery funnel run evidence yet — the pipeline has not run on "
+                           "this machine"),
+                "note": "an absent funnel run is UNKNOWN, never 'no jobs exist'"}
+    doc, err = read_json(latest)
+    if not doc:
+        return {**empty, "reason": f"unreadable discovery run evidence: {err}"}
+    finished = parse_iso(doc.get("finished_at"))
+    age_h = round((now - finished).total_seconds() / 3600.0, 2) if finished else None
+    stale_after = float(spec.get("stale_after_hours", 48))
+    if age_h is None:
+        health = "unknown"
+    elif age_h > stale_after:
+        health = "stale"
+    else:
+        health = "ok"
+    funnel = doc.get("funnel") or {}
+    counts = funnel.get("counts") or {}
+    classifications = doc.get("classifications") or []
+    accepted = [c for c in classifications if c.get("accepted")]
+    rank = {"strong_entry_level_match": 0, "plausible_entry_level": 1}
+    accepted.sort(key=lambda c: (rank.get(c.get("primary_label"), 9),
+                                 -(float(c["confidence"]) if isinstance(c.get("confidence"),
+                                                                       (int, float)) else -1.0),
+                                 str(c.get("candidate_id"))))
+    limit = int(spec.get("max_semantic_candidates", 10))
+    top = [{
+        "candidate_id": c.get("candidate_id"),
+        "company": (c.get("source_fields") or {}).get("company"),
+        "title": (c.get("source_fields") or {}).get("title"),
+        "location": (c.get("source_fields") or {}).get("location"),
+        "url": (c.get("source_fields") or {}).get("url"),
+        "primary_label": c.get("primary_label"),
+        "confidence": c.get("confidence"),
+        "provider": c.get("provider"),
+        "model": c.get("model"),
+        "classifier": c.get("classifier"),
+        "jd_available": c.get("jd_available"),
+        "classification_basis": c.get("classification_basis"),
+        "reasons": c.get("reasons") or [],
+        "uncertainty": c.get("uncertainty") or [],
+    } for c in accepted[:limit]]
+    return {
+        "available": True,
+        "path": str(latest),
+        "run_id": doc.get("run_id"),
+        "region": doc.get("region"),
+        "title_policy_mode": doc.get("title_policy_mode"),
+        "finished_at": doc.get("finished_at"),
+        "age_hours": age_h,
+        "health": health,
+        "health_rule": (f"ok = a funnel run finished within {stale_after}h; unknown = no readable "
+                        f"finish timestamp (never read as healthy)"),
+        "counts": counts,
+        "zero_attribution": funnel.get("zero_attribution"),
+        "not_applicable_stages": funnel.get("not_applicable_stages") or {},
+        "rejections_by_reason": funnel.get("rejections_by_reason") or {},
+        "semantic_provider": doc.get("semantic"),
+        "codex_escalation": {k: v for k, v in (doc.get("codex") or {}).items()
+                             if k != "classifications"},
+        "jd_gap": doc.get("jd_gap"),
+        "classifications_total": len(classifications),
+        "accepted_total": len(accepted),
+        "top_semantic_candidates": top,
+        "ranking_semantics": {
+            "kind": "deterministic_policy_output",
+            "order": ("accepted label (strong_entry_level_match, then plausible_entry_level), then "
+                      "descending confidence, then candidate id"),
+            "note": ("this ranking is a policy output over model classifications. It is NOT a "
+                     "factual claim about the vacancy, its requirements or the applicant's "
+                     "suitability, and it never overrides a deterministic eligibility gate."),
+        },
+        "safety": doc.get("safety") or {},
+    }
+
+
 def collect_application_status(cfg: dict) -> dict:
     """Application-status signals/changes from the read-only Inbox monitor."""
     try:
@@ -941,6 +1036,22 @@ def chief_summary(brief: dict, cfg: dict) -> str:
     asc = brief["application_status_changes"]["counts"]
     lines.append(f"Application status: {asc['proposed_status_changes']} proposal(s), "
                  f"{asc['owner_actions_required']} owner action(s) from the monitor")
+    df = brief.get("discovery_funnel") or {}
+    if df.get("available"):
+        c = df.get("counts") or {}
+        z = df.get("zero_attribution") or {}
+        lines.append(
+            "Discovery funnel: "
+            f"raw={c.get('discovered_raw')} -> prefiltered={c.get('after_hard_negative_prefilter')} "
+            f"-> semantic={c.get('semantically_reviewed')} -> accepted={c.get('deepseek_accept')} "
+            f"/codex={c.get('codex_accept')} -> eligibility={c.get('deterministic_eligibility_pass')} "
+            f"-> tracker={c.get('tracker_candidates')}"
+            + (f"; first zero: {z.get('first_zero_stage')}" if z.get("first_zero_stage")
+               else "; no zero stage")
+            + f" [run {df.get('run_id')}, {df.get('health')}; {df.get('accepted_total')} semantic "
+              f"accept(s) — policy output, not a vacancy claim]")
+    else:
+        lines.append("Discovery funnel: unavailable (no run evidence) — UNKNOWN, never zero jobs")
     lines.append(f"Interviews/follow-ups: {brief['interviews_and_followups']['counts']['packs']} prep pack(s)")
     oa = brief["owner_actions"]["counts"]
     lines.append(f"Owner actions: {oa['open']} open, {oa['unknown_status']} with no readable status")
@@ -995,6 +1106,7 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     trackers = safe(collect_trackers, cfg, now, window_start)
     hashes_before = dict(trackers.get("hashes") or {})
     watch = safe(collect_company_watch, cfg, now)
+    discovery = safe(collect_discovery_funnel, cfg, now)
     status = safe(collect_application_status, cfg)
     interviews = safe(collect_interviews, cfg)
     owner_actions = safe(collect_owner_actions, cfg)
@@ -1050,6 +1162,15 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
     if watch.get("available") is False:
         unknowns.append({"area": "company_watch", "input": "findings",
                          "reason": "Company Watch findings file unavailable"})
+    if discovery.get("available") is False:
+        unknowns.append({"area": "discovery_funnel", "input": "run_evidence",
+                         "reason": discovery.get("reason") or "discovery funnel evidence unavailable"})
+    elif discovery.get("health") in ("unknown", "stale"):
+        unknowns.append({"area": "discovery_funnel", "input": "health",
+                         "reason": (f"discovery funnel run {discovery.get('run_id')}: "
+                                    f"health={discovery.get('health')} "
+                                    f"(age_hours={discovery.get('age_hours')}) — the funnel counts "
+                                    f"do NOT describe the current market")})
     if status.get("available") is False:
         unknowns.append({"area": "application_status", "input": "monitor",
                          "reason": f"Application Inbox summary unavailable: {status.get('error')}"})
@@ -1165,6 +1286,7 @@ def build_brief(cfg: dict, *, now: dt.datetime, window_hours: int | None = None,
                      "tracker_writer dedupe pass"),
         },
         "company_watch": watch,
+        "discovery_funnel": discovery,
         "application_status_changes": asc,
         "interviews_and_followups": {
             "counts": {"packs": interviews.get("pack_count", 0),

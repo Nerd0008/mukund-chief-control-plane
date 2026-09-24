@@ -51,6 +51,10 @@ def empty_cfg(tmp_path: Path) -> dict:
     cfg["inputs"]["linkedin_handoff_dir"] = str(tmp_path / "absent" / "handoffs")
     cfg["inputs"]["company_watch_runtime"] = str(tmp_path / "absent" / "company-watch")
     cfg["out_dir"] = str(tmp_path / "briefs")
+    # The discovery funnel's own run evidence is redirected too, so an empty-input
+    # test never accidentally reads a real funnel run.
+    cfg["discovery"] = {**dict(cfg.get("discovery") or {}),
+                        "latest": str(tmp_path / "absent" / "discovery" / "latest.json")}
     # The two config files this brief *loads* rather than hashes must exist for
     # the collectors to run at all; point them at the real ones.
     cfg["inputs"]["application_inbox_config"] = str(CAREER_OPS / "application_inbox_config.json")
@@ -420,3 +424,120 @@ def test_owner_actions_are_parsed_without_inventing_state():
         assert it["open"] in (True, False, None)
         if it["open"] is None:
             assert it["status"] is None
+
+
+# --------------------------------------------------------------------------- #
+# 6. high-recall discovery funnel reporting
+# --------------------------------------------------------------------------- #
+
+def _funnel_cfg(tmp_path: Path, *, evidence: dict | None, stale_after: float = 48.0) -> dict:
+    cfg = empty_cfg(tmp_path)
+    p = tmp_path / "discovery" / "latest.json"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if evidence is not None:
+        p.write_text(json.dumps(evidence), encoding="utf-8")
+    cfg["discovery"] = {"latest": str(p), "stale_after_hours": stale_after,
+                        "max_semantic_candidates": 5}
+    return cfg
+
+
+FUNNEL_EVIDENCE = {
+    "run_id": "discovery-uk-TEST", "region": "uk", "title_policy_mode": "high_recall",
+    "finished_at": (NOW - dt.timedelta(hours=2)).isoformat(),
+    "funnel": {
+        "counts": {"discovered_raw": 506, "after_hard_negative_prefilter": 6,
+                   "semantically_reviewed": 6, "deepseek_accept": 2, "codex_escalated": 3,
+                   "codex_accept": 1, "deterministic_eligibility_pass": 0,
+                   "duplicates_removed": 0, "tracker_candidates": 0},
+        "zero_attribution": {"first_zero_stage": "deterministic_eligibility_pass",
+                             "reason": "every semantically accepted candidate failed a "
+                                       "deterministic gate",
+                             "attribution_source": "funnel counters"},
+        "not_applicable_stages": {"codex_accept": "no escalation fired"},
+        "rejections_by_reason": {"tier_b_hard_negative: manager": 10},
+    },
+    "semantic": {"provider": "deepseek", "model_observed": "deepseek-flash", "requests": 1},
+    "codex": {"provider": "openai-codex-cli", "budget": 4, "requests": 1},
+    "jd_gap": {"candidates": 6, "with_job_description_text": 0},
+    "classifications": [
+        {"candidate_id": "cand-a", "primary_label": "plausible_entry_level", "confidence": 0.7,
+         "accepted": True, "provider": "deepseek", "model": "deepseek-flash",
+         "classifier": "deepseek_bulk", "jd_available": False,
+         "classification_basis": "title_company_location_only",
+         "source_fields": {"company": "Testco", "title": "SOC Analyst L1",
+                           "location": "London, UK", "url": "https://testco.invalid/1"},
+         "reasons": ["SOC role"], "uncertainty": ["no JD text"]},
+        {"candidate_id": "cand-b", "primary_label": "strong_entry_level_match", "confidence": 0.6,
+         "accepted": True, "provider": "deepseek", "model": "deepseek-flash",
+         "classifier": "deepseek_bulk", "jd_available": False,
+         "classification_basis": "title_company_location_only",
+         "source_fields": {"company": "Testco", "title": "Graduate Cyber Security Analyst"},
+         "reasons": ["graduate"], "uncertainty": []},
+        {"candidate_id": "cand-c", "primary_label": "too_senior", "confidence": 0.9,
+         "accepted": False, "source_fields": {"title": "Senior Security Manager"},
+         "reasons": [], "uncertainty": []},
+    ],
+    "safety": {"canonical_workbook_written": False, "applications_submitted": 0},
+}
+
+
+def test_discovery_funnel_counts_reach_the_brief(tmp_path):
+    cfg = _funnel_cfg(tmp_path, evidence=FUNNEL_EVIDENCE)
+    brief = db.build_brief(cfg, now=NOW)
+    df = brief["discovery_funnel"]
+    assert df["available"] is True
+    assert df["counts"]["discovered_raw"] == 506
+    assert df["counts"]["tracker_candidates"] == 0
+    assert df["zero_attribution"]["first_zero_stage"] == "deterministic_eligibility_pass"
+    assert df["health"] == "ok"
+
+
+def test_top_semantic_candidates_are_ranked_by_the_declared_policy(tmp_path):
+    cfg = _funnel_cfg(tmp_path, evidence=FUNNEL_EVIDENCE)
+    brief = db.build_brief(cfg, now=NOW)
+    top = brief["discovery_funnel"]["top_semantic_candidates"]
+    assert [c["candidate_id"] for c in top] == ["cand-b", "cand-a"]  # strong label first
+    assert brief["discovery_funnel"]["ranking_semantics"]["kind"] == "deterministic_policy_output"
+    assert "NOT a factual claim" in brief["discovery_funnel"]["ranking_semantics"]["note"]
+    # only accepted candidates are listed at all
+    assert all(c["primary_label"] in ("strong_entry_level_match", "plausible_entry_level")
+               for c in top)
+
+
+def test_missing_discovery_evidence_is_unknown_never_zero_jobs(tmp_path):
+    cfg = _funnel_cfg(tmp_path, evidence=None)
+    brief = db.build_brief(cfg, now=NOW)
+    df = brief["discovery_funnel"]
+    assert df["available"] is False
+    assert "never 'no jobs exist'" in df["note"]
+    assert any(u["area"] == "discovery_funnel" for u in brief["unknowns"])
+    assert "unavailable (no run evidence)" in db.chief_summary(brief, cfg)
+
+
+def test_a_stale_funnel_run_is_flagged_and_does_not_describe_the_market(tmp_path):
+    stale = json.loads(json.dumps(FUNNEL_EVIDENCE))
+    stale["finished_at"] = (NOW - dt.timedelta(hours=200)).isoformat()
+    cfg = _funnel_cfg(tmp_path, evidence=stale)
+    brief = db.build_brief(cfg, now=NOW)
+    assert brief["discovery_funnel"]["health"] == "stale"
+    assert any(u["area"] == "discovery_funnel" and "do NOT describe the current market" in u["reason"]
+               for u in brief["unknowns"])
+
+
+def test_funnel_summary_line_is_plain_and_reports_the_zero(tmp_path):
+    cfg = _funnel_cfg(tmp_path, evidence=FUNNEL_EVIDENCE)
+    brief = db.build_brief(cfg, now=NOW)
+    summary = db.chief_summary(brief, cfg)
+    line = [ln for ln in summary.splitlines() if ln.startswith("Discovery funnel:")][0]
+    assert "raw=506" in line and "tracker=0" in line
+    assert "first zero: deterministic_eligibility_pass" in line
+    assert "policy output, not a vacancy claim" in line
+
+
+def test_discovery_collector_never_writes_and_reports_no_submission(tmp_path):
+    cfg = _funnel_cfg(tmp_path, evidence=FUNNEL_EVIDENCE)
+    evidence_path = Path(cfg["discovery"]["latest"])
+    before = sha(evidence_path)
+    df = db.collect_discovery_funnel(cfg, NOW)
+    assert sha(evidence_path) == before
+    assert df["safety"]["applications_submitted"] == 0
