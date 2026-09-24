@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "high",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "completed",
   "prerequisites": [
     "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 committed and pushed the unified scheduled orchestrator, the CRLF-repaired launcher, the focused tests and both cutover evidence records (commit 0e676f5).",
     "Do not race another active agent in the same worktree; if the Career recovery worker or the E3 provider closeout worker is executing, begin only after it reaches a terminal queue state.",
@@ -66,5 +66,36 @@
     "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=0).",
     "next_action": "retry",
     "reason": "recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T22:01:40.033330Z",
+  "result": {
+    "status": "completed",
+    "summary": "Closed out the scheduled Career discovery cutover lane. The prior attempt (attempt 1 of this task) had landed-but-not-committed the live acceptance record and the canonical-status reconciliation before dying to the no-progress watchdog; I preserved that work, independently re-verified the committed revision, and committed/pushed the finished unit. The lane now has ONE coherent acceptance record, audits/evidence/2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover (PASS 39/39 = 23 offline structural/whole-company + 16 live), bound to bytes via code_sha 9042ab57b30168d891a9354e9297a0ecb9fd8c3d (git rev-parse HEAD). I re-ran career-ops/run_scheduled_orchestrator_acceptance.py WITHOUT --live on the committed revision: PASS 23/23 in 96s, including launcher_keeps_crlf_line_endings; that run is bound to current HEAD 5d7edae and preserved under audits/evidence/superseded/...-offline-reverification-at-head/ together with the earlier pre-live pre-flight. I did NOT run a fresh --live pass: the non-GUI mechanism (codex CLI) is not on PATH in this session, so I instead corroborated the existing live record against real runtime artifacts (unified-{uk,dubai,japan,singapore}-20260924T2130-2133Z.json run-health files exist with live_search_queries_observed=2 and matching timestamps) rather than re-proving it or inferring coverage from fixtures. status/canonical-status.json now references all cutover evidence and both superseded offline records (no cutover evidence left unincorporated), states the lane's real state (implementation landed 0e676f5, structural PASS, live acceptance on the committed revision PASS), and records the e3-credential-presence-probe evidence explicitly as the E3 provider-verification lane's responsibility instead of absorbing it. Generated surfaces were regenerated with scripts/status_render.py; status/executive-tracker.md changed, README.md and the state/ summary blocks were already current. No owner scheduled task was registered/enabled/disabled/replaced/triggered; no workbook write, application, outreach, LinkedIn mutation, browser/GUI, login or cookie use.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "285cb1c career: single acceptance record for the scheduled cutover + status reconciliation (pushed 5d7edae..285cb1c to origin/main)"
+    ],
+    "tests": [
+      "career-ops/run_scheduled_orchestrator_acceptance.py (offline, no --live): PASS 23/23 checks in 96s incl. launcher_keeps_crlf_line_endings (bound to HEAD 5d7edae)",
+      "scripts/status_verify.py: PASSED (as_of 2026-09-24T21:10:44Z; 0 warnings)",
+      "scripts/tests/test_status_consistency.py: 23 passed (incl. test_10_no_newer_evidence_left_unincorporated, previously FAIL)",
+      "python -m pytest career-ops/tests scripts/tests -q: 599 passed in 445s"
+    ],
+    "changed_files": [
+      "audits/evidence/2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover/evidence.json",
+      "audits/evidence/2026-09-24T21-28-53Z-career-scheduled-orchestrator-cutover/evidence.md",
+      "audits/evidence/superseded/2026-09-24T21-26-53Z-career-scheduled-orchestrator-cutover-offline-preflight-superseded-by-live-acceptance/evidence.json",
+      "audits/evidence/superseded/2026-09-24T21-26-53Z-career-scheduled-orchestrator-cutover-offline-preflight-superseded-by-live-acceptance/evidence.md",
+      "audits/evidence/superseded/2026-09-24T21-51-05Z-career-scheduled-orchestrator-cutover-offline-reverification-at-head/evidence.json",
+      "audits/evidence/superseded/2026-09-24T21-51-05Z-career-scheduled-orchestrator-cutover-offline-reverification-at-head/evidence.md",
+      "status/canonical-status.json",
+      "status/executive-tracker.md"
+    ],
+    "remaining": [
+      "The live acceptance is bound to revision 9042ab5, not to the post-reconciliation HEAD 285cb1c; the code under test is identical (only queue-bookkeeping commits intervene), but a reader wanting live proof at the exact current SHA must check out that SHA and re-run `--live`, which requires the non-GUI Codex CLI on PATH (absent in this session).",
+      "Incorporation of the e3-credential-presence-probe evidence directories remains owned by the E3 provider-verification lane (agent-e3-provider-verification-stage2-closeout-2026-09-24); this lane explicitly recorded them as that lane's responsibility and did not touch them.",
+      "Untracked runtime scratch left by earlier attempts (runtime/acceptance-run*.txt, runtime/pytest-orch*.txt, runtime/orch-smoke*, runtime/validate_successor_task.py) and the tracked-but-uncommitted remote-queue/logs/queue.log and runtime/career-ops/run-health/tracker-writer.json were deliberately NOT committed \u2014 not attributable to this task."
+    ]
   }
 }
