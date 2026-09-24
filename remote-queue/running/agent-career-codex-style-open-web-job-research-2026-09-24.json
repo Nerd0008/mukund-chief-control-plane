@@ -37,5 +37,26 @@
     "Do not bypass robots/auth/CAPTCHA/access controls or implement stealth/evasion scraping.",
     "If a source blocks public access, record it as unavailable and continue other sources."
   ],
-  "notes": "This is intentionally different from the existing provider scanner. The owner wants the successful Codex behavior: active, broad web research for jobs, while retaining the new Career Ops reliability, semantic filtering, provenance, dedupe and tracker controls."
+  "notes": "This is intentionally different from the existing provider scanner. The owner wants the successful Codex behavior: active, broad web research for jobs, while retaining the new Career Ops reliability, semantic filtering, provenance, dedupe and tracker controls.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T12:52:57.293887Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  }
 }
