@@ -5,7 +5,7 @@
   "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
   "priority": "critical",
   "requires_owner_approval": false,
-  "status": "pending",
+  "status": "blocked",
   "prerequisites": [
     "agent-e3-provider-verification-stage2-closeout-2026-09-24 must be terminal and its evidence/commits must be present on main.",
     "Mukund has already explicitly authorized LOCAL Stage 2 after all provider credentials are stored and objective readiness gates pass.",
@@ -49,5 +49,11 @@
     "last_summary": "Local E3 Stage 2 was NOT enabled: the predecessor task agent-e3-provider-verification-stage2-closeout-2026-09-24 is terminal/blocked (external_provider), which triggers this successor's stop condition, and its fresh evidence independently re-confirms unmet mandatory gates. Verified at HEAD: credential presence 10/10 PASS (presence-only, no value read); bounded smoke 0/7 newly-credentialed providers execution-ready (mistral 429, GLM/Z.ai 429 balance, Qwen 403 Unpurchased, LongCat 402 quota, MiniMax 402 balance, StepFun 402 quota, Tencent 401 code 401002); readiness gate re-run at 2026-09-24T21:21:21Z with 0 provider calls returned NOT ENABLED (a=PASS, b=FAIL on the sole Google image real-dispatch criterion - 2/9 IMAGE_RECITATION recurrences, c=FAIL/fail-closed); regression evidence 22 suites all-pass; production stores byte-identical (all production writes refused). No Stage 2 enablement, no production dispatch, no VPS cutover, no gate weakened, no secret exposed. Canonical status, executive tracker and the owner TODO were reconciled to the measured result and pushed.",
     "next_action": "park",
     "reason": "blocker_category='external_provider' is deterministic; park until the blocking state changes"
+  },
+  "blocked_at": "2026-09-24T21:23:24.258230Z",
+  "blocker": {
+    "category": "external_provider",
+    "owner_action_required": "Fund/enable the six refusing provider accounts and re-issue the Tencent TokenHub key so the stored credentials serve traffic: (1) Mistral 429 rate limit; (2) GLM/Z.ai 429 insufficient balance; (3) Qwen international DashScope 403 Unpurchased (purchase qwen3.8-27b); (4) LongCat 402 token quota; (5) MiniMax 402 balance 1008; (6) StepFun 402 quota; (7) Tencent TokenHub international 401 code 401002 (likely wrong product/key). Then decide whether to accept the attributed provider-side Google image intermittency as a re-scoping of the vision criterion or fund a stability investigation. Re-run scripts/e3_stage2_readiness_gate.py only after these change.",
+    "continue_without": "Independent safe work may continue"
   }
 }
