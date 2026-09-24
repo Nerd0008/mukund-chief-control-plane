@@ -778,3 +778,28 @@ Provider-call budget: **0 (stated up front)**; external mutations: **0**.
 | Attempt-1 defect | **RECORDED, FIXED** | the runner's persistence evaluator assumed `tasks` was a list (it is a keyed object) and died after 9 PASS steps; partial record preserved under `audits/evidence/2026-09-24T03-51-07Z-whole-company-acceptance-attempt1-partial/` with a NOTE; evaluator fixed + fail-closed guard added |
 | E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion weakened; the 0/7 credential gate was not re-run or re-staged |
 | Owner action | **NONE NEW** | pre-existing dependencies only (7 provider credentials, Gmail read-only OAuth, research provider, work authorisation, deployment architecture/VPS, laptop audit, reboot confirmation, legacy task disposition, optional decisions) |
+
+## Career high-recall semantic discovery — B25 (2026-09-24, `agent-career-high-recall-semantic-discovery-2026-09-24`)
+
+**Lane: Career Ops / job discovery. Status: BUILT, TESTED, EVIDENCED. No gate weakened.**
+
+| Item | Status | Evidence |
+|---|---|---|
+| Two-tier title policy | **DONE** | `career-ops/discovery/title_policy.py` — `high_recall` (default) + `intern_only` (original rule preserved verbatim as a narrow mode); Tier A requires an early-career level signal **and** a cyber/IT-security/technology-risk discipline signal; Tier B keeps the owner's negative list plus a listed addition set |
+| Semantic contract | **DONE** | `career-ops/discovery/semantic_contract.py` — closed label set (`strong_entry_level_match`, `plausible_entry_level`, `ambiguous_review`, `too_senior`, `wrong_discipline`, `hard_eligibility_block`) + source fields, reasons, uncertainty, confidence-or-explicit-null, provider/model provenance, and a guard that rejects an invented number/quote/fact-class claim; missing JD → `jd_available=false`, `classification_basis=title_company_location_only`, explicitly not JD analysis |
+| Provider routing | **DONE** | DeepSeek = bulk classifier (batched, provider-reported usage only); Codex = second pass only on declared escalation conditions, hard `--codex-budget` (default 8) per run, budget-dropped candidates recorded |
+| Deterministic gates after semantics | **DONE (unchanged authority)** | region/location, work-authorisation, clearance/citizenship, explicit mandatory experience, application-URL validity — model cannot override; shared dedupe reuses `tracker_writer` primitives |
+| Funnel metrics | **DONE** | all nine declared counters + `rejections_by_reason`, `not_applicable_stages`, `zero_attribution` (first empty stage + cause); a run limit is recorded as a limit, never a market fact |
+| Company Watch in the same funnel | **DONE** | findings enter as candidates; pre-funnel exclusions keep their own reasons (`duplicate-in-run`, `routed_other_region:<r>`) so 19 findings cannot become a silent "0 jobs" |
+| compare-modes command | **DONE** | `pipeline.py compare-modes` — old strict vs new high-recall over the same captured set; writes no canonical workbook, manifest or tracker probe |
+| Recall fixtures | **DONE** | `career-ops/tests/fixtures/discovery/title-fixtures.json` — the eight wrongly-rejected titles plus `Senior Security Manager`, `Principal Security Architect`, `Physical Security Guard`, `Security Sales Director` |
+| Measured recall delta | **PASS** | same 506-candidate set: intern_only 3 title passes → **0** tracker candidates; high_recall 15 title passes → **4** tracker candidates (**+12 / +4, 0 lost**) |
+| Bounded live pass | **PASS (capped)** | `discovered_raw=60`, prefilter 6, semantically reviewed 6, `deepseek_accept=1`, `codex_escalated=3`, `codex_accept=0`, deterministic pass 0, tracker 0 — first zero stage and cause recorded; DeepSeek 2 calls, Codex 1 call (budget 4) |
+| Daily Brief integration | **DONE** | `collect_discovery_funnel` — funnel counts + zero attribution + top accepted candidates labelled a deterministic **policy output**, not a vacancy claim; missing run = UNKNOWN, never "no jobs" |
+| Acceptance runner | **DONE** | `career-ops/run_discovery_acceptance.py` **14/14 checks PASS**, fixtures only, no live source, no provider call; registered in `scripts/whole_company_acceptance.py` and roster B25 |
+| Tests | **PASS** | `test_discovery_pipeline.py` 36; `test_daily_brief.py` 28; `career-ops/tests` 374; `career-ops/tests + scripts/tests` 401 |
+| Canonical workbooks | **UNTOUCHED** | four workbooks hash-identical before/after acceptance; `--apply` remains the only tracker write |
+| External actions | **NONE** | 0 applications, 0 outreach, 0 employer/recruiter contacts, no browser/GUI automation, no account mutation or LinkedIn action |
+| Owner's external Career Ops install | **READ-ONLY** | inspected only; the new code is a control-plane overlay and no install file was edited, patched or migrated |
+| Recorded limitation | **OPEN (honest)** | the Career Ops scan exposes no JD text/URL for offers, so those semantic labels are title/company/location based and not JD analysis; the contract and fallback path exist rather than guessing |
+| Live scheduling | **NOT ENABLED** | the pipeline runs on demand and in acceptance; wiring it into the scheduled scan is an owner decision not yet made |

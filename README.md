@@ -151,6 +151,54 @@ When documents disagree, use the following priority:
 
 Always check recent commits before assuming a handover is still current.
 
+## Career discovery architecture (B25, 2026-09-24)
+
+Job discovery was rebuilt so that the deterministic safety controls are kept while
+the semantic breadth is restored. The previous behaviour used the owner's
+`portals.yml` title filter (`positive = [Intern, Internship]`) as a *required*
+discovery gate; as a precision filter that produced a false
+"no eligible roles" result (a UK scan processed ~2861 postings and Company Watch
+found 19 new ones, with 0 tracker-eligible).
+
+```
+broad collection (existing Career Ops scan lanes + Company Watch)
+  -> light deterministic prefilter   career-ops/discovery/title_policy.py
+  -> DeepSeek bulk semantic triage   career-ops/discovery/classifiers.py
+  -> bounded Codex second pass       ambiguous / high-value candidates only
+  -> deterministic eligibility       location, work authorisation, clearance,
+                                     mandatory experience, application URL
+  -> shared dedupe                   career-ops/tracker_writer.py primitives
+  -> tracker manifest / Chief brief  manifest only; --apply stays explicit
+```
+
+Truth boundaries that hold in this repository:
+
+- Discovery code lives in the control plane as an **overlay**
+  (`career-ops/discovery/`). Nothing in it edits, patches or migrates the owner's
+  external Career Ops install.
+- Title matching is a **prefilter, never an eligibility decision**. The
+  authoritative gates (region/location, work authorisation, clearance or
+  citizenship, explicit mandatory experience, application-URL validity) run *after*
+  semantic classification and **cannot be overridden by a model**.
+- A model label is evidence about a posting, never a fact about the owner's
+  eligibility. Nothing may be inferred about him from a discovery run.
+- Where a source exposes no job-description text, the classification says so
+  (`jd_available=false`, `classification_basis=title_company_location_only`) and
+  is explicitly not JD analysis. No JD fact is ever invented.
+- Funnel metrics make a zero explainable: a zero names the stage where the funnel
+  went to zero and why, and a run limit or a disabled stage is recorded as a limit
+  or as `not_applicable`, never as a market fact.
+- Codex escalation is bounded by a per-run budget and its spend is evidenced;
+  DeepSeek is the bulk classifier.
+- No application, message, employer/recruiter contact, browser/GUI action or
+  account mutation is performed by any discovery path.
+- Canonical workbooks stay byte-identical through engineering acceptance
+  (hash-verified before and after).
+
+Details, commands and measured evidence: `career-ops/README.md`
+(§ "High-recall semantic discovery pipeline") and
+`audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/`.
+
 ## Security
 
 - This repository **must remain private** unless Mukund explicitly changes that policy.

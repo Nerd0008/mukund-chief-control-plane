@@ -810,11 +810,133 @@ workbooks are hash-identical before and after; zero submissions/messages/writes;
 no external channel claimed; the Chief summary is concise; and the morning
 schedule + launcher exist with the task state read from Task Scheduler.
 
+## High-recall semantic discovery pipeline (B25, 2026-09-24)
+
+**Why it exists.** The owner's own `portals.yml` title filter is
+`positive = [Intern, Internship]`. Used as a *required discovery gate* it is a
+precision filter, and it produced the reported false zero: a UK scan processed
+~2861 postings and Company Watch found 19 new ones, while 0 were tracker-eligible
+because no title contained the literal word "Intern". Standalone Codex found
+roles in the same market. The fix is not to drop the deterministic controls; it
+is to put the semantics back in the middle of the funnel.
+
+```
+broad collection (existing Career Ops lanes + Company Watch)
+  -> light deterministic prefilter        career-ops/discovery/title_policy.py
+  -> DeepSeek bulk semantic triage        career-ops/discovery/classifiers.py
+  -> bounded Codex second pass            (ambiguous / high-value only)
+  -> deterministic eligibility gates      location, work authorisation, clearance,
+                                          mandatory experience, application URL
+  -> shared dedupe                        career-ops/tracker_writer.py primitives
+  -> tracker manifest / Chief brief       manifest only; --apply stays explicit
+```
+
+**Two-tier title policy.** `high_recall` is the default discovery mode; the
+owner's original rule stays available unchanged as `intern_only`.
+
+* Tier A (recall) accepts a title only when it carries **both** an early-career
+  level signal (graduate / junior / analyst / analyst I / L1 / intern / trainee /
+  associate / apprentice / …) **and** a cyber/IT-security/technology-risk
+  discipline signal (SOC, cyber security, information security, GRC, IAM,
+  vulnerability, technology risk, security consulting, IT support, …).
+  The generic word "security" alone is never sufficient, and explicit non-cyber
+  signals (physical security, security guard, sales, marketing, credit risk, …)
+  reject the title.
+* Tier B (hard negatives) rejects clearly senior/leadership titles. The owner's
+  own negative list is kept verbatim (`Senior`, `Principal`, `Lead `, `Manager`,
+  `Director`, `Head of`, `Vice President`, `VP `, `Staff Security`) plus a small
+  explicitly listed addition set (`chief`, `ciso`, `executive`, `team lead`,
+  `technical lead`, `group manager`).
+* The prefilter is **not** the eligibility decision: the authoritative gates run
+  after semantic classification and cannot be overridden by a model.
+
+**Semantic contract.** One closed label set —
+`strong_entry_level_match`, `plausible_entry_level`, `ambiguous_review`,
+`too_senior`, `wrong_discipline`, `hard_eligibility_block`. Every classification
+carries its source fields, reasons, uncertainty, confidence (or an explicit
+`null`), and provider/model provenance including whether the model identity was
+observed. A deterministic guard rejects any classification that asserts a number,
+quoted text or fact-class claim (years / sponsorship / clearance / citizenship /
+degree / visa / salary) that is not in the source record. Where no JD text exists
+the record says `jd_available=false` and
+`classification_basis=title_company_location_only`, and the classification is
+explicitly **not** semantic JD analysis.
+
+**Provider routing.** DeepSeek is the bulk classifier for the whole pool (batched,
+provider-reported usage only). Codex is called **only** for candidates that meet
+the declared escalation conditions (`ambiguous_review`,
+`deepseek_confidence_below_0.60`, `high_value_plausible_without_jd_text`) and only
+up to `--codex-budget` (default 8) per run; candidates dropped for budget are
+recorded as such. The second-pass verdict replaces the first-pass label and the
+first pass is preserved on the record (`reviewed_first_pass`).
+
+**Funnel metrics make a zero explainable.** `discovered_raw`,
+`after_hard_negative_prefilter`, `semantically_reviewed`, `deepseek_accept`,
+`codex_escalated`, `codex_accept`, `deterministic_eligibility_pass`,
+`duplicates_removed`, `tracker_candidates`, plus `rejections_by_reason`,
+`not_applicable_stages` (a stage disabled by configuration is not a funnel zero)
+and `zero_attribution` naming the first empty stage with its cause. A run limit is
+recorded as a limit, never as a market fact.
+
+**Company Watch is in the same funnel.** Its findings enter as candidates; the
+findings excluded beforehand are counted with their own Company Watch reason
+(`duplicate-in-run`, `routed_other_region:<r>`), so 19 findings cannot silently
+become "0 jobs".
+
+### Commands
+
+    python career-ops/discovery/pipeline.py policy               # both modes + the contract
+    python career-ops/discovery/pipeline.py selftest             # title regression fixtures
+    python career-ops/discovery/pipeline.py run --region uk \\
+        --scan-record runtime/career-ops/scan-runs/regional-run-uk-*.json \\
+        --company-watch runtime/company-watch/findings-uk-latest.json \\
+        --semantic deepseek --codex-budget 4 --max-candidates 60
+
+    python career-ops/discovery/pipeline.py compare-modes --region uk \\
+        --records <captured-candidate-set.json>
+
+`compare-modes` runs the old strict intern-only policy and the new high-recall
+pipeline over the **same** candidate set and reports the recall delta without
+writing a canonical workbook, a manifest or a tracker probe.
+
+### Measured evidence (2026-09-24, bounded live pass)
+
+`audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/` — over the
+same 506-candidate captured set: `intern_only` title pass 3 → **0** tracker
+candidates; `high_recall` title pass 15 → **4** tracker candidates (+12 titles,
++4 candidates, 0 lost). The funnel run itself: `discovered_raw=60`,
+`after_hard_negative_prefilter=6`, `semantically_reviewed=6`, `deepseek_accept=1`,
+`codex_escalated=3`, `codex_accept=0`, `deterministic_eligibility_pass=0`,
+`tracker_candidates=0` with the first zero stage and its cause recorded. DeepSeek
+was called twice (bulk), Codex once (bounded). No canonical workbook, application,
+contact, browser or account action.
+
+Two limitations are recorded, not hidden: (1) the Career Ops scan exposes no
+job-description text or posting URL for offers, so semantic labels there are
+title/company/location-based and explicitly not JD analysis — the contract and
+the fallback path exist so nothing is guessed; (2) a live DeepSeek response can
+consume its whole completion budget on reasoning and return empty content, so the
+bulk classifier now uses an 8192-token budget and retries a failed batch once in
+halves, recording an empty response as a provider failure rather than a zero.
+
+### Acceptance runner
+
+    python career-ops/run_discovery_acceptance.py     # 14/14 checks, fixtures only
+
+It proves the recall fixtures, the preserved narrow mode, the contract guard, the
+escalation budget cap, the full counter set with per-rejection reasons, the
+`compare-modes` delta and that the four canonical workbooks are byte-identical
+before and after. No live source and no provider call.
+
+### Tests
+
+    python -m pytest career-ops/tests/test_discovery_pipeline.py -q  # 36 passed
+
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 332 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 374 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
-    python -m pytest career-ops/tests/test_daily_brief.py -q    # 22 passed
+    python -m pytest career-ops/tests/test_daily_brief.py -q    # 28 passed (B23 + discovery funnel section)
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed

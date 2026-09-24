@@ -1522,3 +1522,72 @@ tests, no provider series re-run.
   verification criterion weakened. Still open and deliberately not chased: what makes the recitation
   filter fire on some identical calls and not others. Owner action required: **none new** (the
   pressure warning is informational; any failover stays an explicit E4/owner decision).
+
+## Career high-recall semantic discovery — B25 (2026-09-24, `agent-career-high-recall-semantic-discovery-2026-09-24`)
+
+**Status: BUILT / TESTED / EVIDENCED. Discovery policy default changed in the control plane only.**
+
+- **Change.** Job discovery no longer treats the owner's `portals.yml` title filter
+  (`positive = [Intern, Internship]`) as a required gate. New control-plane overlay
+  `career-ops/discovery/` implements: broad collection (existing Career Ops scan lane
+  + Company Watch) → light deterministic two-tier title prefilter → DeepSeek bulk
+  semantic triage → bounded Codex second pass (ambiguous/high-value only) →
+  deterministic eligibility/visa/clearance gates → shared dedupe → tracker
+  **manifest** / Daily Brief handoff. `--apply` remains the only tracker write.
+- **Two-tier policy.** `high_recall` is the default; Tier A accepts a title only with
+  both an early-career level signal and a cyber/IT-security/technology-risk discipline
+  signal (graduate, junior, analyst/analyst I, L1, SOC, information security, GRC, IAM,
+  vulnerability, technology risk, security consulting, IT support …), and rejects
+  explicit non-cyber or senior signals. Tier B keeps the owner's negative list verbatim
+  (`Senior`, `Principal`, `Lead `, `Manager`, `Director`, `Head of`, `Vice President`,
+  `VP `, `Staff Security`) plus a listed addition set. The original strict rule is
+  preserved unchanged as `intern_only`, an available narrow mode — not the default.
+- **Truth boundary.** Title matching is a prefilter, never the eligibility decision; the
+  authoritative gates run after semantic classification and cannot be overridden by a
+  model. A model label is evidence about a posting, never a fact about Mukund. Where no
+  JD text exists, the record states `jd_available=false` /
+  `classification_basis=title_company_location_only` and is explicitly not JD analysis;
+  a deterministic guard rejects any classification that asserts a year count, quote or
+  fact-class claim (years/sponsorship/clearance/citizenship/degree/visa/salary) absent
+  from the source record.
+- **Measured evidence (bounded live pass, same 506-candidate captured set).**
+  `intern_only`: title pass 3 → **0** tracker candidates. `high_recall`: title pass 15 →
+  **4** tracker candidates (**+12 titles / +4 candidates, 0 lost**). Live funnel run:
+  `discovered_raw=60`, `after_hard_negative_prefilter=6`, `semantically_reviewed=6`,
+  `deepseek_accept=1`, `codex_escalated=3`, `codex_accept=0`,
+  `deterministic_eligibility_pass=0`, `tracker_candidates=0`, with the first zero stage
+  and its cause recorded. DeepSeek called twice (bulk); Codex once (budget 4).
+- **Recorded limitations (not hidden).** (1) The Career Ops scan exposes no JD text or
+  posting URL for offers, so semantic labels from that source are title/company/location
+  based and explicitly not JD analysis; the contract and fallback path exist so nothing
+  is guessed. (2) A live DeepSeek reasoning response can spend its whole completion
+  budget and return empty content — the bulk classifier uses an 8192-token budget and a
+  one-time half-split retry, and records an empty response as a provider failure rather
+  than a zero.
+- **Funnel attribution.** Counters `discovered_raw`, `after_hard_negative_prefilter`,
+  `semantically_reviewed`, `deepseek_accept`, `codex_escalated`, `codex_accept`,
+  `deterministic_eligibility_pass`, `duplicates_removed`, `tracker_candidates`, plus
+  `rejections_by_reason`, `not_applicable_stages` (a config-disabled stage is not a zero)
+  and `zero_attribution` naming the first empty stage. Company Watch exclusions carry
+  their own reasons (`duplicate-in-run`, `routed_other_region:<r>`), so 19 findings can
+  no longer silently become "0 jobs".
+- **Brief integration.** `collect_discovery_funnel` in `career-ops/daily_brief.py` adds
+  aggregate funnel counts, the zero attribution and top accepted semantic candidates,
+  labelled as a deterministic **policy output**, not a factual claim about a vacancy; a
+  missing run is UNKNOWN, never "no jobs".
+- **Safety.** No canonical workbook written during engineering acceptance (four
+  workbooks hash-identical before/after), no application, no outreach, no employer or
+  recruiter contact, no browser/GUI automation, no account mutation. The owner's external
+  Career Ops install was inspected read-only and not modified.
+- **Tests.** `career-ops/tests/test_discovery_pipeline.py` 36 passed;
+  `career-ops/tests/test_daily_brief.py` 28 passed; `career-ops/tests` 374 passed;
+  `career-ops/tests + scripts/tests` 401 passed;
+  `python career-ops/run_discovery_acceptance.py` **14/14 checks PASS** (now a step in
+  `scripts/whole_company_acceptance.py`, roster B25).
+- **Evidence.** `audits/evidence/2026-09-24T04-58-25Z-career-high-recall-discovery/`
+  (`evidence.md`, `summary.json` — aggregate, committed) and
+  `audits/evidence/20260924T050730Z-career-high-recall-discovery-acceptance/`
+  (fixtures-only acceptance). Raw per-posting funnel artifacts stay in the git-ignored
+  `runtime/career-ops/discovery/` tree because they name real postings.
+- **Owner action.** None new. Enabling the pipeline on the live schedule (rather than on
+  demand) is an owner decision and has **not** been made.
