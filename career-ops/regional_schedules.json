@@ -9,6 +9,15 @@
   "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
   "policy_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\regional_policy.json",
   "overlap_policy": "Tasks are staggered and each writes a distinct run-health file, so overlapping runs cannot duplicate rows: dry-run scans never mutate state at all, and the deterministic runner keys each run by a hash of its accepted candidate set so a replayed run reports duplicates instead of new rows.",
+  "brief": {
+    "task_name": "ChiefCareerBrief",
+    "time": "07:00",
+    "runner": "career-ops/run_scheduled_brief.cmd",
+    "log_dir": "runtime/career-ops/daily-brief",
+    "mode": "read-only aggregation; writes only the brief artifact under runtime/career-ops/daily-brief",
+    "delivery": "local file only; no external delivery channel is configured, attempted or assumed healthy",
+    "note": "The Career Daily Brief / Pipeline Prioritizer (roster B23). Morning time is chosen so the brief exists before the owner's working day; making the artifact available is all the schedule does. Delivering it to a messaging surface is a separate, unverified step (see career-ops/daily_brief_config.json#delivery)."
+  },
   "regions": {
     "uk": {
       "task_name": "ChiefCareerScan-UK",

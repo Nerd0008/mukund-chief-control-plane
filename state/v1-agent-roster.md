@@ -133,6 +133,33 @@ Not claimed: any live company research (no approved provider), any live vacancy,
 submission, and any "independent AI opinion" — B17 is independent deterministic
 re-derivation, not a second model.
 
+## Status update — 2026-09-24 (Career Daily Brief / Pipeline Prioritizer: B23)
+
+Task `agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23`. Acceptance evidence:
+`audits/evidence/20260924T034000Z-career-daily-brief/` (**32/32 critical checks**,
+0 failures, code SHA recorded in the artifact).
+
+| ID | Worker / service | Status now | Evidence |
+|---|---|---|---|
+| B23 | Career Daily Brief / Pipeline Prioritizer | **BUILT + EVIDENCED — read-only aggregator** | `career-ops/daily_brief.py` + `career-ops/daily_brief_config.json`; `build` emits a machine-readable brief + concise Chief summary; `inputs`/`policy`/`summary`/`status` subcommands; writes only `runtime/career-ops/daily-brief/` (git-ignored) |
+| B23 | Deterministic priority policy | **DECLARED + ENFORCED** | five explicit inputs (deadline 40, stage 20, eligibility certainty 15, freshness 15, owner flag 10); score over the full policy weight so an UNKNOWN lowers the score instead of being imputed; every item reports components, weights, contributions, `coverage_pct`, UNKNOWN inputs and any override; three declared overrides (`urgent_deadline`, `owner_action_min_class`, `unscoreable`) |
+| B23 | No fabricated priority facts | **ENFORCED** | `score_semantics.kind = "deterministic_policy_output"`; a status outside the declared stage vocabulary is UNKNOWN (not zero); the UK tracker has no deadline column so deadline is UNKNOWN for every UK row; Dubai/Japan/Singapore work authorisation stays UNKNOWN; a zero-coverage item is labelled, never scored silently |
+| B23 | Required content | **DONE** | regional scan health per region, newly added jobs (window-dated tracker rows + scan offers that carry no URL), duplicates suppressed (scanner counters + prior-run idempotency + shared writer dedupe), Company Watch findings, application-status change proposals, interview/follow-up items, owner actions |
+| B23 | Idempotency | **PROVEN** | a repeat run over unchanged inputs produces the same content digest and input fingerprint, writes **no new bytes**, and appends only to `run-log.jsonl`; a different window is genuinely different content and therefore a new brief |
+| B23 | Delivery honesty | **ENFORCED** | local file, verified by sha256 read-back; `external_channels: []`, `external_channel_health: "not_verified"` — no messaging/Discord delivery is configured, attempted or assumed healthy |
+| B24-related | Morning schedule | **REGISTERED** | `ChiefCareerBrief` daily 07:00 via `career-ops/run_scheduled_brief.cmd`; `install_schedules.py --install-brief/--remove-brief/--status` (brief task included in `--status`) |
+| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **21 passed**; whole `career-ops/tests/` **299 passed** (was 278) |
+| Safety | Read-only | **VERIFIED** | canonical workbook SHA-256s identical before/after; `applications_submitted: 0`, `external_messages_sent: 0`, `canonical_workbook_writes: 0`; no network/browser/CLI-execution surface in the module (asserted by test) |
+
+Truth boundaries: the brief **owns no career state** — every fact is read back out
+of the canonical artifact that owns it, and nothing is re-derived into a new
+authoritative record. Scan offers carry no URL and cannot become tracker rows until
+one is resolved. The schedule makes the brief available in the morning; delivering
+it to a messaging surface is a separate, unverified step (owner decision recorded
+in `tasks-or-issues/overnight-owner-actions-2026-09-24.md` item 14). The brief is
+not a fit score: a low score with low coverage means "little policy evidence", not
+"poor opportunity".
+
 ## Status update — 2026-09-24 (LinkedIn people/network layer: B19, B20, B21, B22)
 
 Task `agent-linkedin-networking-interview-support-2026-09-23`. Acceptance evidence:

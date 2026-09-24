@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "description": "Career Daily Brief / Pipeline Prioritizer (roster B23) configuration. The brief is a READ-ONLY aggregation of artifacts that other workflows already own: the regional scan run-health/state files, the canonical regional workbooks (via career-ops/tracker_writer.py, read-only), Company Watch findings, the Application Inbox monitor stores, Interview Prep packs, and the owner-action file. It writes nothing outside runtime/career-ops/daily-brief, never submits or contacts anyone, and never invents a priority: the priority score is a declared deterministic policy output reported with its components, weights and UNKNOWN inputs.",
+  "career_ops_dir": "career-ops",
+  "out_dir": "runtime/career-ops/daily-brief",
+  "inputs": {
+    "regional_state": "runtime/career-ops/scan-runs/regional-run-state.json",
+    "scan_runs_dir": "runtime/career-ops/scan-runs",
+    "regional_schedules": "career-ops/regional_schedules.json",
+    "regional_profiles": "career-ops/regional_profiles.json",
+    "regional_policy": "career-ops/regional_policy.json",
+    "application_status_dir": "runtime/career-ops/application-status",
+    "application_inbox_config": "career-ops/application_inbox_config.json",
+    "interview_prep_config": "career-ops/interview_prep_config.json",
+    "job_intelligence_config": "career-ops/job_intelligence_config.json",
+    "submission_gate_log": "runtime/career-ops/job-intelligence/submission-gate-log.jsonl",
+    "company_watch_runtime": "runtime/company-watch",
+    "company_watch_config": "company-watch/company_watch_config.json",
+    "linkedin_handoff_dir": "runtime/linkedin/handoffs",
+    "owner_actions_file": "tasks-or-issues/overnight-owner-actions-2026-09-24.md"
+  },
+  "window": {
+    "default_hours": 24,
+    "max_hours": 168,
+    "note": "The window bounds what counts as 'new'. It never widens a source's own truth: a tracker row is 'new' only if its own date-found column falls inside the window."
+  },
+  "freshness": {
+    "scan_stale_after_hours": 30,
+    "company_watch_stale_after_hours": 48,
+    "note": "Thresholds for labelling a source healthy/stale. A missing timestamp or a missing file is UNKNOWN, never healthy."
+  },
+  "terminal_statuses": [
+    "not applying",
+    "rejected",
+    "closed",
+    "discarded",
+    "withdrawn",
+    "hired"
+  ],
+  "terminal_statuses_note": "Tracker rows in one of these statuses are excluded from the priority candidate list because no pipeline action is available on them. They are still counted in the tracker's own status_counts.",
+  "owner_flag": {
+    "priority_values": ["High"],
+    "selected_values": ["Yes"],
+    "note": "owner_flag is TRUE only when an owner-CONTROLLED cell the owner set says so: the region's own priority column (where its schema has one) reads High, or its own selected column reads Yes. These are the owner's own words, not an inference. Where a region has neither column, owner_flag is UNKNOWN for its rows."
+  },
+  "owner_action_open_tokens": [
+    "pending",
+    "deferred",
+    "unverified",
+    "unknown",
+    "owner action",
+    "owner-gated",
+    "owner approval"
+  ],
+  "owner_action_open_tokens_note": "An owner-action item is reported as OPEN when its own '**Status:**' line contains one of these tokens, CLOSED when the line says no action is needed, and UNKNOWN when the item has no readable status line. Nothing about owner state is inferred beyond that.",
+  "policy_stage_tokens": {
+    "owner_action": "owner_action",
+    "note": "A synthetic, explicitly named stage token for owner-action items so their stage input is a declared policy input rather than an absent one; it is never presented as an application status."
+  },
+  "priority_policy": {
+    "version": "b23-policy-1",
+    "score_semantics": {
+      "kind": "deterministic_policy_output",
+      "note": "The score is the output of this declared policy over five explicit inputs. It is NOT a factual assessment of a vacancy, a candidate fit score, or an employer's ranking. Every candidate reports its score components, their weights, and every input that was UNKNOWN. The score is taken over the FULL policy weight, so an UNKNOWN input lowers the score rather than being imputed to zero and hidden; `coverage_pct` separately states the share of the total policy weight that was actually known. Two candidates with the same score but different coverage are therefore not equally evidenced, and a low score with low coverage means 'little policy evidence', not 'poor opportunity'."
+    },
+    "weights": {
+      "deadline": 40,
+      "stage": 20,
+      "eligibility_certainty": 15,
+      "freshness": 15,
+      "owner_flag": 10
+    },
+    "deadline_bands": [
+      {"max_days": 3, "value": 1.0},
+      {"max_days": 7, "value": 0.7},
+      {"max_days": 14, "value": 0.4},
+      {"max_days": 30, "value": 0.2}
+    ],
+    "deadline_overdue_value": 1.0,
+    "deadline_note": "Read from the region tracker's OWN deadline column. Where that schema has no deadline column (the UK tracker does not), or the cell is empty, deadline is UNKNOWN for every row of that region and every affected candidate lists it.",
+    "stage_values": {
+      "offer": 1.0,
+      "interview": 0.9,
+      "applied": 0.7,
+      "submitted": 0.7,
+      "application started": 0.65,
+      "ready to apply": 0.6,
+      "cv tailored": 0.6,
+      "selected": 0.6,
+      "preparing documents": 0.55,
+      "to review": 0.4,
+      "new": 0.4,
+      "reviewed": 0.4,
+      "pending": 0.4,
+      "owner_action": 0.7
+    },
+    "stage_note": "A status string that is not in this map is UNKNOWN (not zero): each region's vocabulary comes from its own tracker validation list, and no status is guessed.",
+    "eligibility_values": {
+      "authorised": 1.0
+    },
+    "eligibility_note": "Only an explicitly recorded work-authorisation state counts as known. 'UNKNOWN' (Dubai/UAE, Japan, Singapore) is reported as an unknown input so the brief cannot make an unclear eligibility question look resolved.",
+    "freshness_bands": [
+      {"max_days": 2, "value": 1.0},
+      {"max_days": 7, "value": 0.6},
+      {"max_days": 14, "value": 0.3}
+    ],
+    "freshness_note": "Age in days from the record's own posting date, falling back to its date-found value. Older than the last band, or undated, is UNKNOWN.",
+    "class_bands": [
+      {"class": "P1", "min_score": 70},
+      {"class": "P2", "min_score": 50},
+      {"class": "P3", "min_score": 30},
+      {"class": "P4", "min_score": 0}
+    ],
+    "class_order": ["P1", "P2", "P3", "P4"],
+    "unscoreable_class": "P4",
+    "urgent_deadline_days": 3,
+    "urgent_min_class": "P2",
+    "owner_action_min_class": "P2",
+    "overrides_note": "Three hard overrides are declared, and each one is recorded on the item it fires on: (1) a deadline within `urgent_deadline_days` raises the class to at least `urgent_min_class`; (2) an item whose subject type is `owner_action` - something only the owner can do - is raised to at least `owner_action_min_class`; (3) a candidate with no known policy input at all is reported at `unscoreable_class` with the reason recorded, not silently scored. Overrides change the class only; the underlying score and coverage are always reported unchanged.",
+    "subject_type_order": ["tracker_row", "deadline_item", "application_status_change", "interview_prep", "company_watch_finding", "new_offer_without_url", "owner_action"],
+    "rank_order": [
+      "priority class (P1 first)",
+      "score descending",
+      "coverage descending",
+      "subject type (subject_type_order)",
+      "deadline days ascending (unknown last)",
+      "region, then reference - so ties are broken deterministically and the order never depends on iteration order"
+    ]
+  },
+  "brief": {
+    "max_priority_items": 30,
+    "max_priority_items_in_summary": 12,
+    "max_summary_lines": 40,
+    "follow_up_stage_min_value": 0.6
+  },
+  "delivery": {
+    "local_file": true,
+    "external_channels": [],
+    "external_channel_health": "not_verified",
+    "note": "The brief is written locally and the write is verified by sha256 read-back. No external delivery channel is configured, attempted or assumed healthy. Scheduling the brief only makes it available in the morning; delivering it to a messaging surface is a separate, unverified step."
+  },
+  "not_performed": [
+    "Any application submission or application preparation action",
+    "Any contact with an employer, recruiter, agency or candidate",
+    "Any LinkedIn or other social-platform action",
+    "Any write to a canonical tracker or any other workflow's store",
+    "Any invented deadline, eligibility position, priority score component, metric or owner state",
+    "Any interactive browser, GUI application or network call"
+  ]
+}

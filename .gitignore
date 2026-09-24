@@ -64,6 +64,14 @@ runtime/career-ops/application-status/
 runtime/career-ops/application-inbox/
 audits/evidence/**/status-store/
 
+# --- Career Daily Brief runtime artifacts (owner-private) ---
+# The brief restates job titles, companies, posting URLs, deadlines and owner
+# actions, and its acceptance runs write their working copies under the same
+# tree. Only `audits/evidence/<stamp>-career-daily-brief/` (aggregate counts,
+# hashes and check results) is committed.
+runtime/career-ops/daily-brief/
+runtime/career-ops/daily-brief-*/
+
 # --- Owner-private evidence artifacts (never committed) ---
 # Raw tracker backups, raw ATS findings and raw resolution dumps name Mukund's
 # companies, postings and application history. Committed evidence stays

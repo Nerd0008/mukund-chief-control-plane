@@ -588,10 +588,93 @@ workbooks are hash-identical before and after; the append happened on a copy wit
 hash-verified backup and a verified rollback; and a replayed LinkedIn posting is
 deduped.
 
+## Career Daily Brief / Pipeline Prioritizer (B23, 2026-09-24)
+
+`career-ops/daily_brief.py` + `career-ops/daily_brief_config.json`. A **read-only
+aggregator**: it does not own any career state, it restates what the other
+workers already recorded, and it writes nothing outside its own runtime
+directory (`runtime/career-ops/daily-brief/`, git-ignored).
+
+    python career-ops/daily_brief.py inputs
+    python career-ops/daily_brief.py policy
+    python career-ops/daily_brief.py build [--window-hours 24] [--now ISO] [--dry-run]
+    python career-ops/daily_brief.py summary [--latest | --brief FILE]
+    python career-ops/daily_brief.py status
+
+**Inputs (all read-only, each labelled present/absent with a hash):**
+
+| input | owner | used for |
+|---|---|---|
+| `runtime/career-ops/scan-runs/regional-run-state.json` + run-health files | regional job-search workers | scan health, accepted/rejected, duplicates, new offers |
+| canonical regional workbooks via `tracker_writer.py` | Career Ops (Excel) | row counts, status counts, deadline column, newly added rows |
+| `runtime/company-watch/findings-uk-latest.json` (+ registry, aggregate only) | Company Watch | findings counts and freshness |
+| Application Inbox monitor stores via `application_inbox.build_summary()` | Application Inbox | status-change proposals, monitor-raised owner actions |
+| Interview Prep packs | `interview_prep.py` | interview/follow-up artifacts |
+| `tasks-or-issues/overnight-owner-actions-2026-09-24.md` | owner | open owner actions |
+| JobBriefs, LinkedIn handoffs, submission-gate log | the workflows above | output counts only |
+
+**Priority policy (declared, deterministic, versioned).** Five explicit inputs
+with declared weights — deadline 40, application stage 20, eligibility certainty
+15, freshness 15, owner flag 10. The score is taken over the **full** policy
+weight, so an UNKNOWN input lowers the score rather than being imputed; each item
+reports its `components` (value, weight, contribution, observed value), its
+`coverage_pct`, its UNKNOWN inputs, and any override that fired:
+
+* `urgent_deadline` — a deadline within 3 days raises the class to at least P2;
+* `owner_action_min_class` — an item only the owner can action is raised to at least P2;
+* `unscoreable` — no known policy input at all is reported at P4 *and labelled*, never silently scored.
+
+The brief records `score_semantics.kind = "deterministic_policy_output"`: the
+score is a policy output, **not** a claim about the vacancy or the candidate.
+Statuses outside the declared vocabulary, trackers with no deadline column, and
+regions with no recorded work-authorisation position all become named UNKNOWNs —
+the UK tracker has no deadline column, so deadline is UNKNOWN for every UK row,
+and Dubai/Japan/Singapore work authorisation stays UNKNOWN on every record.
+
+**Idempotency.** The brief content is digested with `generated_at`, `brief_id`,
+`content_digest` and the `delivery` block excluded. Where the content digest
+matches, the existing digest-named file is left untouched: a repeat run over
+unchanged inputs writes **no new bytes**, only appends to `run-log.jsonl`, and
+reports `idempotent: true`. A different window is genuinely different content and
+therefore a new brief.
+
+**Delivery.** Local file only, verified by sha256 read-back: `brief-<digest>.json`
+(machine-readable), `chief-summary-<digest>.md`, plus `latest.json` / `latest.md`.
+`delivery.external_channel_health` is `not_verified` — nothing sends, posts or
+notifies, and no messaging channel is assumed healthy.
+
+**Scheduling.** `ChiefCareerBrief` runs daily at **07:00** via
+`career-ops/run_scheduled_brief.cmd`:
+
+    python career-ops/install_schedules.py --install-brief
+    python career-ops/install_schedules.py --remove-brief
+    python career-ops/install_schedules.py --status          # includes the brief task
+
+The schedule makes the brief *available* in the morning; it is not a delivery
+channel and does not claim one.
+
+**Acceptance runner**
+
+    python career-ops/run_daily_brief_acceptance.py [--stamp S]
+
+Writes `audits/evidence/<stamp>-career-daily-brief/acceptance.json` + `.md` —
+**32/32 critical checks** at the time of writing. Encoded guarantees: the live
+brief validates structurally; an empty-input run still builds and labels every
+absent input (never as healthy or as zero); a partial-input run names the missing
+sources and invents no owner action; a repeat run is byte-neutral and
+idempotent; every score equals the sum of its declared components with no unknown
+input also reported as known; every required section (scan health, newly added
+jobs, duplicates suppressed, application-status changes, interview/follow-up
+items, owner actions) is present, with unavailable ones saying so; canonical
+workbooks are hash-identical before and after; zero submissions/messages/writes;
+no external channel claimed; the Chief summary is concise; and the morning
+schedule + launcher exist with the task state read from Task Scheduler.
+
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 278 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 299 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
+    python -m pytest career-ops/tests/test_daily_brief.py -q    # 21 passed
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed

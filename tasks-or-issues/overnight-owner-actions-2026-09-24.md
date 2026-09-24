@@ -279,6 +279,27 @@ stubbed-failure drill (33/33 checks) plus the existing real-path execution rehea
 E4/E5 evidence for v1 acceptance, or is a live-provider failover drill required before cutover? The
 recorded state does not assume an answer either way.
 
+### 14. Decide whether the Career Daily Brief should be *delivered* anywhere (not blocking)
+
+**Status:** PENDING — OWNER DECISION (recorded 2026-09-24 by the Career Daily Brief task)
+**Blocks:** nothing. The brief (roster B23) is **built, tested, acceptance-evidenced (32/32) and
+scheduled**: `ChiefCareerBrief` runs daily at **07:00** and writes a machine-readable brief plus a
+concise Chief summary, locally, under `runtime/career-ops/daily-brief/`.
+**Why owner-only:** the task explicitly said not to assume an external delivery channel is healthy
+until it is verified. Nothing in the system sends, posts or notifies, and this build did **not**
+assume otherwise — every brief records
+`delivery.external_channel_health = "not_verified"` and `external_channels = []`. Choosing a
+channel (or confirming none is wanted) is a decision about where your daily brief should surface and
+under whose account.
+**Action (optional):** say one of —
+1. "keep it local" (recommended, no action needed): open
+   `runtime/career-ops/daily-brief/latest.md` (or `latest.json`) yourself, or ask Chief for the
+   summary; or
+2. name a channel you want it delivered to (e.g. Discord `#career`), and engineering will wire it
+   behind that channel's own health check — the delivery path will stay separate from the brief so a
+   broken channel can never make the brief look unhealthy.
+**Note:** the schedule makes the brief *available* in the morning; it does not deliver it anywhere.
+
 
 
 ## Owner manual-work target

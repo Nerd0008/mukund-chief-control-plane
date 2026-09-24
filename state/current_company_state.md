@@ -956,3 +956,24 @@ labelled synthetic), and any external message or application.
 Do not fabricate qualification/provider evidence, and do not enable Stage 2 or choose a
 deployment architecture without the readiness evidence and the owner decisions recorded in the
 authority file.
+
+## Career Daily Brief / Pipeline Prioritizer — B23 (2026-09-24, 07:00 daily)
+
+The Career department's outputs are now summarisable in one morning read. `career-ops/daily_brief.py`
+(+ `daily_brief_config.json`) is a **read-only aggregator**: it owns no career state, restates what
+the canonical artifacts already say, and writes only `runtime/career-ops/daily-brief/` (git-ignored).
+
+- **Evidence:** `audits/evidence/20260924T034000Z-career-daily-brief/` — **32/32 critical checks**,
+  0 failures; canonical workbook SHA-256s identical before/after; `applications_submitted: 0`,
+  `external_messages_sent: 0`, `canonical_workbook_writes: 0`.
+- **Priority is a declared policy output, not a fact.** Five explicit inputs (deadline, application
+  stage, eligibility certainty, freshness, owner flag) with declared weights; UNKNOWN inputs lower
+  coverage instead of being imputed, and every item publishes its components and unknowns. The UK
+  tracker has no deadline column, so deadline is UNKNOWN for every UK row — stated, not guessed.
+- **Scheduled, not delivered:** `ChiefCareerBrief` runs daily at **07:00** (launcher
+  `career-ops/run_scheduled_brief.cmd`; `install_schedules.py --install-brief/--remove-brief/--status`).
+  `delivery.external_channel_health` is `not_verified` and `external_channels` is empty — nothing
+  sends, posts or notifies, and no channel health is assumed.
+- **Open owner decision (not blocking, item 14 in `tasks-or-issues/overnight-owner-actions-2026-09-24.md`):**
+  keep the brief local-only, or name a channel to deliver it to. The delivery path will stay separate
+  from the brief so a broken channel can never make the brief look unhealthy.

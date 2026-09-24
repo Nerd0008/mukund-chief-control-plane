@@ -46,6 +46,43 @@ def task_command(spec: dict, region: str, schedules: dict) -> str:
     return f'"{launcher}" {region}'
 
 
+def brief_spec(schedules: dict) -> dict:
+    return schedules.get("brief") or {}
+
+
+def brief_command(schedules: dict) -> str:
+    """The Career Daily Brief has no region argument; its launcher takes none."""
+    cp = Path(schedules["control_plane"])
+    spec = brief_spec(schedules)
+    launcher = cp / spec.get("runner", "career-ops/run_scheduled_brief.cmd")
+    return f'"{launcher}"'
+
+
+def install_named(name: str, when: str, cmd: str, extra: dict | None = None) -> dict:
+    args = ["schtasks", "/Create", "/TN", name, "/TR", cmd, "/SC", "DAILY", "/ST", when, "/F"]
+    proc = subprocess.run(args, capture_output=True, text=True, shell=False)
+    return {"task_name": name, "time": when, "command": cmd,
+            "exit_code": proc.returncode, "ok": proc.returncode == 0,
+            "output": (proc.stdout or proc.stderr).strip(), **(extra or {})}
+
+
+def remove_named(name: str, extra: dict | None = None) -> dict:
+    proc = subprocess.run(["schtasks", "/Delete", "/TN", name, "/F"],
+                          capture_output=True, text=True, shell=False)
+    return {"task_name": name, "exit_code": proc.returncode, "ok": proc.returncode == 0,
+            "output": (proc.stdout or proc.stderr).strip(), **(extra or {})}
+
+
+def install_brief(schedules: dict, time_override: str | None) -> dict:
+    spec = brief_spec(schedules)
+    if not spec:
+        return {"task_name": None, "ok": False, "error": "no 'brief' schedule declared"}
+    return install_named(spec["task_name"], time_override or spec["time"],
+                         brief_command(schedules),
+                         {"kind": "career-daily-brief", "mode": spec.get("mode"),
+                          "delivery": spec.get("delivery")})
+
+
 def query(task_name: str) -> dict:
     proc = subprocess.run(["schtasks", "/Query", "/TN", task_name, "/FO", "LIST"],
                           capture_output=True, text=True, shell=False)
@@ -85,13 +122,35 @@ def main(argv=None) -> int:
     g.add_argument("--install", action="store_true")
     g.add_argument("--remove", action="store_true")
     g.add_argument("--status", action="store_true")
+    g.add_argument("--install-brief", action="store_true",
+                   help="register the morning Career Daily Brief task")
+    g.add_argument("--remove-brief", action="store_true")
     ap.add_argument("--region", action="append")
     ap.add_argument("--time", dest="time_override")
     args = ap.parse_args(argv)
 
     schedules = load_schedules()
-    regions = args.region or list(schedules["regions"])
     results = []
+
+    if args.install_brief or args.remove_brief:
+        spec = brief_spec(schedules)
+        if args.status or not spec:
+            results.append({"task_name": None, "ok": False,
+                            "error": "no 'brief' schedule declared in regional_schedules.json"})
+        elif args.install_brief:
+            results.append(install_brief(schedules, args.time_override))
+        else:
+            results.append(remove_named(spec["task_name"], {"kind": "career-daily-brief"}))
+        print(json.dumps({
+            "action": "install-brief" if args.install_brief else "remove-brief",
+            "schtasks_available": shutil.which("schtasks") is not None,
+            "results": results,
+            "note": "The Daily Brief task performs read-only aggregation and writes only its own "
+                    "runtime artifact; it never writes a tracker, submits, or delivers externally.",
+        }, indent=2))
+        return 0 if all(r.get("ok") for r in results) else 1
+
+    regions = args.region or list(schedules["regions"])
     for region in regions:
         if region not in schedules["regions"]:
             results.append({"region": region, "ok": False, "error": "unknown region"})
@@ -106,6 +165,13 @@ def main(argv=None) -> int:
             results.append(install(region, spec, schedules, args.time_override))
         else:
             results.append(remove(region, spec))
+
+    if args.status and brief_spec(schedules):
+        spec = brief_spec(schedules)
+        q = query(spec["task_name"])
+        q.update({"region": None, "kind": "career-daily-brief", "time": spec["time"],
+                  "mode": spec.get("mode"), "delivery": spec.get("delivery")})
+        results.append(q)
 
     print(json.dumps({
         "action": "status" if args.status else ("install" if args.install else "remove"),

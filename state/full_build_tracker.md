@@ -418,3 +418,62 @@ Successor task: **no new `agent-*` task staged** — the whole-company local acc
 task (`agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`, pending)
 already lists the LinkedIn draft/read-only path, and its scope does not mention the
 interview-prep path, so that gap is recorded here for that task rather than duplicated.
+
+## Career Daily Brief / Pipeline Prioritizer (2026-09-24T03:40Z)
+
+Task `agent-career-daily-brief-and-pipeline-prioritizer-2026-09-23` (roster B23).
+Acceptance evidence (authoritative): `audits/evidence/20260924T034000Z-career-daily-brief/`
+(`acceptance.json` + `acceptance.md`) — **32/32 checks passed, 0 critical failures**. The earlier run
+of the same runner is preserved (`…T033000Z-…`, 30/30), superseded because stage 3's partial-input
+check was tightened from an `or`-chained assertion to three precise ones.
+
+The brief is an aggregator, so this task added **no new career state**: it reads the artifacts the
+other Career-department workers already own and restates them.
+
+| Lane | Item | Status | Evidence |
+|---|---|---|---|
+| B23 | Daily Brief / Pipeline Prioritizer | **BUILT + EVIDENCED** | `career-ops/daily_brief.py` + `career-ops/daily_brief_config.json`; subcommands `inputs`, `policy`, `build`, `summary`, `status`; `build` writes a machine-readable brief + a concise Chief summary and nothing else |
+| B23 | Read-only aggregation from canonical state | **ENFORCED** | canonical workbooks read through `tracker_writer.py` only; SHA-256s re-read after the run are identical; `canonical_workbook_writes: 0`; the `safety` block reports `canonical_state_unchanged: true`; the module has no network/browser/subprocess-CLI surface (asserted by test) |
+| B23 | Deterministic priority policy | **DECLARED + ENFORCED** | five explicit inputs with declared weights (deadline 40, application stage 20, eligibility certainty 15, freshness 15, owner flag 10) and declared class bands P1–P4; score is taken over the **full** policy weight, so an UNKNOWN input lowers the score rather than being imputed; each item publishes `components` (value, weight, contribution, observed), `coverage_pct`, its UNKNOWN inputs and any override that fired |
+| B23 | No fabricated priority facts | **ENFORCED** | `score_semantics.kind = "deterministic_policy_output"` with an explicit note that it is not a vacancy assessment, a fit score or an employer ranking; a status outside the declared stage vocabulary is UNKNOWN, never zero; a candidate with no known policy input is reported at P4 **and labelled `unscoreable`**; the acceptance runner asserts every score equals the sum of its declared components and that no input is reported as both known and unknown |
+| B23 | Three declared overrides | **ENFORCED** | `urgent_deadline` (deadline within 3 days → at least P2), `owner_action_min_class` (owner-only action → at least P2), `unscoreable` (→ P4, labelled); overrides are recorded on the item with the rule that fired, so a P1 is always explainable from its components |
+| B23 | Unknowns are named, not filled | **ENFORCED** | the UK tracker has no deadline column, so deadline is UNKNOWN for **every** UK row rather than assumed; Dubai/Japan/Singapore have no recorded work-authorisation position, so eligibility certainty stays UNKNOWN there; an unrecognised status, a missing posting date and a missing owner-action file are all named unknowns with a reason |
+| B23 | Regional scan health | **DONE** | per-region health from the workers' own run-state file: last status, last run time, age in hours against the **injected** logical clock, ok/failed run counters and the scanner's own parsed accepted/rejected/duplicate counters |
+| B23 | Newly added jobs | **DONE + HONEST** | tracker rows with a date-stamp inside the brief window, plus scan offers — which carry **no URL** and are labelled as not yet tracker rows, because the shared writer's dedupe is URL-based and an unresolved offer cannot become one |
+| B23 | Duplicates suppressed | **DONE** | reported from three real sources: the scanner's own duplicate counter, the prior-brief idempotency result, and the shared writer's dedupe policy (stated as policy, not as a measured count) |
+| B23 | Application-status changes | **DONE** | Application Inbox monitor proposals (`build_summary()`), including monitor-raised owner actions; no status is applied — the brief reports proposals the owning worker would make |
+| B23 | Interview / follow-up items | **DONE** | Interview Prep packs, filtered to declared stage values at or above the configured follow-up threshold; a section that is unavailable says so with the reason (`available: false` + `error`) instead of rendering as empty |
+| B23 | Company Watch findings | **DONE + PRIVATE-SAFE** | findings counts and freshness; the company registry is restated at aggregate level only, because it is owner-private |
+| B23 | Owner actions | **DONE** | open items read from `overnight-owner-actions-2026-09-24.md`, each becoming a priority candidate with `owner_action_min_class`; an absent file yields zero items and a named missing input, never an invented action |
+| B23 | Machine-readable + Chief-facing outputs | **DONE** | `brief-<digest>.json` (with its own schema block, priority items, unknowns, safety block and run metadata) plus `chief-summary-<digest>.md`, bounded to a declared maximum of lines, `latest.json`/`latest.md` for stable paths |
+| B23 | Idempotency | **PROVEN** | the content digest excludes `generated_at`, `brief_id`, `content_digest` and the `delivery` block; where the stored file's recomputed digest matches, the run writes **no new bytes** and reports `idempotent: true`; a repeat run is asserted byte-neutral apart from the append-only `run-log.jsonl` |
+| B23 | Empty / partial input behaviour | **PROVEN** | an empty-input run (no workbooks, no run-state, no findings, no owner-action file, no packs) still builds, labels every absent input as absent, never reports an absent source as healthy or as zero, and keeps `ok: true`; a partial-input run names the missing sources and invents no owner action |
+| B23 | Delivery honesty | **ENFORCED** | local file only, verified by sha256 read-back (`stored_content_matches`); `external_channels: []` and `external_channel_health: "not_verified"` — nothing is sent, posted or scheduled to a messaging surface, and no channel is assumed healthy |
+| B23 | Morning schedulability | **DONE** | `ChiefCareerBrief` registered daily at **07:00** (`career-ops/run_scheduled_brief.cmd`); `install_schedules.py` gained `--install-brief` / `--remove-brief`, and `--status` now includes the brief task alongside the regional lanes |
+| Safety | No submission, no outreach | **ENFORCED** | the module contains no submission, messaging, browser or provider call; acceptance asserts zero submissions, zero external messages, zero external actions |
+| Safety | Canonical state not overwritten | **VERIFIED** | workbook SHA-256s identical before/after; the brief's only writes are its own digest-named artifact, the `latest` pointers and its run log, all under git-ignored `runtime/career-ops/daily-brief/` |
+| Tests | New suite | **PASS** | `career-ops/tests/test_daily_brief.py` **21 passed** (new); whole `career-ops/tests/` **299 passed** (was 278) |
+
+Defect found and fixed inside this task (recorded because it was a real correctness bug, not polish):
+the content digest was computed **before** `chief_summary`, `input_fingerprint`, `delivery` and
+`brief_id` were attached, so the stored file's recomputed digest could never match the in-memory one
+— every run would have rewritten its own "identical" artifact and idempotency would have been
+claimed but false. The digest is now finalised after the brief is complete (with the volatile keys
+excluded), and idempotency is **asserted** by the acceptance runner rather than asserted in prose.
+A second leak of the same class was fixed with it: run ages were computed against the wall clock
+instead of the injected logical clock, which made two otherwise identical runs differ.
+
+Truth boundaries recorded in the artifact, not glossed over:
+
+- The brief **owns nothing**. It is a view over canonical artifacts; deleting it loses no career
+  state, and a wrong brief cannot corrupt a tracker.
+- The priority score is a **policy output over declared inputs**. A low score with low coverage means
+  "little policy evidence", not "poor opportunity", and the brief says so in its own semantics block.
+- Scan offers are **not** tracker rows and the brief does not pretend otherwise.
+- The schedule makes the brief *available* in the morning. **No external delivery channel is
+  configured, verified or claimed** (`not_verified`); choosing one is a pending owner decision
+  (`tasks-or-issues/overnight-owner-actions-2026-09-24.md` item 14).
+
+Successor task: **no new `agent-*` task staged** — the aggregation is complete and scheduled inside
+this task's scope; the only open item is the owner delivery-channel decision, which is a decision,
+not engineering.
