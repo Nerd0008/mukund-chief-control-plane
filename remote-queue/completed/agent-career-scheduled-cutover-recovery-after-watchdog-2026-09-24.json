@@ -1,0 +1,104 @@
+{
+  "task_id": "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24",
+  "created_at": "2026-09-24T15:58:00Z",
+  "objective": "Recover the unfinished Career scheduled research cutover by inspecting the exhausted predecessor's partial changes and completing only the smallest remaining non-destructive engineering/verification unit. The predecessor exhausted its bounded attempts on execution_error; this is a new recovery task, not a blind retry.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "Confirm this task is the only agent-* worker running; the umbrella full-operational-build record has no worker and is not execution evidence.",
+    "Inspect current main, git status, worker/process and scheduler state before editing; recover usable predecessor changes without overwriting active Hermes work.",
+    "Preserve predecessor history and all committed evidence; do not modify the blocked predecessor record except for an additive reconciliation note if justified."
+  ],
+  "allowed_scope": [
+    "Inspect the partial Career scheduled-orchestrator, launcher, deployment, test and evidence changes from the blocked predecessor; record exact changed paths and distinguish committed from uncommitted state.",
+    "Resume existing implementation with minimal patches; do not rebuild already completed discovery, watchlist, recruiter/LinkedIn intake, Company Watch, or tracker-writer components.",
+    "Use disposable/copy fixtures for integration acceptance. Prove the unified scheduler invokes the high-recall orchestrator and produces a unified manifest/brief with region/source funnel attribution; preserve intern_only only as explicit diagnostic mode.",
+    "Repair launcher line-ending or portability defects with repository-native deterministic rules, and test the exact launcher bytes on the supported Windows path without launching GUI/browser applications.",
+    "Run bounded, read-only live web acceptance only if the required non-GUI search interface is already available in the environment. Otherwise precisely record unavailable sources; do not infer live source coverage from fixtures.",
+    "Keep schedules disabled or run against isolated test configuration only; do not register, enable, replace, or trigger real owner scheduled tasks.",
+    "Confirm canonical workbook and tracker hashes remain unchanged; perform no tracker apply, application submission, outreach, LinkedIn mutation, account login, or cookie/session access.",
+    "Run focused Career tests and relevant regression suites with explicit progress output and bounded timeouts. Commit and push only the recovered implementation, tests, and truthful evidence attributable to this task.",
+    "Before returning terminal JSON, create exactly one unique authorized successor only if a concrete independent gap remains and no equivalent task is pending/running; otherwise return terminal without a successor."
+  ],
+  "stop_conditions": [
+    "Do not use local interactive browser/GUI, Edge, signed-in sessions, cookies, or owner browser profile.",
+    "Do not claim a source is live, empty, or validated without direct evidence; preserve UNKNOWN/unavailable distinctions.",
+    "Do not enable owner schedules, write canonical trackers, send external messages, apply for jobs, or mutate external accounts.",
+    "Do not enable E3 Stage 2, choose deployment architecture, or perform VPS cutover/deployment.",
+    "Do not duplicate completed work or exceed bounded retry/time policy; if the same deterministic watchdog failure recurs, preserve partial evidence and report the exact remaining blocker."
+  ],
+  "notes": "The predecessor task agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24 exhausted 3/3 attempts (1 no-progress watchdog, 2 hard timeouts). Its terminal record says career-ops scheduled-orchestrator, deployments/06 and runtime changes remain uncommitted, and launcher CRLF preservation was one acceptance gap. Canonical status marks the scheduled-orchestrator cutover NOT COMPLETE/BLOCKED. This recovery task owns inspection and safe salvage; do not race the predecessor's dirty worktree if any process/worktree is still active.",
+  "references": [
+    "remote-queue/blocked/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json",
+    "handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md"
+  ],
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T20:41:46.871548Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=69).",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes worker hit the 300s no-progress watchdog (output_bytes=69).",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T20:53:18.998422Z",
+  "result": {
+    "status": "completed",
+    "summary": "Recovered the blocked predecessor's uncommitted scheduled-cutover work without rebuilding anything. Inspection showed the whole lane was uncommitted: modified tracked files (.gitattributes, career-ops/{README.md,daily_brief.py,install_schedules.py,regional_schedules.json,run_scheduled_scan.cmd}, deployments/06-service-definitions.md), five new untracked career-ops files (discovery/scheduled_orchestrator.py, run_scheduled_orchestrator_acceptance.py, scheduled_orchestrator.md, tests/test_scheduled_orchestrator.py) and two untracked evidence directories. The one real defect from the predecessor's 38/39 acceptance (launcher CRLF) was already repaired by attempt 1 via a repository-native rule (*.cmd eol=crlf) plus CRLF launcher bytes (44/44 CRLF, sha256 cae1c275\u2026). The smallest remaining unit was therefore verification and landing rather than new implementation: focused suite 37/37 pass (EXIT=0, confirmed by the completing background process), cmd.exe parse probe of the exact launcher bytes reproduced the intended orchestrator argv (only the 'set PY=' line substituted; stub exited 9, no scan/browser/GUI), the four canonical tracker workbooks are byte-identical to the recorded hashes, schedules were only queried read-only, then the implementation, tests, docs and both cutover evidence records were committed and pushed, plus exactly one validated successor task for the remaining acceptance/reconciliation gap.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "0e676f5 career: land the unified scheduled discovery cutover (recovery of the blocked predecessor)",
+      "9839da8 queue: authorize the one successor for the scheduled-cutover lane",
+      "remote main verified: 9839da8bd9f96626346fe9efb263c0610308d1b8 (git ls-remote origin main)"
+    ],
+    "tests": [
+      "career-ops/tests/test_scheduled_orchestrator.py: 37 passed in 294.97s, EXIT=0 (background process proc_643325ef8c94 completed, exit code 0)",
+      "career-ops acceptance run audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover: PASS 23/23 (offline; live.attempted=false)",
+      "predecessor acceptance audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover: FAIL 38/39, sole failure launcher_keeps_crlf_line_endings \u2014 now repaired and re-verified",
+      "regression subset (test_daily_brief, test_discovery_pipeline, test_regional_job_search, test_unified_discovery_sources, test_web_research, scripts/tests/test_status_consistency): 1 failed, 219 passed in 33.19s, EXIT=1 (background process proc_808b0a181369); the single failure is scripts/tests/test_status_consistency.py::test_10_no_newer_evidence_left_unincorporated \u2014 pre-existing, see remaining",
+      "cmd.exe parse probe of the exact launcher bytes (runtime/career-ops/discovery/launcher-probe/probe-result.txt): CRLF 44/44, only 'set PY=' line substituted, cmd.exe built the exact orchestrator argv \u2014 run --region uk --scheduled --require-live-web --mode high_recall --budget-seconds 2700 --scan-timeout 900 --web-queries 8 --max-urls 24 --per-query-timeout 180 --retries 1; stub returncode 9 (no real scan)",
+      "canonical tracker workbooks byte-identical before and after every run: uk 84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40, dubai 495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca, japan a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89, singapore 25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1",
+      "read-only schedule state (career-ops/install_schedules.py --status): ChiefCareerScan-UK/Dubai/Japan/Singapore registered and Ready, next runs 23:45/23:50/23:55/00:00 \u2014 queried only, not registered/enabled/replaced/triggered",
+      "successor task validated against remote_queue.queue_schema.load_task_file: errors: [] RESULT: VALID (authority approved, status pending)"
+    ],
+    "changed_files": [
+      ".gitattributes",
+      "career-ops/README.md",
+      "career-ops/daily_brief.py",
+      "career-ops/install_schedules.py",
+      "career-ops/regional_schedules.json",
+      "career-ops/run_scheduled_scan.cmd",
+      "career-ops/discovery/scheduled_orchestrator.py",
+      "career-ops/run_scheduled_orchestrator_acceptance.py",
+      "career-ops/scheduled_orchestrator.md",
+      "career-ops/tests/test_scheduled_orchestrator.py",
+      "deployments/06-service-definitions.md",
+      "audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/evidence.json",
+      "audits/evidence/2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover/evidence.md",
+      "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.json",
+      "audits/evidence/2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover/evidence.md",
+      "remote-queue/pending/agent-career-scheduled-cutover-final-acceptance-and-status-reconciliation-2026-09-24.json"
+    ],
+    "remaining": [
+      "No acceptance record is yet bound to the committed revision: the only live proof (predecessor 14-39-12Z) was produced on pre-CRLF-fix bytes, and the committed 20-33-25Z record is offline-only (live.attempted=false). Live source-class coverage for revision 0e676f5 is therefore UNKNOWN. Owned by the authorized successor.",
+      "status/canonical-status.json (as_of 2026-09-24T15:36:57Z) still records the cutover as NOT COMPLETE / BLOCKED citing only the FAIL record, and scripts/status_verify.py emits 'WARN: evidence directories newer than as_of are not incorporated: [2026-09-24T20-33-25Z-career-scheduled-orchestrator-cutover, 2026-09-24T20-47-43Z-e3-credential-presence-probe]'. scripts/tests/test_status_consistency.py::test_10 fails on this. The second id belongs to the E3 lane (pending task agent-e3-provider-verification-stage2-closeout-2026-09-24, which already owns provider-side status reconciliation). Deliberately not rewritten here to avoid mis-attributing another lane's evidence.",
+      "The unified orchestrator cutover takes effect at the next scheduled run because the four ChiefCareerScan-* tasks call the unchanged launcher path. This task did not enable, disable or trigger them; the owner may want to review the first real run's exit code (a no-go run deliberately exits 3).",
+      "Left deliberately uncommitted in the worktree: remote-queue/logs/queue.log (poller-owned) and runtime/career-ops/run-health/tracker-writer.json (records a tracker-writer run this task did not perform). No tracker apply, application, outreach, LinkedIn mutation, login, cookie/session access or browser/GUI action occurred in this task."
+    ]
+  }
+}
