@@ -14,8 +14,10 @@ Covered:
 * the request shape and the sanitized provider response diagnostics survive into
   the persisted dispatch attempt / DAG state / evidence rows;
 * a dispatch that returns no image part is recorded as a verification FAIL under
-  the declared deterministic contract (never as a pass), and the requested
-  output size is never promoted to a pass by any code path;
+  the declared deterministic contract (never as a pass), and its terminal
+  attribution distinguishes a provider error (no content-side stop reason) from a
+  provider content-side stop; the requested output size is never promoted to a
+  pass by any code path;
 * the repeat-series accounting derives its rate from counts over executed calls.
 """
 
@@ -311,7 +313,10 @@ class ExecutionPathShapeTests(unittest.TestCase):
         node = run["nodes"][0]
         self.assertEqual(node["state"], "FAILED")
         self.assertEqual(node["final_verification"], "FAIL")
-        self.assertEqual(node["failure_attribution"], "verification_fail")
+        # No image arrived and the provider gave no content-side stop reason, so
+        # this is a provider-side delivery error — never a pass, and never
+        # mislabelled as a contract failure of a delivered artifact.
+        self.assertEqual(node["failure_attribution"], "provider_error")
         con = sqlite3.connect(str(self.db_path))
         try:
             row = con.execute("SELECT final_success, verification_outcome "

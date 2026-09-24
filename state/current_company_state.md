@@ -1205,3 +1205,55 @@ artifact `audits/evidence/2026-09-24T02-37-18Z-blocked-work-final-reconciliation
 
 Owner action required (unchanged dependencies only, no new ones): the seven provider credentials, the
 Career Ops rollover-policy decision, and the pre-existing laptop/scheduled-task admin items.
+
+---
+
+## E3 provider content-side stop — truthful attribution + bounded same-request retry
+
+`agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24`, 2026-09-24, authority
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. Evidence:
+`audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/`.
+
+The 2/9 `finishReason=IMAGE_RECITATION` outcome recorded in the 2026-09-24T01:44:32Z series is no
+longer recorded as a node-level `verification_fail`. The E3 production execution leg now separates
+three genuinely different causes, each from provider-returned data only:
+
+| Cause | Attribution | Recovery |
+|---|---|---|
+| Provider content-side stop (provider `finishReason` withheld the content) | `provider_content_stop` | bounded identical same-request retry, then escalation |
+| Transport/provider error (HTTP status, absent credential, raised exception, 200 with no image and no content-side stop reason) | `provider_error` | existing bounded repair budget, then FAILED |
+| Delivered, well-formed output that fails its declared contract | `verification_fail` | existing bounded repair budget, then FAILED |
+
+Verified facts (all offline; **0 real provider calls** — the recorded responses are used verbatim as
+fixtures; the repeat series was not re-run):
+
+- `DEFAULT_MAX_CONTENT_STOP_RETRIES = 2` (initial dispatch + 2 retries = at most 3 identical
+  single-shot calls per node). The bound is the smallest that covers the recorded consecutive-stop
+  cluster; it is stated as an inference from the recorded ordering, not a provider guarantee.
+- The retry repeats the **identical** request (same objective, same contract-declared shape); it is
+  never a reworded repair and never a shape change. The provider finish reason is recorded in the
+  persisted DAG transition cause (`provider_content_stop_unrecovered:<finishReason>`), in
+  `blocking_reason`, and in the evidence row.
+- The unrecovered terminal path is **non-silent**: node `BLOCKED` with
+  `failure_attribution=provider_content_stop` plus an E3 escalation
+  (`trigger=provider_content_stop`) naming the finish reason and the owner decision. A content-side
+  stop is never a pass and never silently a verification failure.
+- Worker identity is never changed silently; equivalent-worker failover remains an explicit E4/owner
+  decision.
+- No unbounded retry path: the node loop carries a hard bound
+  `1 + max_repair_attempts + max_content_stop_retries` with a defensive
+  `attempt_budget_exhausted` BLOCKED guard. Stage-2 credential gate and deterministic owner/external
+  blockers are untouched.
+- Deterministic verification contract unchanged: only an independent verification PASS reaches
+  `COMPLETE`.
+- E4/E5 confirmed unchanged: no fabricated failover; `ConvergenceEnforcer` cap (warn → quarantine →
+  stop) still applies and the truthful attribution is visible to repeated-failure convergence.
+
+Tests: new offline suite `exec-brain/tests/test_e3_provider_content_stop.py` (25 tests, exit 0,
+0 provider calls) registered in `scripts/evidence_runner.py`. Full regression
+`scripts/evidence_runner.py --label regression-post-content-stop` → **19 suites / 19 passed / 0
+failed / 0 unavailable / 507 tests collected / 507 passed / exit 0**
+(`audits/evidence/2026-09-24T02-56-57Z-regression-post-content-stop/`), beating the 18-suite /
+482-test baseline at `d9d1a7f`. E3 Stage 2 remains DISABLED; no production dispatch; no VPS cutover;
+no readiness/qualification criterion changed. Owner action required: **none new** (unchanged
+dependencies only).

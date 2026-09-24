@@ -646,3 +646,25 @@ Audited 2026-09-24T02:45Z at code SHA `9bc20a7`. Authority:
 | Owner action | **NONE NEW** | unchanged dependencies only: seven provider credentials, Career Ops rollover policy, pre-existing laptop/scheduled-task admin items |
 | Ready for whole-company acceptance | **YES** | 0 unresolved non-owner recoverable blockers |
 
+## Provider content-side stop attribution — `agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24`
+
+Audited 2026-09-24, authority `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`.
+Evidence: `audits/evidence/2026-09-24T02-59-00Z-e3-provider-content-stop-attribution/`.
+
+| Item | State | Evidence |
+|---|---|---|
+| Provider-call budget for this task | **0 (stated up front)** | recorded 2026-09-24T01:44:32Z responses used verbatim as offline fixtures; the series was NOT re-run |
+| Content-side stop given its own attribution | **DONE** | `provider_content_stop` in `exec-brain/e3_execution.py`, decided only from provider-returned `finishReason` / `promptFeedback` |
+| Transport/provider error separated | **DONE** | `provider_error` (HTTP status, absent credential, raised exception, or 200 with no image and no content-side stop reason) |
+| Contract failure separated | **DONE** | `verification_fail` retained for a delivered, well-formed output that fails its declared contract |
+| Provider finishReason recorded in the terminal state | **DONE** | DAG transition cause `provider_content_stop_unrecovered:<finishReason>`, `blocking_reason`, and the evidence row's structured deterministic-test results |
+| Retry policy encoded from recorded evidence | **DONE** | bounded identical same-request retry, `DEFAULT_MAX_CONTENT_STOP_RETRIES = 2` (≤ 3 identical single-shot calls per node); same objective + same contract-declared shape, never a reworded repair |
+| Non-silent terminal path | **DONE** | node `BLOCKED` + E3 escalation `trigger=provider_content_stop` naming the finish reason and the owner decision; never a pass, never a silent `verification_fail` |
+| Unbounded retry prevented | **CONFIRMED** | hard bound `1 + max_repair_attempts + max_content_stop_retries` plus a defensive `attempt_budget_exhausted` BLOCKED guard; Stage-2 credential gate untouched |
+| Verification criterion | **UNCHANGED** | only an independent deterministic verification PASS reaches `COMPLETE` |
+| E4 resource continuity / E5 convergence | **CONFIRMED UNCHANGED** | no fabricated or silent failover; worker identity never changed silently; `ConvergenceEnforcer` warn → quarantine → stop cap tests still pass |
+| New offline tests | **25 tests / exit 0 / 0 provider calls** | `exec-brain/tests/test_e3_provider_content_stop.py`, registered in `scripts/evidence_runner.py` |
+| Regression | **PASS — baseline beaten** | `scripts/evidence_runner.py --label regression-post-content-stop` → **19 suites / 19 passed / 0 failed / 0 unavailable / 507 tests / exit 0** (`audits/evidence/2026-09-24T02-56-57Z-regression-post-content-stop/`); baseline 18 / 482 / exit 0 at `d9d1a7f` |
+| E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion changed |
+| Owner action | **NONE NEW** | unchanged dependencies only |
+

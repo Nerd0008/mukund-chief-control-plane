@@ -64,6 +64,92 @@ class WorkerNotRoutable(Exception):
     """Raised when dispatch is attempted for a worker that is not routable."""
 
 
+# ─── Failure attribution ─────────────────────────────────────────────
+#
+# Three genuinely different outcomes must never be conflated in the terminal
+# state of a node:
+#
+# * ``provider_content_stop`` — the provider returned a candidate whose own
+#   ``finishReason`` is one of its documented content-side stop reasons (or a
+#   ``promptFeedback`` block) and therefore withheld the content. Recorded on
+#   the real deployed path 2026-09-24: 2 of 9 identical, deterministic,
+#   single-shot Google image requests returned ``finishReason=IMAGE_RECITATION``
+#   with an empty response part list and 0 candidate tokens, while the same
+#   request returned a decodable 1024x1024 image on 7 of 9
+#   (audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/).
+# * ``provider_error`` — no verifiable output was delivered for a transport or
+#   provider reason (HTTP status, absent credential, raised adapter exception,
+#   or a 200 with no image and no content-side stop reason).
+# * ``verification_fail`` — a well-formed output was delivered and genuinely
+#   failed its declared deterministic contract.
+FAILURE_PROVIDER_CONTENT_STOP = "provider_content_stop"
+FAILURE_PROVIDER_ERROR = "provider_error"
+FAILURE_VERIFICATION_FAIL = "verification_fail"
+
+# Provider-documented finishReasons meaning the provider withheld content on
+# policy/filter grounds. ``IMAGE_RECITATION`` is the only value actually
+# recorded for this roster worker; the others are the provider's equivalent
+# content-side values, listed so the class is not narrowed to one observed
+# string. A value is only attributed from provider-returned data.
+CONTENT_SIDE_STOP_FINISH_REASONS = frozenset({
+    "IMAGE_RECITATION", "RECITATION", "SAFETY", "IMAGE_SAFETY",
+    "PROHIBITED_CONTENT", "BLOCKLIST", "SPII",
+})
+
+# promptFeedback keys that report a content-side block at prompt level.
+CONTENT_SIDE_BLOCK_FEEDBACK_KEYS = ("blockReason", "block_reason")
+
+# Bounded same-request retry budget for a content-side stop.
+#
+# Evidence (audits/evidence/2026-09-24T01-44-32Z-.../observations.json): the two
+# recorded IMAGE_RECITATION stops fell on *consecutive* calls (index 2 and 3 of
+# the 6-call IMAGE-only series) and the immediately following identical call
+# (index 4) returned a decodable 1024x1024 image. The smallest bound that would
+# have recovered that observed cluster is therefore 2 same-request retries
+# (initial + 2 = at most 3 identical single-shot calls). The recorded series also
+# shows the identical request succeeding around the stops, so the stop is not a
+# deterministic property of the request and a same-request retry is a valid
+# bounded recovery — this is not a claim that 2 retries always recover, and not
+# a stability claim about the worker.
+DEFAULT_MAX_CONTENT_STOP_RETRIES = 2
+
+
+def content_side_stop_reason(output: Dict[str, Any]) -> Optional[str]:
+    """The provider's own content-side stop reason for an output, or ``None``.
+
+    Reads only provider-returned values (``finishReason`` / ``promptFeedback``)
+    carried through :func:`normalize_dispatch_output`; never infers a stop.
+    """
+    if not isinstance(output, dict):
+        return None
+    for reason in [output.get("finish_reason")] + list(
+            output.get("candidate_finish_reasons") or []):
+        if reason and reason in CONTENT_SIDE_STOP_FINISH_REASONS:
+            return str(reason)
+    feedback = output.get("prompt_feedback")
+    if isinstance(feedback, dict):
+        for key in CONTENT_SIDE_BLOCK_FEEDBACK_KEYS:
+            if feedback.get(key):
+                return str(feedback[key])
+    return None
+
+
+def classify_dispatch_failure(output: Dict[str, Any]) -> str:
+    """Attribute a dispatch that did not pass verification to one class.
+
+    A provider content-side stop is decided first, from the provider's own stop
+    reason. Everything else that never yielded a deliverable is a provider
+    error; only a delivered, well-formed output can be a contract failure.
+    """
+    if content_side_stop_reason(output) is not None:
+        return FAILURE_PROVIDER_CONTENT_STOP
+    if output.get("error"):
+        return FAILURE_PROVIDER_ERROR
+    if output.get("status") != "COMPLETED":
+        return FAILURE_PROVIDER_ERROR
+    return FAILURE_VERIFICATION_FAIL
+
+
 def _default_adapter_factory(spec: Dict[str, Any]) -> Callable[[], Any]:
     def _build():
         module = importlib.import_module(spec["module"])
@@ -351,6 +437,9 @@ class NodeExecutionResult:
         self.output: Optional[Dict[str, Any]] = None
         self.final_verification: Optional[str] = None
         self.failure_attribution: Optional[str] = None
+        self.failure_finish_reason: Optional[str] = None
+        self.content_stop_retries = 0
+        self.escalation: Optional[Dict[str, Any]] = None
         self.e2_request_ids: List[Optional[str]] = []
         self.evidence_id: Optional[str] = None
         self.blocking_reason: Optional[str] = None
@@ -371,6 +460,9 @@ class NodeExecutionResult:
             "repairs": self.repairs,
             "final_verification": self.final_verification,
             "failure_attribution": self.failure_attribution,
+            "failure_finish_reason": self.failure_finish_reason,
+            "content_stop_retries": self.content_stop_retries,
+            "escalation": self.escalation,
             "e2_request_ids": self.e2_request_ids,
             "evidence_id": self.evidence_id,
             "blocking_reason": self.blocking_reason,
@@ -453,11 +545,16 @@ class E3ProductionExecutor:
 
     def __init__(self, store: OrchestrationStore,
                  adapter_registry: ExecutionAdapterRegistry,
-                 repair_objective_builder: Optional[Callable[[Dict[str, Any], Any, Dict[str, Any]], str]] = None):
+                 repair_objective_builder: Optional[Callable[[Dict[str, Any], Any, Dict[str, Any]], str]] = None,
+                 escalator: Any = None):
         self.store = store
         self.registry = adapter_registry
         self.repair_objective_builder = (repair_objective_builder
                                          or default_repair_objective)
+        if escalator is None:
+            from e3_escalate import E3Escalator
+            escalator = E3Escalator()
+        self.escalator = escalator
 
     # ── state transitions ───────────────────────────────────────────
     @staticmethod
@@ -542,7 +639,8 @@ class E3ProductionExecutor:
                      verification_test_cases_by_node: Optional[Dict[str, List[Dict[str, Any]]]] = None,
                      max_repair_attempts: int = 1,
                      dispatch_timeout: int = 120,
-                     role_by_node: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+                     role_by_node: Optional[Dict[str, str]] = None,
+                     max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES) -> Dict[str, Any]:
         """Execute every node of an assembled plan on the real execution path."""
         plan_id = plan.get("plan_id", "unknown")
         test_cases_by_node = verification_test_cases_by_node or {}
@@ -605,7 +703,8 @@ class E3ProductionExecutor:
             self._execute_node(plan_id, node, worker_id, role, result,
                                node_test_cases,
                                max_repair_attempts, dispatch_timeout,
-                               fingerprint, dag)
+                               fingerprint, dag,
+                               max_content_stop_retries)
 
         complete = all(r.complete for r in results) and bool(results)
         outcome = "EXECUTION_COMPLETE" if complete else "EXECUTION_INCOMPLETE"
@@ -621,13 +720,18 @@ class E3ProductionExecutor:
             "node_count": len(results),
             "nodes_complete": sum(1 for r in results if r.complete),
             "nodes": [r.to_dict() for r in results],
+            # Non-silent: every escalation raised by the leg (currently an
+            # unrecovered provider content-side stop) is surfaced, never only
+            # logged into a node's terminal state.
+            "escalations": [r.escalation for r in results if r.escalation],
         }
 
     def _execute_node(self, plan_id: str, node: Dict[str, Any], worker_id: str,
                       role: str, result: NodeExecutionResult,
                       test_cases: Optional[List[Dict[str, Any]]],
                       max_repair_attempts: int, dispatch_timeout: int,
-                      fingerprint: Any, dag: Any = None) -> None:
+                      fingerprint: Any, dag: Any = None,
+                      max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES) -> None:
         node_id = node["node_id"]
         objective = node.get("objective", "")
         attempts = 0
@@ -635,19 +739,43 @@ class E3ProductionExecutor:
         verification_outcome: Optional[str] = None
         final_success = False
         corrections = 0
+        same_request_retry = False
+        max_content_stop_retries = max(0, int(max_content_stop_retries))
+        # Hard, total attempt bound: one initial dispatch + the bounded repair
+        # budget + the bounded same-request content-stop retries. Every branch
+        # below either breaks or consumes one of those two counters, so the loop
+        # cannot run away; this guard is the belt-and-braces proof of that.
+        max_attempts = 1 + max(0, max_repair_attempts) + max_content_stop_retries
 
         while True:
             attempts += 1
+            if attempts > max_attempts:
+                # Defensive only — unreachable while the counters above are the
+                # sole reasons to continue. It exists so no future edit can turn
+                # this into an unbounded retry loop.
+                self._transition(dag, node_id, plan_id, "BLOCKED",
+                                 f"attempt_budget_exhausted:{max_attempts}")
+                result.state = "BLOCKED"
+                result.blocking_reason = "attempt_budget_exhausted"
+                break
             result.state = "RUNNING"
             self._transition(dag, node_id, plan_id, "RUNNING",
                              f"dispatch_attempt_{attempts}",
                              attempts=attempts)
 
-            if attempts == 1:
+            if attempts == 1 or same_request_retry:
+                # The identical, deterministic, single-shot request (same
+                # objective and same contract-declared shape). A provider
+                # content-side stop is not a property of the request — the
+                # recorded series shows the identical request succeeding around
+                # the stops — so the content-stop recovery repeats the request
+                # rather than rewording it (rewording would change the request
+                # being measured and would not be evidence-supported).
                 dispatch_objective = objective
             else:
                 dispatch_objective = self.repair_objective_builder(
                     node, result.verification_attempts[-1], result.output or {})
+            same_request_retry = False
 
             try:
                 dispatch_result = self._dispatch(node, worker_id, dispatch_objective,
@@ -736,12 +864,99 @@ class E3ProductionExecutor:
                 final_success = True
                 break
 
-            # Genuine rejection.
+            # Classify the failure truthfully BEFORE choosing a recovery path.
+            # Provider-returned stop reason only; never inferred.
+            stop_reason = content_side_stop_reason(output)
+            failure_class = classify_dispatch_failure(output)
+
             result.rejections.append({
                 "attempt": attempts,
                 "outcome": verification.outcome.value,
                 "issues": list(verification.issues),
+                "failure_class": failure_class,
+                "finish_reason": stop_reason,
             })
+
+            if failure_class == FAILURE_PROVIDER_CONTENT_STOP:
+                # Provider content-side stop: the provider withheld the content.
+                # Record the provider's own stop reason, then attempt the bounded
+                # same-request retry that the recorded series supports.
+                result.failure_finish_reason = stop_reason
+                if result.content_stop_retries < max_content_stop_retries:
+                    result.content_stop_retries += 1
+                    result.repairs.append({
+                        "attempt": attempts,
+                        "kind": "same_request_retry",
+                        "reason": "provider_content_stop",
+                        "finish_reason": stop_reason,
+                        "retry_index": result.content_stop_retries,
+                        "retry_budget": max_content_stop_retries,
+                        "note": ("identical deterministic single-shot request: "
+                                 "the recorded series shows the same request "
+                                 "succeeding around the stops, so the stop is "
+                                 "not a property of the request"),
+                    })
+                    same_request_retry = True
+                    self._transition(
+                        dag, node_id, plan_id, "REWORK",
+                        (f"content_stop_same_request_retry_"
+                         f"{result.content_stop_retries}_after_{stop_reason}"),
+                        verification_reference=f"verify-{node_id}-{attempts}",
+                        attempts=attempts)
+                    continue
+
+                # Budget exhausted → non-silent terminal path. The node is not
+                # silently failed as a quality defect and not silently retried:
+                # it is attributed to the provider's content-side stop and
+                # escalated, naming the finish reason that explains why no image
+                # arrived. Worker identity is NOT changed silently — an
+                # equivalent-worker failover is an owner/E4 decision, not an
+                # implicit one here.
+                result.failure_attribution = FAILURE_PROVIDER_CONTENT_STOP
+                escalation = self.escalator.escalate(
+                    trigger="provider_content_stop",
+                    context=(
+                        f"worker {worker_id} node {node_id}: provider "
+                        f"content-side stop finishReason={stop_reason}; "
+                        f"{result.content_stop_retries} identical single-shot "
+                        f"request(s) did not recover it and no image arrived"),
+                    proposals_considered=[
+                        "bounded same-request retry",
+                        "rephrase the request",
+                        "equivalent-worker failover",
+                        "escalate to owner",
+                    ],
+                    why_each_failed=[
+                        f"{result.content_stop_retries} identical same-request "
+                        f"retries did not recover the {stop_reason} stop",
+                        "rephrasing the request would change the request being "
+                        "measured without recorded evidence for a better one",
+                        "worker identity is never changed silently; no "
+                        "equivalent worker was auto-selected",
+                    ],
+                    owner_decision_needed=(
+                        "accept the provider content-side stop as a known "
+                        "limitation, or authorise a specific alternative "
+                        "request/worker for this objective"),
+                    recommended_action="escalate to owner",
+                )
+                result.escalation = {
+                    "escalation_id": escalation.escalation_id,
+                    "trigger": escalation.trigger,
+                    "node_id": node_id,
+                    "worker_id": worker_id,
+                    "finish_reason": stop_reason,
+                    "content_stop_retries": result.content_stop_retries,
+                }
+                self._transition(
+                    dag, node_id, plan_id, "BLOCKED",
+                    f"provider_content_stop_unrecovered:{stop_reason}",
+                    verification_reference=f"verify-{node_id}-{attempts}",
+                    attempts=attempts)
+                result.state = "BLOCKED"
+                result.blocking_reason = (
+                    f"provider_content_stop_unrecovered:{stop_reason}")
+                break
 
             if len(result.repairs) >= max_repair_attempts:
                 self._transition(
@@ -750,11 +965,16 @@ class E3ProductionExecutor:
                     verification_reference=f"verify-{node_id}-{attempts}",
                     attempts=attempts)
                 result.state = "FAILED"
-                result.failure_attribution = "verification_fail"
+                result.failure_attribution = (
+                    FAILURE_PROVIDER_ERROR
+                    if failure_class == FAILURE_PROVIDER_ERROR
+                    else FAILURE_VERIFICATION_FAIL)
                 break
 
             corrections += 1
-            result.repairs.append({"attempt": attempts, "issues": list(verification.issues)})
+            result.repairs.append({"attempt": attempts,
+                                   "issues": list(verification.issues),
+                                   "failure_class": failure_class})
             self._transition(dag, node_id, plan_id, "REWORK",
                              f"targeted_repair_after_attempt_{attempts}",
                              verification_reference=f"verify-{node_id}-{attempts}",
@@ -778,6 +998,17 @@ class E3ProductionExecutor:
                 "attempts": result.verification_attempts,
                 "rejections": len(result.rejections),
                 "repairs": len(result.repairs),
+                "content_stop_retries": result.content_stop_retries,
+                "content_stop_stops": len([
+                    r for r in result.rejections
+                    if r.get("failure_class") == FAILURE_PROVIDER_CONTENT_STOP]),
+                "content_stop_finish_reasons": sorted({
+                    r["finish_reason"] for r in result.rejections
+                    if r.get("failure_class") == FAILURE_PROVIDER_CONTENT_STOP
+                    and r.get("finish_reason")}),
+                "failure_classes": sorted({
+                    r["failure_class"] for r in result.rejections
+                    if r.get("failure_class")}),
             },
             "retries": attempts - 1,
             "corrections": corrections,

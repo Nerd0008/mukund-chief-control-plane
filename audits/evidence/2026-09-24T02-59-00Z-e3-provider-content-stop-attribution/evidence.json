@@ -1,0 +1,94 @@
+{
+  "label": "e3-provider-content-stop-attribution",
+  "task_id": "agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "date_utc": "2026-09-24",
+  "stated_provider_call_budget": {
+    "real_provider_calls_planned": 0,
+    "real_provider_calls_performed": 0,
+    "reason": "the recorded responses of the 2026-09-24T01:44:32Z repeat series already carry the provider-returned values that define the behaviour (finishReason, empty part list, candidate count, usage) and are used verbatim as offline fixtures; the series is explicitly not re-run",
+    "hard_rule": "no real generateContent call is made by this task, its tests, or its evidence run"
+  },
+  "consumed_evidence": {
+    "repeat_series": "audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/",
+    "recorded_dispatches": 9,
+    "objective_hash": "c2e948d48a63"
+  },
+  "recorded_facts": {
+    "no_image_part_in_response": {"count": 2, "of": 9, "indices": [2, 3]},
+    "recurrence_finish_reason": "IMAGE_RECITATION",
+    "recurrence_response_part_kinds": [],
+    "recurrence_candidate_count": 1,
+    "recurrence_candidate_tokens": 0,
+    "recurrence_usage": {"promptTokenCount": 17, "totalTokenCount": 17},
+    "success_finish_reason": "STOP",
+    "success_part_kind": "inlineData:image/jpeg",
+    "success_dims": [1024, 1024],
+    "size_probe": {"requested": {"imageSize": "512"}, "returned_dims": [512, 512]},
+    "prior_terminal_state": {
+      "node_state": "FAILED",
+      "final_verification": "FAIL",
+      "failure_attribution": "verification_fail"
+    }
+  },
+  "inference_not_fact": [
+    "the two stops fell on consecutive calls (index 2 and 3) and the next identical call (index 4) succeeded; read as 'a bounded same-request retry is a valid recovery' this is an inference from observed ordering, not a provider guarantee",
+    "the recitation trigger is still unknown; the provider exposes the stop reason but not the filter input"
+  ],
+  "encoded_policy": {
+    "attributions": {
+      "provider_content_stop": "provider returned a candidate whose finishReason is a content-side stop reason, or a promptFeedback block, and withheld the content",
+      "provider_error": "no verifiable output delivered for a transport/provider reason (HTTP status, absent credential, raised exception, or 200 with no image and no content-side stop reason)",
+      "verification_fail": "a delivered, well-formed output genuinely failed its declared deterministic contract"
+    },
+    "content_side_finish_reasons": ["IMAGE_RECITATION", "RECITATION", "SAFETY", "IMAGE_SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII"],
+    "recorded_content_side_finish_reason": "IMAGE_RECITATION",
+    "recovery": "bounded identical same-request retry (same objective, same contract-declared shape), deterministic, single-shot, reason recorded per call",
+    "max_content_stop_retries": 2,
+    "max_identical_single_shot_calls_per_node": 3,
+    "terminal_path": "BLOCKED with failure_attribution=provider_content_stop, blocking_reason=provider_content_stop_unrecovered:<finishReason>, DAG cause carrying the finish reason, plus an E3 escalation (trigger=provider_content_stop) naming the owner decision",
+    "worker_identity": "never changed silently; equivalent-worker failover remains an explicit E4/owner decision",
+    "hard_attempt_bound": "1 + max_repair_attempts + max_content_stop_retries, with a defensive attempt_budget_exhausted BLOCKED guard",
+    "unbounded_path": false
+  },
+  "verification_contract": {
+    "changed": false,
+    "complete_requires": "independent deterministic verification PASS",
+    "content_stop_is_a_pass": false,
+    "content_stop_silently_becomes_verification_failure": false
+  },
+  "e4_e5_interaction": {
+    "e4": "no fabricated or silent failover; designated equivalent worker never auto-dispatched; escalation states the owner decision",
+    "e5": "terminal outcome carries a truthful provider_content_stop attribution on a non-COMPLETE node so repeated-failure convergence counts it; ConvergenceEnforcer cap (warn -> quarantine -> stop) unchanged"
+  },
+  "tests": {
+    "new_suite": {
+      "script": "exec-brain/tests/test_e3_provider_content_stop.py",
+      "command": "PYTHONPATH=exec-brain python exec-brain/tests/test_e3_provider_content_stop.py",
+      "import_root": "exec-brain",
+      "ran": 25,
+      "passed": 25,
+      "failed": 0,
+      "exit_code": 0,
+      "provider_calls": 0
+    },
+    "full_runner": {
+      "label": "regression-post-content-stop",
+      "command": "python scripts/evidence_runner.py --label regression-post-content-stop",
+      "artifact": "audits/evidence/2026-09-24T02-56-57Z-regression-post-content-stop/",
+      "suites_run": 19,
+      "suites_passed": 19,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 507,
+      "tests_passed": 507,
+      "exit_code": 0,
+      "baseline": {"sha": "d9d1a7f9972f65d1367c7ca4d79f7bf367aace52", "suites": 18, "tests": 482, "exit_code": 0}
+    }
+  },
+  "not_claimed": [
+    "the fixtures reproduce the recorded response shape/values that drive attribution; the image payload is a minimal valid PNG, not the recorded JPEG bytes",
+    "no claim about the recitation trigger, worker stability, or the retry recovery rate",
+    "no E3 Stage 2 enablement, no production dispatch, no VPS cutover, no readiness/qualification criterion changed"
+  ]
+}

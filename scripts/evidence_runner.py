@@ -100,6 +100,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E3 provider content-side stop attribution + bounded same-request retry (offline: recorded-response fixtures, stubbed transports, isolated db)",
+        "script": "exec-brain/tests/test_e3_provider_content_stop.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "E4 resource continuity + E5 safe mode (combined suite)",
         "script": "exec-brain/tests/test_e4e5.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],
