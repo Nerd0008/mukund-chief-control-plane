@@ -1,7 +1,40 @@
 # Current Company State
 
-- Timestamp: 2026-09-24T04:05:00Z
-- Latest evidence run: 2026-09-24T03:57:34Z — **WHOLE-COMPANY LOCAL ACCEPTANCE: PASS** (task
+- Timestamp: 2026-09-24T15:25:00Z
+- Latest evidence run: 2026-09-24T15:16:16Z (run finished 15:17:52Z; evidence directory stamp
+  `2026-09-24T15-45-00Z-isolated-release-reproducibility`) — **RELEASE REPRODUCIBILITY + CODEX IDENTITY
+  PORTABILITY: PASS** (task `agent-release-reproducibility-and-codex-portability-2026-09-24`),
+  `audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/` (`evidence.json` + `evidence.md`)
+  — the repository acceptance suite was executed by `scripts/evidence_runner.py` from a **clean isolated
+  CPython 3.11.16 interpreter built from the pinned artifacts** (`uv venv --python 3.11.16`, installed from
+  `requirements.lock`, no repository packages on `PYTHONPATH` beyond the declared suite import roots):
+  **21 suites run / 21 passed / 0 failed / 0 errors / 0 unavailable, 583 collected / 583 passed**, every
+  suite exit 0, at code SHA `e9d2195`. E3 baseline alone: **58 collected / 58 passed** in that interpreter,
+  and the whole runner was re-executed independently at 2026-09-24T15:19Z in the same pinned interpreter
+  (`scripts/evidence_runner.py --label verify-isolated-recheck`) reproducing **21 suites / 583 collected /
+  583 passed / 0 failed / 0 unavailable** exactly. **The audit's 579-collected figure is superseded and is
+  reported as measured, not forced to the old value** — the count grew because the Codex identity contract
+  replaced one incorrect exact-match test with five truthful-contract tests (E3 baseline 54 → 58).
+  The audit's fresh-smoke finding is closed: `codex doctor --json` may legitimately report `provider=unknown`,
+  so `exec-brain/codex_adapter.py` now records `configured_provider`/`configured_model` (from `config.load`)
+  **separately** from the observed identity and fills `provider` only from a live probe
+  (`observed:network.websocket_reachability`); otherwise it stays `unknown`. UNKNOWN is never converted to
+  `openai`, and routability (successful execution + verified E2 request record) and qualification
+  (evidence-backed benchmark) requirements are unchanged. Offline compatibility fixtures cover
+  `provider=openai`, `provider=unknown` and configured-provider-only payloads
+  (`exec-brain/tests/fixtures/codex_doctor_*.json`); `scripts/codex_identity_contract_check.py` reproduces the
+  audit failure as a correction and reports machine-local Codex facts by presence only.
+  Reproducibility artifacts added: `requirements.txt` + hash-pinned `requirements.lock` (9 packages),
+  `scripts/dependency_inventory.py --check` (fails on any undeclared third-party import),
+  `scripts/release_manifest.py` (commit SHA, dirty state, Python, lock hash, artifact hashes, evidence IDs),
+  `scripts/make_release_archive.py` + `scripts/verify_release_archive.py` (an exported ZIP proves its commit
+  and dependency set by recorded hashes, **never fabricated Git history**), `docs/SETUP.md` (clean-clone
+  setup plus a deterministic no-network/no-secret probe for each deliberately machine-local dependency) and
+  `docs/RELEASE.md`. **No secrets, credentials, `auth.json`, cookies, private runtime databases or owner
+  application data are included in any release artifact.** E1/E2 pass only because this host's machine-local
+  Hermes runtime root is present; on a bare clone they are truthfully recorded `unavailable`. E3 Stage 2 still
+  **NOT ENABLED**; **0 provider calls, 0 external mutations**; no VPS cutover in this task.
+- Previous evidence run: 2026-09-24T03:57:34Z — **WHOLE-COMPANY LOCAL ACCEPTANCE: PASS** (task
   `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`),
   `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/` (`acceptance.md`, `results.json`,
   `roster_account.md/.json`) — **34 steps: 33 PASS, 0 FAIL, 1 owner-gated, 0 unavailable**, code SHA

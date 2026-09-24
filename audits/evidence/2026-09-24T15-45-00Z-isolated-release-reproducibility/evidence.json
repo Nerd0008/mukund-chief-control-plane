@@ -1,0 +1,408 @@
+{
+  "label": "isolated-release-reproducibility",
+  "run_started_utc": "2026-09-24T15:16:16+00:00",
+  "run_finished_utc": "2026-09-24T15:17:52+00:00",
+  "code_sha": "e9d21953af1d3ddd2e27b9e9c000e349ce973d41",
+  "working_directory": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "python_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe",
+  "python_version": "3.11.16",
+  "platform": "win32",
+  "unittest_summary": {
+    "suites_run": 21,
+    "suites_passed": 21,
+    "suites_failed": 0,
+    "suites_unavailable": 0,
+    "tests_collected": 583,
+    "tests_passed": 583
+  },
+  "suites": [
+    {
+      "suite": "E1 executive brain runtime matrix",
+      "script": "exec-brain/tests/test_eb.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_eb.py",
+      "status": "pass",
+      "counts": {
+        "collected": 32,
+        "passed": 32,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E2 governor / provider adapters",
+      "script": "exec-brain/tests/test_governor.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_governor.py  (PYTHONPATH=C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 45,
+        "passed": 45,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 baseline",
+      "script": "exec-brain/tests/test_e3.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 58,
+        "passed": 58,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 extended",
+      "script": "exec-brain/tests/test_e3_extended.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_extended.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 60,
+        "passed": 60,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 shadow orchestrator",
+      "script": "exec-brain/tests/test_e3_shadow_orchestrator.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_shadow_orchestrator.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 18,
+        "passed": 18,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 production rehearsal (real path, isolation, E1/E2 boundary)",
+      "script": "exec-brain/tests/test_e3_production_rehearsal.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_production_rehearsal.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 24,
+        "passed": 24,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 production execution leg (dispatch, verification gating, DAG/evidence persistence)",
+      "script": "exec-brain/tests/test_e3_execution.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_execution.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 22,
+        "passed": 22,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 production execution rehearsal driver (stubbed providers, isolated db)",
+      "script": "exec-brain/tests/test_e3_execution_rehearsal.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_execution_rehearsal.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 26,
+        "passed": 26,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 evidence-backed qualification (recorded-evidence harness, isolated db)",
+      "script": "exec-brain/tests/test_e3_qualification_evidence.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_qualification_evidence.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 13,
+        "passed": 13,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 Google image request-protocol conformance + repeat-series accounting (offline: stubbed HTTP layer, isolated db)",
+      "script": "exec-brain/tests/test_e3_google_image_protocol.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain",
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_google_image_protocol.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain;C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts)",
+      "status": "pass",
+      "counts": {
+        "collected": 18,
+        "passed": 18,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 provider content-side stop attribution + bounded same-request retry (offline: recorded-response fixtures, stubbed transports, isolated db)",
+      "script": "exec-brain/tests/test_e3_provider_content_stop.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_provider_content_stop.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 25,
+        "passed": 25,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E3 operator surface for the content-side stop attribution (offline: stub adapter, isolated db)",
+      "script": "exec-brain/tests/test_e3_operator_surface.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e3_operator_surface.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 13,
+        "passed": 13,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E4 resource continuity + E5 safe mode (combined suite)",
+      "script": "exec-brain/tests/test_e4e5.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e4e5.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 37,
+        "passed": 37,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E4 provider content-side stop pressure over recorded evidence (offline: real execution leg + stub adapters, recorded series artifact, isolated db)",
+      "script": "exec-brain/tests/test_e4_content_stop_pressure.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e4_content_stop_pressure.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 31,
+        "passed": 31,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "E4/E5 real-path drill harness (stubbed providers, isolated db, owner override + recovery)",
+      "script": "exec-brain/tests/test_e4e5_drills.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\tests\\test_e4e5_drills.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain)",
+      "status": "pass",
+      "counts": {
+        "collected": 47,
+        "passed": 47,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Operational services (health snapshot, morning brief, backup/retention, persistence; isolated: temp roots, injected inputs)",
+      "script": "scripts/tests/test_operational_services.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [
+        "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts"
+      ],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\tests\\test_operational_services.py  (PYTHONPATH=C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts)",
+      "status": "pass",
+      "counts": {
+        "collected": 27,
+        "passed": 27,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Remote queue (isolated: disposable roots, mocked/live-free boundaries)",
+      "script": "remote_queue/tests/test_queue.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\tests\\test_queue.py",
+      "status": "pass",
+      "counts": {
+        "collected": 30,
+        "passed": 30,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Remote bridge watchdog/timeout hardening (isolated: fake Hermes child, no live queue)",
+      "script": "remote_queue/tests/test_bridge_watchdog.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\tests\\test_bridge_watchdog.py",
+      "status": "pass",
+      "counts": {
+        "collected": 12,
+        "passed": 12,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Windows console QuickEdit/Select hardening (isolated: injected console api, fake Hermes child)",
+      "script": "remote_queue/tests/test_console_quickedit.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\tests\\test_console_quickedit.py",
+      "status": "pass",
+      "counts": {
+        "collected": 12,
+        "passed": 12,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Bounded recoverable-failure retry, initial + 2 (isolated: disposable queue root, fake handler)",
+      "script": "remote_queue/tests/test_worker_retry.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\tests\\test_worker_retry.py",
+      "status": "pass",
+      "counts": {
+        "collected": 24,
+        "passed": 24,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    },
+    {
+      "suite": "Poller dispatch routing: agent tasks always reach Hermes (isolated: stubbed dispatch, disposable queue root)",
+      "script": "remote_queue/tests/test_poller_routing.py",
+      "import_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "pythonpath": [],
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\isolated-release-venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\tests\\test_poller_routing.py",
+      "status": "pass",
+      "counts": {
+        "collected": 9,
+        "passed": 9,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "exit_code": 0,
+      "notes": null
+    }
+  ]
+}
