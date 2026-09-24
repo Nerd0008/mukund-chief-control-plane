@@ -1047,8 +1047,22 @@ tracker handoff** for it (`source URL not validated live (fetch_state=…)`). Th
 is source-agnostic: it only fires when a surface declares a `fetch_state`, so the
 regional scan, Company Watch and LinkedIn paths are unaffected.
 
+**A search/listing page is not a vacancy.** A broad search returns the job board's
+own search page (`site:linkedin.com/jobs <keywords>` → `linkedin.com/jobs/<keywords>`,
+`uk.indeed.com/q-…`, a Google result page, a Reed `-jobs` keyword page) at least as
+readily as an individual posting. Writing one of those as a vacancy would invent a
+posting from a search snippet, so every result URL is classified from the URL alone
+(`classify_result_kind` → `job_posting` / `search_listing` / `unknown`) and the same
+deterministic gate refuses `search_listing` with
+`discovery result is a search/listing page, not a vacancy posting`. They stay in the
+export with their provenance, are counted (`search_listing_refused`), and when every
+discovered URL was one, the zero is attributed to `vacancy_posting`. An export that
+predates this contract keeps its candidates unclassified — counted in
+`candidates_without_a_declared_result_kind`, never guessed.
+
 **Telemetry.** `queries_executed`, `results_seen`, `candidate_urls`,
-`validated_live`, `validation_failed`, `duplicates_collapsed`, plus the funnel's
+`validated_live`, `validation_failed`, `duplicates_collapsed`,
+`search_listing_refused`, plus the funnel's
 `semantically_reviewed`, `deterministic_eligibility_pass` and `tracker_candidates`
 (carried into the same document by `--with-funnel`), with `rejections_by_reason` and
 a `zero_attribution` block that names the first empty stage — search-source failure,
@@ -1074,7 +1088,7 @@ no application, outreach, posting or messaging anywhere in the path.
 
 ### Tests
 
-    python -m pytest career-ops/tests/test_web_research.py -q    # 55 passed
+    python -m pytest career-ops/tests/test_web_research.py -q    # 70 passed
 
 Covers fixture privacy (reserved `.invalid` hosts), the surface classifier against
 real LinkedIn/Indeed/ATS hostnames and the synthetic ones, the documented
@@ -1083,11 +1097,13 @@ honesty (captured / null / Codex-absent), the anti-fabrication rule, per-result
 provenance, the two-query duplicate collapse, the faked-HTTP validation paths
 (live / dead link / expired marker / robots disallow / non-http), the collector's
 normalisation and exclusion accounting, cross-source collapse with the regional
-lane, fail-closed gate behaviour, and that no canonical workbook is touched.
+lane, fail-closed gate behaviour, that a search/listing page is labelled, counted
+and refused as a vacancy (including the all-listing attributable zero and the
+legacy-export case), and that no canonical workbook is touched.
 
 ### Acceptance runner
 
-    python career-ops/run_web_research_acceptance.py          # 19/19 checks, fixtures only
+    python career-ops/run_web_research_acceptance.py          # 21/21 checks, fixtures only
     python career-ops/run_web_research_acceptance.py --live   # + a bounded live Codex pass
 
 Raw result URLs are owner-private and are written only under the git-ignored
@@ -1096,7 +1112,7 @@ source classes reached, check results).
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 454 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 469 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
     python -m pytest career-ops/tests/test_daily_brief.py -q    # 28 passed (B23 + discovery funnel section)
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
@@ -1105,7 +1121,7 @@ source classes reached, check results).
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
     python -m pytest career-ops/tests/test_tracker_rollover.py -q  # 32 passed (B09)
     python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed (B11 + B19 funnel)
-    python -m pytest career-ops/tests/test_web_research.py -q  # 55 passed (B26 open-web research lane)
+    python -m pytest career-ops/tests/test_web_research.py -q  # 70 passed (B26 open-web research lane)
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

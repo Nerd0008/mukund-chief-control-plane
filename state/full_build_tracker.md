@@ -843,3 +843,41 @@ registered whole-company step `career_high_recall_discovery` → **PASS**,
 were re-hashed independently by this attempt and are unchanged
 (uk `84c53dcb…3f40`, dubai `495edb45…45ca`, japan `a8c4ef90…c89`, singapore `25c7b95b…bf1`).
 External mutations: 0; provider calls: 0.
+
+## Career open-web research lane — B26 (2026-09-24, `agent-career-codex-style-open-web-job-research-2026-09-24`)
+
+**Lane: Career Ops / job discovery. Status: BUILT, TESTED, EVIDENCED. No gate weakened, no second
+tracker/classifier/eligibility engine, no account or browser action.**
+
+The owner's successful standalone Codex workflow *actively researched the open web* (its own
+`portals.yml#search_queries` says "Each query triggers a WebSearch"; `modes/scan.md` documents the
+`site:` Level-3 agent workflow, results treated as unverified until liveness is confirmed, with a
+documented title/company extraction). Those files were inspected read-only and their useful query
+shapes preserved. The lane is one more read-only surface feeding the SAME unified funnel.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Active query matrix | **DONE** | `career-ops/discovery/web_research.py` `build_query_matrix()` — 22 generic UK queries across the role families in scope (graduate/new-grad/junior/associate/analyst/L1/SOC/GRC/IAM/technology-risk/information-security/cybersecurity) × configured regions (uk/dubai/japan/singapore) × surfaces, with the owner's `site:` ATS patterns preserved verbatim (`OWNER_ATS_SITE_QUERIES`, provenance = owner `portals.yml`) plus broad public surfaces (LinkedIn Jobs, Indeed, plain open-web index) |
+| Research-worker interface | **DONE** | `ResearchProvider` + `codex-web-search` (Codex CLI `exec --json`, results accepted only when the event stream contains a `web_search` item for that query), `captured` (replay a captured search document) and `none` (declared zero). Codex capability is probed explicitly (`probe`) and the provider reports unavailability truthfully when the CLI is absent |
+| Anti-fabrication | **DONE** | a query with no observed `web_search` event contributes zero results and is counted `search_not_observed`; a memory recall can never be mistaken for a search result. Never a vacancy from a snippet: title/company come from the fetched page title when one was retrieved, else the observed result title, and unknown fields stay listed in `missing_fields` |
+| Provenance per discovery | **DONE** | query + query id + query provenance, role family, region, discovery surface, result URL, canonical URL (tracking params removed), observed employer/title/location, fetch/validation state, source timestamp, present/missing fields |
+| URL validation | **DONE** | `fetch_validate()` — declared user agent, robots.txt respected (`Disallow` → refused), bounded body, extracts only page `<title>` + meta description, detects closed-posting markers; `validated_live` / `validation_failed` / `discovered_unverified` |
+| Fail-closed gate | **DONE (doubled)** | the source-agnostic deterministic gate refuses tracker handoff for any candidate whose declared `fetch_state` is not `validated_live`, and for any candidate whose declared `result_kind` is `search_listing` (a search/listing page is not a vacancy). Surfaces that declare neither are unaffected (regional scan, Company Watch, LinkedIn export) |
+| Cross-source dedupe | **DONE** | a vacancy seen by search, on an ATS and by another surface collapses through the shared `collapse_candidates()` to one canonical candidate with every surface's provenance retained |
+| Telemetry + zero attribution | **DONE** | `queries_executed`, `results_seen`, `candidate_urls`, `validated_live`, `validation_failed`, `duplicates_collapsed`, `search_listing_refused` + the funnel's `semantically_reviewed` / `deterministic_eligibility_pass` / `tracker_candidates`, with `rejections_by_reason` and a `zero_attribution` that distinguishes search-source failure, no accessible results, validation failure, filtering, eligibility, dedupe and the all-listing case |
+| Company-watchlist hook | **DONE (optional)** | an owner-provided company list adds `<company>` × role-family and `site:<ats> "<company>"` queries; the generic search is complete without the file (absent file is not an error) |
+| Scheduling | **DRY-RUN ONLY** | nothing here writes a canonical workbook; the handoff is a candidate manifest and applying stays `career_ops_cli.py write --apply` |
+| Tests | **PASS** | `career-ops/tests/test_web_research.py` **72 passed** (was 55); `career-ops/tests` **471 passed** |
+| Acceptance runner | **PASS** | `career-ops/run_web_research_acceptance.py` **21/21** checks fixtures-only and **24/24** with a bounded live Codex pass (capability probe + real candidates + reached-source-class honesty) |
+| Bounded live pass | **PASS (real, capped)** | Codex CLI `codex-cli 0.155.0-alpha.16.3` executed real `web_search` calls. Final pass at HEAD: `queries_executed=3`, `results_seen=10`, `candidate_urls=9`, `validated_live=2`, `validation_failed=7`, `search_listing_refused=7`; an earlier pass in the same session reached `results_seen=15`, `candidate_urls=13`. Source classes genuinely reached: `linkedin_jobs`, `indeed`, `employer_careers`. The `exec --search` flag is not accepted by this CLI build — the native tool is available to `exec` without it |
+| Search/listing-page guard | **PASS (from real data)** | broad search returns the boards' own search pages as readily as postings: of the 13 real URLs one bounded live pass reached, 11 were LinkedIn `/jobs/<keywords>`, Indeed `/q-…` or Reed `…-jobs-in-<place>` listing pages, and before this work 7 of them passed the deterministic gates as tracker candidates. Re-classified at HEAD, **0** of the 13 could reach a tracker candidate; in the final pass 7 of 9 were listings (the remaining 2 posting-shaped URLs failed liveness validation and are refused as well) |
+| Canonical workbooks | **UNTOUCHED** | four workbooks SHA-256 identical before/after the acceptance runs; `--apply` remains the only tracker write |
+| External actions | **NONE** | 0 applications, 0 outreach, 0 LinkedIn/account mutations, no login/cookie/session, no CAPTCHA bypass, no browser/GUI automation, no scraping behind auth; public/search-index discovery plus robots-respecting read-only HTTP retrieval only |
+| Raw result URLs | **OWNER-PRIVATE** | stay under the git-ignored `runtime/career-ops/web-research/`; committed evidence is aggregate only (counters, source classes, check results) |
+| Not claimed | **HONEST BOUNDARY** | the lane does not claim LinkedIn/Indeed/Google were "searched" as accounts — they were reached only as public/search-index result pages; no employer or recruiter was contacted; and this live pass is a bounded sample, not a market survey |
+
+Attempt history (truthful): attempt 1 hit the 1200s dispatch wrapper limit and attempt 2 the 300s
+no-progress watchdog, both *after* landing the implementation and evidence; attempt 3 inspected the
+repository first, re-verified the landed work at HEAD, added the search/listing-page guard and
+completed the commit/push units. Nothing from the earlier attempts was recreated, reverted or redone.
+

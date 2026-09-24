@@ -1652,3 +1652,37 @@ tests, no provider series re-run.
   `audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/` (22/22 PASS) and
   `audits/evidence/2026-09-24T05-43-11Z-whole-company-acceptance/` (step PASS,
   `canonical_workbooks_unchanged: true`); 461 tests passed; workbooks re-hashed unchanged.
+
+## Career open-web research lane — B26 (2026-09-24, `agent-career-codex-style-open-web-job-research-2026-09-24`)
+
+**Status: BUILT / TESTED / EVIDENCED. Read-only, dry-run. No external action, no gate weakened.**
+
+- **What changed.** `career-ops/discovery/web_research.py` adds the owner's successful Codex
+  behaviour back as ONE more read-only discovery surface in the same unified funnel: an actively
+  *generated* query matrix (role families × configured regions × surfaces, the owner's `site:` ATS
+  shapes preserved verbatim, optional company-watchlist hook) is executed by a research worker
+  (`codex-web-search` / `captured` / `none`), every result is normalised into the one candidate
+  schema with full provenance, and destinations are validated with a polite robots-respecting
+  read-only HTTP retrieval. `pipeline.SOURCE_WEB_RESEARCH` = `collect_from_web_research()`.
+- **Codex capability, tested.** `codex-cli 0.155.0-alpha.16.3` (resolved from the installed Codex
+  bin root) performs real `web_search` calls under `codex exec --json`; a result is accepted only
+  when the execution stream contains a `web_search` item for that query, so a memory recall can
+  never be recorded as a search. When the CLI is absent the provider says so and contributes zero.
+  The `exec --search` flag is not accepted by this build; the native tool needs no flag.
+- **Bounded live pass (real).** Final pass at HEAD: 3 queries → 10 results seen → 9 candidate URLs → 2 validated live, 7 failed validation, 7 refused as listing pages; an earlier pass in the same session reached 15 results / 13 candidate URLs. Source classes genuinely reached: `linkedin_jobs`, `indeed`, `employer_careers`. First, failed live attempts (0 results) were recorded as FAIL and kept as history rather than overwritten.
+- **New guard from that live data.** Broad search returns the boards' own search pages as readily as postings: 11 of the 13 real URLs from one bounded pass were LinkedIn `/jobs/<keywords>`, Indeed `/q-…` or Reed `…-jobs-in-<place>` listing pages, and before this work 7 of them passed the deterministic gates as tracker candidates. Every URL is now classified from the URL alone
+  (`classify_result_kind` → `job_posting` / `search_listing` / `unknown`) and the source-agnostic
+  deterministic gate refuses `search_listing`; at HEAD **0** of those 13 could reach a tracker
+  candidate (the 2 posting-shaped URLs that did surface failed liveness validation and are refused
+  as well). Legacy exports without a declared kind are counted, never guessed.
+- **Tests.** `career-ops/tests/test_web_research.py` **72 passed** (55 at first landing);
+  `career-ops/tests` **471 passed**. Acceptance runner `career-ops/run_web_research_acceptance.py`
+  **21/21** checks fixtures-only and **24/24** with the bounded live pass.
+- **Safety.** 0 applications, 0 outreach, 0 employer/recruiter contacts, no login/account,
+  no cookie/session, no CAPTCHA bypass, no browser or GUI automation, no scraping behind auth, no
+  LinkedIn action. The four canonical workbooks are SHA-256 identical before and after every
+  acceptance run; the handoff is a candidate manifest and `--apply` remains the only tracker write.
+- **Owner action.** None new. The live research lane stays dry-run/read-only; enabling canonical
+  writes or a schedule remains an owner decision. A company watchlist file is optional.
+- **Evidence.** `audits/evidence/*-career-open-web-research/` (aggregate only; raw result URLs stay
+  under the git-ignored `runtime/career-ops/web-research/`).
