@@ -6,13 +6,20 @@ Authority: `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`
 ## Verdict
 
 **Local E3 Stage 2 remains NOT ENABLED.** The post-key verification sequence was executed in full
-and the readiness gate was re-run with a clean regression. Conditions (a) *all intended provider
-credentials configured* and (c) *recorded owner authorization for this step* are now SATISFIED.
-Condition (b) is still unmet on exactly one criterion — the Google image real-dispatch condition
-(`resolved, not intermittent`). Independently, every newly-credentialed provider refused live
-dispatch, so provider-diverse routing cannot execute even though the credentials exist.
+and the readiness gate was re-run with a clean regression. Condition (a) *all intended provider
+credentials configured* is SATISFIED (10/10) and provider identity is verified for every intended
+provider. Condition (b) is unmet on exactly one criterion — the Google image real-dispatch condition
+(`resolved, not intermittent`). Condition (c) is **False for this run**: the live coordinator
+instruction appended to the running contract at 2026-09-24T20:56Z forbids local E3 Stage 2 enablement
+in this execution and supersedes the earlier embedded authorization. Independently, every
+newly-credentialed provider refused live dispatch, so provider-diverse routing cannot execute even
+though the credentials exist.
 
-No qualification, verification, safety, privacy, cost, retry or readiness gate was weakened.
+Enablement belongs to the gated successor task
+`agent-e3-stage2-enable-after-provider-verification-2026-09-24` (queue commit `df0514b`).
+
+No qualification, verification, safety, privacy, cost, retry or readiness gate was weakened. The gate
+now reads the coordinator override from the contract and fails closed while it stands.
 
 ## What was run (in order)
 
@@ -25,7 +32,7 @@ No qualification, verification, safety, privacy, cost, retry or readiness gate w
 | 5 | `scripts/evidence_runner.py --label e3-provider-verification-regression` | **PASS** — 22 suites / 606 collected / 606 passed / 0 failed / 0 unavailable. |
 | 6 | `exec-brain/e3_execution_rehearsal.py` | **PASS** — bounded real-provider production rehearsal, no failed check, 7 real calls (deepseek 5 / openai 2). |
 | 7 | `exec-brain/e4e5_drill_harness.py` | **PASS 36/36**, `real_provider_calls = 0`, `evidence_kind = stubbed_provider_failure`. |
-| 8 | `scripts/e3_stage2_readiness_gate.py --regression-evidence <step 5>` | `NOT ENABLED` — a=PASS, b=FAIL, c=PASS. |
+| 8 | `scripts/e3_stage2_readiness_gate.py --regression-evidence <step 5>` | `NOT ENABLED` — a=PASS, b=FAIL (Google image criterion), c=FAIL (live coordinator override forbids enablement for this run). Evidence: `audits/evidence/2026-09-24T21-12-42Z-e3-stage2-readiness-gate-verdict/`. |
 
 ## Corrections made from live-provider evidence
 

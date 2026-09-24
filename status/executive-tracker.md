@@ -104,6 +104,8 @@ Truth boundaries that hold:
 Known open items:
 - The umbrella record `full-operational-build-2026-09-24` remains in running/ with no associated worker process, and poller.handle_task routes any task id containing "operational" to a handler that returns a hardcoded status with no execution evidence — it must not be read as evidence that its steps ran.
 - agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 completed the scheduled cutover (23/23 checks); the earlier parked record is superseded.
+- The running contract for agent-e3-provider-verification-stage2-closeout-2026-09-24 carries a live coordinator override (2026-09-24T20:56Z) forbidding local E3 Stage 2 enablement for that run; the readiness gate reads it and evaluates condition (c) as unsatisfied while it stands.
+- Local E3 Stage 2 enablement is deferred to the queued successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24, which is gated on the owner's live authorization plus the provider accounts serving traffic.
 
 ## 7. Provider credential readiness
 
@@ -118,12 +120,13 @@ Known open items:
 
 ## 8. Stage 2 state
 
-**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:11:06Z)
+**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:12:42Z)
 
 Failing conditions at the last verdict:
 - condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)
+- condition (c) not satisfied for THIS run: the live coordinator instruction forbids local E3 Stage 2 enablement here and supersedes the earlier embedded authorization; enablement is deferred to the successor task
 
-The post-key sequence was executed in full on 2026-09-24 and the gate was re-run with the clean 22-suite regression. Conditions (a) all credentials configured and (c) recorded owner authorization are now SATISFIED (10/10 credentials present). Condition (b) is still unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') — the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. Re-staging requires that criterion to be resolved or explicitly re-scoped by the owner, and the provider accounts to serve traffic. The gate was not weakened to force a pass.
+The post-key sequence ran in full on 2026-09-24 and the override-aware gate was re-run with the clean 22-suite regression. Condition (a) is SATISFIED (10/10 credentials present; provider identity verified for every intended provider - 6/7 live catalogue, 1/7 authoritative documentation). Condition (b) is unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') - the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Condition (c) is False for this run because the live coordinator instruction (appended to the running contract at 2026-09-24T20:56Z) forbids local E3 Stage 2 enablement and supersedes the earlier embedded authorization. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. NEVER re-run this gate expecting enablement: enablement belongs to the dedicated successor task and needs the owner's live authorization plus the unmet criterion resolved or re-scoped.
 
 ## 9. Deployment state
 
@@ -269,6 +272,7 @@ unless the documented product scope requires it.
 
 | At (UTC) | Evidence | Result | What |
 |---|---|---|---|
+| 2026-09-24T21:12:42Z | `2026-09-24T21-12-42Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (a=PASS, b=FAIL, c=FAIL: live coordinator override) | Override-aware E3 Stage 2 readiness gate re-run with the clean 22-suite regression. Credential presence 10/10; provider identity verified for every intended provider; bounded real-provider rehearsal and E4/E5 drills consumed; regressions all pass; integrity isolation and rollback checks pass. Sole unmet readiness criterion is the Google image real-dispatch condition. Condition (c) additionally fails because the live coordinator instruction forbids enablement for this run. All seven provider refusals are recorded as external blockers with their exact provider errors. |
 | 2026-09-24T21:11:06Z | `2026-09-24T21-11-06Z-e3-stage2-readiness-gate-verdict` | NOT ENABLED (condition a PASS, condition b FAIL, condition c PASS) | E3 Stage 2 readiness gate re-run with the clean 22-suite regression: credentials 10/10 present; provider identity verified for every intended provider (6/7 live catalogue, 1/7 authoritative documentation); bounded real-provider rehearsal and E4/E5 drills consumed; regressions all pass; integrity isolation and rollback checks pass. Sole unmet criterion is the Google image real-dispatch condition. All seven newly-credentialed provider refusals are recorded as external blockers with their exact provider errors. |
 | 2026-09-24T21:10:44Z | `2026-09-24T21-09-18Z-e3-provider-verification-regression` | PASS 22 suites / 606 collected / 606 passed / 0 failed | Clean post-key regression at SHA 6cbb573: every E1/E2/E3/E4/E5 suite, the queue/bridge suites and the canonical-status consistency suite passed after the provider adapter and worker-registry corrections and the canonical-status reconciliation. |
 | 2026-09-24T21:06:25Z | `2026-09-24T21-06-25Z-e3-provider-live-identity-probe` | 6/7 LIVE-VERIFIED, 1/7 DOCUMENTATION-DERIVED | Bounded GET /models reconciliation: corrected the stale mappings (mistral-small-4 -> mistral-small-latest, lower-case minimax-m3 -> MiniMax-M3, CN dashscope -> dashscope-intl, api.stepfun.com -> api.stepfun.ai, BigModel CN -> Z.ai international, hunyuan-hy3 -> TokenHub international 'hy3'); LongCat direct API preserved as already correct. Read-only, 0 completion calls. |

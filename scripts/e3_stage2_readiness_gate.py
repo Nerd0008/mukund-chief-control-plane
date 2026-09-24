@@ -84,6 +84,14 @@ AUTHORIZATION_MARKERS = [
      "Owner authorization for LOCAL E3 Stage 2 is now explicit"),
 ]
 
+# A live coordinator instruction can forbid enablement for a specific run. When it
+# is present it SUPERSEDES any earlier embedded authorization: the gate fails
+# closed and will not enable Stage 2 while the override stands.
+COORDINATOR_OVERRIDE_MARKERS = [
+    (TASK_CONTRACT_PATH,
+     "DO NOT enable local E3 Stage 2"),
+]
+
 
 PRODUCTION_STORES = {
     "orchestration": RUNTIME_ROOT / "orchestration.db",
@@ -205,13 +213,22 @@ def check_owner_authorization() -> dict:
         else:
             missing.append({"path": str(path.relative_to(REPO_ROOT)),
                             "marker": marker})
+    overrides = []
+    for path, marker in COORDINATOR_OVERRIDE_MARKERS:
+        text = path.read_text(encoding="utf-8") if path.exists() else ""
+        if marker in text:
+            overrides.append({"path": str(path.relative_to(REPO_ROOT)),
+                              "marker": marker})
     return {
         "authorization_recorded": not missing,
         "markers_found": found,
         "markers_missing": missing,
+        "coordinator_override_active": bool(overrides),
+        "coordinator_override_markers": overrides,
         "note": ("read from the authority file and the immutable task contract; "
                  "the gate does not invent authorization and fails closed if the "
-                 "recorded authorization is absent"),
+                 "recorded authorization is absent or a live coordinator "
+                 "instruction forbids enablement for this run"),
     }
 
 
@@ -712,16 +729,24 @@ def main() -> int:
     # only applicable once the recorded precondition (all intended provider
     # credentials configured) holds.
     condition_c_satisfied = bool(authorization["authorization_recorded"]
-                                 and condition_a)
+                                 and condition_a
+                                 and not authorization["coordinator_override_active"])
     condition_c_note = (
         "the authority records the owner's standing conditional approval plus the "
         "instruction to re-run the gates after the credentials are configured and "
-        "complete local Stage 2 if they pass, and this task's immutable contract "
-        "records that the owner authorization for LOCAL E3 Stage 2 is now explicit "
-        "and applies if and only if every objective readiness gate passes. "
+        "complete local Stage 2 if they pass, and this task's contract records the "
+        "owner authorization for LOCAL E3 Stage 2 as explicit and applicable if and "
+        "only if every objective readiness gate passes. "
         "Authorization markers found: " + str(len(authorization["markers_found"])) +
         "/" + str(len(AUTHORIZATION_MARKERS)) + ". Precondition (all intended "
-        "provider credentials configured) satisfied: " + str(condition_a) + ".")
+        "provider credentials configured) satisfied: " + str(condition_a) + ". "
+        "Live coordinator override forbidding enablement for this run: " +
+        str(authorization["coordinator_override_active"]) + ".")
+    if authorization["coordinator_override_active"]:
+        condition_c_note += (
+            " The live coordinator instruction SUPERSEDES the earlier embedded "
+            "authorization: this run must not enable local E3 Stage 2 or production "
+            "dispatch, and enablement is deferred to the successor task.")
     if authorization["markers_missing"]:
         condition_c_note += (" MISSING MARKERS: " +
                              str(authorization["markers_missing"]))
@@ -805,6 +830,8 @@ def main() -> int:
         "condition_a_credentials": condition_a,
         "condition_b_criteria": condition_b,
         "condition_c_owner_authorization": condition_c_satisfied,
+        "coordinator_override_active":
+            authorization["coordinator_override_active"],
         "still_missing_workers": credentials["still_missing_workers"],
         "provider_identity_verified": provider_state.get("identity_verified"),
         "provider_workers_execution_ready": [
