@@ -1442,7 +1442,9 @@ tests, no provider series re-run.
   → **21 suites / 21 passed / 0 failed / 0 unavailable / 579 tests collected / 579 passed, runner exit
   code 0** (`audits/evidence/2026-09-24T03-40-43Z-e4-content-stop-pressure-operator-brief-final/regression/`).
   No suite lost tests; only this task's own suites grew. Baseline was 21 suites / 560 tests at
-  `03ebc74` (20 / 529 at `82ddf0`).
+  `03ebc74` (20 / 529 at `82ddf0`). Final frozen re-run after the evidence/state commit `7580a30`
+  (`--label e4-operator-pressure-integration-final-exitcheck`) → **21 / 21 / 579 / 579, runner exit
+  code 0** (`…-operator-brief-final/regression-final-exitcheck/`).
 - **Deployment.** None required and none performed: only `scripts/` and the repo-only drill harness
   changed, and `exec-brain/resource_monitor.py` is byte-identical to the deployed runtime copy
   (`c138c0ec…`), so `python scripts/deploy_e3_runtime.py --dry-run` → `copied: []`, exit 0. No runtime

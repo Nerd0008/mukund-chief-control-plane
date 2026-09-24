@@ -36,6 +36,10 @@ Unchanged (proves the E4 view itself was not touched/re-parameterised):
 
    → exit `0`; **21 suites / 21 passed / 0 failed / 0 unavailable / 579 tests collected / 579 passed**
    (`regression/evidence.json`, `regression/evidence.md`).
+   Final frozen re-run after the evidence/state commit `7580a30`:
+   `python scripts/evidence_runner.py --label e4-operator-pressure-integration-final-exitcheck --out-dir <evidence dir>/regression-final-exitcheck`
+   → exit `0`; **21 suites / 21 passed / 0 failed / 0 unavailable / 579 / 579**
+   (`regression-final-exitcheck/evidence.json`).
    Pre-change baseline at `82ddf0`: 20 suites / 529 tests; previous task's baseline
    `03ebc74`: 21 suites / 560 tests. Per-suite comparison: no suite lost tests; the
    only increases are this task's own suites (`test_operational_services.py` 17 → 27,
