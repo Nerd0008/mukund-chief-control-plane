@@ -302,6 +302,20 @@ def test_a_general_domain_word_alone_is_not_treated_as_evidence():
         "a specific-term requirement must still find canonical evidence"
 
 
+@needs_install
+def test_the_committed_schema_validates_a_real_pack():
+    """The JSON schema is a contract, not decoration: it must accept a real pack."""
+    jsonschema = pytest.importorskip("jsonschema")
+    pack = ip.build_prep_pack(CFG, minimal_brief(), stamp="20260924T000000Z")
+    schema = json.loads(ip.pack_schema_path(CFG).read_text(encoding="utf-8"))
+    jsonschema.validate(instance=pack, schema=schema)
+    # and it must reject a pack whose question claims employer origin
+    broken = json.loads(json.dumps(pack))
+    broken["sections"]["likely_questions"][0]["employer_supplied"] = True
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(instance=broken, schema=schema)
+
+
 def test_module_imports_no_network_or_browser_library():
     src = (CAREER_OPS / "interview_prep.py").read_text(encoding="utf-8")
     imports = "\n".join(line for line in src.splitlines()

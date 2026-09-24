@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -60,6 +61,17 @@ JD_UK = FIXTURES / "jd-information-security-analyst.txt"
 JD_UAE = JI_FIXTURES / "jd-unknown-eligibility.txt"
 RECORD_UK = JI_FIXTURES / "job-record-uk.json"
 RESEARCH_CITED = JI_FIXTURES / "research-cited.json"
+
+
+def code_sha() -> str:
+    """The revision the acceptance was actually run against (never guessed)."""
+    try:
+        result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(CONTROL_PLANE),
+                                capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return "UNKNOWN"
+    sha = result.stdout.strip()
+    return sha if result.returncode == 0 and sha else "UNKNOWN"
 
 
 def fixture_job() -> dict:
@@ -89,6 +101,7 @@ def main(argv=None) -> int:
     ev: dict = {
         "acceptance_run": stamp,
         "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "code_sha": code_sha(),
         "workflow": "LinkedIn networking/recruiter outreach drafts + Interview Prep Agent",
         "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md "
                      "§ LinkedIn workflow / roster B19,B20,B21,B22",

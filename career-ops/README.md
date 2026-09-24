@@ -590,9 +590,9 @@ deduped.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 277 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 278 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
-    python -m pytest career-ops/tests/test_interview_prep.py -q    # 25 passed
+    python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
     python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed

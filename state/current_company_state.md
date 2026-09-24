@@ -10,8 +10,8 @@
   pack built from a canonical JobBrief + cited research + the canonical `cv.md`/`profile.yml`
   (every talking point re-read verbatim from `cv.md`, every question marked
   `employer_supplied: false`); owner action gate refuses post/message/connect/apply. New suite
-  `career-ops/tests/test_interview_prep.py` 25 passed; `test_linkedin_workflow.py` 38 passed; whole
-  `career-ops/tests/` **277 passed**. 0 LinkedIn mutations, 0 messages, 0 applications, 0 provider
+  `career-ops/tests/test_interview_prep.py` 26 passed; `test_linkedin_workflow.py` 38 passed; whole
+  `career-ops/tests/` **278 passed**. 0 LinkedIn mutations, 0 messages, 0 applications, 0 provider
   calls, 0 browser launches; canonical source hashes unchanged.
 - Previous evidence run: 2026-09-24T00:14:21Z — **four regional job-search workers + deterministic
   scheduled execution** (task `agent-regional-job-search-agents-and-schedulers-2026-09-23`),
