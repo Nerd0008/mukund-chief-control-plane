@@ -246,6 +246,8 @@ donor. Engineering will not change it without that decision.
 
 ### 8. After the provider keys are configured — run the exact post-key verification sequence (owner + engineering)
 
+**Provider adapter verification TODO added 2026-09-24:** before the Mistral smoke/qualification run, re-check the live Mistral model catalogue and update the adapter's configured API model id if needed. The current control-plane adapter still uses `mistral-small-4`; the verification run must confirm the provider-accepted id (for example the current Small 4 alias/version exposed by Mistral) from live provider evidence rather than assuming the old string is valid. Do not change qualification state until the corrected id, endpoint, credential and smoke test all pass.
+
 **Status:** OWNER-GATED — cannot be run before the seven credentials exist and Stage 2 is enabled.
 **Blocks:** the *only* remaining E4/E5 item — a drill on the **live provider** path (a real provider
 failure actually failing a node, and real provider-health re-verification before leaving safe mode).
