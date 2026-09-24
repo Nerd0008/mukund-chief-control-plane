@@ -81,7 +81,7 @@ ROSTER_COVERAGE = {
     "B10": {"state": "pending task", "task": "agent-company-watch-job-search-integration-2026-09-23"},
     "B11": {"state": "pending task", "task": "agent-company-watch-job-search-integration-2026-09-23"},
     "B12": {"state": "pending task", "task": "agent-application-inbox-status-monitor-2026-09-23"},
-    "B13": {"state": "built+evidenced", "evidence": "career-ops/job_intelligence.py + job_brief_schema.json; extractive JobBrief, verbatim lines with source_line; 2026-09-24T00:46:02Z acceptance 42/42"},
+    "B13": {"state": "built+evidenced", "evidence": "career-ops/job_intelligence.py + job_brief_schema.json; extractive JobBrief, verbatim lines with source_line; 2026-09-24T00:50:49Z acceptance 42/42"},
     "B14": {"state": "built+evidenced (research sources owner-gated)", "evidence": "job_intelligence.research_brief(); cited-only facts, uncited rejected, no provider -> research_needed; http/browser providers disabled, never launched"},
     "B15": {"state": "pending task", "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"},
     "B16": {"state": "pending task", "task": "agent-cv-cover-letter-linkedin-workflows-2026-09-23"},

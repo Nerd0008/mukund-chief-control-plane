@@ -25,12 +25,16 @@ Design rules encoded here (they are the point of the module, not comments):
 
 CLI
   python career-ops/job_intelligence.py schema
-  python career-ops/job_intelligence.py brief --jd-file JD.txt [--record REC.json]
+  python career-ops/job_intelligence.py brief --jd-file JD.txt [--job-record REC.json]
                                        [--region uk --id ID | --url URL | --row N
                                         | --pipeline-index N] [--research-file F]
-                                       [--out DIR] [--stamp S]
+                                       [--out DIR] [--out-record FILE] [--stamp S]
   python career-ops/job_intelligence.py research --brief BRIEF.json [--research-file F]
   python career-ops/job_intelligence.py validate --brief BRIEF.json
+
+Input and output paths are separate flags (``--job-record``/``--jd-file``/
+``--research-file`` are read-only; ``--out``/``--out-record`` are written), and the
+command refuses to run if an output path would overwrite one of its own inputs.
 """
 
 from __future__ import annotations
@@ -714,7 +718,30 @@ def _resolve_job(cfg: dict, args) -> dict:
     profiles = tw.load_profiles(str(profiles_path(cfg)))
     return cvw.resolve_job(wf_cfg, profiles, region=args.region, job_id=args.id,
                            url=args.url, row=args.row,
-                           pipeline_index=args.pipeline_index, record_file=args.record)
+                           pipeline_index=args.pipeline_index,
+                           record_file=args.job_record)
+
+
+def _refuse_to_overwrite_inputs(cfg: dict, args, out_paths: list[Path]) -> list[dict]:
+    """Never write over a file this command was told to READ.
+
+    A single overloaded ``--record`` flag once meant "input job record" here and
+    "where to write the result" in the Career Ops workflow, which silently
+    destroyed a fixture. Input and output paths are now separate flags and this
+    guard makes the collision impossible even if a caller passes the same path.
+    """
+    inputs = []
+    for attr in ("job_record", "jd_file", "research_file"):
+        value = getattr(args, attr, None)
+        if value:
+            inputs.append((attr, Path(value).resolve()))
+    problems = []
+    for flag, inp in inputs:
+        for out in out_paths:
+            if out.resolve() == inp:
+                problems.append({"input_flag": flag, "path": str(inp),
+                                 "reason": "output path would overwrite an input file"})
+    return problems
 
 
 def cmd_schema(args) -> int:
@@ -752,16 +779,24 @@ def cmd_brief(args) -> int:
     run_dir = Path(args.out) if args.out else (runtime_dir(cfg) / stamp)
     run_dir.mkdir(parents=True, exist_ok=True)
     brief_path = run_dir / "job_brief.json"
+    out_paths = [brief_path]
+    if args.out_record:
+        out_paths.append(Path(args.out_record))
+    collisions = _refuse_to_overwrite_inputs(cfg, args, out_paths)
+    if collisions:
+        emit({"ok": False, "reason": "refusing to write over an input file",
+              "collisions": collisions, "writes_performed": []})
+        return 1
     brief["brief_path"] = str(brief_path)
     brief_path.write_text(json.dumps(brief, indent=2, ensure_ascii=False, default=str),
                           encoding="utf-8")
-    brief["handoff_jd_text_path"] = None
     out = dict(brief)
     out["ok"] = brief["validation"]["ok"] and not brief["candidate_claim_violations"]
-    if args.record:
-        Path(args.record).write_text(json.dumps(out, indent=2, ensure_ascii=False, default=str),
-                                     encoding="utf-8")
-        out["recorded_to"] = args.record
+    out["recorded_to"] = str(brief_path)
+    if args.out_record:
+        Path(args.out_record).write_text(json.dumps(out, indent=2, ensure_ascii=False, default=str),
+                                        encoding="utf-8")
+        out["recorded_to"] = args.out_record
     emit(out)
     return 0 if out["ok"] else 1
 
@@ -803,11 +838,12 @@ def main(argv=None) -> int:
     p.add_argument("--url")
     p.add_argument("--row", type=int)
     p.add_argument("--pipeline-index", type=int)
-    p.add_argument("--record")
-    p.add_argument("--jd-file")
-    p.add_argument("--research-file")
+    p.add_argument("--job-record", help="INPUT: job-record JSON to read (never written to)")
+    p.add_argument("--out-record", help="OUTPUT: optional extra copy of the brief JSON")
+    p.add_argument("--jd-file", help="INPUT: posting text file")
+    p.add_argument("--research-file", help="INPUT: cited research evidence JSON")
     p.add_argument("--allow-network", action="store_true")
-    p.add_argument("--out")
+    p.add_argument("--out", help="OUTPUT: run directory")
     p.add_argument("--stamp")
     p.set_defaults(fn=cmd_brief)
 

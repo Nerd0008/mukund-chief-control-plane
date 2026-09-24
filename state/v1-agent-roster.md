@@ -120,7 +120,7 @@ to be added and no locally discovered owner-relevant workflow was left unmapped.
 ## Status update — 2026-09-24 (job intelligence + application pack task)
 
 Task `agent-job-intelligence-and-application-pack-2026-09-23`. Evidence:
-`audits/evidence/2026-09-24T00-46-02Z-job-intelligence-and-application-pack/`.
+`audits/evidence/2026-09-24T00-50-49Z-job-intelligence-and-application-pack/`.
 
 | ID | Worker / service | Status now | Evidence |
 |---|---|---|---|

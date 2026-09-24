@@ -462,3 +462,42 @@ def test_canonical_sources_are_never_modified_by_the_test_run():
 @pytest.mark.parametrize("field", ["requirements", "responsibilities", "eligibility"])
 def test_brief_buckets_are_lists(field):
     assert isinstance(uk_brief()[field], list)
+
+
+# --------------------------------------------------------------------------- #
+# input-safety regression: the CLI must never write over what it reads
+# --------------------------------------------------------------------------- #
+
+def test_shipped_job_record_fixture_is_a_job_record_not_a_brief():
+    doc = json.loads(RECORD_UK.read_text(encoding="utf-8"))
+    assert doc.get("source_kind") == "synthetic-fixture-job-record"
+    assert doc.get("company") and doc.get("title")
+    assert "brief_id" not in doc and "requirements" not in doc
+
+
+def test_brief_cli_refuses_to_overwrite_its_inputs(tmp_path, capsys):
+    """Regression: an overloaded --record flag once wrote the brief over the
+    job-record fixture that the same command had just read."""
+    job_record = tmp_path / "rec.json"
+    job_record.write_text(RECORD_UK.read_text(encoding="utf-8"), encoding="utf-8")
+    before = job_record.read_bytes()
+    rc = ji.main(["brief", "--job-record", str(job_record), "--jd-file", str(JD_UK),
+                  "--out", str(tmp_path / "run"), "--out-record", str(job_record)])
+    assert rc == 1
+    assert job_record.read_bytes() == before, "the input job record was overwritten"
+    payload = json.loads(capsys.readouterr().out.strip())
+    assert payload["ok"] is False
+    assert any("overwrite an input file" in c["reason"] for c in payload["collisions"])
+
+
+def test_brief_cli_writes_only_to_output_paths(tmp_path):
+    job_record = tmp_path / "rec.json"
+    job_record.write_text(RECORD_UK.read_text(encoding="utf-8"), encoding="utf-8")
+    jd_before = JD_UK.read_bytes()
+    out_dir = tmp_path / "run"
+    rc = ji.main(["brief", "--job-record", str(job_record), "--jd-file", str(JD_UK),
+                  "--out", str(out_dir), "--stamp", "teststamp"])
+    assert rc == 0
+    assert (out_dir / "job_brief.json").exists()
+    assert job_record.read_text(encoding="utf-8") == RECORD_UK.read_text(encoding="utf-8")
+    assert JD_UK.read_bytes() == jd_before

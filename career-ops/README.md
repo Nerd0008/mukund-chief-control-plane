@@ -378,10 +378,14 @@ separately and **no live-mailbox evidence is claimed**.
 Roster **B13** (Job Description Analyzer) and **B14** (Company/Role Research Brief).
 
     python career-ops/job_intelligence.py schema
-    python career-ops/job_intelligence.py brief --record REC.json --jd-file JD.txt \
-        [--research-file RESEARCH.json] [--out DIR] [--stamp S]
+    python career-ops/job_intelligence.py brief --job-record REC.json --jd-file JD.txt \
+        [--research-file RESEARCH.json] [--out DIR] [--out-record FILE] [--stamp S]
     python career-ops/job_intelligence.py research --brief JOB_BRIEF.json [--research-file F]
     python career-ops/job_intelligence.py validate --brief JOB_BRIEF.json
+
+`--job-record` / `--jd-file` / `--research-file` are **inputs** and are never
+written to; `--out` / `--out-record` are outputs. The command refuses to run if an
+output path would overwrite one of its own inputs.
 
 `job_brief_schema.json` is the committed JobBrief contract; `brief` refuses to
 report success unless the brief validates against it and contains no
@@ -488,9 +492,9 @@ deduped.
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 245 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 248 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
-    python -m pytest career-ops/tests/test_job_intelligence.py -q  # 38 passed
+    python -m pytest career-ops/tests/test_job_intelligence.py -q  # 41 passed
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 34 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
 

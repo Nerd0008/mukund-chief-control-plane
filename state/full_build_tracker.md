@@ -335,11 +335,13 @@ item 6 — state the Dubai/UAE, Japan and Singapore work-authorisation position,
 produced for those regions is labelled UNKNOWN until the owner says otherwise; item 7 — decide whether
 to add a UAE/Japan-specific provider or accept the agent-driven `search_queries` path.
 
-## Job intelligence + application pack: JobBrief, research brief, reviewer, submission gate (2026-09-24T00:46Z)
+## Job intelligence + application pack: JobBrief, research brief, reviewer, submission gate (2026-09-24T00:50Z)
 
 Task `agent-job-intelligence-and-application-pack-2026-09-23` (roster B13, B14, B17, B18).
-Acceptance evidence: `audits/evidence/2026-09-24T00-46-02Z-job-intelligence-and-application-pack/`
-(`acceptance.json` + `acceptance.md`).
+Acceptance evidence: `audits/evidence/2026-09-24T00-50-49Z-job-intelligence-and-application-pack/`
+(`acceptance.json` + `acceptance.md`). Two earlier runs of the same runner are preserved under
+`audits/evidence/superseded/`: the 00-44-06Z run predates the reviewer single-line-comment fix,
+and the 00-46-02Z run predates the `job_intelligence` CLI input/output flag fix below.
 
 | Lane | Item | Status | Evidence |
 |---|---|---|---|
@@ -355,7 +357,8 @@ Acceptance evidence: `audits/evidence/2026-09-24T00-46-02Z-job-intelligence-and-
 | B18 | Submission gate always requires owner approval | **BUILT + EVIDENCED** | `career-ops/submission_gate.py`; refuses a blocked review, unverified truthfulness, no approval, an approval not bound to `pack_id`+`pack_sha256`, a pack changed after approval, unacknowledged unknowns, and an approval located inside the repository |
 | B18 | No autonomous submission | **ENFORCED** | 14 external actions all refused and logged; a valid external approval yields `approved_pending_owner_manual_submission` + an owner checklist, with `external_action_performed: false` on every decision |
 | Safety | Canonical sources + trackers untouched | **VERIFIED** | `cv.md` / `config/profile.yml` / `config/cv-facts.json` SHA-256 identical before and after the acceptance run; `applications_submitted: 0`, `external_messages_sent: 0`, `browser_launched: false`, `network_research_calls: 0` |
-| Tests | New suite + no regressions | **PASS** | `career-ops/tests/test_job_intelligence.py` **38 passed**; whole `career-ops/tests/` **245 passed** (was 207); acceptance runner **42/42 checks, 0 critical failures** |
+| Tests | New suite + no regressions | **PASS** | `career-ops/tests/test_job_intelligence.py` **41 passed**; whole `career-ops/tests/` **248 passed** (was 207); acceptance runner **42/42 checks, 0 critical failures** |
+| Defect found + fixed | CLI wrote over a file it was reading | **FIXED + REGRESSION-TESTED** | `job_intelligence.py brief` originally reused one `--record` flag for both the input job record and the output path (the Career Ops workflow's `--record` means *output*), so a CLI smoke run wrote the brief over the job-record fixture. Inputs and outputs are now separate flags (`--job-record`/`--jd-file`/`--research-file` vs `--out`/`--out-record`) and `_refuse_to_overwrite_inputs()` refuses any command whose output path resolves to one of its own inputs (exit 1, nothing written). Caught by re-running the suite against the committed revision rather than trusting the earlier green run |
 
 Not claimed (deliberately): any live company research (no approved provider exists, so
 every brief carries `research_needed`), any live vacancy (the fixture posting is
