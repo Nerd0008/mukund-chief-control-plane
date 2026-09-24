@@ -1,0 +1,32 @@
+{
+  "task_id": "agent-career-priority-company-watchlist-engine-2026-09-24",
+  "created_at": "2026-09-24T12:00:00Z",
+  "objective": "Build the owner-company priority watchlist layer so a plain list of company names can be dropped in later and immediately become a first-class discovery source. Resolve each company to its official careers/ATS surface, run company+role-family web research in addition to Company Watch, preserve provenance, and send findings through the same unified discovery/semantic/eligibility/dedupe funnel. The watchlist is additive to broad-market search, never a replacement.",
+  "authority": "owner instruction in current chat",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "agent-career-codex-style-open-web-job-research-2026-09-24 must reach a truthful terminal state.",
+    "Reuse the unified discovery schema/funnel and web-research collector from the prerequisite."
+  ],
+  "allowed_scope": [
+    "Create a simple owner-editable watchlist input format accepting company names with optional careers URLs/notes; an empty list must be valid so infrastructure can finish before the owner supplies names.",
+    "Implement deterministic company identity normalization/aliases so duplicate spellings collapse without merging distinct companies.",
+    "For each watchlist company, discover and verify the official careers page and ATS host where possible; support common ATS families including Greenhouse, Lever, Workday, Ashby, SmartRecruiters, Teamtailor, Workable and region-specific ATS surfaces discovered by the web-research lane.",
+    "Run two complementary query families per company: official-careers/ATS discovery and company-name + early-career cyber role-family web research. Do not rely on one ATS URL alone.",
+    "Give watchlist findings a priority_watchlist provenance flag and surface them prominently in the Chief/Career brief, but do not bypass semantic or deterministic eligibility gates.",
+    "Keep historical/current Company Watch registry data reusable; do not duplicate its state. Merge source provenance when Company Watch and web research find the same vacancy.",
+    "Record per-company health: last checked, careers source found/not found, queries executed, live vacancies observed, candidates after funnel, access/blocking reason, and next retry.",
+    "Add acceptance fixtures for aliases, ATS discovery, company with no careers page, company with zero matching roles, duplicate vacancy from Company Watch + web research, and a watchlist vacancy that remains visible even when not top-ranked globally.",
+    "No canonical tracker writes during acceptance; produce read-only manifests/brief sections only.",
+    "Update docs/state/roster and push."
+  ],
+  "stop_conditions": [
+    "No fabricated careers URLs or vacancies.",
+    "No employer/recruiter contact, applications or account mutation.",
+    "No browser/GUI automation or signed-in session use.",
+    "A company with inaccessible careers infrastructure must be labelled unavailable/unknown, not 'no jobs'."
+  ],
+  "notes": "Owner will provide the actual company list later. This task should make adding that list a data/config step, not another engineering project."
+}
