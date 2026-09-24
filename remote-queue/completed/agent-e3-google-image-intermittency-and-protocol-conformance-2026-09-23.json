@@ -1,0 +1,79 @@
+{
+  "task_id": "agent-e3-google-image-intermittency-and-protocol-conformance-2026-09-23",
+  "created_at": "2026-09-23T21:55:00Z",
+  "objective": "Resolve the one remaining Google image worker unknown with a strictly bounded repeat series, then settle the image request protocol truthfully. The 2026-09-23 diagnosis spent exactly one real Google image call on the identical request that had failed with 'no_image_part_in_response' and the failure did NOT reproduce (200, finishReason STOP, inlineData:image/jpeg, 1024x1024, 434365 bytes, decodes cleanly, 1383 provider-reported candidate tokens of which 1120 IMAGE). The earlier no-image response is therefore intermittent and its trigger is still unknown. Run a small bounded repeat series (state the call budget up front; a single-digit number of deterministic single-shot calls) to establish whether the no-image response recurs and at what rate, and record the observed rate truthfully rather than declaring the worker stable or broken. Separately, determine by controlled comparison whether the adapter's current image request shape is complete for this model \u2014 it currently sends generationConfig.responseModalities=['IMAGE'] only, with no text modality and no image output configuration \u2014 and record what the provider actually does with that shape, including whether an explicitly requested image size (the earlier objective asked for 64x64) is honoured or ignored. Then re-run the evidence-backed qualification for the vision role from whatever real execution evidence now exists. Do not enable Stage 2 or production dispatch in this task.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23 reached a terminal state and recorded the single-call diagnosis",
+    "the deployed runtime root already carries the sanitized response-shape diagnostics (gemini_adapter response_part_kinds / candidate_finish_reasons / response_text_excerpt and the corresponding e3_execution attempt fields)"
+  ],
+  "allowed_scope": [
+    "Inspect audits/evidence/2026-09-23T21-49-21Z-e3-google-image-diagnosis/ (evidence.json, evidence.md), audits/evidence/2026-09-23T21-10-00Z-e3-production-execution-rehearsal/ (the original failing attempt gem-d8c43b8cb447) and audits/evidence/2026-09-23T21-53-01Z-e3-qualification-from-evidence/ before making any claim.",
+    "State the real provider call budget up front, in the evidence artifact, with a reason per call. A single-digit bounded repeat series of deterministic single-shot image requests is the maximum acceptable; no unbounded or exploratory generation.",
+    "Run the repeat series through the real deployed path (ExecutionAdapterRegistry -> GeminiImageExecutionAdapter -> generateContent) so every observation is a recorded dispatch attempt with the sanitized diagnostics, and persist the schema-v2 dag_node/dag_state_event/performance_evidence rows it produces.",
+    "Record the observed recurrence rate of the no-image response as a measured rate over the executed series, with the exact counts; do not describe the worker as stable, unreliable or broken beyond what the recorded series supports.",
+    "Determine the correct image request shape for gemini-3.1-flash-image by controlled comparison where it can be done inside the stated budget (for example IMAGE-only versus TEXT+IMAGE responseModalities), and record which shape the provider accepts and what it returns for each.",
+    "Record truthfully whether an explicitly requested output size (e.g. '64 by 64 pixels') is honoured. If the provider ignores prompt-stated size, record that as a protocol/spec fact and either implement size control through a supported parameter or record it as a known limitation \u2014 never as a pass.",
+    "Re-run scripts/e3_qualification_from_evidence.py after the new evidence exists, and record whether the vision role moves off EVALUATING. Qualification may only be marked from recorded evidence; smoke readiness is not qualification.",
+    "Keep E2 integration public-interface only (governor.record_request()); no direct SQL writes from E3 into exec_brain.db or governor.db, and do not write to those stores at all.",
+    "Do not weaken any readiness criterion and do not enable E3 Stage 2 or production dispatch; the owner has deferred local Stage 2 completion until after all remaining provider credentials are configured on 2026-09-24 and the readiness gates are re-run.",
+    "Run the full E1/E2/E3/E4/E5 plus queue and bridge regression suites through scripts/evidence_runner.py after any change and record exact commands, counts and exit codes.",
+    "Update state/current_company_state.md and state/full_build_tracker.md with verified facts only.",
+    "Commit and push small recoverable changes and return a strict terminal JSON result.",
+    "Before returning a terminal result, create exactly one successor agent-* task in remote-queue/pending/ so the local poller can continue; do not create a duplicate if an equivalent pending or running task already exists."
+  ],
+  "stop_conditions": [
+    "Do not fabricate provider, model, usage, latency, recurrence-rate or qualification evidence.",
+    "Do not spend more real provider calls than the budget stated up front in the evidence artifact.",
+    "Do not declare the Google image worker stable, reliable or qualified from a bounded series that does not support it.",
+    "Do not enable E3 Stage 2 or production dispatch in this task.",
+    "Do not weaken or skip a readiness criterion.",
+    "Do not expose secrets, credential values, raw chain-of-thought, or private runtime database content; store objectives as hashes in DAG/state logs.",
+    "Do not perform VPS cutover or finalize deployment architecture.",
+    "If a real execution requires owner credentials or account action, record the exact owner action and continue non-dependent work."
+  ],
+  "notes": "Staged by agent-e3-image-diagnosis-and-multiworker-execution-2026-09-23 immediately before exit, per the owner standing directive to hand off to exactly one next bounded task. READ FIRST: owner commit 1310440 ('owner: prioritize completion over token conservation', authority file, 2026-09-23T22:50Z) says that for this completion sprint engineering must NOT be optimised for token conservation or provider cost (DeepSeek is the high-volume workhorse and may be used aggressively where appropriate), with priority order correctness/truthfulness, then completion/deployment readiness, then speed and unattended continuity, then reliability/recoverability, then token efficiency; it explicitly does not authorise weakening gates or fabricating completion. This task's own repeat-series budget should therefore be set for statistical usefulness rather than minimal cost, while staying bounded enough to avoid hangs. Verified state at staging (all from recorded evidence): the E3 real execution path works end to end, including the decomposed multi-worker plan already evidenced at 2026-09-23T21-32-41Z (builder/deepseek -> integrator/codex-cli, per-node deterministic verification, rejection -> REWORK -> targeted repair -> re-verified PASS, dependency-gated dispatch) - do NOT repeat it. The Google image real-dispatch failure was diagnosed with exactly one additional bounded call and did NOT reproduce; the trigger is an open unknown. The evidence-backed qualification harness (e3_qualification_benchmark.EvidenceBackedBenchmark + scripts/e3_qualification_from_evidence.py) now derives capability state only from recorded performance_evidence rows and has recorded codex-cli (builder, integrator) and deepseek-v41-flash (builder) as QUALIFIED for task_family 'code', with google-nano-banana-2 (vision) left EVALUATING (1 verified pass of 2 recorded executions); do not re-derive those decisions, only extend them with new evidence. Regression baseline to beat or match: 12 suites / 364 tests / exit 0 at SHA 4da92eb. Owner standing directive for continuity: keep working locally, keep commits small and recoverable, and hand off to exactly one next bounded task before exit.",
+  "completed_at": "2026-09-24T01:50:00Z",
+  "result": {
+    "status": "completed",
+    "summary": "Ran the bounded repeat series the diagnosis said was required, through the real deployed path (ExecutionAdapterRegistry -> GeminiImageExecutionAdapter -> generateContent), and settled the image request protocol truthfully. A 9-call budget was stated in the evidence artifact before the first call and was exactly honoured (6 identical IMAGE-only single-shot repeats of the exact failing request, 2 with responseModalities ['TEXT','IMAGE'], 1 with ['TEXT','IMAGE'] plus generationConfig.imageConfig); 9 attempted, 9 recorded, no abort, and no metadata call was made, so generations == the stated total. The no-image response RECURRED: 2 of 9 executed calls (measured rate 0.2222) - 2/6 on the IMAGE-only shape, 0/2 on TEXT+IMAGE, 0/1 on TEXT+IMAGE+imageConfig. Both recurrences carried a provider-supplied finishReason=IMAGE_RECITATION with an empty response part list, no candidate and 0 candidate tokens, i.e. a provider content-side stop rather than an adapter, transport or modality-list failure; the same IMAGE-only shape returned decodable 1024x1024 JPEGs on 4 of its 6 calls. The worker is NOT described as stable, unreliable or broken beyond what the series supports. Request protocol: the production shape (responseModalities ['IMAGE'], no imageConfig) is accepted by this model and was made contract-declarable (optional response_modalities / image_config, production default unchanged, shape echoed into the result, the sanitized metadata and the persisted dispatch attempt); the provider also accepts ['TEXT','IMAGE']. Output size: a size stated only in the prompt is IGNORED (objective asked 64x64, every IMAGE-only call returned 1024x1024), while the provider's own parameter generationConfig.imageConfig={imageSize:'512'} was accepted and returned 512x512 - so size is controllable through that supported parameter and exact 64x64 is recorded as a known limitation, never as a pass. No readiness or verification criterion was weakened (the image node's deterministic contract is still 'an image part arrived and decodes'). Re-running scripts/e3_qualification_from_evidence.py moved google-nano-banana-2/vision off EVALUATING to QUALIFIED on the unchanged bar (11 recorded executions, 8 verified passes, 8 first-pass, all six checks pass, qualified_rows_without_evidence 0) - recorded as dispatch repeatability under the declared contract, explicitly not as 'always returns an image'. E2 integration stayed public-interface only: all 9 telemetry rows were written through governor.record_request() and read back from governor.db (all_found true), with the two failures recording status=error and output_tokens=null rather than an approximation; no SQL write was made to exec_brain.db or governor.db. E3 Stage 2 and production dispatch were NOT enabled. One driver defect was found and fixed inside the task: the first revision of the runner wrote evidence.json and then crashed in its markdown renderer; the provider cost was already spent at that point, so the artifacts were re-derived from the captured responses through a new --from-evidence path with 0 additional provider calls instead of re-running the series.",
+    "owner_action_required": "Configure the seven remaining owner-local provider credentials so the Stage-2 readiness gate (scripts/e3_stage2_readiness_gate.py) can be re-run; nothing in this task is blocked on it. Optional: the Google image worker can return a provider content-side stop (finishReason IMAGE_RECITATION, image withheld) on roughly the rate recorded here, so any future image workflow should expect a possible no-image result at that rate and handle it non-silently.",
+    "blocker_category": null,
+    "commits": [
+      "5a12463 e3: contract-declarable image request shape + bounded Google image repeat series",
+      "435b627 e3: bounded Google image repeat series evidence + successor task"
+    ],
+    "tests": [
+      "python scripts/e3_google_image_repeat_series.py -> 9/9 stated-budget real calls recorded; recurrence 2/9; run on the real deployed path; artifact audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/",
+      "python scripts/e3_google_image_repeat_series.py --from-evidence <artifact> -> re-derivation with 0 additional provider calls",
+      "python scripts/e3_qualification_from_evidence.py -> google-nano-banana-2/vision QUALIFIED (11 recorded executions / 8 verified passes); artifact audits/evidence/2026-09-24T01-46-56Z-e3-qualification-from-evidence/",
+      "python exec-brain/tests/test_e3_google_image_protocol.py -> 18 passed (offline, stubbed HTTP layer, isolated db)",
+      "python scripts/evidence_runner.py --label e3-google-image-protocol-conformance -> 16 suites / 456 tests / 16 passed / 0 failed / 0 unavailable / exit_code 0 at SHA 5a12463; artifact audits/evidence/2026-09-24T01-47-46Z-e3-google-image-protocol-conformance/",
+      "python scripts/deploy_e3_runtime.py -> copied e3_qualification_benchmark.py, e3_execution.py, gemini_adapter.py to the runtime root; rollback backup exec-brain/backups/e3-deploy-20260924T014415Z"
+    ],
+    "changed_files": [
+      "exec-brain/gemini_adapter.py",
+      "exec-brain/e3_execution.py",
+      "exec-brain/tests/test_e3_google_image_protocol.py",
+      "scripts/e3_google_image_repeat_series.py",
+      "scripts/evidence_runner.py",
+      "audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/{evidence.json,evidence.md,observations.json}",
+      "audits/evidence/2026-09-24T01-46-56Z-e3-qualification-from-evidence/{evidence.json,evidence.md}",
+      "audits/evidence/2026-09-24T01-47-46Z-e3-google-image-protocol-conformance/{evidence.json,evidence.md}",
+      "state/current_company_state.md",
+      "state/full_build_tracker.md",
+      "remote-queue/pending/agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24.json"
+    ],
+    "remaining": [
+      "Open unknown, deliberately not chased: what makes the provider's recitation filter fire on some calls and not others for the identical prompt. The provider exposes the stop reason but not the filter input, and no unbounded generation was performed to chase it.",
+      "Inference not fact: the 2026-09-23T21:10Z failure gem-d8c43b8cb447 captured no finish_reason, so its identity with these recurrences rests on identical request plus identical usage (17 prompt / 0 output tokens).",
+      "The recurrence is currently recorded as a node-level deterministic-verification failure, conflating a provider content-side stop with a contract failure; the successor task agent-e3-provider-content-stop-attribution-and-image-retry-policy-2026-09-24 owns truthful attribution and a bounded, non-looping terminal path.",
+      "Exact 64x64 output is not achievable through the supported size parameter (it is a size class); recorded as a known limitation of this provider/model.",
+      "E3 Stage 2 and production dispatch remain disabled pending the owner-local credentials and a readiness-gate re-run.",
+      "Untracked audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/ belongs to the separate company-watch recovery task and was deliberately left untouched."
+    ]
+  }
+}
