@@ -1,0 +1,89 @@
+{
+  "task_id": "agent-whole-company-local-acceptance-and-morning-handover-2026-09-23",
+  "created_at": "2026-09-23T21:39:00Z",
+  "objective": "Run the final engineering-morning acceptance pass over the complete Chief OS v1 and produce the morning handover: prove every non-owner-blocked local workflow, enumerate exact remaining afternoon admin actions, and leave the system ready for owner configuration and evening deployment.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "low",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "All earlier engineering queue tasks should be terminal or explicitly blocked with truthful evidence.",
+    "agent-company-watch-recovery-final-pass-2026-09-24 must be in a truthful terminal state",
+    "agent-blocked-work-final-reconciliation-2026-09-24 must be in a truthful terminal state and no unresolved non-owner recoverable blocker may remain"
+  ],
+  "allowed_scope": [
+    "Read state/v1-agent-roster.md and account for every roster item: PASS, READY_NEEDS_OWNER_CONFIG, BLOCKED_EXTERNAL, or superseded with evidence. No UNKNOWN omission.",
+    "Run whole-company local acceptance covering Chief intake; E1/E2; E3 delegation/verification; E4/E5 drills/harness; remote queue/watchdog; Discord sync; Career Ops scan/dedupe/tracker write; regional job-search jobs; Company Watch; application status path; JobBrief/CV/cover-letter/reviewer; LinkedIn draft/read-only path; Career Brief; Morning Chief Brief; owner escalation; backup/restore checks.",
+    "Do not claim live external integration where only fixture evidence exists; label owner-configured acceptance steps separately.",
+    "Run the full regression/evidence runner and any subsystem suites, recording exact counts/exits.",
+    "Reconcile current_company_state.md, full_build_tracker.md, v1-agent-roster.md and overnight owner-action TODO.",
+    "Produce a final morning handover with: completed engineering, tests/evidence, manual afternoon steps in execution order, Stage 2 readiness steps after keys, deployment prerequisites, rollback/no-go criteria, and exact remaining blockers.",
+    "Do not perform Stage 2 enablement before keys or final deployment/cutover."
+  ],
+  "stop_conditions": [
+    "No fabricated PASS.",
+    "No external mutations.",
+    "No deployment cutover.",
+    "No hidden unresolved agent/workflow."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work. Owner directive 2026-09-24: run final blocked-work recovery/reconciliation before whole-company acceptance so historical execution_error records are either superseded by evidence, recovered, or truthfully left owner/external-gated. Do not declare acceptance while a recoverable non-owner gap remains.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T04:02:59.443393Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes returned an unstructured final response (sha256=72005c9ba8703af51af20757e3cd8b68991462a181d6755368ad15acc28e9959, bytes=758). Inspect locally; raw response was not committed.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes returned an unstructured final response (sha256=72005c9ba8703af51af20757e3cd8b68991462a181d6755368ad15acc28e9959, bytes=758). Inspect locally; raw response was not committed.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T04:06:17.299282Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 2 resumed attempt 1's committed work instead of rebuilding it. Attempt 1 failed only in response format (execution_error, unstructured reply) after landing the acceptance package at b4545a7/021ba06; that work is preserved. Verification added now: scripts/whole_company_acceptance.py is byte-identical between the accepted SHA 31eecdb and HEAD e9f5db8 (git hash-object 5b644dab9fb424850e7409feceef1f9fbc5b569e) and no code changed between those commits (git diff 31eecdb..HEAD -- scripts/ empty), so the authoritative 34-step acceptance evidence stays valid for HEAD; the full regression was independently re-run from scratch at HEAD and reproduced the recorded figures exactly (21 suites / 21 passed / 0 failed / 0 unavailable / 579 collected / 579 passed / runner exit 0, code SHA e9f5db8, python 3.11.16 win32). Roster account verified machine-readable: 50/50 items, 0 unaccounted (47 PASS, 3 READY_NEEDS_OWNER_CONFIG = B12 live mailbox OAuth, B14 research provider, C03 owner-gated cutover; 0 BLOCKED_EXTERNAL) plus 10 supplementary owner-gated/external items. All 12 blocked queue records carry final_reconciliation_2026_09_24: 10 superseded by verified successors, 2 parked unchanged as deterministic owner/external credential blockers \u2014 no recoverable non-owner gap remains. Acceptance run itself: 34 steps, 33 PASS, 0 FAIL, 1 owner-gated (presence-only credential probe, 7/7 absent), 0 unavailable; canonical workbooks SHA-256 unchanged; 0 external mutations; 0 provider calls; preflight GO; backup/restore drill PASS (10 artifacts); E4/E5 drills 36/36 with real_provider_calls=0. Morning handover (handovers/2026-09-24-morning-handover.md, sections 1-12) contains completed engineering, exact counts, ordered afternoon owner steps, post-key Stage 2 sequence, deployment prerequisites, rollback/no-go criteria and exact remaining blockers. No Stage 2 enablement, no deployment/cutover, no external mutation, no credential or provider call, no new owner action. Committed and pushed to origin/main (HEAD == origin/main == 4fe4fc9); only the dispatcher-owned remote-queue/logs/queue.log is left unstaged.",
+    "owner_action_required": "Configure the seven missing provider credentials (only genuine owner manual step, ~10 min): from the repo root run `python scripts/set_provider_key.py --worker <name>` for mistral-small-4, glm-53-flash, qwen38-27b, longcat-2.0, minimax-m3, step-37-flash, tencent-hunyuan-hy3, then verify with `python scripts/set_provider_key.py --status` expecting 10/10 present; afterwards the post-key Stage 2 sequence (handover section 6) can run. Remaining non-credential owner items are unchanged and listed in tasks-or-issues/overnight-owner-actions-2026-09-24.md (Gmail read-only OAuth, research provider, UAE/Japan/Singapore work-authorisation position, deployment architecture + VPS details + cutover authorisation, owner-attended laptop trust audit, reboot-persistence confirmation, legacy 'Mukund Chief of Staff' task disposition, optional cadence/vocabulary/rotation decisions).",
+    "blocker_category": null,
+    "commits": [
+      "4fe4fc9 acceptance: attempt-2 independent regression verification at HEAD (21 suites / 579 tests / exit 0) \u2014 pushed to origin/main",
+      "preserved from attempt 1 (not recreated): b4545a7 acceptance: whole-company local acceptance PASS (34 steps) + morning handover; reconcile state",
+      "preserved from attempt 1 (not recreated): 021ba06 acceptance: correct sub-artifact count in handover/state (13, not 12)",
+      "preserved: 31eecdb acceptance: add deterministic whole-company local acceptance runner (C01)"
+    ],
+    "tests": [
+      "scripts/evidence_runner.py re-run at HEAD e9f5db8 (label attempt2-verification): 21 suites run / 21 passed / 0 failed / 0 unavailable / 579 collected / 579 passed / exit 0",
+      "whole-company acceptance (evidence audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final): 34 steps \u2014 33 PASS, 0 FAIL, 1 OWNER_GATED, 0 unavailable; verdict PASS; canonical_workbooks_unchanged true; external_mutations_performed 0; provider_calls_spent_by_this_runner 0",
+      "roster_account.json: 50/50 roster items, unaccounted [] (47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL) + 10 supplementary owner-gated items",
+      "E4/E5 drill harness inside acceptance: 36/36 checks, real_provider_calls=0, stub_dispatches=10, evidence_kind=stubbed_provider_failure",
+      "deployment preflight: verdict GO, 11 checks, 0 FAIL, 1 WARN (7 credentials absent)",
+      "backup/restore/rollback drill: status PASS, 10 artifacts",
+      "remote-queue blocked records: 12/12 carry final_reconciliation_2026_09_24 (10 superseded by verified successors, 2 parked deterministic owner/external credential blockers)",
+      "git: HEAD 4fe4fc9 == origin/main 4fe4fc9 after push"
+    ],
+    "changed_files": [
+      "audits/evidence/2026-09-24T04-03-58Z-regression-attempt2-verification-at-head/evidence.json",
+      "audits/evidence/2026-09-24T04-03-58Z-regression-attempt2-verification-at-head/evidence.md",
+      "handovers/2026-09-24-morning-handover.md",
+      "state/current_company_state.md"
+    ],
+    "remaining": [
+      "Owner: configure the seven provider credentials, then run the post-key sequence (scripts/e3_credential_presence_probe.py, scripts/e3_stage2_readiness_gate.py, scripts/evidence_runner.py --label post-keys-regression, exec-brain/e3_execution_rehearsal.py, exec-brain/e4e5_drill_harness.py) before local Stage 2 enablement.",
+      "Owner: grant the Gmail read-only OAuth for the live Application Inbox feed (local-export path works today).",
+      "Owner: state the UAE/Japan/Singapore work-authorisation position so those records leave UNKNOWN.",
+      "Owner: deployment architecture decision, VPS host/account details supplied outside GitHub, and explicit cutover authorisation (preflight is already GO; nothing is cut over).",
+      "Owner: owner-attended laptop trust audit, reboot-persistence confirmation, and disposition of the legacy 'Mukund Chief of Staff' logon task.",
+      "Owner: optional decisions \u2014 JobBrief research provider, LinkedIn live surface, Career Daily Brief delivery channel, tracker-vocabulary gaps, operational-service scheduling cadence, month-rotation policy.",
+      "Not actionable now (deterministic external gates, not defects): local Stage 2 (credential state unchanged \u2014 anti-loop directive forbids re-staging the readiness gate), live-provider E4/E5 failover drill (no live-provider mode by design), Google image worker intermittent IMAGE_RECITATION stop (recorded 2/9), VPS cutover (unauthorised)."
+    ]
+  }
+}
