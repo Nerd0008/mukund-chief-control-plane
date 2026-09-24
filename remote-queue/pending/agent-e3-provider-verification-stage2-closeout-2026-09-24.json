@@ -1,0 +1,39 @@
+{
+  "task_id": "agent-e3-provider-verification-stage2-closeout-2026-09-24",
+  "created_at": "2026-09-24T20:45:00Z",
+  "objective": "Immediately complete the post-credential E3 provider verification and local Stage 2 closeout now that the owner has confirmed all ten provider credentials are obtained and stored locally. Reconcile live provider endpoints/model IDs, prove credential presence, run bounded real-provider verification, update routing/qualification truth, run regression and production rehearsal, exercise safe live failover/recovery evidence where the existing harness supports it, and enable local E3 Stage 2 only if every objective readiness gate passes.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Owner has explicitly confirmed all ten provider credentials are obtained and stored locally in approved local secret storage.",
+    "Do not race another active agent in the same worktree. If the Career scheduled-cutover recovery task is still executing, begin only after it reaches a terminal queue state or otherwise yields the shared worktree safely.",
+    "Inspect current main, git status, queue state, deployed E3 runtime, and provider registry/adapters before modifying anything; preserve all work already landed by other tasks."
+  ],
+  "allowed_scope": [
+    "Run the presence-only provider credential probe first. Record presence/store names only; never print, log, commit, echo, or expose any credential value.",
+    "Reconcile each generic provider's current live endpoint and API model identity against authoritative provider documentation and/or bounded provider /models discovery. Never guess a model ID from a marketing name.",
+    "Correct stale registry/adapter mappings where evidence requires it, including known deferred mappings for StepFun global API/provider naming and Tencent international TokenHub/Hy3, while preserving already-correct LongCat direct API work.",
+    "Verify Mistral, Qwen, GLM/Z.ai, MiniMax, LongCat, StepFun and Tencent Hunyuan/Hy3 endpoints/model IDs; preserve Codex, DeepSeek and Google evidence unless a regression requires re-checking.",
+    "Deploy corrected E3 modules with scripts/deploy_e3_runtime.py so repository source of truth and %LOCALAPPDATA%/hermes/exec-brain are synchronized; retain the deployment backup/manifest.",
+    "Run minimal bounded smoke tests/live identity checks for intended providers with the smallest practical token/output budgets and no unnecessary repeat spend. Record exact HTTP/provider failures truthfully.",
+    "Update routable/auth/model/qualification state only from observed evidence. Credential present alone is not routable or qualified.",
+    "Run the full post-key E1/E2/E3/E4/E5 regression and status-consistency checks after adapter corrections.",
+    "Run the bounded real-provider E3 production rehearsal and existing live-provider continuity/failover/recovery checks where the current harness safely supports them. Do not fabricate live-failover evidence if the harness lacks a real mode.",
+    "Run scripts/e3_stage2_readiness_gate.py only after the credential, live identity, regression and rehearsal prerequisites are satisfied.",
+    "Owner authorization for LOCAL E3 Stage 2 is now explicit: if and only if every objective readiness gate passes with no unresolved critical integrity/privacy/safety blocker, complete local Stage 2 enablement and record evidence/state truthfully.",
+    "Regenerate canonical status/executive tracker and reconcile the owner-action TODO after successful verification so provider credentials are no longer shown as absent.",
+    "Commit and push only truthful code, tests, state and evidence attributable to this task."
+  ],
+  "stop_conditions": [
+    "Do not expose provider secrets in chat, GitHub, logs, evidence, shell arguments or task records.",
+    "Do not perform VPS cutover, choose the final deployment topology, or provision remote infrastructure; this task is local Stage 2 closeout only.",
+    "Do not weaken qualification, verification, safety, privacy, cost, retry or readiness gates to force a pass.",
+    "Do not spend unbounded provider quota. Use bounded minimum-cost calls and stop/reconcile on repeated provider errors rather than looping.",
+    "Do not overwrite, revert or duplicate the Career recovery worker's changes. If shared-worktree ownership is ambiguous, wait/fail closed with an exact blocker instead of racing it.",
+    "Do not claim real-provider failover/recovery if only stubbed/simulated evidence is available; preserve the gap explicitly.",
+    "Do not enable Stage 2 if any required provider identity, regression, rehearsal, integrity or safety gate fails."
+  ],
+  "notes": "Owner explicitly requested this work be scheduled immediately after confirming all provider keys are stored. This task is the highest-priority next execution unit. It may wait behind the currently running Career recovery worker only to avoid shared-worktree corruption; once that worker releases the slot, begin immediately."
+}
