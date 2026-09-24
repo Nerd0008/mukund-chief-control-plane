@@ -31,6 +31,9 @@ contacted, no account/session/cookie is used and no browser or GUI automation is
 imported. Raw result URLs are owner-private job-search data and stay under the
 git-ignored ``runtime/`` tree; the committed evidence is aggregate only.
 
+Every record also names the exact committed revision (``git rev-parse HEAD``) the
+acceptance executed against, so the verdict is bound to bytes rather than to a date.
+
 Usage
 -----
   python career-ops/run_scheduled_orchestrator_acceptance.py
@@ -44,6 +47,7 @@ import datetime as dt
 import hashlib
 import io
 import json
+import subprocess
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -74,6 +78,45 @@ BANNED_IMPORTS = ("selenium", "playwright", "pyppeteer", "requests_html", "webbr
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def git_rev_parse_head() -> str:
+    """The exact committed revision this acceptance run executes against.
+
+    The record is bound to bytes, not to a date: a later reader can check out
+    this SHA and re-run the acceptance against the same code.
+    """
+    try:
+        proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(CONTROL_PLANE),
+                              capture_output=True, text=True, timeout=60)
+    except Exception:  # noqa: BLE001 - a missing git must not abort the acceptance
+        return "UNKNOWN"
+    return proc.stdout.strip() if proc.returncode == 0 else "UNKNOWN"
+
+
+def worktree_change_counts() -> dict:
+    """Tracked-modified / untracked entry counts at run time.
+
+    Recorded so the revision binding is honest: a run made on a dirty worktree
+    is still bound to the SHA, and the reader can see the tree was not clean.
+    """
+    out: dict[str, int | None] = {"modified_tracked": None, "untracked": None}
+    try:
+        proc = subprocess.run(["git", "status", "--porcelain"], cwd=str(CONTROL_PLANE),
+                              capture_output=True, text=True, timeout=60)
+    except Exception:  # noqa: BLE001
+        return out
+    if proc.returncode != 0:
+        return out
+    modified = untracked = 0
+    for line in proc.stdout.splitlines():
+        if line.startswith("??"):
+            untracked += 1
+        elif line.strip():
+            modified += 1
+    out["modified_tracked"] = modified
+    out["untracked"] = untracked
+    return out
 
 
 def tracker_hashes() -> dict:
@@ -366,6 +409,10 @@ def main(argv=None) -> int:
         "stamp": stamp,
         "started_at": started.replace(microsecond=0).isoformat(),
         "finished_at": finished.replace(microsecond=0).isoformat(),
+        "run_started_utc": started.replace(microsecond=0).isoformat(),
+        "run_finished_utc": finished.replace(microsecond=0).isoformat(),
+        "code_sha": git_rev_parse_head(),
+        "worktree_at_run": worktree_change_counts(),
         "status": "PASS" if not failed else "FAIL",
         "checks": checks,
         "counts": {"checks": len(checks), "passed": len(checks) - len(failed),
@@ -395,7 +442,10 @@ def main(argv=None) -> int:
                                            encoding="utf-8")
     lines = [f"# Unified scheduled Career discovery cutover acceptance — {stamp}", "",
              f"Status: **{doc['status']}** ({doc['counts']['passed']}/{doc['counts']['checks']} "
-             "checks)", ""]
+             "checks)", "",
+             f"Committed revision under test: `{doc['code_sha']}` "
+             f"(worktree at run: {json.dumps(doc['worktree_at_run'])})", "",
+             f"Live pass attempted: {doc['live'].get('attempted')}", ""]
     for c in checks:
         lines.append(f"- [{'x' if c['ok'] else ' '}] `{c['check']}` — "
                      f"{json.dumps(c['detail'], ensure_ascii=False)[:400]}")
