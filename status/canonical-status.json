@@ -67,7 +67,7 @@
       "verified_evidence": "audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json",
       "isolated_reproducibility_evidence": "audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json",
       "real_path_rehearsal_evidence": "audits/evidence/2026-09-24T21-04-19Z-e3-production-execution-rehearsal/evidence.json",
-      "stage2_gate_verdict": "audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/",
+      "stage2_gate_verdict": "audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/",
       "test_counts": "E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run",
       "notes": "E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) remains gated: a recorded readiness criterion (Google image real-dispatch settled) is unmet and every newly-credentialed provider refused live dispatch at the billing/entitlement/auth layer, so provider-diverse routing cannot execute.",
       "real_path_rehearsal_note": "Re-run at HEAD for this task: planner-decomposed multi-worker plan on the real execution leg, per-node deterministic verification, rejection -> repair -> re-verify, 7 bounded real provider calls (deepseek 5 / openai 2), plus the content-stop stub scenario. No failed check.",
@@ -317,20 +317,20 @@
   "stage2": {
     "state": "NOT ENABLED",
     "gate": "scripts/e3_stage2_readiness_gate.py",
-    "verdict_evidence": "audits/evidence/2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict/",
-    "verdict_utc": "2026-09-24T21:16:01Z",
-    "verdict_note": "Re-run by retry attempt 2 at HEAD with the newest bounded-smoke evidence and the same clean 22-suite regression. Verdict identical: NOT ENABLED (a=PASS 10/10 credentials, b=FAIL on the sole Google image real-dispatch criterion, c=FAIL because the live coordinator override forbids enablement for this run). 0/7 newly-credentialed providers execution-ready.",
-    "prior_verdict_evidence": "audits/evidence/2026-09-24T21-12-42Z-e3-stage2-readiness-gate-verdict/",
+    "verdict_evidence": "audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/",
+    "verdict_utc": "2026-09-24T21:21:21Z",
+    "verdict_note": "Independent re-run by the gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 at HEAD, 0 provider calls. Decisive verdict unchanged: NOT ENABLED (a=PASS 10/10 credentials, b=FAIL on the sole Google image real-dispatch criterion, c=FAIL). The successor did NOT enable Stage 2 — its own stop condition (predecessor ended blocked) and the unmet readiness criterion both require leaving Stage 2 OFF. 0/7 newly-credentialed providers execution-ready; all seven refusals unchanged.",
+    "prior_verdict_evidence": "audits/evidence/2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict/",
     "failing_conditions": [
       "condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)",
-      "condition (c) not satisfied for THIS run: the live coordinator instruction forbids local E3 Stage 2 enablement here and supersedes the earlier embedded authorization; enablement is deferred to the successor task"
+      "condition (c) evaluated False by the gate for this run: its recorded authorization source (the predecessor's contract, now terminal) no longer carries the enablement markers, so the gate fails closed; independently, condition (b) alone bars enablement and no enablement was performed"
     ],
-    "anti_loop": "The post-key sequence ran in full on 2026-09-24 and the override-aware gate was re-run with the clean 22-suite regression. Condition (a) is SATISFIED (10/10 credentials present; provider identity verified for every intended provider - 6/7 live catalogue, 1/7 authoritative documentation). Condition (b) is unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') - the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Condition (c) is False for this run because the live coordinator instruction (appended to the running contract at 2026-09-24T20:56Z) forbids local E3 Stage 2 enablement and supersedes the earlier embedded authorization. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. NEVER re-run this gate expecting enablement: enablement belongs to the dedicated successor task and needs the owner's live authorization plus the unmet criterion resolved or re-scoped.",
+    "anti_loop": "The post-key sequence ran in full on 2026-09-24 and the override-aware gate was re-run with the clean 22-suite regression. Condition (a) is SATISFIED (10/10 credentials present; provider identity verified for every intended provider - 6/7 live catalogue, 1/7 authoritative documentation). Condition (b) is unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') - the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. The gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 then ran ONCE, independently re-evaluated this rule at HEAD (0 provider calls, evidence audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/) and again did NOT enable Stage 2. NEVER re-run this gate expecting enablement: enablement needs the unmet criterion resolved or re-scoped AND the seven provider accounts funded so the stored keys serve traffic; until then it is a deterministic owner/provider blocker and must not be retried in a loop.",
     "coordinator_override": {
-      "active": true,
+      "active": false,
       "source": "remote-queue/running/agent-e3-provider-verification-stage2-closeout-2026-09-24.json",
-      "effect": "Stage 2 / production dispatch must not be enabled by this task; the gate evaluates condition (c) as unsatisfied while the override stands.",
-      "successor": "agent-e3-stage2-enable-after-provider-verification-2026-09-24 (queue commit df0514b, gated)"
+      "effect": "The run-scoped live coordinator instruction that forbade enablement applied to the predecessor task, which is now terminal (parked, external_provider). The gate's marker source moved with that contract, so the override no longer stands. This does NOT enable Stage 2: condition (b) remains unmet and no enablement was performed by the successor.",
+      "successor": "agent-e3-stage2-enable-after-provider-verification-2026-09-24 (ran 2026-09-24T21:21:21Z, left Stage 2 NOT ENABLED)"
     }
   },
   "deployment": {
@@ -376,9 +376,9 @@
       "category": "owner_approval",
       "state": "OPEN",
       "blocks": "production dispatch through the Executive Brain; the live-provider E4/E5 drill",
-      "evidence": "audits/evidence/2026-09-23T22-53-53Z-e3-stage2-readiness-gate-verdict/",
+      "evidence": "audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/",
       "owner_action_required": true,
-      "owner_action": "The post-key verification sequence has now been executed (presence probe, live identity reconciliation, bounded smoke, full regression, bounded real-provider rehearsal, E4/E5 drills, readiness gate). Stage 2 stays disabled because a recorded readiness criterion is unmet (Google image real-dispatch not settled) and every newly-credentialed provider refused live dispatch. Owner decision required: resolve or re-scope the Google-image criterion and fund the provider accounts, then re-run the gate."
+      "owner_action": "The post-key verification sequence has been executed and independently re-evaluated by the gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 (2026-09-24T21:21:21Z, 0 provider calls). Stage 2 stays disabled because a recorded readiness criterion is unmet (Google image real-dispatch not settled) and every newly-credentialed provider refused live dispatch; the successor left the system unchanged rather than weakening a gate. Owner decision required: resolve or re-scope the Google-image criterion and fund the provider accounts, then re-run the gate."
     },
     {
       "id": "live-provider-failover-gap",
@@ -579,6 +579,12 @@
     "Whether the six provider accounts can be funded/entitled so the stored keys serve traffic, and whether the Tencent key belongs to the correct TokenHub product, are owner/provider questions."
   ],
   "history": [
+    {
+      "at": "2026-09-24T21:21:21Z",
+      "id": "2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict",
+      "result": "NOT ENABLED (a=PASS 10/10 credentials, b=FAIL Google image criterion, c=FAIL)",
+      "what": "Gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 independently re-ran the readiness gate at HEAD with 0 provider calls and evaluated the enablement rule. Stage 2 was NOT enabled: the predecessor task agent-e3-provider-verification-stage2-closeout-2026-09-24 had reached a terminal blocked state (external_provider), and its fresh evidence proves the mandatory readiness criterion (Google image real-dispatch settled) is still unmet plus all seven newly-credentialed providers still refuse live dispatch. The action left the system unchanged and recorded the exact blocker rather than retrying the external blocker in a loop."
+    },
     {
       "at": "2026-09-24T21:16:01Z",
       "id": "2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict",

@@ -416,6 +416,31 @@ they are not lost (all recorded, none changed):
   `scripts/deployment_backup_restore_drill.py`, plus
   `scripts/set_provider_key.py` for item 1.
 
+## Reconciliation — gated Stage-2 activation successor (2026-09-24T21:21Z)
+
+Task `agent-e3-stage2-enable-after-provider-verification-2026-09-24` (the gated successor created by
+queue commit `df0514b`). Evidence:
+`audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/`.
+
+- **Stage 2 remains NOT ENABLED — system left unchanged.** The successor's contract permits
+  enablement only if the predecessor's fresh evidence proves every mandatory gate green. The
+  predecessor `agent-e3-provider-verification-stage2-closeout-2026-09-24` ended **terminal/blocked
+  (`external_provider`)**, so the successor's own stop condition required leaving Stage 2 OFF and
+  recording the precise blocker instead of retrying.
+- **Independent verification (0 provider calls).** The successor re-ran `scripts/e3_stage2_readiness_gate.py`
+  at HEAD: condition (a) credentials **PASS** (10/10 present, presence-only, no value read),
+  condition (b) **FAIL** on the sole Google image real-dispatch criterion, condition (c) **FAIL**
+  (the gate's authorization-marker source is the predecessor contract, now terminal, so it fails
+  closed). 0/7 newly-credentialed providers execution-ready; regression evidence all-pass (22 suites).
+- **No gate was weakened and nothing was enabled.** No VPS cutover, no deployment, no topology
+  decision, no secret exposed.
+- **No new owner action was created by this task.** Items **1b** (fund/enable the seven provider
+  accounts + re-issue the Tencent TokenHub key) and **2b** (resolve or re-scope the Google-image
+  criterion; decide the live-provider E4/E5 failover acceptance question) are confirmed as the exact,
+  still-current blockers. Re-run `python scripts/e3_stage2_readiness_gate.py` only after they change.
+
+---
+
 ## Owner manual-work target
 
 Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.
