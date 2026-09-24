@@ -12,6 +12,7 @@
     "Inspect current main, git status, queue state, deployed E3 runtime, and provider registry/adapters before modifying anything; preserve all work already landed by other tasks."
   ],
   "allowed_scope": [
+    "CURRENT COORDINATOR OVERRIDE (2026-09-24): Run credential presence, endpoint/model verification, smoke, rehearsal, qualification, regression and readiness-gate checks as authorized, but DO NOT enable local E3 Stage 2 or production dispatch in this execution, even if all gates pass. Record the gate verdict and exact remaining conditions; wait for a future explicit owner authorization in the live coordinator instructions before any enablement.",
     "Run the presence-only provider credential probe first. Record presence/store names only; never print, log, commit, echo, or expose any credential value.",
     "Reconcile each generic provider's current live endpoint and API model identity against authoritative provider documentation and/or bounded provider /models discovery. Never guess a model ID from a marketing name.",
     "Correct stale registry/adapter mappings where evidence requires it, including known deferred mappings for StepFun global API/provider naming and Tencent international TokenHub/Hy3, while preserving already-correct LongCat direct API work.",
@@ -27,6 +28,7 @@
     "Commit and push only truthful code, tests, state and evidence attributable to this task."
   ],
   "stop_conditions": [
+    "Current live coordinator instruction forbids E3 Stage 2 enablement; never enable Stage 2 or production dispatch in this task.",
     "Do not expose provider secrets in chat, GitHub, logs, evidence, shell arguments or task records.",
     "Do not perform VPS cutover, choose the final deployment topology, or provision remote infrastructure; this task is local Stage 2 closeout only.",
     "Do not weaken qualification, verification, safety, privacy, cost, retry or readiness gates to force a pass.",
@@ -35,5 +37,5 @@
     "Do not claim real-provider failover/recovery if only stubbed/simulated evidence is available; preserve the gap explicitly.",
     "Do not enable Stage 2 if any required provider identity, regression, rehearsal, integrity or safety gate fails."
   ],
-  "notes": "Owner explicitly requested this work be scheduled immediately after confirming all provider keys are stored. This task is the highest-priority next execution unit. It may wait behind the currently running Career recovery worker only to avoid shared-worktree corruption; once that worker releases the slot, begin immediately."
+  "notes": "Owner explicitly requested this work be scheduled immediately after confirming all provider keys are stored. This task is the highest-priority next execution unit. It may wait behind the currently running Career recovery worker only to avoid shared-worktree corruption; once that worker releases the slot, begin immediately. Coordinator appended an active-run policy override at 2026-09-24T20:56Z: provider verification and the readiness gate may continue, but Stage 2/production dispatch enablement is forbidden for this run. This explicit live instruction supersedes any earlier embedded authorization."
 }
