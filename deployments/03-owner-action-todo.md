@@ -1,150 +1,191 @@
-# 03 — Owner action TODO (exact order)
+# 03 — Owner action TODO (live priority order)
 
-Consolidated single list of everything that genuinely needs Mukund, in the order
-it should be executed. This is the deployment-package view; the authoritative
-running list (with full context for every item) remains
+This is the concise list of what genuinely still needs Mukund. Detailed history remains in
 `tasks-or-issues/overnight-owner-actions-2026-09-24.md`.
 
-Last reconciled: 2026-09-24 (task
-`agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24`)
-against measured live state. See
-`audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.md`
-for the built-but-not-live gap audit behind this list.
+Last reconciled against live repository state and the post-hardening integration-gap audit:
+`audits/evidence/2026-09-24T22-37-43Z-post-stage2-integration-gap-audit/audit.md`.
 
-Estimated total for the critical path: **~45–60 minutes**, of which the provider
-account funding step is ~30 minutes.
+## A. Do now — blocks E3 Stage 2
+
+### 1. Provider accounts: make the seven stored credentials actually serve traffic
+
+Credentials are already present. The remaining work is provider-side account activation,
+billing/quota/entitlement, plus a fresh Tencent TokenHub key.
+
+Work **one provider at a time** in this order:
+
+1. **Tencent TokenHub / Hy3**
+   - revoke the previously exposed TokenHub key;
+   - confirm TokenHub / Hy3 activation and required PAYG/billing;
+   - create a fresh TokenHub key;
+   - store it locally only with `python scripts/set_provider_key.py --target hunyuan`;
+   - test `GET /v1/models`; only if HTTP 200, run one bounded `hy3` smoke.
+2. **Qwen / Alibaba** — enable/purchase entitlement for `qwen3.7-plus`.
+3. **GLM / Z.ai** — add the minimum usable API balance/resource package.
+4. **LongCat** — add/activate minimum token quota.
+5. **MiniMax** — add minimum usable API balance.
+6. **StepFun** — enable/add minimum quota/PAYG billing.
+7. **Mistral** — inspect billing/account tier/usage limits causing the 429, then make one bounded smoke only after an account-side change.
+
+Do not paste keys into chat, GitHub, Discord, logs or queue JSON. Provider console work uses
+the already-open Firefox tabs.
+
+**After each owner-side fix:** engineering/Codex verifies credential presence, model identity and
+exactly one bounded smoke. Do not rerun every provider after each fix.
+
+### 2. Decide the Google-image Stage-2 criterion — only after the text providers are green
+
+Observed evidence: 9 real image calls, 7 valid images, 2 provider-side
+`IMAGE_RECITATION` stops.
+
+Owner decision after provider setup:
+- keep zero-intermittency as a hard Stage-2 requirement and investigate further; or
+- approve a formally specified bounded retry/fallback policy and re-scope the criterion.
+
+Do not weaken the criterion merely to turn the gate green.
+
+### 3. Decide the E4/E5 acceptance standard before final cutover
+
+Current evidence is truthful but limited:
+- E4/E5 stubbed-failure drill: PASS;
+- real-path execution rehearsal: PASS;
+- real provider outage -> real equivalent-worker failover: **not yet exercised**.
+
+Choose one:
+- accept the current stubbed-failure drill + real-path rehearsal for v1; or
+- require a bounded live-provider failover drill before cutover.
+
+Once Steps 1–3 are resolved, engineering owns the regression, rehearsal and readiness-gate reruns.
+Mukund should not need to manually run ordinary verification commands.
 
 ---
 
-## Resolved since the previous revision (no owner action needed)
+## B. Owner actions needed before treating the laptop as production
 
-- **Provider credentials** — all ten roster credentials are present (10/10,
-  verified 2026-09-24T20:54:33Z). No key value was read, logged or committed.
-- **Battery gating** — removed from all seven affected tasks; every owned task
-  now also has `StartWhenAvailable`, `StopOnIdleEnd` cleared, and the two light
-  periodic tasks have a logon trigger. Reversible backups exist.
-- **Operational services scheduling** — backup (02:30), log rotation (03:00),
-  morning brief (06:30) and health snapshot (08:00) are registered and Enabled,
-  local artifacts only.
-- **Log rotation/retention** — implemented and evidenced over every declared
-  live log path.
-- **Legacy `Mukund Chief of Staff` task** — confirmed `Disabled` and kept in
-  place as a rollback donor (not deleted).
-- **LinkedIn publishing path** — now built (OAuth + owner-gated publish). It
-  needs credentials before it can go live (see Step 8).
+### 4. Owner-attended laptop trust/security audit
+
+Two unexplained visible UI events remain unattributed (an Edge `events near me` search and a blank
+terminal window). Do not clear Edge history, shell history, Windows Event Logs, Task Scheduler history,
+Defender history, Hermes logs or related artifacts before the audit.
+
+This is required before the laptop is treated as a trusted production host.
+
+### 5. Reboot-persistence confirmation
+
+Task configuration is hardened and reports no known reboot-configuration gap, but no reboot has been
+observed.
+
+After the next owner-initiated reboot, use:
+`deployments/11-owner-reboot-acceptance-checklist.md`
+
+Engineering must not reboot the laptop autonomously.
+
+### 6. Choose an off-machine/off-site backup destination and retention
+
+Local backup/restore is implemented and drilled, but no off-machine backup exists.
+
+Choose a destination and retention policy, then authorise engineering to wire it. This is required
+before claiming resilient production deployment.
+
+### 7. Final deployment topology — deferred until local Stage 2 is proven
+
+Current preference is recorded but is **not** a final decision:
+
+- laptop primary + GitHub control plane + VPS watchdog/failover; or
+- VPS primary; or
+- keep local-only for now.
+
+Only provide VPS host/account details locally if a VPS path is actually chosen.
 
 ---
 
-## Step 1 — Fund / enable the seven provider accounts so the stored keys serve traffic
+## C. Career Ops owner setup — useful, but does not block Stage 2
 
-The keys are configured; the accounts refuse live dispatch. Verified errors
-(provider-side, no further narrowing possible from here):
+### 8. Gmail read-only OAuth
 
-- mistral — HTTP 429 `Rate limit exceeded`
-- GLM / Z.ai — HTTP 429 `Insufficient balance or no resource package`
-- Qwen (intl dashscope) — HTTP 403 `AccessDenied.Unpurchased` on `qwen3.7-plus`
-  (purchase/enable that model id for this account)
-- LongCat — HTTP 402 `Insufficient token quota`
-- MiniMax — HTTP 402 `insufficient balance (1008)`
-- StepFun (global) — HTTP 402 `exceeded your current quota`
-- Tencent Hunyuan/Hy3 — HTTP 401 `code 401002`; re-issue a TokenHub key at
-  https://console.tencentcloud.com/tokenhub/apikey
+The Application Inbox monitor is built; the live Gmail feed still needs your one-time read-only OAuth
+grant. Until then it can use owner-provided local exports.
 
-- Why owner-only: provider accounts/billing and the key material are yours; no
-  automation may create, hold or transmit them.
-- Do **not** paste any key into chat, Discord, GitHub, a queue job or a file.
-- Verify: `python scripts/set_provider_key.py --status` (expect 10/10 present),
-  then `python scripts/e3_provider_bounded_smoke.py`.
-- Full per-provider detail: `overnight-owner-actions-2026-09-24.md` item 1b.
+Follow the recorded Gmail instructions in the long owner-action file. The grant must remain read-only.
 
-## Step 2 — Post-key verification sequence (engineering-run)
+### 9. Supply the priority-company watchlist
 
-The sequence already ran once (2026-09-24) and Stage 2 was **not** enabled
-because a recorded readiness criterion is unmet and every newly-credentialed
-provider refused live dispatch. Re-run after Step 1:
+The Company Watch lane is built but intentionally empty until you provide the target company names.
 
-1. `python scripts/e3_credential_presence_probe.py` — expect 0/7 missing.
-2. `python scripts/e3_stage2_readiness_gate.py` — expect readiness conditions MET.
-3. `python scripts/evidence_runner.py --label post-keys-regression` — every suite
-   must pass; the figure to beat is recorded in
-   `overnight-owner-actions-2026-09-24.md` item 8.
-4. `python exec-brain/e3_execution_rehearsal.py` — bounded real-provider rehearsal.
-5. `python exec-brain/e4e5_drill_harness.py` — expect the full drill pass with
-   `real_provider_calls = 0` (it has no live-provider mode by design).
-6. Only then complete local E3 Stage 2.
+Owner-edited runtime target:
+`runtime/career-ops/watchlist/company-watchlist.json`
 
-Steps 1–6 are **engineering-run** once Step 1 is done. Two remaining
-owner decisions also gate Stage 2: the Google-image criterion (item 2b) and the
-live-provider E4/E5 acceptance question.
+### 10. Decide tracker vocabulary
 
-## Step 3 — Deployment architecture decision (after local proof)
+Choose whether to add:
+- `Assessment`;
+- Dubai `Offer`;
+- Japan `Rejected`;
 
-Choose one, in writing:
+or keep those events as explicit owner decisions.
 
-1. **Laptop primary + GitHub control plane + VPS watchdog/failover** (your
-   recorded preference, not yet a decision), or
-2. **VPS primary**, or
-3. defer the whole topology question while local operation is the deliverable.
+### 11. Decide monthly-rollover handling for owner-state rows
 
-Blocks: every `PENDING OWNER DECISION` step in `07-cutover-runbook.md`. If you
-pick (1) or (2), also supply the VPS host/account detail **outside GitHub**.
+The system currently refuses to delete or silently roll owner-state rows. Choose the rollover
+disposition/policy; until then those rows stay preserved.
 
-## Step 4 — VPS details (only if a VPS path is chosen)
+### 12. Dubai/Japan discovery coverage
 
-Provide host/account access details locally. Do not place them in GitHub, chat,
-logs or queue jobs.
+Choose one per region:
+- add a regional provider/source;
+- keep the existing agent-driven search path only; or
+- park that regional scan.
 
-## Step 5 — Owner-attended laptop security audit
+### 13. Application work-authorisation questions are not a proactive TODO
 
-Needed before the laptop is treated as a trusted production host. Two unexplained
-visible UI events (`events near me` Edge search; a blank terminal window) must be
-attributed first. Nothing was cleared or deleted; the correlation scope is
-recorded in `overnight-owner-actions-2026-09-24.md` item 5.
+Do **not** add visa/sponsorship/right-to-work wording to generated materials or surface it as a routine
+owner task. Only handle it when an application/employer explicitly asks, and answer from accurate
+owner-grounded facts at that point.
 
-## Step 6 — Reboot-persistence confirmation
+---
 
-**Updated 2026-09-24:** all eleven owned tasks now carry `StartWhenAvailable` and
-the two light periodic tasks carry a logon trigger, so they are *configured* to
-survive a reboot (read-only assessment: `unverified_after_reboot = []`).
-Engineering must not reboot your laptop, so the reboot itself is still
-unobserved. Run the short checklist after your next reboot:
-`deployments/11-owner-reboot-acceptance-checklist.md`.
+## D. Optional integrations — only if Mukund wants them live
 
-## Step 7 — Optional, non-blocking decisions (answer whenever convenient)
+### 14. LinkedIn live publishing
 
-| Item | Question | Recorded in |
-|---|---|---|
-| Tracker vocabulary | add `Assessment` / `Offer` (Dubai) / `Rejected` (Japan) statuses, or keep them as owner decisions? | owner-actions item 10 |
-| Company/role research provider | name an approved source, or keep the cited-file path only? | item 11 |
-| LinkedIn live account | create a LinkedIn app + store OAuth credentials (Step 8), or keep drafting/review only? | item 13 |
-| Career Daily Brief delivery | keep it local, or name a channel to deliver it to? | item 14 |
-| Regional work authorisation (UAE / Japan / Singapore) | one line per region — sponsorship needed / no route / open | item 6 |
-| Dubai + Japan discovery providers | add a regional provider, keep agent-driven search only, or park those lanes? | item 7 |
-| Acceptance question | is the stubbed-failure E4/E5 drill plus the real-path execution rehearsal enough for v1, or is a live-provider failover drill required before cutover? | item 8 |
-| Company watchlist | supply your short target-company list, or leave the lane empty? | `runtime/career-ops/watchlist/company-watchlist.json` |
-| Off-machine backup | choose a destination + retention, or accept local-only backup for now? | owner-actions (deployment-time facts) |
-| Legacy `Mukund Chief of Staff` task | it is now `Disabled` and kept as a donor; confirm whether it should eventually be removed | item 7 (legacy task) |
+The official OAuth/publishing path is built and remains `READY_NEEDS_OWNER_CONFIG`.
+If live publishing is wanted, create/configure the LinkedIn developer app and store credentials only
+in local secret storage. Publishing still requires explicit owner approval for the exact draft.
 
-## Step 8 — Optional: take the LinkedIn publishing path live
+Keeping LinkedIn as draft/review-only is a valid final choice.
 
-The owner-authenticated publishing path is **built but not live** — no LinkedIn
-app or OAuth credential set exists, so nothing can be (and was not) published.
+### 15. Company/role research provider
 
-1. Create a LinkedIn developer app; request the `openid profile w_member_social`
-   scopes through the official API path (do not bypass LinkedIn review).
-2. Store the client id, client secret and a member access/refresh token in
-   Windows Credential Manager under the `chief-linkedin-*` targets (never in
-   chat, GitHub, a queue job or a log).
-3. `python career-ops/linkedin_auth.py status` must then report them present.
-4. Authorise one specific post: publishing needs both an owner approval flag and
-   a confirm-token equal to the sha256 of the exact draft body. Dry-run is the
-   default; duplicates are refused against a local body-hash ledger.
+Either name an approved research source or keep the cited-file/manual research path only.
 
-See `career-ops/linkedin-live-publish.md`.
+### 16. Live recruiter/intermediary feed
 
-## What is explicitly NOT owner work
+Either provide a read-only export/source or leave the fixture/local-input path as-is.
 
-Ordinary engineering, scripting, testing, scheduling, integration, documentation,
-acceptance preparation and deployment preparation are done by the build. If you
-find yourself being asked to run a normal setup step, that is a bug in this list —
-say so and it gets engineered instead.
+### 17. Career Daily Brief delivery
+
+Choose a delivery channel, or explicitly keep the brief local. Local generation/scheduling already works.
+
+### 18. Legacy `Mukund Chief of Staff` task
+
+It is currently **Disabled** and preserved as a rollback donor. No action is needed now.
+Decide later whether to keep it indefinitely or delete it after Hermes is fully accepted.
+
+---
+
+## Already done — no owner action
+
+- Provider credential storage: 10/10 present.
+- E1 and E2 active/verified.
+- E3 implemented/verified.
+- Clean regression baseline: 22 suites / 606 collected / 606 passed.
+- Battery gating removed from affected tasks.
+- Unattended task hardening applied while preserving user-scoped credential access.
+- Operational backup, log rotation, morning brief and health snapshot schedules registered.
+- Log rotation/retention implemented.
+- Career scheduled cutover accepted.
+- LinkedIn OAuth/publish code path built (not live).
+- Legacy Chief task disabled, not deleted.
+- Hardening successor worker completed.
+- E3 Stage 2 remains OFF until the objective gates pass.
