@@ -1,0 +1,41 @@
+{
+  "task_id": "agent-post-stage2-integrations-and-production-hardening-2026-09-24",
+  "created_at": "2026-09-24T21:03:00Z",
+  "objective": "After the active E3 provider verification task and the Career final-acceptance task reach terminal states, close the remaining owner-approved operational and integration gaps that were left built-but-not-live by the previous agent. Add a real owner-authenticated LinkedIn OAuth/publishing integration around the existing B20/B21 draft generators, harden unattended Windows execution, remove battery gating, implement/schedule log rotation and operational services, preserve the legacy Chief stack suspended, and reconcile the remaining owner-only feature gaps without inventing credentials, legal facts, or external capabilities.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "normal",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "Do not race the currently running E3 provider verification/Stage-2 closeout worker or the queued Career final-acceptance/status-reconciliation worker. Begin only after both have reached a terminal queue state and the shared worktree is clean.",
+    "Mukund has approved removal of scheduled-task battery gating, unattended-service hardening, log rotation/retention, and operational-service scheduling.",
+    "Mukund has directed that the legacy 'Mukund Chief of Staff' task remain suspended/disabled (not deleted) until Hermes is fully proven.",
+    "Mukund has asked for LinkedIn live account OAuth/publishing support to be added. Preserve an explicit owner approval gate before any real post/message/profile mutation; generating drafts may be automatic, publishing may not silently occur.",
+    "Inspect current main, status/canonical-status.json, the owner TODO, Task Scheduler state, Windows credential scope, LinkedIn workflow guards, and all landed evidence before changing anything."
+  ],
+  "allowed_scope": [
+    "LinkedIn: design and implement an authenticated live-account integration using an official/approved API path where available. Keep tokens outside the repository. Reuse the existing B20/B21 generation and review paths. Add an explicit owner-approved publish action, post-id/timestamp/result logging, duplicate-post prevention, bounded retries, and a dry-run mode. Do not bypass LinkedIn API permissions/review or use browser-session scraping as a substitute.",
+    "LinkedIn: keep post generation independent from publishing so Hermes can research/generate/review while external account mutation remains owner-gated. Preserve existing guards for messages, connections, applications and profile edits unless separately authorized.",
+    "Windows unattended execution: harden Hermes/Chief tasks so they continue reliably when the laptop is idle and, where safely achievable, without an interactive desktop session. Preserve access to the owner's user-scoped Windows Credential Manager secrets; do not blindly switch provider tasks to SYSTEM or another account that cannot read them.",
+    "Battery policy: remove DisallowStartIfOnBatteries / StopIfGoingOnBatteries from the seven affected Hermes/Chief tasks, with reversible task-definition backups and verification.",
+    "Operational services: enable the owner-approved backup/health/brief/log-rotation schedules using the existing operational_services implementation, with bounded cadence, retention and evidence. Do not invent an external delivery destination for briefs.",
+    "Log rotation/retention: implement and verify retention for all live Hermes/Chief log paths; prove dry-run then real bounded cleanup only for files covered by the retention policy.",
+    "Legacy task: verify the superseded 'Mukund Chief of Staff' scheduled task is suspended/disabled and leave it in place as a rollback donor until Hermes is fully accepted. Do not delete it.",
+    "Reboot persistence preparation: ensure the owned Hermes/Chief task definitions include the required logon/boot/StartWhenAvailable behavior where appropriate, but do not reboot the owner's laptop autonomously. Produce a concise owner reboot acceptance checklist.",
+    "Audit the prior agent's built-but-not-live gaps and update the owner TODO/status truthfully. Explicitly account for: Gmail read-only OAuth live feed; JobBrief company/role research provider; live recruiter/intermediary feed; Career Daily Brief external delivery channel; tracker vocabulary gaps (Assessment, Japan Rejected, Dubai Offer); current-month tracker rollover policy; owner company watchlist names; UAE/Japan provider coverage; LinkedIn live account integration; off-machine backup destination; laptop trust audit; final deployment topology/VPS decision; live-provider E4/E5 evidence if still absent.",
+    "Where an item still requires owner input or third-party OAuth/app review, prepare the exact next step and leave it owner-gated rather than pretending it is complete.",
+    "Reconcile the owner-action TODO and generated status surfaces only after live state is measured; do not erase historical evidence."
+  ],
+  "stop_conditions": [
+    "Never store OAuth tokens, provider keys, refresh tokens, browser cookies or account secrets in GitHub, queue JSON, evidence, logs or chat.",
+    "Do not post, message, connect, apply, edit the LinkedIn profile, or perform any other LinkedIn account mutation without a distinct owner-approved action for that mutation.",
+    "Do not use browser automation, session-cookie extraction, CAPTCHA bypass or scraping behind authentication to obtain LinkedIn access.",
+    "Do not answer application visa/right-to-work questions inaccurately or hard-code a false generic 'No'. Do not proactively mention sponsorship in generated materials unless an application/employer explicitly asks; when explicitly asked, surface the question for an accurate owner-grounded answer.",
+    "Do not delete the legacy Chief scheduled task.",
+    "Do not reboot, sign out, suspend or power-cycle the owner's laptop.",
+    "Do not choose a VPS/final deployment topology or off-site backup vendor without owner input.",
+    "Do not activate a research provider, recruiter feed, external brief-delivery destination or tracker-vocabulary change without either existing owner authorization or a recorded owner decision.",
+    "Do not mark a built-but-not-live integration PASS solely because fixture/dry-run tests pass."
+  ],
+  "notes": "This task captures owner decisions made after the morning acceptance and audits omissions from the previous agent. It is intentionally queued behind provider verification and Career final acceptance to avoid shared-worktree conflicts. The previous agent completed LinkedIn draft/read-only workflows only; no live LinkedIn credential/session/API path exists yet."
+}
