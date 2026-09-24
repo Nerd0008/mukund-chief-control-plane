@@ -118,6 +118,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E4 provider content-side stop pressure over recorded evidence (offline: real execution leg + stub adapters, recorded series artifact, isolated db)",
+        "script": "exec-brain/tests/test_e4_content_stop_pressure.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "E4/E5 real-path drill harness (stubbed providers, isolated db, owner override + recovery)",
         "script": "exec-brain/tests/test_e4e5_drills.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],

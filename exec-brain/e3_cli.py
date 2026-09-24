@@ -148,6 +148,11 @@ def register(subparsers) -> None:
 
     p = subparsers.add_parser("e3-status", help="E3 orchestration status")
     p.add_argument("--db", default=None)
+    p.add_argument("--pressure-series", dest="pressure_series", action="append",
+                   default=None,
+                   help="recorded provider series artifact (observations.json) to "
+                        "include as an additional source in the E4 provider "
+                        "content-side stop pressure view; repeatable")
     p.set_defaults(func=cmd_e3_status)
 
     p = subparsers.add_parser("e3-plan", help="plan a task (advisory)")

@@ -1316,3 +1316,77 @@ qualification or verification criterion changed; no unbounded retry path created
 staged in `remote-queue/pending/` (`agent-e4-provider-content-stop-pressure-visibility-2026-09-24`)
 without duplicating or pre-empting the pending whole-company acceptance. Owner action required:
 **none new** (unchanged dependencies only).
+
+## E4 resource continuity — recorded provider content-side stop pressure — `agent-e4-provider-content-stop-pressure-visibility-2026-09-24`
+
+Ran 2026-09-24T03:22:46Z–03:30:56Z at code SHA `03ebc74`. Evidence:
+`audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/` (`evidence.md`, `evidence.json`,
+`operator_pressure_output.txt`, `deployed_surface_output.txt`, `deployed_hash_verification.txt`).
+Provider-call budget: **0 (stated up front)** — stub adapters on the real execution path, isolated
+dbs, and the recorded series artifact read verbatim; no provider series re-run.
+
+- **Gap closed.** The E4 resource-continuity view measured only tokens, counts and a cost-derived
+  time-to-exhaustion, so a provider that repeatedly withholds content while still consuming prompt
+  tokens (`promptTokenCount: 17` on every recorded `IMAGE_RECITATION` call) was reported as *healthy
+  capacity* even though the terminal attribution already existed.
+- **New view.** `exec-brain/resource_monitor.py` gained `content_stop_pressure()`,
+  `evidence_row_ledgers()` (read-only over the recorded `performance_evidence` rows),
+  `recorded_series_ledger()` (reads an already-recorded series artifact verbatim),
+  `render_content_stop_pressure()`, `build_content_stop_pressure_view()` and
+  `ResourceMonitor.get_content_stop_pressure()`. Per worker/provider/model it reports attempts
+  observed (classified and unclassified), content-side stops observed, the stop rate **with its
+  sample size**, the last observed finishReason, the last recorded stop time and the bounded boolean
+  `content_withheld_at_measurable_rate`, with status `unknown` / `clean` /
+  `stops_recorded_below_bound` / `pressured`. Sources are never merged, so a recorded series and the
+  store rows can never be conflated. No new store schema; no E1/E2 write (the view only SELECTs).
+- **Bounded flag.** `MEASURABLE_CONTENT_STOP_RATE = 0.2` (just below the only recorded rate for this
+  roster, 2/9 = 0.222) and `MEASURABLE_CONTENT_STOP_MIN_SAMPLE = 5` (the bounded per-node recovery
+  path records at most 3 dispatch attempts for one node). Both bounds only bound the flag — the raw
+  rate, sample size, finishReason and stop time are always reported; a group with no classified
+  attempt reports `unknown`, never a rate and never "clear".
+- **Operator surface.** `e3-status` now prints an `E4 Resource Continuity: provider content-side stop
+  pressure` section; `e3-status --pressure-series <observations.json>` (repeatable) adds an
+  already-recorded provider series as its own source. A missing E4 module degrades to an explicit
+  "(unavailable … deploy it with scripts/deploy_e3_runtime.py)" line rather than breaking E3 status.
+- **What it reports about the existing recorded state.** Read-only over a copy of the live store:
+  `orchestration_store.performance_evidence` → 29 attempts observed, **0 classified** (codex-cli 5,
+  deepseek-v41-flash 13, google-nano-banana-2 11) → status `unknown` for all three, because those rows
+  were recorded before the content-stop classification existed. They are reported as **unknown, not
+  healthy**. Supplying the recorded series artifact surfaces the recorded pressure for the google
+  pair: 9 attempts / 2 stops → rate `0.222 (sample size 9)`, last finishReason `IMAGE_RECITATION`,
+  `content_withheld_at_measurable_rate = yes`.
+- **Observation only.** No automatic worker swap, re-dispatch, failover, retry or safe-mode entry;
+  any failover or re-request remains an explicit E4/owner decision. The test
+  `test_the_view_writes_nothing_and_acts_on_nothing` proves the table counts are unchanged after the
+  view is built.
+- **Tests.** New offline suite `exec-brain/tests/test_e4_content_stop_pressure.py` — **31 tests**,
+  0 provider calls, registered in `scripts/evidence_runner.py`; covers a clean provider (no pressure),
+  a provider whose recorded attempts include content-side stops (truthful rate + finishReason),
+  repeated stops across nodes (flagged), zero attempts (`unknown`, never a fabricated rate),
+  pre-classification rows (unclassified, never stop-free), the recorded artifact (read, SHA-256
+  unchanged, never re-run) and the operator surface.
+- **Regression.** Pre-deploy `scripts/evidence_runner.py --label regression-pre-content-stop-pressure`
+  → **21 suites / 21 passed / 560 tests / 0 failed / 0 unavailable**
+  (`audits/evidence/2026-09-24T03-23-28Z-regression-pre-content-stop-pressure/`). The first
+  post-deploy run (`…2026-09-24T03-25-04Z-regression-post-content-stop-pressure-postdeploy/`) failed
+  exactly one test — E1 `test_t13_no_gateway_modification`, because the runtime-root allow-list did
+  not yet include the newly deployed `resource_monitor.py`; the allow-list was extended by exactly the
+  deployed module (additive, with a negative proof: an unexpected probe file still fails the gate and
+  the probe was deleted). Final post-deploy run
+  `--label regression-post-content-stop-pressure-final-exitcheck` → **21 / 21 / 560 / 0 failed / 0
+  unavailable, runner exit code 0 (captured)**
+  (`audits/evidence/2026-09-24T03-29-37Z-regression-post-content-stop-pressure-final/`). Baseline
+  beaten: 20 suites / 529 tests at `82ddf0`.
+- **Deployment.** `scripts/deploy_e3_runtime.py` 2026-09-24T03:24:48Z copied `e3_commands.py`,
+  `e3_cli.py` and `resource_monitor.py` (the E4 module was added to the deployed module set because the
+  deployed `e3-status` imports it), backup `…\exec-brain\backups\e3-deploy-20260924T032448Z`; repo vs
+  deployed SHA-256 `ALL_MATCH` (`e3_commands` `bcd12768…`, `e3_cli` `8c50a33c…`, `resource_monitor`
+  `c138c0ec…`; unchanged `e3_execution` `6f625a0a…`, `e3_shadow_orchestrator` `808b092a…`,
+  `e3_execution_rehearsal` `b482775f…`). The **deployed** module (runtime root import only) was run
+  against the read-only store copy and printed the section, including the recorded series at
+  `0.222 (sample size 9)` / `content withheld at a measurable rate: yes`.
+- **Not done.** E3 Stage 2 **NOT ENABLED**; no production dispatch; no VPS cutover; the 0/7
+  provider-credential gate was not run, re-parameterised or re-opened; no readiness, qualification or
+  verification criterion weakened; no automatic failover/re-dispatch path created. Still open and
+  deliberately not chased: what makes the recitation filter fire on some identical calls and not
+  others. Owner action required: **none new** (unchanged dependencies only).

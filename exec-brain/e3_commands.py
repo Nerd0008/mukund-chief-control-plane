@@ -53,6 +53,35 @@ TERMINAL_FAILURE_STATES = ("BLOCKED", "FAILED")
 # hold many historical nodes; the total count is still reported).
 MAX_STATUS_ATTRIBUTION_NODES = 20
 
+# E4 resource continuity reads its recorded rows from the same orchestration
+# store, so the provider content-side stop pressure view is surfaced next to the
+# node attribution. It is read-only and observation-only: it never swaps a
+# worker, re-dispatches, enters safe mode or enables Stage 2. If the E4 module is
+# not importable in this runtime the section reports that state rather than a
+# fabricated view.
+CONTENT_STOP_PRESSURE_SECTION = (
+    "--- E4 Resource Continuity: provider content-side stop pressure ---")
+
+
+def content_stop_pressure_lines(con, series_paths=()):
+    """Operator lines for the E4 content-side stop pressure view, or ``None``.
+
+    ``None`` means the E4 resource-continuity module is not importable in this
+    runtime (the caller prints that instead of inventing a view). The view itself
+    is built by :func:`resource_monitor.build_content_stop_pressure_view` over
+    already-recorded rows/artifacts only — no provider call, no store write.
+    """
+    try:
+        from resource_monitor import (build_content_stop_pressure_view,
+                                      render_content_stop_pressure)
+    except Exception:  # noqa: BLE001 — never break the E3 surface
+        return None
+    view = build_content_stop_pressure_view(con, series_paths=series_paths or ())
+    lines = list(render_content_stop_pressure(view))
+    for error in view.get("source_errors") or []:
+        lines.append(f"  source error (recorded evidence only): {error}")
+    return lines
+
 
 def finish_reason_from_cause(cause):
     """The provider finishReason named in a content-stop cause, else ``None``.
@@ -317,6 +346,25 @@ class E3Commands:
             print("  (none)")
         elif len(node_ids) > MAX_STATUS_ATTRIBUTION_NODES:
             print(f"  ... {len(node_ids) - MAX_STATUS_ATTRIBUTION_NODES} more")
+
+        # E4 resource continuity: recorded provider content-side stop pressure.
+        # Observation only — nothing is swapped, re-dispatched, retried or
+        # auto-recovered from here, and no store is written.
+        print(f"\n{CONTENT_STOP_PRESSURE_SECTION}")
+        pressure_series = getattr(args, "pressure_series", None)
+        pressure_lines = content_stop_pressure_lines(
+            con, series_paths=pressure_series)
+        if pressure_lines is None:
+            print("  (unavailable: the E4 resource-continuity module could not be "
+                  "imported in this runtime; deploy it with "
+                  "scripts/deploy_e3_runtime.py)")
+        else:
+            for line in pressure_lines:
+                print(line)
+            if not pressure_series:
+                print("  (add --pressure-series <recorded series observations.json> "
+                      "to include an already-recorded provider series as its own "
+                      "source; no provider call is made either way)")
 
     def plan(self, args):
         """Plan a task (shadow only)."""

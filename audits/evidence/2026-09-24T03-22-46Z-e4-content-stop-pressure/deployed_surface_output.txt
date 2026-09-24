@@ -1,0 +1,39 @@
+deployed module under test: C:\Users\mukun\AppData\Local\hermes\exec-brain\e3_commands.py
+runtime root (import root): C:\Users\mukun\AppData\Local\hermes\exec-brain
+store read: C:/Users/mukun/AppData/Local/hermes/cache/scratch/live-orchestration-copy.db
+recorded series supplied: C:/Users/mukun/Documents/mukund-chief-control-plane/audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/observations.json
+
+--- E4 Resource Continuity: provider content-side stop pressure ---
+  bounds: rate >= 0.2 AND sample >= 5 recorded dispatch attempts (bounded flag)
+  source: orchestration_store.performance_evidence (attempts observed 29, classified 0, content-side stops 0)
+    openai/unknown [worker codex-cli]
+      attempts observed: 5 (0 classified, 5 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+    deepseek/deepseek-flash [worker deepseek-v41-flash]
+      attempts observed: 13 (0 classified, 13 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 11 (0 classified, 11 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+  source: recorded_provider_series:e3-google-image-repeat-series (attempts observed 9, classified 9, content-side stops 2)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 9 (9 classified, 0 without the content-stop ledger)
+      content-side stops observed: 2
+      stop rate: 0.222 (sample size 9 classified attempts; 2/9 classified recorded dispatch attempts)
+      last observed finishReason: IMAGE_RECITATION
+      last stop recorded at: 2026-09-24T01:44:32+00:00
+      content withheld at a measurable rate: yes (status: pressured)
+  content_stop_pressure_detected: yes
+  decision: observation only — no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision

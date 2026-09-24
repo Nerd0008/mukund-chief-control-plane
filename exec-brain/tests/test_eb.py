@@ -336,6 +336,12 @@ class TestMatrix(EBTest):
                    "e3_qualification_benchmark.py", "e3_shadow_orchestrator.py",
                    "e3_production_rehearsal.py", "e3_execution.py",
                    "e3_execution_rehearsal.py",
+                   # E4 resource continuity, deployed because the deployed
+                   # e3-status surface imports it for the recorded provider
+                   # content-side stop pressure view (see
+                   # scripts/deploy_e3_runtime.py). Every other unexpected file
+                   # still fails this check.
+                   "resource_monitor.py",
                    "__pycache__")
         # SQLite WAL sidecars are runtime artifacts of an ALREADY-allowed
         # project database, not newly deployed files. They are created and

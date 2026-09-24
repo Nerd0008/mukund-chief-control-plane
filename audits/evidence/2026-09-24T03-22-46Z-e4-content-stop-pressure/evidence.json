@@ -1,0 +1,181 @@
+{
+  "task_id": "agent-e4-provider-content-stop-pressure-visibility-2026-09-24",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "ran_utc": {
+    "first_artifact": "2026-09-24T03:22:46Z",
+    "last_artifact": "2026-09-24T03:30:56Z"
+  },
+  "code_sha_at_run": "03ebc74bc6dd799c438893b432f66af9c6be8ed2",
+  "provider_calls_spent": 0,
+  "provider_calls_note": "All fixtures are stub adapters on the real execution path on isolated scratch dbs, plus the recorded performance_evidence rows and the recorded IMAGE_RECITATION series artifact read verbatim. No provider series was re-run.",
+  "deliverable": {
+    "surface": "exec-brain/resource_monitor.py",
+    "api": [
+      "ResourceMonitor.get_content_stop_pressure(series_paths=())",
+      "content_stop_pressure(ledgers)",
+      "evidence_row_ledgers(con)",
+      "recorded_series_ledger(path)",
+      "render_content_stop_pressure(view)",
+      "build_content_stop_pressure_view(con, series_paths=())"
+    ],
+    "per_group_fields": [
+      "worker_id", "provider", "model",
+      "attempts_observed", "attempts_classified", "attempts_unclassified",
+      "content_stops_observed", "sample_size", "content_stop_rate",
+      "last_finish_reason", "last_stop_at",
+      "content_withheld_at_measurable_rate", "status"
+    ],
+    "bounded_flag": {
+      "field": "content_withheld_at_measurable_rate",
+      "rate_threshold": 0.2,
+      "minimum_sample": 5,
+      "basis": "recorded series rate 2/9 = 0.222 (threshold sits just below it); the bounded per-node recovery path records at most 3 dispatch attempts for one node, so a single node can never present its own ratio as a provider-level rate"
+    },
+    "statuses": ["unknown", "clean", "stops_recorded_below_bound", "pressured"],
+    "observation_only": true,
+    "new_store_schema": false,
+    "e1_e2_writes": false,
+    "automatic_actions": "none (no worker swap, re-dispatch, failover, retry or safe-mode entry)"
+  },
+  "operator_surface": {
+    "where": "exec-brain/e3_commands.py status() — '--- E4 Resource Continuity: provider content-side stop pressure ---' (+ additive e3-status --pressure-series option in exec-brain/e3_cli.py)",
+    "degradation": "prints an explicit 'unavailable (module not deployed)' line instead of a fabricated view when the E4 module cannot be imported"
+  },
+  "recorded_state_reported": {
+    "live_store_read_only_copy": {
+      "source": "orchestration_store.performance_evidence",
+      "attempts_observed": 29,
+      "attempts_classified": 0,
+      "content_stops_observed": 0,
+      "groups": {
+        "codex-cli (openai/unknown)": "5 attempts, unknown (no classified attempt)",
+        "deepseek-v41-flash (deepseek/deepseek-flash)": "13 attempts, unknown (no classified attempt)",
+        "google-nano-banana-2 (google/gemini-3.1-flash-image)": "11 attempts, unknown (no classified attempt)"
+      },
+      "why": "those rows were recorded before the content-stop classification existed, so their attempts are reported unclassified and their rate unknown — never as healthy capacity",
+      "note": "read from a read-only copy of the runtime store; the live db was not modified"
+    },
+    "recorded_series_source": {
+      "artifact": "audits/evidence/2026-09-24T01-44-32Z-e3-google-image-repeat-series/observations.json",
+      "attempts_observed": 9,
+      "content_stops_observed": 2,
+      "content_stop_rate": 0.2222222222222222,
+      "sample_size": 9,
+      "last_finish_reason": "IMAGE_RECITATION",
+      "content_withheld_at_measurable_rate": true,
+      "status": "pressured"
+    }
+  },
+  "tests": {
+    "new_suite": "exec-brain/tests/test_e4_content_stop_pressure.py",
+    "new_suite_tests": 31,
+    "new_suite_command": "python exec-brain/tests/test_e4_content_stop_pressure.py",
+    "registered_in": "scripts/evidence_runner.py",
+    "provider_calls": 0,
+    "e1_gate_negative_proof": {
+      "command": "touch <runtime-root>/probe_unexpected_file.py; python exec-brain/tests/test_eb.py TestMatrix.test_t13_no_gateway_modification",
+      "result": "FAILED with 'unexpected file probe_unexpected_file.py'; probe deleted afterwards; suite then green 32/32",
+      "meaning": "the E1 static gate criterion is unchanged — it still rejects every file outside the deployed module set"
+    }
+  },
+  "regression": [
+    {
+      "label": "regression-pre-content-stop-pressure",
+      "out_dir": "audits/evidence/2026-09-24T03-23-28Z-regression-pre-content-stop-pressure",
+      "run_started_utc": "2026-09-24T03:23:28+00:00",
+      "run_finished_utc": "2026-09-24T03:24:46+00:00",
+      "phase": "pre-deploy",
+      "suites_run": 21,
+      "suites_passed": 21,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 560,
+      "tests_passed": 560,
+      "per_suite_exit_codes_all_zero": true
+    },
+    {
+      "label": "regression-post-content-stop-pressure-postdeploy",
+      "out_dir": "audits/evidence/2026-09-24T03-25-04Z-regression-post-content-stop-pressure-postdeploy",
+      "run_started_utc": "2026-09-24T03:25:04+00:00",
+      "run_finished_utc": "2026-09-24T03:26:24+00:00",
+      "phase": "post-deploy, before the E1 runtime-root allow-list was extended by the deployed E4 module",
+      "suites_run": 21,
+      "suites_passed": 20,
+      "suites_failed": 1,
+      "suites_unavailable": 0,
+      "tests_collected": 560,
+      "tests_passed": 559,
+      "failing_suite": "E1 executive brain runtime matrix — test_t13_no_gateway_modification",
+      "failure_reason": "runtime root contained the newly deployed resource_monitor.py, which was not yet in the gate's allow-list",
+      "resolution": "the allow-list was extended by exactly the deployed module (additive; negative proof above)"
+    },
+    {
+      "label": "regression-post-content-stop-pressure-final-exitcheck",
+      "out_dir": "audits/evidence/2026-09-24T03-29-37Z-regression-post-content-stop-pressure-final",
+      "run_started_utc": "2026-09-24T03:29:37+00:00",
+      "run_finished_utc": "2026-09-24T03:30:56+00:00",
+      "phase": "post-deploy, final",
+      "suites_run": 21,
+      "suites_passed": 21,
+      "suites_failed": 0,
+      "suites_unavailable": 0,
+      "tests_collected": 560,
+      "tests_passed": 560,
+      "runner_exit_code": 0
+    },
+    {
+      "label": "superseded green run",
+      "out_dir": "audits/evidence/superseded/2026-09-24T03-27-28Z-regression-post-content-stop-pressure-postdeploy-final-superseded-by-exit-verified-rerun",
+      "suites_run": 21,
+      "suites_failed": 0,
+      "tests_collected": 560,
+      "note": "identical per-suite records; superseded only because its aggregate exit code was not captured"
+    }
+  ],
+  "baseline_before_this_task": {
+    "suites": 20,
+    "tests": 529,
+    "code_sha": "82ddf0 (pre-deploy) and its post-deploy re-run",
+    "delta": "+1 suite / +31 tests, no core suite regression"
+  },
+  "deployment": {
+    "script": "scripts/deploy_e3_runtime.py",
+    "deployed_at_utc": "2026-09-24T03:24:48+00:00",
+    "backup_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\backups\\e3-deploy-20260924T032448Z",
+    "copied": ["e3_commands.py", "e3_cli.py", "resource_monitor.py"],
+    "eb_py": "already-patched",
+    "deployed_module_set_change": "resource_monitor.py added to E3_MODULES because the deployed e3-status imports it for the pressure view",
+    "sha256": {
+      "e3_commands.py": "bcd1276896f7db12286c8e4f51c28eea550bd908b9b4e0bf15e702f4c3a89f96",
+      "e3_cli.py": "8c50a33c93b55262987a3cd1e89bc52628e83786217293b8e72e514aabc5bf85",
+      "resource_monitor.py": "c138c0ecdce5011c8bc889a429cbf6cd5917311f778fe5b6f8148616f29e2688",
+      "e3_execution.py": "6f625a0a05e44b4f195ec1b53c8bc385ad4af389a9f9e2377a379778362d36f3",
+      "e3_shadow_orchestrator.py": "808b092a59b2a1e848ab653ce2c8579b0af4b340707653c15d55282367746185",
+      "e3_execution_rehearsal.py": "b482775f732eb105e2b85bb8d49e098720e6a25cb3c4a8f3ec2234fdb4461b2b"
+    },
+    "all_repo_vs_deployed_match": true,
+    "deployed_surface_verified": "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/deployed_surface_output.txt (deployed e3_commands loaded from the runtime root only)"
+  },
+  "artifacts": [
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/evidence.md",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/evidence.json",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/operator_pressure_demo.py",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/operator_pressure_output.txt",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/deployed_surface_check.py",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/deployed_surface_output.txt",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/verify_deployed_hashes.py",
+    "audits/evidence/2026-09-24T03-22-46Z-e4-content-stop-pressure/deployed_hash_verification.txt",
+    "audits/evidence/2026-09-24T03-23-28Z-regression-pre-content-stop-pressure/",
+    "audits/evidence/2026-09-24T03-25-04Z-regression-post-content-stop-pressure-postdeploy/",
+    "audits/evidence/2026-09-24T03-29-37Z-regression-post-content-stop-pressure-final/"
+  ],
+  "not_done": [
+    "no automatic worker swap / re-dispatch / failover / retry / safe-mode entry (observation only)",
+    "E3 Stage 2 not enabled; production dispatch not enabled; VPS cutover not performed",
+    "the 0/7 provider-credential gate was not run, re-parameterised or re-opened",
+    "no readiness, qualification or verification criterion weakened"
+  ],
+  "open": [
+    "what makes the provider's recitation filter fire on some identical calls and not others (the provider exposes the stop reason but not the filter input; no unbounded generation may be used to chase it)"
+  ]
+}

@@ -1,0 +1,150 @@
+run_outcome: EXECUTION_BLOCKED
+node_state: BLOCKED
+stub_dispatch_calls: 3
+recorded_series_artifact: C:\Users\mukun\Documents\mukund-chief-control-plane\audits\evidence\2026-09-24T01-44-32Z-e3-google-image-repeat-series\observations.json
+===== e3-status (store source only) =====
+=== E3 Orchestration Status ===
+Database: C:\Users\mukun\AppData\Local\Temp\e4-pressure-demo-bdjugl9n\orchestration.db
+
+Schema version: 2
+
+--- Worker Pool ---
+  LOCKED: 6 workers
+    - codex-cli (openai/codex-cli) [routable]
+    - mistral-small-4 (mistral/mistral-small-4) [NOT routable]
+    - google-nano-banana-2 (google/gemini-3.1-flash-image) [routable]
+    - deepseek-v41-flash (deepseek/deepseek-flash) [routable]
+    - glm-53-flash (glm/glm-5.3-flash) [NOT routable]
+    - qwen38-27b (qwen/qwen3.8-27b) [NOT routable]
+  EVALUATE: 1 workers
+    - longcat-2.0 (nous/longcat-2.0) [NOT routable]
+  BENCHMARK: 3 workers
+    - minimax-m3 (minimax/minimax-m3) [NOT routable]
+    - step-37-flash (step/step-3.7-flash) [NOT routable]
+    - tencent-hunyuan-hy3 (tencent/hunyuan-hy3) [NOT routable]
+
+--- Capability Registry ---
+
+--- DAG Nodes ---
+  BLOCKED: 1
+
+--- Node Failure Attribution ---
+  Node: node-pressure-demo  (plan plan-pressure-demo)
+    State: BLOCKED
+    Assigned worker: google-nano-banana-2
+    Failure attribution: provider_content_stop
+    Provider finish reason: IMAGE_RECITATION
+    Verification outcome: FAIL
+    Content-stop retries used: 2 (stops recorded: 3)
+    Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION
+
+--- E4 Resource Continuity: provider content-side stop pressure ---
+  bounds: rate >= 0.2 AND sample >= 5 recorded dispatch attempts (bounded flag)
+  source: orchestration_store.performance_evidence (attempts observed 3, classified 3, content-side stops 3)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 3 (3 classified, 0 without the content-stop ledger)
+      content-side stops observed: 3
+      stop rate: 1.000 (sample size 3 classified attempts; 3/3 classified recorded dispatch attempts)
+      last observed finishReason: IMAGE_RECITATION
+      last stop recorded at: 2026-09-24 03:29:12
+      content withheld at a measurable rate: no (status: stops_recorded_below_bound)
+  content_stop_pressure_detected: no
+  decision: observation only — no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision
+  (add --pressure-series <recorded series observations.json> to include an already-recorded provider series as its own source; no provider call is made either way)
+
+===== e3-status --pressure-series <recorded series> =====
+=== E3 Orchestration Status ===
+Database: C:\Users\mukun\AppData\Local\Temp\e4-pressure-demo-bdjugl9n\orchestration.db
+
+Schema version: 2
+
+--- Worker Pool ---
+  LOCKED: 6 workers
+    - codex-cli (openai/codex-cli) [routable]
+    - mistral-small-4 (mistral/mistral-small-4) [NOT routable]
+    - google-nano-banana-2 (google/gemini-3.1-flash-image) [routable]
+    - deepseek-v41-flash (deepseek/deepseek-flash) [routable]
+    - glm-53-flash (glm/glm-5.3-flash) [NOT routable]
+    - qwen38-27b (qwen/qwen3.8-27b) [NOT routable]
+  EVALUATE: 1 workers
+    - longcat-2.0 (nous/longcat-2.0) [NOT routable]
+  BENCHMARK: 3 workers
+    - minimax-m3 (minimax/minimax-m3) [NOT routable]
+    - step-37-flash (step/step-3.7-flash) [NOT routable]
+    - tencent-hunyuan-hy3 (tencent/hunyuan-hy3) [NOT routable]
+
+--- Capability Registry ---
+
+--- DAG Nodes ---
+  BLOCKED: 1
+
+--- Node Failure Attribution ---
+  Node: node-pressure-demo  (plan plan-pressure-demo)
+    State: BLOCKED
+    Assigned worker: google-nano-banana-2
+    Failure attribution: provider_content_stop
+    Provider finish reason: IMAGE_RECITATION
+    Verification outcome: FAIL
+    Content-stop retries used: 2 (stops recorded: 3)
+    Terminal transition cause: provider_content_stop_unrecovered:IMAGE_RECITATION
+
+--- E4 Resource Continuity: provider content-side stop pressure ---
+  bounds: rate >= 0.2 AND sample >= 5 recorded dispatch attempts (bounded flag)
+  source: orchestration_store.performance_evidence (attempts observed 3, classified 3, content-side stops 3)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 3 (3 classified, 0 without the content-stop ledger)
+      content-side stops observed: 3
+      stop rate: 1.000 (sample size 3 classified attempts; 3/3 classified recorded dispatch attempts)
+      last observed finishReason: IMAGE_RECITATION
+      last stop recorded at: 2026-09-24 03:29:12
+      content withheld at a measurable rate: no (status: stops_recorded_below_bound)
+  source: recorded_provider_series:e3-google-image-repeat-series (attempts observed 9, classified 9, content-side stops 2)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 9 (9 classified, 0 without the content-stop ledger)
+      content-side stops observed: 2
+      stop rate: 0.222 (sample size 9 classified attempts; 2/9 classified recorded dispatch attempts)
+      last observed finishReason: IMAGE_RECITATION
+      last stop recorded at: 2026-09-24T01:44:32+00:00
+      content withheld at a measurable rate: yes (status: pressured)
+  content_stop_pressure_detected: yes
+  decision: observation only — no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision
+
+===== pressure view (store + recorded series), key fields =====
+source=orchestration_store.performance_evidence attempts_observed=3 classified=3 content_side_stops=3
+  google-nano-banana-2 (google/gemini-3.1-flash-image) attempts=3 classified=3 stops=3 rate=1.000 sample_size=3 last_finish_reason=IMAGE_RECITATION last_stop_at=2026-09-24 03:29:12 flag=False status=stops_recorded_below_bound
+source=recorded_provider_series:e3-google-image-repeat-series attempts_observed=9 classified=9 content_side_stops=2
+  google-nano-banana-2 (google/gemini-3.1-flash-image) attempts=9 classified=9 stops=2 rate=0.222 sample_size=9 last_finish_reason=IMAGE_RECITATION last_stop_at=2026-09-24T01:44:32+00:00 flag=True status=pressured
+content_stop_pressure_detected=True rate_threshold=0.2 minimum_sample=5
+===== recorded rows of a real store, read-only (C:\Users\mukun\AppData\Local\hermes\cache\scratch\live-orchestration-copy.db) =====
+source=orchestration_store.performance_evidence attempts_observed=29 classified=0 content_side_stops=0
+  codex-cli (openai/unknown) attempts=5 classified=0 stops=0 rate=unknown sample_size=0 last_finish_reason=None last_stop_at=None flag=None status=unknown
+  deepseek-v41-flash (deepseek/deepseek-flash) attempts=13 classified=0 stops=0 rate=unknown sample_size=0 last_finish_reason=None last_stop_at=None flag=None status=unknown
+  google-nano-banana-2 (google/gemini-3.1-flash-image) attempts=11 classified=0 stops=0 rate=unknown sample_size=0 last_finish_reason=None last_stop_at=None flag=None status=unknown
+content_stop_pressure_detected=False rate_threshold=0.2 minimum_sample=5
+===== real-store operator lines (read-only) =====
+  bounds: rate >= 0.2 AND sample >= 5 recorded dispatch attempts (bounded flag)
+  source: orchestration_store.performance_evidence (attempts observed 29, classified 0, content-side stops 0)
+    openai/unknown [worker codex-cli]
+      attempts observed: 5 (0 classified, 5 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+    deepseek/deepseek-flash [worker deepseek-v41-flash]
+      attempts observed: 13 (0 classified, 13 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+    google/gemini-3.1-flash-image [worker google-nano-banana-2]
+      attempts observed: 11 (0 classified, 11 without the content-stop ledger)
+      content-side stops observed: 0
+      stop rate: unknown (sample size 0 — no classified attempt recorded; no rate is reported from zero attempts)
+      last observed finishReason: none recorded
+      last stop recorded at: none recorded
+      content withheld at a measurable rate: unknown (status: unknown)
+  content_stop_pressure_detected: no
+  decision: observation only — no automatic worker swap, re-dispatch, failover, retry or safe-mode entry; any failover or re-request stays an explicit E4/owner decision
+note: Stub adapter only: 0 real provider calls, no credential read, no network use. The store is an isolated scratch DB. The recorded provider series artifact is consumed verbatim; it was never re-run.

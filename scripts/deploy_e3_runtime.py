@@ -73,6 +73,10 @@ E3_MODULES = [
     "gemini_adapter.py",
     "deepseek_keyaccess.py",
     "gemini_keyaccess.py",
+    # E4 resource continuity is imported by the deployed e3-status surface (the
+    # provider content-side stop pressure view over recorded evidence), so it is
+    # part of the deployed module set. It is pure stdlib and touches no store.
+    "resource_monitor.py",
 ]
 
 # Never copy anything that looks like a secret, whatever it is named.
