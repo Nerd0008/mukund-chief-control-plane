@@ -957,7 +957,7 @@ labelled synthetic), and any external message or application.
 Task `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`; authority
 `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. Evidence:
 `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/` (34 step records with exact
-commands/exit codes, 12 sub-artifacts, `roster_account.md/.json`), code SHA `31eecdb`.
+commands/exit codes, 13 sub-artifacts, `roster_account.md/.json`), code SHA `31eecdb`.
 
 - New deterministic driver (roster C01): `scripts/whole_company_acceptance.py`. It runs the **existing**
   verified surfaces (nothing re-implemented), records every real exit code, writes `results.json`

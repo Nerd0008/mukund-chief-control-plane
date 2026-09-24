@@ -748,7 +748,7 @@ provider series re-run.
 
 Ran 2026-09-24T03:57:34Z–04:00Z at code SHA `31eecdb`.
 Evidence: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/`
-(`acceptance.md`, `results.json`, `roster_account.json/.md`, 12 sub-artifact directories).
+(`acceptance.md`, `results.json`, `roster_account.json/.md`, 13 sub-artifact directories).
 Provider-call budget: **0 (stated up front)**; external mutations: **0**.
 
 | Item | State | Evidence |

@@ -4,7 +4,7 @@
 **Task:** `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`
 **Authority:** `tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`
 **Acceptance evidence:** `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/`
-(`acceptance.md`, `results.json`, `roster_account.md`, `roster_account.json` + 12 sub-artifacts)
+(`acceptance.md`, `results.json`, `roster_account.md`, `roster_account.json` + 13 sub-artifacts)
 **Acceptance code SHA:** `31eecdbbae4945fcde7ad2831a6f5d8ca4da0507`
 
 ---
