@@ -1,0 +1,36 @@
+{
+  "task_id": "agent-provider-debug-qwen-tencent-entitlement-2026-09-24",
+  "created_at": "2026-09-24T22:05:00Z",
+  "objective": "Debug the post-key provider failures using the already-captured live evidence, correct the Qwen model-selection reconciliation bug, and run the minimum bounded real calls needed to distinguish Hermes configuration faults from provider account/quota/credential blockers. Produce a concise evidence-backed result for each provider without weakening Stage 2 gates.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "status": "pending",
+  "prerequisites": [
+    "No real agent currently owns the shared worktree; the full-operational-build record is an umbrella placeholder only.",
+    "All ten credentials are present locally; never print, log, commit or expose any secret value.",
+    "Use the newest provider verification evidence and current main as the starting point."
+  ],
+  "allowed_scope": [
+    "Qwen: inspect the 2026-09-24 live DashScope international catalogue evidence. Treat the owner's selected model qwen3.7-plus as authoritative intent. Verify that qwen3.7-plus and/or its dated alias are actually present in the captured live catalogue. If present, correct generic_openai_adapter.py and worker_registry.py from qwen3.8-27b to qwen3.7-plus while preserving the existing worker_id qwen38-27b only if required for credential compatibility.",
+    "Qwen: deploy the corrected E3 runtime with scripts/deploy_e3_runtime.py, then perform exactly one bounded real chat smoke call to qwen3.7-plus (max_tokens <= 16, one attempt, no retry). Record HTTP status, provider error code/message, returned model field and usage if any. Never log the credential.",
+    "Qwen: if qwen3.7-plus succeeds, mark only the directly proven routing/identity fields accordingly; qualification remains evidence-driven. If it returns AccessDenied.Unpurchased, record that as a genuine account entitlement blocker for the intended model.",
+    "Mistral: do not spend repeated calls. Inspect the two existing 429 responses and adapter evidence. If one additional diagnostic call can capture non-secret rate-limit headers (Retry-After / x-ratelimit style headers) within the same <=16-token one-attempt budget, do so once; otherwise classify the evidence without another call. Distinguish transient request-rate limiting from account/tier/monthly quota only where headers/provider evidence supports it.",
+    "GLM, LongCat, MiniMax and StepFun: verify the live model catalogue evidence, endpoint correctness and provider-returned billing/quota messages. Do not re-spend calls merely to reproduce deterministic 402/429 balance failures.",
+    "Tencent Hy3: inspect the exact TokenHub endpoint/key-product evidence. Re-probe GET /v1/models at most once using the stored key, with no chat completion call unless authentication succeeds. If 401 code 401002 repeats, classify as TokenHub credential/product/account mismatch and leave owner re-issuance as the next step.",
+    "Google image: use existing 9-call series only. Audit whether IMAGE_RECITATION is a provider content stop rather than transport/auth failure, and whether the current Stage-2 criterion is intentionally conservative. Do not generate additional images in this task.",
+    "Run only the focused tests needed for changed Qwen adapter/registry/deployment behavior plus status consistency if canonical state is updated. Do not run a full paid provider suite.",
+    "Update canonical status/TODO only where the debug establishes a changed fact. Preserve unresolved external blockers truthfully.",
+    "Commit and push the Qwen correction, focused tests and debug evidence."
+  ],
+  "stop_conditions": [
+    "Do not purchase, recharge, enable billing, alter provider plans, or create/reissue API keys; those are owner/provider actions.",
+    "Do not expose credentials or secret-derived values.",
+    "Do not enable Stage 2 in this task.",
+    "Do not repeat deterministic failed provider calls merely to get the same error.",
+    "Do not change the Google readiness criterion just to make Stage 2 pass.",
+    "Do not claim Qwen entitlement failure until the intended qwen3.7-plus model itself has been tested.",
+    "Do not use browser/GUI automation or signed-in browser sessions."
+  ],
+  "notes": "This task exists because the prior closeout claimed qwen3.7-plus was absent while its own committed live catalogue evidence lists qwen3.7-plus and qwen3.7-plus-2026-05-26. The user requested a live debug and results."
+}
