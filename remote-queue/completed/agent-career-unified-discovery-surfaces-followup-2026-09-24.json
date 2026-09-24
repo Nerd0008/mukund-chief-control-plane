@@ -1,0 +1,83 @@
+{
+  "task_id": "agent-career-unified-discovery-surfaces-followup-2026-09-24",
+  "created_at": "2026-09-24T04:54:00Z",
+  "objective": "After the high-recall semantic discovery task completes, extend the same discovery/funnel contract to every remaining job-discovery surface not explicitly owned by that running contract: Recruiter/Intermediary Watch (B11), LinkedIn Job Discovery intake (B19), and any future read-only discovery source. All sources must normalize into one candidate schema and pass through the same semantic triage, deterministic eligibility, dedupe, provenance and funnel-metrics layers before tracker/Chief handoff.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [
+    "agent-career-high-recall-semantic-discovery-2026-09-24 must reach a truthful terminal state.",
+    "Do not edit or race the currently running high-recall discovery task."
+  ],
+  "allowed_scope": [
+    "Reuse the semantic-discovery contract and common candidate schema produced by the prerequisite task; do not fork a second classifier.",
+    "Route Recruiter/Intermediary Watch findings through the same high-recall -> semantic triage -> hard eligibility -> dedupe -> handoff funnel.",
+    "Route LinkedIn read-only/exported job discoveries through the same funnel. Do not add LinkedIn account automation, scraping, browser control, posting, messaging or applications.",
+    "Make source provenance explicit so the same job from regional scan, Company Watch, recruiter watch or LinkedIn collapses to one canonical candidate.",
+    "Expose per-source funnel metrics and rejection reasons so zero results are attributable by source and stage.",
+    "Add regression fixtures proving the same vacancy discovered by multiple sources dedupes to one candidate and that source provenance is preserved.",
+    "Keep canonical trackers unchanged during engineering acceptance and update state/tracker docs truthfully."
+  ],
+  "stop_conditions": [
+    "No external mutations, applications, messages or recruiter contact.",
+    "No browser/GUI automation or LinkedIn account/session access.",
+    "No fabricated jobs or source provenance.",
+    "Do not weaken deterministic owner/eligibility gates."
+  ],
+  "notes": "Owner clarified that the redesign should apply to all job-search agents. The running prerequisite already covers UK/Dubai/Japan/Singapore regional agents and Company Watch. This successor closes the remaining discovery surfaces without modifying the running contract.",
+  "execution_attempts": [
+    {
+      "attempt": 1,
+      "recorded_at": "2026-09-24T05:40:05.889472Z",
+      "status": "blocked",
+      "blocker_category": "execution_error",
+      "summary": "Hermes dispatch exceeded 1200 seconds.",
+      "will_retry": true,
+      "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+    }
+  ],
+  "retry_state": {
+    "attempts_used": 1,
+    "retries_used": 0,
+    "max_attempts": 3,
+    "max_retries": 2,
+    "last_blocker_category": "execution_error",
+    "last_summary": "Hermes dispatch exceeded 1200 seconds.",
+    "next_action": "retry",
+    "reason": "recoverable execution failure (execution_error); attempt 1 of 3 failed, retry 1 of 2 scheduled"
+  },
+  "completed_at": "2026-09-24T05:43:58.255420Z",
+  "result": {
+    "status": "completed",
+    "summary": "Attempt 2 inspected repository and queue state first: attempt 1 had already landed the entire allowed-scope engineering (commit 2856366: SOURCE_REGISTRY/source_contract, collect_from_recruiter_watch B11, collect_from_linkedin B19 reusing the one linkedin_workflow parser, collapse_candidates canonical identity + provenance, funnel.by_source per-source counters/zero attribution, utm_* dedupe narrowing, fixtures, 24 new tests, docs/state/roster) and pushed it, then was killed by the 1200s dispatch wrapper before the queue completion. Nothing was recreated, reverted or duplicated; only the independent verification and the queue transition were outstanding. Fresh verification at HEAD: career-ops/run_discovery_acceptance.py PASS 22/22 (fixtures only), including multi_source_run_counts_every_surface (discovered_raw=6 -> canonical_candidates=4 -> cross_source_duplicates_removed=2), same_vacancy_dedupes_to_one_canonical_candidate_with_provenance (one canonical candidate with sources explicit-records + recruiter/intermediary watch + linkedin export and 3 provenance entries) and every_source_has_its_own_funnel_counters_and_zero_attribution; python -m pytest career-ops/tests company-watch/tests scripts/tests -q -> 461 passed (matches the recorded figure); registered whole-company step career_high_recall_discovery -> PASS with canonical_workbooks_unchanged=true. The four canonical workbooks were re-hashed by this attempt and are byte-identical to the hashes recorded in the earlier evidence (uk 84c53dcb...3f40, dubai 495edb45...45ca, japan a8c4ef90...c89, singapore 25c7b95b...bf1). STOP conditions held: no external mutations, no applications/messages/recruiter contact, no browser/GUI or LinkedIn account/session access, no fabricated jobs or provenance; the collectors are read-only file readers and no deterministic owner/eligibility gate was weakened. Code was not modified by this attempt.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "d65bbd9 acceptance: attempt-2 independent re-verification of the unified discovery surfaces at HEAD (evidence, state, runtime run-health, queue log)",
+      "2856366 discovery: unify every read-only discovery surface in the one funnel (B11 + B19) - attempt 1, preserved unchanged",
+      "3c8082b queue: attempt 1/3 retry record - preserved unchanged"
+    ],
+    "tests": [
+      "python career-ops/run_discovery_acceptance.py -> PASS 22/22 checks; audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/",
+      "python -m pytest career-ops/tests company-watch/tests scripts/tests -q -> 461 passed in 129.05s",
+      "python scripts/whole_company_acceptance.py --only career_high_recall_discovery -> PASS (1 step, 0 fail), canonical_workbooks_unchanged=true; audits/evidence/2026-09-24T05-43-11Z-whole-company-acceptance/",
+      "sha256sum of the four canonical workbooks before and after all runs: unchanged (84c53dcb...3f40 / 495edb45...45ca / a8c4ef90...c89 / 25c7b95b...bf1)",
+      "read-only audit of the collectors: no network/browser/subprocess use in collect_from_recruiter_watch or collect_from_linkedin; linkedin_workflow declares and implements no login/session/API/scrape/browser"
+    ],
+    "changed_files": [
+      "audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/evidence.json",
+      "audits/evidence/20260924T054055Z-career-high-recall-discovery-acceptance/evidence.md",
+      "audits/evidence/2026-09-24T05-43-11Z-whole-company-acceptance/ (results.json, acceptance.md, roster_account.json/md, career-discovery/evidence.json/md)",
+      "state/full_build_tracker.md",
+      "state/current_company_state.md",
+      "runtime/career-ops/run-health/tracker-writer.json",
+      "remote-queue/logs/queue.log"
+    ],
+    "remaining": [
+      "Owner decision, not an engineering gap: no live recruiter/intermediary watch producer exists yet, so B11 intake is exercised against a declared read-only export shape (fixture-verified) and the live LinkedIn surface stays owner-gated and untested against a real account.",
+      "Owner decision: whether to wire the unified funnel into the live scheduled scan instead of on-demand runs (the scheduled regional scan still applies the owner's unchanged portals.yml intern-only title filter).",
+      "Inherited recorded limitation: the Career Ops scan source exposes no JD text or posting URL for offers, so semantic labels from that source stay title/company/location based and are explicitly not JD analysis."
+    ]
+  }
+}
