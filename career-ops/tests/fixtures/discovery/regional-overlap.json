@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "description": "Regional (Career Ops lane) candidate set for the unified-discovery overlap regression. Invented records only; reserved .invalid URLs; not a real vacancy.",
+  "not_a_real_vacancy": true,
+  "records": [
+    {
+      "company": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1",
+      "source": "uk regional scan"
+    },
+    {
+      "company": "Regional Only Ltd (NOT A REAL VACANCY)",
+      "title": "Graduate Cyber Security Analyst",
+      "location": "Leeds, England",
+      "url": "https://regional-only.invalid/jobs/graduate-cyber-security-analyst",
+      "source": "uk regional scan"
+    }
+  ]
+}

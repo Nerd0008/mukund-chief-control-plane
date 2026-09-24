@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Multi-stage high-recall discovery pipeline (control-plane, non-destructive).
 
-    broad collection
+One funnel for every read-only discovery surface:
+
+    broad collection (Career Ops lanes, Company Watch, recruiter/intermediary
+      watch, LinkedIn owner exports, …)
+      -> cross-source canonical collapse (one vacancy -> one candidate, provenance kept)
       -> light deterministic prefilter (two-tier title policy)
       -> DeepSeek bulk semantic triage (structured contract)
       -> bounded Codex second pass (ambiguous / high-value only)
@@ -12,12 +16,18 @@
 
 Subcommands
 -----------
-  policy                         the two-tier title policy + semantic contract
+  policy                         the two-tier title policy, the semantic contract,
+                                 the source registry and the source contract
   selftest                       run the regression fixtures (positive + negative)
-  run        --region R [--records F | --scan-record F | --company-watch F]
+  run        --region R [--records F | --scan-record F | --company-watch F |
+                         --recruiter-watch F | --linkedin F]
                                  one bounded funnel run; writes only run evidence
   compare-modes --region R ...   old strict intern-only policy vs the new
                                  high-recall pipeline over the SAME candidate set
+
+Adding a read-only discovery surface means adding one collector to
+``SOURCE_REGISTRY`` that returns the same collection-block shape — never a second
+classifier, eligibility rule set or dedupe engine.
 
 Safety
 ------
@@ -25,7 +35,8 @@ Safety
   a manifest. Applying stays the explicit ``career_ops_cli.py write --apply``.
 * Codex escalation is capped by ``--codex-budget`` (default 8) and only fires on
   the deterministic conditions in ``classifiers.escalation_reason``.
-* Nothing here submits an application, contacts an employer or opens a browser.
+* Nothing here submits an application, contacts an employer, an agency or an
+  intermediary, opens a browser, uses an account/session or scrapes a site.
 """
 
 from __future__ import annotations
@@ -81,6 +92,19 @@ DEFAULT_RUNTIME_DIR = CONTROL_PLANE / "runtime" / "career-ops" / "discovery"
 SOURCE_EXPLICIT = "explicit records file"
 SOURCE_SCAN_RECORD = "regional run-health scan record"
 SOURCE_COMPANY_WATCH = "company-watch findings"
+SOURCE_RECRUITER_WATCH = "recruiter/intermediary watch findings"
+SOURCE_LINKEDIN_EXPORT = "linkedin job-discovery export"
+
+#: Every read-only discovery surface routes through the SAME funnel. Adding a
+#: source means adding one collector here — never a second classifier, a second
+#: eligibility rule set or a second dedupe engine.
+SOURCE_REGISTRY = {
+    SOURCE_EXPLICIT: "collect_from_records",
+    SOURCE_SCAN_RECORD: "collect_from_scan_record",
+    SOURCE_COMPANY_WATCH: "collect_from_company_watch",
+    SOURCE_RECRUITER_WATCH: "collect_from_recruiter_watch",
+    SOURCE_LINKEDIN_EXPORT: "collect_from_linkedin",
+}
 
 
 def now_utc() -> str:
@@ -108,13 +132,14 @@ def write_json_atomic(path: Path, obj) -> None:
 
 CANDIDATE_FIELDS = ("company", "title", "location", "url", "description", "summary",
                     "posted_date", "salary", "experience_required", "employment_type",
-                    "vendor")
+                    "vendor", "intermediary", "source_detail")
 
 
 def normalise_candidate(raw: dict, source: str) -> dict:
     rec = {k: raw.get(k) for k in CANDIDATE_FIELDS if raw.get(k) not in (None, "")}
     rec["source"] = raw.get("source") or source
     rec["_collection_source"] = source
+    rec["_declared_source"] = raw.get("source") or None
     rec["needs_url_resolution"] = not bool(tw.extract_url(rec.get("url")))
     return rec
 
@@ -206,6 +231,285 @@ def collect_from_company_watch(path: Path, region: str) -> dict:
 CONTENT_FIELD_ORDER = ("description", "summary")
 
 
+def collect_from_recruiter_watch(path: Path, region: str) -> dict:
+    """Recruiter / intermediary watch findings (roster B11) as candidates.
+
+    The watch is a read-only discovery surface: it records what an agency or
+    intermediary advertised, and — when the employer is named — the employer.
+    Nothing here contacts an agency, an intermediary or an employer.
+
+    The accepted export shape is declared, not guessed::
+
+        {"generated_at": ..., "region": ..., "findings": [
+           {"intermediary": ..., "employer": ..., "company": ...,
+            "title": ..., "location": ..., "url": ...,
+            "decision": "new"|"duplicate"|"rejected",
+            "decision_reason": ..., "region_route": ...,
+            "attribution_confidence": ...}, ...]}
+
+    Findings the watch itself excluded (routed to another region, or already
+    known) are counted with their own watch reason, so they cannot silently
+    become "0 jobs".
+    """
+    doc = read_json(path)
+    findings = doc.get("findings") or doc.get("records") or []
+    candidates, excluded = [], Counter()
+    for f in findings:
+        if not isinstance(f, dict):
+            excluded["malformed_finding"] += 1
+            continue
+        reason = f.get("decision") or "unknown"
+        if f.get("region_route") not in (None, region):
+            excluded[f"routed_other_region:{f.get('region_route')}"] += 1
+            continue
+        if reason != "new":
+            excluded[f"recruiter_watch_decision:{reason}"] += 1
+            continue
+        rec = normalise_candidate(f, SOURCE_RECRUITER_WATCH)
+        rec["intermediary"] = f.get("intermediary") or f.get("agency")
+        rec["company"] = f.get("company") or f.get("employer")
+        rec["recruiter_watch"] = {
+            "intermediary": f.get("intermediary") or f.get("agency"),
+            "employer_named": bool(f.get("employer") or f.get("company")),
+            "decision": reason,
+            "decision_reason": f.get("decision_reason"),
+            "attribution_confidence": f.get("attribution_confidence"),
+            "region_route": f.get("region_route"),
+        }
+        candidates.append(rec)
+    return {
+        "available": True,
+        "path": str(path),
+        "candidates": candidates,
+        "coverage": {
+            "kind": "recruiter/intermediary watch findings",
+            "findings_total": len(findings),
+            "findings_entering_this_funnel": len(candidates),
+            "findings_excluded_before_the_funnel": dict(sorted(excluded.items())),
+            "generated_at": doc.get("generated_at"),
+            "region": doc.get("region"),
+            "note": ("read-only intermediary surface: an employer named by the intermediary is "
+                     "the candidate's company, and an unnamed employer stays unnamed. No agency "
+                     "or employer is contacted and no account is used."),
+            "match_basis": ("company + title + location + posting URL; the same posting seen "
+                            "through an agency collapses to the same canonical candidate as the "
+                            "employer's own posting"),
+        },
+    }
+
+
+def collect_from_linkedin(path: Path, region: str) -> dict:
+    """LinkedIn read-only / owner-exported job discoveries (roster B19).
+
+    Only an owner-exported local file is read; the existing read-only LinkedIn
+    intake parser does the parsing, so there is exactly one LinkedIn export
+    parser. There is no login, no API session, no scraping, no browser control,
+    no posting, no messaging and no application anywhere in this path.
+
+    Company-only signals and lines without a URL are reported as coverage, not
+    guessed into postings.
+    """
+    signals, unsupported = [], []
+    try:
+        import linkedin_workflow as lw  # noqa: PLC0415 - existing read-only intake
+        cfg = lw.load_config()
+        parsed = lw.parse_inbox_file(Path(path), cfg)
+        unsupported = list(parsed.get("unclassified") or [])
+        # the existing read-only classifier labels each signal (job_signal /
+        # company_signal / unclassified); this does no network access
+        classified = [lw.classify(s) for s in (parsed.get("signals") or [])]
+        signals = [s for s in classified if s.get("signal_kind") == "job_signal"]
+        company_signals = [s for s in classified
+                           if s.get("signal_kind") == "company_signal"]
+        other_signals = [s for s in classified
+                         if s.get("signal_kind") not in ("job_signal", "company_signal")]
+        file_sha = parsed.get("sha256")
+        skipped = parsed.get("skipped")
+    except Exception as exc:  # noqa: BLE001 - reported as a limitation, never fatal
+        return {
+            "available": False,
+            "path": str(path),
+            "candidates": [],
+            "coverage": {"kind": "linkedin job-discovery export",
+                         "limitation": f"linkedin export could not be read: {type(exc).__name__}: {exc}",
+                         "note": ("the LinkedIn surface is read-only; a file that cannot be "
+                                  "parsed contributes zero candidates and is recorded as such "
+                                  "rather than being guessed")},
+        }
+
+    candidates = []
+    for sig in signals:
+        # A missing company/title stays missing: the parser already refused to guess.
+        rec = normalise_candidate(sig, SOURCE_LINKEDIN_EXPORT)
+        rec["source_detail"] = sig.get("source_detail") or sig.get("source")
+        if rec.get("posted_at") and not rec.get("posted_date"):
+            rec["posted_date"] = rec.pop("posted_at")
+        candidates.append(rec)
+
+    return {
+        "available": True,
+        "path": str(path),
+        "candidates": candidates,
+        "coverage": {
+            "kind": "linkedin job-discovery export (owner-exported local file)",
+            "file_sha256": file_sha,
+            "skipped": skipped,
+            "job_signals_entering_this_funnel": len(candidates),
+            "company_signals_not_job_candidates": len(company_signals),
+            "unclassified_signals_not_job_candidates": len(other_signals),
+            "lines_without_a_url": len(unsupported),
+            "unclassified": unsupported[:20],
+            "note": ("read-only owner export only: no login, API, scraping, browser, posting, "
+                     "messaging, connection request or application. Company-only signals stay "
+                     "company signals and never become vacancy candidates."),
+            "match_basis": ("posting URL (tracking parameters removed) where present, else "
+                            "company + title; the same posting re-shared with a utm parameter "
+                            "collapses to one canonical candidate"),
+        },
+    }
+
+
+# --------------------------------------------------------------------------- #
+# cross-source canonical collapse (one vacancy -> one candidate)
+# --------------------------------------------------------------------------- #
+
+def canonical_key(rec: dict) -> tuple:
+    """Stable cross-source identity for a vacancy.
+
+    Prefers the normalised posting URL (the same code the tracker dedupe uses,
+    so tracking parameters cannot split a posting). Falls back to
+    company + title when no URL was supplied — and then only when both are
+    present, so two URL-less records are never merged on an empty key.
+    """
+    url = tw.normalize_url(rec.get("url"))
+    if url:
+        return ("url", url)
+    company = tw.key_text(rec.get("company"))
+    title = tw.key_text(rec.get("title"))
+    if company and title:
+        return ("pair", company, title)
+    return ("unkeyed", candidate_id(rec))
+
+
+def _field_count(rec: dict) -> int:
+    return sum(1 for k in CANDIDATE_FIELDS if rec.get(k) not in (None, ""))
+
+
+def collapse_candidates(candidates: list) -> dict:
+    """Collapse the same vacancy discovered by several sources into one candidate.
+
+    The canonical candidate is the richest record (most populated fields,
+    earliest discovery as the tie-break); missing fields are filled from the
+    other copies; and every discovery is preserved in ``provenance`` with its
+    own collection surface, declared source, file and index. Nothing is
+    overwritten and no field is invented.
+    """
+    groups: dict[tuple, list] = {}
+    order: list = []
+    for idx, rec in enumerate(candidates):
+        key = canonical_key(rec)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append((idx, rec))
+
+    canonical, collapsed = [], []
+    for key in order:
+        members = groups[key]
+        members_sorted = sorted(members, key=lambda t: (-_field_count(t[1]), t[0]))
+        base_idx, base = members_sorted[0]
+        out = {k: v for k, v in base.items()}
+        out.pop("_collection_source", None)
+        for _idx, other in members_sorted[1:]:
+            for field in CANDIDATE_FIELDS:
+                if out.get(field) in (None, "") and other.get(field) not in (None, ""):
+                    out[field] = other[field]
+
+        sources, provenance = [], []
+        for idx, rec in sorted(members, key=lambda t: t[0]):
+            collection_source = rec.get("_collection_source") or SOURCE_EXPLICIT
+            if collection_source not in sources:
+                sources.append(collection_source)
+            entry = {
+                "collection_source": collection_source,
+                "declared_source": rec.get("_declared_source"),
+                "source_detail": rec.get("source_detail"),
+                "candidate_id": candidate_id(rec),
+                "raw_index": idx,
+            }
+            if entry not in provenance:
+                provenance.append(entry)
+        out["sources"] = sources
+        out["provenance"] = provenance
+        out["duplicate_discoveries"] = len(members) - 1
+        out["source"] = sources[0]
+        out["canonical_key"] = list(key)
+        out["candidate_id"] = candidate_id(out)
+        canonical.append(out)
+        if len(members) > 1:
+            collapsed.append({"canonical_key": list(key), "candidate_id": out["candidate_id"],
+                              "company": out.get("company"), "title": out.get("title"),
+                              "url": tw.extract_url(out.get("url")),
+                              "discoveries": len(members), "sources": sources,
+                              "duplicate_discoveries": len(members) - 1})
+
+    shared_by_source: dict = {}
+    for entry in collapsed:
+        for source in entry["sources"]:
+            bucket = shared_by_source.setdefault(source, {"candidate_ids": [], "shared_with": {}})
+            bucket["candidate_ids"].append(entry["candidate_id"])
+            for other in entry["sources"]:
+                if other == source:
+                    continue
+                bucket["shared_with"][other] = bucket["shared_with"].get(other, 0) + 1
+
+    return {
+        "engine": "discovery.pipeline.collapse_candidates (URL-normalised, then company+title)",
+        "counts": {
+            "raw_discoveries": len(candidates),
+            "canonical_candidates": len(canonical),
+            "cross_source_duplicates_removed": len(candidates) - len(canonical),
+            "multi_source_canonical_candidates": len(collapsed),
+        },
+        "collapsed": collapsed,
+        "by_source": {k: {"candidate_ids": v["candidate_ids"],
+                          "shared_with": dict(sorted(v["shared_with"].items()))}
+                      for k, v in sorted(shared_by_source.items())},
+        "candidates": canonical,
+        "note": ("one vacancy is one canonical candidate whatever combination of regional scan, "
+                 "Company Watch, recruiter/intermediary watch and LinkedIn export discovered it; "
+                 "every discovery is preserved in the candidate's provenance. De-duplication "
+                 "here is in-run identity only and does not replace the shared tracker dedupe."),
+    }
+
+
+def source_contract_document() -> dict:
+    """The declared contract every read-only discovery surface must satisfy."""
+    return {
+        "contract_version": SCHEMA_VERSION,
+        "sources": dict(SOURCE_REGISTRY),
+        "candidate_fields": list(CANDIDATE_FIELDS),
+        "canonical_identity": [
+            "normalised posting URL where one is present (tracking parameters removed by "
+            "tracker_writer.normalize_url, the same code the tracker dedupe uses)",
+            "company + title when no URL is present; a record with neither is never merged",
+        ],
+        "provenance": ("every discovery keeps its collection surface, declared source, source "
+                       "detail and raw index; merging fills a missing field and never invents "
+                       "or overwrites one"),
+        "rules": [
+            "every read-only discovery surface normalises into the one candidate schema and "
+            "runs the same prefilter, semantic triage, deterministic eligibility gates and "
+            "shared dedupe — no source gets its own classifier or its own eligibility rules",
+            "read-only only: no login, no account/session access, no scraping, no browser or GUI "
+            "automation, no posting, no messaging, no connection request, no application",
+            "the same vacancy seen through several surfaces collapses to one canonical candidate, "
+            "and the collapse count is reported separately from any market fact",
+            "every source carries its own funnel counters, rejection reasons and first zero",
+        ],
+    }
+
+
 def jd_gap_report(candidates: list) -> dict:
     with_jd = [c for c in candidates if jd_available(c)]
     return {
@@ -226,17 +530,21 @@ def jd_gap_report(candidates: list) -> dict:
 def prefilter(candidates: list, *, mode: str, funnel: Funnel) -> dict:
     kept, decisions = [], []
     for rec in candidates:
+        sources = rec.get("sources") or [rec.get("_collection_source") or SOURCE_EXPLICIT]
         decision = title_decision(str(rec.get("title") or ""), mode)
         entry = {"candidate_id": candidate_id(rec), "company": rec.get("company"),
                  "title": rec.get("title"), "location": rec.get("location"),
                  "mode": mode, "decision": decision["decision"], "tier": decision.get("tier"),
-                 "reason": decision["reason"], "signals": decision.get("signals")}
+                 "reason": decision["reason"], "signals": decision.get("signals"),
+                 "sources": sources}
         decisions.append(entry)
         if decision["decision"] == "pass":
             kept.append(rec)
+            funnel.source_stages(sources, "after_hard_negative_prefilter")
         else:
-            funnel.reject(("tier_b_hard_negative: " if decision.get("tier") == "B"
-                           else "tier_a_no_recall_signal: ") + decision["reason"])
+            reason = (("tier_b_hard_negative: " if decision.get("tier") == "B"
+                       else "tier_a_no_recall_signal: ") + decision["reason"])
+            funnel.reject(reason, sources=sources)
     funnel.set("after_hard_negative_prefilter", len(kept))
     return {"mode": mode, "counts": {"input": len(candidates), "kept": len(kept),
                                      "removed": len(candidates) - len(kept)},
@@ -367,6 +675,27 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     for note in _coverage_notes(collection or []):
         funnel.note(note)
 
+    # 0. cross-source canonical collapse ----------------------------------- #
+    # The same vacancy discovered by several read-only surfaces is ONE candidate
+    # before anything else runs. Raw discovery counts stay raw (each source's own
+    # count), and the collapse is reported separately so a de-duplication is never
+    # presented as a market fact.
+    collapse = collapse_candidates(candidates)
+    canonical = collapse["candidates"]
+    funnel.set("canonical_candidates", collapse["counts"]["canonical_candidates"])
+    funnel.set("cross_source_duplicates_removed",
+               collapse["counts"]["cross_source_duplicates_removed"])
+    funnel.shared_candidates = {k: v for k, v in collapse.items()
+                               if k in ("counts", "collapsed", "by_source")}
+    if collapse["counts"]["cross_source_duplicates_removed"]:
+        funnel.note(f"cross-source collapse: {collapse['counts']['raw_discoveries']} raw "
+                    f"discoveries -> {collapse['counts']['canonical_candidates']} canonical "
+                    f"candidates ({collapse['counts']['cross_source_duplicates_removed']} "
+                    f"duplicate discoveries of an already-canonical vacancy)")
+    candidates = canonical
+    for rec in candidates:
+        funnel.source_stages(rec.get("sources"), "canonical")
+
     # 1. prefilter --------------------------------------------------------- #
     pre = prefilter(candidates, mode=mode, funnel=funnel)
     kept = [c for c, d in zip(candidates, pre["decisions"]) if d["decision"] == "pass"]
@@ -377,6 +706,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                                    max_tokens=max_tokens, deepseek_adapter=deepseek_adapter)
     classifications = semantic_doc.get("classifications") or {}
     funnel.set("semantically_reviewed", len(classifications))
+    for rec in kept:
+        funnel.source_stages(rec.get("sources"), "semantically_reviewed")
     for cls in classifications.values():
         if not cls.get("valid"):
             funnel.reject("semantic_contract_guard_rejected: "
@@ -391,6 +722,10 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         funnel.skip("deepseek_accept",
                     "semantic stage disabled by the caller (--semantic off)")
         funnel.set("deepseek_accept", 0)
+        funnel.source_skip("semantically_reviewed",
+                           "semantic stage disabled by the caller (--semantic off)")
+        funnel.source_skip("semantic_accept",
+                           "semantic stage disabled by the caller (--semantic off)")
     else:
         accepted = [c for c in kept if classifications.get(candidate_id(c), {}).get("accepted")]
         if semantic_doc.get("provider") == "deepseek":
@@ -427,6 +762,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                     "no candidate met the deterministic escalation conditions, so no Codex "
                     "call was made (see codex.limitation)")
         funnel.skip("codex_accept", "no Codex second pass was run in this run")
+    for rec in accepted:
+        funnel.source_stages(rec.get("sources"), "semantic_accept")
 
     # 4. deterministic gates ------------------------------------------------ #
     scope = rjs.lane_scope(region, schedules["regions"][region])
@@ -435,7 +772,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
             cls = classifications.get(candidate_id(rec)) or {}
             if not cls.get("accepted"):
                 funnel.reject(f"semantic_label: {cls.get('primary_label') or 'unclassified'}"
-                              f" ({cls.get('classifier') or 'no classifier'})")
+                              f" ({cls.get('classifier') or 'no classifier'})",
+                              sources=rec.get("sources"))
     if not accepted:
         funnel.explain(
             "deterministic_eligibility_pass",
@@ -445,15 +783,18 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     gated = []
     for rec in accepted:
         verdict = deterministic_gates(region, rec, policy, scope)
+        sources = rec.get("sources")
         entry = {"candidate_id": candidate_id(rec), "company": rec.get("company"),
                  "title": rec.get("title"), "location": rec.get("location"),
-                 "url": rec.get("url"), "semantic_label":
+                 "url": rec.get("url"), "sources": sources, "semantic_label":
                      classifications.get(candidate_id(rec), {}).get("primary_label"),
                  **verdict}
         gated.append(entry)
         if verdict["decision"] != "accepted":
             for reason in verdict["reasons"]:
-                funnel.reject("deterministic_gate: " + reason)
+                funnel.reject("deterministic_gate: " + reason, sources=sources)
+        else:
+            funnel.source_stages(sources, "deterministic_eligibility_pass")
     passed = [g for g in gated if g["decision"] == "accepted"]
     funnel.set("deterministic_eligibility_pass", len(passed))
 
@@ -473,9 +814,26 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     funnel.set("duplicates_removed", int(duplicates or 0))
     new_rows = [o for o in probe.get("outcomes", []) if o.get("decision") == "appended"]
     funnel.set("tracker_candidates", len(new_rows))
+    outcome_sources = {e["candidate_id"]: e.get("sources") for e in passed}
+    src_by_url = {tw.normalize_url(e.get("url")): e.get("sources") for e in passed
+                  if tw.normalize_url(e.get("url"))}
+    src_by_pair = {tw.pair_key(e.get("company"), e.get("title")): e.get("sources")
+                   for e in passed if str(tw.pair_key(e.get("company"), e.get("title"))).strip("|")}
+
+    def _outcome_sources(outcome: dict):
+        url_key = tw.normalize_url(outcome.get("url"))
+        if url_key and url_key in src_by_url:
+            return src_by_url[url_key]
+        return src_by_pair.get(tw.pair_key(outcome.get("company"), outcome.get("title"))) \
+            or outcome_sources.get(outcome.get("candidate_id"))
+
     for outcome in probe.get("outcomes", []):
+        sources_for_outcome = _outcome_sources(outcome)
         if outcome.get("decision") != "appended":
-            funnel.reject("dedupe: " + str(outcome.get("reason") or outcome.get("decision")))
+            funnel.reject("dedupe: " + str(outcome.get("reason") or outcome.get("decision")),
+                          sources=sources_for_outcome)
+        else:
+            funnel.source_stages(sources_for_outcome, "tracker_candidates")
 
     return {
         "run_id": run_id,
@@ -484,6 +842,20 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "semantic": {k: v for k, v in semantic_doc.items() if k != "classifications"},
         "codex": {k: v for k, v in codex_doc.items() if k != "classifications"},
         "prefilter": {"counts": pre["counts"], "mode": pre["mode"]},
+        "cross_source_dedupe": {
+            "engine": collapse["engine"],
+            "counts": collapse["counts"],
+            "collapsed": collapse["collapsed"],
+            "by_source": collapse["by_source"],
+            "note": collapse["note"],
+        },
+        "canonical_candidates": [
+            {k: c.get(k) for k in ("candidate_id", "company", "title", "location", "url",
+                                   "source", "sources", "duplicate_discoveries",
+                                   "canonical_key", "provenance")}
+            for c in candidates
+        ],
+        "source_registry": dict(SOURCE_REGISTRY),
         "classifications": [classifications[candidate_id(c)] for c in kept
                             if candidate_id(c) in classifications],
         "eligibility": {"input": len(accepted), "decisions": gated,
@@ -644,6 +1016,8 @@ def cmd_policy(args) -> int:
           "semantic_contract": contract_document(),
           "codex_budget_default": DEFAULT_CODEX_BUDGET,
           "deepseek_batch_size_default": DEFAULT_BATCH_SIZE,
+          "source_registry": dict(SOURCE_REGISTRY),
+          "source_contract": source_contract_document(),
           "deepseek_probe": deepseek_probe(args.model)})
     return 0
 
@@ -657,23 +1031,45 @@ def cmd_selftest(args) -> int:
 MAX_CLASSIFICATIONS_IN_RUN = 200
 
 
-def cmd_run(args) -> int:
-    run_id = f"discovery-{args.region}-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
-    collection, candidates = [], []
-    if args.records:
-        block = collect_from_records(Path(args.records)); block["source"] = SOURCE_EXPLICIT
-        collection.append(block); candidates.extend(block["candidates"])
-    if args.scan_record:
+def collect_sources(args) -> list:
+    """Build the ordered collection blocks for one run from the CLI sources.
+
+    Every read-only discovery surface is collected through the same normaliser
+    and the same declared collection-block shape, so the rest of the funnel does
+    not need to know which surface produced a candidate.
+    """
+    collection: list = []
+    if getattr(args, "records", None):
+        block = collect_from_records(Path(args.records))
+        block["source"] = SOURCE_EXPLICIT
+        collection.append(block)
+    if getattr(args, "scan_record", None):
         block = collect_from_scan_record(Path(args.scan_record))
         block["source"] = SOURCE_SCAN_RECORD
-        collection.append(block); candidates.extend(block["candidates"])
-    if args.company_watch:
+        collection.append(block)
+    if getattr(args, "company_watch", None):
         block = collect_from_company_watch(Path(args.company_watch), args.region)
         block["source"] = SOURCE_COMPANY_WATCH
-        collection.append(block); candidates.extend(block["candidates"])
+        collection.append(block)
+    if getattr(args, "recruiter_watch", None):
+        block = collect_from_recruiter_watch(Path(args.recruiter_watch), args.region)
+        block["source"] = SOURCE_RECRUITER_WATCH
+        collection.append(block)
+    if getattr(args, "linkedin", None):
+        block = collect_from_linkedin(Path(args.linkedin), args.region)
+        block["source"] = SOURCE_LINKEDIN_EXPORT
+        collection.append(block)
+    return collection
+
+
+def cmd_run(args) -> int:
+    run_id = f"discovery-{args.region}-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    collection = collect_sources(args)
+    candidates = [c for b in collection for c in b["candidates"]]
     if not collection:
         emit({"ok": False, "reason": "no candidate source supplied; pass --records, "
-                                     "--scan-record or --company-watch",
+                                     "--scan-record, --company-watch, --recruiter-watch or "
+                                     "--linkedin",
               "run_id": run_id, "region": args.region})
         return 2
 
@@ -734,6 +1130,8 @@ def cmd_run(args) -> int:
 def _summary_line(doc: dict) -> str:
     c = doc["funnel"]["counts"]
     head = (f"discovered_raw={c['discovered_raw']} "
+            f"canonical_candidates={c['canonical_candidates']} "
+            f"cross_source_duplicates_removed={c['cross_source_duplicates_removed']} "
             f"after_hard_negative_prefilter={c['after_hard_negative_prefilter']} "
             f"semantically_reviewed={c['semantically_reviewed']} "
             f"deepseek_accept={c['deepseek_accept']} "
@@ -741,20 +1139,19 @@ def _summary_line(doc: dict) -> str:
             f"deterministic_eligibility_pass={c['deterministic_eligibility_pass']} "
             f"duplicates_removed={c['duplicates_removed']} "
             f"tracker_candidates={c['tracker_candidates']}")
+    zeros = [f"{src}:{entry['zero_attribution']['first_zero_stage']}"
+             for src, entry in sorted((doc["funnel"].get("by_source") or {}).items())
+             if entry["zero_attribution"].get("first_zero_stage")]
+    per_source = (" :: per-source zeroes " + ", ".join(zeros)) if zeros else ""
     z = doc["funnel"]["zero_attribution"]
     if z.get("first_zero_stage"):
-        return f"{head} :: funnel first reached zero at {z['first_zero_stage']} ({z['reason']})"
-    return head
+        return (f"{head}{per_source} :: funnel first reached zero at "
+                f"{z['first_zero_stage']} ({z['reason']})")
+    return head + per_source
 
 
 def cmd_compare(args) -> int:
-    candidates = []
-    if args.records:
-        candidates.extend(collect_from_records(Path(args.records))["candidates"])
-    if args.scan_record:
-        candidates.extend(collect_from_scan_record(Path(args.scan_record))["candidates"])
-    if args.company_watch:
-        candidates.extend(collect_from_company_watch(Path(args.company_watch), args.region)["candidates"])
+    candidates = [c for b in collect_sources(args) for c in b["candidates"]]
     if not candidates:
         emit({"ok": False, "reason": "no candidate source supplied"})
         return 2
@@ -786,6 +1183,10 @@ def main(argv=None) -> int:
     p.add_argument("--records")
     p.add_argument("--scan-record")
     p.add_argument("--company-watch")
+    p.add_argument("--recruiter-watch",
+                   help="read-only recruiter/intermediary watch findings export (B11)")
+    p.add_argument("--linkedin",
+                   help="read-only owner-exported LinkedIn job-discovery file (B19)")
     p.add_argument("--title-mode", choices=list(MODES), default=DEFAULT_MODE)
     p.add_argument("--semantic", choices=("auto", "deepseek", "deterministic", "off"),
                    default=DEFAULT_SEMANTIC)
@@ -808,6 +1209,8 @@ def main(argv=None) -> int:
     p.add_argument("--records")
     p.add_argument("--scan-record")
     p.add_argument("--company-watch")
+    p.add_argument("--recruiter-watch")
+    p.add_argument("--linkedin")
     p.add_argument("--semantic", choices=("off", "auto", "deepseek"), default="off")
     p.add_argument("--model", default="deepseek-flash")
     p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)

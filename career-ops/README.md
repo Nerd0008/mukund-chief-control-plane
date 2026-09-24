@@ -883,13 +883,52 @@ findings excluded beforehand are counted with their own Company Watch reason
 (`duplicate-in-run`, `routed_other_region:<r>`), so 19 findings cannot silently
 become "0 jobs".
 
+**Every remaining read-only discovery surface is in the same funnel too (2026-09-24).**
+`SOURCE_REGISTRY` names the surfaces — explicit records, regional scan record, Company
+Watch, **recruiter/intermediary watch** (B11) and **LinkedIn owner export** (B19) — and
+each one is added as a *collector* that returns the same collection-block shape. No
+surface gets a second classifier, a second eligibility rule set or a second dedupe
+engine.
+
+* `collect_from_recruiter_watch()` reads a **declared** read-only findings export
+  (intermediary/agency, employer, title, location, URL, `decision`, `region_route`,
+  attribution confidence). Findings the watch itself excluded keep their own reason
+  (`recruiter_watch_decision:<d>`, `routed_other_region:<r>`). No agency or employer is
+  ever contacted, and **no live recruiter-watch feed was scanned** — the collector reads
+  a declared export shape and records that boundary.
+* `collect_from_linkedin()` reads an **owner-exported** `.json/.jsonl/.csv/.md/.txt` file
+  through the *existing* `linkedin_workflow.parse_inbox_file` + `classify` path, so there
+  is exactly one LinkedIn parser. Only `job_signal`s become candidates; company-only
+  signals and URL-less lines are counted in coverage and never guessed into postings.
+  There is no login, API, session, scrape, browser, post, message, connection request or
+  application anywhere in this path.
+
+**One vacancy → one canonical candidate.** `collapse_candidates()` runs first: canonical
+identity is the normalised posting URL (`tracker_writer.normalize_url` — the same code the
+tracker dedupe uses, which now also drops any `utm_*` parameter) or, when no URL exists,
+company + title. The richest copy wins, missing fields are filled from the other copies,
+nothing is invented, and every discovery is preserved in the candidate's `provenance`
+(collection surface, declared source, source detail, raw index) beside `sources` and
+`duplicate_discoveries`. The collapse is reported as `cross_source_dedupe` and is in-run
+identity only — it never replaces the shared tracker dedupe, and it is never presented as a
+market fact.
+
+**Per-source funnel metrics.** `funnel.by_source[source]` carries that surface's own stage
+counts, its own `rejections_by_reason`, its own `not_applicable_stages` and its own
+`zero_attribution` naming the first empty stage and cause, so a source that produced zero
+tracker candidates says where *it* went to zero. A canonical candidate discovered by
+several surfaces is counted once in each of them and the overlap is recorded explicitly in
+`funnel.shared_candidates`.
+
 ### Commands
 
-    python career-ops/discovery/pipeline.py policy               # both modes + the contract
+    python career-ops/discovery/pipeline.py policy               # modes + contract + source registry
     python career-ops/discovery/pipeline.py selftest             # title regression fixtures
     python career-ops/discovery/pipeline.py run --region uk \\
         --scan-record runtime/career-ops/scan-runs/regional-run-uk-*.json \\
         --company-watch runtime/company-watch/findings-uk-latest.json \\
+        --recruiter-watch <recruiter-watch-findings-export.json> \\
+        --linkedin <owner-exported-linkedin-jobs.json> \\
         --semantic deepseek --codex-budget 4 --max-candidates 60
 
     python career-ops/discovery/pipeline.py compare-modes --region uk \\
@@ -921,20 +960,24 @@ halves, recording an empty response as a provider failure rather than a zero.
 
 ### Acceptance runner
 
-    python career-ops/run_discovery_acceptance.py     # 14/14 checks, fixtures only
+    python career-ops/run_discovery_acceptance.py     # 22/22 checks, fixtures only
 
 It proves the recall fixtures, the preserved narrow mode, the contract guard, the
 escalation budget cap, the full counter set with per-rejection reasons, the
-`compare-modes` delta and that the four canonical workbooks are byte-identical
-before and after. No live source and no provider call.
+`compare-modes` delta, the unified read-only surfaces (B11 + B19 normalising into the
+same schema and funnel), the cross-source collapse of one vacancy to one canonical
+candidate with its provenance preserved, the per-source counters and zero attribution,
+and that the four canonical workbooks are byte-identical before and after. No live
+source and no provider call.
 
 ### Tests
 
+    python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed
     python -m pytest career-ops/tests/test_discovery_pipeline.py -q  # 36 passed
 
 ## Tests
 
-    python -m pytest career-ops/tests/ -q                      # 374 passed (2026-09-24)
+    python -m pytest career-ops/tests/ -q                      # 399 passed (2026-09-24)
     python -m pytest career-ops/tests/test_cv_workflow.py -q    # 21 passed
     python -m pytest career-ops/tests/test_daily_brief.py -q    # 28 passed (B23 + discovery funnel section)
     python -m pytest career-ops/tests/test_interview_prep.py -q    # 26 passed
@@ -942,6 +985,7 @@ before and after. No live source and no provider call.
     python -m pytest career-ops/tests/test_linkedin_workflow.py -q  # 38 passed
     python -m pytest career-ops/tests/test_regional_job_search.py -q  # 32 passed
     python -m pytest career-ops/tests/test_tracker_rollover.py -q  # 32 passed (B09)
+    python -m pytest career-ops/tests/test_unified_discovery_sources.py -q  # 24 passed (B11 + B19 funnel)
 
 Offline and non-destructive: the canonical CV assets and the canonical workbooks
 are only ever read, and every write in a test goes to `tmp_path`.

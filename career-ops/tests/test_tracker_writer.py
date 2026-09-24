@@ -158,6 +158,16 @@ def test_url_normalization_handles_tracking_params_and_hyperlinks():
     assert c == b
 
 
+def test_url_normalization_drops_any_utm_prefixed_parameter():
+    """A re-share that adds an arbitrary utm_* marker is the same posting."""
+    canonical = tw.normalize_url("https://jobs.lever.co/acme/abc123")
+    assert tw.normalize_url(
+        "https://jobs.lever.co/acme/abc123?utm_campaign=alert&utm_content=7788"
+    ) == canonical
+    # a non-tracking query parameter still distinguishes two postings
+    assert tw.normalize_url("https://jobs.lever.co/acme/abc123?team=soc") != canonical
+
+
 def test_cross_month_duplicate_detected_from_archive(workspace, tmp_path):
     """A URL recorded only in a previous month's workbook is not re-added."""
     cfg = dict(tw.region_config(PROFILES, "japan"))

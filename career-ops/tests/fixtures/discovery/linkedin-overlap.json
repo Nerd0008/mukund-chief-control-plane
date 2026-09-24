@@ -1,0 +1,32 @@
+{
+  "_fixture": "LinkedIn saved-job export fixture for the unified-discovery overlap regression. Invented companies only; reserved .invalid URL hosts; no real posting and no real account data. Read-only: nothing here is fetched, opened or logged into.",
+  "not_a_real_vacancy": true,
+  "exported_at": "2026-09-24T05:10:00Z",
+  "signals": [
+    {
+      "kind": "job",
+      "company": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1?utm_campaign=alert&utm_content=7788",
+      "posted_at": "2026-09-21",
+      "source": "linkedin-saved-job-feed",
+      "source_detail": "LinkedIn saved-job alert (owner export)"
+    },
+    {
+      "kind": "job",
+      "company": "Linkedin Only Ltd (NOT A REAL VACANCY)",
+      "title": "Junior Security Analyst",
+      "location": "Bristol, United Kingdom",
+      "url": "https://linkedin-only.invalid/jobs/junior-security-analyst",
+      "posted_at": "2026-09-20",
+      "source": "linkedin-saved-job-feed"
+    },
+    {
+      "kind": "company",
+      "company": "Fixture Holdings plc (NOT A REAL COMPANY)",
+      "source": "linkedin-company-follow",
+      "source_detail": "Company followed; no posting attached"
+    }
+  ]
+}

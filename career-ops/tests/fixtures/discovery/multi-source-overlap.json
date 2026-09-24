@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "description": "Multi-source overlap fixture set for the unified discovery funnel. The SAME invented vacancy (Overlap Test Ltd / SOC Analyst L1) is discovered by three different read-only surfaces: a regional candidate set, a recruiter/intermediary watch export and a LinkedIn saved-job export (with tracking parameters). EVERY company, title, agency, person and URL here is invented for testing; EVERY host uses the reserved .invalid TLD and no record describes a real vacancy, employer, agency or person. These records are never written to a canonical tracker by any test.",
+  "not_a_real_vacancy": true,
+  "canonical_vacancy": {
+    "company": "Overlap Test Ltd (NOT A REAL VACANCY)",
+    "title": "SOC Analyst L1",
+    "location": "London, United Kingdom",
+    "url_host": "overlap-test.invalid",
+    "discovered_by": [
+      "explicit records file",
+      "recruiter/intermediary watch findings",
+      "linkedin job-discovery export"
+    ]
+  },
+  "sources": {
+    "regional": "regional-overlap.json",
+    "recruiter_watch": "recruiter-watch-overlap.json",
+    "linkedin": "linkedin-overlap.json"
+  }
+}

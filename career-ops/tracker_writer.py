@@ -84,6 +84,13 @@ def extract_url(value) -> str:
 
 
 def normalize_url(value) -> str:
+    """Canonical posting URL: host/path case-folded, tracking parameters removed.
+
+    A parameter is dropped when it is in the declared ``TRACKING_PARAMS`` set or
+    when its name is an ``utm_*`` marker (the Urchin Tracking Module prefix used
+    by campaign/re-share links). Both cases describe the *same* posting reached
+    through a different link, so they must not create a second tracker row.
+    """
     url = extract_url(value)
     if not url:
         return ""
@@ -94,7 +101,7 @@ def normalize_url(value) -> str:
     if not parts.netloc:
         return url.strip().lower().rstrip("/")
     query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
-             if k.lower() not in TRACKING_PARAMS]
+             if k.lower() not in TRACKING_PARAMS and not k.lower().startswith("utm_")]
     path = re.sub(r"/{2,}", "/", parts.path)
     if path.endswith("/") and len(path) > 1:
         path = path.rstrip("/")

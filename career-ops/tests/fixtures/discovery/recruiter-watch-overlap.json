@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "description": "Recruiter / intermediary watch export fixture (B11) for the unified-discovery overlap regression. Invented agency and employer names only; reserved .invalid URLs; not a real vacancy and not a real agency. Read-only export: the pipeline only ever reads this file.",
+  "not_a_real_vacancy": true,
+  "generated_at": "2026-09-24T05:00:00Z",
+  "region": "uk",
+  "findings": [
+    {
+      "intermediary": "Fixture Recruitment Partners (NOT A REAL AGENCY)",
+      "employer": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "company": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1?utm_source=recruiter&ref=email",
+      "posted_at": "2026-09-23",
+      "decision": "new",
+      "decision_reason": "not present in the recruiter watch ledger",
+      "region_route": "uk",
+      "attribution_confidence": "employer named in the intermediary posting"
+    },
+    {
+      "intermediary": "Fixture Recruitment Partners (NOT A REAL AGENCY)",
+      "employer": "Recruiter Only Ltd (NOT A REAL VACANCY)",
+      "company": "Recruiter Only Ltd (NOT A REAL VACANCY)",
+      "title": "IAM Analyst",
+      "location": "Manchester, United Kingdom",
+      "url": "https://recruiter-only.invalid/jobs/iam-analyst",
+      "posted_at": "2026-09-22",
+      "decision": "new",
+      "decision_reason": "not present in the recruiter watch ledger",
+      "region_route": "uk",
+      "attribution_confidence": "employer named in the intermediary posting"
+    },
+    {
+      "intermediary": "Fixture Recruitment Partners (NOT A REAL AGENCY)",
+      "employer": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "company": "Overlap Test Ltd (NOT A REAL VACANCY)",
+      "title": "SOC Analyst L1",
+      "location": "London, United Kingdom",
+      "url": "https://overlap-test.invalid/jobs/soc-analyst-l1",
+      "decision": "duplicate",
+      "decision_reason": "already present in the recruiter watch ledger",
+      "region_route": "uk",
+      "attribution_confidence": "employer named in the intermediary posting"
+    },
+    {
+      "intermediary": "Gulf Fixture Search (NOT A REAL AGENCY)",
+      "employer": "Dubai Fixture Holdings (NOT A REAL VACANCY)",
+      "company": "Dubai Fixture Holdings (NOT A REAL VACANCY)",
+      "title": "Information Security Analyst",
+      "location": "Dubai, United Arab Emirates",
+      "url": "https://dubai-fixture.invalid/jobs/information-security-analyst",
+      "decision": "new",
+      "decision_reason": "not present in the recruiter watch ledger",
+      "region_route": "dubai",
+      "attribution_confidence": "unknown"
+    }
+  ]
+}

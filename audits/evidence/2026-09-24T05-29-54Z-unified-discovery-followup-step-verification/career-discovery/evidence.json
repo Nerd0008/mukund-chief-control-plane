@@ -1,0 +1,396 @@
+{
+  "task": "agent-career-high-recall-semantic-discovery-2026-09-24",
+  "task_successor": "agent-career-unified-discovery-surfaces-followup-2026-09-24",
+  "runner": "career-ops/run_discovery_acceptance.py",
+  "run_id": "20260924T052955Z",
+  "started_at": "2026-09-24T05:29:55+00:00",
+  "finished_at": "2026-09-24T05:29:55+00:00",
+  "duration_s": 0.3,
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "title_policy_fixtures",
+      "ok": true,
+      "detail": "32/32 fixtures matched"
+    },
+    {
+      "check": "recall_titles_accepted_by_default",
+      "ok": true,
+      "detail": [
+        "Graduate Cyber Security Analyst",
+        "Junior Security Analyst",
+        "SOC Analyst L1",
+        "Information Security Analyst",
+        "Junior GRC Analyst",
+        "Cyber Risk Analyst",
+        "IAM Analyst",
+        "Technology Risk Graduate"
+      ]
+    },
+    {
+      "check": "negative_titles_still_rejected",
+      "ok": true,
+      "detail": [
+        "Senior Security Manager",
+        "Principal Security Architect",
+        "Physical Security Guard",
+        "Security Sales Director"
+      ]
+    },
+    {
+      "check": "intern_only_mode_preserved",
+      "ok": true,
+      "detail": {
+        "Graduate Cyber Security Analyst": "reject",
+        "Junior Security Analyst": "reject",
+        "SOC Analyst L1": "reject",
+        "Information Security Analyst": "reject",
+        "Junior GRC Analyst": "reject",
+        "Cyber Risk Analyst": "reject",
+        "IAM Analyst": "reject",
+        "Technology Risk Graduate": "reject"
+      }
+    },
+    {
+      "check": "contract_guard_rejects_invented_fact",
+      "ok": true,
+      "detail": [
+        "number '5' asserted in reasons is not in the source record",
+        "assertion mentions 'years' but the source record contains no such field",
+        "assertion mentions 'clearance' but the source record contains no such field"
+      ]
+    },
+    {
+      "check": "contract_marks_missing_jd",
+      "ok": true,
+      "detail": "title_company_location_only"
+    },
+    {
+      "check": "codex_escalation_is_budgeted",
+      "ok": true,
+      "detail": {
+        "selected": 2,
+        "dropped": 4
+      }
+    },
+    {
+      "check": "funnel_exposes_every_declared_counter",
+      "ok": true,
+      "detail": {
+        "discovered_raw": 10,
+        "after_hard_negative_prefilter": 8,
+        "semantically_reviewed": 0,
+        "deepseek_accept": 0,
+        "codex_escalated": 0,
+        "codex_accept": 0,
+        "deterministic_eligibility_pass": 5,
+        "duplicates_removed": 0,
+        "tracker_candidates": 5
+      }
+    },
+    {
+      "check": "every_rejection_has_a_reason",
+      "ok": true,
+      "detail": [
+        "deterministic_gate: blocked location 'Bengaluru, India'",
+        "deterministic_gate: clearance/citizenship requirement stated: british citizen, sc, security clearance",
+        "deterministic_gate: no usable application URL — a posting without a URL is not writable state",
+        "tier_a_no_recall_signal: non-cyber title signal: physical security, security guard"
+      ]
+    },
+    {
+      "check": "zero_attribution_present",
+      "ok": true,
+      "detail": {
+        "first_zero_stage": "duplicates_removed",
+        "reason": "all eligible candidates were already canonical/known (dedupe)",
+        "skipped_not_applicable": {
+          "codex_accept": "Codex escalation disabled by the caller (--codex off)",
+          "codex_escalated": "Codex escalation disabled by the caller (--codex off)",
+          "deepseek_accept": "semantic stage disabled by the caller (--semantic off)",
+          "semantically_reviewed": "semantic stage disabled by the caller (--semantic off)"
+        },
+        "attribution_source": "funnel counters (not an inference about the job market or about real vacancies)"
+      }
+    },
+    {
+      "check": "funnel_run_wrote_no_canonical_workbook",
+      "ok": true,
+      "detail": {
+        "canonical_workbook_written": false,
+        "applications_submitted": 0,
+        "employer_contacts": 0,
+        "browser_used": false,
+        "handoff": "manifest only; applying stays career_ops_cli.py write --apply"
+      }
+    },
+    {
+      "check": "compare_modes_reports_recall_delta",
+      "ok": true,
+      "detail": {
+        "intern_only": {
+          "title_pass": 0,
+          "title_reject": 10,
+          "would_reach_tracker": 0
+        },
+        "high_recall": {
+          "title_pass": 8,
+          "title_reject": 2,
+          "would_reach_tracker": 5
+        },
+        "delta": {
+          "title_pass_delta": 8,
+          "tracker_candidate_delta": 5,
+          "note": "titles regained by high-recall are only 'recall' if the deterministic gates also pass; both counts are reported separately so a title-policy delta is never presented as a tracker delta"
+        },
+        "regained": 8,
+        "lost": 0
+      }
+    },
+    {
+      "check": "compare_modes_wrote_nothing",
+      "ok": true,
+      "detail": {
+        "canonical_workbook_written": false,
+        "manifest_written": false,
+        "tracker_probe_run": false,
+        "applications_submitted": 0
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical",
+      "ok": true,
+      "detail": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    },
+    {
+      "check": "recruiter_watch_normalises_into_the_candidate_schema",
+      "ok": true,
+      "detail": {
+        "findings_total": 4,
+        "findings_entering_this_funnel": 2,
+        "findings_excluded_before_the_funnel": {
+          "recruiter_watch_decision:duplicate": 1,
+          "routed_other_region:dubai": 1
+        }
+      }
+    },
+    {
+      "check": "recruiter_watch_exclusions_are_attributable",
+      "ok": true,
+      "detail": {
+        "recruiter_watch_decision:duplicate": 1,
+        "routed_other_region:dubai": 1
+      }
+    },
+    {
+      "check": "linkedin_export_normalises_job_signals_only",
+      "ok": true,
+      "detail": {
+        "file_sha256": "569b5e9b4597477e13354fadb545662b0c6407b227db9d3cf5588c89b7bc042f",
+        "job_signals_entering_this_funnel": 2,
+        "company_signals_not_job_candidates": 1
+      }
+    },
+    {
+      "check": "multi_source_run_counts_every_surface",
+      "ok": true,
+      "detail": {
+        "discovered_raw": 6,
+        "canonical_candidates": 4,
+        "cross_source_duplicates_removed": 2
+      }
+    },
+    {
+      "check": "same_vacancy_dedupes_to_one_canonical_candidate_with_provenance",
+      "ok": true,
+      "detail": {
+        "shared_candidates": 1,
+        "sources": [
+          "explicit records file",
+          "recruiter/intermediary watch findings",
+          "linkedin job-discovery export"
+        ],
+        "provenance_entries": 3
+      }
+    },
+    {
+      "check": "every_source_has_its_own_funnel_counters_and_zero_attribution",
+      "ok": true,
+      "detail": {
+        "linkedin job-discovery export": {
+          "after_hard_negative_prefilter": 2,
+          "canonical": 2,
+          "deterministic_eligibility_pass": 2,
+          "discovered": 2,
+          "semantic_accept": 2,
+          "semantically_reviewed": 2,
+          "tracker_candidates": 2
+        },
+        "recruiter/intermediary watch findings": {
+          "after_hard_negative_prefilter": 2,
+          "canonical": 2,
+          "deterministic_eligibility_pass": 2,
+          "discovered": 2,
+          "semantic_accept": 2,
+          "semantically_reviewed": 2,
+          "tracker_candidates": 2
+        },
+        "explicit records file": {
+          "after_hard_negative_prefilter": 2,
+          "canonical": 2,
+          "deterministic_eligibility_pass": 2,
+          "discovered": 2,
+          "semantic_accept": 2,
+          "semantically_reviewed": 2,
+          "tracker_candidates": 2
+        }
+      }
+    },
+    {
+      "check": "unified_run_wrote_no_canonical_workbook",
+      "ok": true,
+      "detail": {
+        "canonical_workbook_written": false,
+        "applications_submitted": 0,
+        "employer_contacts": 0,
+        "browser_used": false,
+        "handoff": "manifest only; applying stays career_ops_cli.py write --apply"
+      }
+    },
+    {
+      "check": "canonical_workbooks_still_byte_identical_after_unified_run",
+      "ok": true,
+      "detail": {
+        "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    }
+  ],
+  "counts": {
+    "checks": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "funnel_counts": {
+    "discovered_raw": 10,
+    "canonical_candidates": 10,
+    "cross_source_duplicates_removed": 0,
+    "after_hard_negative_prefilter": 8,
+    "semantically_reviewed": 0,
+    "deepseek_accept": 0,
+    "codex_escalated": 0,
+    "codex_accept": 0,
+    "deterministic_eligibility_pass": 5,
+    "duplicates_removed": 0,
+    "tracker_candidates": 5,
+    "discovered_raw_by_source": {
+      "explicit records file": 10
+    }
+  },
+  "unified_discovery_surfaces": {
+    "source_registry": {
+      "explicit records file": "collect_from_records",
+      "regional run-health scan record": "collect_from_scan_record",
+      "company-watch findings": "collect_from_company_watch",
+      "recruiter/intermediary watch findings": "collect_from_recruiter_watch",
+      "linkedin job-discovery export": "collect_from_linkedin"
+    },
+    "recruiter_watch_findings": 4,
+    "recruiter_watch_candidates": 2,
+    "linkedin_job_signals": 2,
+    "unified_run_counts": {
+      "discovered_raw": 6,
+      "canonical_candidates": 4,
+      "cross_source_duplicates_removed": 2,
+      "after_hard_negative_prefilter": 4,
+      "deterministic_eligibility_pass": 4,
+      "tracker_candidates": 4
+    },
+    "canonical_candidate_sources": [
+      "explicit records file",
+      "recruiter/intermediary watch findings",
+      "linkedin job-discovery export"
+    ],
+    "per_source": {
+      "linkedin job-discovery export": {
+        "after_hard_negative_prefilter": 2,
+        "canonical": 2,
+        "deterministic_eligibility_pass": 2,
+        "discovered": 2,
+        "semantic_accept": 2,
+        "semantically_reviewed": 2,
+        "tracker_candidates": 2
+      },
+      "recruiter/intermediary watch findings": {
+        "after_hard_negative_prefilter": 2,
+        "canonical": 2,
+        "deterministic_eligibility_pass": 2,
+        "discovered": 2,
+        "semantic_accept": 2,
+        "semantically_reviewed": 2,
+        "tracker_candidates": 2
+      },
+      "explicit records file": {
+        "after_hard_negative_prefilter": 2,
+        "canonical": 2,
+        "deterministic_eligibility_pass": 2,
+        "discovered": 2,
+        "semantic_accept": 2,
+        "semantically_reviewed": 2,
+        "tracker_candidates": 2
+      }
+    }
+  },
+  "compare_modes": {
+    "intern_only": {
+      "title_pass": 0,
+      "title_reject": 10,
+      "would_reach_tracker": 0
+    },
+    "high_recall": {
+      "title_pass": 8,
+      "title_reject": 2,
+      "would_reach_tracker": 5
+    },
+    "title_pass_delta": 8,
+    "tracker_candidate_delta": 5
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40"
+    },
+    "dubai": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "canonical_workbook_writes": 0,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "agency_or_intermediary_contacts": 0,
+    "browser_or_gui_used": false,
+    "account_or_session_used": false,
+    "scraping_performed": false,
+    "live_source_scanned": false,
+    "live_provider_called": false,
+    "fixtures_only": true
+  },
+  "privacy_note": "all candidates in this run come from the synthetic fixture set (invented titles, reserved .invalid URLs); no real posting, company or application URL appears in this evidence"
+}

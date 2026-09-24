@@ -1591,3 +1591,60 @@ tests, no provider series re-run.
   `runtime/career-ops/discovery/` tree because they name real postings.
 - **Owner action.** None new. Enabling the pipeline on the live schedule (rather than on
   demand) is an owner decision and has **not** been made.
+
+## Unified job-discovery surfaces — B11 + B19 successor (2026-09-24, `agent-career-unified-discovery-surfaces-followup-2026-09-24`)
+
+**Status: BUILT / TESTED / EVIDENCED. The running high-recall contract was extended, not forked; no gate weakened.**
+
+- **Change.** Every read-only discovery surface now runs the *same* funnel. Added to
+  `career-ops/discovery/pipeline.py`: `SOURCE_REGISTRY` (explicit records, regional
+  scan record, Company Watch, recruiter/intermediary watch, LinkedIn export),
+  `collect_from_recruiter_watch()` (B11), `collect_from_linkedin()` (B19) and
+  `collapse_candidates()` (cross-source canonical identity). No second classifier, no
+  second eligibility rule set, no second dedupe engine.
+- **B11 Recruiter / intermediary Watch.** A declared read-only findings export
+  (intermediary/agency, employer, title, location, URL, `decision`, `region_route`,
+  attribution confidence) normalises into the common candidate schema. Findings the watch
+  itself excluded stay attributable (`recruiter_watch_decision:duplicate`,
+  `routed_other_region:dubai`) instead of becoming a silent zero. No agency or employer is
+  contacted, and **no live recruiter-watch feed was scanned** — the collector reads a
+  declared export shape and records that boundary.
+- **B19 LinkedIn job discovery.** An owner-exported local file is read through the
+  *existing* `linkedin_workflow.parse_inbox_file` + `classify` path, so there is exactly one
+  LinkedIn export parser. Only `job_signal`s become candidates; company-only signals and
+  URL-less lines are reported in coverage and never guessed into postings. No login, API,
+  session, scrape, browser, post, message, connection request or application exists in this
+  path.
+- **One vacancy → one canonical candidate.** Canonical identity is the normalised posting
+  URL (`tracker_writer.normalize_url`, the same code the tracker dedupe uses, which now also
+  drops any `utm_*` parameter) or, when no URL exists, company + title. The richest copy
+  wins, missing fields are filled from the other copies, nothing is invented, and each
+  discovery is preserved in the candidate's `provenance` (collection surface, declared
+  source, source detail, raw index) with `sources` + `duplicate_discoveries`. Fixture proof:
+  `discovered_raw=6` → `canonical_candidates=4` → `cross_source_duplicates_removed=2`, with
+  one canonical candidate carrying all three surfaces' provenance.
+- **Per-source attribution.** `funnel.by_source[source]` gives each surface its own stage
+  counts, its own `rejections_by_reason`, its own `not_applicable_stages` and its own
+  `zero_attribution` naming the first empty stage and cause; a shared canonical candidate is
+  counted in each source that discovered it and the overlap is recorded explicitly. The run
+  also reports `cross_source_dedupe` and `canonical_candidates`, and the summary line lists
+  per-source zeroes.
+- **Truth boundary.** Collapse is in-run identity only and never replaces the shared
+  tracker dedupe; a de-duplication is reported as a de-duplication, never as a market fact.
+  The read-only rule is declared in `source_contract` and asserted by tests: no login, no
+  account/session, no scraping, no browser/GUI, no posting/messaging/application.
+- **Tests.** New `career-ops/tests/test_unified_discovery_sources.py` **24 passed**;
+  `test_discovery_pipeline.py` 36 passed; `test_tracker_writer.py` +1 (`utm_*`);
+  `career-ops/tests + company-watch/tests + scripts/tests` **461 passed**.
+  `career-ops/run_discovery_acceptance.py` **22/22 checks PASS** (was 14/14); the registered
+  whole-company step `career_high_recall_discovery` re-runs PASS at HEAD.
+- **Safety.** The four canonical workbooks are SHA-256 identical before/after the acceptance
+  run and across the full 461-test suite; 0 applications, 0 employer/agency/intermediary
+  contacts, no browser/GUI, no account/session, no scraping, no LinkedIn action. The
+  successor did not modify the running prerequisite contract's classifier or contract.
+- **Owner action.** None new. The live LinkedIn surface stays owner-gated and untested
+  against a real account, and no live recruiter/intermediary watch producer exists yet.
+- **Evidence.** `audits/evidence/20260924T053909Z-career-high-recall-discovery-acceptance/`
+  (fixtures-only acceptance, 22/22 checks) and
+  `audits/evidence/2026-09-24T05-29-54Z-unified-discovery-followup-step-verification/`
+  (registered whole-company step `career_high_recall_discovery` re-run at HEAD → PASS).

@@ -366,8 +366,9 @@ STEPS = [
          argv=[PY, "career-ops/daily_brief.py", "status"]),
     dict(id="career_high_recall_discovery", category="career_discovery",
          name="High-recall semantic discovery pipeline acceptance (two-tier title policy + "
-              "semantic contract + bounded escalation + compare-modes; fixtures only, no live "
-              "source, no provider call, no tracker write)",
+              "semantic contract + bounded escalation + compare-modes + unified read-only "
+              "sources B11/B19 with cross-source provenance; fixtures only, no live source, "
+              "no provider call, no tracker write)",
          kind="local", timeout=600, check=_check_exit0,
          argv=[PY, "career-ops/run_discovery_acceptance.py",
                "--out-dir", "{ev}/career-discovery"]),

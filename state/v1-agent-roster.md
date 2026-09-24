@@ -208,4 +208,25 @@ Superseded with evidence: the legacy `Mukund Chief of Staff` logon task (recorde
 2026-09-23 reconciliation record) remains a donor; it is not an active v1 service and was not
 revived, restructured or deleted.
 
+## Status update — 2026-09-24 (unified discovery surfaces: B11 + B19 funnel integration)
+
+Task `agent-career-unified-discovery-surfaces-followup-2026-09-24`. Evidence:
+`audits/evidence/20260924T053909Z-career-high-recall-discovery-acceptance/` (**22/22 checks PASS**,
+fixtures only) and the registered whole-company step re-run at HEAD →
+`audits/evidence/2026-09-24T05-29-54Z-unified-discovery-followup-step-verification/`
+(PASS, `canonical_workbooks_unchanged: true`).
+
+The high-recall semantic discovery contract is now the single funnel for **every** read-only
+discovery surface, so no source keeps a private classifier, eligibility rule set or dedupe engine.
+
+| ID | Worker / service | Status now | Evidence |
+|---|---|---|---|
+| B11 | Recruiter / intermediary Watch Agent | **BUILT + EVIDENCED — read-only discovery intake in the shared funnel** | `career-ops/discovery/pipeline.py` `collect_from_recruiter_watch()`; a declared read-only findings export normalises into the one candidate schema; pre-funnel exclusions keep their own reasons (`recruiter_watch_decision:<d>`, `routed_other_region:<r>`); no agency/employer contact and no live watch producer yet |
+| B19 | LinkedIn Job Discovery Agent | **BUILT + EVIDENCED — read-only owner export in the same funnel** | `career-ops/discovery/pipeline.py` `collect_from_linkedin()` reuses `career-ops/linkedin_workflow.py` `parse_inbox_file`/`classify` (one LinkedIn parser); only `job_signal`s become candidates; company-only signals and URL-less lines are counted, never guessed |
+| B25-related | Cross-source canonical identity + per-source metrics | **BUILT + EVIDENCED** | `collapse_candidates()` (normalised URL else company+title, provenance per discovery) and `funnel.by_source[source]` (own stage counts, own `rejections_by_reason`, own `zero_attribution`); fixture proof `discovered_raw=6 → canonical 4 → cross-source duplicates removed 2` with one canonical candidate carrying three surfaces' provenance |
+
+Not claimed: no live recruiter/intermediary watch feed and no live LinkedIn account surface was
+scanned or contacted. The collectors' evidence is fixture-only, and every discovery path remains
+read-only (no login, account/session, scraping, browser, posting, messaging or application).
+
 

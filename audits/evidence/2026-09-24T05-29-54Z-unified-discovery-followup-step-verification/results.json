@@ -1,0 +1,68 @@
+{
+  "label": "unified-discovery-followup-step-verification",
+  "kind": "whole_company_local_acceptance",
+  "started_utc": "2026-09-24T05:29:54+00:00",
+  "repo_root": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+  "runtime_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain",
+  "python": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
+  "external_mutations_performed": 0,
+  "provider_calls_spent_by_this_runner": 0,
+  "note": "local acceptance only: no provider call, no external mutation, no publish, no submit, no deployment cutover",
+  "steps": [
+    {
+      "id": "career_high_recall_discovery",
+      "name": "High-recall semantic discovery pipeline acceptance (two-tier title policy + semantic contract + bounded escalation + compare-modes + unified read-only sources B11/B19 with cross-source provenance; fixtures only, no live source, no provider call, no tracker write)",
+      "category": "career_discovery",
+      "kind": "local",
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe career-ops/run_discovery_acceptance.py --out-dir C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-24T05-29-54Z-unified-discovery-followup-step-verification/career-discovery",
+      "cwd": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+      "exit_code": 0,
+      "duration_s": 0.79,
+      "timed_out": false,
+      "status": "PASS",
+      "detail": "exit 0 in 0.79s",
+      "stdout_tail": "PASS: 22/22 checks; evidence written to C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\audits\\evidence\\2026-09-24T05-29-54Z-unified-discovery-followup-step-verification\\career-discovery\r\n",
+      "stderr_tail": ""
+    }
+  ],
+  "finished_utc": "2026-09-24T05:29:55+00:00",
+  "canonical_workbooks": {
+    "paths": {
+      "uk": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "dubai": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "japan": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "singapore": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx"
+    },
+    "sha256_before": {
+      "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    },
+    "sha256_after": {
+      "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    },
+    "unchanged_after_acceptance": true
+  },
+  "queue_state_after": {
+    "pending": 0,
+    "running": 2,
+    "blocked": 12,
+    "completed": 35
+  },
+  "summary": {
+    "steps_run": 1,
+    "pass": 1,
+    "fail": 0,
+    "owner_gated": 0,
+    "unavailable": 0,
+    "verdict": "PASS",
+    "canonical_workbooks_unchanged": true,
+    "failed_steps": [],
+    "unavailable_steps": [],
+    "owner_gated_steps": []
+  }
+}
