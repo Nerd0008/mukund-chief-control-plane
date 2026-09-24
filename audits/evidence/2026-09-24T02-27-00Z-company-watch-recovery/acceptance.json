@@ -1,0 +1,190 @@
+{
+  "copy": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+  "copy_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+  "copy_sha256_after": "b8a2b88b10100356ecce34502f2e7a1f7bc6d2045d3ba48b16d8cee2275b6af6",
+  "records_offered": 3,
+  "test_rows": 3,
+  "first": {
+    "invoked": true,
+    "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\career_ops_cli.py write --region uk --manifest audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance.json --tracker runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx --backup-dir audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\backups --archive-dir runtime\\company-watch\\acceptance-recovery --apply",
+    "exit_code": 0,
+    "manifest": "audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance.json",
+    "mode": "apply",
+    "tracker": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+    "result": {
+      "region": "uk",
+      "tracker": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+      "applied": true,
+      "generated_at": "2026-09-24T02:27:22+00:00",
+      "counts": {
+        "input": 3,
+        "appended": 3,
+        "duplicates": 0,
+        "rejected": 0,
+        "refreshed": 0
+      },
+      "outcomes": [
+        {
+          "company": "Abound",
+          "title": "Legal Counsel Regulatory",
+          "url": "https://jobs.ashbyhq.com/abound/1aa9bb86-ab19-4d1d-afa2-0c894b66ea0e",
+          "decision": "appended",
+          "id": "J35"
+        },
+        {
+          "company": "Abound",
+          "title": "Data Engineer",
+          "url": "https://jobs.ashbyhq.com/abound/e45c504a-290c-42b0-9aab-61a0edcbb229",
+          "decision": "appended",
+          "id": "J36"
+        },
+        {
+          "company": "Abound",
+          "title": "Senior Security Engineer",
+          "url": "https://jobs.ashbyhq.com/abound/a0764a3a-f53a-4ad2-9502-b6d471361b0d",
+          "decision": "appended",
+          "id": "J37"
+        }
+      ],
+      "pre_data_rows": 34,
+      "cross_month_index": {
+        "sources": {
+          "uk-cyber-job-tracker.xlsx": 34,
+          "ledger:data/scan-history.tsv": 146
+        },
+        "keys": 154
+      },
+      "tracker_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "verification_of_temp": {
+        "path": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.write-tmp.xlsx",
+        "ok": true,
+        "problems": [],
+        "sheets": [
+          "Jobs",
+          "Summary",
+          "How to use",
+          "UK graduate and internship"
+        ],
+        "table_ref": "A9:V46",
+        "last_data_row": 46,
+        "data_rows": 37,
+        "expected_appended": 3,
+        "headers_unchanged": true,
+        "fit_tier_formula_cells": 0,
+        "validations": {
+          "J": 4,
+          "K": 4
+        },
+        "owner_columns_unchanged": true,
+        "duplicate_urls_in_workbook": [],
+        "formula_error_cells": [],
+        "cross_month_duplicate_notes": []
+      },
+      "backup": "audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\backups\\uk-cyber-job-tracker.pre-20260924-032722.xlsx",
+      "tracker_sha256_after": "b8a2b88b10100356ecce34502f2e7a1f7bc6d2045d3ba48b16d8cee2275b6af6",
+      "post_data_rows": 37,
+      "verification": {
+        "path": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+        "ok": true,
+        "problems": [],
+        "sheets": [
+          "Jobs",
+          "Summary",
+          "How to use",
+          "UK graduate and internship"
+        ],
+        "table_ref": "A9:V46",
+        "last_data_row": 46,
+        "data_rows": 37,
+        "expected_appended": 3,
+        "headers_unchanged": true,
+        "fit_tier_formula_cells": 0,
+        "validations": {
+          "J": 4,
+          "K": 4
+        },
+        "owner_columns_unchanged": true,
+        "duplicate_urls_in_workbook": [],
+        "formula_error_cells": [],
+        "cross_month_duplicate_notes": []
+      },
+      "planned_rows": [
+        "J35",
+        "J36",
+        "J37"
+      ],
+      "mode": "apply",
+      "provenance": {
+        "manifest": "audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance.json",
+        "writer": "career-ops/tracker_writer.py"
+      }
+    },
+    "ok": true
+  },
+  "repeat": {
+    "invoked": true,
+    "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\career_ops_cli.py write --region uk --manifest audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance-repeat.json --tracker runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx --backup-dir audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\backups --archive-dir runtime\\company-watch\\acceptance-recovery --apply",
+    "exit_code": 1,
+    "manifest": "audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance-repeat.json",
+    "mode": "apply",
+    "tracker": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+    "result": {
+      "region": "uk",
+      "tracker": "runtime\\company-watch\\acceptance-recovery\\uk-cyber-job-tracker.xlsx",
+      "applied": false,
+      "generated_at": "2026-09-24T02:27:23+00:00",
+      "counts": {
+        "input": 3,
+        "appended": 0,
+        "duplicates": 3,
+        "rejected": 0,
+        "refreshed": 0
+      },
+      "outcomes": [
+        {
+          "company": "Abound",
+          "title": "Legal Counsel Regulatory",
+          "url": "https://jobs.ashbyhq.com/abound/1aa9bb86-ab19-4d1d-afa2-0c894b66ea0e",
+          "decision": "duplicate",
+          "reason": "already present in canonical workbook",
+          "existing_row": 44
+        },
+        {
+          "company": "Abound",
+          "title": "Data Engineer",
+          "url": "https://jobs.ashbyhq.com/abound/e45c504a-290c-42b0-9aab-61a0edcbb229",
+          "decision": "duplicate",
+          "reason": "already present in canonical workbook",
+          "existing_row": 45
+        },
+        {
+          "company": "Abound",
+          "title": "Senior Security Engineer",
+          "url": "https://jobs.ashbyhq.com/abound/a0764a3a-f53a-4ad2-9502-b6d471361b0d",
+          "decision": "duplicate",
+          "reason": "already present in canonical workbook",
+          "existing_row": 46
+        }
+      ],
+      "pre_data_rows": 37,
+      "cross_month_index": {
+        "sources": {
+          "uk-cyber-job-tracker.xlsx": 3,
+          "ledger:data/scan-history.tsv": 146
+        },
+        "keys": 157
+      },
+      "tracker_sha256_before": "b8a2b88b10100356ecce34502f2e7a1f7bc6d2045d3ba48b16d8cee2275b6af6",
+      "planned_rows": [],
+      "reason": "no changes required: nothing to append or refresh",
+      "mode": "apply",
+      "provenance": {
+        "manifest": "audits\\evidence\\2026-09-24T02-27-00Z-company-watch-recovery\\manifest-uk-acceptance-repeat.json",
+        "writer": "career-ops/tracker_writer.py"
+      }
+    },
+    "ok": false
+  },
+  "data_rows_after": 37,
+  "canonical_untouched": true
+}

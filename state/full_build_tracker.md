@@ -585,3 +585,44 @@ Owner decision still open: whether to rotate the current month out of the live w
 what to do with the rows that carry owner application state. The worker refuses those rotations by
 design; nothing was forced, and no canonical workbook was modified.
 
+## Company Watch / job-search integration — recovery pass (2026-09-24T02:27Z)
+
+Task `agent-company-watch-recovery-final-pass-2026-09-24`, recovering the record
+`agent-company-watch-job-search-integration-2026-09-23` that was claimed at 2026-09-23T22:58:06Z and
+hard-blocked at 2026-09-23T23:18:06Z with `execution_error` ("Hermes dispatch exceeded 1200
+seconds"). **Nothing was rebuilt**: the inspection the task asked for first showed the module had
+already reached `main` in commit `42a2bec` (the CV/cover-letter + LinkedIn task, which imports
+Company Watch for its dedupe). The recovery pass therefore verified that landed work, closed the one
+real evidence gap it found, and produced fresh bounded evidence.
+
+| Item | State | Evidence |
+|---|---|---|
+| Inventory / reconciliation before editing | **DONE** | `company-watch/` is tracked on `main` at `42a2bec`: `company_registry.py`, `ats_endpoints.py`, `company_watch.py` (CLI `registry`/`resolve`/`scan`/`handoff`/`workbook`/`run`), `company_watch_config.json`, aggregate `registry/company_watch_registry_summary.json`, `tests/test_company_watch.py`. No unpushed partial work was found in the worktree, and none was assumed |
+| Original blocked run's evidence | **PRESERVED + COMMITTED (private-safe)** | `audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/` — `evidence.md`, `evidence.json`, `acceptance.json` committed; `findings.json`, `resolution.json`, `manifest-*.json` and the raw tracker backup stay git-ignored because they name companies/postings |
+| Structured ATS/career endpoint watcher | **VERIFIED WORKING** | bounded live `resolve` still resolves vendor boards (`greenhouse`/`ashby`/`lever`/`workable`/`smartrecruiters`); attribution stays `high` only when the vendor payload names the company — 1 board resolved, 11 `manual_attribution_required` in this run |
+| Canonical dedupe handoff | **VERIFIED, canonical untouched** | shared dedupe read from `career-ops/tracker_writer.py` (34 canonical data rows + 154 cross-month keys); dry-run handoff of the marked sample appended 3/3 against the canonical workbook with the canonical SHA-256 re-checked identical afterwards |
+| Regional tracker handoff (dubai/japan/singapore) | **GAP FOUND AND CLOSED** | the previous suite only asserted the regional *provenance mapping*, never an end-to-end write. Added `test_regional_handoff_writes_provenance_to_a_tracker_copy` (parametrized per region) and `test_regional_handoff_requires_an_explicit_region`: provenance lands in `Source` (X), existing owner columns (R,S,T,U,V,Z) are unchanged, re-applying appends 0 with 1 duplicate, canonical regional workbook hash unchanged |
+| Bounded acceptance evidence | **PASS (fresh, this pass)** | `audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/` — 12 companies, 58 HTTP requests, **23.2 s**, `budget_exhausted: false`; 19 findings (all `new`), 0 tracker-eligible under the owner's intern-only UK filter; acceptance write on a **copy** 3 appended → repeat 3 duplicates, canonical untouched |
+| Evidence attribution | **FIXED** | the evidence header had the original task id hardcoded, so a later acceptance/recovery run could not label its own evidence. `run --task-id <id>` now sets it (default unchanged), documented in `company-watch/README.md` |
+| Tests | **PASS** | `company-watch/tests/test_company_watch.py` **35 passed** (was 31; +4 regional end-to-end/refusal tests), offline |
+| No external action | **ENFORCED** | read-only public ATS GETs only; no applications, messages, recruiter/company contact, account or LinkedIn mutation; no secrets or raw email content added |
+
+Truth boundaries recorded, not glossed over:
+
+- The historical counts (**203** confirmed/strongly evidenced employers, **18** recruiters, **221**
+  organisations with application/CV evidence) are **re-parsed from the owner's recorded history file**
+  (`uk_application_company_history_18_months.md`, SHA-256 `2fb46ce8…`) on every refresh with no
+  declared-vs-parsed mismatch — that is *re-derivation from the recording*, not a re-verification
+  against the mailbox. They stay historical.
+- An empty tracker-eligible set is the owner's own filter doing its job (UK lane is
+  `Intern`/`Internship` only), not a claim that no watched company is hiring.
+- `run-health/tracker-writer.json` is written by *any* writer invocation, including the
+  copy-targeted acceptance writes, so a test run can move the department health counters. It was
+  restored to its committed state after this pass; hardening it would belong to the tracker-writer
+  owner, not to this task.
+- Not this task's to finish: the regional scan/schedule lanes
+  (`agent-regional-job-search-agents-and-schedulers-2026-09-23`) and the reconciliation of the
+  historical blocked record itself, which the pending `agent-blocked-work-final-reconciliation-
+  2026-09-24` owns (it lists this recovery as its prerequisite, so the blocked JSON was deliberately
+  left in place).
+

@@ -1,0 +1,448 @@
+{
+  "task": "agent-company-watch-job-search-integration-2026-09-23",
+  "run_id": "20260923T231046Z",
+  "started_at": "2026-09-23T23:10:46+00:00",
+  "finished_at": "2026-09-23T23:12:43+00:00",
+  "duration_s": 116.6,
+  "region": "uk",
+  "config": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\company-watch\\company_watch_config.json",
+  "registry": {
+    "source_path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\uk_application_company_history_18_months.md",
+    "source_sha256": "2fb46ce8e1da0508327940e6f7518f328810338ac3d2abc47027ada29d8dc663",
+    "source_period": "28 February 2025 to 26 August 2026",
+    "counts": {
+      "parsed_total_rows": 229,
+      "parsed_employers": 203,
+      "parsed_recruiters": 18,
+      "parsed_other_applications": 4,
+      "parsed_unverified_candidates": 4,
+      "parsed_organizations_with_application_or_cv_evidence": 221,
+      "parsed_by_class": {
+        "employer": 203,
+        "recruiter": 18,
+        "other_application": 4,
+        "unverified_candidate": 4
+      },
+      "declared_in_source": {
+        "Confirmed or strongly evidenced employers": 203,
+        "Recruiters / intermediaries that received applications or CVs": 18,
+        "Total job-search organisations with application/CV evidence": 221,
+        "Other non-employment applications": 4,
+        "Possible applications needing verification": 4
+      },
+      "declared_vs_parsed": {
+        "confirmed_employers": {
+          "declared": 203,
+          "parsed": 203
+        },
+        "recruiters": {
+          "declared": 18,
+          "parsed": 18
+        },
+        "other_applications": {
+          "declared": 4,
+          "parsed": 4
+        },
+        "unverified_candidates": {
+          "declared": 4,
+          "parsed": 4
+        },
+        "organizations_with_application_or_cv_evidence": {
+          "declared": 221,
+          "parsed": 221
+        }
+      },
+      "count_mismatch": {}
+    },
+    "full_registry_local_only": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\company-watch\\company_watch_registry.json"
+  },
+  "selection": {
+    "start_index": 0,
+    "limit": 60,
+    "order": "evidence_class then name",
+    "registry_companies": 229
+  },
+  "http": {
+    "requests": 300,
+    "ok": 82,
+    "non_200": 218,
+    "total_bytes": 1016662
+  },
+  "resolution": {
+    "companies_probed": 60,
+    "boards_resolved": 8,
+    "unresolved": 52,
+    "by_vendor": {
+      "ashby": 2,
+      "greenhouse": 4,
+      "smartrecruiters": 2
+    },
+    "attribution": {
+      "high": 6,
+      "low": 2,
+      "manual_attribution_required": 54
+    },
+    "budget_exhausted": false
+  },
+  "findings": {
+    "counts": {
+      "findings": 594,
+      "by_decision": {
+        "new": 507,
+        "duplicate-in-run": 87
+      },
+      "tracker_eligible": 0,
+      "owner_filter_eligible": 0,
+      "routed_in_scope": 64,
+      "routed_other_region": 4,
+      "routed_unresolved": 526
+    },
+    "filters": {
+      "location_always_allow": [
+        "United Kingdom",
+        "UK",
+        "Remote, UK",
+        "UK Remote"
+      ],
+      "location_allow": [
+        "United Kingdom",
+        "England",
+        "Scotland",
+        "Wales",
+        "Northern Ireland",
+        "UK",
+        "Remote, UK"
+      ],
+      "location_block": [
+        "United States",
+        "USA",
+        "Canada",
+        "India",
+        "Singapore",
+        "Australia",
+        "Abu Dhabi",
+        "Sharjah",
+        "Dubai",
+        "United Arab Emirates",
+        "UAE"
+      ],
+      "title_positive": [
+        "Intern",
+        "Internship"
+      ],
+      "title_negative": [
+        "Senior",
+        "Principal",
+        "Lead ",
+        "Manager",
+        "Director",
+        "Head of",
+        "Vice President",
+        "VP ",
+        "Staff Security"
+      ],
+      "max_posting_age_days": 14,
+      "available": true,
+      "parser": "pyyaml"
+    },
+    "dedupe_source": {
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "tracker_sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "canonical_data_rows": 34,
+      "cross_month_keys": 154,
+      "cross_month_sources": {
+        "uk-cyber-job-tracker.xlsx": 34,
+        "ledger:data/scan-history.tsv": 146
+      }
+    }
+  },
+  "handoff_dry_run": {
+    "invoked": false,
+    "mode": "dry-run",
+    "exit_code": null,
+    "counts": null,
+    "tracker": null,
+    "canonical_untouched": true
+  },
+  "acceptance_write": {
+    "copy": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+    "copy_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "copy_sha256_after": "a634cfd3046dde2ca4cdd8f9e12edc292a2280a3c76cdb30c0a3af555e63dad1",
+    "records_offered": 3,
+    "test_rows": 3,
+    "first": {
+      "invoked": true,
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\career_ops_cli.py write --region uk --manifest audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance.json --tracker runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx --backup-dir audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\backups --archive-dir runtime\\company-watch\\acceptance --apply",
+      "exit_code": 0,
+      "manifest": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance.json",
+      "mode": "apply",
+      "tracker": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+      "result": {
+        "region": "uk",
+        "tracker": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+        "applied": true,
+        "generated_at": "2026-09-23T23:12:42+00:00",
+        "counts": {
+          "input": 3,
+          "appended": 3,
+          "duplicates": 0,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "outcomes": [
+          {
+            "company": "Abound",
+            "title": "Legal Counsel Regulatory",
+            "url": "https://jobs.ashbyhq.com/abound/1aa9bb86-ab19-4d1d-afa2-0c894b66ea0e",
+            "decision": "appended",
+            "id": "J35"
+          },
+          {
+            "company": "Abound",
+            "title": "Data Engineer",
+            "url": "https://jobs.ashbyhq.com/abound/e45c504a-290c-42b0-9aab-61a0edcbb229",
+            "decision": "appended",
+            "id": "J36"
+          },
+          {
+            "company": "Abound",
+            "title": "Senior Security Engineer",
+            "url": "https://jobs.ashbyhq.com/abound/a0764a3a-f53a-4ad2-9502-b6d471361b0d",
+            "decision": "appended",
+            "id": "J37"
+          }
+        ],
+        "pre_data_rows": 34,
+        "cross_month_index": {
+          "sources": {
+            "uk-cyber-job-tracker.xlsx": 34,
+            "ledger:data/scan-history.tsv": 146
+          },
+          "keys": 154
+        },
+        "tracker_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "verification_of_temp": {
+          "path": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.write-tmp.xlsx",
+          "ok": true,
+          "problems": [],
+          "sheets": [
+            "Jobs",
+            "Summary",
+            "How to use",
+            "UK graduate and internship"
+          ],
+          "table_ref": "A9:V46",
+          "last_data_row": 46,
+          "data_rows": 37,
+          "expected_appended": 3,
+          "headers_unchanged": true,
+          "fit_tier_formula_cells": 0,
+          "validations": {
+            "J": 4,
+            "K": 4
+          },
+          "owner_columns_unchanged": true,
+          "duplicate_urls_in_workbook": [],
+          "formula_error_cells": [],
+          "cross_month_duplicate_notes": []
+        },
+        "backup": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\backups\\uk-cyber-job-tracker.pre-20260924-001242.xlsx",
+        "tracker_sha256_after": "a634cfd3046dde2ca4cdd8f9e12edc292a2280a3c76cdb30c0a3af555e63dad1",
+        "post_data_rows": 37,
+        "verification": {
+          "path": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+          "ok": true,
+          "problems": [],
+          "sheets": [
+            "Jobs",
+            "Summary",
+            "How to use",
+            "UK graduate and internship"
+          ],
+          "table_ref": "A9:V46",
+          "last_data_row": 46,
+          "data_rows": 37,
+          "expected_appended": 3,
+          "headers_unchanged": true,
+          "fit_tier_formula_cells": 0,
+          "validations": {
+            "J": 4,
+            "K": 4
+          },
+          "owner_columns_unchanged": true,
+          "duplicate_urls_in_workbook": [],
+          "formula_error_cells": [],
+          "cross_month_duplicate_notes": []
+        },
+        "planned_rows": [
+          "J35",
+          "J36",
+          "J37"
+        ],
+        "mode": "apply",
+        "provenance": {
+          "manifest": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance.json",
+          "writer": "career-ops/tracker_writer.py"
+        }
+      },
+      "ok": true
+    },
+    "repeat": {
+      "invoked": true,
+      "command": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\career_ops_cli.py write --region uk --manifest audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance-repeat.json --tracker runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx --backup-dir audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\backups --archive-dir runtime\\company-watch\\acceptance --apply",
+      "exit_code": 1,
+      "manifest": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance-repeat.json",
+      "mode": "apply",
+      "tracker": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+      "result": {
+        "region": "uk",
+        "tracker": "runtime\\company-watch\\acceptance\\uk-cyber-job-tracker.xlsx",
+        "applied": false,
+        "generated_at": "2026-09-23T23:12:43+00:00",
+        "counts": {
+          "input": 3,
+          "appended": 0,
+          "duplicates": 3,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "outcomes": [
+          {
+            "company": "Abound",
+            "title": "Legal Counsel Regulatory",
+            "url": "https://jobs.ashbyhq.com/abound/1aa9bb86-ab19-4d1d-afa2-0c894b66ea0e",
+            "decision": "duplicate",
+            "reason": "already present in canonical workbook",
+            "existing_row": 44
+          },
+          {
+            "company": "Abound",
+            "title": "Data Engineer",
+            "url": "https://jobs.ashbyhq.com/abound/e45c504a-290c-42b0-9aab-61a0edcbb229",
+            "decision": "duplicate",
+            "reason": "already present in canonical workbook",
+            "existing_row": 45
+          },
+          {
+            "company": "Abound",
+            "title": "Senior Security Engineer",
+            "url": "https://jobs.ashbyhq.com/abound/a0764a3a-f53a-4ad2-9502-b6d471361b0d",
+            "decision": "duplicate",
+            "reason": "already present in canonical workbook",
+            "existing_row": 46
+          }
+        ],
+        "pre_data_rows": 37,
+        "cross_month_index": {
+          "sources": {
+            "uk-cyber-job-tracker.xlsx": 3,
+            "ledger:data/scan-history.tsv": 146
+          },
+          "keys": 157
+        },
+        "tracker_sha256_before": "a634cfd3046dde2ca4cdd8f9e12edc292a2280a3c76cdb30c0a3af555e63dad1",
+        "planned_rows": [],
+        "reason": "no changes required: nothing to append or refresh",
+        "mode": "apply",
+        "provenance": {
+          "manifest": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\manifest-uk-acceptance-repeat.json",
+          "writer": "career-ops/tracker_writer.py"
+        }
+      },
+      "ok": false
+    },
+    "data_rows_after": 37,
+    "canonical_untouched": true
+  },
+  "workbook": {
+    "ok": true,
+    "path": "C:\\Users\\mukun\\Downloads\\codex\\company-watch\\Company_Watch_2026-09.xlsx",
+    "sheets": [
+      "README",
+      "Watch List",
+      "Findings",
+      "Tracker Handoff",
+      "Run Log"
+    ],
+    "headers": {
+      "README": [
+        "Company Watch — monthly operational workbook",
+        null
+      ],
+      "Watch List": [
+        "Company",
+        "Evidence Class",
+        "Prior Application Evidence",
+        "ATS Vendor",
+        "Board Slug",
+        "Jobs Listed",
+        "Attribution Confidence",
+        "Attribution Basis",
+        "Manual Attribution Required",
+        "Last Resolved At",
+        "Board URL",
+        "Source",
+        "Source Section"
+      ],
+      "Findings": [
+        "Company",
+        "Title",
+        "Location",
+        "URL",
+        "URL Quality",
+        "Vendor",
+        "Vendor Job ID",
+        "Posted At",
+        "Age (days)",
+        "Region Route",
+        "Dedupe Decision",
+        "Dedupe Reason",
+        "Owner Filter Eligible",
+        "Tracker Eligible",
+        "Attribution Confidence",
+        "Source",
+        "Feeding Timestamp"
+      ],
+      "Tracker Handoff": [
+        "Region",
+        "Mode",
+        "Rows",
+        "Tracker",
+        "Manifest",
+        "Career Ops Exit Code",
+        "Handed Off At",
+        "Notes"
+      ],
+      "Run Log": [
+        "Run ID",
+        "Started (UTC)",
+        "Region",
+        "Companies Probed",
+        "Boards Resolved",
+        "Findings",
+        "Duplicates",
+        "Eligible",
+        "HTTP Requests",
+        "Budget Exhausted",
+        "Duration (s)",
+        "Mode"
+      ]
+    },
+    "conflict_check": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\company-watch\\Company_Watch_2026-09.xlsx",
+      "name": "Company_Watch_2026-09.xlsx",
+      "archive_glob_conflicts": [],
+      "safe": true
+    },
+    "forbidden_application_state_columns": [],
+    "note": "operational workbook only; canonical regional trackers remain application state",
+    "written_at": "2026-09-23T23:12:43+00:00"
+  },
+  "artifacts": {
+    "resolution": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\resolution.json",
+    "findings": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\findings.json",
+    "acceptance": "audits\\evidence\\2026-09-23T23-10-46Z-company-watch-integration\\acceptance.json",
+    "workbook": "C:\\Users\\mukun\\Downloads\\codex\\company-watch\\Company_Watch_2026-09.xlsx"
+  },
+  "local_only_detail": "Per-company registry and per-posting findings name owner job-search history and are kept in git-ignored runtime paths; this evidence records aggregate counts and verification results only."
+}

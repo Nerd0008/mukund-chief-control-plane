@@ -1098,3 +1098,35 @@ interface and B09; the regional lanes and Company Watch were left to their own t
 
 **Open owner decision:** whether to rotate the current month out of the live workbooks, and how to
 treat the rows that hold owner application state. No rotation was applied to any canonical workbook.
+
+## Company Watch integration — recovery pass (2026-09-24T02:27Z)
+
+Task `agent-company-watch-recovery-final-pass-2026-09-24`, recovering the Company Watch record that
+was claimed 2026-09-23T22:58:06Z and blocked 2026-09-23T23:18:06Z (`execution_error`, 1200 s
+dispatch ceiling). Inspected first, rebuilt nothing: the integration had already landed on `main` in
+`42a2bec` (the CV/cover-letter + LinkedIn task, which imports Company Watch for its dedupe).
+
+- **Verified, not rebuilt.** `company-watch/` (`company_registry.py`, `ats_endpoints.py`,
+  `company_watch.py` CLI, config, aggregate registry summary) is tracked; no partial local work was
+  found or assumed. The watch list is still parsed from the owner's recorded history file
+  (`uk_application_company_history_18_months.md`) with **zero** declared-vs-parsed mismatches, so the
+  historical 203 employers / 18 recruiters / 221 evidenced organisations remain **historical
+  re-derivations**, not freshly mailbox-verified numbers.
+- **Gap found and closed:** the suite asserted the regional provenance *mapping* but never proved an
+  end-to-end regional write. Four new offline tests now write a region-routed finding into a **copy**
+  of the Dubai/Japan/Singapore tracker and assert provenance in `Source` (X), unchanged owner columns
+  (R,S,T,U,V,Z), 0 appends on repeat, and an unchanged canonical hash — plus a refusal test that a
+  Japan-routed finding is never handed to the UK tracker. `company-watch/tests/` **35 passed**
+  (was 31).
+- **Fresh bounded evidence:** `audits/evidence/2026-09-24T02-27-00Z-company-watch-recovery/`
+  (23.2 s, 12 companies, 58 HTTP requests, `budget_exhausted: false`; 19 findings, 0 tracker-eligible
+  under the owner's intern-only UK filter; acceptance write on a workbook copy 3 appended → repeat 3
+  duplicates; canonical workbook SHA-256 unchanged). The original blocked run's evidence dir
+  (`audits/evidence/2026-09-23T23-10-46Z-company-watch-integration/`) is now committed private-safe
+  (aggregate files only; per-company findings/resolution stay git-ignored).
+- **Still open, owned elsewhere:** the regional scan/schedule lanes; the blocked-record
+  reconciliation itself (pending `agent-blocked-work-final-reconciliation-2026-09-24` owns it — the
+  blocked JSON was deliberately left untouched because this task is its recorded prerequisite).
+- **No external action:** read-only public ATS GETs only; no applications, messages, recruiter or
+  company contact, account or LinkedIn mutation. Nothing was pushed to any tracker other than a copy;
+  no canonical workbook was modified.
