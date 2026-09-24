@@ -1,0 +1,112 @@
+{
+  "artifact": "operational backup",
+  "started_utc": "2026-09-24T03:59:41+00:00",
+  "snapshot_root": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational",
+  "snapshot_dir": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20260924T035941Z",
+  "dry_run": true,
+  "retention_keep": 7,
+  "artifacts": [
+    {
+      "label": "e1-e2-exec-brain",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "e2-governor",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "e3-orchestration",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "hermes-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "hermes-kanban",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "hermes-shared-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "hermes-cron-executions",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "status": "PLANNED",
+      "plan": "sqlite online backup + integrity_check"
+    },
+    {
+      "label": "e1-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\chain-head.json",
+      "status": "PLANNED",
+      "plan": "byte copy + sha256"
+    },
+    {
+      "label": "e2-gov-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\gov-chain-head.json",
+      "status": "PLANNED",
+      "plan": "byte copy + sha256"
+    }
+  ],
+  "pruned": [],
+  "live_state_modified": false,
+  "network_calls_spent": 0,
+  "provider_calls_spent": 0,
+  "failure_labels": [],
+  "status": "PASS",
+  "finished_utc": "2026-09-24T03:59:41+00:00",
+  "log_rotation": [
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\agent.log",
+      "exists": true,
+      "size_bytes": 2915277,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\errors.log",
+      "exists": true,
+      "size_bytes": 346802,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\logs\\gateway.log",
+      "exists": true,
+      "size_bytes": 69263,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\gateway-starts.log",
+      "exists": true,
+      "size_bytes": 262,
+      "action": "no_rotation_needed"
+    },
+    {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote-queue\\logs\\queue.log",
+      "exists": true,
+      "size_bytes": 26472,
+      "action": "no_rotation_needed"
+    }
+  ]
+}

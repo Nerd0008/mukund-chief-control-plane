@@ -1,0 +1,368 @@
+{
+  "roster": [
+    {
+      "id": "A01",
+      "worker": "Hermes Chief of Staff / owner interface",
+      "status": "PASS",
+      "evidence": "live gateway; this session; state/current_company_state.md"
+    },
+    {
+      "id": "A02",
+      "worker": "E1 intake, classification, immutable quality floor",
+      "status": "PASS",
+      "evidence": "this run: chief_intake_e1_classify + e1_quality_floor_audit (chain + integrity PASS)"
+    },
+    {
+      "id": "A03",
+      "worker": "E2 Resource Governor / provider telemetry",
+      "status": "PASS",
+      "evidence": "this run: e2_gov_verify PASS + e2_telemetry + e2_resource_brief"
+    },
+    {
+      "id": "A04",
+      "worker": "Daily Resource Brief generator",
+      "status": "PASS",
+      "evidence": "this run: e2_resource_brief (eb brief); unknown dimensions stay UNKNOWN"
+    },
+    {
+      "id": "A05",
+      "worker": "E3 Planner / decomposer",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_planner.py; regression suite in full_regression"
+    },
+    {
+      "id": "A06",
+      "worker": "E3 Router / meta-selector / Qualification Gate",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_router.py + qualification_gate.py; evidence-driven capability_registry; this run: e3_status"
+    },
+    {
+      "id": "A07",
+      "worker": "E3 Context Compiler",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_context.py; full_regression"
+    },
+    {
+      "id": "A08",
+      "worker": "E3 Permission Compiler",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_permissions.py; full_regression"
+    },
+    {
+      "id": "A09",
+      "worker": "E3 Dynamic Team Assembler",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_team_assembly.py; decomposed multi-worker rehearsal evidence 2026-09-23T21:32:41Z"
+    },
+    {
+      "id": "A10",
+      "worker": "E3 Worker Execution Manager",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_execution.py; this run: e4e5_drill_harness on the real execution abstractions"
+    },
+    {
+      "id": "A11",
+      "worker": "E3 Integrator",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_integrator.py; multi-worker rehearsal scenario F COMPLETE"
+    },
+    {
+      "id": "A12",
+      "worker": "E3 Independent Critic / Verifier",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_verifier.py; a node cannot reach COMPLETE without a verification PASS"
+    },
+    {
+      "id": "A13",
+      "worker": "E3 Conflict / targeted rework / replanning / escalation",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_conflict.py, e3_replan.py, e3_escalate.py; full_regression"
+    },
+    {
+      "id": "A14",
+      "worker": "E3 Capability Learning / benchmark / qualification manager",
+      "status": "PASS",
+      "evidence": "exec-brain/e3_qualification_benchmark.py + scripts/e3_qualification_from_evidence.py (evidence-backed bar; qualified_rows_without_evidence = 0)"
+    },
+    {
+      "id": "A15",
+      "worker": "E4 Resource Continuity / checkpoint / failover manager",
+      "status": "PASS",
+      "evidence": "exec-brain/resource_monitor.py, checkpoint/failover paths; this run: e4e5 drills D1/D3/D7"
+    },
+    {
+      "id": "A16",
+      "worker": "E5 Safe Mode / failure-drill / convergence manager",
+      "status": "PASS",
+      "evidence": "exec-brain/safe_mode.py; this run: e4e5 drills D5/D6 (stubbed-failure level)"
+    },
+    {
+      "id": "A17",
+      "worker": "Audit / decision-journal / evidence-state reconciler",
+      "status": "PASS",
+      "evidence": "decision_rationale + blocked-work reconciliation 2026-09-24T02:45Z; this run's evidence bundle"
+    },
+    {
+      "id": "A18",
+      "worker": "Remote Queue Scheduler / watchdog / recovery supervisor",
+      "status": "PASS",
+      "evidence": "remote_queue/ + tests; this run: remote_queue_scheduler_state (read-only) + full_regression queue/bridge suites"
+    },
+    {
+      "id": "A19",
+      "worker": "Discord Chief Gateway + archive/sync worker",
+      "status": "PASS",
+      "evidence": "gateway connected; this run: discord_sync_dry_run (no publish performed in acceptance)"
+    },
+    {
+      "id": "A20",
+      "worker": "Company Registry / system inventory worker",
+      "status": "PASS",
+      "evidence": "scripts/company_inventory.py; 50/50 roster items mapped (2026-09-23 audit)"
+    },
+    {
+      "id": "A21",
+      "worker": "Local health / backup / restore / boot-persistence worker",
+      "status": "PASS",
+      "evidence": "this run: operational_health_snapshot + operational_backup_dry_run + backup_restore_drill + validate-persistence (reboot itself owner-gated, recorded)"
+    },
+    {
+      "id": "A22",
+      "worker": "Morning Chief Brief aggregator",
+      "status": "PASS",
+      "evidence": "this run: morning_chief_brief"
+    },
+    {
+      "id": "B01",
+      "worker": "Career Ops Manager / Chief integration",
+      "status": "PASS",
+      "evidence": "career-ops/career_ops_cli.py single Chief entry point; this run: career_ops_cli_inventory"
+    },
+    {
+      "id": "B02",
+      "worker": "UK Job Search Agent",
+      "status": "PASS",
+      "evidence": "career-ops/regional_job_search.py + ChiefCareerScan-UK (dry-run); this run: regional_jobs_eligibility_uk"
+    },
+    {
+      "id": "B03",
+      "worker": "Dubai Job Search Agent",
+      "status": "PASS",
+      "evidence": "lane built + scheduled (dry-run); this run: regional_jobs_eligibility_dubai. Limitation: no UAE-specific provider (owner decision, item 7) \u2014 thin results are a coverage fact, not a vacancy fact"
+    },
+    {
+      "id": "B04",
+      "worker": "Japan Job Search Agent",
+      "status": "PASS",
+      "evidence": "lane built + scheduled (dry-run); this run: regional_jobs_eligibility_japan. Limitation: no Japan-specific provider (owner decision, item 7)"
+    },
+    {
+      "id": "B05",
+      "worker": "Singapore Job Search Agent",
+      "status": "PASS",
+      "evidence": "lane built + scheduled (dry-run); this run: regional_jobs_eligibility_singapore"
+    },
+    {
+      "id": "B06",
+      "worker": "Job Eligibility / role-policy filter",
+      "status": "PASS",
+      "evidence": "career-ops/regional_policy.json + evaluate_record; fail-closed when scope unresolved"
+    },
+    {
+      "id": "B07",
+      "worker": "Job / Company / Application dedupe-state manager",
+      "status": "PASS",
+      "evidence": "shared tracker_writer primitives (normalize_url/pair_key/cross-month index); this run: dedupe replay per region"
+    },
+    {
+      "id": "B08",
+      "worker": "Excel Tracker Writer (openpyxl, artifact-tool replaced)",
+      "status": "PASS",
+      "evidence": "career-ops/tracker_writer.py; this run: career_ops_scan_dedupe_write on a dated copy"
+    },
+    {
+      "id": "B09",
+      "worker": "Monthly Tracker Rollover / archive worker",
+      "status": "PASS",
+      "evidence": "career-ops/tracker_rollover.py; this run: tracker_rollover acceptance"
+    },
+    {
+      "id": "B10",
+      "worker": "Company Watch Agent",
+      "status": "PASS",
+      "evidence": "company-watch/; this run: company_watch_registry + company_watch_handoff_dry_run"
+    },
+    {
+      "id": "B11",
+      "worker": "Recruiter / intermediary Watch Agent",
+      "status": "PASS",
+      "evidence": "recruiters parsed from the recorded history into the watched registry; read-only discovery, no contact"
+    },
+    {
+      "id": "B12",
+      "worker": "Application Inbox / Status Monitor",
+      "status": "READY_NEEDS_OWNER_CONFIG",
+      "evidence": "built + tested; this run: application_status_monitor passes on fixtures/local export. Live mailbox feed needs the owner's Gmail read-only OAuth (overnight-owner-actions item 9)"
+    },
+    {
+      "id": "B13",
+      "worker": "Job Description Analyzer / requirement extractor",
+      "status": "PASS",
+      "evidence": "career-ops/job_intelligence.py; this run: jobbrief_cv_cover_reviewer"
+    },
+    {
+      "id": "B14",
+      "worker": "Company / Role Research Brief Agent",
+      "status": "READY_NEEDS_OWNER_CONFIG",
+      "evidence": "built; every brief reports research_needed while no research provider is owner-approved (item 11). Cited-file path works"
+    },
+    {
+      "id": "B15",
+      "worker": "CV Tailor Agent",
+      "status": "PASS",
+      "evidence": "career-ops/cv_workflow.py (deterministic reordering, provenance per line); this run: cv_cover_linkedin_handoff"
+    },
+    {
+      "id": "B16",
+      "worker": "Cover Letter Agent",
+      "status": "PASS",
+      "evidence": "career-ops/cv_workflow.py + cv_render_cover.mjs; this run: cv_cover_linkedin_handoff"
+    },
+    {
+      "id": "B17",
+      "worker": "Application Pack Reviewer / truth & completeness gate",
+      "status": "PASS",
+      "evidence": "career-ops/application_pack_review.py; this run: jobbrief_cv_cover_reviewer"
+    },
+    {
+      "id": "B18",
+      "worker": "Submission Gate / owner-approval handoff",
+      "status": "PASS",
+      "evidence": "career-ops/submission_gate.py; this run: owner_escalation_and_gates refuses the external action"
+    },
+    {
+      "id": "B19",
+      "worker": "LinkedIn Job Discovery Agent (read-only)",
+      "status": "PASS",
+      "evidence": "career-ops/linkedin_workflow.py intake/dedupe/handoff; owner-exported local files only"
+    },
+    {
+      "id": "B20",
+      "worker": "LinkedIn Profile / Post Draft Agent",
+      "status": "PASS",
+      "evidence": "unsent drafts with provenance; this run: cv_cover_linkedin_handoff"
+    },
+    {
+      "id": "B21",
+      "worker": "Networking / Recruiter Outreach Draft Agent",
+      "status": "PASS",
+      "evidence": "three unsent variants, explicit unsent state; this run: linkedin_outreach_interview_prep"
+    },
+    {
+      "id": "B22",
+      "worker": "Interview Prep Agent",
+      "status": "PASS",
+      "evidence": "career-ops/interview_prep.py; this run: linkedin_outreach_interview_prep"
+    },
+    {
+      "id": "B23",
+      "worker": "Career Daily Brief / Pipeline Prioritizer",
+      "status": "PASS",
+      "evidence": "career-ops/daily_brief.py; this run: career_daily_brief + career_brief_status"
+    },
+    {
+      "id": "B24",
+      "worker": "Regional Scheduler / run-health monitor",
+      "status": "PASS",
+      "evidence": "career-ops/install_schedules.py + dept_run_health; this run: regional_jobs_lanes + validate-persistence"
+    },
+    {
+      "id": "C01",
+      "worker": "Whole-company Local Acceptance Runner",
+      "status": "PASS",
+      "evidence": "scripts/whole_company_acceptance.py; this acceptance run's evidence bundle"
+    },
+    {
+      "id": "C02",
+      "worker": "Owner-Action Consolidator",
+      "status": "PASS",
+      "evidence": "consolidated order in tasks-or-issues/overnight-owner-actions-2026-09-24.md + the handover's ordered afternoon list"
+    },
+    {
+      "id": "C03",
+      "worker": "Deployment Prep / Manifest / Restore Agent",
+      "status": "READY_NEEDS_OWNER_CONFIG",
+      "evidence": "deployments/ manifest, preflight GO, backup/restore drill pass; cutover itself is owner-gated (architecture + VPS details + authorisation)"
+    },
+    {
+      "id": "C04",
+      "worker": "Final Morning Handover Generator",
+      "status": "PASS",
+      "evidence": "handovers/2026-09-24-morning-handover.md (this run)"
+    }
+  ],
+  "supplementary_owner_gated": [
+    {
+      "item": "provider-credentials",
+      "what": "7 API worker credentials (Mistral, GLM, Qwen, LongCat, MiniMax, Step, Hunyuan)",
+      "status": "READY_NEEDS_OWNER_CONFIG",
+      "detail": "presence probe: 0/7 configured; owner action item 1; use scripts/set_provider_key.py"
+    },
+    {
+      "item": "e3-stage2",
+      "what": "E3 local Stage 2 production enablement",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "gated on the 7 credentials + explicit owner step; anti-loop directive forbids re-staging while 0/7"
+    },
+    {
+      "item": "live-provider-e4e5",
+      "what": "Live-provider E4 failover / E5 recovery drill",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "harness has no live-provider mode by design; owner acceptance question recorded (item 8)"
+    },
+    {
+      "item": "deployment-architecture",
+      "what": "Deployment architecture choice + VPS host/account details",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "owner decision items 3 + 4; no cutover authorised"
+    },
+    {
+      "item": "reboot-persistence",
+      "what": "Reboot survival of the 7 non-`Hermes_Gateway` Chief tasks",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "read-only validation done; a reboot is prohibited by this contract, so survival is UNVERIFIED (item 6)"
+    },
+    {
+      "item": "laptop-security-audit",
+      "what": "Owner-attended laptop UI-event attribution audit",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "item 5; evidence preserved, no destructive cleanup performed"
+    },
+    {
+      "item": "rollover-policy",
+      "what": "Rotate 2026-09 out of the live workbooks (owner-column rows blocked)",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "uk 26 / dubai 8 / singapore 4 owner-state rows; refused, not deleted"
+    },
+    {
+      "item": "regional-work-auth",
+      "what": "Work-authorisation facts for UAE / Japan / Singapore",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "every non-UK record stays labelled UNKNOWN (item 6)"
+    },
+    {
+      "item": "linkedin-live-surface",
+      "what": "Whether the live LinkedIn account may ever be read",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "owner-export path only today (item 13)"
+    },
+    {
+      "item": "ops-scheduling",
+      "what": "Scheduling cadence for operational backup / log rotation / briefs",
+      "status": "BLOCKED_EXTERNAL",
+      "detail": "runs on demand only until the owner approves a cadence (item 15)"
+    }
+  ],
+  "roster_items": 50,
+  "unaccounted": []
+}

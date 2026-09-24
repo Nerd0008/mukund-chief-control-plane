@@ -743,3 +743,38 @@ provider series re-run.
 | E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion weakened; the 0/7 credential gate was not run, re-parameterised or re-opened |
 | Still open, deliberately not chased | **RECORDED** | what makes the recitation filter fire on some identical calls and not others; the provider exposes the stop reason but not the filter input, and no unbounded generation may be used to chase it |
 | Owner action | **NONE NEW** | the pressure warning is informational; unchanged dependencies only (7 provider credentials still absent, pending whole-company acceptance not pre-empted) |
+
+## Whole-company local acceptance + morning handover — `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`
+
+Ran 2026-09-24T03:57:34Z–04:00Z at code SHA `31eecdb`.
+Evidence: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/`
+(`acceptance.md`, `results.json`, `roster_account.json/.md`, 12 sub-artifact directories).
+Provider-call budget: **0 (stated up front)**; external mutations: **0**.
+
+| Item | State | Evidence |
+|---|---|---|
+| Acceptance verdict | **PASS** | 34 steps — **33 PASS, 0 FAIL, 1 owner-gated (credential presence probe), 0 unavailable**; `canonical_workbooks_unchanged: true` |
+| Driver | **NEW (roster C01)** | `scripts/whole_company_acceptance.py` — orchestrates the existing verified surfaces as real subprocesses, incremental `results.json`, fail-closed (an unavailable/unparsable step is never a pass; a broken evaluator is `unavailable`) |
+| Regression | **PASS** | `scripts/evidence_runner.py` inside the run: **21 suites / 579 collected / 579 passed / 0 failed / 0 errors / 0 unavailable**, every suite exit 0 (`…/regression/evidence.json`). Baseline at sprint start: 15 suites / 438 tests |
+| E3 delegation/verification + E4/E5 | **PASS** | drill harness **36/36 checks**, `real_provider_calls = 0`, `stub_dispatches = 10`, `evidence_kind = stubbed_provider_failure` |
+| Chief intake / E1 / E2 | **PASS** | E1 classify + quality-floor/integrity audit PASS; E2 governor verify PASS; E2 resource brief + telemetry exit 0 |
+| E3 store | **PASS** | `e3-verify-db`: schema v2, all required tables present |
+| Remote queue + watchdog | **PASS (read-only)** | 9 tasks inspected, 2 configured to survive a reboot; 8 Chief tasks + the legacy donor; no task created/modified/deleted |
+| Discord sync | **PASS (dry-run)** | `scripts/sync_discord_chief.py --dry-run` — nothing published by this task |
+| Career Ops records | **PASS** | `run_acceptance.py` (scan → eligibility → dedupe → tracker write on a dated copy → Chief summary) + `career_ops_cli inventory`; rollover acceptance PASS |
+| Regional jobs | **PASS** | lanes ready; UK/Dubai/Japan/Singapore offline eligibility + dedupe replays of recorded scans |
+| Company Watch | **PASS** | registry parse + handoff interface dry-run against the canonical workbook (recorded findings + 3 labelled ineligible test rows; hash unchanged) |
+| Application status | **PASS** | `run_application_inbox_acceptance.py` (fixture + runtime-synthesised mailbox; store byte-identical on repeat) |
+| JobBrief / CV / cover letter / reviewer / gate | **PASS** | `run_job_intelligence_acceptance.py` (incl. a tampered pack being blocked) |
+| LinkedIn read-only / drafts / interview prep | **PASS** | `run_cv_linkedin_acceptance.py` + `run_interview_prep_acceptance.py`; 0 network calls, 0 account mutations, unsent drafts |
+| Career brief | **PASS** | `run_daily_brief_acceptance.py` + `daily_brief.py status` (scheduled 07:00; delivery channel `not_verified`) |
+| Morning Chief Brief / health | **PASS** | verdict `ATTENTION`, `fail_count 0`, attention 2; brief active 2 / blocked 12 / owner actions 18 / escalations 3 |
+| Owner escalation / external-action refusal | **PASS** | `submission_gate.py guard --action submit_application` refuses; drill D2 escalation recorded |
+| Backup / restore | **PASS** | operational backup + log-rotation **dry-run** exit 0; backup/restore/rollback drill `status: PASS`, 10 artifacts |
+| Deployment preflight | **PASS** | verdict **GO**, 11 checks, 0 FAIL, 1 WARN (credentials absent, owner-gated) |
+| Credentials | **OWNER_GATED** | presence-only probe: 7/7 API worker credentials absent — owner action, not a defect |
+| Roster account | **50/50, no omission** | 47 PASS, 3 READY_NEEDS_OWNER_CONFIG (B12, B14, C03), 0 BLOCKED_EXTERNAL, 0 unmapped + 10 supplementary owner-gated items (`roster_account.md`) |
+| Morning handover | **PRODUCED** | `handovers/2026-09-24-morning-handover.md` |
+| Attempt-1 defect | **RECORDED, FIXED** | the runner's persistence evaluator assumed `tasks` was a list (it is a keyed object) and died after 9 PASS steps; partial record preserved under `audits/evidence/2026-09-24T03-51-07Z-whole-company-acceptance-attempt1-partial/` with a NOTE; evaluator fixed + fail-closed guard added |
+| E3 Stage 2 / production dispatch / VPS cutover | **NOT ENABLED / NOT PERFORMED** | no readiness, qualification or verification criterion weakened; the 0/7 credential gate was not re-run or re-staged |
+| Owner action | **NONE NEW** | pre-existing dependencies only (7 provider credentials, Gmail read-only OAuth, research provider, work authorisation, deployment architecture/VPS, laptop audit, reboot confirmation, legacy task disposition, optional decisions) |

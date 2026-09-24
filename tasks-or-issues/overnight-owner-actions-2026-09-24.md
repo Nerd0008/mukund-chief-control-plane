@@ -259,13 +259,14 @@ provision, and (b) Stage 2 enablement, which the owner deferred until those keys
 1. `python scripts/e3_credential_presence_probe.py` — must show the seven workers as configured.
 2. `python scripts/e3_stage2_readiness_gate.py` — must report the readiness conditions MET and the
    Stage 2 verdict; record its output directory.
-3. `python scripts/evidence_runner.py --label post-keys-regression` — must be **438 collected /
-   438 passed / 0 failed / 0 errors / 0 skipped, every suite exit 0** (15 suites; the figure to beat
-   as of 2026-09-24T23:55Z). Any suite failure blocks Stage 2.
+3. `python scripts/evidence_runner.py --label post-keys-regression` — must be **579 collected /
+   579 passed / 0 failed / 0 errors / 0 unavailable, every suite exit 0** (21 suites; the figure to
+   beat, set by the whole-company acceptance run of 2026-09-24T03:57:34Z at SHA `31eecdb`). Any suite
+   failure blocks Stage 2.
 4. `python exec-brain/e3_execution_rehearsal.py` — the bounded **real-provider** execution rehearsal.
    This is the only driver that spends real provider calls; keep it bounded (its default is ~7 calls).
 5. `python exec-brain/e4e5_drill_harness.py` — re-run the E4/E5 drills on the enabled system and
-   confirm 33/33 checks with `real_provider_calls = 0` and `live_stores_changed = []`.
+   confirm **36/36 checks** with `real_provider_calls = 0` and `live_stores_changed = []`.
 6. Only then complete local Stage 2 (item 2 above).
 
 **Truthful gap to close before claiming live failover coverage (engineering, small, not owner work):**
@@ -376,3 +377,27 @@ they are not lost (all recorded, none changed):
 Mukund's expected manual task is **provider-key configuration only**. Engineering does not stop in the morning; it continues until the system is complete and deployment-ready.
 
 Do not assign ordinary engineering, scripting, testing, scheduling, integration, documentation, acceptance preparation, or deployment preparation to Mukund. If an unforeseen external service genuinely requires owner interaction that cannot be completed safely by the system, record the exact reason and minimum action here, then continue all independent work.
+
+---
+
+## Reconciliation — whole-company local acceptance (2026-09-24T03:57Z)
+
+Task `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`. Evidence:
+`audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/`;
+handover: `handovers/2026-09-24-morning-handover.md`.
+
+- **Local acceptance: PASS** — 34 steps, **33 PASS, 0 FAIL, 1 owner-gated, 0 unavailable**;
+  `canonical_workbooks_unchanged: true`; 0 external mutations; 0 provider calls; code SHA `31eecdb`.
+- **No new owner action was created by this task.** The list above is confirmed as the complete and
+  current owner-action set, and nothing in it was worked around or silently dropped.
+- Two figures in item 8 were stale and are now corrected to the verified current numbers:
+  regression baseline **21 suites / 579 tests** (was "15 suites / 438"), drill harness **36/36**
+  (was "33/33").
+- Items 1 (seven provider credentials) and 2 (post-key Stage 2) remain the critical path. The
+  credential gate was deliberately **not** re-run or re-staged (anti-loop directive).
+- Deployment preflight re-run inside acceptance: **GO** (11 checks, 0 FAIL, 1 WARN = the seven absent
+  credentials), and the backup/restore/rollback drill **PASS** (10 artifacts) — both read-only; no
+  cutover, no deployment, no scheduled task changed.
+- Roster account: **50/50 items accounted for** — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG (B12 Gmail
+  read-only OAuth = item 9; B14 research provider = item 11; C03 cutover owner-gated = items 3/4),
+  0 BLOCKED_EXTERNAL, 0 unmapped (`state/v1-agent-roster.md` § "Final account").

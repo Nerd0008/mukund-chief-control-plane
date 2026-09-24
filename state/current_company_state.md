@@ -1,7 +1,19 @@
 # Current Company State
 
-- Timestamp: 2026-09-24T01:30:00Z
-- Latest evidence run: 2026-09-24T01:30:00Z — **LinkedIn people/network layer completed: networking /
+- Timestamp: 2026-09-24T04:05:00Z
+- Latest evidence run: 2026-09-24T03:57:34Z — **WHOLE-COMPANY LOCAL ACCEPTANCE: PASS** (task
+  `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`),
+  `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/` (`acceptance.md`, `results.json`,
+  `roster_account.md/.json`) — **34 steps: 33 PASS, 0 FAIL, 1 owner-gated, 0 unavailable**, code SHA
+  `31eecdb`, `canonical_workbooks_unchanged: true`, **0 external mutations / 0 provider calls**.
+  Driver `scripts/whole_company_acceptance.py` (roster C01). Full regression inside the run:
+  **21 suites / 579 collected / 579 passed / 0 failed / 0 errors / 0 unavailable, every suite exit 0**;
+  E4/E5 drills **36/36 checks, `real_provider_calls = 0`**; deployment preflight **GO** (0 FAIL, 1 WARN
+  = the 7 absent credentials); backup/restore/rollback drill **PASS** (10 artifacts); roster **50/50**
+  (47 PASS, 3 READY_NEEDS_OWNER_CONFIG). Morning handover:
+  `handovers/2026-09-24-morning-handover.md`. E3 Stage 2 still **NOT ENABLED**; no production dispatch;
+  no VPS cutover; the only remaining gaps are owner-only or deliberately out of scope.
+- Previous evidence run: 2026-09-24T01:30:00Z — **LinkedIn people/network layer completed: networking /
   recruiter / hiring-manager outreach drafts + Interview Prep Agent (B22)** (task
   `agent-linkedin-networking-interview-support-2026-09-23`),
   `audits/evidence/20260924T020000Z-linkedin-outreach-interview-prep/acceptance.json` (+ `.md`) —
@@ -939,6 +951,52 @@ stays owner-gated — owner decision recorded as item 13 in
 `tasks-or-issues/overnight-owner-actions-2026-09-24.md`), any real interview, any
 employer-supplied question, any live vacancy or company research (the acceptance fixtures are
 labelled synthetic), and any external message or application.
+
+## Whole-company local acceptance + morning handover (2026-09-24T03:57Z)
+
+Task `agent-whole-company-local-acceptance-and-morning-handover-2026-09-23`; authority
+`tasks-or-issues/2026-09-24-full-operational-vps-cutover.md`. Evidence:
+`audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/` (34 step records with exact
+commands/exit codes, 12 sub-artifacts, `roster_account.md/.json`), code SHA `31eecdb`.
+
+- New deterministic driver (roster C01): `scripts/whole_company_acceptance.py`. It runs the **existing**
+  verified surfaces (nothing re-implemented), records every real exit code, writes `results.json`
+  incrementally, and fails closed: an unavailable/unparsable step is never a pass, and a broken
+  evaluator is recorded as `unavailable` (that guard was added after attempt 1 of this run died on its
+  own evaluator defect — preserved with a NOTE under
+  `audits/evidence/2026-09-24T03-51-07Z-whole-company-acceptance-attempt1-partial/`).
+- **Verdict PASS: 34 steps — 33 PASS, 0 FAIL, 1 owner-gated, 0 unavailable.** Owner-gated step is the
+  presence-only credential probe (7/7 API worker credentials absent; owner action, not a defect).
+- **Safety proven in-run:** `canonical_workbooks_unchanged: true` (SHA-256 of all four canonical
+  workbooks identical before/after), 0 external mutations, 0 provider calls, Discord sync dry-run only,
+  every write path exercised against copies/dry-runs.
+- **Regression:** 21 suites / 579 collected / 579 passed / 0 failed / 0 errors / 0 unavailable, every
+  suite exit 0 (`…/regression/evidence.json`). Baseline at the start of the sprint was 15 suites / 438
+  tests.
+- **E4/E5:** drill harness 36/36 checks, `real_provider_calls = 0`, `stub_dispatches = 10`,
+  `evidence_kind = stubbed_provider_failure` (a stubbed failure is never presented as real provider
+  evidence).
+- **Operator surfaces:** health snapshot `ATTENTION` with `fail_count 0` / 2 attention items; Morning
+  Chief Brief `verdict=ATTENTION`, active 2, blocked 12, owner actions 18, escalations 3.
+- **Deployment:** preflight verdict **GO** (11 checks, 0 FAIL, 1 WARN = credentials absent);
+  backup/restore/rollback drill **PASS** (10 artifacts); persistence read-only validation on 9 tasks
+  (2 configured to survive a reboot; a reboot was not performed — prohibited by this contract).
+- **Roster account (C02 input):** all **50/50** items accounted for — **47 PASS,
+  3 READY_NEEDS_OWNER_CONFIG** (B12 live mailbox OAuth, B14 research provider, C03 cutover
+  owner-gated), 0 BLOCKED_EXTERNAL, 0 unmapped, plus 10 supplementary owner-gated/external items.
+  Detailed in `state/v1-agent-roster.md` § "Final account".
+- **Morning handover produced:** `handovers/2026-09-24-morning-handover.md` — completed engineering,
+  exact test/evidence counts, ordered afternoon owner steps, the post-key Stage 2 sequence, deployment
+  prerequisites, rollback/no-go criteria, and the exact remaining blockers.
+- **Not done, by contract:** local Stage 2 **NOT ENABLED**; no production dispatch; no provider call;
+  no VPS cutover; no external publish/submit; no readiness, qualification or verification criterion
+  weakened; the 0/7 credential gate was not re-staged (anti-loop directive).
+
+Owner action required: **only the pre-existing owner items** — 7 provider credentials (item 1), the
+post-key verification sequence (item 8), the work-authorisation answer, the deployment architecture /
+VPS decision, the owner-attended laptop audit, reboot-persistence confirmation, the legacy task
+disposition, and the optional decisions listed in the handover §5. No new owner dependency was created
+by this task.
 
 ## Next non-blocked priority
 

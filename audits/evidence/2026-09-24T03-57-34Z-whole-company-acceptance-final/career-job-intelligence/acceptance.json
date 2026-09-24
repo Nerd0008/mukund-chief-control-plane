@@ -1,0 +1,836 @@
+{
+  "acceptance_run": "20260924T035912Z",
+  "generated_at": "2026-09-24T03:59:12+00:00",
+  "workflow": "JobBrief / research brief / CV+cover-letter handoff / pack reviewer / submission gate",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md § CV + cover-letter workflow / § company-role research / roster B13,B14,B17,B18",
+  "cheating_guards": {
+    "applications_submitted": 0,
+    "employer_or_recruiter_contact": 0,
+    "browser_or_gui_launched": false,
+    "network_research_calls": 0,
+    "canonical_sources_modified": false,
+    "canonical_trackers_touched": false,
+    "live_vacancy_claimed": false,
+    "fabricated_facts_used": 0
+  },
+  "fixtures": {
+    "job_record": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\job-record-uk.json",
+      "kind": "SYNTHETIC job record",
+      "sha256": "abc762e7df1ab7610eec337896975b0d4f5f2987280ed62bb7ebac88edf17bfc"
+    },
+    "posting_uk": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\jd-information-security-analyst.txt",
+      "kind": "SYNTHETIC posting text",
+      "sha256": "eea7ed1476d1dfe46ed6d9d91752886380592e693844ae91fc2da156693953a2"
+    },
+    "posting_uae": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\jd-unknown-eligibility.txt",
+      "kind": "SYNTHETIC posting text",
+      "sha256": "7f4a21b48e1b1617a12fda63a47aadfaa816b2081c92d94184b325b9d7ddcfc3"
+    },
+    "research_cited": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\research-cited.json",
+      "kind": "SYNTHETIC cited research",
+      "sha256": "abefd7a890a78d53f39cddc979c286055c2ad8a0450fbffd381277a939c5f816"
+    },
+    "research_uncited": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\research-uncited.json",
+      "kind": "SYNTHETIC partly-uncited research",
+      "sha256": "f5c925a0d0e54e32b3100d5759d3538305820d9c7d10fede5009ed1a484af1d5"
+    },
+    "note": "No fixture is a live vacancy or a real research result; every fixture says so in its own body."
+  },
+  "stage_1_sources": {
+    "sources": {
+      "cv_md": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md",
+        "exists": true,
+        "sha256": "111b43e4a0a61df78562106accda15b4487b02cb0b44baa787206d816ae34c12"
+      },
+      "profile": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml",
+        "exists": true,
+        "sha256": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4"
+      },
+      "cv_facts": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json",
+        "exists": true,
+        "sha256": "c1ad731b2c44debe4114aaa3fb646e0c2e8a95062d610b27f73ebaf66427e863"
+      },
+      "cover_template": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\templates\\cover-letter-template.html",
+        "exists": true,
+        "sha256": "17c3e54aefcbda14c0194bd4d9a71d94da0d2e97d9a10cd7f8cf442daae8386e"
+      },
+      "cover_script": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\generate-cover-letter.mjs",
+        "exists": true,
+        "sha256": "b4c7299a42d3cae71c4a75af71e443d0e9acb3f0e0f82500808b951e1ce60dd1"
+      },
+      "tailor_script": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\openai-tailor.mjs",
+        "exists": true,
+        "sha256": "c3aa812d193836306a2693a3bd54298f79b434e8be37c2fa074254b47b84f2d8"
+      },
+      "pipeline": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+        "exists": true,
+        "sha256": "ac8c0e3294a3398d0be4b5f1a753f84edd7f62596e7e8e4e13794a506aaf6ec2"
+      }
+    },
+    "node_available": true,
+    "fact_gate_ready": true,
+    "read_only": true
+  },
+  "stage_2_job_record": {
+    "resolved": true,
+    "source_kind": "synthetic-fixture-job-record",
+    "job": {
+      "company": "Crown Agents Bank",
+      "title": "Information Security Analyst",
+      "location": "London, United Kingdom",
+      "url": "https://example.invalid/fixture/information-security-analyst",
+      "posted_date": "2026-09-20",
+      "fit_score": null,
+      "live_status": "Uncertain — fixture, never verified live",
+      "key_requirements": null,
+      "key_responsibilities": null,
+      "job_type": "Full-time",
+      "work_model": "Hybrid",
+      "salary": null,
+      "id": "FIXTURE-UK-0001"
+    },
+    "posting_chars": {
+      "uk": 1372,
+      "uae": 403
+    }
+  },
+  "stage_3_job_brief": {
+    "brief_id": "jb-20260924T035912Z-2105e710",
+    "schema_validation": {
+      "ok": true,
+      "errors": [],
+      "schema": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\job_brief_schema.json",
+      "schema_id": "career-ops/job_brief_schema.json"
+    },
+    "candidate_claim_violations": [],
+    "counts": {
+      "requirements_essential": 5,
+      "requirements_desirable": 4,
+      "responsibilities": 8,
+      "eligibility": 1,
+      "keywords": 40,
+      "source_supported_facts": 18
+    },
+    "citation_mismatches": [],
+    "preferences_are_desirable_only": true,
+    "preference_texts_sample": [
+      "CompTIA Security+ or equivalent certification.",
+      "Experience with Splunk or another SIEM platform.",
+      "Experience working in a Security Operations Centre (SOC).",
+      "Knowledge of ISO 27001 and GDPR."
+    ],
+    "keywords_sample": [
+      "security",
+      "analysis",
+      "cyber",
+      "information",
+      "phishing",
+      "triage",
+      "written",
+      "activities"
+    ],
+    "risks": [
+      {
+        "kind": "desirable_items_present",
+        "severity": "info"
+      }
+    ],
+    "eligibility": [
+      {
+        "text": "Right to work: applicants must already hold the right to work in the United Kingdom.",
+        "source_line": 29,
+        "source_section": "Desirable",
+        "category": "right_to_work",
+        "status": "satisfied_by_owner_source",
+        "owner_source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml#location.authorized_in",
+        "owner_source_line": 51,
+        "note": "The posting's right-to-work condition names only locations the owner's own profile lists as authorised. This is an owner-stated fact, not an inference; the CV/cover letter may not claim more than the owner source states."
+      }
+    ],
+    "research_status": "research_needed",
+    "posting_lines_total": 29
+  },
+  "stage_3b_unstated_region": {
+    "eligibility": [
+      {
+        "text": "Right to work: applicants must already hold a UAE work permit or be eligible to obtain one without employer sponsorship.",
+        "source_line": 9,
+        "source_section": "Essential requirements",
+        "category": "right_to_work",
+        "status": "unknown",
+        "owner_source": null,
+        "owner_source_line": null,
+        "note": "The posting names uae and the owner profile lists only United Kingdom. No owner-stated right to work there — owner decision required."
+      }
+    ],
+    "unknown_statuses": [
+      "unknown"
+    ],
+    "blocker_risks": [
+      "eligibility_right_to_work_unknown"
+    ],
+    "note": "The owner profile lists only the United Kingdom. A UAE right-to-work condition is therefore UNKNOWN and produces a blocker risk; it is never satisfied by assumption."
+  },
+  "stage_4_research": {
+    "no_provider": {
+      "status": "research_needed",
+      "facts": 0,
+      "requested": [
+        "official company careers/ATS presence",
+        "company registration/legal identity",
+        "recent material company news"
+      ],
+      "notes": [
+        "No research provider was supplied, so no company fact could be cited.",
+        "provider 'http' is disabled: disabled by default: no owner-approved research endpoint is configured. Enable per-source only with an owner-approved endpoint list."
+      ]
+    },
+    "cited_file": {
+      "status": "provided",
+      "facts": [
+        {
+          "claim": "company_legal_name",
+          "value": "Crown Agents Bank Ltd (fixture value)",
+          "source": "fixture:example.invalid/company-register",
+          "citation": "https://example.invalid/company-register/fixture-0001",
+          "provider": "file",
+          "retrieved_at": "2026-09-24T00:00:00Z"
+        },
+        {
+          "claim": "careers_channel",
+          "value": "Own careers page listed in the posting footer (fixture value)",
+          "source": "fixture:example.invalid/careers",
+          "citation": "https://example.invalid/careers/fixture-0001",
+          "provider": "file",
+          "retrieved_at": "2026-09-24T00:00:00Z"
+        }
+      ],
+      "sources": [
+        {
+          "provider": "file",
+          "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\job-intelligence\\research-cited.json",
+          "sha256": "abefd7a890a78d53f39cddc979c286055c2ad8a0450fbffd381277a939c5f816",
+          "facts_accepted": 2,
+          "facts_rejected": 0
+        }
+      ]
+    },
+    "partly_uncited_file": {
+      "status": "partial",
+      "accepted": 1,
+      "rejected": [
+        {
+          "index": 1,
+          "reason": "missing source, citation",
+          "claim": "recent_news",
+          "raw": "{'claim': 'recent_news', 'value': 'Uncited assertion (fixture value)', 'source': '', 'citation': ''}"
+        }
+      ]
+    },
+    "allow_network_without_provider": {
+      "status": "research_needed",
+      "facts": 0,
+      "notes": [
+        "--allow-network was requested but no network research provider is enabled in the configuration; nothing was fetched."
+      ]
+    },
+    "providers": {
+      "file": {
+        "enabled": true,
+        "kind": "owner-or-fixture-provided structured evidence file (JSON)",
+        "reason": "Each fact must carry a source and a citation; facts without them are rejected and listed under rejected_facts."
+      },
+      "http": {
+        "enabled": false,
+        "kind": "structured HTTP/API fetch",
+        "reason": "disabled by default: no owner-approved research endpoint is configured. Enable per-source only with an owner-approved endpoint list."
+      },
+      "browser": {
+        "enabled": false,
+        "kind": "interactive browser / GUI research",
+        "reason": "disabled: the owner's 2026-09-23 late-night directive forbids launching or controlling an interactive browser, Windows Search or another visible GUI application from this machine unless the immutable task explicitly requires that exact UI action."
+      }
+    },
+    "browser_provider_enabled": false
+  },
+  "stage_5_handoff": {
+    "handoff_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\job-brief\\handoff_jd_text.txt",
+    "lines": 18,
+    "all_lines_from_posting": true,
+    "not_from_posting": [],
+    "only_source_supported_facts": true,
+    "research_status_in_pack_brief": "provided",
+    "company_facts_in_pack_brief": 2
+  },
+  "stage_6_drafts": {
+    "ok": true,
+    "status": "draft_ready_for_owner_review",
+    "run_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\cv-drafts",
+    "cv_draft": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\cv-drafts\\cv_draft.md",
+    "cover_payload": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\cv-drafts\\cover_letter_payload.json",
+    "cover_html": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\cv-drafts\\cover_letter_draft.html",
+    "fact_gate": {
+      "cv_draft": "pass",
+      "cover_letter": "pass"
+    },
+    "jd_terms_ranked": 72,
+    "terms_absent_from_canonical": [
+      "written",
+      "activities",
+      "alerts",
+      "already",
+      "another",
+      "assurance",
+      "attention",
+      "automation",
+      "behaviour",
+      "centre",
+      "certification",
+      "clear",
+      "communication",
+      "contribute",
+      "degree",
+      "detail",
+      "discipline",
+      "documentation",
+      "equivalent",
+      "events",
+      "familiarity",
+      "gdpr",
+      "hold",
+      "incident",
+      "investigate"
+    ],
+    "owner_input_required": [
+      "Posting terms with no canonical evidence: written, activities, alerts, already, another, assurance, attention, automation, behaviour, centre, certification, clear, communication, contribute, degree, detail, discipline, documentation, equivalent, events, familiarity, gdpr, hold, incident, investigate — do not claim these; add real evidence or leave them out.",
+      "DRAFT ONLY — owner review required. No application has been submitted and nothing has been sent to the employer."
+    ],
+    "external_actions_taken": [],
+    "next_step_owner_gated": true
+  },
+  "stage_7_review": {
+    "reviewer": "career-ops/application_pack_review.py",
+    "reviewer_role": "B17 Application Pack Reviewer / truth & completeness gate",
+    "independent_of_generator": "separate module; re-derives from artifacts",
+    "independence_statement": {
+      "statement": "Separate module; re-reads the on-disk artifacts plus the canonical sources and the posting file, and re-derives every verdict with its own logic. It does not import or trust the generator's verdicts.",
+      "limitation": "Both the generator and this reviewer are deterministic software, so this is independent re-derivation, NOT a second model or an independent AI opinion, and NOT a substitute for owner review.",
+      "reads": [
+        "job_brief.json",
+        "cv_draft.md",
+        "cover_letter_payload.json",
+        "cover_letter_draft.html",
+        "draft_result.json",
+        "posting file (--jd-file)",
+        "canonical cv.md + config/profile.yml (read-only)"
+      ]
+    },
+    "verdict": "pass_with_owner_input_required",
+    "truthfulness_verified": true,
+    "blockers": [],
+    "findings_by_area": {
+      "requirement_coverage": [
+        {
+          "id": "essential_requirements_uncovered",
+          "severity": "major"
+        },
+        {
+          "id": "essential_requirements_partial",
+          "severity": "info"
+        }
+      ]
+    },
+    "coverage_counts": {
+      "essential_total": 5,
+      "essential_covered": 3,
+      "essential_partial": 1,
+      "essential_uncovered": 1,
+      "desirable_total": 4,
+      "desirable_covered": 2,
+      "essential_coverage_ratio": 0.6,
+      "note": "Coverage means the posting's own vocabulary overlaps text that exists in the canonical sources. It is a ranking aid, not evidence that any specific requirement is met. Desirable items are reported separately and are never folded into essential coverage."
+    },
+    "coverage_essential": [
+      {
+        "text": "A degree in information security, cyber security or a related discipli",
+        "status": "covered",
+        "match_ratio": 0.667
+      },
+      {
+        "text": "Understanding of phishing analysis, endpoint assessment and network se",
+        "status": "covered",
+        "match_ratio": 0.833
+      },
+      {
+        "text": "Scripting or automation ability in Python or PowerShell.",
+        "status": "partial",
+        "match_ratio": 0.25
+      },
+      {
+        "text": "Familiarity with regular expressions and log analysis.",
+        "status": "covered",
+        "match_ratio": 0.5
+      },
+      {
+        "text": "Strong written communication and attention to detail.",
+        "status": "uncovered",
+        "match_ratio": 0.0
+      }
+    ],
+    "coverage_desirable_reported_separately": true,
+    "consistency": {
+      "identity_mismatches": [],
+      "posting_citation_mismatches": [],
+      "handoff_lines_not_in_posting": [],
+      "candidate_name": {
+        "payload": "Mukund Didwania",
+        "canonical": "Mukund Didwania",
+        "ok": true
+      }
+    },
+    "formatting": {
+      "cv_draft": {
+        "chars": 2969,
+        "headings": 14,
+        "bullets": 12,
+        "ends_with_newline": true,
+        "placeholders": []
+      },
+      "payload": {
+        "missing_top_level": [],
+        "missing_letter_keys": [],
+        "empty_letter_values": []
+      },
+      "cover_html": {
+        "present": true,
+        "chars": 5561,
+        "looks_like_html": true,
+        "placeholders": [],
+        "mentions_undefined": false
+      },
+      "pdf_exported": false,
+      "pdf_note": "PDF export is intentionally NOT performed: the install's generate-pdf.mjs launches headless Chromium, which the owner's GUI-safety directive forbids. The exact owner command is recorded in the draft result instead."
+    },
+    "unresolved_unknowns": [
+      "Posting terms with no canonical evidence: written, activities, alerts, already, another, assurance, attention, automation, behaviour, centre, certification, clear, communication, contribute, degree, detail, discipline, documentation, equivalent, events, familiarity, gdpr, hold, incident, investigate — do not claim these; add real evidence or leave them out."
+    ],
+    "pack_id": "pack-e514a333c460",
+    "pack_sha256": "e514a333c46040a759b91ac7216b512e0ef2e1f0e53b1258d39d39144dd7a4ad",
+    "external_actions_taken": []
+  },
+  "stage_8_independence": {
+    "tamper": {
+      "added_cv_line": "- Reduced security incidents by 45% across a 250-user estate.",
+      "added_letter_sentence": "I have led a team of 12 analysts and hold CISSP."
+    },
+    "verdict": "block",
+    "blocker_ids": [
+      "cv_draft_not_verbatim",
+      "cover_letter_free_text",
+      "candidate_claim_not_canonical"
+    ],
+    "truthfulness_verified": false,
+    "detected_verbatim_violation": true,
+    "detected_free_text": true,
+    "detected_first_person_claim": true,
+    "note": "A reviewer that rubber-stamped the generator could not produce this result: the tampered pack is blocked on the invented CV line, the invented metric and the invented first-person claim."
+  },
+  "stage_9_submission_gate": {
+    "gate": "career-ops/submission_gate.py",
+    "policy": "External application actions are OWNER-GATED without exception. This gate implements no submission path: with a valid owner approval it produces an owner checklist and stops. Nothing is submitted, sent, uploaded or accepted.",
+    "no_approval": {
+      "status": "awaiting_owner_approval",
+      "submission_eligible": false,
+      "external_action_performed": false,
+      "owner_action_required": "Review the pack yourself, then approve this exact pack (pack-e514a333c460, sha256 e514a333c46040a7…) by creating an approval record OUTSIDE this repository, e.g. %LOCALAPPDATA%\\hermes\\secrets\\application-approvals\\<pack>.json with {\"approved_by\": \"Mukund\", \"approved_at\": ISO8601, \"pack_id\": \"pack-e5"
+    },
+    "guards": {
+      "submit_application": {
+        "status": "refused",
+        "allowed": false,
+        "performed": false
+      },
+      "email_employer": {
+        "status": "refused",
+        "allowed": false
+      },
+      "review_pack": {
+        "status": "not_an_external_action",
+        "allowed": false,
+        "note": "a non-external action is still never performed by the gate"
+      }
+    },
+    "approval_inside_repository": {
+      "status": "refused",
+      "problems": [
+        "the approval record is sourced from inside the repository; a committed file is not an owner action"
+      ]
+    },
+    "stale_approval": {
+      "status": "refused",
+      "problems": [
+        "approval binds pack_id 'pack-stale000000' but the reviewed pack is 'pack-e514a333c460'",
+        "approval binds a different pack hash — the pack changed after approval, or the approval belongs to another pack"
+      ]
+    },
+    "valid_external_approval": {
+      "status": "approved_pending_owner_manual_submission",
+      "submission_eligible": true,
+      "external_action_performed": false,
+      "checklist_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\acceptance\\20260924T035912Z\\owner-checklist.json",
+      "owner_action_required": "Submit the application manually through the employer's channel; the system will not submit it. Then record the application in the Career Ops tracker."
+    },
+    "approval_vs_tampered_pack": {
+      "status": "refused",
+      "problems": null
+    },
+    "truthfulness_unverified": {
+      "status": "refused",
+      "reason": "the reviewer did not verify truthfulness for this pack"
+    },
+    "external_actions_taken": []
+  },
+  "stage_10_no_side_effects": {
+    "canonical_sources_before": {
+      "cv_md": "111b43e4a0a61df78562106accda15b4487b02cb0b44baa787206d816ae34c12",
+      "profile": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+      "cv_facts": "c1ad731b2c44debe4114aaa3fb646e0c2e8a95062d610b27f73ebaf66427e863",
+      "cover_template": "17c3e54aefcbda14c0194bd4d9a71d94da0d2e97d9a10cd7f8cf442daae8386e",
+      "cover_script": "b4c7299a42d3cae71c4a75af71e443d0e9acb3f0e0f82500808b951e1ce60dd1",
+      "tailor_script": "c3aa812d193836306a2693a3bd54298f79b434e8be37c2fa074254b47b84f2d8",
+      "pipeline": "ac8c0e3294a3398d0be4b5f1a753f84edd7f62596e7e8e4e13794a506aaf6ec2"
+    },
+    "canonical_sources_after": {
+      "cv_md": "111b43e4a0a61df78562106accda15b4487b02cb0b44baa787206d816ae34c12",
+      "profile": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+      "cv_facts": "c1ad731b2c44debe4114aaa3fb646e0c2e8a95062d610b27f73ebaf66427e863",
+      "cover_template": "17c3e54aefcbda14c0194bd4d9a71d94da0d2e97d9a10cd7f8cf442daae8386e",
+      "cover_script": "b4c7299a42d3cae71c4a75af71e443d0e9acb3f0e0f82500808b951e1ce60dd1",
+      "tailor_script": "c3aa812d193836306a2693a3bd54298f79b434e8be37c2fa074254b47b84f2d8",
+      "pipeline": "ac8c0e3294a3398d0be4b5f1a753f84edd7f62596e7e8e4e13794a506aaf6ec2"
+    },
+    "canonical_sources_unchanged": true,
+    "trackers": {
+      "uk": {
+        "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+        "exists": true,
+        "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40"
+      },
+      "dubai": {
+        "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+        "exists": true,
+        "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+      },
+      "japan": {
+        "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+        "exists": true,
+        "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+      },
+      "singapore": {
+        "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+        "exists": true,
+        "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    },
+    "canonical_trackers_touched": false,
+    "applications_submitted": 0,
+    "external_messages_sent": 0,
+    "browser_launched": false,
+    "network_research_calls_by_this_runner": 0
+  },
+  "checks": [
+    {
+      "check": "stage1 node + install fact gate available",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage1 all canonical sources present",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage2 job record resolved into the pipeline",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 JobBrief validates against the committed schema",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage3 JobBrief carries no candidate claim",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 every extracted line is a verbatim posting line at its cited line number",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage3 desirable posting lines became preferences, never essential requirements",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 essential requirements extracted from the fixture posting",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        "A degree in information security, cyber security or a related discipline.",
+        "Understanding of phishing analysis, endpoint assessment and network security.",
+        "Scripting or automation ability in Python or PowerShell.",
+        "Familiarity with regular expressions and log analysis.",
+        "Strong written communication and attention to detail."
+      ]
+    },
+    {
+      "check": "stage3 no company fact is asserted without research",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 research request list recorded",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 JobBrief made no external action",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3b a region the owner has not stated is 'unknown', not satisfied",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        "unknown"
+      ]
+    },
+    {
+      "check": "stage3b the unknown eligibility produces a blocker risk",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 with no provider the brief records research_needed and invents nothing",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 a cited provider file yields cited facts",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 an uncited fact is rejected and never used",
+      "ok": true,
+      "critical": true,
+      "detail": [
+        {
+          "index": 1,
+          "reason": "missing source, citation",
+          "claim": "recent_news",
+          "raw": "{'claim': 'recent_news', 'value': 'Uncited assertion (fixture value)', 'source': '', 'citation': ''}"
+        }
+      ]
+    },
+    {
+      "check": "stage4 browser research provider is disabled (owner GUI-safety directive)",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 --allow-network without an enabled provider fetches nothing",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage5 every handoff line is verbatim posting text",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage5 the pack brief carries cited company research",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 CV + cover-letter drafts produced through the existing workflow",
+      "ok": true,
+      "critical": true,
+      "detail": "draft_ready_for_owner_review"
+    },
+    {
+      "check": "stage6 install fact gate did not block either artifact",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "cv_draft": "pass",
+        "cover_letter": "pass"
+      }
+    },
+    {
+      "check": "stage6 rendered cover-letter HTML exists",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 the draft workflow performed no external action",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 reviewer did not block an honest pack",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage7 reviewer verified truthfulness",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 reviewer found no truthfulness/consistency/formatting blocker",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 reviewer reported essential coverage numbers",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "essential_total": 5,
+        "essential_covered": 3,
+        "essential_partial": 1,
+        "essential_uncovered": 1,
+        "desirable_total": 4,
+        "desirable_covered": 2,
+        "essential_coverage_ratio": 0.6,
+        "note": "Coverage means the posting's own vocabulary overlaps text that exists in the canonical sources. It is a ranking aid, not evidence that any specific requirement is met. Desirable items are reported separately and are never folded into essential coverage."
+      }
+    },
+    {
+      "check": "stage7 reviewer re-checked every posting citation and found no drift",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 reviewer surfaced unresolved unknowns to the owner",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 reviewer performed no external action",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 reviewer blocks a tampered pack",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 reviewer detected the invented CV line",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 reviewer detected the invented first-person claim",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 without owner approval the gate waits and performs nothing",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 the gate refuses every external action",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 an approval placed inside the repository is refused",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 an approval bound to a different pack is refused",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 a valid external approval still performs no external action",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 an approval for a changed pack is refused",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage9 the gate refuses when truthfulness is not verified",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage10 canonical Career Ops sources untouched",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    }
+  ],
+  "critical_checks_failed": [],
+  "ok": true
+}

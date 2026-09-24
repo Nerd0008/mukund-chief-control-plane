@@ -15,8 +15,9 @@ Cutover must not start (and must be aborted mid-run) if **any** box is unclear.
 - [ ] Any database fails `PRAGMA integrity_check`, or a restored DB's row counts
       differ from its snapshot fingerprint.
 - [ ] `scripts/evidence_runner.py` reports any failing suite, error or skipped
-      test (verified 2026-09-24: 16 suites / 456 tests, all passing, SHA `b6329b7`).
-- [ ] E4/E5 drill harness is not 33/33, or reports `real_provider_calls > 0` or a
+      test (verified 2026-09-24T03:57:34Z: **21 suites / 579 tests, all passing, 0 unavailable,
+      SHA `31eecdb`** — the whole-company acceptance run).
+- [ ] E4/E5 drill harness is not **36/36**, or reports `real_provider_calls > 0` or a
       non-empty `live_stores_changed`.
 - [ ] A credential is unresolved **and** the destination would need it: 10/10
       roster workers must show `credential_present: true`, or the missing worker

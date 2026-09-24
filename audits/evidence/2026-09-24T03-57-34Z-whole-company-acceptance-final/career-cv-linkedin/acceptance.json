@@ -1,0 +1,904 @@
+{
+  "acceptance_run": "20260924T035913Z",
+  "generated_at": "2026-09-24T03:59:13+00:00",
+  "workflow": "career-ops CV/cover-letter drafts + minimal LinkedIn workflow",
+  "region": "uk",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md § CV + cover-letter workflow / § LinkedIn workflow",
+  "cheating_guards": {
+    "canonical_trackers_touched": false,
+    "applications_submitted": 0,
+    "external_messages_sent": 0,
+    "linkedin_posts_published": 0,
+    "linkedin_connections_requested": 0,
+    "network_calls_by_linkedin_workflow": 0,
+    "browser_launched": false
+  },
+  "stage_1_sources": {
+    "sources": {
+      "cv_md": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md",
+        "exists": true,
+        "sha256": "111b43e4a0a61df78562106accda15b4487b02cb0b44baa787206d816ae34c12"
+      },
+      "profile": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml",
+        "exists": true,
+        "sha256": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4"
+      },
+      "cv_facts": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json",
+        "exists": true,
+        "sha256": "c1ad731b2c44debe4114aaa3fb646e0c2e8a95062d610b27f73ebaf66427e863"
+      },
+      "cover_template": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\templates\\cover-letter-template.html",
+        "exists": true,
+        "sha256": "17c3e54aefcbda14c0194bd4d9a71d94da0d2e97d9a10cd7f8cf442daae8386e"
+      },
+      "cover_script": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\generate-cover-letter.mjs",
+        "exists": true,
+        "sha256": "b4c7299a42d3cae71c4a75af71e443d0e9acb3f0e0f82500808b951e1ce60dd1"
+      },
+      "tailor_script": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\openai-tailor.mjs",
+        "exists": true,
+        "sha256": "c3aa812d193836306a2693a3bd54298f79b434e8be37c2fa074254b47b84f2d8"
+      },
+      "pipeline": {
+        "path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+        "exists": true,
+        "sha256": "ac8c0e3294a3398d0be4b5f1a753f84edd7f62596e7e8e4e13794a506aaf6ec2"
+      }
+    },
+    "node_available": true,
+    "fact_gate_ready": true,
+    "note": "Canonical CV/profile/facts are read-only sources in the existing Career Ops install."
+  },
+  "stage_2_job_context": {
+    "resolved": true,
+    "reason": null,
+    "job": {
+      "company": "Crown Agents Bank",
+      "title": "Information Security Analyst",
+      "location": "London, United Kingdom",
+      "url": "https://jobs.smartrecruiters.com/CrownAgentsBank/744000126513120-information-security-analyst",
+      "fit_score": 4.9,
+      "id": null
+    },
+    "source_kind": "career-ops-pipeline.md",
+    "job_description": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\jd-information-security-analyst.txt",
+      "kind": "SYNTHETIC FIXTURE — not a live vacancy, not fetched from anywhere",
+      "sha256": "eea7ed1476d1dfe46ed6d9d91752886380592e693844ae91fc2da156693953a2",
+      "chars": 1372
+    }
+  },
+  "stage_3_cv_and_cover_letter_drafts": {
+    "status": "draft_ready_for_owner_review",
+    "run_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts",
+    "job": {
+      "company": "Crown Agents Bank",
+      "title": "Information Security Analyst",
+      "location": "London, United Kingdom",
+      "url": "https://jobs.smartrecruiters.com/CrownAgentsBank/744000126513120-information-security-analyst",
+      "fit_score": 4.9,
+      "id": null,
+      "source_kind": "career-ops-pipeline.md",
+      "source_path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md"
+    },
+    "job_description": {
+      "available": true,
+      "source": "synthetic fixture jd-information-security-analyst.txt",
+      "chars": 1372,
+      "terms_ranked": 76,
+      "terms_absent_from_canonical_sources": [
+        "written",
+        "activities",
+        "alerts",
+        "already",
+        "another",
+        "assurance",
+        "attention",
+        "automation",
+        "behaviour",
+        "centre",
+        "certification",
+        "clear",
+        "communication",
+        "contribute",
+        "degree",
+        "detail",
+        "discipline",
+        "documentation",
+        "equivalent",
+        "events",
+        "familiarity",
+        "fixture",
+        "gdpr",
+        "hold",
+        "incident"
+      ]
+    },
+    "cv_draft": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts\\cv_draft.md",
+      "sha256": "7edff40691de4ddc40a2d7fb1a64116a7f576438fe51f21630c756d12506e942",
+      "sections": [
+        "Mukund Didwania",
+        "Profile",
+        "Education",
+        "MSc Information Security | Royal Holloway, University of London",
+        "Bachelor of Computer Applications | MIT World Peace University",
+        "Certifications",
+        "Employment Experience",
+        "Co-op | November 2025 - present",
+        "Agency Hospitality Staff | Runner, Waiter and Bar Staff",
+        "Projects",
+        "SafePaste | Browser extension project",
+        "InboxDefender | Phishing analysis project",
+        "AttackSurfaceIQ | Endpoint risk assessment project",
+        "Technical Skills"
+      ],
+      "bullets_total": 12,
+      "sections_with_reordered_bullets": [],
+      "provenance_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts\\cv_draft_provenance.json",
+      "rewriting": "none — selection/reordering of canonical lines only"
+    },
+    "cover_letter": {
+      "payload_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts\\cover_letter_payload.json",
+      "html_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts\\cover_letter_draft.html",
+      "render": {
+        "rendered": true,
+        "renderer": "generate-cover-letter.mjs buildHtml",
+        "fact_gate_module": "verify-cv-facts.mjs verifyFacts",
+        "html_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\cv-drafts\\cover_letter_draft.html",
+        "html_chars": 5557,
+        "fact_gate": {
+          "verdict": "pass",
+          "invented": [],
+          "unsupportedFacts": [],
+          "forbidden": [],
+          "warnings": []
+        },
+        "browser_launched": false,
+        "pdf_rendered": false,
+        "exit_code": 0
+      },
+      "evidence_bullets": 4
+    },
+    "fact_gate": {
+      "cv_draft": {
+        "verdict": "pass",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [],
+        "available": true,
+        "exit_code": 0
+      },
+      "cover_letter": {
+        "verdict": "pass",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [],
+        "available": true,
+        "exit_code": 0
+      }
+    },
+    "lines_not_verbatim_from_cv_md": [],
+    "owner_input_required": [
+      "Posting terms with no canonical evidence: written, activities, alerts, already, another, assurance, attention, automation, behaviour, centre, certification, clear, communication, contribute, degree, detail, discipline, documentation, equivalent, events, familiarity, fixture, gdpr, hold, incident — do not claim these; add real evidence or leave them out.",
+      "DRAFT ONLY — owner review required. No application has been submitted and nothing has been sent to the employer."
+    ],
+    "llm_tailor_request": {
+      "executed": false,
+      "reason": "sends cv.md and the job description to a third-party endpoint; requires a provider key and explicit owner authorization",
+      "command": "node openai-tailor.mjs --jd <jd.txt> --report <report.md>   (run from C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0; set OPENAI_API_KEY/OPENAI_BASE_URL/OPENAI_MODEL first)"
+    },
+    "pdf_rendered": false,
+    "note": "The cover-letter HTML is produced by the install's own buildHtml; PDF rendering (headless Chromium) is deliberately not performed."
+  },
+  "stage_4_linkedin_intake": {
+    "inbox": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin",
+    "files": [
+      {
+        "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\alerts.md",
+        "sha256": "cd387064084dd91227ad658832170c59f2505c233243e8ca4a49a36a6ce6c667",
+        "signals": 2,
+        "unclassified": 3,
+        "skipped": null
+      },
+      {
+        "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\companies.csv",
+        "sha256": "318d97ac070a169a5e2497c15034b800a81e764b014d1e806ab2bad79c9a4fe3",
+        "signals": 3,
+        "unclassified": 0,
+        "skipped": null
+      },
+      {
+        "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+        "sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+        "signals": 5,
+        "unclassified": 0,
+        "skipped": null
+      }
+    ],
+    "counts": {
+      "files": 3,
+      "signals": 10,
+      "job_signals": 6,
+      "company_signals": 4,
+      "unclassified": 3
+    },
+    "read_only_contract": {
+      "network_used": false,
+      "urls_fetched": 0,
+      "browser_launched": false,
+      "linkedin_authenticated": false,
+      "account_mutations": 0,
+      "note": "Signals are parsed from owner-provided local files. Every URL is treated as an opaque string; nothing is requested or opened."
+    },
+    "unclassified_sample": [
+      "line carries no URL; not guessed into a signal",
+      "line carries no URL; not guessed into a signal",
+      "line carries no URL; not guessed into a signal"
+    ]
+  },
+  "stage_5_dedupe": {
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+    "tracker_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "tracker_sha256_after": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "counts": {
+      "job_signals": 3,
+      "company_signals": 4,
+      "new": 3,
+      "duplicates": 0,
+      "blocked_by_owner_filter": 2
+    },
+    "canonical_url_keys": 34,
+    "cross_month_keys": 154,
+    "company_watch": {
+      "registry_available": true,
+      "registry_companies": 229,
+      "handoff_files": [
+        {
+          "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\company-watch\\handoff-uk-20260924T035028Z.json",
+          "records": 3
+        },
+        {
+          "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\company-watch\\handoff-uk-20260924T035906Z.json",
+          "records": 3
+        }
+      ],
+      "detail": {
+        "registry_source_sha256": "2fb46ce8e1da0508327940e6f7518f328810338ac3d2abc47027ada29d8dc663"
+      }
+    },
+    "company_watch_registry_companies": 229,
+    "dedupe_engine": "company_watch.build_shared_dedupe + career-ops/tracker_writer.py",
+    "job_decisions": [
+      {
+        "company": "Example Analytics Ltd",
+        "title": "Cyber Security Intern",
+        "location": "London, United Kingdom",
+        "posted_at": "2026-09-20",
+        "url": "https://job-boards.greenhouse.io/exampleanalytics/jobs/999000111?utm_campaign=alert",
+        "source_kind": "linkedin-inbox",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\alerts.md",
+          "file_sha256": "cd387064084dd91227ad658832170c59f2505c233243e8ca4a49a36a6ce6c667",
+          "index": 0,
+          "line": 3
+        },
+        "decision": "new",
+        "reason": "eligible for Career Ops handoff",
+        "region_route": "uk",
+        "owner_filter_eligible": true,
+        "owner_filter_reasons": [],
+        "company_known_to_company_watch": false,
+        "already_handed_off_by_company_watch": false,
+        "merged_signals": 2,
+        "merged_provenance": [
+          {
+            "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+            "file_sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+            "index": 0
+          },
+          {
+            "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+            "file_sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+            "index": 1
+          }
+        ]
+      },
+      {
+        "company": "Placeholder Systems Ltd",
+        "title": "IT Support Analyst",
+        "location": "Manchester, United Kingdom",
+        "posted_at": "2026-09-19",
+        "url": "https://example.com/careers/it-support-analyst-4711",
+        "source_kind": "linkedin-inbox",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\alerts.md",
+          "file_sha256": "cd387064084dd91227ad658832170c59f2505c233243e8ca4a49a36a6ce6c667",
+          "index": 1,
+          "line": 4
+        },
+        "decision": "new",
+        "reason": "eligible for Career Ops handoff",
+        "region_route": "uk",
+        "owner_filter_eligible": false,
+        "owner_filter_reasons": [
+          "title has no positive match in the owner's title filter"
+        ],
+        "company_known_to_company_watch": false,
+        "already_handed_off_by_company_watch": false,
+        "merged_signals": 1,
+        "merged_provenance": [
+          {
+            "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+            "file_sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+            "index": 2
+          }
+        ]
+      },
+      {
+        "company": "Nowhere Security Inc",
+        "title": "Senior Principal Security Architect",
+        "location": "Austin, United States",
+        "posted_at": "2026-09-18",
+        "url": "https://example.invalid/jobs/9999",
+        "source_kind": "linkedin-saved-job-feed",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+          "file_sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+          "index": 3
+        },
+        "decision": "new",
+        "reason": "eligible for Career Ops handoff",
+        "region_route": null,
+        "owner_filter_eligible": false,
+        "owner_filter_reasons": [
+          "location 'Austin, United States' not in the owner's allow list",
+          "location matches the owner's block list",
+          "title matches the owner's negative title filter",
+          "title has no positive match in the owner's title filter",
+          "location does not route to the requested region"
+        ],
+        "company_known_to_company_watch": false,
+        "already_handed_off_by_company_watch": false
+      }
+    ],
+    "company_decisions": [
+      {
+        "company": "Example Analytics Ltd",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\companies.csv",
+          "file_sha256": "318d97ac070a169a5e2497c15034b800a81e764b014d1e806ab2bad79c9a4fe3",
+          "index": 0
+        },
+        "known_to_company_watch": false,
+        "already_in_career_ops_workbook": false,
+        "decision": "new-company-signal",
+        "reason": "company not present in Career Ops or Company Watch"
+      },
+      {
+        "company": "Placeholder Systems Ltd",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\companies.csv",
+          "file_sha256": "318d97ac070a169a5e2497c15034b800a81e764b014d1e806ab2bad79c9a4fe3",
+          "index": 1
+        },
+        "known_to_company_watch": false,
+        "already_in_career_ops_workbook": false,
+        "decision": "new-company-signal",
+        "reason": "company not present in Career Ops or Company Watch"
+      },
+      {
+        "company": "Fixture Holdings plc",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\companies.csv",
+          "file_sha256": "318d97ac070a169a5e2497c15034b800a81e764b014d1e806ab2bad79c9a4fe3",
+          "index": 2
+        },
+        "known_to_company_watch": false,
+        "already_in_career_ops_workbook": false,
+        "decision": "new-company-signal",
+        "reason": "company not present in Career Ops or Company Watch"
+      },
+      {
+        "company": "Fixture Holdings plc",
+        "provenance": {
+          "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\tests\\fixtures\\linkedin\\saved_jobs.json",
+          "file_sha256": "bca4958773c15242ac0876635796fa5865c328380d0aba883185bfdf6d3d70b9",
+          "index": 4
+        },
+        "known_to_company_watch": false,
+        "already_in_career_ops_workbook": false,
+        "decision": "new-company-signal",
+        "reason": "company not present in Career Ops or Company Watch"
+      }
+    ]
+  },
+  "stage_6_linkedin_drafts": {
+    "status": "drafts_ready_for_owner_review",
+    "counts": {
+      "total": 7,
+      "profile": 1,
+      "post": 4,
+      "outreach": 2,
+      "outreach_networking": 1,
+      "outreach_recruiter": 1,
+      "outreach_hiring_manager": 0
+    },
+    "fact_gate": {
+      "verdict": "pass",
+      "invented": [],
+      "unsupportedFacts": [],
+      "forbidden": [],
+      "warnings": [],
+      "available": true,
+      "exit_code": 0
+    },
+    "drafts_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\linkedin-drafts\\linkedin_drafts.json",
+    "posts_performed": 0,
+    "sends_performed": 0,
+    "drafts": [
+      {
+        "kind": "profile",
+        "topic": null,
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:10",
+          "cv.md:56",
+          "cv.md:57"
+        ]
+      },
+      {
+        "kind": "post",
+        "topic": "project evidence",
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:44"
+        ]
+      },
+      {
+        "kind": "post",
+        "topic": "certification",
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:22"
+        ]
+      },
+      {
+        "kind": "post",
+        "topic": "current study",
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:10"
+        ]
+      },
+      {
+        "kind": "post",
+        "topic": "tools in practice",
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:56",
+          "cv.md:57"
+        ]
+      },
+      {
+        "kind": "outreach",
+        "topic": null,
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:10"
+        ]
+      },
+      {
+        "kind": "outreach",
+        "topic": null,
+        "status": "draft_unsent",
+        "sources": [
+          "cv.md:10",
+          "cv.md:22"
+        ]
+      }
+    ]
+  },
+  "stage_7_owner_action_gate": {
+    "refusals": {
+      "post": {
+        "allowed": false,
+        "owner_gated": true,
+        "performed": false,
+        "reason": "external LinkedIn action is owner-gated; this workflow implements no path that performs it"
+      },
+      "message": {
+        "allowed": false,
+        "owner_gated": true,
+        "performed": false,
+        "reason": "external LinkedIn action is owner-gated; this workflow implements no path that performs it"
+      },
+      "connection_request": {
+        "allowed": false,
+        "owner_gated": true,
+        "performed": false,
+        "reason": "external LinkedIn action is owner-gated; this workflow implements no path that performs it"
+      },
+      "apply": {
+        "allowed": false,
+        "owner_gated": true,
+        "performed": false,
+        "reason": "external LinkedIn action is owner-gated; this workflow implements no path that performs it"
+      },
+      "profile_update": {
+        "allowed": false,
+        "owner_gated": true,
+        "performed": false,
+        "reason": "external LinkedIn action is owner-gated; this workflow implements no path that performs it"
+      }
+    },
+    "allowed_read_draft_example": {
+      "action": "intake",
+      "allowed": true,
+      "owner_gated": false,
+      "performed": false,
+      "reason": "action is not an external LinkedIn mutation (read/draft only)",
+      "policy": "External LinkedIn posting, messaging, connection requests, reactions, follows, profile edits and application submission are OWNER-GATED. This workflow refuses them and records the refusal; it implements no path that performs them.",
+      "available_paths": [
+        "intake (read-only)",
+        "dedupe (read-only)",
+        "draft (unsent)",
+        "handoff (dry-run unless --apply)"
+      ],
+      "logged_to": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\action-gate-log.jsonl"
+    }
+  },
+  "stage_8_handoff": {
+    "manifest_counts": {
+      "selected": 1,
+      "included_as_test_rows": 0
+    },
+    "provenance_column": "discovery",
+    "dry_run": {
+      "invoked": true,
+      "exit_code": 0,
+      "mode": "dry-run",
+      "planned": [
+        "J35"
+      ],
+      "counts": {
+        "input": 1,
+        "appended": 1,
+        "duplicates": 0,
+        "rejected": 0,
+        "refreshed": 0
+      }
+    },
+    "canonical_sha256_after_dry_run": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "test_copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\uk-cyber-job-tracker.xlsx",
+    "test_copy_sha256_before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "test_copy_sha256_after": "4187f78a61f1a3d4124caf99c1205083baf7bf2e3093cf4a0e891f74bc0549fc",
+    "applied": true,
+    "applied_counts": {
+      "input": 1,
+      "appended": 1,
+      "duplicates": 0,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "planned_rows": [
+      "J35"
+    ],
+    "backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\backups\\uk-cyber-job-tracker.pre-20260924-045915.xlsx",
+    "verification": {
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\uk-cyber-job-tracker.xlsx",
+      "ok": true,
+      "problems": [],
+      "sheets": [
+        "Jobs",
+        "Summary",
+        "How to use",
+        "UK graduate and internship"
+      ],
+      "table_ref": "A9:V44",
+      "last_data_row": 44,
+      "data_rows": 35,
+      "expected_appended": 1,
+      "headers_unchanged": true,
+      "fit_tier_formula_cells": 0,
+      "validations": {
+        "J": 4,
+        "K": 4
+      },
+      "owner_columns_unchanged": true,
+      "duplicate_urls_in_workbook": [],
+      "formula_error_cells": [],
+      "cross_month_duplicate_notes": []
+    },
+    "rows_after": 35,
+    "linkedin_provenance_row": {
+      "row": 44,
+      "column": "Q",
+      "value": "LINKEDIN — read-only LinkedIn signal intake ('linkedin-inbox') from alerts.md (sha256 cd387064084d); posting date 2026-09-20; deduped new against the canonical uk workbook, the cross-month ledger and "
+    },
+    "canonical_sha256_after_apply": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "canonical_untouched": true,
+    "application_state_written": false
+  },
+  "stage_9_replay_dedupe": {
+    "decision": "duplicate",
+    "reason": "already present in the canonical regional workbook",
+    "note": "The same LinkedIn posting replayed against the written copy must be a duplicate."
+  },
+  "stage_9b_rollback": {
+    "restored_from": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\acceptance\\20260924T035913Z\\backups\\uk-cyber-job-tracker.pre-20260924-045915.xlsx",
+    "restored_sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "equals_pre_write_hash": true
+  },
+  "stage_10_chief_summary": {
+    "exit_code": 0,
+    "region": {
+      "available": true,
+      "display_name": "United Kingdom",
+      "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+      "data_rows": 34,
+      "last_id": "J34",
+      "status_counts": {
+        "To Review": 29,
+        "Not Applying": 5
+      },
+      "actionable_ids": [
+        "J1",
+        "J2",
+        "J4",
+        "J5",
+        "J8",
+        "J10",
+        "J11",
+        "J13",
+        "J14",
+        "J15",
+        "J16",
+        "J17",
+        "J18",
+        "J19",
+        "J20",
+        "J21",
+        "J22",
+        "J23",
+        "J24",
+        "J25",
+        "J26",
+        "J27",
+        "J28",
+        "J29",
+        "J30"
+      ],
+      "owner_columns_untouched_by_automation": [
+        "J",
+        "K",
+        "S",
+        "T",
+        "U",
+        "V"
+      ],
+      "excel_is_source_of_truth": true
+    }
+  },
+  "final_canonical_hashes": {
+    "uk": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+    "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+    "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+    "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+  },
+  "final_canonical_hashes_unchanged": {
+    "uk": true,
+    "dubai": true,
+    "japan": true,
+    "singapore": true
+  },
+  "checks": [
+    {
+      "check": "stage1 node + install fact gate available",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "node": true,
+        "fact_gate": true
+      }
+    },
+    {
+      "check": "stage2 job record resolved from Career Ops state",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage3 CV/cover-letter drafts produced",
+      "ok": true,
+      "critical": true,
+      "detail": "draft_ready_for_owner_review"
+    },
+    {
+      "check": "stage3 every CV draft line is verbatim canonical text",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage3 install fact gate did not block",
+      "ok": true,
+      "critical": true,
+      "detail": []
+    },
+    {
+      "check": "stage3 cover letter rendered by the install's own renderer",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage4 LinkedIn intake read-only contract holds",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "network_used": false,
+        "urls_fetched": 0,
+        "browser_launched": false,
+        "linkedin_authenticated": false,
+        "account_mutations": 0,
+        "note": "Signals are parsed from owner-provided local files. Every URL is treated as an opaque string; nothing is requested or opened."
+      }
+    },
+    {
+      "check": "stage4 signals classified from fixtures",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "files": 3,
+        "signals": 10,
+        "job_signals": 6,
+        "company_signals": 4,
+        "unclassified": 3
+      }
+    },
+    {
+      "check": "stage5 canonical tracker untouched by dedupe",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage5 LinkedIn jobs deduped against Career Ops + Company Watch",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "job_signals": 3,
+        "company_signals": 4,
+        "new": 3,
+        "duplicates": 0,
+        "blocked_by_owner_filter": 2
+      }
+    },
+    {
+      "check": "stage5 a same-posting LinkedIn duplicate was detected and merged",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "Example Analytics Ltd": 2,
+        "Placeholder Systems Ltd": 1,
+        "Nowhere Security Inc": null
+      }
+    },
+    {
+      "check": "stage6 LinkedIn drafts produced and fact-gated",
+      "ok": true,
+      "critical": true,
+      "detail": "drafts_ready_for_owner_review"
+    },
+    {
+      "check": "stage6 every LinkedIn draft is unsent",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage6 no post/send performed",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage7 every external LinkedIn action refused and unperformed",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "post": false,
+        "message": false,
+        "connection_request": false,
+        "apply": false,
+        "profile_update": false
+      }
+    },
+    {
+      "check": "stage7 a read/draft action is not blocked",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 dry-run handoff did not touch the canonical tracker",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 handoff applied to the TEST COPY",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 canonical tracker untouched by the applied handoff",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "check": "stage8 LinkedIn provenance recorded in a non-owner column",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "row": 44,
+        "column": "Q",
+        "value": "LINKEDIN — read-only LinkedIn signal intake ('linkedin-inbox') from alerts.md (sha256 cd387064084d); posting date 2026-09-20; deduped new against the canonical uk workbook, the cross-month ledger and "
+      }
+    },
+    {
+      "check": "stage9 a LinkedIn posting already written is deduped on replay",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "company": "Example Analytics Ltd",
+        "title": "Cyber Security Intern",
+        "location": "London, United Kingdom",
+        "posted_at": "2026-09-20",
+        "url": "https://job-boards.greenhouse.io/exampleanalytics/jobs/999000111?utm_campaign=alert",
+        "source_kind": "linkedin-acceptance-replay",
+        "provenance": {
+          "file": "acceptance-replay",
+          "file_sha256": "n/a",
+          "index": 0
+        },
+        "decision": "duplicate",
+        "reason": "already present in the canonical regional workbook",
+        "region_route": "uk",
+        "owner_filter_eligible": true,
+        "owner_filter_reasons": [],
+        "company_known_to_company_watch": false,
+        "already_handed_off_by_company_watch": false
+      }
+    },
+    {
+      "check": "stage9b rollback restores the pre-write copy",
+      "ok": true,
+      "critical": true,
+      "detail": {
+        "restored": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40",
+        "before": "84c53dcb10c2a69a2de0da819498e15b89164cc03f56c655abfdc5d8b6b73f40"
+      }
+    },
+    {
+      "check": "stage10 Chief summary produced",
+      "ok": true,
+      "critical": true,
+      "detail": null
+    }
+  ],
+  "critical_checks_failed": [],
+  "ok": true
+}
