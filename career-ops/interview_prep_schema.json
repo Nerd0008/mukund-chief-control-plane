@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "career-ops/interview_prep_schema.json",
+  "title": "InterviewPrepPack",
+  "description": "Role-specific interview preparation pack produced by career-ops/interview_prep.py (roster B22) from a canonical JobBrief plus the canonical owner sources. Every question is a deterministic preparation prompt derived from the posting's own text and is explicitly NOT employer-supplied; every talking point quotes a canonical CV line verbatim with its cv.md source line; where the posting asks for something the canonical sources do not evidence, the item records owner_input_required instead of a claim.",
+  "type": "object",
+  "required": [
+    "schema_version", "prep_id", "generated_at", "generator", "job", "provenance",
+    "sections", "counts", "truth_rules", "candidate_claims", "not_performed",
+    "external_actions_taken", "interview_scheduled", "interview_attended"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "prep_id": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "generator": {"type": "string"},
+    "job": {
+      "type": "object",
+      "description": "The brief's job block, unedited: company/title/location/region/url.",
+      "properties": {
+        "id": {"type": ["string", "integer", "null"]},
+        "company": {"type": ["string", "null"]},
+        "title": {"type": ["string", "null"]},
+        "location": {"type": ["string", "null"]},
+        "url": {"type": ["string", "null"]},
+        "region": {"type": ["string", "null"]},
+        "source_kind": {"type": ["string", "null"]}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["brief", "canonical_owner_sources", "question_derivation"],
+      "properties": {
+        "brief": {
+          "type": "object",
+          "required": ["brief_id"],
+          "properties": {
+            "path": {"type": ["string", "null"]},
+            "brief_id": {"type": ["string", "null"]},
+            "sha256": {"type": ["string", "null"]},
+            "generator": {"type": ["string", "null"]},
+            "job_description": {"type": "object"}
+          }
+        },
+        "canonical_owner_sources": {"type": "object"},
+        "canonical_evidence_lines": {"type": "integer"},
+        "research_source": {"type": "string"},
+        "question_derivation": {"type": "string"}
+      }
+    },
+    "research": {
+      "type": "object",
+      "description": "Cited company/role facts carried from the brief. Empty facts with status != 'provided' when no research provider is approved.",
+      "properties": {
+        "status": {"type": "string"},
+        "facts_available": {"type": "integer"},
+        "facts": {"type": "array"}
+      }
+    },
+    "sections": {
+      "type": "object",
+      "required": ["technical_prep", "behavioural_prep", "likely_questions",
+                   "evidence_backed_talking_points", "questions_to_ask_employer", "unknowns"],
+      "properties": {
+        "technical_prep": {"type": "array", "items": {"$ref": "#/$defs/question"}},
+        "behavioural_prep": {"type": "array", "items": {"$ref": "#/$defs/question"}},
+        "likely_questions": {"type": "array", "items": {"$ref": "#/$defs/question"}},
+        "evidence_backed_talking_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "use", "status", "quotes", "scaffold"],
+            "properties": {
+              "id": {"type": "string"},
+              "use": {"type": "string"},
+              "status": {"enum": ["evidence_backed", "owner_input_required"]},
+              "requirement": {
+                "type": ["object", "null"],
+                "properties": {
+                  "text": {"type": "string"},
+                  "source_line": {"type": "integer"},
+                  "source_section": {"type": ["string", "null"]}
+                }
+              },
+              "quotes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["quote", "source", "source_line"],
+                  "properties": {
+                    "quote": {"type": "string", "description": "VERBATIM canonical CV line."},
+                    "source": {"const": "cv.md"},
+                    "source_line": {"type": "integer"},
+                    "matched_terms": {"type": "array", "items": {"type": "string"}}
+                  }
+                }
+              },
+              "scaffold": {"type": "string"},
+              "owner_action": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "questions_to_ask_employer": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["prompt", "basis"],
+            "properties": {
+              "prompt": {"type": "string"},
+              "basis": {"type": "object"}
+            }
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["kind", "detail"],
+            "properties": {
+              "kind": {"type": "string"},
+              "detail": {"type": ["string", "null"]},
+              "source": {"type": ["string", "null"]},
+              "action": {"type": ["string", "null"]},
+              "severity": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    },
+    "counts": {"type": "object"},
+    "truth_rules": {"type": "array", "items": {"type": "string"}},
+    "candidate_claims": {
+      "type": "array",
+      "maxItems": 0,
+      "description": "MUST be empty. Candidate truth is quoted verbatim from the canonical sources with a source line; it is never asserted by this module."
+    },
+    "not_performed": {"type": "array", "items": {"type": "string"}},
+    "external_actions_taken": {"type": "array", "maxItems": 0},
+    "interview_scheduled": {"const": false},
+    "interview_attended": {"const": false}
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": ["id", "bucket", "prompt", "basis", "derivation", "employer_supplied", "note"],
+      "properties": {
+        "id": {"type": "string"},
+        "bucket": {"type": "string"},
+        "category": {"type": "string"},
+        "theme": {"type": "string"},
+        "prompt": {"type": "string"},
+        "basis": {
+          "type": "object",
+          "required": ["kind"],
+          "properties": {
+            "kind": {"type": "string"},
+            "text": {"type": ["string", "null"], "description": "VERBATIM posting line."},
+            "source_line": {"type": ["integer", "null"]},
+            "source_section": {"type": ["string", "null"]},
+            "requirement_kind": {"type": ["string", "null"]},
+            "resolved_status": {"type": ["string", "null"]},
+            "owner_source": {"type": ["string", "null"]},
+            "owner_source_line": {"type": ["integer", "null"]},
+            "job": {"type": "object"}
+          }
+        },
+        "derivation": {"type": "string"},
+        "employer_supplied": {"const": false},
+        "note": {"type": "string"}
+      }
+    }
+  }
+}

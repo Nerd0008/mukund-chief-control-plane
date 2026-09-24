@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "description": "Chief <-> Career Ops Interview Prep Agent (roster B22). Consumes a canonical JobBrief (career-ops/job_intelligence.py), optional cited company research, and the canonical owner sources (cv.md / config/profile.yml / config/cv-facts.json). It produces role-specific technical and behavioural preparation, a likely-question list, evidence-backed talking points and an explicit unknown list. Every question is DERIVED BY A DETERMINISTIC TEMPLATE and is labelled as generated, never as a question the employer supplied. Every talking point quotes a canonical CV line verbatim with its source line; where the posting asks for something the canonical sources do not evidence, the pack records owner_input_required instead of inventing a claim. No employer, recruiter or candidate-facing message is sent and no interview claim is created.",
+  "career_ops_dir": "career-ops",
+  "cv_workflow_config": "career-ops/cv_workflow_config.json",
+  "job_intelligence_config": "career-ops/job_intelligence_config.json",
+  "brief_schema": "career-ops/job_brief_schema.json",
+  "pack_schema": "career-ops/interview_prep_schema.json",
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "runtime_dir": "runtime/career-ops/interview-prep",
+  "evidence_dir": "audits/evidence",
+  "limits": {
+    "max_technical_questions": 18,
+    "max_behavioural_questions": 10,
+    "max_likely_questions": 30,
+    "max_talking_points": 12,
+    "max_questions_to_ask_employer": 8,
+    "max_unknowns": 40
+  },
+  "evidence_matching": {
+    "note": "A talking point is only produced where a canonical CV line shares at least one posting term. Overlap is computed deterministically (token overlap against the posting's own vocabulary); no model ranks anything.",
+    "min_matched_terms": 1,
+    "general_terms": [
+      "security", "cyber", "information", "data", "analysis", "analyst", "team", "teams",
+      "support", "monitor", "monitoring", "incident", "triage", "alert", "alerts", "project",
+      "projects", "tools", "tool", "systems", "system", "role", "business", "reporting",
+      "report", "technical", "written", "communication", "skills", "training", "standards",
+      "standard", "policy", "policies", "risk", "compliance", "management", "degree",
+      "university", "assessment", "service", "services", "customer", "customers", "london",
+      "analysis", "understanding", "knowledge", "familiarity", "experience", "ability",
+      "and", "the", "for", "with", "you", "your", "our", "are", "will", "have", "has"
+    ],
+    "general_terms_note": "These are domain words that appear in almost any posting and almost any CV line. A match on them alone is NOT evidence: at least one matched term must fall outside this list, otherwise the requirement is reported as owner_input_required rather than dressed up as sourced evidence.",
+    "qualification_section_patterns": [
+      "education", "^msc", "^bsc", "^beng", "^ba ", "^bachelor", "^master", "^mba",
+      "^phd", "^doctor", "^degree", "^diploma", "^hnd"
+    ],
+    "qualification_section_note": "A requirement the question bank classifies as qualification_education is answered from the canonical Education material. The canonical CV marks each qualification with its own heading, so these heading patterns (as well as a section literally named Education) identify that material. The quotes are still verbatim cv.md lines with source lines; this only decides which canonical lines are eligible, it never writes a claim.",
+    "section_weight": {
+      "Projects": 3,
+      "Technical Skills": 2,
+      "Profile": 2,
+      "Employment Experience": 2,
+      "Certifications": 2,
+      "Education": 1
+    }
+  },
+  "question_bank": {
+    "note": "Deterministic templates. `match` is a case-insensitive regex over the posting's own requirement/responsibility line. The rendered question is a PREPARATION PROMPT derived from that line; it is explicitly not a question the employer has supplied, and the pack records that on every item.",
+    "categories": [
+      {
+        "id": "siem_log_analysis",
+        "match": "siem|splunk|sentinel|qradar|log analysis|log pipeline|log source|logging",
+        "technical": "Walk through how you would take an unfamiliar log source and turn it into a detection you would trust. Which query language and which false-positive controls would you use?"
+      },
+      {
+        "id": "phishing_email",
+        "match": "phish|email security|spam|social engineering",
+        "technical": "Take a reported phishing email. Describe your analysis steps end to end, from the report triage through to the conclusion you would write down."
+      },
+      {
+        "id": "endpoint_host",
+        "match": "endpoint|edr|host-based|antivirus|hardening|workstation",
+        "technical": "How would you assess an endpoint you suspect is compromised, and what evidence would you collect before making a change to it?"
+      },
+      {
+        "id": "network_security",
+        "match": "network security|firewall|tcp/ip|dns|proxy|packet|network analysis",
+        "technical": "Describe how you would investigate suspicious traffic using only network-layer evidence. Where are the limits of that evidence, and what would you ask for next?"
+      },
+      {
+        "id": "scripting_automation",
+        "match": "python|powershell|script|automation|automate|regular expression|regex",
+        "technical": "Describe an automation you would write for this team and how you would test it before letting it touch a live environment."
+      },
+      {
+        "id": "vulnerability_management",
+        "match": "vulnerab|patch|remediat|scan|exposure",
+        "technical": "How would you prioritise a list of open vulnerabilities when the business cannot fix everything at once?"
+      },
+      {
+        "id": "incident_response",
+        "match": "incident|triage|alert|monitor|response|detection",
+        "technical": "Talk through an alert that you would escalate immediately versus one you would close. What decides it, and how do you record the decision?"
+      },
+      {
+        "id": "grc_policy",
+        "match": "policy|policies|standard|compliance|iso 27001|gdpr|risk|audit|assurance|governance|control",
+        "technical": "Explain a control you would expect to see in a financial-services environment, why it exists and what evidence proves it is operating."
+      },
+      {
+        "id": "communication_reporting",
+        "match": "written|communication|report|documentation|stakeholder|present|non-technical",
+        "technical": "Describe how you would write the same finding for a technical peer and for a non-technical manager."
+      },
+      {
+        "id": "qualification_education",
+        "match": "degree|bachelor|master|qualification|educated|discipline",
+        "technical": "Which parts of your academic work map most directly onto the day-to-day of this role, and which parts you would expect to learn on the job?"
+      },
+      {
+        "id": "cloud_identity",
+        "match": "aws|azure|entra|m365|microsoft 365|cloud|iam|identity|active directory",
+        "technical": "How would you approach identity and access review in a cloud tenant you have not administered before?"
+      }
+    ],
+    "fallback_technical": "The posting states the following requirement: prepare a concrete, evidence-backed answer to it, and be ready to say plainly which parts you have not done before.",
+    "behavioural": [
+      {
+        "id": "risk_and_standards",
+        "match": "risk|policy|policies|standard|compliance|procedure|assurance|audit",
+        "question": "Describe a time you noticed something being done against the agreed standard. What did you do and what was the outcome?"
+      },
+      {
+        "id": "coordinating_others",
+        "match": "coordinate|co-ordinat|team|colleague|shift|workload|collaborat|support",
+        "question": "Describe a time you had to organise other people to get something done under time pressure. How did you divide the work?"
+      },
+      {
+        "id": "customer_stakeholder",
+        "match": "customer|client|stakeholder|member|service|feedback",
+        "question": "Describe a time you had to handle a difficult or unhappy person. What did you do, and what would you do differently?"
+      },
+      {
+        "id": "learning_quickly",
+        "match": "training|learn|new area|on the job|development|fast-paced",
+        "question": "Describe a time you had to become useful in an unfamiliar area quickly. How did you decide what to learn first?"
+      },
+      {
+        "id": "mistake_and_feedback",
+        "match": "",
+        "question": "Describe a mistake you made and what changed afterwards in how you work."
+      },
+      {
+        "id": "prioritisation",
+        "match": "priorit|deadline|time pressure|queue|backlog|volume",
+        "question": "Describe a time you had more work than time. How did you decide what to leave undone, and who did you tell?"
+      },
+      {
+        "id": "ambiguity",
+        "match": "",
+        "question": "Describe a time the instructions you were given were unclear. What did you do next?"
+      }
+    ],
+    "motivation_templates": [
+      "Why this role, and why now? (Anchor on the posting's own stated responsibilities — quote them back rather than paraphrasing them.)",
+      "Which part of this posting do you have real evidence for, and which part would you be learning?"
+    ],
+    "reserved_employer_question_note": "Questions to ask the employer are derived only from the brief's own unknowns and eligibility lines. They are suggestions for the candidate to ask, not claims that the employer said anything."
+  },
+  "truth_rules": [
+    "A likely question is a preparation prompt generated by a deterministic template from the posting's own text. It is NOT a question the employer supplied, and every item says so.",
+    "A talking point quotes a canonical CV line verbatim with its cv.md source line. No talking point paraphrases, summarises, merges or extends canonical content.",
+    "Where the posting asks for something the canonical sources do not evidence, the pack records owner_input_required. It never writes a claim about the candidate.",
+    "Company/role context is carried only from the brief's cited research facts. With no research provider, the pack records research_needed and adds no company fact.",
+    "An eligibility condition is only marked satisfied when the JobBrief itself resolved it from a canonical owner source; otherwise it stays unknown.",
+    "Nothing in this workflow contacts an employer, a recruiter or a candidate, and nothing is posted, sent, scheduled or submitted."
+  ],
+  "not_performed": [
+    "Any contact with an employer, recruiter, agency or interviewer",
+    "Any LinkedIn or other social-platform action",
+    "Any application submission",
+    "Any claim about the candidate that is not verbatim canonical source text with a source line",
+    "Any invented interview question, interviewer name, panel format or interview process detail",
+    "Any interactive browser, GUI application or network research call"
+  ]
+}
