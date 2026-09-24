@@ -1,0 +1,76 @@
+{
+  "task_id": "agent-operational-brief-health-backup-persistence-2026-09-23",
+  "created_at": "2026-09-23T21:37:00Z",
+  "objective": "Finish the non-career operational services: Daily Resource Brief verification, Morning Chief Brief aggregation, system health snapshot, backup/restore verification, scheduler/boot persistence checks and failure escalation so the laptop can operate unattended.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "high",
+  "requires_owner_approval": false,
+  "status": "completed",
+  "prerequisites": [],
+  "allowed_scope": [
+    "Validate E2 Daily Resource Brief generation from real governor state; UNKNOWN must remain UNKNOWN.",
+    "Build/validate a Morning Chief Brief aggregating resource status, active/blocked queue work, system health, career brief availability and exact owner actions.",
+    "Validate scheduled tasks for queue poller and Discord sync; record rather than silently repair unrelated legacy tasks.",
+    "Validate backup/restore procedures for control-plane runtime and relevant local DB/state without exposing raw DB contents to GitHub.",
+    "Validate restart/boot persistence configuration and produce exact deployment/admin checklist items where owner action is required.",
+    "Add a deterministic health snapshot command/script suitable for acceptance testing.",
+    "Run tests and record evidence."
+  ],
+  "stop_conditions": [
+    "No reboot unless explicitly authorized in the task/owner directive.",
+    "No destructive restore over live state.",
+    "No secrets/private DB publication.",
+    "No VPS cutover."
+  ],
+  "notes": "Part of the owner-mandated 2026-09-24 morning engineering cutoff. Continue independently around owner-only credential/admin blockers; record those in tasks-or-issues/overnight-owner-actions-2026-09-24.md. Do not duplicate equivalent pending/running work.",
+  "reconciliation": {
+    "reconciled_at": "2026-09-24T02:44:00Z",
+    "reconciled_by": "agent-blocked-work-final-reconciliation-2026-09-24",
+    "previous_state": "running/ since 2026-09-24T01:38:05Z with NO execution",
+    "verdict": "never_dispatched_silently_swallowed_by_poller_routing_defect",
+    "evidence": "queue.log line 308: 'Task agent-operational-brief-health-backup-persistence-2026-09-23 in progress (attempt 1)' logged 0.001s after the claim at 2026-09-24T01:38:05Z with no dispatch, no Hermes session and no terminal transition. Cause: poller.handle_task matched the substring 'operational' in the task id BEFORE the agent- dispatch branch and returned handle_operational_build()'s hardcoded in_progress status, so the task sat in running/ with no work performed. Fixed in this task (agent- dispatch now precedes the legacy placeholder routers).",
+    "action": "Restored to pending/ unchanged (same task_id, no duplicate chain) so the corrected poller dispatches it to Hermes on the next cycle. No work from this contract has been performed yet.",
+    "no_duplicate_chain": true
+  },
+  "completed_at": "2026-09-24T02:50:34.267575Z",
+  "result": {
+    "status": "completed",
+    "summary": "Built and validated the non-career operational services in scripts/operational_services.py (read-only, deterministic, single CLI with 4 subcommands): (1) health-snapshot \u2014 DB integrity for 7 databases, queue state, scheduled-task state, credential presence, E2/Career brief availability, log sizes and a failure-escalation list, suitable for acceptance testing (live run: verdict ATTENTION, fail_count 0, 7/7 DBs integrity ok, 8/8 tasks present); (2) morning-brief \u2014 Morning Chief Brief aggregating resource status, system health, active/blocked queue work, career-brief availability, the exact owner actions parsed from overnight-owner-actions and escalations (live run: 4 active, 12 blocked, 17 owner actions, 2 escalations); (3) backup \u2014 SQLite online-backup of the operational state set with integrity verification and a 7-snapshot retention policy written OUTSIDE the repository (live run PASS; retention pruning proven with --keep 1; --dry-run wrote nothing), plus log rotation/retention (plan/apply, locked logs recorded not forced); (4) validate-persistence \u2014 read-only scheduler/boot persistence validation that records verdicts and a 22-item owner checklist without changing any task. E2 Daily Resource Brief validated from real governor state (renders=True, briefs_logged=3, UNKNOWN preserved). Credential presence routing fixed so workers with dedicated adapters (deepseek, gemini) are no longer false-negatived by the generic adapter (now correctly configured=2, missing=7, matching the documented truthful state). Added scripts/tests/test_operational_services.py (17 isolated tests) and registered it in the evidence runner; documented the operational layer in deployments/10 and updated deployments/05, 06, 09 and the owner-action TODO. No raw database was published; snapshots live only under %LOCALAPPDATA%\\hermes\\backups\\operational. No reboot, no destructive restore, no scheduled-task change, no VPS cutover.",
+    "owner_action_required": "1) After your next owner-initiated reboot, confirm all eight Chief tasks return to Ready/Running with advancing Next Run Time \u2014 reboot persistence is UNVERIFIED (not failed) for the 7 tasks that have no logon/boot trigger and no StartWhenAvailable (Hermes_Gateway is config-verified); if any does not return, ask engineering to add a logon trigger. 2) Reply with the cadence you want for the operational services (backup / log rotation / morning brief) or 'on demand only' \u2014 both recorded as items 6 and 15 in tasks-or-issues/overnight-owner-actions-2026-09-24.md.",
+    "blocker_category": null,
+    "commits": [
+      "6329876 ops-services: health snapshot, morning brief, operational backup/retention, persistence validation"
+    ],
+    "tests": [
+      "scripts/tests/test_operational_services.py \u2014 17/17 passed, exit 0 (isolated: temp roots, injected task inputs, no live state)",
+      "evidence_runner --only operational: 1 suite run, 1 passed, 0 failed/unavailable, 17 collected, 17 passed, 0 errors, 0 skipped, exit 0 (audits/evidence/2026-09-24T02-49-47Z-operational-services-tests/)",
+      "python scripts/operational_services.py health-snapshot: verdict ATTENTION, fail_count 0, 7/7 databases integrity_check=ok, 8/8 chief tasks present",
+      "python scripts/operational_services.py morning-brief: verdict ATTENTION, active=4, blocked=12, owner_actions=17, escalations=2",
+      "python scripts/operational_services.py backup: status PASS, 0 failure labels; retention proven (--keep 1 pruned the prior snapshot); snapshot outside the repo",
+      "python scripts/operational_services.py backup --dry-run: status PASS, wrote nothing",
+      "python scripts/operational_services.py validate-persistence: 7 tasks unverified_after_reboot, 22 owner-checklist items, no task changed",
+      "E2 Daily Resource Brief validation from live governor state: renders=True, briefs_logged=3, unknown_preserved=True"
+    ],
+    "changed_files": [
+      "scripts/operational_services.py",
+      "scripts/tests/test_operational_services.py",
+      "scripts/evidence_runner.py",
+      "scripts/deployment_preflight.py",
+      ".gitignore",
+      "deployments/10-operational-services.md",
+      "deployments/05-backup-and-restore-plan.md",
+      "deployments/06-service-definitions.md",
+      "deployments/09-acceptance-and-health-commands.md",
+      "tasks-or-issues/overnight-owner-actions-2026-09-24.md",
+      "audits/evidence/2026-09-24T02-48-01Z-operational-services/ (health_snapshot, latest, operational_backup, persistence)",
+      "audits/evidence/2026-09-24T02-49-47Z-operational-services-tests/ (evidence.json/md)"
+    ],
+    "remaining": [
+      "Reboot persistence for the 7 non-gateway tasks remains config-only unverified until an owner-initiated reboot confirms it (owner action recorded).",
+      "Operational backup, log rotation and morning brief run on demand only; scheduling them awaits the owner cadence decision (item 15).",
+      "E2 brief publication to resource-status/ (governor.publish_brief) is not wired to a CLI command, so resource-status/latest-brief.md is not yet produced by an operational run \u2014 recorded, not claimed.",
+      "No off-site/off-machine backup exists; destination is an owner decision (deployments/05 \u00a75).",
+      "Full regression re-run (all 17 suites) is owned by the pending whole-company local acceptance task; this run validated the new suite in isolation."
+    ]
+  }
+}
