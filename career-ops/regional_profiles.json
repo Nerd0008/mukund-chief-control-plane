@@ -14,7 +14,7 @@
       "header_row": 9,
       "first_data_row": 10,
       "last_data_row": 43,
-      "expected_sheets": ["Jobs", "Summary", "How to use", "UK graduate and internship"],
+      "expected_sheets": ["Jobs", "Summary", "How to use", "UK graduate and internship", "Applied"],
       "license_free_rows": 500,
       "id": {"column": "A", "style": "sequential", "prefix": "J", "start": 1},
       "dedupe": {"url_column": "O", "company_column": "C", "title_column": "D"},

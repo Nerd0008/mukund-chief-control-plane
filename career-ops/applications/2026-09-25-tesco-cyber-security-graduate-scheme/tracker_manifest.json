@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-09-25",
+      "company": "Tesco (Insurance and Money Services)",
+      "title": "IMS Technology - Cyber Security Graduate Scheme",
+      "location": "Edinburgh, Scotland (hybrid; office attendance 2 days per week). Glasgow is also cited as a Customer Service Centre location.",
+      "salary": "\u00a334,000",
+      "url": "https://careers.tesco.com/en_GB/careers/JobDetail/209133",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated",
+      "work_authorisation_risk": "UNRESOLVED AND MATERIAL. No sponsorship or citizenship requirement is stated, and none is ruled out either. Programme starts 6 September 2027 and runs two years, i.e. to roughly September 2029; the owner's Graduate visa expires 23 December 2027, so the role term extends well beyond current work permission. Contract type is stated as 'Temporary'. Right to work must be raised with Tesco before applying.",
+      "key_gap": "JD states no tech background is required and screens on potential, curiosity and willingness to learn, so there is no technical gap to close. The scheme includes a Customer Service rotation, which the owner's Co-op Person in Charge and hospitality experience evidence well. Genuine gaps are experiential only: no production incident-response, security-platform or cyber-assurance experience, which the scheme itself is designed to provide.",
+      "recommendation": "Strong fit on selection criteria: the JD explicitly welcomes non-technical backgrounds and the owner exceeds the stated bar (MSc Information Security with Merit, CompTIA Security+, ISC2 CC) while evidencing the customer-facing and problem-solving behaviours the scheme names. Apply before 22 December 2026. The binding question is not suitability but sponsorship across 2027-2029 given the visa expires 23 December 2027 \u2014 resolve before investing in the application.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text provided by owner via Discord 2026-09-25; official Tesco careers posting located and verified live by Chief 2026-09-25 (job ID 209133, apply-by 22-Dec-2026 and \u00a334,000 confirmed against the live page).",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

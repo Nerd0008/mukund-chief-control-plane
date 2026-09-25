@@ -1,0 +1,17 @@
+{
+  "heading": "Application for IMS Technology - Cyber Security Graduate Scheme",
+  "salutation": "Dear Tesco Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Didwania_Tesco_Cyber_Security_Graduate_Scheme_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\tesco_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Cyber Security Graduate Scheme because it is built the way I want to learn: technical work across incident response, security platforms and cyber assurance, alongside the customer-facing experience that makes security work mean something. Tesco Insurance and Money Services protects things customers cannot afford to lose, and that is exactly the kind of setting where careful security work has a visible purpose.",
+
+    "My MSc in Information Security from Royal Holloway, awarded with Merit, covered security management, digital forensics and network security, and I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. That foundation means I can read a finding, work out what it actually means for the business, and explain it clearly to colleagues who are not technical - the part of assurance that decides whether an issue really gets fixed.",
+
+    "My own projects were built around visibility and investigation. InboxDefender is a phishing-analysis prototype that highlights suspicious indicators and supports manual triage, keeping sensitive email data local and mapping findings to MITRE ATT&CK. AttackSurfaceIQ maps Windows error codes to their known causes so a system fault can be investigated consistently instead of guessed at. They are personal projects rather than production tools, but they taught me the habits your team needs: recording what was checked, testing against legitimate as well as suspicious samples, and writing findings so that someone else can act on them.",
+
+    "Working as an IT Support Assistant and as Person in Charge at Co-op has given me both halves of that picture. I am the first point of contact for IT issues, so I spend my day solving other people's problems patiently and explaining what I am doing. I also run weekly risk assessments, review operational controls, and log and escalate issues through to closure - spotting the small problem that could become a real one. I would bring that same instinct, and that same manner with customers and colleagues, to the Customer Service rotation and to the security work that follows it.",
+
+    "What I would offer Tesco is curiosity with follow-through. I am genuinely interested in how systems work and in what makes them fail safely, I am comfortable asking questions rather than guessing, and I like being the person who closes something out properly. I am keen to learn your security platforms and assurance processes thoroughly, to work alongside the wider technology teams, and to build a long-term career helping to protect Tesco's customers and colleagues."
+  ]
+}

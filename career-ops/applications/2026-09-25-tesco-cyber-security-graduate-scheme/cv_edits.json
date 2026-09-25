@@ -1,0 +1,87 @@
+{
+  "purpose": "Tesco IMS Technology - Cyber Security Graduate Scheme tailoring",
+  "master": "Mukund_CV_BASE_2026-09-25.pdf supplied by owner 2026-09-25",
+  "constraint": "layout preserved: each edit keeps its span origin, font, size; +/-15% chars and rendered-width gate",
+  "edits": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "Information Security MSc graduate (Merit) with CompTIA Security+ and ISC2 CC, applying for a graduate cyber"
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "security role spanning incident response, security platforms and cyber assurance. IT support, risk assessment"
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "and customer-facing experience, plus real curiosity about how systems work and how to keep our customers' data safe."
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Phishing analysis, incident triage, Windows Event Logs, MITRE ATT&CK"
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, Active Directory, endpoint configuration"
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "ISO 27001, Cyber Essentials, GDPR, NIST CSF"
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "Customer support, documentation, stakeholder coordination and teamwork"
+    },
+    {
+      "find": "• Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-",
+      "replace": "• Manage 4–5 access requests daily through on-premises Active Directory, verifying approval before granting time-"
+    },
+    {
+      "find": "limited permissions and documenting access periods and extensions.",
+      "replace": "limited permissions, documenting each access period for assurance."
+    },
+    {
+      "find": "• Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting ",
+      "replace": "• Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and "
+    },
+    {
+      "find": "colleagues to recurring phishing tactics.",
+      "replace": "escalating phishing patterns to colleagues."
+    },
+    {
+      "find": "• Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining    ",
+      "replace": "• Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, spotting "
+    },
+    {
+      "find": "assessment records and identifying issues requiring corrective action.",
+      "replace": "weak points in process and recording every issue that needs corrective action."
+    },
+    {
+      "find": "• Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through  ",
+      "replace": "• Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents and "
+    },
+    {
+      "find": "internal reporting systems, apply temporary controls and escalate unresolved risks.",
+      "replace": "escalate unresolved risks through internal reporting, applying fixes under time pressure."
+    },
+    {
+      "find": "• Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up ",
+      "replace": "• Coordinate 7–8 colleagues per shift, explaining control requirements, assigning corrective actions and following up "
+    },
+    {
+      "find": "to ensure identified risks are addressed.",
+      "replace": "until identified risks are closed out."
+    },
+    {
+      "find": "• Designed and developed a phishing-analysis prototype to highlight suspicious email indicators and support manual triage,",
+      "replace": "• Designed and developed a phishing-analysis prototype that highlights suspicious email indicators and supports triage,"
+    },
+    {
+      "find": "with design reviews from an experienced SOC analyst.",
+      "replace": "reviewed by an experienced SOC analyst for realism."
+    },
+    {
+      "find": "• Developed a local tool that maps Windows error codes to common causes, supporting investigation of system ",
+      "replace": "• Developed a local tool that maps Windows error codes to known causes, supporting investigation of system "
+    }
+  ]
+}
