@@ -554,3 +554,9 @@ ordinary worker contracts retain LongCat's provider default. One fresh, single-a
 with finish reason `stop`, and recorded provider-returned usage plus E2 linkage.
 Evidence: `audits/evidence/2026-09-25T16-45-00Z-longcat-thinking-disabled-smoke/`.
 This resolves the strict smoke failure but does not by itself enable E3 Stage 2.
+
+**MiniMax M3:** one bounded deployed-adapter smoke reached the configured endpoint
+and credential but received HTTP 402, provider error `insufficient balance (1008)`.
+The failed attempt was recorded through E2; no retry was performed. The exact
+remaining owner action is to add MiniMax API balance, then request a new bounded
+smoke. Evidence: `audits/evidence/2026-09-25T16-55-00Z-minimax-m3-smoke/`.
