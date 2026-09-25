@@ -21,7 +21,7 @@ RUNTIME_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "exec-brain
 
 E3_COMMAND_NAMES = ["e3-init", "e3-register-workers", "e3-status", "e3-plan",
                     "e3-route", "e3-rationale", "e3-trace", "e3-why",
-                    "e3-verify-db", "e3-execute"]
+                    "e3-verify-db", "e3-stage2-status", "e3-stage2-enable", "e3-execute"]
 
 
 def _module_dir() -> str:
@@ -82,6 +82,8 @@ def cmd_e3_verify_db(args):
 
 def cmd_e3_execute(args):
     """Drive the real E3 production execution leg on the local path."""
+    from stage2_control import require_enabled
+    require_enabled()
     if _module_dir() not in sys.path:
         sys.path.insert(0, _module_dir())
     from e3_execution import ExecutionAdapterRegistry
@@ -131,6 +133,28 @@ def cmd_e3_execute(args):
         "execution_escalations": out.get("execution_escalations"),
         "content_stop_escalation": out.get("content_stop_escalation"),
     }, indent=2, default=str))
+
+
+def cmd_e3_stage2_status(args):
+    from stage2_control import read_state
+    print(json.dumps(read_state(), indent=2))
+
+
+def cmd_e3_stage2_enable(args):
+    from stage2_control import enable
+    record = Path(args.approval_record)
+    evidence = Path(args.regression_evidence)
+    if not args.confirm:
+        raise RuntimeError("Refusing Stage 2 enablement without --confirm")
+    if not record.exists() or "LOCAL E3 STAGE 2 ENABLEMENT AUTHORIZED" not in record.read_text(encoding="utf-8"):
+        raise RuntimeError("Approval record is missing the required owner authorization marker")
+    if not evidence.exists():
+        raise RuntimeError("Regression evidence path does not exist")
+    report = json.loads(evidence.read_text(encoding="utf-8"))
+    summary = report.get("unittest_summary", {})
+    if summary.get("suites_failed") != 0 or summary.get("suites_unavailable") != 0:
+        raise RuntimeError("Regression evidence is not clean")
+    print(json.dumps(enable(approval_record=args.approval_record, regression_evidence=args.regression_evidence, allowed_workers=args.allowed_worker), indent=2))
 
 
 # ── registration ────────────────────────────────────────────────────
@@ -189,6 +213,16 @@ def register(subparsers) -> None:
                               help="verify orchestration.db integrity")
     p.add_argument("--db", default=None)
     p.set_defaults(func=cmd_e3_verify_db)
+
+    p = subparsers.add_parser("e3-stage2-status", help="show local Stage 2 enablement state")
+    p.set_defaults(func=cmd_e3_stage2_status)
+
+    p = subparsers.add_parser("e3-stage2-enable", help="enable local Stage 2 with explicit owner record")
+    p.add_argument("--approval-record", required=True)
+    p.add_argument("--regression-evidence", required=True)
+    p.add_argument("--allowed-worker", action="append", default=[])
+    p.add_argument("--confirm", action="store_true")
+    p.set_defaults(func=cmd_e3_stage2_enable)
 
     p = subparsers.add_parser(
         "e3-execute",

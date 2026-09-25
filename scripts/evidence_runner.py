@@ -76,6 +76,12 @@ SUITES = [
         "guard": None,
     },
     {
+        "name": "E3 Stage 2 enablement control (local state, fail-closed production gate)",
+        "script": "exec-brain/tests/test_stage2_control.py",
+        "pythonpath": [REPO_ROOT / "exec-brain"],
+        "guard": None,
+    },
+    {
         "name": "E3 production execution leg (dispatch, verification gating, DAG/evidence persistence)",
         "script": "exec-brain/tests/test_e3_execution.py",
         "pythonpath": [REPO_ROOT / "exec-brain"],

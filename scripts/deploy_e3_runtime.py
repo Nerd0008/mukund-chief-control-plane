@@ -40,6 +40,7 @@ RUNTIME_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "exec-brain
 # excludes E1/E2-owned files (eb.py is patched separately, governor.py is E2's).
 E3_MODULES = [
     "orchestration_db.py",
+    "stage2_control.py",
     "execution_dag.py",
     "worker_contract.py",
     "worker_registry.py",
