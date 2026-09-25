@@ -595,6 +595,26 @@ rate-limit result as the current execution evidence. Evidence:
 `audits/evidence/2026-09-25T17-45-00Z-mistral-small-recheck/`. It does not enable
 E3 Stage 2 or qualify the remaining provider roster.
 
+**GLM-5.3 Flash retry:** the queued verification task reached its terminal state.
+Its one permitted completion attempt again received HTTP 429 `Insufficient balance or
+no resource package`, while a read-only catalogue check confirmed the endpoint and
+`glm-5.3-flash` model. The live execution blocker is therefore account entitlement on
+the exact Z.ai API account associated with credential target `glm`, not model mapping.
+Evidence: `audits/evidence/2026-09-25T17-25-00Z-glm-53-flash-smoke/` and the
+terminal queue record `agent-glm-53-flash-smoke-retry-2026-09-25`.
+
+**Qwen 3.7 Plus:** one fresh bounded deployed-adapter smoke reached the configured
+international endpoint and stored credential but received HTTP 403
+`AccessDenied.Unpurchased`; E2 recorded the failed attempt and no retry was made.
+The remaining owner action is to purchase/enable `qwen3.7-plus` on this exact DashScope
+account, then request one fresh bounded smoke. Evidence:
+`audits/evidence/2026-09-25T17-55-00Z-qwen-37-plus-smoke/`.
+
+**StepFun:** Mukund directed that this provider is not to be used for the local plan.
+It is intentionally excluded from new setup or smoke work. This decision does not
+silently change any existing Stage 2 gate; Stage 2 remains disabled pending a future
+authorized roster/gate reconciliation.
+
 **GLM-5.3 Flash post-payment retry (owner reported Z.ai payment complete):** one fresh
 bounded smoke through the deployed `glm-53-flash` worker and unchanged generic
 OpenAI-compatible adapter, sent to `https://api.z.ai/api/paas/v4/chat/completions` with
