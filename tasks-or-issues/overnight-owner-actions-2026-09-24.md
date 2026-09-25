@@ -567,3 +567,10 @@ The prior balance observation remains historical; the current first blocker is t
 replace the MiniMax API secret in the credential store with an active API key, then
 request one fresh bounded smoke. E2 recorded this failed attempt; no retry was made.
 Evidence: `audits/evidence/2026-09-25T17-05-00Z-minimax-m3-recheck/`.
+
+**MiniMax M3 current result:** PASS. A fresh bounded smoke completed with HTTP 200;
+the provider returned `MiniMax-M3`, supplied a `stop` completion with the required
+`READY` content, and E2 linkage was recorded. This supersedes the earlier credential
+rejection as the current execution result. Evidence:
+`audits/evidence/2026-09-25T17-15-00Z-minimax-m3-recheck-2/`. It does not enable
+E3 Stage 2 or qualify the rest of the provider roster.
