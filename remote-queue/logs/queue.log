@@ -1412,3 +1412,13 @@ error: Please commit or stash them.
 [2026-09-25T17:32:07.463652Z] Claimed task: agent-glm-53-flash-smoke-retry-2026-09-25
 [2026-09-25T17:32:07.466649Z] Handling task: agent-glm-53-flash-smoke-retry-2026-09-25 (attempt 1)
 [2026-09-25T17:35:13.439367Z] Task agent-glm-53-flash-smoke-retry-2026-09-25 attempt 1/3: park (blocker_category='external_provider' is deterministic; park until the blocking state changes)
+[2026-09-25T20:14:02.524467Z] git stash untracked failed: warning: in the working copy of 'career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cv_edits.json', CRLF will be replaced by LF the next time Git touche
+[2026-09-25T20:14:02.800448Z] Skipping poll cycle: git pull failed
+[2026-09-25T20:16:04.258257Z] git pull: success (with stash/restore)
+[2026-09-25T20:18:04.279551Z] git pull: success (with stash/restore)
+[2026-09-25T20:20:04.590474Z] git pull: success (with stash/restore)
+[2026-09-25T20:22:04.089556Z] git pull: success (with stash/restore)
+[2026-09-25T20:24:04.100252Z] git pull: success (with stash/restore)
+[2026-09-25T20:26:04.146693Z] git pull: success (with stash/restore)
+[2026-09-25T20:28:05.148751Z] git pull: success (with stash/restore)
+[2026-09-25T20:30:04.817576Z] git pull: success (with stash/restore)
