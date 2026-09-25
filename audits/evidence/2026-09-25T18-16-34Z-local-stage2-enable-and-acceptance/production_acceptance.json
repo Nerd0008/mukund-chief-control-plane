@@ -1,0 +1,17 @@
+{
+  "scope": "one bounded local E3 Stage 2 production-dispatch acceptance",
+  "executed_at_utc": "2026-09-25T18:16:41Z",
+  "objective_hash": "9fd4e527ac47",
+  "outcome": "EXECUTION_COMPLETE",
+  "plan_id": "plan-0001",
+  "node_count": 1,
+  "nodes_complete": 1,
+  "worker_id": "codex-cli",
+  "provider": "openai",
+  "dispatch_status": "COMPLETED",
+  "final_verification": "PASS",
+  "evidence_id": "evidence-b0a8cab2d8bb",
+  "provider_deferred_workers_selected": false,
+  "response_content_recorded": false,
+  "secret_material_recorded": false
+}

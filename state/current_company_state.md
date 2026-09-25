@@ -3,15 +3,15 @@
 <!-- BEGIN GENERATED: executive-status (scripts/status_render.py) -->
 ## Canonical status (generated)
 
-_Generated from `status/canonical-status.json` at as-of **2026-09-25T18:09:05Z** by `python scripts/status_render.py`; verify with `python scripts/status_verify.py`. The evidence chronology below is preserved unchanged._
+_Generated from `status/canonical-status.json` at as-of **2026-09-25T18:14:49Z** by `python scripts/status_render.py`; verify with `python scripts/status_verify.py`. The evidence chronology below is preserved unchanged._
 
-- **Code identity:** branch `main`, authoring HEAD `305efb95342a567f7b3b7df7f84ddddaf6444d94`, newest verified evidence SHA `305efb95342a567f7b3b7df7f84ddddaf6444d94`.
-- **Newest evidence run:** `2026-09-25T18-07-35Z-local-deployment-release-regression` — **PASS (22 suites / 612 collected / 612 passed / 0 failed)** (finished 2026-09-25T18:09:05Z); regression **22 suites / 612 collected / 612 passed / 0 failed / 0 unavailable**.
-- **Executive Brain:** E1 ACTIVE; E2 ACTIVE; E3 IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED; E4 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES); E5 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES).
+- **Code identity:** branch `main`, authoring HEAD `ec581e6643cd29a3da394cea08892a2b7c837aba`, newest verified evidence SHA `8e2847b3d4d8b544a670434c066c23f3fbe6b1f1`.
+- **Newest evidence run:** `2026-09-25T18-13-26Z-stage2-enable-regression` — **PASS (23 suites / 614 collected / 614 passed / 0 failed)** (finished 2026-09-25T18:14:49Z); regression **23 suites / 614 collected / 614 passed / 0 failed / 0 unavailable**.
+- **Executive Brain:** E1 ACTIVE; E2 ACTIVE; E3 LOCAL STAGE 2 ENABLED; VERIFIED WORKER POOL ONLY; E4 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES); E5 IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES).
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
 - **Provider credentials:** 10 / 10 present (0 absent).
-- **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED (cutover not authorised; preflight GO with 0 owner-gated WARN).
-- **Production blockers (8), separate from implementation completion:** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`.
+- **Stage 2:** ENABLED. **Deployment:** LOCAL DEPLOYED (cutover local-authorised; preflight GO with 0 owner-gated WARN).
+- **Production blockers (7), separate from implementation completion:** `provider-execution-blocked`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`.
 - **Optional / feature-gated owner decisions (not release blockers):** 12 items — see `status/executive-tracker.md` section 11.
 
 Full regenerated view: `status/executive-tracker.md`.

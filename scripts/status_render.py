@@ -312,15 +312,14 @@ def render_readme_block(c: dict) -> str:
     for phase in ("E1", "E2", "E3", "E4", "E5"):
         p = e[phase]
         stage2 = "n/a" if phase != "E3" else ("ENABLED" if p.get("stage2_enabled") else "**NOT ENABLED**")
-        lines.append(f"| **{phase}** | {p['state']} | {p['implementation']} | {stage2} | no |")
+        lines.append(f"| **{phase}** | {p['state']} | {p['implementation']} | {stage2} | {'yes' if p.get('production_dispatch_enabled', False) or p.get('deployed', False) else 'no'} |")
     lines += [
         "",
         "- **E1 — ACTIVE:** task classification, immutable quality floors, routing discipline, owner overrides, audit integrity.",
         "- **E2 — ACTIVE:** Resource Governor telemetry, provider capacity/state tracking, deterministic Daily Resource Brief.",
-        "- **E3 — IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED:** multi-model orchestration, dynamic team assembly, "
-        "evidence-backed worker qualification, execution DAGs, deterministic verification gates, decision-rationale "
-        "audit trails. Stage 2 (production enablement) is gated on the seven absent provider credentials and an "
-        "explicit owner step.",
+        f"- **E3 — {e['E3']['state']}:** multi-model orchestration, dynamic team assembly, "
+        "evidence-backed worker qualification, execution DAGs, deterministic verification gates and decision-rationale "
+        "audit trails. Local Stage 2 is restricted to the recorded verified worker pool; provider-deferred workers remain non-routable.",
         "- **E4 — IMPLEMENTED AND DRILL-VERIFIED:** predictive exhaustion, protected reserves, resource-driven "
         "checkpointing, checkpoint/state handover and equivalent-worker failover. Drills use injected (stubbed) "
         "provider failures; real-provider failover is **not** claimed.",
@@ -328,8 +327,8 @@ def render_readme_block(c: dict) -> str:
         "handling, bounded convergence enforcement, mature owner-override UX and a recovery path. The real "
         "provider-health probe before leaving safe mode is **not** wired.",
         "",
-        f"**Production blockers remain open ({len(c['production_blockers'])}): the system is not "
-        f"production-deployed and no cutover is authorised.** See `status/executive-tracker.md` "
+        f"**Production blockers remain open ({len(c['production_blockers'])}): local deployment is active, "
+        f"while VPS cutover is not authorised.** See `status/executive-tracker.md` "
         f"(section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.",
     ]
     return "\n".join(lines) + "\n"

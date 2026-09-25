@@ -26,7 +26,7 @@ The long-term goal is not a single chatbot. It is an AI management system capabl
 <!-- BEGIN GENERATED: executive-status (scripts/status_render.py) -->
 ## Current Executive Brain roadmap
 
-_Generated from the canonical status source (`status/canonical-status.json`, as of 2026-09-25T18:09:05Z). Regenerate with `python scripts/status_render.py`._
+_Generated from the canonical status source (`status/canonical-status.json`, as of 2026-09-25T18:14:49Z). Regenerate with `python scripts/status_render.py`._
 
 The Executive Brain is implemented in five layers. **Implementation completion,
 Stage 2 enablement and production deployment are three different states.**
@@ -35,17 +35,17 @@ Stage 2 enablement and production deployment are three different states.**
 |---|---|---|---|---|
 | **E1** | ACTIVE | verified | n/a | no |
 | **E2** | ACTIVE | verified | n/a | no |
-| **E3** | IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED | verified | **NOT ENABLED** | no |
+| **E3** | LOCAL STAGE 2 ENABLED; VERIFIED WORKER POOL ONLY | verified | ENABLED | yes |
 | **E4** | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | verified | n/a | no |
 | **E5** | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | verified | n/a | no |
 
 - **E1 — ACTIVE:** task classification, immutable quality floors, routing discipline, owner overrides, audit integrity.
 - **E2 — ACTIVE:** Resource Governor telemetry, provider capacity/state tracking, deterministic Daily Resource Brief.
-- **E3 — IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED:** multi-model orchestration, dynamic team assembly, evidence-backed worker qualification, execution DAGs, deterministic verification gates, decision-rationale audit trails. Stage 2 (production enablement) is gated on the seven absent provider credentials and an explicit owner step.
+- **E3 — LOCAL STAGE 2 ENABLED; VERIFIED WORKER POOL ONLY:** multi-model orchestration, dynamic team assembly, evidence-backed worker qualification, execution DAGs, deterministic verification gates and decision-rationale audit trails. Local Stage 2 is restricted to the recorded verified worker pool; provider-deferred workers remain non-routable.
 - **E4 — IMPLEMENTED AND DRILL-VERIFIED:** predictive exhaustion, protected reserves, resource-driven checkpointing, checkpoint/state handover and equivalent-worker failover. Drills use injected (stubbed) provider failures; real-provider failover is **not** claimed.
 - **E5 — IMPLEMENTED AND DRILL-VERIFIED:** safe/degraded mode, failure drills, outage and malformed-output handling, bounded convergence enforcement, mature owner-override UX and a recovery path. The real provider-health probe before leaving safe mode is **not** wired.
 
-**Production blockers remain open (8): the system is not production-deployed and no cutover is authorised.** See `status/executive-tracker.md` (section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.
+**Production blockers remain open (7): local deployment is active, while VPS cutover is not authorised.** See `status/executive-tracker.md` (section 10) for the explicit blocker list, and `state/current_company_state.md` for the live state.
 <!-- END GENERATED: executive-status (scripts/status_render.py) -->
 
 ## Multi-model worker pool

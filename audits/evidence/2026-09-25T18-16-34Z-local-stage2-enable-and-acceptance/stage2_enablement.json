@@ -1,0 +1,14 @@
+{
+  "stage2_enabled": true,
+  "enabled_at_utc": "2026-09-25T18:16:34+00:00",
+  "scope": "local host only",
+  "approval_record": "tasks-or-issues/2026-09-25-local-e3-stage2-authorization.md",
+  "regression_evidence": "audits/evidence/2026-09-25T18-13-26Z-stage2-enable-regression/evidence.json",
+  "allowed_workers": [
+    "codex-cli",
+    "deepseek-v41-flash",
+    "google-nano-banana-2"
+  ],
+  "deferred_workers": "Provider-deferred workers remain non-routable and cannot be selected for dispatch.",
+  "secret_material_recorded": false
+}

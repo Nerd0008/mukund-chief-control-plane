@@ -8,8 +8,8 @@
 - Canonical source: `status/canonical-status.json` (schema v1.0)
 - Generation command: `python scripts/status_render.py`
 - Verification command: `python scripts/status_verify.py`
-- Status as of (newest incorporated evidence): **2026-09-25T18:09:05Z**
-- Newest evidence run: `2026-09-25T18-07-35Z-local-deployment-release-regression` — **PASS (22 suites / 612 collected / 612 passed / 0 failed)**
+- Status as of (newest incorporated evidence): **2026-09-25T18:14:49Z**
+- Newest evidence run: `2026-09-25T18-13-26Z-stage2-enable-regression` — **PASS (23 suites / 614 collected / 614 passed / 0 failed)**
 
 ## 1. Code and release identity
 
@@ -17,8 +17,8 @@
 |---|---|
 | Repository | https://github.com/Nerd0008/mukund-chief-control-plane.git |
 | Branch | main |
-| Authoring HEAD | `305efb95342a567f7b3b7df7f84ddddaf6444d94` |
-| Verified evidence SHA | `305efb95342a567f7b3b7df7f84ddddaf6444d94` |
+| Authoring HEAD | `ec581e6643cd29a3da394cea08892a2b7c837aba` |
+| Verified evidence SHA | `8e2847b3d4d8b544a670434c066c23f3fbe6b1f1` |
 | Supported Python | 3.11.16 |
 | Unsupported | 3.14.x |
 | Dependency manifest / lock | `requirements.txt` / `requirements.lock` |
@@ -33,7 +33,7 @@ separate states and are never collapsed into one.
 |---|---|---|---|---|---|
 | **E1** | Intake, classification, immutable quality floors, owner overrides, audit integrity | verified | ACTIVE | n/a | no |
 | **E2** | Resource Governor telemetry, provider capacity/state tracking, deterministic Daily Resource Brief | verified | ACTIVE | n/a | no |
-| **E3** | Intelligent multi-model orchestration, team assembly, qualification, execution DAGs, verification, rationale audit | verified | IMPLEMENTED AND VERIFIED, STAGE 2 NOT ENABLED | NOT ENABLED | no |
+| **E3** | Intelligent multi-model orchestration, team assembly, qualification, execution DAGs, verification, rationale audit | verified | LOCAL STAGE 2 ENABLED; VERIFIED WORKER POOL ONLY | ENABLED | yes |
 | **E4** | Predictive exhaustion, protected reserves, resource-driven checkpointing, handover, equivalent-worker failover | verified | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | n/a | no |
 | **E5** | Safe/degraded mode, failure drills, outage and malformed-output handling, convergence enforcement, owner override UX and recovery | verified | IMPLEMENTED AND DRILL-VERIFIED (STUBBED PROVIDER FAILURES) | n/a | no |
 
@@ -41,8 +41,8 @@ separate states and are never collapsed into one.
   - E1 passes only because this host's machine-local Hermes runtime root is present; on a bare clone it is truthfully recorded `unavailable`.
 - **E2** — 45 collected / 45 passed (suite "E2 governor / provider adapters").
   - Same machine-local runtime-root caveat as E1.
-- **E3** — E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run.
-  - E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) remains gated: a recorded readiness criterion (Google image real-dispatch settled) is unmet and every newly-credentialed provider refused live dispatch at the billing/entitlement/auth layer, so provider-diverse routing cannot execute.
+- **E3** — E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 / Stage 2 control 2 — all pass in the 23-suite, 614-test regression.
+  - Local Stage 2 was explicitly authorized and enabled only for codex-cli, deepseek-v41-flash and google-nano-banana-2. One bounded local production-dispatch acceptance completed through codex-cli and passed deterministic verification. The seven provider-deferred workers remain non-routable; this does not claim provider-diverse routing, VPS deployment, or a live-provider E4/E5 failover.
 - **E4** — 36 checks passed / 36 total, real_provider_calls = 0, live stores byte-identical.
   - evidence_kind = stubbed_provider_failure. A real provider outage -> real equivalent-worker failover has NOT been exercised and is not claimed (see production blocker `live-provider-failover-gap`).
 - **E5** — 36 checks passed / 36 total; safe-mode entry, owner override audit, recovery refusal/success and the bounded 3-dispatch convergence cap all asserted.
@@ -62,12 +62,12 @@ Source: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/ros
 
 ## 4. Regression evidence (newest verification run)
 
-- Suites: **22 run / 22 passed / 0 failed / 0 unavailable**
-- Tests: **612 collected / 612 passed / 0 failed**
-- Code SHA: `305efb95342a567f7b3b7df7f84ddddaf6444d94`
+- Suites: **23 run / 23 passed / 0 failed / 0 unavailable**
+- Tests: **614 collected / 614 passed / 0 failed**
+- Code SHA: `8e2847b3d4d8b544a670434c066c23f3fbe6b1f1`
 - Interpreter: 3.14.6
-- Source: `audits/evidence/2026-09-25T18-07-35Z-local-deployment-release-regression/evidence.json`
-- Current full local release regression. Earlier evidence remains historical.
+- Source: `audits/evidence/2026-09-25T18-13-26Z-stage2-enable-regression/evidence.json`
+- Regression that includes the Stage 2 control tests. A final full regression will supersede this after canonical-status reconciliation.
 
 ## 5. Career discovery state
 
@@ -120,33 +120,32 @@ Known open items:
 
 ## 8. Stage 2 state
 
-**NOT ENABLED** (gate `scripts/e3_stage2_readiness_gate.py`, verdict 2026-09-24T21:21:21Z)
+**ENABLED** (gate `exec-brain/stage2_control.py (machine-local fail-closed control)`, verdict 2026-09-25T18:16:34Z)
 
 Failing conditions at the last verdict:
-- condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)
-- condition (c) evaluated False by the gate for this run: its recorded authorization source (the predecessor's contract, now terminal) no longer carries the enablement markers, so the gate fails closed; independently, condition (b) alone bars enablement and no enablement was performed
+- Seven provider-deferred workers remain non-routable pending independent provider recovery or qualification.
+- Google image IMAGE_RECITATION intermittency remains accepted as provider-side and is not used by the enabled local Stage 2 pool.
 
-The post-key sequence ran in full on 2026-09-24 and the override-aware gate was re-run with the clean 22-suite regression. Condition (a) is SATISFIED (10/10 credentials present; provider identity verified for every intended provider - 6/7 live catalogue, 1/7 authoritative documentation). Condition (b) is unmet on exactly one criterion: the Google image real-dispatch condition ('resolved, not intermittent') - the bounded repeat series observed 2/9 recurrences carrying the provider's own finishReason IMAGE_RECITATION. Independently, all seven newly-credentialed workers were refused by their providers (billing/quota/entitlement/invalid key), so provider-diverse routing cannot execute. The gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 then ran ONCE, independently re-evaluated this rule at HEAD (0 provider calls, evidence audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/) and again did NOT enable Stage 2. NEVER re-run this gate expecting enablement: enablement needs the unmet criterion resolved or re-scoped AND the seven provider accounts funded so the stored keys serve traffic; until then it is a deterministic owner/provider blocker and must not be retried in a loop.
+Do not re-run provider smokes until the owner elects to pursue each external billing, entitlement or authentication dependency. Local Stage 2 uses only the three recorded verified workers.
 
 ## 9. Deployment state
 
-- **State: NOT DEPLOYED** — cutover not authorised.
-- **Architecture:** DEFERRED BY OWNER — no final architecture decision recorded. Recorded preference only: laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, explicitly not a decision.
-- **VPS details:** NOT PROVIDED (owner dependency)
+- **State: LOCAL DEPLOYED** — cutover local-authorised.
+- **Architecture:** LOCAL-ONLY BY OWNER — current laptop deployment; VPS topology and cutover remain deferred.
+- **VPS details:** DEFERRED BY OWNER — no VPS access or cutover requested.
 - **Preflight:** GO (10 PASS, 0 WARN, 0 FAIL); sole warning: none
-  - Local deployment preflight rerun after installing the declared dependencies: all checks passed. This does not authorize VPS cutover or enable E3 Stage 2.
+  - Local deployment preflight rerun after installing the declared dependencies: all checks passed. Local E3 Stage 2 enablement and acceptance are recorded separately; this does not authorize a VPS cutover.
 - **Backup/restore drill:** PASS (10 artifacts)
 - Runbook `deployments/07-cutover-runbook.md`, rollback `deployments/08-rollback-and-no-go-checklist.md`, services `deployments/06-service-definitions.md`
 - Inbound network: none required by any Chief/Hermes component (outbound 443 only)
 
 ## 10. Production blockers (separate from implementation completion)
 
-8 open item(s). Implementation completion is NOT release readiness.
+7 open item(s). Implementation completion is NOT release readiness.
 
 | ID | Blocker | Category | State | Owner action |
 |---|---|---|---|---|
 | `provider-execution-blocked` | All ten roster credentials are present but the seven newly-credentialed providers refuse live dispatch (billing / entitlement / quota / invalid key) | external_provider | OPEN | required |
-| `stage2-not-enabled` | E3 Stage 2 (production enablement) is not enabled | owner_approval | OPEN | required |
 | `live-provider-failover-gap` | No live-provider E4 failover / E5 provider-health recovery has been exercised | architecture | OPEN | required |
 | `deployment-cutover-decision` | Deployment architecture and VPS cutover are undecided and unauthorised | owner_approval | OPEN | required |
 | `offsite-backup-absent` | No off-site backup exists | architecture | OPEN | required |
@@ -159,12 +158,6 @@ The post-key sequence ran in full on 2026-09-24 and the override-aware gate was 
 - Blocks: live execution of the seven generic API workers and therefore provider-diverse E3 routing; Tencent/Hy3 provider identity stays documentation-derived only
 - Evidence: `audits/evidence/2026-09-24T21-00-28Z-e3-provider-bounded-smoke/evidence.json`
 - Owner action: Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded' (a single diagnostic call captured the response headers and the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence); GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased on the owner's intended `qwen3.7-plus` (purchase/enable qwen3.7-plus for this account — the earlier `qwen3.8-27b` selection was a Hermes-side mapping error, now corrected, and the intended id IS present in the live catalogue); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002 repeats on a single GET /v1/models re-probe — TokenHub credential/product/account mismatch). Each worker stays routable=false meanwhile.
-
-### `stage2-not-enabled` — E3 Stage 2 (production enablement) is not enabled
-
-- Blocks: production dispatch through the Executive Brain; the live-provider E4/E5 drill
-- Evidence: `audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/`
-- Owner action: The post-key verification sequence has been executed and independently re-evaluated by the gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 (2026-09-24T21:21:21Z, 0 provider calls). Stage 2 stays disabled because a recorded readiness criterion is unmet (Google image real-dispatch not settled) and every newly-credentialed provider refused live dispatch; the successor left the system unchanged rather than weakening a gate. Owner decision required: resolve or re-scope the Google-image criterion and fund the provider accounts, then re-run the gate.
 
 ### `live-provider-failover-gap` — No live-provider E4 failover / E5 provider-health recovery has been exercised
 
@@ -202,15 +195,17 @@ The post-key sequence ran in full on 2026-09-24 and the override-aware gate was 
 - Evidence: `audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/verify_after_apply.json`
 - Owner action: Decide whether to keep the laptop powered and signed in, or approve a service-account/credential change for the scheduled tasks. The 2026-09-24 hardening deliberately did NOT switch any task to SYSTEM or another account, because the seven provider keys live in the owner's user-scoped Windows Credential Manager and a different account could not read them.
 
-### Resolved blockers (2 — recorded, not deleted)
+### Resolved blockers (3 — recorded, not deleted)
 
 | ID | Item | State |
 |---|---|---|
 | `battery-gating` | Battery gating removed from the seven affected Chief tasks | RESOLVED 2026-09-24 (applied + verified live) |
 | `log-rotation-retention` | Bounded log rotation/retention over every declared live log path | RESOLVED 2026-09-24 (dry-run then bounded apply evidenced) |
+| `stage2-not-enabled` | E3 Stage 2 local enablement gate | RESOLVED 2026-09-25 (local-only, restricted worker pool) |
 
 - **`battery-gating`** — DisallowStartIfOnBatteries and StopIfGoingOnBatteries are false on every owned task, so an unattended run is no longer blocked on battery. Applied by scripts/harden_scheduled_tasks.py with byte-exact reversible pre-change backups under deployments/service-definitions/backups/20260924T221712Z-pre-hardening. Evidence: `audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/verify_after_apply.json`
 - **`log-rotation-retention`** — python scripts/operational_services.py rotate-logs [--apply]: archive a log above 5 MB, keep the newest 5 archives per log, over the live Hermes/Chief log paths only. Hermes-managed JSON record stores are recorded out of scope and never pruned. Scheduled daily at 03:00 (ChiefLogRotation). Evidence: `audits/evidence/2026-09-24T22-21-49Z-task-hardening-and-operational-schedules/log-rotation/log_rotation.json`
+- **`stage2-not-enabled`** — Owner explicitly authorized local Stage 2. The machine-local fail-closed control was enabled only for codex-cli, deepseek-v41-flash and google-nano-banana-2, then one bounded production-dispatch acceptance passed through codex-cli. Provider-deferred workers remain non-routable. Evidence: `audits/evidence/2026-09-25T18-16-34Z-local-stage2-enable-and-acceptance/stage2_enablement.json`
 
 ## 11. Optional / feature-gated owner decisions (NOT release blockers)
 

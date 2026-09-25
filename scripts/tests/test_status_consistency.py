@@ -91,10 +91,11 @@ class CanonicalStatusSource(unittest.TestCase):
         for entry in self.canonical["production_blockers"]:
             self.assertIn(entry["state"], {"OPEN", "UNKNOWN", "BLOCKED"},
                           f"production blocker {entry['id']} has a non-open state")
-        self.assertNotEqual(self.canonical["stage2"]["state"], "ENABLED")
-        self.assertEqual(self.canonical["executive_brain"]["E3"]["stage2_enabled"], False)
-        self.assertNotIn(self.canonical["deployment"]["state"], {"DEPLOYED", "PRODUCTION"})
-        self.assertNotEqual(self.canonical["deployment"]["cutover"], "authorised")
+        self.assertEqual(self.canonical["stage2"]["state"], "ENABLED")
+        self.assertEqual(self.canonical["executive_brain"]["E3"]["stage2_enabled"], True)
+        self.assertEqual(self.canonical["executive_brain"]["E3"]["production_dispatch_enabled"], True)
+        self.assertEqual(self.canonical["deployment"]["state"], "LOCAL DEPLOYED")
+        self.assertEqual(self.canonical["deployment"]["cutover"], "local-authorised")
         self.assertTrue(self.canonical["production_blockers"])
         self.assertEqual(src.check_no_ready_claim(self.canonical), [])
 
@@ -160,7 +161,7 @@ class DriftDetection(unittest.TestCase):
         canonical = src.load_canonical()
         broken = copy.deepcopy(canonical)
         broken["production_blockers"] = [
-            b for b in broken["production_blockers"] if b["id"] != "stage2-not-enabled"
+            b for b in broken["production_blockers"] if b["id"] != "provider-execution-blocked"
         ]
         problems = src.check_blockers(broken)
         self.assertTrue(any(level == "FAIL" for level, _ in problems),

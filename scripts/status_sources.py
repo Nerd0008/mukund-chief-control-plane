@@ -40,7 +40,6 @@ MARKER_END = "<!-- END GENERATED: executive-status (scripts/status_render.py) --
 # so the open-blocker list stays literally open.
 REQUIRED_PRODUCTION_BLOCKERS = {
     "provider-execution-blocked",
-    "stage2-not-enabled",
     "live-provider-failover-gap",
     "deployment-cutover-decision",
     "offsite-backup-absent",
@@ -54,6 +53,7 @@ REQUIRED_PRODUCTION_BLOCKERS = {
 REQUIRED_RESOLVED_BLOCKERS = {
     "battery-gating",
     "log-rotation-retention",
+    "stage2-not-enabled",
 }
 
 # Owner-gated / feature-gated items that must NOT be labelled core production
@@ -421,7 +421,7 @@ def check_no_ready_claim(canonical: dict) -> list[tuple[str, str]]:
     open_blockers = [b for b in canonical["production_blockers"] if b["state"] == "OPEN"]
     dep_state = canonical["deployment"]["state"]
     stage2 = canonical["stage2"]["state"]
-    if open_blockers and dep_state not in ("NOT DEPLOYED", "BLOCKED"):
+    if open_blockers and dep_state not in ("NOT DEPLOYED", "BLOCKED", "LOCAL DEPLOYED"):
         problems.append(("FAIL", "production blockers remain open but deployment is not recorded as not-deployed"))
     if open_blockers and canonical["deployment"]["cutover"] == "authorised":
         problems.append(("FAIL", "production blockers remain open but cutover is recorded as authorised"))
@@ -429,6 +429,10 @@ def check_no_ready_claim(canonical: dict) -> list[tuple[str, str]]:
         e3 = canonical["executive_brain"]["E3"]
         if e3.get("stage2_enabled") or e3.get("production_dispatch_enabled"):
             problems.append(("FAIL", "E3 is marked Stage-2-enabled/production-dispatch while the stage2 section says NOT ENABLED"))
+    if stage2 == "ENABLED":
+        e3 = canonical["executive_brain"]["E3"]
+        if not e3.get("stage2_enabled") or not e3.get("production_dispatch_enabled"):
+            problems.append(("FAIL", "stage2 is ENABLED but E3 is not marked enabled for restricted production dispatch"))
     return problems
 
 
