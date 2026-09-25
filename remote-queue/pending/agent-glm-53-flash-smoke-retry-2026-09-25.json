@@ -1,0 +1,25 @@
+{
+  "task_id": "agent-glm-53-flash-smoke-retry-2026-09-25",
+  "created_at": "2026-09-25T17:31:00Z",
+  "objective": "Run one fresh bounded smoke test of the existing GLM-5.3-Flash worker after the owner reports Z.ai payment is complete. Verification-only: prove whether the stored credential now serves traffic.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "allowed_scope": [
+    "Use the existing glm-53-flash worker and deployed generic OpenAI-compatible adapter unchanged unless a newly proven adapter defect prevents execution.",
+    "Run exactly one real completion against the configured Z.ai international endpoint using api_model_id glm-5.3-flash.",
+    "Use max_tokens <= 16, one attempt, no retry.",
+    "Confirm credential presence without revealing the credential value.",
+    "Record sanitized evidence only: HTTP status, returned model field, finish reason, provider-returned usage, runtime, and sanitized error if any.",
+    "Record E2 linkage through the public governor interface.",
+    "If the smoke succeeds, update current execution truth for GLM from the older 429 balance blocker to PASS/routable based on evidence; qualification remains UNPROVEN.",
+    "Do not touch E3 Stage 2, other providers, or unrelated files."
+  ],
+  "stop_conditions": [
+    "Exactly one GLM completion call maximum.",
+    "No secret/key value in GitHub, logs, queue records, or chat.",
+    "No Stage 2 enablement.",
+    "If provider still refuses traffic, record the exact sanitized blocker and stop."
+  ],
+  "status": "pending"
+}
