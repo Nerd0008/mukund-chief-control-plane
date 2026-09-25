@@ -594,3 +594,22 @@ with finish reason `stop`, and E2 linkage was recorded. This supersedes the earl
 rate-limit result as the current execution evidence. Evidence:
 `audits/evidence/2026-09-25T17-45-00Z-mistral-small-recheck/`. It does not enable
 E3 Stage 2 or qualify the remaining provider roster.
+
+**GLM-5.3 Flash post-payment retry (owner reported Z.ai payment complete):** one fresh
+bounded smoke through the deployed `glm-53-flash` worker and unchanged generic
+OpenAI-compatible adapter, sent to `https://api.z.ai/api/paas/v4/chat/completions` with
+`api_model_id=glm-5.3-flash`, `max_tokens=16`, one attempt, no retry. The stored
+credential was present in the credential store (presence only — no value read, printed
+or stored) and the endpoint answered, but the completion was still refused with HTTP
+429 `Insufficient balance or no resource package. Please recharge.` No model field and
+no provider usage were returned; E2 recorded the failed attempt as
+`obs-20260925-50e4ab40` via `governor.record_request()` (chain verification clean). A
+read-only `GET /models` answered 200 with 11 models and `glm-5.3-flash` still present,
+so the endpoint/credential/model mapping remain verified. Execution truth is unchanged:
+`routable=false`, `smoke_test=FAILED`, qualification UNPROVEN — no PASS is claimed. The
+release of an earlier `glm-5.3-flash` refusal was therefore not the observed result.
+Exact remaining owner action: confirm the Z.ai payment landed on **this** API account
+and covered **API pay-as-you-go balance or a resource package** for `glm-5.3-flash` —
+a topped-up consumer/subscription plan or a payment on a different Z.ai/BigModel
+account or region would not release this 429 — then request one fresh bounded smoke.
+Evidence: `audits/evidence/2026-09-25T17-33-14Z-glm-53-flash-smoke-retry/`.
