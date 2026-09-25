@@ -536,3 +536,9 @@ power-cycled; no VPS/off-site vendor was chosen; the legacy task was not deleted
 Mukund accepted the Google image worker's attributed provider-side `IMAGE_RECITATION` intermittency for the **local E3 readiness criterion**. Preserve the observed 2/9 recurrence, provider attribution, bounded retry/fallback evidence and the worker's unqualified/stability status; this decision does not fabricate a stability result or bypass provider-execution evidence. The remaining Stage 2 blocker is live execution readiness for the text-provider roster, and Stage 2 remains disabled until its objective gates pass.
 
 Mukund also directed the project to remain **local-only for now**. VPS architecture, access, deployment and cutover are deferred to a future owner decision. Continue local engineering, qualification, verification, evidence and reversible deployment preparation only.
+
+## Provider evidence update — 2026-09-25
+
+**Tencent Hunyuan Hy3:** PASS. After the owner re-issued and stored the TokenHub key, one bounded smoke through the deployed adapter completed with HTTP 200. The configured and returned model were both `hy3`; model identity was confirmed and E2 linkage was recorded. Evidence: `audits/evidence/2026-09-25T16-20-00Z-tencent-hy3-smoke/`.
+
+This closes Tencent credential/authentication as a provider-execution blocker. It does not establish broad provider readiness, alter the remaining provider-account blockers, qualify any worker beyond the recorded evidence, or enable E3 Stage 2.
