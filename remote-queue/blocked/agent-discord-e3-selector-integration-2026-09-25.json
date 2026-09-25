@@ -29,7 +29,7 @@
     "Do not perform VPS cutover, reboot, sign-out, firewall changes, external account mutations, or secret migration."
   ],
   "notes": "Observed defect before task: Discord screenshot shows native provider picker with DeepSeek current and no LongCat. Repo inspection shows E3Router constructed without WorkerRegistry/E2 state, _get_provider/_get_model return unknown, candidate ordering is qualification-confidence only, TeamAssembler takes first candidate, ADAPTER_MODULES only binds codex-cli/deepseek/google, while 2026-09-25 evidence records HTTP 200 for Mistral/LongCat/MiniMax/Tencent. Stage 2 state currently allows only codex-cli/deepseek/google.",
-  "status": "pending",
+  "status": "blocked",
   "execution_attempts": [
     {
       "attempt": 1,
@@ -68,5 +68,11 @@
     "last_summary": "Hermes CLI exited with code 1 (output_bytes=406).",
     "next_action": "park",
     "reason": "retry budget exhausted after 3 of 3 permitted attempts"
+  },
+  "blocked_at": "2026-09-25T20:35:14.377922Z",
+  "blocker": {
+    "category": "execution_error",
+    "owner_action_required": "Hermes CLI exited with code 1 (output_bytes=406).",
+    "continue_without": "Independent safe work may continue"
   }
 }

@@ -1428,3 +1428,4 @@ error: Please commit or stash them.
 [2026-09-25T20:31:50.595010Z] Handling task: agent-discord-e3-selector-integration-2026-09-25 (attempt 2)
 [2026-09-25T20:33:32.578826Z] Task agent-discord-e3-selector-integration-2026-09-25 attempt 2/3: retry (recoverable execution failure (execution_error); attempt 2 of 3 failed, retry 2 of 2 scheduled)
 [2026-09-25T20:33:32.578826Z] Handling task: agent-discord-e3-selector-integration-2026-09-25 (attempt 3)
+[2026-09-25T20:35:14.368919Z] Task agent-discord-e3-selector-integration-2026-09-25 attempt 3/3: park (retry budget exhausted after 3 of 3 permitted attempts)
