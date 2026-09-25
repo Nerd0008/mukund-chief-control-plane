@@ -640,3 +640,17 @@ below the Usage Bundle minimum. Retain the endpoint, credential-presence and fai
 execution evidence; use the providers with current passing smoke evidence for local
 work. This is a cost/roster decision only: it does not mark GLM routable, change the
 existing Stage 2 gate, or enable Stage 2.
+
+**Enabled-provider roster recheck:** one fresh bounded smoke was run for each
+non-deferred provider. Mistral Small (`mistral-small-latest`), LongCat 2.0
+(`LongCat-2.0`), MiniMax M3 (`MiniMax-M3`), and Tencent Hunyuan Hy3 (`hy3`) each
+completed with HTTP 200, provider-returned model identity, the required `READY`
+completion, and E2 linkage. Qwen 3.7 Plus remained blocked with HTTP 403
+`AccessDenied.Unpurchased`. GLM and StepFun were not called because they are
+explicitly deferred. Evidence:
+`audits/evidence/2026-09-25T18-45-07Z-mistral-small-4-roster-recheck/`,
+`audits/evidence/2026-09-25T18-45-08Z-longcat-2.0-roster-recheck/`,
+`audits/evidence/2026-09-25T18-45-11Z-minimax-m3-roster-recheck/`,
+`audits/evidence/2026-09-25T18-45-14Z-tencent-hunyuan-hy3-roster-recheck/`, and
+`audits/evidence/2026-09-25T18-45-18Z-qwen38-27b-roster-recheck/`.
+This is current bounded execution evidence only; E3 Stage 2 remains disabled.
