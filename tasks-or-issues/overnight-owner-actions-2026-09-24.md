@@ -581,3 +581,9 @@ package. Please recharge.` E2 recorded the failed attempt; no retry was made. Th
 exact remaining owner action is to add GLM account credit or an eligible resource
 package, then request a fresh bounded smoke. Evidence:
 `audits/evidence/2026-09-25T17-25-00Z-glm-53-flash-smoke/`.
+
+**Mistral Small:** one bounded deployed-adapter smoke reached the configured endpoint
+and stored credential but received HTTP 429 `Rate limit exceeded`. E2 recorded the
+failed attempt; no retry was made. The exact remaining owner action is to wait for or
+increase the Mistral account's usable API rate/tier, then request one fresh bounded
+smoke. Evidence: `audits/evidence/2026-09-25T17-35-00Z-mistral-small-smoke/`.
