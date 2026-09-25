@@ -1,0 +1,13 @@
+{
+  "worker_id": "qwen38-27b",
+  "probe": "one temporary workspace-endpoint completion; no config changed",
+  "endpoint": "https://ws-c3pdddiv06zom9lm.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1/chat/completions",
+  "status": "FAILED",
+  "http_status": 403,
+  "returned_model": null,
+  "finish_reason": null,
+  "content_preview": null,
+  "usage": null,
+  "error": "Access to model denied. Please make sure you are eligible for using the model.",
+  "provider_error_body": "code=AccessDenied.Unpurchased"
+}

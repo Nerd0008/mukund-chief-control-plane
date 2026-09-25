@@ -654,3 +654,14 @@ explicitly deferred. Evidence:
 `audits/evidence/2026-09-25T18-45-14Z-tencent-hunyuan-hy3-roster-recheck/`, and
 `audits/evidence/2026-09-25T18-45-18Z-qwen38-27b-roster-recheck/`.
 This is current bounded execution evidence only; E3 Stage 2 remains disabled.
+
+**Qwen root-cause check:** the Singapore Model Studio console shows the Hermes API key
+with `All` model permission. A one-call probe of the workspace-specific
+pay-as-you-go endpoint also returned the same HTTP 403
+`AccessDenied.Unpurchased`, so this is not caused by the legacy shared endpoint or
+an API-key access-scope setting. The Qwen3.7-Plus playground itself reports
+`RISK.RISK_CONTROL_REJECTION` / `System Exception` under “Some Features Restricted”.
+The remaining external action is Alibaba Cloud support or account verification to
+release that risk-control restriction; no key, endpoint, or local code change can
+truthfully make the model available. Evidence:
+`audits/evidence/2026-09-25T19-00-00Z-qwen-workspace-endpoint-probe/`.
