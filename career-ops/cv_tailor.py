@@ -125,30 +125,85 @@ def norm(text: str) -> str:
     return text.replace("\xa0", " ")
 
 
-def normalise_spaces(path: Path) -> int:
-    """Rewrite U+00A0 -> U+0020 in every ToUnicode CMap, in place.
+# PyMuPDF's embedded-TTF path writes several ToUnicode destinations incorrectly.
+# Left alone they survive into text extraction, so the PDF displays perfectly while an
+# ATS parser reads a hyphen as nothing and ";" as a Greek question mark. That silently
+# breaks keyword matching in exactly the documents this script produces.
+CMAP_FIXES = {
+    "00a0": "0020",  # no-break space -> space
+    "00ad": "002d",  # soft hyphen    -> hyphen-minus
+    "037e": "003b",  # greek question -> semicolon
+}
 
-    PyMuPDF maps the TTF space glyph to U+00A0, which survives into extraction and
-    can confuse ATS parsers. The glyph widths are unaffected, so layout is safe.
+
+def font_family(name: str) -> str:
+    """Normalise a font resource name to a comparable family + weight.
+
+    Restored and re-typeset text is inserted with the full Windows TTF, so its resource
+    is named "Times New Roman Regular" while the master's own subsets are
+    "TimesNewRomanPSMT". Both are the same typeface at the same metrics, so comparing
+    raw resource names would flag a correctly aligned line as "moved".
+    """
+    n = name.split("+", 1)[-1].lower().replace(" ", "").replace("-", "")
+    n = n.replace("timesnewromanps", "times").replace("timesnewroman", "times")
+    if n.startswith("times"):
+        return "times" + ("bold" if "bold" in n else "") + ("italic" if "italic" in n else "")
+    return n
+
+
+def master_font_names(master: Path) -> set:
+    """Basefont names present in the master, so text we did not insert is left alone."""
+    names = set()
+    for page in pymupdf.open(master):
+        for fo in page.get_fonts(full=True):
+            names.add(fo[3])
+    return names
+
+
+def repair_cmaps(path: Path, untouched: set) -> dict:
+    """Rewrite bad ToUnicode destinations in the fonts this run inserted.
+
+    Destination-aware: only the ``<src> <dst>`` destination half is touched, never a
+    stray byte sequence elsewhere in the stream (the previous implementation did a
+    blanket ``00a0`` substitution, which can corrupt unrelated entries), and only for
+    fonts absent from the master, so the original subsets keep their own CMaps and
+    every untouched span still extracts byte-identically.
     """
     doc = pymupdf.open(path)
-    patched = 0
-    for xref in range(1, doc.xref_length()):
-        try:
+    patched, fonts = 0, []
+    entry = re.compile(rb"<([0-9A-Fa-f]{2,4})>\s*<([0-9A-Fa-f]{4,8})>")
+
+    def _sub(m):
+        src, dst = m.group(1), m.group(2)
+        if len(dst) < 4:
+            return m.group(0)
+        new = CMAP_FIXES.get(dst[:4].lower().decode())
+        if not new:
+            return m.group(0)
+        return b"<" + src + b"> <" + new.encode() + dst[4:] + b">"
+
+    for page in doc:
+        for fo in page.get_fonts(full=True):
+            xref, basefont = fo[0], fo[3]
+            if basefont in untouched:
+                continue
             tu = doc.xref_get_key(xref, "ToUnicode")
-        except Exception:
-            continue
-        if tu and tu[0] == "xref":
+            if not tu or tu[0] != "xref":
+                continue
             num = int(tu[1].split()[0])
             raw = doc.xref_stream(num)
-            if raw and b"00a0" in raw.lower():
-                doc.update_stream(num, re.sub(rb"(?i)00a0", b"0020", raw))
+            if not raw:
+                continue
+            fixed = entry.sub(_sub, raw)
+            if fixed != raw:
+                doc.update_stream(num, fixed)
                 patched += 1
-    tmp = path.with_suffix(".spaces.tmp.pdf")
+                fonts.append(basefont)
+    tmp = path.with_suffix(".cmap.tmp.pdf")
     doc.save(str(tmp), garbage=3, deflate=True)
     doc.close()
     tmp.replace(path)
-    return patched
+    return {"streams_patched": patched, "fonts": fonts}
 
 
 def subset_embedded_fonts(path: Path) -> dict:
@@ -250,9 +305,41 @@ def main(argv=None) -> int:
         page.add_redact_annot(rect, fill=None)
     page.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_NONE)
 
+    # ---- collateral repair ------------------------------------------------- #
+    # apply_redactions deletes any text its rect INTERSECTS, and on a tight baseline the
+    # metric boxes of adjacent lines genuinely overlap (this document runs ~9.7pt leading
+    # against ~11pt bbox height). Redacting a line can therefore silently remove the line
+    # beneath it -- which is how "faults across business devices." disappeared from the
+    # last AttackSurfaceIQ bullet. Re-insert anything removed that we never asked to edit,
+    # at its original origin, font and size.
+    inserted_names = set()
+    edited_keys = {(s["text"].strip(), round(s["origin"].y, 2)) for s, _, _ in plan}
+    survived = {s["text"].strip() for s in spans_of(page)}
+    collateral = []
+    for s in before_snapshot:
+        text = s["text"].strip()
+        if not text or (text, round(s["origin"].y, 2)) in edited_keys or text in survived:
+            continue
+        fontfile = FONT_FILES.get(s["font"]) or FALLBACK_FONT.get(s["font"])
+        if not fontfile or not Path(fontfile).exists():
+            collateral.append({"text": s["text"][:60], "error": "no font file to restore with"})
+            continue
+        name = INSERT_FONTNAME[s["font"]]
+        if name not in inserted_names:
+            page.insert_font(fontname=name, fontfile=str(fontfile))
+            inserted_names.add(name)
+        page.insert_text(pymupdf.Point(s["origin"].x, s["origin"].y), s["text"],
+                         fontname=name, fontsize=s["size"], color=(0, 0, 0))
+        collateral.append({"text": s["text"][:60], "font": s["font"],
+                           "origin": [round(s["origin"].x, 2), round(s["origin"].y, 2)]})
+
+    collateral_errors = [c for c in collateral if "error" in c]
+
     for target, replace, fontfile in plan:
         name = INSERT_FONTNAME[target["font"]]
-        page.insert_font(fontname=name, fontfile=str(fontfile))
+        if name not in inserted_names:
+            page.insert_font(fontname=name, fontfile=str(fontfile))
+            inserted_names.add(name)
         page.insert_text(target["origin"], replace, fontname=name,
                          fontsize=target["size"], color=(0, 0, 0))
 
@@ -261,8 +348,10 @@ def main(argv=None) -> int:
     doc.save(str(out), garbage=3, deflate=True)
     doc.close()
 
-    space_streams_patched = normalise_spaces(out)
+    # Subset first, then repair the CMaps: subsetting rewrites glyph ids and re-emits
+    # ToUnicode, so repairing before it would simply be undone.
     font_subset = subset_embedded_fonts(out)
+    cmap_repair = repair_cmaps(out, master_font_names(master))
 
     # ---- verification -----------------------------------------------------
     doc2 = pymupdf.open(out)
@@ -283,7 +372,8 @@ def main(argv=None) -> int:
             missing.append({"text": s["text"][:60], "font": s["font"]})
             continue
         ok = any(abs(c["origin"].x - s["origin"].x) < 0.6 and abs(c["origin"].y - s["origin"].y) < 0.6
-                 and abs(c["size"] - s["size"]) < 0.05 and c["font"] == s["font"] for c in cands)
+                 and abs(c["size"] - s["size"]) < 0.05
+                 and font_family(c["font"]) == font_family(s["font"]) for c in cands)
         if not ok:
             c = cands[0]
             moved.append({"text": s["text"][:50], "before": [round(s["origin"].x, 2), round(s["origin"].y, 2)],
@@ -296,8 +386,10 @@ def main(argv=None) -> int:
     if args.png_dir:
         page2.get_pixmap(dpi=110).save(str(Path(args.png_dir) / "after.png"))
 
+    report_ok = bool(not problems and not moved and not missing
+                     and replacements_present and page_ok and not collateral_errors)
     report = {
-        "ok": True and not problems,
+        "ok": report_ok,
         "master": str(master),
         "output": str(out),
         "page": {"width": page2.rect.width, "height": page2.rect.height, "page_count": doc2.page_count},
@@ -312,7 +404,8 @@ def main(argv=None) -> int:
             "missing": missing,
             "all_replacements_present": replacements_present,
             "page_geometry_unchanged": page_ok,
-            "space_streams_normalised": space_streams_patched,
+            "collateral_restored": collateral,
+            "cmap_repair": cmap_repair,
             "non_breaking_spaces_remaining": nbsp_left,
             "font_subsetting": font_subset,
         },
@@ -322,7 +415,7 @@ def main(argv=None) -> int:
     if args.report:
         Path(args.report).write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
-    return 0 if report["ok"] else 1
+    return 0 if report_ok else 1
 
 
 if __name__ == "__main__":
