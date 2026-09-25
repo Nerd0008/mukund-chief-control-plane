@@ -106,11 +106,25 @@ class TestExecutionAdapterRegistry(unittest.TestCase):
         self.assertEqual(reg.routable_worker_ids(), ["deepseek-v41-flash"])
         self.assertIsNotNone(reg.adapter_for("deepseek-v41-flash"))
 
-    def test_real_roster_marks_only_three_workers_routable(self):
+    def test_real_roster_includes_live_verified_longcat(self):
         import worker_registry as wr
         reg = ExecutionAdapterRegistry(worker_registry=wr.WorkerRegistry())
         self.assertEqual(reg.routable_worker_ids(),
-                         ["codex-cli", "deepseek-v41-flash", "google-nano-banana-2"])
+                         ["codex-cli", "deepseek-v41-flash",
+                          "google-nano-banana-2", "longcat-2.0"])
+        self.assertIn("longcat-2.0", reg.bindings)
+        self.assertEqual(reg.bindings["longcat-2.0"]["provider"], "longcat")
+
+    def test_stage2_allowlist_filters_otherwise_routable_workers(self):
+        import worker_registry as wr
+        reg = ExecutionAdapterRegistry(
+            worker_registry=wr.WorkerRegistry(),
+            allowed_workers=["longcat-2.0"],
+        )
+        self.assertTrue(reg.is_routable("longcat-2.0"))
+        self.assertFalse(reg.is_routable("deepseek-v41-flash"))
+        self.assertFalse(reg.is_routable("codex-cli"))
+        self.assertEqual(reg.routable_worker_ids(), ["longcat-2.0"])
 
     def test_usage_reporter_failure_never_fabricates_a_request_id(self):
         def boom(_):
