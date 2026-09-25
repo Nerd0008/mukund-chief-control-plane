@@ -633,3 +633,10 @@ and covered **API pay-as-you-go balance or a resource package** for `glm-5.3-fla
 a topped-up consumer/subscription plan or a payment on a different Z.ai/BigModel
 account or region would not release this 429 — then request one fresh bounded smoke.
 Evidence: `audits/evidence/2026-09-25T17-33-14Z-glm-53-flash-smoke-retry/`.
+
+**GLM-5.3 Flash deferral:** Mukund directed that GLM is not to receive further
+funding, setup, or smoke retries for now because the available Z.ai cash balance is
+below the Usage Bundle minimum. Retain the endpoint, credential-presence and failed
+execution evidence; use the providers with current passing smoke evidence for local
+work. This is a cost/roster decision only: it does not mark GLM routable, change the
+existing Stage 2 gate, or enable Stage 2.
