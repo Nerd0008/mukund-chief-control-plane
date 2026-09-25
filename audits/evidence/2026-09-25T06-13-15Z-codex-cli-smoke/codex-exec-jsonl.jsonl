@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a0d732-7f48-7370-bdec-08231bc7d236"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "CODEX_SMOKE_OK"}}
+{"type": "turn.completed", "usage": {"input_tokens": 19201, "cached_input_tokens": 12032, "cache_write_input_tokens": 0, "output_tokens": 9, "reasoning_output_tokens": 0}}

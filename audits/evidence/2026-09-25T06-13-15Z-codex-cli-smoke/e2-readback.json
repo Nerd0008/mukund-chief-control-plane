@@ -1,0 +1,22 @@
+{
+  "task": "agent-codex-cli-smoke-2026-09-25",
+  "captured_at_utc": "2026-09-25T06:14:00Z",
+  "read_back_of": "obs-20260925-39ed6ee5",
+  "access": "governor.db opened read-only (mode=ro); no E3 SQL write into E1/E2 databases",
+  "row": [
+    {
+      "request_id": "obs-20260925-39ed6ee5",
+      "provider": "openai-codex-cli",
+      "model": null,
+      "requested_at": "2026-09-25T06:13:33+00:00",
+      "input_tokens": null,
+      "output_tokens": null,
+      "total_tokens": 0,
+      "monetary_cost": "unknown",
+      "status": "success",
+      "error_code": null,
+      "latency_ms": 7799
+    }
+  ],
+  "interpretation": "E2 linkage VERIFIED: the row exists, is attributed to provider openai-codex-cli, status success, latency 7799 ms. The token columns are NULL because exec-brain/codex_adapter.py:report_usage_to_e2 reads result['usage'] while CodexExecutionAdapter.dispatch returns the provider usage under result['usage_tokens'] (see codex_adapter.py:347 and :562). Provider usage itself WAS returned and IS captured in evidence.json (input_tokens 19201 / cached 12032 / output 9). Recorded as an observed defect; the adapter was intentionally NOT rewritten in this verification-only task, and no second Codex execution was spent to correct the row."
+}

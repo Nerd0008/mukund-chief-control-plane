@@ -1,0 +1,101 @@
+{
+  "task": "agent-codex-cli-smoke-2026-09-25",
+  "captured_at_utc": "2026-09-25T06:13:15Z",
+  "host": "mukund-local-hermes-host",
+  "adapter": {
+    "path_used": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\codex_adapter.py",
+    "sha256": "4926464a5dd30f25543caee3e5607d090b822a61f7f980a5f9c3f7752e5c4e83",
+    "repo_copy_sha256": "4926464a5dd30f25543caee3e5607d090b822a61f7f980a5f9c3f7752e5c4e83",
+    "rewritten": false
+  },
+  "execution_profile": "safe",
+  "smoke_objective": "Reply exactly CODEX_SMOKE_OK",
+  "executions_spent": 1,
+  "retries": 0,
+  "resolver": {
+    "resolved": "ok",
+    "executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\node\\codex.CMD"
+  },
+  "health": {
+    "status": "healthy",
+    "version": "codex-cli 0.156.1"
+  },
+  "identity_probe": {
+    "provider": "openai",
+    "provider_provenance": "observed:network.websocket_reachability",
+    "configured_provider": "openai",
+    "model": "unknown",
+    "configured_model": "gpt-5.6-terra",
+    "auth_mode": "chatgpt",
+    "version": "0.156.1",
+    "interface": "Codex CLI",
+    "cancellation_support": "UNSUPPORTED",
+    "e2_usage_linkage": "NOT_VERIFIED",
+    "supports_websockets": true,
+    "supports_jsonl": true,
+    "auth_configured": true,
+    "auth_storage_mode": "File",
+    "stored_api_key": false,
+    "websocket_reachable": true,
+    "server_model_present": false,
+    "observed_provider_name": "OpenAI",
+    "cli_version": "0.156.1",
+    "resolved_executable_name": "codex.CMD",
+    "resolved_executable_dir": "node"
+  },
+  "execution": {
+    "passed": true,
+    "exact_reply_match": true,
+    "final_message": "CODEX_SMOKE_OK",
+    "status": "COMPLETED",
+    "exit_code": 0,
+    "error": null,
+    "runtime_s": 7.799935579299927,
+    "wall_clock_s": 7.921214580535889,
+    "dispatch_id": "codex-15356c594d58",
+    "codex_thread_id": "01a0d732-7f48-7370-bdec-08231bc7d236",
+    "provider_field_from_adapter": "openai",
+    "model_field_from_adapter": "unknown",
+    "usage_exposed": true,
+    "usage_provider_returned": {
+      "input_tokens": 19201,
+      "cached_input_tokens": 12032,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 9,
+      "reasoning_output_tokens": 0
+    },
+    "dispatch_metadata": {
+      "dispatch_time": "2026-09-25T06:13:25Z",
+      "elapsed_seconds": 7.799935579299927,
+      "objective_hash": "e51f127a1336",
+      "objective_summary": "Reply exactly CODEX_SMOKE_OK",
+      "cli_flags": [
+        "--json",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write"
+      ],
+      "working_directory": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cache\\scratch\\codex_smoke_2026-09-25",
+      "execution_profile": "safe",
+      "timeout": 180,
+      "contract_id": "codex-cli-smoke-2026-09-25",
+      "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\node\\codex.CMD",
+      "resolved_version": "0.156.1"
+    },
+    "stdout_event_types": [
+      "item.completed",
+      "thread.started",
+      "turn.completed",
+      "turn.started"
+    ],
+    "stderr_present": true
+  },
+  "e2": {
+    "usage_linkage": "VERIFIED",
+    "e2_request_id": "obs-20260925-39ed6ee5",
+    "e2_error": null
+  },
+  "qualification": "UNPROVEN",
+  "routable": true,
+  "verdict": "PASS (execution readiness only)"
+}

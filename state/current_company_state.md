@@ -1783,3 +1783,30 @@ tests, no provider series re-run.
 - **Evidence.** `audits/evidence/<stamp>-career-priority-watchlist/` (aggregate only; the owner's
   company list and discovered careers/vacancy URLs stay under the git-ignored
   `runtime/career-ops/watchlist/`).
+
+## Codex CLI worker — fresh smoke re-verification (2026-09-25, `agent-codex-cli-smoke-2026-09-25`)
+
+**Status: PASS — execution readiness only. Qualification unchanged (`UNPROVEN`). No production state,
+provider configuration, or E3 Stage 2 state changed.**
+
+- Worktree inspected first: one worktree (`[main]`), no agent-* worker process running, no other real
+  task in `remote-queue/running/`. Adapter used unchanged (`%LOCALAPPDATA%\hermes\exec-brain\codex_adapter.py`,
+  SHA-256 `4926464a5dd30f…`, identical to the repo copy).
+- Executable `%LOCALAPPDATA%\hermes\node\codex.CMD`, version `codex-cli 0.156.1` (host CLI updated
+  since the 2026-09-23 record of `0.155.0-alpha.16.3`). Auth present (mode `chatgpt`, storage `File`,
+  stored API key `false`, login store present, content never read).
+- Exactly ONE harmless non-interactive `codex exec --json` (safe `workspace-write`, isolated scratch
+  cwd, 180 s bound) → exit 0, `COMPLETED`, final message `CODEX_SMOKE_OK`, 7.80 s. Provider usage WAS
+  exposed and captured this time (19201 in / 12032 cached / 9 out) — the earlier note that the CLI
+  exposes no usage no longer holds for this CLI build.
+- Identity: provider `openai` (observed via websocket reachability); served model still **UNKNOWN**
+  (`server model present=false`); config declaration `gpt-5.6-terra` recorded only as `configured_model`.
+- E2 linkage VERIFIED — `obs-20260925-39ed6ee5` (public `governor.record_request()`, read-only
+  read-back: provider `openai-codex-cli`, status `success`, latency 7799 ms). Routable `true` on
+  readiness + linkage alone; qualification stays evidence-driven and UNPROVEN.
+- Bounded check: `exec-brain/tests/test_e3.py -k Codex` → 10 passed / 49 deselected / exit 0.
+- **Open defect (recorded, not fixed in this verification-only task):** `report_usage_to_e2()` reads
+  `result["usage"]` while `dispatch()` returns usage under `result["usage_tokens"]`, so the E2 row has
+  NULL token columns although the provider returned usage. Recommended follow-up: one-line key fix +
+  unit test against the recorded JSONL fixture (no Codex spend).
+- Evidence: `audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/`.

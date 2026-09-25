@@ -42,3 +42,30 @@ Blocking: (resolved) Codex ChatGPT usage limit
 ## Close condition
 
 Met: smoke PASS; adapter safe; E2 linkage verified; registry status updated; commit pushed.
+
+## Re-verification — agent-codex-cli-smoke-2026-09-25 (fresh smoke)
+
+Status: CLOSED (re-verified 2026-09-25) — smoke PASS, execution readiness reconfirmed; qualification
+still UNPROVEN; one adapter defect newly proven (not fixed in this verification-only task).
+
+- Executable/version: resolved `%LOCALAPPDATA%\hermes\node\codex.CMD` via PATH by the unchanged
+  resolver; `codex-cli 0.156.1` (host CLI updated since the 0.155.0-alpha.16.3 record). Health
+  `healthy`; no code was rewritten (adapter SHA-256 `4926464a5dd30f…` identical to the repo copy).
+- Auth: `codex doctor --json` auth configured / mode `chatgpt` / storage `File` / stored API key
+  `false`; login store present (content never read). No credentials read, logged, or committed.
+- Smoke: exactly ONE harmless non-interactive `codex exec --json` (safe `workspace-write` profile,
+  bounding timeout 180 s, isolated scratch cwd, objective `Reply exactly CODEX_SMOKE_OK`) →
+  exit 0, `COMPLETED`, final message `CODEX_SMOKE_OK`, 7.80 s, thread
+  `01a0d732-7f48-7370-bdec-08231bc7d236`. No retries. Provider usage exposed and captured
+  (19201 in / 12032 cached / 9 out).
+- E2 linkage: VERIFIED — `obs-20260925-39ed6ee5` via the public `governor.record_request()`
+  interface; read-only read-back confirms provider `openai-codex-cli`, status `success`.
+- Routable `true` (readiness + linkage only). Qualification `UNPROVEN`. E3 Stage 2 not enabled;
+  no production dispatch or provider configuration changed.
+- Bounded check: `exec-brain/tests/test_e3.py -k Codex` → 10 passed / 49 deselected / exit 0.
+- Open defect found (recorded, deliberately not fixed here): `report_usage_to_e2()` reads
+  `result["usage"]` while `dispatch()` returns usage under `result["usage_tokens"]`, so the E2 row
+  carries NULL token columns despite exposed usage. One-line fix + offline fixture test recommended
+  as a separate task.
+- Evidence: `audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/` (`evidence.json`,
+  `evidence.md`, `codex-exec-jsonl.jsonl`, `e2-readback.json`).
