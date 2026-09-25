@@ -326,7 +326,7 @@ class TestMatrix(EBTest):
                    "deepseek_adapter.py", "deepseek_keyaccess.py",
                    "gemini_adapter.py", "gemini_keyaccess.py",
                    "generic_openai_adapter.py",
-                   "orchestration.db", "e3-stage2-state.json",
+                   "orchestration.db", "e3-stage2-state.json", "stage2_control.py",
                    # E3 orchestration modules + CLI bindings (deployed)
                    "e3_cli.py", "e3_planner.py", "e3_router.py",
                    "e3_team_assembly.py", "e3_integrator.py", "e3_verifier.py",
