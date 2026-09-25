@@ -462,6 +462,17 @@ class E3ShadowOrchestrator:
             raise ValueError("orchestrate_and_execute requires a bound orchestration db_path")
         self._connect()
 
+        # Build the exact production execution registry before routing so the
+        # selector cannot assign a worker that Stage 2 would later refuse.
+        if adapter_registry is not None:
+            registry = adapter_registry
+        else:
+            from stage2_control import read_state
+            stage2_state = read_state()
+            allowed = (stage2_state.get("allowed_workers", [])
+                       if stage2_state.get("enabled") else None)
+            registry = ExecutionAdapterRegistry(allowed_workers=allowed)
+
         out: Dict[str, Any] = {
             "objective": objective,
             "task_fingerprint": fingerprint.compute_hash() if hasattr(fingerprint, "compute_hash") else None,
@@ -484,8 +495,15 @@ class E3ShadowOrchestrator:
         candidates_by_node: Dict[str, List[RouterCandidate]] = {}
         if self.router:
             for node in plan["nodes"]:
-                candidates_by_node[node["node_id"]] = self.router.propose_candidates(
+                proposed = self.router.propose_candidates(
                     node, fingerprint.task_family, fingerprint)
+                # Hard production filter: team assembly may only see workers
+                # that are routable under the same adapter registry / Stage 2
+                # allowlist the executor will enforce.
+                candidates_by_node[node["node_id"]] = [
+                    candidate for candidate in proposed
+                    if registry.is_routable(candidate.worker_id)
+                ]
         out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
 
         if self.capability_registry:
@@ -514,14 +532,6 @@ class E3ShadowOrchestrator:
             out["outcome"] = "TEAM_INCOMPLETE"
             return out
 
-        if adapter_registry is not None:
-            registry = adapter_registry
-        else:
-            from stage2_control import read_state
-            stage2_state = read_state()
-            allowed = (stage2_state.get("allowed_workers", [])
-                       if stage2_state.get("enabled") else None)
-            registry = ExecutionAdapterRegistry(allowed_workers=allowed)
         store = OrchestrationStore(self.db_path)
         try:
             executor = E3ProductionExecutor(store, registry,
