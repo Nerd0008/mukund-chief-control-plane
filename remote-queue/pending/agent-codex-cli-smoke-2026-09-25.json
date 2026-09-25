@@ -1,0 +1,27 @@
+{
+  "task_id": "agent-codex-cli-smoke-2026-09-25",
+  "created_at": "2026-09-25T06:08:00Z",
+  "objective": "Run one fresh harmless smoke test of the existing Codex CLI worker on Mukund's local Hermes host and report whether it actually executes successfully now. This is a verification-only task: do not change provider configuration, do not enable E3 Stage 2, and do not perform unrelated implementation work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "allowed_scope": [
+    "Inspect current main and verify no real agent-* worker owns the shared worktree before starting.",
+    "Use the existing exec-brain Codex CLI adapter/resolver; do not rewrite it unless the smoke cannot run because of a newly proven local-path defect.",
+    "Confirm Codex CLI executable/version and authentication presence without reading or exposing secret/token values.",
+    "Run exactly ONE harmless non-interactive Codex execution with the instruction: Reply exactly CODEX_SMOKE_OK",
+    "Use the existing safe execution profile and keep the call bounded. No retries.",
+    "Record only sanitized evidence: resolved executable path/version, exit code, final assistant message, runtime, provider/model identity only if directly exposed, provider-returned usage only if exposed, and E2 linkage result if the adapter records one.",
+    "A smoke PASS proves execution readiness only. Do not change qualification from UNPROVEN on smoke alone.",
+    "If the smoke fails, record the exact sanitized failure class/message and stop; do not loop or spend another Codex execution.",
+    "Return a strict terminal result and allow the queue system to move this task to completed or blocked."
+  ],
+  "stop_conditions": [
+    "Exactly one Codex execution maximum.",
+    "Do not expose or log credentials, tokens, cookies, private chain-of-thought, or raw secret-store contents.",
+    "Do not enable E3 Stage 2 or change production dispatch.",
+    "Do not run broad regressions or unrelated provider tests.",
+    "If login/account/subscription action is required, return blocked with the owner action instead of retrying."
+  ],
+  "status": "pending"
+}
