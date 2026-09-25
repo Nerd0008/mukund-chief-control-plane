@@ -514,7 +514,14 @@ class E3ShadowOrchestrator:
             out["outcome"] = "TEAM_INCOMPLETE"
             return out
 
-        registry = adapter_registry or ExecutionAdapterRegistry()
+        if adapter_registry is not None:
+            registry = adapter_registry
+        else:
+            from stage2_control import read_state
+            stage2_state = read_state()
+            allowed = (stage2_state.get("allowed_workers", [])
+                       if stage2_state.get("enabled") else None)
+            registry = ExecutionAdapterRegistry(allowed_workers=allowed)
         store = OrchestrationStore(self.db_path)
         try:
             executor = E3ProductionExecutor(store, registry,
