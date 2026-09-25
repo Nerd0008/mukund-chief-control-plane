@@ -1,0 +1,33 @@
+{
+  "task_id": "agent-discord-e3-selector-integration-2026-09-25",
+  "created_at": "2026-09-25T20:20:00Z",
+  "objective": "Fix the live Hermes Discord/model-selection path so Discord uses the E3 Stage 2 worker pool and automatic router instead of silently sticking to the native current DeepSeek provider. Reconcile the now-passing provider workers, make routing auditable and non-sticky, deploy locally, and verify the full local routing path without weakening any gate.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "allowed_scope": [
+    "Consume owner authorization recorded at tasks-or-issues/2026-09-25-discord-e3-selector-authorization.md. Do not exceed that scope.",
+    "Inspect the actual installed Hermes Discord gateway/config/plugin surface under the owner's local Hermes installation and the repo-managed Chief integration. Determine exactly why the Discord /model provider picker shows native Hermes providers and why ordinary Discord messages remain on DeepSeek.",
+    "Prefer a supported extension/plugin/config integration. If a local installed Hermes file must be changed, create an exact reversible backup first and record its path/hash. Do not edit secrets or auth material.",
+    "Create a single operator-facing E3 worker/model surface in Discord. It must show the E3 worker identity, actual API model, readiness/qualification state, and unavailable reason for blocked workers. Do not present native Hermes provider selection as the automatic E3 router. If the native /model UI cannot be safely extended, add an explicit E3 model/route command and clearly label the native selector as transport/manual fallback rather than pretending it controls E3.",
+    "Wire normal Chief/Discord task execution to E3 Stage 2 automatic orchestration by default. Preserve an explicit manual worker override and a safe fallback for requests E3 cannot route. Never silently bypass Stage 2.",
+    "Fix E3 routing so it does not choose the first candidate merely because SQL/insertion order makes that candidate first. Hard-gate on Stage 2 allowed_workers, WorkerRegistry routable state and real adapter binding. Rank deterministically using qualification/evidence, task-family/role fit, capability hints, recorded historical performance and observed E2 provider health/capacity. Unknown cost/latency/capacity remains UNKNOWN and must not be guessed. Add a stable final tie-break only after evidence/task-fit scores.",
+    "Pass WorkerRegistry and any available E2 state into E3Router so provider/model identity is not 'unknown' when the roster knows it. Persist/print the actual selection rationale and scores for audit.",
+    "Reconcile current live execution evidence. Mistral Small (mistral-small-latest), LongCat 2.0 (LongCat-2.0), MiniMax M3 (MiniMax-M3) and Tencent Hunyuan Hy3 (hy3) have successful HTTP 200 smoke evidence on 2026-09-25 and may be marked execution-ready/routable only if the committed evidence is independently verified. Do not mark them QUALIFIED solely from smoke tests.",
+    "Add real ExecutionAdapterRegistry bindings for each independently verified newly-routable generic OpenAI-compatible worker using generic_openai_adapter. Keep GLM-5.3 Flash, Qwen3.7 Plus and Step 3.7 Flash non-routable because their current provider blockers remain unresolved.",
+    "Update the local Stage 2 state allowlist to the seven owner-authorized workers only after registry/binding tests and regression pass. No VPS deployment.",
+    "Add regression tests proving: blocked workers cannot be selected; allowed-but-unqualified workers are only eligible under the existing low-risk exploration/qualification rules; code/repository tasks do not deterministically stick to DeepSeek when Codex has better task-fit/evidence; image tasks route to the Google image worker; a manual override is honored only when the selected worker is allowed+routable; deterministic tie-break is stable; provider/model identity in router decisions is real roster data rather than unknown.",
+    "Run the full relevant regression and a bounded local production-routing acceptance. Use the smallest safe number of real provider calls; no retries unless an existing bounded policy explicitly allows one. Record E2 linkage and selection rationale. Do not send a synthetic Discord message externally on the owner's behalf; instead prove the gateway handler/integration locally and leave exactly one simple owner Discord acceptance message if an external inbound event is still required.",
+    "Update canonical status only from measured evidence. Do not claim Discord end-to-end live PASS unless an actual Discord inbound event was observed after deployment.",
+    "Never read, print, log, commit, or expose credential values. Do not modify auth.json or provider secrets."
+  ],
+  "stop_conditions": [
+    "Stop and block if the installed Discord gateway has no safe/reversible integration point and modifying vendor code would require an unsupported destructive patch.",
+    "Stop and record the exact failure if any supposedly passing provider no longer passes the evidence/binding preconditions; do not reclassify it as routable without proof.",
+    "Do not enable GLM, Qwen or StepFun.",
+    "Do not weaken E1/E2/E3 verification or qualification gates.",
+    "Do not perform VPS cutover, reboot, sign-out, firewall changes, external account mutations, or secret migration."
+  ],
+  "notes": "Observed defect before task: Discord screenshot shows native provider picker with DeepSeek current and no LongCat. Repo inspection shows E3Router constructed without WorkerRegistry/E2 state, _get_provider/_get_model return unknown, candidate ordering is qualification-confidence only, TeamAssembler takes first candidate, ADAPTER_MODULES only binds codex-cli/deepseek/google, while 2026-09-25 evidence records HTTP 200 for Mistral/LongCat/MiniMax/Tencent. Stage 2 state currently allows only codex-cli/deepseek/google.",
+  "status": "pending"
+}
