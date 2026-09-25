@@ -1409,3 +1409,5 @@ error: Please commit or stash them.
 [2026-09-25T17:30:05.291451Z] git pull: success (with stash/restore)
 [2026-09-25T17:30:05.302454Z] Invalid task agent-glm-53-flash-smoke-2026-09-25: ['authority not in approved list: tasks-or-issues/overnight-owner-actions-2026-09-24.md']
 [2026-09-25T17:32:04.903806Z] git pull: success (with stash/restore)
+[2026-09-25T17:32:07.463652Z] Claimed task: agent-glm-53-flash-smoke-retry-2026-09-25
+[2026-09-25T17:32:07.466649Z] Handling task: agent-glm-53-flash-smoke-retry-2026-09-25 (attempt 1)
