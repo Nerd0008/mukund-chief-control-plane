@@ -102,6 +102,9 @@ different structure.**
   bullet y 359-368). Nothing else on the page moved.
 - Non-breaking spaces: 4 before, 4 after (parity with the master; inserted text was CMap-
   normalised so no new U+00A0 entered the document).
+- Fonts: the two inserted Times New Roman fonts arrive whole (~640 KB each); subsetting them
+  takes the file from 1,502,681 to 230,032 bytes with a **zero-pixel-difference** render,
+  text unchanged.
 
 **Outputs**
 

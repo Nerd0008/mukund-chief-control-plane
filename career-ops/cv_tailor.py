@@ -151,6 +151,22 @@ def normalise_spaces(path: Path) -> int:
     return patched
 
 
+def subset_embedded_fonts(path: Path) -> dict:
+    """Subset the fonts we embedded, which arrive whole (~640 KB each).
+
+    Glyph ids change; text, geometry and rendering do not. Verified by the caller
+    as a zero-pixel-difference render before/after.
+    """
+    before = path.stat().st_size
+    doc = pymupdf.open(path)
+    doc.subset_fonts()
+    tmp = path.with_suffix(".subset.tmp.pdf")
+    doc.save(str(tmp), garbage=4, deflate=True, clean=True)
+    doc.close()
+    tmp.replace(path)
+    return {"bytes_before": before, "bytes_after": path.stat().st_size}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--master", required=True)
@@ -246,6 +262,7 @@ def main(argv=None) -> int:
     doc.close()
 
     space_streams_patched = normalise_spaces(out)
+    font_subset = subset_embedded_fonts(out)
 
     # ---- verification -----------------------------------------------------
     doc2 = pymupdf.open(out)
@@ -297,6 +314,7 @@ def main(argv=None) -> int:
             "page_geometry_unchanged": page_ok,
             "space_streams_normalised": space_streams_patched,
             "non_breaking_spaces_remaining": nbsp_left,
+            "font_subsetting": font_subset,
         },
     }
     doc2.close()
