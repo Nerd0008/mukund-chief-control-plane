@@ -1,0 +1,57 @@
+{
+  "artifact": "sanitized credential-presence status evidence",
+  "source_label": "e3-credential-presence-probe",
+  "run_started_utc": "2026-09-25T18:06:05+00:00",
+  "run_finished_utc": "2026-09-25T18:06:05+00:00",
+  "network_calls_spent": 0,
+  "real_provider_calls_spent": 0,
+  "still_missing_count": 0,
+  "still_missing_workers": [],
+  "all_seven_configured": true,
+  "workers": [
+    {
+      "worker_id": "mistral-small-4",
+      "provider": "mistral",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "glm-53-flash",
+      "provider": "glm",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "qwen38-27b",
+      "provider": "qwen",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "longcat-2.0",
+      "provider": "longcat",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "minimax-m3",
+      "provider": "minimax",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "step-37-flash",
+      "provider": "step",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    },
+    {
+      "worker_id": "tencent-hunyuan-hy3",
+      "provider": "tencent",
+      "credential_present": true,
+      "auth_source": "credential_manager"
+    }
+  ],
+  "redaction_note": "Credential values, environment values, and Credential Manager target enumeration are intentionally omitted.",
+  "code_sha": "305efb95342a567f7b3b7df7f84ddddaf6444d94"
+}

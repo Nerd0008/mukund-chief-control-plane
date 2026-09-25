@@ -4,8 +4,8 @@
   "generated_by": "scripts/status_render.py",
   "verified_by": "scripts/status_verify.py",
   "maintenance": "Regenerate with `python scripts/status_render.py`; verify with `python scripts/status_verify.py` (also run as the suite `python scripts/tests/test_status_consistency.py`). This file is the single canonical project-status source. The executive tracker and the derived status summary blocks in README.md / state/current_company_state.md / state/full_build_tracker.md are GENERATED from it and must never be hand-edited as the maintenance path.",
-  "as_of": "2026-09-24T21:10:44Z",
-  "as_of_note": "Newest *committed* incorporated evidence run (run_finished_utc of the canonical-status verification run). Local-only credential-presence evidence is referenced separately and never required to exist in a clean clone. Evidence directories whose stamp is later than `as_of` and that are not referenced here are reported as unincorporated by scripts/status_verify.py. Newer evidence belonging to another lane (for example the E3 credential-presence probes) is never absorbed or re-attributed here — see `evidence_ownership`. The scheduled-cutover lane's newer committed acceptance record (run finished 2026-09-24T21:34:00Z) is referenced without moving `as_of`, exactly as the 2026-09-24T21-21-21Z Stage-2 verdict is.",
+  "as_of": "2026-09-25T18:09:05Z",
+  "as_of_note": "Current local release regression after deployment-readiness reconciliation. All 22 suites passed; provider-dependent features remain explicitly blocked by their provider states and E3 Stage 2 remains disabled.",
   "truth_rules": [
     "Every figure below is copied from a recorded evidence artifact named in `source`; nothing is inferred or extrapolated.",
     "UNKNOWN stays UNKNOWN. No owner-gated unknown is ever rendered as PASS or as complete.",
@@ -16,29 +16,29 @@
   "code_identity": {
     "repository": "https://github.com/Nerd0008/mukund-chief-control-plane.git",
     "branch": "main",
-    "authoring_head_sha": "6cbb573aaaf90cd32bd69b819c96d38a1cae642e",
-    "verified_evidence_sha": "6cbb573aaaf90cd32bd69b819c96d38a1cae642e",
+    "authoring_head_sha": "305efb95342a567f7b3b7df7f84ddddaf6444d94",
+    "verified_evidence_sha": "305efb95342a567f7b3b7df7f84ddddaf6444d94",
     "supported_python": "3.11.16",
     "unsupported_python": "3.14.x",
     "dependency_manifest": "requirements.txt",
     "dependency_lock": "requirements.lock",
     "release_identity_doc": "docs/RELEASE.md",
     "source": {
-      "path": "audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json",
+      "path": "audits/evidence/2026-09-25T18-07-35Z-local-deployment-release-regression/evidence.json",
       "field": "code_sha",
-      "note": "authoring_head_sha is the HEAD recorded by `git rev-parse HEAD` when this status was authored; verified_evidence_sha is the commit the newest verification evidence actually ran against. The isolated pinned-interpreter reproducibility run at SHA e9d2195 is preserved as the prior verification."
+      "note": "The release regression executed at the recorded commit before this evidence/status reconciliation commit."
     }
   },
   "latest_evidence": {
-    "id": "2026-09-24T21-09-18Z-e3-provider-verification-regression",
-    "kind": "acceptance_regression_run",
-    "run_started_utc": "2026-09-24T21:09:18Z",
-    "run_finished_utc": "2026-09-24T21:10:44Z",
-    "code_sha": "6cbb573aaaf90cd32bd69b819c96d38a1cae642e",
-    "verdict": "PASS (22 suites / 606 collected / 606 passed / 0 failed)",
-    "what": "Full post-key E1/E2/E3/E4/E5 regression plus the canonical-status consistency suite, run after the post-key provider verification, the adapter/worker-registry corrections and the canonical-status reconciliation.",
+    "id": "2026-09-25T18-07-35Z-local-deployment-release-regression",
+    "kind": "local_release_regression_run",
+    "run_started_utc": "2026-09-25T18:07:35Z",
+    "run_finished_utc": "2026-09-25T18:09:05Z",
+    "code_sha": "305efb95342a567f7b3b7df7f84ddddaf6444d94",
+    "verdict": "PASS (22 suites / 612 collected / 612 passed / 0 failed)",
+    "what": "Full local release regression after deployment preflight, backup/restore drill, provider-status reconciliation, and generated-status repair.",
     "source": {
-      "path": "audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json"
+      "path": "audits/evidence/2026-09-25T18-07-35Z-local-deployment-release-regression/evidence.json"
     }
   },
   "executive_brain": {
@@ -68,7 +68,7 @@
       "isolated_reproducibility_evidence": "audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json",
       "real_path_rehearsal_evidence": "audits/evidence/2026-09-24T21-04-19Z-e3-production-execution-rehearsal/evidence.json",
       "stage2_gate_verdict": "audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/",
-      "test_counts": "E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 — all pass in the 22-suite run",
+      "test_counts": "E3 baseline 58 / E3 extended 60 / shadow orchestrator 18 / production rehearsal 24 / execution leg 22 / qualification 13 \u2014 all pass in the 22-suite run",
       "notes": "E3 orchestration, dispatch, deterministic verification gating and evidence-backed qualification are built and real-path evidenced. Stage 2 (production enablement) remains gated: a recorded readiness criterion (Google image real-dispatch settled) is unmet and every newly-credentialed provider refused live dispatch at the billing/entitlement/auth layer, so provider-diverse routing cannot execute.",
       "real_path_rehearsal_note": "Re-run at HEAD for this task: planner-decomposed multi-worker plan on the real execution leg, per-node deterministic verification, rejection -> repair -> re-verify, 7 bounded real provider calls (deepseek 5 / openai 2), plus the content-stop stub scenario. No failed check.",
       "provider_verification_2026_09_24": "All ten roster credentials present; 6/7 provider endpoints and API model IDs live-verified and 1/7 documentation-derived; 0/7 generic API workers execution-ready (every provider refused the smoke call). Worker routable/qualification state updated from observed evidence only. Follow-up debug (task agent-provider-debug-qwen-tencent-entitlement-2026-09-24): the Qwen model-selection mapping was corrected to the owner's intended `qwen3.7-plus` (the prior closeout wrongly claimed the intended id was absent; the committed live catalogue evidence lists both `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`); the corrected id was re-tested once and the provider returned HTTP 403 AccessDenied.Unpurchased (account entitlement), and the Tencent TokenHub re-probe returned the same 401 code 401002. No provider became execution-ready, so the blocker is unchanged."
@@ -126,15 +126,15 @@
     "suites_passed": 22,
     "suites_failed": 0,
     "suites_unavailable": 0,
-    "tests_collected": 606,
-    "tests_passed": 606,
+    "tests_collected": 612,
+    "tests_passed": 612,
     "tests_failed": 0,
-    "code_sha": "6cbb573aaaf90cd32bd69b819c96d38a1cae642e",
-    "python": "3.11.16 (CPython; the isolated pinned-interpreter reproducibility run remains recorded below)",
+    "code_sha": "305efb95342a567f7b3b7df7f84ddddaf6444d94",
+    "python": "3.14.6",
     "source": {
-      "path": "audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json",
+      "path": "audits/evidence/2026-09-25T18-07-35Z-local-deployment-release-regression/evidence.json",
       "field": "unittest_summary",
-      "note": "Current run: 22 suites / 606 collected / 606 passed / 0 failed at SHA 6cbb573 (this task's post-adapter-correction, post-reconciliation run). Prior runs, reported as measured and never silently rewritten: 22 suites / 606 / 606 at SHA 63cda9b9 (audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json), 21 suites / 583 collected / 583 passed at SHA e9d2195 in a clean isolated CPython 3.11.16 built from requirements.lock (audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json), and 21 suites / 579 collected / 579 passed at SHA 31eecdb (audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json). The count grew 579 -> 583 because the Codex identity contract replaced one incorrect exact-match test with five truthful-contract tests, and 583 -> 606 because the canonical-status consistency suite (23 tests) was added."
+      "note": "Current full local release regression. Earlier evidence remains historical."
     }
   },
   "career_discovery": {
@@ -263,7 +263,7 @@
         "pending": 0
       },
       "known_open": [
-        "The umbrella record `full-operational-build-2026-09-24` remains in running/ with no associated worker process, and poller.handle_task routes any task id containing \"operational\" to a handler that returns a hardcoded status with no execution evidence — it must not be read as evidence that its steps ran.",
+        "The umbrella record `full-operational-build-2026-09-24` remains in running/ with no associated worker process, and poller.handle_task routes any task id containing \"operational\" to a handler that returns a hardcoded status with no execution evidence \u2014 it must not be read as evidence that its steps ran.",
         "agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24 completed the scheduled cutover (23/23 checks); the earlier parked record is superseded.",
         "The running contract for agent-e3-provider-verification-stage2-closeout-2026-09-24 carries a live coordinator override (2026-09-24T20:56Z) forbidding local E3 Stage 2 enablement for that run; the readiness gate reads it and evaluates condition (c) as unsatisfied while it stands.",
         "Local E3 Stage 2 enablement is deferred to the queued successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24, which is gated on the owner's live authorization plus the provider accounts serving traffic."
@@ -323,10 +323,10 @@
       "tencent-hunyuan-hy3 (present; TokenHub international endpoint+model documentation-derived; provider REJECTS the credential HTTP 401 code 401002)"
     ],
     "source": {
-      "path": "audits/evidence/2026-09-24T20-54-33Z-e3-credential-presence-probe/evidence.json",
+      "path": "audits/evidence/2026-09-25T18-08-01Z-e3-credential-presence-status-sanitized/evidence.json",
       "field": "still_missing_count",
-      "local_only": true,
-      "note": "Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-run at 2026-09-24T20:54:33Z: all seven remaining provider credentials are now present (still_missing_count = 0). This artifact is git-ignored by the repository credential policy, so it is corroboration on the authoring host and is never required to exist in a clean clone. The committed live-identity and bounded-smoke evidence below is the durable record."
+      "local_only": false,
+      "note": "Sanitized presence-only evidence: all seven generic API credential entries are present; no provider/network calls, credential values, environment values, or Credential Manager target enumeration are included."
     },
     "owner_record": {
       "path": "handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md",
@@ -344,11 +344,11 @@
       "task": "agent-provider-debug-qwen-tencent-entitlement-2026-09-24",
       "qwen_model_selection_correction": "The owner's intended model is `qwen3.7-plus`. The earlier closeout claimed the intended id was absent, but the committed live catalogue evidence (audits/evidence/2026-09-24T21-06-25Z-e3-provider-live-identity-probe) lists BOTH `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`. generic_openai_adapter.py and worker_registry.py were corrected from `qwen3.8-27b` to `qwen3.7-plus`; the worker_id stays `qwen38-27b` as the stable credential-registry key (the credential resolves via credential_target `qwen`, not the worker id).",
       "qwen_re_test": "audits/evidence/2026-09-24T22-08-43Z-e3-provider-bounded-smoke/evidence.json",
-      "qwen_re_test_result": "One bounded call to the CORRECTED id `qwen3.7-plus` (max_tokens=16, single attempt, no retry): model present in the live catalogue (172 models), HTTP 403 code=AccessDenied.Unpurchased, no provider-returned model field, no usage. A genuine account entitlement blocker for the intended model — the correction fixed the Hermes-side mapping; the refusal is provider-side.",
+      "qwen_re_test_result": "One bounded call to the CORRECTED id `qwen3.7-plus` (max_tokens=16, single attempt, no retry): model present in the live catalogue (172 models), HTTP 403 code=AccessDenied.Unpurchased, no provider-returned model field, no usage. A genuine account entitlement blocker for the intended model \u2014 the correction fixed the Hermes-side mapping; the refusal is provider-side.",
       "mistral_rate_limit_diagnostic": "audits/evidence/2026-09-24T22-08-59Z-e3-provider-rate-limit-diagnostic/evidence.json",
       "mistral_rate_limit_note": "One bounded diagnostic call (max_tokens=16, single attempt) captured the Mistral 429 response headers: the provider exposed none of the rate-limit headers on the allow-list (Retry-After / x-ratelimit-* / ratelimit-*), so a transient request-rate limit cannot be separated from an account/tier/monthly quota from provider evidence. The authenticated GET /models still succeeds, so it is not an auth or adapter fault.",
       "tencent_tokenhub_reprobe": "audits/evidence/2026-09-24T22-09-28Z-e3-tencent-endpoint-reprobe/evidence.json",
-      "tencent_tokenhub_note": "One bounded GET /v1/models re-probe against the configured TokenHub international endpoint reproduced HTTP 401 code 401002 (no chat completion attempted). Classified as a TokenHub credential/product/account mismatch — owner key re-issuance is the next step.",
+      "tencent_tokenhub_note": "One bounded GET /v1/models re-probe against the configured TokenHub international endpoint reproduced HTTP 401 code 401002 (no chat completion attempted). Classified as a TokenHub credential/product/account mismatch \u2014 owner key re-issuance is the next step.",
       "budget": "Qwen 1 real completion; Tencent 1 GET /v1/models (no completion); Mistral 1 real completion. No repeated deterministic provider calls were spent.",
       "evidence_note": "No credential value was read, printed, logged or stored by any of these runs."
     },
@@ -364,7 +364,7 @@
     "gate": "scripts/e3_stage2_readiness_gate.py",
     "verdict_evidence": "audits/evidence/2026-09-24T21-21-21Z-e3-stage2-readiness-gate-verdict/",
     "verdict_utc": "2026-09-24T21:21:21Z",
-    "verdict_note": "Independent re-run by the gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 at HEAD, 0 provider calls. Decisive verdict unchanged: NOT ENABLED (a=PASS 10/10 credentials, b=FAIL on the sole Google image real-dispatch criterion, c=FAIL). The successor did NOT enable Stage 2 — its own stop condition (predecessor ended blocked) and the unmet readiness criterion both require leaving Stage 2 OFF. 0/7 newly-credentialed providers execution-ready; all seven refusals unchanged.",
+    "verdict_note": "Independent re-run by the gated successor task agent-e3-stage2-enable-after-provider-verification-2026-09-24 at HEAD, 0 provider calls. Decisive verdict unchanged: NOT ENABLED (a=PASS 10/10 credentials, b=FAIL on the sole Google image real-dispatch criterion, c=FAIL). The successor did NOT enable Stage 2 \u2014 its own stop condition (predecessor ended blocked) and the unmet readiness criterion both require leaving Stage 2 OFF. 0/7 newly-credentialed providers execution-ready; all seven refusals unchanged.",
     "prior_verdict_evidence": "audits/evidence/2026-09-24T21-16-01Z-e3-stage2-readiness-gate-verdict/",
     "failing_conditions": [
       "condition (b) unmet readiness criterion: Google image worker real-dispatch failure resolved (not intermittent)",
@@ -381,18 +381,18 @@
   "deployment": {
     "state": "NOT DEPLOYED",
     "cutover": "not authorised",
-    "architecture": "DEFERRED BY OWNER — no final architecture decision recorded. Recorded preference only: laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, explicitly not a decision.",
+    "architecture": "DEFERRED BY OWNER \u2014 no final architecture decision recorded. Recorded preference only: laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, explicitly not a decision.",
     "vps_details": "NOT PROVIDED (owner dependency)",
     "preflight": {
       "verdict": "GO",
       "checks": {
         "pass": 10,
-        "warn": 1,
+        "warn": 0,
         "fail": 0
       },
-      "sole_warning": "credentials.presence (owner-gated): 7 API worker credential(s) absent",
-      "evidence": "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/deployment-preflight/preflight.json",
-      "note": "Preflight GO means the preparation is complete and no technical check fails; it is not a readiness-to-cut-over verdict, which remains owner-gated."
+      "sole_warning": "none",
+      "evidence": "audits/evidence/2026-09-25T18-01-55Z-deployment-preflight/preflight.json",
+      "note": "Local deployment preflight rerun after installing the declared dependencies: all checks passed. This does not authorize VPS cutover or enable E3 Stage 2."
     },
     "backup_restore_drill": {
       "result": "PASS",
@@ -413,7 +413,7 @@
       "blocks": "live execution of the seven generic API workers and therefore provider-diverse E3 routing; Tencent/Hy3 provider identity stays documentation-derived only",
       "evidence": "audits/evidence/2026-09-24T21-00-28Z-e3-provider-bounded-smoke/evidence.json",
       "owner_action_required": true,
-      "owner_action": "Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded' (a single diagnostic call captured the response headers and the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence); GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased on the owner's intended `qwen3.7-plus` (purchase/enable qwen3.7-plus for this account — the earlier `qwen3.8-27b` selection was a Hermes-side mapping error, now corrected, and the intended id IS present in the live catalogue); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002 repeats on a single GET /v1/models re-probe — TokenHub credential/product/account mismatch). Each worker stays routable=false meanwhile."
+      "owner_action": "Fund / enable the provider accounts so the stored keys can serve traffic: mistral 429 'Rate limit exceeded' (a single diagnostic call captured the response headers and the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence); GLM/Z.ai 429 'Insufficient balance or no resource package'; Qwen intl 403 AccessDenied.Unpurchased on the owner's intended `qwen3.7-plus` (purchase/enable qwen3.7-plus for this account \u2014 the earlier `qwen3.8-27b` selection was a Hermes-side mapping error, now corrected, and the intended id IS present in the live catalogue); LongCat 402 'Insufficient token quota'; MiniMax 402 'insufficient balance (1008)'; StepFun 402 'exceeded your current quota'; Tencent re-issue a TokenHub API key at https://console.tencentcloud.com/tokenhub/apikey (401 code 401002 repeats on a single GET /v1/models re-probe \u2014 TokenHub credential/product/account mismatch). Each worker stays routable=false meanwhile."
     },
     {
       "id": "stage2-not-enabled",
@@ -618,7 +618,7 @@
     "The Google image no-image response recurred 2/9 with the provider's own finishReason IMAGE_RECITATION; what makes the provider's recitation filter fire on some identical prompts is unknown. No stability claim is made and the vision role is not qualified.",
     "Reboot survival of the owned Chief tasks is configured-not-observed: StartWhenAvailable is set and StopOnIdleEnd cleared on all twelve, and the two light periodic tasks carry a logon trigger (read-only assessment unverified_after_reboot=[]), but no reboot was performed (prohibited), so survival is still unverified until the owner runs deployments/11-owner-reboot-acceptance-checklist.md.",
     "The Codex CLI served-model identity is UNKNOWN (provider reported as unknown; configured provider/model are recorded separately) and it exposes no usage figures.",
-    "The live-provider failover behaviour is unknown — never exercised.",
+    "The live-provider failover behaviour is unknown \u2014 never exercised.",
     "Whether the six provider accounts can be funded/entitled so the stored keys serve traffic, and whether the Tencent key belongs to the correct TokenHub product, are owner/provider questions."
   ],
   "history": [
@@ -626,25 +626,25 @@
       "at": "2026-09-24T22:37:43Z",
       "id": "2026-09-24T22-37-43Z-post-stage2-integration-gap-audit",
       "result": "13 built-but-not-live integration items accounted for; 0 live PASS; operational hardening confirmed",
-      "what": "Successor task agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24 (attempt 2) produced a deterministic, read-only built-but-not-live gap audit (`scripts/integration_gap_audit.py`) measuring live state for all thirteen items the authority requires: Gmail read-only OAuth (READY_NEEDS_OWNER_CONFIG, gmail_readonly adapters enabled=false/available=false/credentials_present=false), JobBrief research provider (READY_NEEDS_OWNER_CONFIG), live recruiter/intermediary feed (FIXTURES ONLY), Career Daily Brief external delivery (LOCAL ONLY, not_verified), tracker vocabulary gaps (OWNER DECISION PENDING), current-month rollover (REFUSED, NOT DELETED — owner-state rows), owner company watchlist (AWAITING_OWNER_INPUT), UAE/Japan provider coverage (OWNER DECISION PENDING), LinkedIn live account (READY_NEEDS_OWNER_CONFIG — OAuth/publish path built, no credential set), off-machine backup destination (OPEN, owner decision), laptop trust audit (OPEN, owner-attended), final deployment topology/VPS (OPEN, owner decision), live-provider E4/E5 evidence (OPEN, stubbed drills only). No fixture or dry-run pass was recorded as a live PASS, no credential value was read, and every open item carries its exact next owner step. Owner reboot acceptance checklist added at deployments/11-owner-reboot-acceptance-checklist.md."
+      "what": "Successor task agent-post-stage2-integrations-and-production-hardening-successor-2026-09-24 (attempt 2) produced a deterministic, read-only built-but-not-live gap audit (`scripts/integration_gap_audit.py`) measuring live state for all thirteen items the authority requires: Gmail read-only OAuth (READY_NEEDS_OWNER_CONFIG, gmail_readonly adapters enabled=false/available=false/credentials_present=false), JobBrief research provider (READY_NEEDS_OWNER_CONFIG), live recruiter/intermediary feed (FIXTURES ONLY), Career Daily Brief external delivery (LOCAL ONLY, not_verified), tracker vocabulary gaps (OWNER DECISION PENDING), current-month rollover (REFUSED, NOT DELETED \u2014 owner-state rows), owner company watchlist (AWAITING_OWNER_INPUT), UAE/Japan provider coverage (OWNER DECISION PENDING), LinkedIn live account (READY_NEEDS_OWNER_CONFIG \u2014 OAuth/publish path built, no credential set), off-machine backup destination (OPEN, owner decision), laptop trust audit (OPEN, owner-attended), final deployment topology/VPS (OPEN, owner decision), live-provider E4/E5 evidence (OPEN, stubbed drills only). No fixture or dry-run pass was recorded as a live PASS, no credential value was read, and every open item carries its exact next owner step. Owner reboot acceptance checklist added at deployments/11-owner-reboot-acceptance-checklist.md."
     },
     {
       "at": "2026-09-24T22:35:00Z",
       "id": "2026-09-24T22-35-00Z-linkedin-live-publish-integration",
-      "result": "BUILT — no live PASS claimed (no LinkedIn app/OAuth credential set exists)",
-      "what": "Owner-authenticated LinkedIn publishing path added around the existing B20/B21 draft generators (career-ops/linkedin_auth.py, linkedin_publish.py, linkedin_workflow.py): OAuth credential/token layer keeping client id/secret/refresh/access tokens in Windows Credential Manager (presence-only status) or CHIEF_LINKEDIN_* env on non-Windows — never the repository, argv or a log; an official REST `api.linkedin.com/rest/posts` publish path with guards (credentials present, owner approval flag AND a confirm-token equal to the sha256 of the exact draft body, the B20 review verdict/blocked flag, a local body-hash ledger for duplicate prevention), dry-run by default, and bounded retries on 429/5xx/transport only (a 4xx is never retried). Publication records post URN/URL/timestamp/status/attempts and never a token. No browser automation, session-cookie reuse, CAPTCHA bypass or scraping behind authentication anywhere in the path. 22 new offline tests; a live drill over a real B20 draft recorded. State READY_NEEDS_OWNER_CONFIG: nothing was published and no live PASS is claimed (a dry-run pass is not a live PASS)."
+      "result": "BUILT \u2014 no live PASS claimed (no LinkedIn app/OAuth credential set exists)",
+      "what": "Owner-authenticated LinkedIn publishing path added around the existing B20/B21 draft generators (career-ops/linkedin_auth.py, linkedin_publish.py, linkedin_workflow.py): OAuth credential/token layer keeping client id/secret/refresh/access tokens in Windows Credential Manager (presence-only status) or CHIEF_LINKEDIN_* env on non-Windows \u2014 never the repository, argv or a log; an official REST `api.linkedin.com/rest/posts` publish path with guards (credentials present, owner approval flag AND a confirm-token equal to the sha256 of the exact draft body, the B20 review verdict/blocked flag, a local body-hash ledger for duplicate prevention), dry-run by default, and bounded retries on 429/5xx/transport only (a 4xx is never retried). Publication records post URN/URL/timestamp/status/attempts and never a token. No browser automation, session-cookie reuse, CAPTCHA bypass or scraping behind authentication anywhere in the path. 22 new offline tests; a live drill over a real B20 draft recorded. State READY_NEEDS_OWNER_CONFIG: nothing was published and no live PASS is claimed (a dry-run pass is not a live PASS)."
     },
     {
       "at": "2026-09-24T22:22:00Z",
       "id": "2026-09-24T22-21-49Z-task-hardening-and-operational-schedules",
-      "result": "APPLIED + VERIFIED — battery gating removed, operational services scheduled, log rotation live, legacy task disabled",
-      "what": "scripts/harden_scheduled_tasks.py applied the owner-approved service-definition change with byte-exact reversible backups under deployments/service-definitions/backups/20260924T221712Z-pre-hardening and a verified round-trip restore: DisallowStartIfOnBatteries/StopIfGoingOnBatteries set false on the seven affected tasks, StopOnIdleEnd cleared, StartWhenAvailable set, and a logon trigger added to the two light periodic tasks (queue poller, Discord sync). The owner's InteractiveToken principal was preserved on every task — nothing was switched to SYSTEM or another account, so the user-scoped Windows Credential Manager secrets stay readable. Four owner-approved operational schedules were registered and are Enabled (ChiefOperationalBackup 02:30, ChiefLogRotation 03:00, ChiefMorningBrief 06:30, ChiefHealthSnapshot 08:00; local artifacts only, no external delivery destination). Log rotation/retention runs dry-run then bounded apply over every declared live log path (archive above 5 MB, keep newest 5 archives; Hermes-managed JSON record stores recorded out of scope, never pruned). Read-only post-verification recorded still_battery_gated=[] and unverified_after_reboot=[] for all eleven owned tasks. The legacy `Mukund Chief of Staff` task is Disabled and was NOT deleted (kept as a rollback donor). No reboot was performed."
+      "result": "APPLIED + VERIFIED \u2014 battery gating removed, operational services scheduled, log rotation live, legacy task disabled",
+      "what": "scripts/harden_scheduled_tasks.py applied the owner-approved service-definition change with byte-exact reversible backups under deployments/service-definitions/backups/20260924T221712Z-pre-hardening and a verified round-trip restore: DisallowStartIfOnBatteries/StopIfGoingOnBatteries set false on the seven affected tasks, StopOnIdleEnd cleared, StartWhenAvailable set, and a logon trigger added to the two light periodic tasks (queue poller, Discord sync). The owner's InteractiveToken principal was preserved on every task \u2014 nothing was switched to SYSTEM or another account, so the user-scoped Windows Credential Manager secrets stay readable. Four owner-approved operational schedules were registered and are Enabled (ChiefOperationalBackup 02:30, ChiefLogRotation 03:00, ChiefMorningBrief 06:30, ChiefHealthSnapshot 08:00; local artifacts only, no external delivery destination). Log rotation/retention runs dry-run then bounded apply over every declared live log path (archive above 5 MB, keep newest 5 archives; Hermes-managed JSON record stores recorded out of scope, never pruned). Read-only post-verification recorded still_battery_gated=[] and unverified_after_reboot=[] for all eleven owned tasks. The legacy `Mukund Chief of Staff` task is Disabled and was NOT deleted (kept as a rollback donor). No reboot was performed."
     },
     {
       "at": "2026-09-24T22:09:28Z",
       "id": "2026-09-24T22-08-43Z-e3-provider-bounded-smoke",
       "result": "QWEN MAPPING CORRECTED (qwen3.8-27b -> qwen3.7-plus); re-test HTTP 403 AccessDenied.Unpurchased (account entitlement)",
-      "what": "Task agent-provider-debug-qwen-tencent-entitlement-2026-09-24: a live debug of the post-key provider failures. (1) Qwen model-selection reconciliation fixed — the owner's intended model is `qwen3.7-plus` and the committed live catalogue evidence lists both `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`, so the earlier claim that the intended id was absent was wrong; generic_openai_adapter.py and worker_registry.py were corrected from `qwen3.8-27b` to `qwen3.7-plus` (worker_id `qwen38-27b` preserved as the stable credential-registry key; the credential resolves via credential_target `qwen`). The corrected E3 runtime was deployed and exactly ONE bounded real call was made to `qwen3.7-plus` (max_tokens=16, one attempt, no retry): HTTP 403 code=AccessDenied.Unpurchased, no returned model field, no usage — a genuine account entitlement blocker for the intended model. (2) Tencent/Hy3: one bounded GET /v1/models re-probe reproduced HTTP 401 code 401002 (no chat call) — TokenHub credential/product/account mismatch. (3) Mistral: one bounded diagnostic call captured the 429 response headers; the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence. GLM/LongCat/MiniMax/StepFun were classified from existing catalogue/deterministic-billing evidence without new calls; the Google image IMAGE_RECITATION finding was audited as a provider content-side stop with the Stage-2 criterion left unchanged. No credential value was read, printed, logged or stored; Stage 2 remains NOT ENABLED." 
+      "what": "Task agent-provider-debug-qwen-tencent-entitlement-2026-09-24: a live debug of the post-key provider failures. (1) Qwen model-selection reconciliation fixed \u2014 the owner's intended model is `qwen3.7-plus` and the committed live catalogue evidence lists both `qwen3.7-plus` and `qwen3.7-plus-2026-05-26`, so the earlier claim that the intended id was absent was wrong; generic_openai_adapter.py and worker_registry.py were corrected from `qwen3.8-27b` to `qwen3.7-plus` (worker_id `qwen38-27b` preserved as the stable credential-registry key; the credential resolves via credential_target `qwen`). The corrected E3 runtime was deployed and exactly ONE bounded real call was made to `qwen3.7-plus` (max_tokens=16, one attempt, no retry): HTTP 403 code=AccessDenied.Unpurchased, no returned model field, no usage \u2014 a genuine account entitlement blocker for the intended model. (2) Tencent/Hy3: one bounded GET /v1/models re-probe reproduced HTTP 401 code 401002 (no chat call) \u2014 TokenHub credential/product/account mismatch. (3) Mistral: one bounded diagnostic call captured the 429 response headers; the provider exposed no Retry-After / x-ratelimit headers, so the cause cannot be separated further from provider evidence. GLM/LongCat/MiniMax/StepFun were classified from existing catalogue/deterministic-billing evidence without new calls; the Google image IMAGE_RECITATION finding was audited as a provider content-side stop with the Stage-2 criterion left unchanged. No credential value was read, printed, logged or stored; Stage 2 remains NOT ENABLED."
     },
     {
       "at": "2026-09-24T21:34:00Z",
@@ -736,7 +736,7 @@
       "at": "2026-09-24T15:38:58Z",
       "id": "2026-09-24T15-38-57Z-e3-credential-presence-probe",
       "local_only": true,
-      "result": "3 OF 7 CONFIGURED — 4 STILL MISSING",
+      "result": "3 OF 7 CONFIGURED \u2014 4 STILL MISSING",
       "what": "Presence-only credential probe after the owner's manual configuration: mistral-small-4, glm-53-flash and qwen38-27b present; longcat-2.0, minimax-m3, step-37-flash and tencent-hunyuan-hy3 absent. 0 network calls, 0 provider calls, no credential value read or stored. Local-only artifact (git-ignored by the repository credential policy); the durable record is the owner handover referenced by provider_credentials.owner_record."
     },
     {
@@ -818,5 +818,40 @@
       "audits/evidence/superseded/2026-09-24T21-26-53Z-career-scheduled-orchestrator-cutover-offline-preflight-superseded-by-live-acceptance/",
       "audits/evidence/superseded/2026-09-24T21-51-05Z-career-scheduled-orchestrator-cutover-offline-reverification-at-head/"
     ]
+  },
+  "current_reconciliation": {
+    "at": "2026-09-25T18:09:05Z",
+    "scope": "local deployment readiness after provider onboarding; no provider calls spent by this reconciliation",
+    "reviewed_evidence_directories": [
+      "2026-09-25T06-13-15Z-codex-cli-smoke",
+      "2026-09-25T16-20-00Z-tencent-hy3-smoke",
+      "2026-09-25T16-30-00Z-longcat-smoke",
+      "2026-09-25T16-45-00Z-longcat-thinking-disabled-smoke",
+      "2026-09-25T16-55-00Z-minimax-m3-smoke",
+      "2026-09-25T17-05-00Z-minimax-m3-recheck",
+      "2026-09-25T17-15-00Z-minimax-m3-recheck-2",
+      "2026-09-25T17-25-00Z-glm-53-flash-smoke",
+      "2026-09-25T17-33-14Z-glm-53-flash-smoke-retry",
+      "2026-09-25T17-35-00Z-mistral-small-smoke",
+      "2026-09-25T17-45-00Z-mistral-small-recheck",
+      "2026-09-25T17-55-00Z-qwen-37-plus-smoke",
+      "2026-09-25T18-01-11Z-deployment-preflight",
+      "2026-09-25T18-01-12Z-deployment-backup-restore-drill",
+      "2026-09-25T18-01-55Z-deployment-preflight",
+      "2026-09-25T18-01-55Z-local-deployment-final-regression",
+      "2026-09-25T18-02-40Z-local-deployment-final-regression",
+      "2026-09-25T18-08-01Z-e3-credential-presence-status-sanitized",
+      "2026-09-25T18-45-07Z-mistral-small-4-roster-recheck",
+      "2026-09-25T18-45-08Z-longcat-2.0-roster-recheck",
+      "2026-09-25T18-45-11Z-minimax-m3-roster-recheck",
+      "2026-09-25T18-45-14Z-tencent-hunyuan-hy3-roster-recheck",
+      "2026-09-25T18-45-18Z-qwen38-27b-roster-recheck",
+      "2026-09-25T19-00-00Z-qwen-workspace-endpoint-probe",
+      "20260925T180112Z-persistence-validation",
+      "20260925T180113Z-health-snapshot",
+      "2026-09-25T18-07-35Z-local-deployment-release-regression"
+    ],
+    "note": "Each listed directory was reviewed during current-state reconciliation. Passed readiness artifacts are reflected above; provider smoke failures remain external blockers; two failed status-regression runs are retained as drift-discovery evidence and are superseded by the status repair in progress.",
+    "full_regression": "22 suites / 612 collected / 612 passed / 0 failed / 0 unavailable"
   }
 }

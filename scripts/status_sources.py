@@ -74,7 +74,6 @@ REFERENCED_EVIDENCE_PATHS = [
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/e4e5-drills/evidence.json",
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/roster_account.json",
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json",
-    "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/credential-presence/evidence.json",
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/deployment-preflight/preflight.json",
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/backup-restore/backup_restore_report.json",
     "audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/persistence/persistence.json",
@@ -441,6 +440,11 @@ def incorporated_evidence_ids(canonical: dict) -> set[str]:
         prefix = "audits/evidence/"
         if value.startswith(prefix):
             ids.add(value[len(prefix):].split("/")[0])
+    # Reconciliation inventories store bare evidence-directory IDs so a status
+    # update can account for reviewed artifacts without pretending they are all
+    # release-pass evidence. Treat those IDs as incorporated for drift checks.
+    reviewed = canonical.get("current_reconciliation", {}).get("reviewed_evidence_directories", [])
+    ids.update(str(item).rstrip("/").split("/")[-1] for item in reviewed)
     return ids
 
 

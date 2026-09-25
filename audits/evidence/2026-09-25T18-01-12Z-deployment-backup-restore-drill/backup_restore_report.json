@@ -1,0 +1,472 @@
+{
+  "artifact": "backup/restore verification drill",
+  "run_started_utc": "2026-09-25T18:01:12+00:00",
+  "artifacts": [
+    {
+      "label": "e1-e2-exec-brain",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\exec_brain.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "audit_log": 5,
+          "override_record": 0,
+          "quality_floor": 0,
+          "sqlite_sequence": 1,
+          "strategy_decision": 0,
+          "subtask_record": 0,
+          "task_record": 4
+        },
+        "sha256": "5c72f5e5a985542f82213f54b72fa36a581c55e7468548b6850d95211a021470"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "audit_log": 5,
+          "override_record": 0,
+          "quality_floor": 0,
+          "sqlite_sequence": 1,
+          "strategy_decision": 0,
+          "subtask_record": 0,
+          "task_record": 4
+        },
+        "sha256": "cc4e1083ffcbe7cc302177714e154f967e21cefb3e1b192e2fae476ca941c741"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "audit_log": 5,
+          "override_record": 0,
+          "quality_floor": 0,
+          "sqlite_sequence": 1,
+          "strategy_decision": 0,
+          "subtask_record": 0,
+          "task_record": 4
+        },
+        "sha256": "cc4e1083ffcbe7cc302177714e154f967e21cefb3e1b192e2fae476ca941c741"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "e2-governor",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\governor.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capacity_dimension": 22,
+          "daily_aggregate": 0,
+          "daily_brief_log": 4,
+          "observed_request": 145,
+          "provider_snapshot": 16
+        },
+        "sha256": "39dafda5a047a1c665f4fae8d982408ac6d2f7d0389fa88e398e38a9b9890bac"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capacity_dimension": 22,
+          "daily_aggregate": 0,
+          "daily_brief_log": 4,
+          "observed_request": 145,
+          "provider_snapshot": 16
+        },
+        "sha256": "51c581474d5306c9cc3b1a4abaf97b2d6963e2a4a7ec79a05e5c7a8bf42e9a33"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capacity_dimension": 22,
+          "daily_aggregate": 0,
+          "daily_brief_log": 4,
+          "observed_request": 145,
+          "provider_snapshot": 16
+        },
+        "sha256": "51c581474d5306c9cc3b1a4abaf97b2d6963e2a4a7ec79a05e5c7a8bf42e9a33"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "e3-orchestration",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\orchestration.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capability_registry": 4,
+          "conflict_record": 0,
+          "convergence_event": 0,
+          "dag_node": 17,
+          "dag_state_event": 151,
+          "decision_outcome_review": 0,
+          "decision_rationale_event": 0,
+          "failure_drill_log": 0,
+          "performance_evidence": 30,
+          "plan_version": 0,
+          "resource_checkpoint": 0,
+          "resource_snapshot": 0,
+          "router_decision": 0,
+          "safe_mode_event": 0,
+          "schema_version": 2,
+          "sqlite_sequence": 0,
+          "task_fingerprint_index": 0,
+          "worker_capability_event": 12
+        },
+        "sha256": "cadc21c2c608618a7faef43be6a7b95cc8405eb0ebee3b14b7ffa8438e1275b2"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capability_registry": 4,
+          "conflict_record": 0,
+          "convergence_event": 0,
+          "dag_node": 17,
+          "dag_state_event": 151,
+          "decision_outcome_review": 0,
+          "decision_rationale_event": 0,
+          "failure_drill_log": 0,
+          "performance_evidence": 30,
+          "plan_version": 0,
+          "resource_checkpoint": 0,
+          "resource_snapshot": 0,
+          "router_decision": 0,
+          "safe_mode_event": 0,
+          "schema_version": 2,
+          "sqlite_sequence": 0,
+          "task_fingerprint_index": 0,
+          "worker_capability_event": 12
+        },
+        "sha256": "327fdb60dc18b9d39771dfcc4c847d91ed987b7691fd773728a102bebbafde34"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "capability_registry": 4,
+          "conflict_record": 0,
+          "convergence_event": 0,
+          "dag_node": 17,
+          "dag_state_event": 151,
+          "decision_outcome_review": 0,
+          "decision_rationale_event": 0,
+          "failure_drill_log": 0,
+          "performance_evidence": 30,
+          "plan_version": 0,
+          "resource_checkpoint": 0,
+          "resource_snapshot": 0,
+          "router_decision": 0,
+          "safe_mode_event": 0,
+          "schema_version": 2,
+          "sqlite_sequence": 0,
+          "task_fingerprint_index": 0,
+          "worker_capability_event": 12
+        },
+        "sha256": "327fdb60dc18b9d39771dfcc4c847d91ed987b7691fd773728a102bebbafde34"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\state.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "async_delegations": 0,
+          "compression_locks": 0,
+          "conversation_generations": 1,
+          "delivery_obligations": 22,
+          "gateway_heartbeats": 0,
+          "gateway_hygiene_state": 0,
+          "gateway_routing": 7,
+          "messages": 16219,
+          "messages_fts": 16219,
+          "messages_fts_config": 2,
+          "messages_fts_data": 2890,
+          "messages_fts_docsize": 16219,
+          "messages_fts_idx": 2024,
+          "messages_fts_trigram": 7510,
+          "messages_fts_trigram_config": 2,
+          "messages_fts_trigram_data": 1013,
+          "messages_fts_trigram_docsize": 7510,
+          "messages_fts_trigram_idx": 966,
+          "schema_version": 1,
+          "session_model_usage": 186,
+          "session_turn_leases": 2,
+          "sessions": 85,
+          "sqlite_sequence": 1,
+          "state_meta": 7,
+          "system_prompts": 80
+        },
+        "sha256": "c355ba884f233aa51e9fa4de27032470238d376efd2a353190cf019fc8519f1e"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "async_delegations": 0,
+          "compression_locks": 0,
+          "conversation_generations": 1,
+          "delivery_obligations": 22,
+          "gateway_heartbeats": 0,
+          "gateway_hygiene_state": 0,
+          "gateway_routing": 7,
+          "messages": 16219,
+          "messages_fts": 16219,
+          "messages_fts_config": 2,
+          "messages_fts_data": 2890,
+          "messages_fts_docsize": 16219,
+          "messages_fts_idx": 2024,
+          "messages_fts_trigram": 7510,
+          "messages_fts_trigram_config": 2,
+          "messages_fts_trigram_data": 1013,
+          "messages_fts_trigram_docsize": 7510,
+          "messages_fts_trigram_idx": 966,
+          "schema_version": 1,
+          "session_model_usage": 186,
+          "session_turn_leases": 2,
+          "sessions": 85,
+          "sqlite_sequence": 1,
+          "state_meta": 7,
+          "system_prompts": 80
+        },
+        "sha256": "c5bd5c91db7f0cce104107c703c4aec4e51c506cca737d20aafa4f730abd9ffe"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "async_delegations": 0,
+          "compression_locks": 0,
+          "conversation_generations": 1,
+          "delivery_obligations": 22,
+          "gateway_heartbeats": 0,
+          "gateway_hygiene_state": 0,
+          "gateway_routing": 7,
+          "messages": 16219,
+          "messages_fts": 16219,
+          "messages_fts_config": 2,
+          "messages_fts_data": 2890,
+          "messages_fts_docsize": 16219,
+          "messages_fts_idx": 2024,
+          "messages_fts_trigram": 7510,
+          "messages_fts_trigram_config": 2,
+          "messages_fts_trigram_data": 1013,
+          "messages_fts_trigram_docsize": 7510,
+          "messages_fts_trigram_idx": 966,
+          "schema_version": 1,
+          "session_model_usage": 186,
+          "session_turn_leases": 2,
+          "sessions": 85,
+          "sqlite_sequence": 1,
+          "state_meta": 7,
+          "system_prompts": 80
+        },
+        "sha256": "c5bd5c91db7f0cce104107c703c4aec4e51c506cca737d20aafa4f730abd9ffe"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-kanban",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\kanban.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "kanban_notify_subs": 0,
+          "sqlite_sequence": 0,
+          "task_attachments": 0,
+          "task_comments": 0,
+          "task_events": 0,
+          "task_links": 0,
+          "task_runs": 0,
+          "tasks": 0
+        },
+        "sha256": "459faad2a07548e77dac1ce5833b3714f016bbe6eb893c132736ba8a015b3308"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "kanban_notify_subs": 0,
+          "sqlite_sequence": 0,
+          "task_attachments": 0,
+          "task_comments": 0,
+          "task_events": 0,
+          "task_links": 0,
+          "task_runs": 0,
+          "tasks": 0
+        },
+        "sha256": "b88f7863fbcf10102e9f8be43e5c03b89e32e7ad08df023e8f66180b6a053831"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "kanban_notify_subs": 0,
+          "sqlite_sequence": 0,
+          "task_attachments": 0,
+          "task_comments": 0,
+          "task_events": 0,
+          "task_links": 0,
+          "task_runs": 0,
+          "tasks": 0
+        },
+        "sha256": "b88f7863fbcf10102e9f8be43e5c03b89e32e7ad08df023e8f66180b6a053831"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-shared-state",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\shared-state.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "hosted_room_events": 0,
+          "hosted_room_legacy_imports": 1,
+          "hosted_room_links": 0,
+          "hosted_room_peer_reservations": 0,
+          "hosted_room_policy_cursors": 0,
+          "hosted_room_policy_events": 0,
+          "hosted_room_policy_publications": 0,
+          "hosted_room_policy_threads": 0,
+          "hosted_room_policy_transcript": 0,
+          "hosted_room_policy_transcript_state": 0,
+          "hosted_room_policy_watermarks": 0,
+          "hosted_room_remote_runs": 0,
+          "hosted_room_retired_ids": 0,
+          "hosted_room_revoked_grants": 0,
+          "hosted_rooms": 0
+        },
+        "sha256": "b107ae08e0c31272c96ba759ac59f8d0a6d77dcbc2b6c5a5691b2f6919b96d29"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "hosted_room_events": 0,
+          "hosted_room_legacy_imports": 1,
+          "hosted_room_links": 0,
+          "hosted_room_peer_reservations": 0,
+          "hosted_room_policy_cursors": 0,
+          "hosted_room_policy_events": 0,
+          "hosted_room_policy_publications": 0,
+          "hosted_room_policy_threads": 0,
+          "hosted_room_policy_transcript": 0,
+          "hosted_room_policy_transcript_state": 0,
+          "hosted_room_policy_watermarks": 0,
+          "hosted_room_remote_runs": 0,
+          "hosted_room_retired_ids": 0,
+          "hosted_room_revoked_grants": 0,
+          "hosted_rooms": 0
+        },
+        "sha256": "5f918cc473ff2b083f912dfb0b0208e02b89763e67dd2ba4c713d41e7adf7aee"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "hosted_room_events": 0,
+          "hosted_room_legacy_imports": 1,
+          "hosted_room_links": 0,
+          "hosted_room_peer_reservations": 0,
+          "hosted_room_policy_cursors": 0,
+          "hosted_room_policy_events": 0,
+          "hosted_room_policy_publications": 0,
+          "hosted_room_policy_threads": 0,
+          "hosted_room_policy_transcript": 0,
+          "hosted_room_policy_transcript_state": 0,
+          "hosted_room_policy_watermarks": 0,
+          "hosted_room_remote_runs": 0,
+          "hosted_room_retired_ids": 0,
+          "hosted_room_revoked_grants": 0,
+          "hosted_rooms": 0
+        },
+        "sha256": "5f918cc473ff2b083f912dfb0b0208e02b89763e67dd2ba4c713d41e7adf7aee"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "hermes-cron-executions",
+      "kind": "sqlite",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\cron\\executions.db",
+      "source_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "executions": 0
+        },
+        "sha256": "a9ccb4989ebcd38f923fff49b43049591fef0fd970ee48605795ca509d17e517"
+      },
+      "backup_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "executions": 0
+        },
+        "sha256": "e61132d933d8822bd1920ddac1d1343f101af88e3b97280bf83de1511a05d2e5"
+      },
+      "restore_fingerprint": {
+        "integrity_check": "ok",
+        "row_counts": {
+          "executions": 0
+        },
+        "sha256": "e61132d933d8822bd1920ddac1d1343f101af88e3b97280bf83de1511a05d2e5"
+      },
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "e1-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\chain-head.json",
+      "source_sha256": "84b9004e8824a64e2646f4f59b6f05a1316bb41ff203161ab1ec7ac724affa1b",
+      "backup_sha256": "84b9004e8824a64e2646f4f59b6f05a1316bb41ff203161ab1ec7ac724affa1b",
+      "restore_sha256": "84b9004e8824a64e2646f4f59b6f05a1316bb41ff203161ab1ec7ac724affa1b",
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "e2-gov-chain-head",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\gov-chain-head.json",
+      "source_sha256": "00cfec09dfa4667360222e6cb89fa461036c94bbb2302c16915672eb35dc861e",
+      "backup_sha256": "00cfec09dfa4667360222e6cb89fa461036c94bbb2302c16915672eb35dc861e",
+      "restore_sha256": "00cfec09dfa4667360222e6cb89fa461036c94bbb2302c16915672eb35dc861e",
+      "restore_matches_backup": true,
+      "status": "PASS"
+    },
+    {
+      "label": "e2-deepseek-config",
+      "kind": "json",
+      "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\deepseek-config.json",
+      "source_sha256": "e897d1335cddcc0ce0b43560626122c726994dfb8d64505ce79538a9d2b93a21",
+      "backup_sha256": "e897d1335cddcc0ce0b43560626122c726994dfb8d64505ce79538a9d2b93a21",
+      "restore_sha256": "e897d1335cddcc0ce0b43560626122c726994dfb8d64505ce79538a9d2b93a21",
+      "restore_matches_backup": true,
+      "status": "PASS"
+    }
+  ],
+  "rollback_dry_run": {
+    "command": "python scripts/deploy_e3_runtime.py --dry-run",
+    "exit_code": 0,
+    "dry_run": true,
+    "would_copy": 0,
+    "performed_no_write": true,
+    "status": "PASS"
+  },
+  "failure_labels": [],
+  "status": "PASS",
+  "live_state_modified": false,
+  "network_calls_spent": 0,
+  "provider_calls_spent": 0,
+  "guarantees": [
+    "never writes to the live runtime root or any live database",
+    "reads databases read-only; snapshots via the SQLite backup API",
+    "no credential value read; no network call",
+    "restore is verified into a throwaway directory, not over live state"
+  ],
+  "ownership_note": "This drill verifies the *deployment* backup/restore path. The scheduled operational backup service and its retention policy are owned by agent-operational-brief-health-backup-persistence-2026-09-23.",
+  "run_finished_utc": "2026-09-25T18:01:15+00:00",
+  "out_dir": "C:\\Users\\mukun\\Documents\\Codex\\mukund-chief-control-plane-owner-decisions\\audits\\evidence\\2026-09-25T18-01-12Z-deployment-backup-restore-drill",
+  "snapshot_dir": "C:\\Users\\mukun\\AppData\\Local\\Temp\\chief-backup-restore-drill-20260925T180112Z",
+  "snapshot_note": "Raw database snapshots live outside the repository (scratch dir). They are not published; only this report (hashes, row counts, verdicts) is committed."
+}

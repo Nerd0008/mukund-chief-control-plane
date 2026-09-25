@@ -8,8 +8,8 @@
 - Canonical source: `status/canonical-status.json` (schema v1.0)
 - Generation command: `python scripts/status_render.py`
 - Verification command: `python scripts/status_verify.py`
-- Status as of (newest incorporated evidence): **2026-09-24T21:10:44Z**
-- Newest evidence run: `2026-09-24T21-09-18Z-e3-provider-verification-regression` — **PASS (22 suites / 606 collected / 606 passed / 0 failed)**
+- Status as of (newest incorporated evidence): **2026-09-25T18:09:05Z**
+- Newest evidence run: `2026-09-25T18-07-35Z-local-deployment-release-regression` — **PASS (22 suites / 612 collected / 612 passed / 0 failed)**
 
 ## 1. Code and release identity
 
@@ -17,8 +17,8 @@
 |---|---|
 | Repository | https://github.com/Nerd0008/mukund-chief-control-plane.git |
 | Branch | main |
-| Authoring HEAD | `6cbb573aaaf90cd32bd69b819c96d38a1cae642e` |
-| Verified evidence SHA | `6cbb573aaaf90cd32bd69b819c96d38a1cae642e` |
+| Authoring HEAD | `305efb95342a567f7b3b7df7f84ddddaf6444d94` |
+| Verified evidence SHA | `305efb95342a567f7b3b7df7f84ddddaf6444d94` |
 | Supported Python | 3.11.16 |
 | Unsupported | 3.14.x |
 | Dependency manifest / lock | `requirements.txt` / `requirements.lock` |
@@ -63,11 +63,11 @@ Source: `audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/ros
 ## 4. Regression evidence (newest verification run)
 
 - Suites: **22 run / 22 passed / 0 failed / 0 unavailable**
-- Tests: **606 collected / 606 passed / 0 failed**
-- Code SHA: `6cbb573aaaf90cd32bd69b819c96d38a1cae642e`
-- Interpreter: 3.11.16 (CPython; the isolated pinned-interpreter reproducibility run remains recorded below)
-- Source: `audits/evidence/2026-09-24T21-09-18Z-e3-provider-verification-regression/evidence.json`
-- Current run: 22 suites / 606 collected / 606 passed / 0 failed at SHA 6cbb573 (this task's post-adapter-correction, post-reconciliation run). Prior runs, reported as measured and never silently rewritten: 22 suites / 606 / 606 at SHA 63cda9b9 (audits/evidence/2026-09-24T15-35-35Z-canonical-status-verification/evidence.json), 21 suites / 583 collected / 583 passed at SHA e9d2195 in a clean isolated CPython 3.11.16 built from requirements.lock (audits/evidence/2026-09-24T15-45-00Z-isolated-release-reproducibility/evidence.json), and 21 suites / 579 collected / 579 passed at SHA 31eecdb (audits/evidence/2026-09-24T03-57-34Z-whole-company-acceptance-final/regression/evidence.json). The count grew 579 -> 583 because the Codex identity contract replaced one incorrect exact-match test with five truthful-contract tests, and 583 -> 606 because the canonical-status consistency suite (23 tests) was added.
+- Tests: **612 collected / 612 passed / 0 failed**
+- Code SHA: `305efb95342a567f7b3b7df7f84ddddaf6444d94`
+- Interpreter: 3.14.6
+- Source: `audits/evidence/2026-09-25T18-07-35Z-local-deployment-release-regression/evidence.json`
+- Current full local release regression. Earlier evidence remains historical.
 
 ## 5. Career discovery state
 
@@ -116,7 +116,7 @@ Known open items:
 - Routable: `codex-cli`, `deepseek-v41-flash`, `google-nano-banana-2`
 - Routable = execution access + implemented adapter + passing smoke test. The three pre-existing workers are routable. All seven newly-credentialed generic API workers are routable=false with smoke_test='FAILED' and qualification='UNPROVEN': credential presence was never treated as routable or qualified, and each refusal is recorded with its exact provider-returned error. E2 linkage was exercised for all seven through the public governor.record_request() interface and every row was read back (status 'error').
 - Owner record: `handovers/2026-09-24-provider-configuration-and-final-closeout-handover.md` — Owner handover recording the manual credential configuration. It is superseded on the credential count by the 2026-09-24T20:54:33Z presence probe (10/10 present) and is preserved as the historical record of the setup plus the explicitly deferred adapter corrections.
-- Source: `audits/evidence/2026-09-24T20-54-33Z-e3-credential-presence-probe/evidence.json` — Presence-only probe: no network call, no credential value read, printed, logged or stored. Re-run at 2026-09-24T20:54:33Z: all seven remaining provider credentials are now present (still_missing_count = 0). This artifact is git-ignored by the repository credential policy, so it is corroboration on the authoring host and is never required to exist in a clean clone. The committed live-identity and bounded-smoke evidence below is the durable record.
+- Source: `audits/evidence/2026-09-25T18-08-01Z-e3-credential-presence-status-sanitized/evidence.json` — Sanitized presence-only evidence: all seven generic API credential entries are present; no provider/network calls, credential values, environment values, or Credential Manager target enumeration are included.
 
 ## 8. Stage 2 state
 
@@ -133,8 +133,8 @@ The post-key sequence ran in full on 2026-09-24 and the override-aware gate was 
 - **State: NOT DEPLOYED** — cutover not authorised.
 - **Architecture:** DEFERRED BY OWNER — no final architecture decision recorded. Recorded preference only: laptop-primary + GitHub control/collaboration plane + VPS watchdog/failover, explicitly not a decision.
 - **VPS details:** NOT PROVIDED (owner dependency)
-- **Preflight:** GO (10 PASS, 1 WARN, 0 FAIL); sole warning: credentials.presence (owner-gated): 7 API worker credential(s) absent
-  - Preflight GO means the preparation is complete and no technical check fails; it is not a readiness-to-cut-over verdict, which remains owner-gated.
+- **Preflight:** GO (10 PASS, 0 WARN, 0 FAIL); sole warning: none
+  - Local deployment preflight rerun after installing the declared dependencies: all checks passed. This does not authorize VPS cutover or enable E3 Stage 2.
 - **Backup/restore drill:** PASS (10 artifacts)
 - Runbook `deployments/07-cutover-runbook.md`, rollback `deployments/08-rollback-and-no-go-checklist.md`, services `deployments/06-service-definitions.md`
 - Inbound network: none required by any Chief/Hermes component (outbound 443 only)

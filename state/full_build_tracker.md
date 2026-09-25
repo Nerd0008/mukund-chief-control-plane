@@ -3,15 +3,15 @@
 <!-- BEGIN GENERATED: executive-status (scripts/status_render.py) -->
 > **Status header is GENERATED** from `status/canonical-status.json` by `python scripts/status_render.py` — do not hand-edit this block.
 
-- **Canonical status as of:** 2026-09-24T21:10:44Z (newest evidence `2026-09-24T21-09-18Z-e3-provider-verification-regression`).
+- **Canonical status as of:** 2026-09-25T18:09:05Z (newest evidence `2026-09-25T18-07-35Z-local-deployment-release-regression`).
 - **Regeneration command:** `python scripts/status_render.py`; **verification:** `python scripts/status_verify.py`.
 - **Executive tracker (generated):** `status/executive-tracker.md`.
-- **Code identity at authoring:** `6cbb573aaaf90cd32bd69b819c96d38a1cae642e` (verified evidence SHA `6cbb573aaaf90cd32bd69b819c96d38a1cae642e`).
+- **Code identity at authoring:** `305efb95342a567f7b3b7df7f84ddddaf6444d94` (verified evidence SHA `305efb95342a567f7b3b7df7f84ddddaf6444d94`).
 - **Roster:** 50 items — 47 PASS, 3 READY_NEEDS_OWNER_CONFIG, 0 BLOCKED_EXTERNAL.
 - **Provider credentials:** 10 / 10 present.
 - **Stage 2:** NOT ENABLED. **Deployment:** NOT DEPLOYED; cutover not authorised.
 - **Production blockers (8):** `provider-execution-blocked`, `stage2-not-enabled`, `live-provider-failover-gap`, `deployment-cutover-decision`, `offsite-backup-absent`, `reboot-persistence-unverified`, `laptop-trust-audit`, `unattended-interactive-token`.
-- **Latest regression:** 22 suites / 606 tests, 606 passed, 0 failed, 0 unavailable.
+- **Latest regression:** 22 suites / 612 tests, 612 passed, 0 failed, 0 unavailable.
 
 The narrative lanes, truth defects and per-task detail below remain the historical record and are
 not regenerated.
