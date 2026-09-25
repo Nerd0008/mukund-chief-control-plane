@@ -1,0 +1,63 @@
+{
+  "task_id": "agent-codex-cli-smoke-2026-09-25",
+  "created_at": "2026-09-25T06:08:00Z",
+  "objective": "Run one fresh harmless smoke test of the existing Codex CLI worker on Mukund's local Hermes host and report whether it actually executes successfully now. This is a verification-only task: do not change provider configuration, do not enable E3 Stage 2, and do not perform unrelated implementation work.",
+  "authority": "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md",
+  "priority": "critical",
+  "requires_owner_approval": false,
+  "allowed_scope": [
+    "Inspect current main and verify no real agent-* worker owns the shared worktree before starting.",
+    "Use the existing exec-brain Codex CLI adapter/resolver; do not rewrite it unless the smoke cannot run because of a newly proven local-path defect.",
+    "Confirm Codex CLI executable/version and authentication presence without reading or exposing secret/token values.",
+    "Run exactly ONE harmless non-interactive Codex execution with the instruction: Reply exactly CODEX_SMOKE_OK",
+    "Use the existing safe execution profile and keep the call bounded. No retries.",
+    "Record only sanitized evidence: resolved executable path/version, exit code, final assistant message, runtime, provider/model identity only if directly exposed, provider-returned usage only if exposed, and E2 linkage result if the adapter records one.",
+    "A smoke PASS proves execution readiness only. Do not change qualification from UNPROVEN on smoke alone.",
+    "If the smoke fails, record the exact sanitized failure class/message and stop; do not loop or spend another Codex execution.",
+    "Return a strict terminal result and allow the queue system to move this task to completed or blocked."
+  ],
+  "stop_conditions": [
+    "Exactly one Codex execution maximum.",
+    "Do not expose or log credentials, tokens, cookies, private chain-of-thought, or raw secret-store contents.",
+    "Do not enable E3 Stage 2 or change production dispatch.",
+    "Do not run broad regressions or unrelated provider tests.",
+    "If login/account/subscription action is required, return blocked with the owner action instead of retrying."
+  ],
+  "status": "completed",
+  "completed_at": "2026-09-25T06:15:41.966891Z",
+  "result": {
+    "status": "completed",
+    "summary": "One fresh bounded smoke of the existing Codex CLI worker PASSED: exactly one non-interactive `codex exec --json` (existing exec-brain adapter, unchanged, safe workspace-write profile, isolated scratch cwd, 180s bound) returned exit code 0, status COMPLETED, final assistant message exactly 'CODEX_SMOKE_OK' in 7.80s (dispatch codex-15356c594d58, thread 01a0d732-7f48-7370-bdec-08231bc7d236). Resolved executable %LOCALAPPDATA%\\hermes\\node\\codex.CMD, version codex-cli 0.156.1 (host CLI updated since the 2026-09-23 record of 0.155.0-alpha.16.3); health healthy. Authentication is present (doctor: auth configured, mode chatgpt, storage File, stored API key false; login store present with content never read) \u2014 no credential/token value was read, logged, or committed. Provider identity is exposed as openai (observed via network.websocket_reachability); served model remains UNKNOWN (server model present=false) and the config declaration gpt-5.6-terra is recorded only as configured_model. Provider-returned usage WAS exposed and captured this run (19201 input / 12032 cached / 9 output tokens). E2 linkage VERIFIED via the public governor.record_request() interface as obs-20260925-39ed6ee5 with a read-only read-back (provider openai-codex-cli, status success, latency 7799ms). Pre-flight: single git worktree on main, no agent-* worker process running, no other real task in remote-queue/running. No provider configuration was changed, E3 Stage 2 was not enabled, qualification remains UNPROVEN, and routable is asserted only on execution readiness + verified E2 linkage. One adapter defect was newly proven and deliberately NOT fixed (verification-only scope, and the single permitted execution was already spent): report_usage_to_e2() reads result['usage'] while dispatch() returns usage under result['usage_tokens'], so the E2 row carries NULL token columns despite exposed usage. Sanitized evidence at audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/ (evidence.json, evidence.md, codex-exec-jsonl.jsonl, e2-readback.json, run_codex_smoke.py, e2_readback.py); commit 38eea20 pushed to origin/main.",
+    "owner_action_required": null,
+    "blocker_category": null,
+    "commits": [
+      "38eea20 evidence: fresh Codex CLI smoke PASS (readiness only) with E2 linkage \u2014 pushed to origin/main (HEAD == origin/main == 38eea20ce7e5278ff37ce48c8bfb88605bf5888d)"
+    ],
+    "tests": [
+      "Codex smoke (exactly ONE non-interactive codex exec --json, safe profile, isolated scratch cwd, timeout 180s, objective 'Reply exactly CODEX_SMOKE_OK'): PASS \u2014 exit_code=0, status=COMPLETED, final_message='CODEX_SMOKE_OK' (exact match), runtime 7.80s, no retries, no error item",
+      "Codex resolver + health (existing adapter, unchanged): resolved %LOCALAPPDATA%\\hermes\\node\\codex.CMD, codex-cli 0.156.1, status healthy",
+      "Codex auth presence (codex doctor --json + scripts/codex_identity_contract_check.py): auth configured=true, mode chatgpt, storage File, stored API key false, login store present=True (content never read) \u2014 no secret value accessed",
+      "exec-brain/tests/test_e3.py -k Codex (bounded, codex-specific only; no broad regression per task scope): 10 passed / 49 deselected / exit 0",
+      "E2 linkage read-back (governor.db opened read-only, no SQL write): obs-20260925-39ed6ee5 present, provider=openai-codex-cli, status=success, latency_ms=7799; token columns NULL \u2014 see recorded defect"
+    ],
+    "changed_files": [
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/evidence.json",
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/evidence.md",
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/e2-readback.json",
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/codex-exec-jsonl.jsonl",
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/run_codex_smoke.py",
+      "audits/evidence/2026-09-25T06-13-15Z-codex-cli-smoke/e2_readback.py",
+      "state/current_company_state.md",
+      "tasks-or-issues/e3-codex-smoke-test-after-limit-reset.md"
+    ],
+    "remaining": [
+      "Fix the proven adapter defect in a separate task: exec-brain/codex_adapter.py report_usage_to_e2() reads result['usage'] but dispatch() returns result['usage_tokens'] (codex_adapter.py:562 vs :347), so E2 rows carry NULL input/output tokens despite provider-exposed usage. One-line key fix plus a unit test asserting the E2 payload carries the exposed token values, verifiable offline from the recorded JSONL fixture with no Codex spend.",
+      "The E2 row obs-20260925-39ed6ee5 keeps NULL token columns; the true provider-reported values (19201 in / 9 out / 12032 cached) are recorded in evidence only. Do not create a duplicate row without owner/architecture direction.",
+      "Codex qualification remains UNPROVEN \u2014 no cold-start / task-role benchmark evidence exists; the smoke PASS proves execution readiness only, and routable=false/true must not be treated as qualification.",
+      "Served model identity remains UNKNOWN: the CLI reports server model present=false; do not promote configured_model gpt-5.6-terra to observed execution identity.",
+      "The stderr stream was non-empty but its text was not persisted by this run's capture (terminal status COMPLETED, exit 0, no error item); if stderr content matters later, capture it in the next bounded Codex run rather than re-spending a call for it now.",
+      "Docs drift to reconcile at the next documentation step: docs/SETUP.md records the authoring-host CLI as 0.155.0-alpha.16.3 and states the Codex CLI exposes no usage; this host is now 0.156.1 and usage is exposed on turn.completed.",
+      "The run-smoke script resolves a one-off: the queue system should advance this task record from remote-queue/running to completed/blocked \u2014 it was intentionally left untouched as immutable execution input."
+    ]
+  }
+}
