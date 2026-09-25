@@ -57,6 +57,12 @@ ADAPTER_MODULES: Dict[str, Dict[str, Any]] = {
         "provider": "google",
         "kwargs": {},
     },
+    "longcat-2.0": {
+        "module": "generic_openai_adapter",
+        "class": "GenericOpenAIAdapter",
+        "provider": "longcat",
+        "kwargs": {"provider_key": "longcat"},
+    },
 }
 
 
@@ -188,6 +194,26 @@ class ExecutionAdapterRegistry:
         self._instances: Dict[str, Any] = {}
 
     # ── routing truth ───────────────────────────────────────────────
+    @staticmethod
+    def _stage2_worker_allowed(worker_id: str) -> bool:
+        """Enforce the local Stage 2 allowlist whenever Stage 2 is enabled.
+
+        Test/rehearsal environments with no enablement record retain their
+        existing behavior; an enabled production state fails closed when the
+        worker is absent from allowed_workers.
+        """
+        try:
+            from stage2_control import read_state
+            state = read_state()
+        except Exception:
+            return True
+        if not state.get("enabled"):
+            return True
+        allowed = state.get("allowed_workers")
+        if not isinstance(allowed, list):
+            return False
+        return worker_id in allowed
+
     def is_routable(self, worker_id: str) -> bool:
         """True only for workers the registry reports routable AND that have a
         real execution binding (smoke PASS + E2 linkage + adapter)."""
@@ -195,6 +221,8 @@ class ExecutionAdapterRegistry:
         if not worker:
             return False
         if not worker.get("routable"):
+            return False
+        if not self._stage2_worker_allowed(worker_id):
             return False
         return worker_id in self._factories or worker_id in self.bindings
 
