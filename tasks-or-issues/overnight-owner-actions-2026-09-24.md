@@ -544,3 +544,13 @@ Mukund also directed the project to remain **local-only for now**. VPS architect
 This closes Tencent credential/authentication as a provider-execution blocker. It does not establish broad provider readiness, alter the remaining provider-account blockers, qualify any worker beyond the recorded evidence, or enable E3 Stage 2.
 
 **LongCat 2.0:** partial live evidence only. After the owner account change, one bounded smoke reached the configured model and returned HTTP 200 plus provider usage (31 total tokens); the response ended `finish_reason=length` at the 16-token cap, so the strict single-word completion condition did not pass. Catalogue observation confirmed `LongCat-2.0` exists. The result proves endpoint/auth/quota reachability for that call but does not qualify the worker or mark the smoke complete. Evidence: `audits/evidence/2026-09-25T16-30-00Z-longcat-smoke/`.
+
+**LongCat 2.0 correction:** the earlier capped result was caused by LongCat's default
+reasoning mode consuming the deliberately tiny smoke budget before visible content was
+emitted. The bounded compatibility probe now sends LongCat's documented
+`thinking: {"type": "disabled"}` request option for its fixed one-word check only;
+ordinary worker contracts retain LongCat's provider default. One fresh, single-attempt
+16-token smoke then completed with HTTP 200, returned `LongCat-2.0`, returned `READY`
+with finish reason `stop`, and recorded provider-returned usage plus E2 linkage.
+Evidence: `audits/evidence/2026-09-25T16-45-00Z-longcat-thinking-disabled-smoke/`.
+This resolves the strict smoke failure but does not by itself enable E3 Stage 2.

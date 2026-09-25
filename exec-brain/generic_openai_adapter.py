@@ -355,6 +355,13 @@ class GenericOpenAIAdapter:
             "max_tokens": max_tokens,
             "temperature": temperature,
         }
+        # Provider-specific options are opt-in per contract.  They are never
+        # inferred from a worker id and normal execution keeps provider defaults.
+        provider_options = contract.get("provider_request_options") or {}
+        if not isinstance(provider_options, dict):
+            return self._error_result(dispatch_id, contract_id, objective, model,
+                                      "invalid_provider_request_options", timeout)
+        payload.update(provider_options)
 
         key, source = self._resolve_auth()
         if not key:

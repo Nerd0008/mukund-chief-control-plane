@@ -99,6 +99,12 @@ def probe_worker(worker_id: str) -> dict:
         "temperature": 0.0,
         "timeout": TIMEOUT,
     }
+    # LongCat enables reasoning by default.  With this smoke's deliberately
+    # tiny 16-token budget that can exhaust the response before user-visible
+    # content is emitted.  Disable reasoning only for this fixed one-word
+    # compatibility probe; normal worker contracts retain provider defaults.
+    if worker_id == "longcat-2.0":
+        contract["provider_request_options"] = {"thinking": {"type": "disabled"}}
     result = adapter.dispatch(contract)
     meta = result.get("dispatch_metadata") or {}
     content = result.get("content")
