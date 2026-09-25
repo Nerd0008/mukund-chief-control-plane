@@ -1411,3 +1411,4 @@ error: Please commit or stash them.
 [2026-09-25T17:32:04.903806Z] git pull: success (with stash/restore)
 [2026-09-25T17:32:07.463652Z] Claimed task: agent-glm-53-flash-smoke-retry-2026-09-25
 [2026-09-25T17:32:07.466649Z] Handling task: agent-glm-53-flash-smoke-retry-2026-09-25 (attempt 1)
+[2026-09-25T17:35:13.439367Z] Task agent-glm-53-flash-smoke-retry-2026-09-25 attempt 1/3: park (blocker_category='external_provider' is deterministic; park until the blocking state changes)

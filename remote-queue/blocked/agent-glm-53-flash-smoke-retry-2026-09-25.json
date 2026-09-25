@@ -21,7 +21,7 @@
     "No Stage 2 enablement.",
     "If provider still refuses traffic, record the exact sanitized blocker and stop."
   ],
-  "status": "pending",
+  "status": "blocked",
   "execution_attempts": [
     {
       "attempt": 1,
@@ -42,5 +42,11 @@
     "last_summary": "One fresh bounded smoke of the existing glm-53-flash worker was run exactly once through the deployed generic OpenAI-compatible adapter (api_model_id=glm-5.3-flash, max_tokens=16, single attempt, no retry) and the provider still refuses traffic: HTTP 429 'Insufficient balance or no resource package. Please recharge.'. The stored credential is present (presence-only check; value never read, printed or stored) and the endpoint answered (read-only GET /models = 200, 11 models, glm-5.3-flash present), so endpoint/credential/model mapping remain verified, but no completion was served: no returned model field, no finish reason, no provider usage (usage null, never estimated), runtime 0.500s. E2 linkage was recorded through the public governor interface (governor.record_request) as obs-20260925-50e4ab40 with status=error and the provider error code; connection/chain verification returned clean. The smoke did NOT succeed, so GLM execution truth was left unchanged per scope: routable=false, smoke_test=FAILED, qualification UNPROVEN \u2014 no PASS is claimed. No secret value appears in the repository, logs, queue records or this report (verified by scan of the committed diff and evidence files). E3 Stage 2 was not touched or enabled, and no other provider or unrelated file was modified.",
     "next_action": "park",
     "reason": "blocker_category='external_provider' is deterministic; park until the blocking state changes"
+  },
+  "blocked_at": "2026-09-25T17:35:13.451887Z",
+  "blocker": {
+    "category": "external_provider",
+    "owner_action_required": "Confirm the Z.ai payment landed on THIS API account (the one whose key is stored as credential target 'glm') and that it added API pay-as-you-go balance or a purchased resource package usable by glm-5.3-flash on https://api.z.ai/api/paas/v4 \u2014 a subscription/consumer top-up, or a payment made on a different Z.ai/BigModel account or region, would not clear this HTTP 429. Once confirmed, request one fresh bounded GLM smoke.",
+    "continue_without": "Independent safe work may continue"
   }
 }
