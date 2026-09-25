@@ -574,3 +574,10 @@ the provider returned `MiniMax-M3`, supplied a `stop` completion with the requir
 rejection as the current execution result. Evidence:
 `audits/evidence/2026-09-25T17-15-00Z-minimax-m3-recheck-2/`. It does not enable
 E3 Stage 2 or qualify the rest of the provider roster.
+
+**GLM-5.3 Flash:** one bounded deployed-adapter smoke reached the configured endpoint
+and stored credential but received HTTP 429: `Insufficient balance or no resource
+package. Please recharge.` E2 recorded the failed attempt; no retry was made. The
+exact remaining owner action is to add GLM account credit or an eligible resource
+package, then request a fresh bounded smoke. Evidence:
+`audits/evidence/2026-09-25T17-25-00Z-glm-53-flash-smoke/`.
