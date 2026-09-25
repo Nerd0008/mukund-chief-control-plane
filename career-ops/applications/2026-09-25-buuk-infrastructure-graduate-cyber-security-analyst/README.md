@@ -67,3 +67,47 @@ Woolpit, Suffolk head office.
 Standing rule: whenever the owner supplies a CV and a JD together, the role is recorded
 as **Applied** in the canonical regional tracker with the date of supply as the date
 applied, and the CV + JD are archived in a package directory under `career-ops/applications/`.
+
+## CV tailoring (2026-09-25)
+
+Owner instruction: *"change what you need in the CV, it's the master CV which you can change
+based on JD but maintain format exactly as this to the same pixels and character count
+similar where it doesn't affect any spacing or format issues."*
+
+Applied the established redact-and-retypeset method (`career-ops/cv_tailor.py`) rather than
+regenerating the CV from HTML, because the master is a fixed-geometry document: A4
+595.5 x 850.5 pt, Times New Roman throughout, every line on an absolute baseline.
+
+**Nine text elements changed, all in place — no element moved, no line re-wrapped into a
+different structure.**
+
+| # | Element | Change |
+|---|---|---|
+| 1-3 | Professional Summary | Re-targeted from "seeking a cybersecurity internship" to a graduate cyber security analyst role; now leads on security operations, alert investigation, governance, risk and data protection |
+| 4 | Security Analysis | "Phishing analysis, ..." -> "Alert triage, phishing analysis, Windows Event Logs, MITRE ATT&CK" |
+| 5 | Systems & Support | "endpoint configuration" -> "Active Directory, account administration" |
+| 6 | Skills label | "Framework Familiarity:" -> "Governance & Privacy:" |
+| 7 | Framework list | "ISO27001, Cyber Essentials, GDPR, NIST CSF" -> "ISO 27001, UK GDPR, NIST CSF, Cyber Essentials" |
+| 8 | Communication & Support | leads with "Documentation", adds "policy compliance" |
+| 9 | Colourful Aura bullet 2 | leads with "Triage and investigate" |
+
+**Verification (report: `cv_tailor_report.json`)**
+
+- All 9 edits within the +/-15% character budget and within the measured rendered width of
+  each line (script refuses to write otherwise).
+- 72 untouched spans: all re-read after the write, identical in text, position, font and size.
+- Page geometry unchanged: 595.5 x 850.5 pt, 1 page, 81 -> 81 spans.
+- Pixel diff against the master at 150 dpi: **2.077% of page pixels differ**, and every
+  changed band maps to an edited line (summary y 74-110, skills y 131-151 and y 176-197,
+  bullet y 359-368). Nothing else on the page moved.
+- Non-breaking spaces: 4 before, 4 after (parity with the master; inserted text was CMap-
+  normalised so no new U+00A0 entered the document).
+
+**Outputs**
+
+- `cv_tailored_buuk.pdf` (this package)
+- `C:\Users\mukun\Downloads\codex\_CVs\Mukund_Didwania_BUUK_Infrastructure_Graduate_Cyber_Security_Analyst_CV.pdf`
+- `cv_edits.json` — the edit specification, replayable
+- `preview/before.png`, `preview/after.png`, `preview/side_by_side.png`, `preview/diff_mask.png`
+- `cv_tailor_report.json` — measurements, verification, provenance
+

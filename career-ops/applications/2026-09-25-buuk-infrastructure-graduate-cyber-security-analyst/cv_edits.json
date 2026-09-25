@@ -1,0 +1,43 @@
+{
+  "purpose": "BUUK Infrastructure Graduate Cyber Security Analyst tailoring",
+  "master": "Mukund_CV.pdf supplied by owner 2026-09-25",
+  "constraint": "layout preserved: each edit keeps its span origin, font, size; +/-15% chars and rendered-width gate",
+  "edits": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "Information Security MSc graduate (Merit) with CompTIA Security+ and ISC2 CC, targeting a graduate cyber security"
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "analyst role spanning security operations, alert investigation, governance, risk and data protection. Practical "
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "exposure to access control, phishing analysis and operational risk assessment, supported by three security projects."
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Alert triage, phishing analysis, Windows Event Logs, MITRE ATT&CK"
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, Active Directory, account administration"
+    },
+    {
+      "find": "Framework Familiarity: ",
+      "replace": "Governance & Privacy: "
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "ISO 27001, UK GDPR, NIST CSF, Cyber Essentials "
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "Documentation, user support, stakeholder coordination, policy compliance"
+    },
+    {
+      "find": "• Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting ",
+      "replace": "• Triage and investigate 4–5 suspicious emails daily, checking sender and link domains, documenting findings and alerting "
+    }
+  ]
+}
