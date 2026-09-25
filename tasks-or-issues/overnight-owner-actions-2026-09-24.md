@@ -587,3 +587,10 @@ and stored credential but received HTTP 429 `Rate limit exceeded`. E2 recorded t
 failed attempt; no retry was made. The exact remaining owner action is to wait for or
 increase the Mistral account's usable API rate/tier, then request one fresh bounded
 smoke. Evidence: `audits/evidence/2026-09-25T17-35-00Z-mistral-small-smoke/`.
+
+**Mistral Small current result:** PASS. A fresh bounded smoke completed with HTTP 200;
+the provider returned `mistral-small-latest`, supplied the required `READY` completion
+with finish reason `stop`, and E2 linkage was recorded. This supersedes the earlier
+rate-limit result as the current execution evidence. Evidence:
+`audits/evidence/2026-09-25T17-45-00Z-mistral-small-recheck/`. It does not enable
+E3 Stage 2 or qualify the remaining provider roster.
