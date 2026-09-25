@@ -560,3 +560,10 @@ and credential but received HTTP 402, provider error `insufficient balance (1008
 The failed attempt was recorded through E2; no retry was performed. The exact
 remaining owner action is to add MiniMax API balance, then request a new bounded
 smoke. Evidence: `audits/evidence/2026-09-25T16-55-00Z-minimax-m3-smoke/`.
+
+**MiniMax M3 recheck:** the current stored credential was rejected with HTTP 401
+(`authorized_error`, error code 1004), before a balance condition could be evaluated.
+The prior balance observation remains historical; the current first blocker is to
+replace the MiniMax API secret in the credential store with an active API key, then
+request one fresh bounded smoke. E2 recorded this failed attempt; no retry was made.
+Evidence: `audits/evidence/2026-09-25T17-05-00Z-minimax-m3-recheck/`.
