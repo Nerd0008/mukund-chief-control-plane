@@ -5,7 +5,7 @@
   "last_by_region": {
     "dubai": {
       "applied": false,
-      "at": "2026-09-24T13:47:57+00:00",
+      "at": "2026-09-24T15:18:01+00:00",
       "counts": {
         "appended": 0,
         "data_rows_after": null,
@@ -26,7 +26,7 @@
     },
     "japan": {
       "applied": false,
-      "at": "2026-09-24T13:48:02+00:00",
+      "at": "2026-09-24T15:18:05+00:00",
       "counts": {
         "appended": 0,
         "data_rows_after": null,
@@ -46,13 +46,13 @@
       "verification_ok": false
     },
     "singapore": {
-      "applied": false,
-      "at": "2026-09-24T13:48:05+00:00",
+      "applied": true,
+      "at": "2026-09-24T15:18:07+00:00",
       "counts": {
-        "appended": 0,
-        "data_rows_after": null,
-        "data_rows_before": 23,
-        "duplicates": 1,
+        "appended": 1,
+        "data_rows_after": 23,
+        "data_rows_before": 22,
+        "duplicates": 0,
         "input": 1,
         "refreshed": 0,
         "rejected": 0
@@ -61,14 +61,14 @@
       "mode": "apply",
       "problems": 0,
       "region": "singapore",
-      "result": "no-op",
-      "status": "no-op",
+      "result": "ok",
+      "status": "ok",
       "tracker_filename": "Singapore_Cybersecurity_Job_Tracker.xlsx",
-      "verification_ok": false
+      "verification_ok": true
     },
     "uk": {
       "applied": true,
-      "at": "2026-09-24T13:54:36+00:00",
+      "at": "2026-09-25T19:09:50+00:00",
       "counts": {
         "appended": 1,
         "data_rows_after": 35,
@@ -90,7 +90,7 @@
   },
   "last_run": {
     "applied": true,
-    "at": "2026-09-24T13:54:36+00:00",
+    "at": "2026-09-25T19:09:50+00:00",
     "counts": {
       "appended": 1,
       "data_rows_after": 35,
@@ -111,9 +111,9 @@
   },
   "owns": "deduplicated append into a canonical regional workbook",
   "roster": "B08",
-  "runs_recorded": 124,
+  "runs_recorded": 165,
   "schema_version": 1,
   "title": "Excel Tracker Writer",
-  "updated_at": "2026-09-24T13:54:36+00:00",
+  "updated_at": "2026-09-25T19:09:50+00:00",
   "worker": "career-ops/tracker_writer.py"
 }

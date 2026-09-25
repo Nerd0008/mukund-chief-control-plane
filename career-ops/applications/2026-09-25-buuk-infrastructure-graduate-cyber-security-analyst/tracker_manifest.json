@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-09-25",
+      "company": "BUUK Infrastructure",
+      "title": "Graduate Cyber Security Analyst",
+      "location": "Woolpit, Suffolk (head office); Bury St Edmunds; travel between company locations",
+      "salary": "\u00a333,270",
+      "url": "https://careers.bu-uk.co.uk/job/Graduate-Cyber-Security-Analyst/1523-en_GB",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated",
+      "work_authorisation_risk": "Low for the role term; no sponsorship/citizenship requirement stated. Graduate visa valid to 23 Dec 2027; future sponsorship not addressed by the employer.",
+      "key_gap": "Desirable-only: no evidenced M365 / Azure / Microsoft Sentinel / Defender / Entra ID exposure. Role is otherwise GRC-and-operations weighted, which matches existing evidence.",
+      "recommendation": "Apply before the 09/10/2026 posting end date. Three-stage process (telephone interview then Assessment Centre at Woolpit on Thu 3 Dec 2026). Owner-supplied JD and CV assessed 2026-09-25: eligibility clean, degree requirement exceeded (MSc Information Security, Merit), both named desirable certifications held (CompTIA Security+, ISC2 CC). No prior full-time cyber security experience required by the JD.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD PDF and CV provided by owner via Discord 2026-09-25; official ATS URL verified live by Chief 2026-09-25.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
