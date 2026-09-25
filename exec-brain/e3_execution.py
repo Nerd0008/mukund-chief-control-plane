@@ -183,7 +183,8 @@ class ExecutionAdapterRegistry:
     def __init__(self, worker_registry: Any = None,
                  adapter_factories: Optional[Dict[str, Callable[[], Any]]] = None,
                  usage_reporters: Optional[Dict[str, Callable[[Dict[str, Any]], Optional[str]]]] = None,
-                 bindings: Optional[Dict[str, Dict[str, Any]]] = None):
+                 bindings: Optional[Dict[str, Dict[str, Any]]] = None,
+                 allowed_workers: Optional[List[str]] = None):
         if worker_registry is None:
             from worker_registry import WorkerRegistry
             worker_registry = WorkerRegistry()
@@ -192,28 +193,10 @@ class ExecutionAdapterRegistry:
         self._factories = dict(adapter_factories or {})
         self._usage_reporters = dict(usage_reporters or {})
         self._instances: Dict[str, Any] = {}
+        self.allowed_workers = (None if allowed_workers is None
+                                else set(allowed_workers))
 
     # ── routing truth ───────────────────────────────────────────────
-    @staticmethod
-    def _stage2_worker_allowed(worker_id: str) -> bool:
-        """Enforce the local Stage 2 allowlist whenever Stage 2 is enabled.
-
-        Test/rehearsal environments with no enablement record retain their
-        existing behavior; an enabled production state fails closed when the
-        worker is absent from allowed_workers.
-        """
-        try:
-            from stage2_control import read_state
-            state = read_state()
-        except Exception:
-            return True
-        if not state.get("enabled"):
-            return True
-        allowed = state.get("allowed_workers")
-        if not isinstance(allowed, list):
-            return False
-        return worker_id in allowed
-
     def is_routable(self, worker_id: str) -> bool:
         """True only for workers the registry reports routable AND that have a
         real execution binding (smoke PASS + E2 linkage + adapter)."""
@@ -222,7 +205,7 @@ class ExecutionAdapterRegistry:
             return False
         if not worker.get("routable"):
             return False
-        if not self._stage2_worker_allowed(worker_id):
+        if self.allowed_workers is not None and worker_id not in self.allowed_workers:
             return False
         return worker_id in self._factories or worker_id in self.bindings
 
