@@ -198,6 +198,31 @@ class TestExecutorPersistence(unittest.TestCase):
         self.assertEqual(read["evidence"][0]["final_success"], 1)
         self.assertEqual(read["evidence"][0]["first_pass_success"], 1)
 
+    def test_verified_content_is_opt_in_for_gateway_consumers(self):
+        adapter = FakeAdapter(["gateway-visible"])
+        fp, plan, dag = _plan_and_dag()
+        node_id = plan["nodes"][0]["node_id"]
+        from e3_team_assembly import TeamAssignment
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(
+            node_id, "deepseek-v41-flash", "builder", "HIGH", "unit-test"))
+        assembly.complete = True
+
+        execu = E3ProductionExecutor(self.store, _registry(adapter))
+        run = execu.execute_plan(
+            plan, dag, assembly, fp, "task",
+            verification_test_cases_by_node={
+                node_id: [{"name": "c", "field": "content_present",
+                           "expected": True}]},
+            role_by_node=self._role_by_node(plan),
+            return_verified_content=True,
+        )
+        self.assertEqual(run["outcome"], "EXECUTION_COMPLETE")
+        self.assertEqual(run["verified_outputs"][0]["content"], "gateway-visible")
+        self.assertEqual(run["verified_outputs"][0]["final_verification"], "PASS")
+        # Existing node/audit payload remains content-redacted.
+        self.assertNotIn("output", run["nodes"][0])
+
     def test_rejection_triggers_repair_and_reverification(self):
         adapter = FakeAdapter(["not-validated", "validated"])
         fp, plan, dag = _plan_and_dag()
