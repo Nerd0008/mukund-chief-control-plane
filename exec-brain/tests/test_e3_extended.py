@@ -5,6 +5,8 @@ import os
 import sqlite3
 import tempfile
 import unittest
+import importlib.util
+from types import SimpleNamespace
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -587,6 +589,126 @@ class TestExplorationRules(unittest.TestCase):
         self.assertTrue(shadow.can_shadow("R0", True))
         self.assertFalse(shadow.can_shadow("R2", True))
         self.assertFalse(shadow.can_shadow("R0", False))
+
+
+class TestE3RouterDeterministicSelection(unittest.TestCase):
+    """The selector must use roster identity/task fit, not SQL insertion order."""
+
+    class _Workers:
+        def __init__(self):
+            self.rows = {
+                "generic-first": {
+                    "worker_id": "generic-first", "provider": "generic",
+                    "model": "generic-model", "api_model_id": "generic-model",
+                    "routable": True, "capability_hints": ["reasoning"],
+                },
+                "code-fit": {
+                    "worker_id": "code-fit", "provider": "code-provider",
+                    "model": "code-model", "api_model_id": "code-model-v2",
+                    "routable": True,
+                    "capability_hints": ["coding", "repository", "debugging"],
+                },
+            }
+
+        def get_worker(self, worker_id):
+            return self.rows.get(worker_id)
+
+    def test_task_fit_beats_insertion_order_and_identity_is_real(self):
+        con = sqlite3.connect(":memory:")
+        init_db(con)
+        reg = CapabilityRegistry(con)
+        # Deliberately insert the generic worker first.
+        reg.register_worker("generic-first", "generic", "generic-model",
+                            roles=["builder"], state="EVALUATING",
+                            task_family="code")
+        reg.register_worker("code-fit", "code-provider", "code-model",
+                            roles=["builder"], state="EVALUATING",
+                            task_family="code")
+        router = E3Router(reg, worker_registry=self._Workers())
+        node = {"capability_roles": ["builder"]}
+        candidates = router.propose_candidates(node, "code")
+        self.assertEqual([c.worker_id for c in candidates][:2],
+                         ["code-fit", "generic-first"])
+        self.assertEqual(candidates[0].provider, "code-provider")
+        self.assertEqual(candidates[0].model, "code-model-v2")
+        self.assertGreater(candidates[0].score, candidates[1].score)
+        self.assertIn("score=", candidates[0].concise_rationale)
+        con.close()
+
+
+class TestDiscordE3Bridge(unittest.IsolatedAsyncioTestCase):
+    """Authorized Discord traffic is handled by E3 and native Hermes is skipped."""
+
+    @staticmethod
+    def _load_bridge():
+        repo_root = Path(__file__).resolve().parents[2]
+        path = repo_root / "hermes-plugins" / "e3-discord-router" / "__init__.py"
+        spec = importlib.util.spec_from_file_location("test_e3_discord_router", path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        spec.loader.exec_module(module)
+        return module
+
+    async def test_authorized_discord_message_is_sent_then_skipped(self):
+        bridge = self._load_bridge()
+        bridge._run_e3_sync = lambda text, context: {
+            "ok": True,
+            "content": "E3 says hello",
+            "workers": ["longcat-2.0"],
+            "family": "other",
+            "role": "builder",
+        }
+
+        class Adapter:
+            def __init__(self):
+                self.sent = []
+            async def send(self, chat_id, content, reply_to=None, metadata=None):
+                self.sent.append((chat_id, content, reply_to))
+                return SimpleNamespace(success=True)
+
+        class Store:
+            def __init__(self):
+                self.rows = []
+            def get_or_create_session(self, source):
+                return SimpleNamespace(session_id="sid-1")
+            def load_transcript(self, session_id):
+                return [{"role": "assistant", "content": "prior"}]
+            def append_to_transcript(self, session_id, message, skip_db=False):
+                self.rows.append((session_id, message))
+
+        platform = SimpleNamespace(value="discord")
+        source = SimpleNamespace(platform=platform, chat_id="chan-1")
+        event = SimpleNamespace(source=source, text="hello", message_id="msg-1")
+        adapter = Adapter()
+        gateway = SimpleNamespace(
+            adapters={platform: adapter},
+            _is_user_authorized_for_source=lambda src: True,
+        )
+        store = Store()
+
+        result = await bridge._handle_gateway_message(
+            event, gateway, store)
+
+        self.assertEqual(result["action"], "skip")
+        self.assertEqual(result["reason"], "handled-by-e3")
+        self.assertEqual(len(adapter.sent), 1)
+        self.assertIn("E3 says hello", adapter.sent[0][1])
+        self.assertIn("longcat-2.0", adapter.sent[0][1])
+        self.assertEqual([row[1]["role"] for row in store.rows],
+                         ["user", "assistant"])
+
+    async def test_unauthorized_message_falls_through_to_hermes_auth(self):
+        bridge = self._load_bridge()
+        platform = SimpleNamespace(value="discord")
+        source = SimpleNamespace(platform=platform, chat_id="chan-1")
+        event = SimpleNamespace(source=source, text="hello", message_id="msg-1")
+        gateway = SimpleNamespace(
+            adapters={},
+            _is_user_authorized_for_source=lambda src: False,
+        )
+        result = await bridge._handle_gateway_message(
+            event, gateway, SimpleNamespace())
+        self.assertIsNone(result)
 
 
 class TestColdStartBenchmark(unittest.TestCase):
