@@ -128,7 +128,10 @@ class E3ShadowOrchestrator:
         if db_path:
             self._connect()
             self.capability_registry = CapabilityRegistry(self.con)
-            self.router = E3Router(self.capability_registry)
+            self.router = E3Router(
+                self.capability_registry,
+                worker_registry=self.worker_registry,
+            )
 
     def _connect(self):
         """Connect to orchestration DB."""
@@ -443,6 +446,7 @@ class E3ShadowOrchestrator:
             adapter_registry: Optional[Any] = None,
             repair_objective_builder: Optional[Any] = None,
             role_by_node: Optional[Dict[str, str]] = None,
+            return_verified_content: bool = False,
     ) -> Dict[str, Any]:
         """Run the full E3 pipeline *including* the production execution leg.
 
@@ -542,6 +546,7 @@ class E3ShadowOrchestrator:
                 max_repair_attempts=max_repair_attempts,
                 dispatch_timeout=dispatch_timeout,
                 role_by_node=role_by_node,
+                return_verified_content=return_verified_content,
             )
         finally:
             store.close()
