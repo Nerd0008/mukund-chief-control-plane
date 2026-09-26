@@ -509,6 +509,22 @@ class E3ShadowOrchestrator:
                     if registry.is_routable(candidate.worker_id)
                 ]
         out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
+        out["candidate_rankings"] = {
+            node_id: [
+                {
+                    "worker_id": candidate.worker_id,
+                    "provider": candidate.provider,
+                    "model": candidate.model,
+                    "role": candidate.role,
+                    "confidence": candidate.confidence,
+                    "score": candidate.score,
+                    "score_components": candidate.score_components,
+                    "rationale": candidate.concise_rationale,
+                }
+                for candidate in candidates
+            ]
+            for node_id, candidates in candidates_by_node.items()
+        }
 
         if self.capability_registry:
             assembler = TeamAssembler(self.capability_registry, self.router)
