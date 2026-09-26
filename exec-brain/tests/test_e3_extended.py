@@ -614,8 +614,10 @@ class TestE3RouterDeterministicSelection(unittest.TestCase):
             return self.rows.get(worker_id)
 
     def test_task_fit_beats_insertion_order_and_identity_is_real(self):
-        con = sqlite3.connect(":memory:")
-        init_db(con)
+        tmp = tempfile.NamedTemporaryFile(prefix="e3-router-", suffix=".db", delete=False)
+        tmp.close()
+        self.addCleanup(lambda: Path(tmp.name).unlink(missing_ok=True))
+        con = init_db(Path(tmp.name))
         reg = CapabilityRegistry(con)
         # Deliberately insert the generic worker first.
         reg.register_worker("generic-first", "generic", "generic-model",
