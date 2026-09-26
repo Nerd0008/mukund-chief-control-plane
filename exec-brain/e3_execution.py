@@ -651,7 +651,8 @@ class E3ProductionExecutor:
                      max_repair_attempts: int = 1,
                      dispatch_timeout: int = 120,
                      role_by_node: Optional[Dict[str, str]] = None,
-                     max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES) -> Dict[str, Any]:
+                     max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES,
+                     return_verified_content: bool = False) -> Dict[str, Any]:
         """Execute every node of an assembled plan on the real execution path."""
         plan_id = plan.get("plan_id", "unknown")
         test_cases_by_node = verification_test_cases_by_node or {}
@@ -724,7 +725,7 @@ class E3ProductionExecutor:
         elif any(r.state == "FAILED" for r in results):
             outcome = "EXECUTION_FAILED"
 
-        return {
+        payload = {
             "plan_id": plan_id,
             "objective": objective,
             "outcome": outcome,
@@ -736,6 +737,25 @@ class E3ProductionExecutor:
             # logged into a node's terminal state.
             "escalations": [r.escalation for r in results if r.escalation],
         }
+        if return_verified_content:
+            # Gateway/UI-only escape hatch: expose content only after the node
+            # reached COMPLETE and deterministic verification passed.  Default
+            # execution/audit surfaces remain content-redacted.
+            payload["verified_outputs"] = [
+                {
+                    "node_id": r.node_id,
+                    "worker_id": r.worker_id,
+                    "provider": (r.output or {}).get("provider"),
+                    "model": (r.output or {}).get("model"),
+                    "content": (r.output or {}).get("content"),
+                    "final_verification": r.final_verification,
+                }
+                for r in results
+                if r.complete and r.final_verification == "PASS"
+                and isinstance((r.output or {}).get("content"), str)
+                and (r.output or {}).get("content").strip()
+            ]
+        return payload
 
     def _execute_node(self, plan_id: str, node: Dict[str, Any], worker_id: str,
                       role: str, result: NodeExecutionResult,
