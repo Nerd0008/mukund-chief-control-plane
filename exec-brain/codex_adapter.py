@@ -559,7 +559,10 @@ def report_usage_to_e2(result: Dict[str, Any]) -> Optional[str]:
         sys.path.insert(0, str(gov_dir))
     import governor
 
-    usage = result.get("usage") or {}
+    # The Codex dispatcher returns its observed event usage as
+    # ``usage_tokens``.  Accept the older ``usage`` shape too so reporting
+    # never silently drops real Codex token telemetry.
+    usage = result.get("usage") or result.get("usage_tokens") or {}
     status = "success" if result.get("status") == "COMPLETED" else "error"
     latency_ms = int((result.get("runtime_s") or 0) * 1000)
 
@@ -663,4 +666,3 @@ def run_smoke_test(adapter: Optional[Any] = None,
         'routable': bool(passed and e2_request_id),
         'qualification': 'UNPROVEN',  # smoke readiness is not qualification
     }
-

@@ -128,7 +128,7 @@ class E3ShadowOrchestrator:
         if db_path:
             self._connect()
             self.capability_registry = CapabilityRegistry(self.con)
-            self.router = E3Router(self.capability_registry)
+            self.router = E3Router(self.capability_registry, self.worker_registry)
 
     def _connect(self):
         """Connect to orchestration DB."""

@@ -57,6 +57,12 @@ ADAPTER_MODULES: Dict[str, Dict[str, Any]] = {
         "provider": "google",
         "kwargs": {},
     },
+    "longcat-2.0": {
+        "module": "generic_openai_adapter",
+        "class": "GenericOpenAIAdapter",
+        "provider": "longcat",
+        "kwargs": {"provider_key": "longcat"},
+    },
 }
 
 

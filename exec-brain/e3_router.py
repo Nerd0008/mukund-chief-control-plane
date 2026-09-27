@@ -70,6 +70,14 @@ class E3Router:
             eligible = self.registry.find_eligible_workers(task_family, role, risk_class="R1")
             for entry in eligible:
                 wid = entry["worker_id"]
+                # Capability eligibility is advisory.  A production candidate
+                # must also have a live adapter binding and a worker state that
+                # permits dispatch.  Without this intersection E3 can propose
+                # providers that its execution leg must later reject.
+                if self.worker_registry is not None:
+                    worker = self.worker_registry.get_worker(wid)
+                    if not worker or not worker.get("routable"):
+                        continue
                 state = entry["state"]
                 confidence = self._compute_confidence(wid, task_family, state, historical_evidence)
                 reasoning_codes = self._build_reasoning_codes(wid, task_family, state, historical_evidence)
@@ -144,9 +152,15 @@ class E3Router:
         return "; ".join(parts)
 
     def _get_provider(self, worker_id: str) -> str:
+        if self.worker_registry is not None:
+            worker = self.worker_registry.get_worker(worker_id) or {}
+            return str(worker.get("provider") or "unknown")
         return "unknown"
 
     def _get_model(self, worker_id: str) -> str:
+        if self.worker_registry is not None:
+            worker = self.worker_registry.get_worker(worker_id) or {}
+            return str(worker.get("api_model_id") or worker.get("model") or "unknown")
         return "unknown"
 
     def create_router_decision(self, plan_id: str, node_id: str,
