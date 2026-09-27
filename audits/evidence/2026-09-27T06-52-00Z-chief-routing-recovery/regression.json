@@ -1,0 +1,8 @@
+{
+  "unittest_summary": {
+    "suites_failed": 0,
+    "suites_unavailable": 0,
+    "tests_run": 89
+  },
+  "command": "python -m unittest exec-brain/tests/test_chief_routing.py exec-brain/tests/test_discord_chief_bridge.py exec-brain/tests/test_e3_execution.py exec-brain/tests/test_e3_extended.py"
+}

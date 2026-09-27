@@ -1,0 +1,11 @@
+{
+  "executed_at_utc": "2026-09-27T06:59:40+00:00",
+  "results": {
+    "discord_hi": {"worker": "longcat-2.0", "provider": "longcat", "model": "LongCat-2.0", "e2_request_id": "obs-20260927-3f14641a", "status": "success"},
+    "direct_general": {"worker": "longcat-2.0", "status": "success"},
+    "direct_image": {"worker": "google-nano-banana-2", "status": "success", "image_returned": true},
+    "direct_engineering": {"worker": "codex-cli", "status": "success"},
+    "deepseek_unavailable_fallback": {"deepseek_status": "HTTP 402 insufficient balance", "fallback_worker": "codex-cli", "status": "success"}
+  },
+  "discontinued_workers_selected": []
+}
