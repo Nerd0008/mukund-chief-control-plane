@@ -21,7 +21,8 @@ HELPER = '''    async def _hmwa_try_chief_e3_dispatch(self, message_text, source
         """Route normal Chief-channel Discord text through E3, never native DeepSeek."""
         # CHIEF_E3_DISCORD_BRIDGE
         platform = source.platform.value if hasattr(source.platform, "value") else str(source.platform)
-        if platform != "discord" or str(source.chat_id or "") != "1551586294382067762":
+        parent = getattr(source, "parent_chat_id", None)
+        if platform != "discord" or str(parent or source.chat_id or "") != "1551586294382067762":
             return None
         if not (message_text or "").strip() or (message_text or "").lstrip().startswith("/"):
             return None
@@ -61,7 +62,17 @@ CALL_NEW = """            bridge_result = await self._hmwa_try_chief_e3_dispatch
 def install(gateway: Path, dry_run: bool) -> dict:
     text = gateway.read_text(encoding="utf-8")
     if MARKER in text:
-        return {"action": "already-installed", "gateway": str(gateway)}
+        old = 'if platform != "discord" or str(source.chat_id or "") != "1551586294382067762":'
+        new = 'parent = getattr(source, "parent_chat_id", None)\n        if platform != "discord" or str(parent or source.chat_id or "") != "1551586294382067762":'
+        if old not in text:
+            return {"action": "already-installed", "gateway": str(gateway)}
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        backup = gateway.parent / "backups" / f"chief-e3-bridge-{stamp}" / gateway.name
+        if not dry_run:
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(gateway, backup)
+            gateway.write_text(text.replace(old, new, 1), encoding="utf-8")
+        return {"action": "would-update" if dry_run else "updated", "gateway": str(gateway), "backup": str(backup)}
     helper_anchor = "    async def _handle_message_with_agent(self, event, source, _quick_key: str, run_generation: int):\n"
     if helper_anchor not in text or CALL_OLD not in text:
         raise RuntimeError("gateway source shape changed; refusing an unsafe patch")
