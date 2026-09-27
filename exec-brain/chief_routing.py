@@ -86,7 +86,12 @@ class ChiefRouteSelector:
 
     @staticmethod
     def _failed(result: Dict[str, Any]) -> bool:
-        if result.get("status") != "COMPLETED" or not result.get("content"):
+        # Image adapters correctly return no text; a decoded provider image is
+        # their successful deliverable.  Codex exposes its answer as
+        # ``final_message`` rather than the generic ``content`` field.
+        delivered = (result.get("content") or result.get("final_message")
+                     or result.get("image_b64"))
+        if result.get("status") != "COMPLETED" or not delivered:
             return True
         return False
 
@@ -112,7 +117,11 @@ class ChiefRouteSelector:
                 return {
                     "status": "COMPLETED", "worker_id": worker_id,
                     "provider": result.get("provider"), "model": result.get("model"),
-                    "content": result.get("content"), "intent": decision.intent,
+                    "content": result.get("content") or result.get("final_message")
+                    or ("Image generated successfully." if result.get("image_b64") else None),
+                    "image_b64": result.get("image_b64"),
+                    "image_mime": result.get("image_mime"),
+                    "intent": decision.intent,
                     "attempts": attempts, "skipped": decision.skipped,
                 }
             error = str(result.get("error") or result.get("exit_code") or "provider_failed")

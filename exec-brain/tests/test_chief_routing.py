@@ -52,6 +52,13 @@ class ChiefRoutingTests(unittest.TestCase):
         selector = self.selector({"google-nano-banana-2": _ok("google")})
         self.assertEqual(selector.dispatch("Generate an image of a cat")['worker_id'], "google-nano-banana-2")
 
+    def test_image_completion_without_text_is_successful(self):
+        selector = self.selector({"google-nano-banana-2": {
+            "status": "COMPLETED", "content": None, "image_b64": "aW1hZ2U=",
+            "image_mime": "image/png", "provider": "google", "model": "image",
+        }})
+        self.assertEqual(selector.dispatch("Draw an image")['worker_id'], "google-nano-banana-2")
+
     def test_engineering_uses_codex(self):
         selector = self.selector({"codex-cli": _ok("codex")})
         self.assertEqual(selector.dispatch("Debug this GitHub repository")['worker_id'], "codex-cli")
