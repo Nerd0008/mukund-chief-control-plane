@@ -106,11 +106,11 @@ class TestExecutionAdapterRegistry(unittest.TestCase):
         self.assertEqual(reg.routable_worker_ids(), ["deepseek-v41-flash"])
         self.assertIsNotNone(reg.adapter_for("deepseek-v41-flash"))
 
-    def test_real_roster_marks_only_three_workers_routable(self):
+    def test_real_roster_marks_owner_active_workers_routable(self):
         import worker_registry as wr
         reg = ExecutionAdapterRegistry(worker_registry=wr.WorkerRegistry())
         self.assertEqual(reg.routable_worker_ids(),
-                         ["codex-cli", "deepseek-v41-flash", "google-nano-banana-2"])
+                         ["codex-cli", "google-nano-banana-2", "longcat-2.0"])
 
     def test_usage_reporter_failure_never_fabricates_a_request_id(self):
         def boom(_):

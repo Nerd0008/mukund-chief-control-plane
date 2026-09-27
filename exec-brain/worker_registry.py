@@ -161,7 +161,8 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'LOCKED',
         'capability_hints': ['reasoning', 'coding', 'long-context', 'agents'],
-        'routable': True,  # smoke test PASS + E2 linkage VERIFIED + no security issue
+        'routable': False,  # owner reports no remaining balance; retained only as a standby fallback
+        'routing_status': 'STANDBY_UNAVAILABLE_BY_OWNER_20260927',
         'auth_configured': True,
         'auth_source': 'credential_manager',
         'exec_interface': 'https://api.deepseek.com/chat/completions',
@@ -278,15 +279,22 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'EVALUATE',
         'capability_hints': ['reasoning', 'coding'],
-        'routable': False,  # direct endpoint + model verified; account has no quota
+        'routable': True,  # 2026-09-27 direct smoke PASS + provider identity + E2 linkage verified
+        'routing_status': 'ACTIVE_PRIMARY_BY_OWNER_20260927',
         'auth_configured': True,
         'auth_source': 'credential_manager',
         'exec_interface': 'generic_openai_adapter (longcat)',
         'adapter_implemented': True,
         'adapter_file': 'generic_openai_adapter.py',
-        'smoke_test': 'FAILED',
+        'smoke_test': 'PASS',
         'e2_usage_linkage': 'VERIFIED',
         'qualification': 'UNPROVEN',
+        'verified_2026_09_27': {
+            'smoke_http_status': 200,
+            'provider_returned_model': 'LongCat-2.0',
+            'e2_request_id': 'obs-20260927-1a7aed65',
+            'evidence': 'audits/evidence/2026-09-27T06-49-41Z-longcat-primary-live-smoke/evidence.json',
+        },
         'verified_2026_09_24': {
             'credential_present': True,
             'endpoint': 'https://api.longcat.chat/openai',
@@ -297,7 +305,7 @@ WORKER_ROSTER = [
             'provider_error': 'Call failed: Insufficient token quota.',
             'routable_reason': 'provider_account_token_quota_exhausted',
         },
-        'notes': ('2026-09-24 post-credential verification: the direct LongCat platform '
+        'notes': ('2026-09-27 recovery smoke: one bounded live call completed HTTP 200 with provider-returned model `LongCat-2.0` and E2 row `obs-20260927-1a7aed65`; selected as owner-approved primary. Earlier history is preserved below. 2026-09-24 post-credential verification: the direct LongCat platform '
                   'endpoint work was already correct and is intentionally preserved — '
                   'https://api.longcat.chat/openai/v1/models answered 200 with `LongCat-2.0` '
                   'observed (the bare /v1 path 404s). One bounded smoke call returned HTTP 402 '

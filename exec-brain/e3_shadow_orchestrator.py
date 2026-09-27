@@ -461,6 +461,12 @@ class E3ShadowOrchestrator:
         if self.db_path is None:
             raise ValueError("orchestrate_and_execute requires a bound orchestration db_path")
         self._connect()
+        registry = adapter_registry or ExecutionAdapterRegistry()
+        # The candidate gate must inspect the same worker registry that will
+        # execute the plan.  This keeps injected test/rehearsal registries and
+        # production routing aligned.
+        if self.router is not None:
+            self.router.worker_registry = registry.worker_registry
 
         out: Dict[str, Any] = {
             "objective": objective,
@@ -514,7 +520,6 @@ class E3ShadowOrchestrator:
             out["outcome"] = "TEAM_INCOMPLETE"
             return out
 
-        registry = adapter_registry or ExecutionAdapterRegistry()
         store = OrchestrationStore(self.db_path)
         try:
             executor = E3ProductionExecutor(store, registry,

@@ -68,6 +68,8 @@ E3_MODULES = [
     "e3_production_rehearsal.py",
     "e3_execution.py",
     "e3_execution_rehearsal.py",
+    "chief_routing.py",
+    "discord_chief_bridge.py",
     "generic_openai_adapter.py",
     "deepseek_adapter.py",
     "codex_adapter.py",
