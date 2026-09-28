@@ -23,7 +23,8 @@ class RouterCandidate:
 
     def __init__(self, worker_id: str, provider: str, model: str,
                  role: str, confidence: str, reasoning_codes: Optional[List[str]],
-                 concise_rationale: str, evidence_references: Optional[List[str]] = None):
+                 concise_rationale: str, evidence_references: Optional[List[str]] = None,
+                 score: float = 0.0, score_components: Optional[Dict[str, float]] = None):
         self.worker_id = worker_id
         self.provider = provider
         self.model = model
@@ -32,6 +33,8 @@ class RouterCandidate:
         self.reasoning_codes = reasoning_codes if reasoning_codes is not None else []
         self.concise_rationale = concise_rationale
         self.evidence_references = evidence_references if evidence_references is not None else []
+        self.score = float(score)
+        self.score_components = dict(score_components or {})
 
 
 class MetaSelector:
@@ -54,6 +57,12 @@ class E3Router:
     def __init__(self, registry: CapabilityRegistry, worker_registry: Any = None,
                  e2_provider_state: Optional[Dict] = None):
         self.registry = registry
+        # Capability rows record evaluation state, but they are not execution
+        # authority.  Use the roster by default so callers cannot accidentally
+        # turn an arbitrary capability row into a production candidate.
+        if worker_registry is None:
+            from worker_registry import WorkerRegistry
+            worker_registry = WorkerRegistry()
         self.worker_registry = worker_registry
         self.e2_state = e2_provider_state if e2_provider_state is not None else {}
         self.meta_selector = MetaSelector(registry)
@@ -71,10 +80,20 @@ class E3Router:
             for entry in eligible:
                 wid = entry["worker_id"]
                 state = entry["state"]
+                # A capability row alone is not enough for production routing:
+                # the static worker registry remains the execution-readiness source.
+                worker = self._worker_record(wid)
+                if worker is None or not worker.get("routable", False):
+                    continue
+
                 confidence = self._compute_confidence(wid, task_family, state, historical_evidence)
                 reasoning_codes = self._build_reasoning_codes(wid, task_family, state, historical_evidence)
-                rationale = self._build_rationale(wid, task_family, state, historical_evidence)
                 evidence_refs = [e.get("evidence_id", "") for e in historical_evidence if e.get("worker_id") == wid]
+                score, components = self._score_candidate(
+                    wid, task_family, role, state, historical_evidence)
+                rationale = self._build_rationale(
+                    wid, task_family, state, historical_evidence,
+                    score=score, score_components=components)
 
                 candidates.append(RouterCandidate(
                     worker_id=wid,
@@ -85,10 +104,13 @@ class E3Router:
                     reasoning_codes=reasoning_codes,
                     concise_rationale=rationale,
                     evidence_references=evidence_refs,
+                    score=score,
+                    score_components=components,
                 ))
 
-        confidence_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
-        candidates.sort(key=lambda c: confidence_order.get(c.confidence, 3))
+        # Deterministic evidence/task-fit ordering.  Worker id is only the final
+        # tie-break so insertion/SQL row order can never make one model "sticky".
+        candidates.sort(key=lambda c: (-c.score, c.worker_id, c.role))
         return candidates
 
     def _compute_confidence(self, worker_id: str, task_family: str,
@@ -129,25 +151,119 @@ class E3Router:
                 codes.append("PROVIDER_UNKNOWN")
         return codes
 
+    def _worker_record(self, worker_id: str) -> Optional[Dict[str, Any]]:
+        if self.worker_registry is None:
+            return None
+        try:
+            return self.worker_registry.get_worker(worker_id)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _fit_terms(task_family: str, role: str) -> List[str]:
+        family_terms = {
+            "code": ["coding", "repository", "debugging", "implementation", "reasoning"],
+            "review": ["debugging", "reasoning", "coding"],
+            "research": ["reasoning", "long-context", "agents"],
+            "analysis": ["reasoning", "long-context", "data-analyst"],
+            "writing": ["reasoning", "long-context", "writer"],
+            "data-processing": ["data-analyst", "reasoning", "coding"],
+            "ops": ["agents", "tool-use", "reasoning", "coding"],
+            "monitoring": ["agents", "high-volume", "fast"],
+            "decision-support": ["reasoning", "long-context"],
+            "extraction": ["long-context", "reasoning", "vision"],
+            "summarization": ["long-context", "reasoning"],
+            "verification": ["critic", "debugging", "reasoning"],
+            "other": ["reasoning", "agents"],
+        }
+        role_terms = {
+            "builder": ["coding", "implementation", "reasoning", "agents"],
+            "writer": ["writer", "reasoning", "long-context"],
+            "researcher": ["reasoning", "long-context", "agents"],
+            "critic": ["critic", "debugging", "reasoning"],
+            "verifier": ["critic", "debugging", "reasoning"],
+            "vision": ["vision", "image-generation", "image-editing", "multimodal"],
+            "data-analyst": ["data-analyst", "reasoning"],
+            "integrator": ["reasoning", "long-context", "agents"],
+            "router": ["reasoning", "agents", "fast"],
+        }
+        return list(dict.fromkeys(
+            family_terms.get(task_family, ["reasoning"]) +
+            role_terms.get(role, ["reasoning"])
+        ))
+
+    def _score_candidate(self, worker_id: str, task_family: str, role: str,
+                         state: str, historical: List[Dict]) -> Tuple[float, Dict[str, float]]:
+        worker = self._worker_record(worker_id) or {}
+        hints = set(worker.get("capability_hints") or [])
+        wanted = self._fit_terms(task_family, role)
+
+        state_score = {"QUALIFIED": 40.0, "EVALUATING": 18.0}.get(state, 0.0)
+        readiness_score = 20.0 if worker.get("routable") else 0.0
+        fit_matches = sum(1 for term in wanted if term in hints)
+        fit_score = min(24.0, float(fit_matches * 6))
+
+        relevant = [e for e in historical if e.get("worker_id") == worker_id]
+        evidence_score = 0.0
+        if relevant:
+            first_pass = sum(1 for e in relevant if e.get("first_pass_success"))
+            evidence_score = min(10.0, 10.0 * first_pass / len(relevant))
+
+        health_score = 0.0
+        provider = self._get_provider(worker_id)
+        pstate = self.e2_state.get(provider, {}) if provider else {}
+        health = pstate.get("capacity_confidence") or pstate.get("status")
+        if health in ("HEALTHY", "healthy", "READY", "ready"):
+            health_score = 6.0
+        elif health in ("DEGRADED", "degraded"):
+            health_score = -4.0
+        elif health in ("BLOCKED", "blocked", "UNHEALTHY", "unhealthy"):
+            health_score = -20.0
+
+        components = {
+            "capability_state": state_score,
+            "execution_readiness": readiness_score,
+            "task_fit": fit_score,
+            "historical_evidence": evidence_score,
+            "provider_health": health_score,
+        }
+        return sum(components.values()), components
+
     def _build_rationale(self, worker_id: str, task_family: str,
-                         state: str, historical: List[Dict]) -> str:
+                         state: str, historical: List[Dict],
+                         score: Optional[float] = None,
+                         score_components: Optional[Dict[str, float]] = None) -> str:
         parts: List[str] = []
         if state == "QUALIFIED":
             parts.append(f"Worker {worker_id} is QUALIFIED for {task_family}")
         elif state == "EVALUATING":
             parts.append(f"Worker {worker_id} is EVALUATING for {task_family}")
 
+        worker = self._worker_record(worker_id) or {}
+        hints = worker.get("capability_hints") or []
+        if hints:
+            parts.append("hints=" + ",".join(sorted(hints)))
+
         relevant = [e for e in historical if e.get("worker_id") == worker_id]
         if relevant:
             successes = sum(1 for e in relevant if e.get("first_pass_success"))
-            parts.append(f"Evidence: {successes}/{len(relevant)} first-pass successes")
+            parts.append(f"evidence={successes}/{len(relevant)} first-pass")
+        if score is not None:
+            parts.append(f"score={score:.1f}")
+        if score_components:
+            parts.append("components=" + ",".join(
+                f"{k}:{v:.1f}" for k, v in sorted(score_components.items())))
         return "; ".join(parts)
 
     def _get_provider(self, worker_id: str) -> str:
-        return "unknown"
+        worker = self._worker_record(worker_id)
+        return str(worker.get("provider")) if worker and worker.get("provider") else "unknown"
 
     def _get_model(self, worker_id: str) -> str:
-        return "unknown"
+        worker = self._worker_record(worker_id)
+        if not worker:
+            return "unknown"
+        return str(worker.get("api_model_id") or worker.get("model") or "unknown")
 
     def create_router_decision(self, plan_id: str, node_id: str,
                                candidate: RouterCandidate) -> Dict[str, Any]:

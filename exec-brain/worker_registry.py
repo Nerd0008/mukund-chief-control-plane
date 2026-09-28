@@ -278,13 +278,16 @@ WORKER_ROSTER = [
         'interface': 'api',
         'pool_status': 'EVALUATE',
         'capability_hints': ['reasoning', 'coding'],
-        'routable': False,  # direct endpoint + model verified; account has no quota
+        # 2026-09-25 owner-run bounded smoke supersedes the 2026-09-24 quota
+        # blocker: HTTP 200, provider-returned model LongCat-2.0, identity
+        # confirmed, no provider error, and E2 usage linkage recorded.
+        'routable': True,
         'auth_configured': True,
         'auth_source': 'credential_manager',
         'exec_interface': 'generic_openai_adapter (longcat)',
         'adapter_implemented': True,
         'adapter_file': 'generic_openai_adapter.py',
-        'smoke_test': 'FAILED',
+        'smoke_test': 'PASS',
         'e2_usage_linkage': 'VERIFIED',
         'qualification': 'UNPROVEN',
         'verified_2026_09_24': {
@@ -297,12 +300,24 @@ WORKER_ROSTER = [
             'provider_error': 'Call failed: Insufficient token quota.',
             'routable_reason': 'provider_account_token_quota_exhausted',
         },
-        'notes': ('2026-09-24 post-credential verification: the direct LongCat platform '
-                  'endpoint work was already correct and is intentionally preserved — '
-                  'https://api.longcat.chat/openai/v1/models answered 200 with `LongCat-2.0` '
-                  'observed (the bare /v1 path 404s). One bounded smoke call returned HTTP 402 '
-                  '"Insufficient token quota": account quota blocker, not an adapter fault; '
-                  'routable=false, qualification UNPROVEN.'),
+        'verified_2026_09_25': {
+            'credential_present': True,
+            'endpoint': 'https://api.longcat.chat/openai',
+            'smoke_http_status': 200,
+            'provider_returned_model': 'LongCat-2.0',
+            'model_identity_confirmed_by_provider': True,
+            'provider_error': None,
+            'e2_usage_linkage': 'recorded',
+            'evidence': 'audits/evidence/2026-09-25T20-40-12Z-e3-provider-bounded-smoke/evidence.json',
+            'routable_reason': 'bounded_live_smoke_pass_with_model_identity_and_e2_linkage',
+        },
+        'notes': ('2026-09-25: the owner re-ran the bounded LongCat smoke after '
+                  'provisioning the 50M-token pack. The direct LongCat endpoint '
+                  'returned HTTP 200 with provider model LongCat-2.0, identity '
+                  'confirmed and E2 linkage recorded. This supersedes the older '
+                  '2026-09-24 HTTP 402 quota blocker for execution readiness. '
+                  'Qualification remains UNPROVEN; smoke readiness is not a '
+                  'capability qualification.'),
     },
     {
         'worker_id': 'minimax-m3',
