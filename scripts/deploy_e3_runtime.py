@@ -36,7 +36,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "exec-brain"
 RUNTIME_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "exec-brain"
 
-# The E3 module set (orchestration + adapters + shared E3 deps). Deliberately
+# The E3 module set (orchestration + adapters + shared E3 deps). The companion
+# ``hermes-plugins/e3-model-provider`` is installed separately so Hermes can
+# retain its normal agent/tool/skill loop while routing completions through E3.
+# Deliberately
 # excludes E1/E2-owned files (eb.py is patched separately, governor.py is E2's).
 E3_MODULES = [
     "orchestration_db.py",
@@ -72,6 +75,7 @@ E3_MODULES = [
     "discord_chief_bridge.py",
     "department_dispatch.py",
     "chief_context.py",
+    "hermes_e3_provider.py",
     "e3_execution_rehearsal.py",
     "generic_openai_adapter.py",
     "deepseek_adapter.py",

@@ -31,7 +31,9 @@ class ChiefContextCompiler:
     """Select relevant persistent sources under a strict character budget."""
 
     DEFAULT_BUDGET = 16000
-    DEFAULT_SOURCE_LIMIT = 6000
+    # Keep owner, company, project and history lanes simultaneously visible;
+    # one large canonical file must not crowd out the other source classes.
+    DEFAULT_SOURCE_LIMIT = 4000
 
     def __init__(self, *, root: Optional[Path] = None, max_chars: int = DEFAULT_BUDGET,
                  source_limit: int = DEFAULT_SOURCE_LIMIT,
@@ -51,7 +53,6 @@ class ChiefContextCompiler:
         paths = [
             ("owner-context-local", local_root / "skills" / "personal" / "mukund-owner-context" / "SKILL.md", "owner"),
             ("company-registry-local", local_root / "skills" / "personal" / "mukund-company-registry" / "SKILL.md", "company"),
-            ("company-registry-reference", local_root / "skills" / "personal" / "mukund-company-registry" / "references" / "company_registry.yaml", "company"),
             ("owner-memory", local_root / "memories" / "MEMORY.md", "owner"),
             ("owner-profile", local_root / "memories" / "USER.md", "owner"),
             ("owner-context", self.root / "state" / "current_company_state.md", "owner/project"),
@@ -68,7 +69,9 @@ class ChiefContextCompiler:
         history_root = self.history_root
         if history_root is None:
             archive_env = os.environ.get("HERMES_DISCORD_ARCHIVE_DIR")
-            history_root = Path(archive_env) if archive_env else hermes_home / "hooks" / "discord-chief-archive"
+            history_root = Path(archive_env) if archive_env else Path.home() / "DiscordArchive" / "chief"
+            if not history_root.is_dir():
+                history_root = hermes_home / "hooks" / "discord-chief-archive"
         # The archive hook is code plus local state; only ingest textual/jsonl
         # records when present, never copy private archives into the repository.
         if history_root.is_dir():
@@ -107,8 +110,8 @@ class ChiefContextCompiler:
                 task_records: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         candidates = self._sources if self._sources is not None else self._default_sources()
         selected = [s for s in candidates if self._relevant(s, objective)]
-        priority = {"owner": 0, "owner/project": 0, "history": 1, "company": 2,
-                    "company/project": 2, "canonical": 3, "project": 4}
+        priority = {"owner": 0, "company": 1, "history": 2, "project": 2,
+                    "owner/project": 3, "company/project": 4, "canonical": 5}
         selected.sort(key=lambda s: priority.get(s.kind, 5))
         sections = []
         manifest = []

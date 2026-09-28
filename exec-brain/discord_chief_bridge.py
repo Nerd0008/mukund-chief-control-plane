@@ -1,4 +1,8 @@
-"""Source-controlled bridge from an authenticated Chief turn to its owner layer."""
+"""Offline Chief router used by the Hermes E3 model-provider seam.
+
+The live gateway is not intercepted: Hermes invokes its normal agent loop and
+the installed ``e3`` ProviderProfile calls this boundary for each completion.
+"""
 from __future__ import annotations
 from typing import Any, Dict, Optional
 

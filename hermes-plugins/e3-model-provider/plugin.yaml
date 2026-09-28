@@ -1,0 +1,5 @@
+name: chief-e3-model-provider
+kind: model-provider
+version: 1.0.0
+description: Hermes model-provider seam that delegates completions to E3 while retaining the agent loop.
+author: Mukund

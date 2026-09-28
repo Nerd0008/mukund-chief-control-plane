@@ -49,6 +49,7 @@ def audit() -> dict:
             if bad:
                 failures.append({"path": relative, "kind": "direct_adapter_import", "modules": bad})
     plugin = (ROOT / "hermes-plugins/e3-discord-router/__init__.py").read_text(encoding="utf-8")
+    deploy_source = (ROOT / "scripts/deploy_e3_runtime.py").read_text(encoding="utf-8")
     if "orchestrate_and_execute" in plugin or '"action": "skip"' in plugin:
         failures.append({"path": "hermes-plugins/e3-discord-router/__init__.py",
                          "kind": "normal_discord_consumed_before_chief"})
@@ -57,10 +58,20 @@ def audit() -> dict:
         failures.append({"path": "exec-brain/department_dispatch.py",
                          "kind": "implemented_department_resolved_to_placeholder"})
     bridge_script = (ROOT / "scripts/install_discord_e3_bridge.py").read_text(encoding="utf-8")
-    for marker in ("CHIEF_E3_DISCORD_BRIDGE", "authenticated", "hermes_session_preserved"):
-        if marker not in bridge_script:
-            failures.append({"path": "scripts/install_discord_e3_bridge.py",
-                             "kind": "missing_discord_chief_integration_seam", "marker": marker})
+    if "bridge_result = await" in bridge_script or "agent_result = bridge_result" in bridge_script:
+        failures.append({"path": "scripts/install_discord_e3_bridge.py",
+                         "kind": "gateway_patch_bypasses_hermes_agent_loop"})
+    provider = (ROOT / "hermes-plugins/e3-model-provider/__init__.py").read_text(encoding="utf-8")
+    for marker in ("ProviderProfile", "create_client", "E3ModelClient"):
+        if marker not in provider:
+            failures.append({"path": "hermes-plugins/e3-model-provider/__init__.py",
+                             "kind": "missing_e3_model_provider_seam", "marker": marker})
+    if not (ROOT / "scripts/install_e3_model_provider.py").is_file():
+        failures.append({"path": "scripts/install_e3_model_provider.py",
+                         "kind": "missing_provider_deployment_rollback_seam"})
+    if "e3-model-provider" not in deploy_source:
+        failures.append({"path": "scripts/deploy_e3_runtime.py",
+                         "kind": "missing_e3_provider_provenance"})
     context = (ROOT / "exec-brain/chief_context.py").read_text(encoding="utf-8")
     for marker in ("owner-context-local", "company-registry-local", "discord-chief-history"):
         if marker not in context:
@@ -72,10 +83,10 @@ def audit() -> dict:
     for relative in ("exec-brain/chief_routing.py", "exec-brain/discord_chief_bridge.py",
                      "exec-brain/department_dispatch.py", "exec-brain/chief_context.py",
                      "exec-brain/e3_service.py",
+                     "exec-brain/hermes_e3_provider.py",
                      "scripts/e3_runtime_provenance.py"):
         if not (ROOT / relative).is_file():
             failures.append({"path": relative, "kind": "missing_chief_e3_provenance"})
-    deploy_source = (ROOT / "scripts/deploy_e3_runtime.py").read_text(encoding="utf-8")
     for module in ("e3_service.py", "chief_routing.py", "discord_chief_bridge.py",
                    "department_dispatch.py", "chief_context.py"):
         if module not in deploy_source:

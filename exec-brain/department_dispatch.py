@@ -28,10 +28,12 @@ class CareerOpsDepartment:
     explicit activation-only operation delegated to the unified orchestrator.
     """
 
-    def __init__(self, *, repo_root: Optional[Path] = None, allow_external: bool = False):
+    def __init__(self, *, repo_root: Optional[Path] = None, allow_external: bool = False,
+                 orchestrator: Any = None):
         self.repo_root = Path(repo_root or Path(__file__).resolve().parents[1])
         self.career_root = self.repo_root / "career-ops"
         self.allow_external = allow_external
+        self.orchestrator = orchestrator
 
     def _imports(self):
         root = str(self.career_root)
@@ -102,12 +104,74 @@ class CareerOpsDepartment:
             "provider_call_made": False,
             "mode": "offline-plan" if (dry_run or not self.allow_external) else "live-activation-required",
         }
+        if self.allow_external and not dry_run:
+            try:
+                if self.orchestrator is not None:
+                    result = self.orchestrator.run_all(regions=regions, requested_count=count,
+                                                      dry_run=False)
+                else:
+                    result = self._run_unified_orchestrator(regions, count)
+                if not isinstance(result, dict):
+                    raise TypeError("unified orchestrator returned a non-object result")
+                candidates = result.get("canonical_candidates") or result.get("records") or []
+                bounded = candidates[: count * len(regions)]
+                result["canonical_candidates"] = bounded
+                result["requested_count"] = count
+                result["regions_requested"] = regions
+                return {"status": "DEPARTMENT_COMPLETED", "department": "career-ops",
+                        "workflow": plan["workflow"], "operation": operation,
+                        "regions": regions, "requested_count": count,
+                        "provider_call_made": bool(result.get("provider_call_made", False)),
+                        "read_only": bool(result.get("read_only", True)),
+                        "executed": True, "result": result,
+                        "content": json.dumps({"workflow": plan["workflow"],
+                                               "regions": regions,
+                                               "results": len(bounded)}, sort_keys=True)}
+            except Exception as exc:  # truthful per-dispatch failure, no generic E3 prose
+                return {"status": "DEPARTMENT_FAILED", "department": "career-ops",
+                        "workflow": plan["workflow"], "regions": regions,
+                        "requested_count": count, "provider_call_made": False,
+                        "read_only": True, "executed": True,
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "content": "Career Ops discovery failed; see structured error."}
         return {"status": "DEPARTMENT_COMPLETED", "department": "career-ops",
                 "workflow": plan["workflow"], "operation": operation,
                 "regions": regions, "requested_count": count, "provider_call_made": False,
                 "read_only": True, "result": plan,
                 "content": (f"Career Ops read-only discovery planned for {', '.join(regions)} "
                              f"with up to {count} results per region.")}
+
+    def _run_unified_orchestrator(self, regions: list[str], count: int) -> dict:
+        """Execute the existing run-all command with its safety gates intact."""
+        import argparse
+        import io
+        from contextlib import redirect_stdout
+        if str(self.career_root / "discovery") not in sys.path:
+            sys.path.insert(0, str(self.career_root / "discovery"))
+        import scheduled_orchestrator as orchestrator  # type: ignore
+        args = argparse.Namespace(
+            regions=regions, region="all", scheduled=False, no_live=False,
+            provider="auto", executable=None, reuse_web_export=None, watchlist=None,
+            web_queries=orchestrator.DEFAULT_WEB_QUERIES,
+            limit_per_query=min(orchestrator.DEFAULT_LIMIT_PER_QUERY, count),
+            max_urls=orchestrator.DEFAULT_MAX_URLS,
+            per_query_timeout=orchestrator.DEFAULT_PER_QUERY_TIMEOUT,
+            scan_timeout=orchestrator.DEFAULT_SCAN_TIMEOUT, skip_regional_scan=False,
+            scan_records_dir=None, no_validate=False,
+            budget_seconds=orchestrator.DEFAULT_BUDGET_SECONDS, retries=orchestrator.DEFAULT_RETRIES,
+            ingest_stale_hours=orchestrator.DEFAULT_INGEST_STALE_HOURS,
+            semantic="deterministic", model="", batch_size=8, max_tokens=None,
+            codex="off", codex_budget=0, out_dir=None, web_out_dir=None,
+            state_file=None, state_file_out=None, no_lock=True,
+            mode=orchestrator.DEFAULT_MODE, compare=False, require_live_web=False,
+        )
+        out = io.StringIO()
+        with redirect_stdout(out):
+            rc = orchestrator.cmd_run_all(args)
+        lines = [line for line in out.getvalue().splitlines() if line.strip()]
+        result = json.loads(lines[-1]) if lines else {}
+        result["orchestrator_exit_code"] = rc
+        return result
 
 
 class DefaultDepartmentDispatcher:
