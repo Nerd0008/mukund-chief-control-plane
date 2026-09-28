@@ -43,8 +43,13 @@ class E3Profile(ProviderProfile):
             Path.home() / "Documents" / "Codex" / "mukund-chief-control-plane-owner-decisions",
             runtime.parent,
         ]
+        # Prefer a checkout that contains the actual Career Ops entry points.
+        # A sibling ``career-ops`` directory alone is insufficient: older
+        # checkouts can exist beside the active source tree and otherwise make
+        # the live Chief department import the wrong (incomplete) package.
         repo_root = next((candidate for candidate in candidates
-                          if (candidate / "career-ops").is_dir()), runtime.parent)
+                          if (candidate / "career-ops" / "career_ops_cli.py").is_file()
+                          and (candidate / "career-ops" / "discovery" / "scheduled_orchestrator.py").is_file()), runtime.parent)
         dispatcher = DefaultDepartmentDispatcher(
             career_ops=CareerOpsDepartment(repo_root=repo_root, allow_external=True))
         return E3ModelClient(E3ApplicationService(), department_dispatcher=dispatcher)
