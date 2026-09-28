@@ -851,9 +851,10 @@
       "2026-09-25T18-13-26Z-stage2-enable-regression",
       "2026-09-25T18-16-34Z-local-stage2-enable-and-acceptance",
       "2026-09-25T20-51-40Z-longcat-stage2-emergency-regression",
-      "2026-09-25T21-03-34Z-longcat-stage2-emergency-regression-final"
+      "2026-09-25T21-03-34Z-longcat-stage2-emergency-regression-final",
+      "2026-09-28T09-25-15Z-e3-discord-bridge-codex-release"
     ],
-    "note": "Current reconciliation records local-only Stage 2 enablement for three verified workers and a bounded passing production acceptance. The 2026-09-25 LongCat emergency branch additionally reviewed two diagnostic regression runs: the 20:51:40Z run failed only because E1's runtime-file boundary test had not yet allowlisted the legitimate Stage 2 state/control artifacts; the 21:03:34Z run failed only because canonical status had not yet incorporated those new evidence directories. Neither diagnostic run is treated as clean release regression evidence. LongCat's fresh HTTP 200/model-identity/E2 smoke evidence is being used only for the isolated emergency branch until a clean full regression passes. Provider-deferred workers remain external blockers; VPS deployment remains deferred by owner.",
+    "note": "Current reconciliation records local-only Stage 2 enablement for three verified workers and a bounded passing production acceptance. The 2026-09-25 LongCat emergency branch additionally reviewed two diagnostic regression runs: the 20:51:40Z run failed only because E1's runtime-file boundary test had not yet allowlisted the legitimate Stage 2 state/control artifacts; the 21:03:34Z run failed only because canonical status had not yet incorporated those new evidence directories. Neither diagnostic run is treated as clean release regression evidence. LongCat's fresh HTTP 200/model-identity/E2 smoke evidence is being used only for the isolated emergency branch until a clean full regression passes. Provider-deferred workers remain external blockers; VPS deployment remains deferred by owner. The 2026-09-28 E3 Discord bridge repair release regression passed 23 suites / 628 tests at 28f7b01; it verifies the offline integration and does not claim gateway deployment, provider execution, or any change to Stage 2 state.",
     "full_regression": "23 suites / 614 collected / 614 passed / 0 failed / 0 unavailable"
   }
 }
