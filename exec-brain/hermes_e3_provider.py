@@ -75,7 +75,13 @@ def _serialize_existing_tool_calls(calls: Any) -> str:
 def _bridge_messages(messages: list[dict[str, Any]], tools: Any,
                      tool_choice: Any, chief_context: Any) -> list[dict[str, Any]]:
     """Translate Hermes' native tool rows to Hermes' existing text-tool bridge."""
-    from agent.acp_openai_bridge import render_tool_bridge_sections
+    try:
+        from agent.acp_openai_bridge import render_tool_bridge_sections
+    except ModuleNotFoundError:
+        # Source-tree tests do not install the Hermes agent package.  The
+        # bundled compatibility module has the same narrow bridge contract;
+        # the live Hermes runtime continues to use its native implementation.
+        from acp_openai_bridge import render_tool_bridge_sections
 
     bridged: list[dict[str, Any]] = []
     sections = render_tool_bridge_sections(tools or [], tool_choice)
@@ -206,7 +212,10 @@ class E3ChatCompletions:
         # Reuse Hermes' own parser and only accept tools that were actually
         # offered on this request.
         if tools and not tool_calls and content:
-            from agent.acp_openai_bridge import extract_tool_calls_from_text
+            try:
+                from agent.acp_openai_bridge import extract_tool_calls_from_text
+            except ModuleNotFoundError:
+                from acp_openai_bridge import extract_tool_calls_from_text
             extracted, cleaned = extract_tool_calls_from_text(content)
             if extracted:
                 allowed = _offered_tool_names(tools)
