@@ -926,7 +926,7 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
 def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     batch_size: int, timeout: int, mode: str,
                     max_tokens: int | None = None,
-                    deepseek_adapter=None) -> dict:
+                    e3_service=None) -> dict:
     max_tokens = max_tokens or DEFAULT_MAX_TOKENS
     if semantic == "off":
         return {"provider": "none", "requested": "off",
@@ -938,7 +938,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
             doc = deepseek_bulk_classify(candidates, model=deepseek_model,
                                          batch_size=batch_size, timeout=timeout,
                                          max_tokens=max_tokens,
-                                         adapter=deepseek_adapter, mode=mode)
+                                         e3_service=e3_service, mode=mode)
             doc["requested"] = semantic
             doc["probe"] = probe
             if doc.get("classifications"):
@@ -972,7 +972,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                deepseek_model: str, batch_size: int, codex_budget: int,
                codex_enabled: bool, timeout: int, run_id: str,
                max_tokens: int | None = None,
-               deepseek_adapter=None, codex_adapter=None,
+               e3_service=None,
                codex_workdir: str | None = None,
                collection: list | None = None) -> dict:
     policy = rjs.load_policy()
@@ -1013,7 +1013,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     # 2. semantic ----------------------------------------------------------- #
     semantic_doc = _semantic_stage(kept, semantic=semantic, deepseek_model=deepseek_model,
                                    batch_size=batch_size, timeout=timeout, mode=mode,
-                                   max_tokens=max_tokens, deepseek_adapter=deepseek_adapter)
+                                   max_tokens=max_tokens, e3_service=e3_service)
     classifications = semantic_doc.get("classifications") or {}
     funnel.set("semantically_reviewed", len(classifications))
     for rec in kept:
@@ -1053,7 +1053,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                  "escalated": [], "dropped_due_to_budget": []}
     if codex_enabled:
         codex_doc = codex_escalate(kept, classifications, budget=codex_budget,
-                                   timeout=timeout, adapter=codex_adapter,
+                                   timeout=timeout, e3_service=e3_service,
                                    workdir=codex_workdir)
         codex_cls = codex_doc.get("classifications") or {}
         effective = dict(classifications)
@@ -1255,7 +1255,7 @@ def priority_watchlist_block(candidates: list, passed: list) -> dict:
 
 def compare_modes(candidates: list, *, region: str, semantic: str,
                   deepseek_model: str, batch_size: int, timeout: int,
-                  deepseek_adapter=None) -> dict:
+                  e3_service=None) -> dict:
     """Old strict intern-only policy vs the new high-recall pipeline.
 
     Runs over the SAME candidate set. Never writes a canonical tracker: no
@@ -1316,7 +1316,7 @@ def compare_modes(candidates: list, *, region: str, semantic: str,
                               semantic="auto" if semantic == "auto" else "deepseek",
                               deepseek_model=deepseek_model, batch_size=batch_size,
                               timeout=timeout, mode=MODE_HIGH_RECALL,
-                              deepseek_adapter=deepseek_adapter)
+                              e3_service=e3_service)
         semantic_doc = {k: v for k, v in doc.items() if k != "classifications"}
         semantic_doc["labels"] = dict(Counter(
             c.get("primary_label") for c in (doc.get("classifications") or {}).values()))

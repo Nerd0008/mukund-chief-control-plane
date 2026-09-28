@@ -439,23 +439,24 @@ class CodexWebSearchProvider(ResearchProvider):
     name = "codex-web-search"
 
     def __init__(self, executable: str | Path | None = None, *, sandbox: str = "read-only",
-                 workdir: str | Path | None = None):
+                 workdir: str | Path | None = None, e3_service=None):
         self._executable_override = executable
         self.sandbox = sandbox
         self.workdir = str(workdir) if workdir else str(CONTROL_PLANE)
         self._resolved = None
+        if e3_service is None:
+            if str(EXEC_BRAIN) not in sys.path:
+                sys.path.insert(0, str(EXEC_BRAIN))
+            from e3_service import E3ApplicationService
+            e3_service = E3ApplicationService()
+        self._e3_service = e3_service
 
     def resolve(self):
         if self._resolved is not None:
             return self._resolved
-        import codex_adapter  # noqa: PLC0415 - existing adapter, no credential access
-        if self._executable_override:
-            exe = Path(self._executable_override)
-            if codex_adapter._codex_version_of(exe) is None:  # noqa: SLF001
-                raise RuntimeError(f"Codex CLI at {exe} did not validate via --version")
-            self._resolved = exe
-        else:
-            self._resolved = codex_adapter._resolve_codex_executable()  # noqa: SLF001
+        # The historical constructor argument is retained for CLI compatibility
+        # but ignored: Career Ops no longer resolves or invokes Codex itself.
+        self._resolved = "e3-service"
         return self._resolved
 
     def probe(self, *, timeout: int = 240) -> dict:
@@ -482,55 +483,25 @@ class CodexWebSearchProvider(ResearchProvider):
         return out
 
     def _run_one(self, exe, query: str, *, limit: int, timeout: int) -> dict:
-        import subprocess  # noqa: PLC0415
         prompt = CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
-        cmd = [str(exe), "exec", "--json", "--skip-git-repo-check",
-               "--sandbox", self.sandbox, "--cd", self.workdir, prompt]
         out = {"query": query, "results": [], "web_search_observed": False,
                "executed_queries": [], "cli_version": None, "error": None,
                "raw_events": 0, "elapsed_s": None}
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            result = self._e3_service.execute(
+                objective=prompt, task_family="research", required_role="researcher",
+                timeout=timeout, context={"working_directory": self.workdir,
+                                           "requires_live_web_evidence": True})
         except Exception as exc:  # noqa: BLE001
             out["error"] = f"{type(exc).__name__}: {exc}"
             return out
-        events = []
-        for line in (proc.stdout or "").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                events.append(json.loads(line))
-            except json.JSONDecodeError:
-                continue
-        out["raw_events"] = len(events)
-        final_message = None
-        for event in events:
-            if event.get("type") != "item.completed":
-                continue
-            item = event.get("item") or {}
-            if item.get("type") == "web_search":
-                out["web_search_observed"] = True
-                if item.get("query"):
-                    out["executed_queries"].append(item["query"])
-            elif item.get("type") in ("agent_message", "message"):
-                message = item.get("text") or item.get("content")
-                if isinstance(message, list):
-                    message = "".join(p.get("text", "") for p in message
-                                      if isinstance(p, dict))
-                if message:
-                    final_message = message
-        if proc.returncode != 0 and final_message is None:
-            out["error"] = (proc.stderr or "").strip()[:400] or f"exit code {proc.returncode}"
-        if not out["web_search_observed"]:
-            # Fail truthfully: no live search was observed, so no result is accepted.
+        if result.get("status") != "COMPLETED":
+            out["error"] = result.get("error") or "E3 research execution failed"
             return out
-        if final_message:
-            payload, err = _parse_json_array(final_message)
-            if err:
-                out["error"] = err
-            elif isinstance(payload, list):
-                out["results"] = [r for r in payload if isinstance(r, dict) and r.get("url")]
+        # E3's generic text contract does not yet expose a provider-observed
+        # web-search event.  Do not treat generated JSON as live research until
+        # that evidence is part of the E3 contract.
+        out["error"] = "E3 response lacked provider-observed web-search evidence"
         return out
 
     def research(self, queries: list, *, limit_per_query: int = 5,

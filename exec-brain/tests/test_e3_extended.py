@@ -648,7 +648,7 @@ class TestE3RouterDeterministicSelection(unittest.TestCase):
 
 
 class TestDiscordE3Bridge(unittest.IsolatedAsyncioTestCase):
-    """Authorized Discord traffic is handled by E3 and native Hermes is skipped."""
+    """The plugin observes normal Discord traffic and never consumes it."""
 
     @staticmethod
     def _load_bridge():
@@ -660,174 +660,23 @@ class TestDiscordE3Bridge(unittest.IsolatedAsyncioTestCase):
         spec.loader.exec_module(module)
         return module
 
-    class Platform(Enum):
-        DISCORD = "discord"
-
-    @staticmethod
-    def _gateway(adapter, *, authorized=True):
-        return SimpleNamespace(
-            adapters={TestDiscordE3Bridge.Platform.DISCORD: adapter},
-            _is_user_authorized_for_source=lambda src: authorized,
-        )
-
-    @staticmethod
-    def _event(*, text="hello", chat_id="chan-1", thread_id=None,
-               prospective_thread_id=None):
-        source = SimpleNamespace(
-            platform=TestDiscordE3Bridge.Platform.DISCORD,
-            chat_id=chat_id,
-            thread_id=thread_id,
-            prospective_thread_id=prospective_thread_id,
-        )
-        return SimpleNamespace(source=source, text=text, message_id="msg-1")
-
-    @staticmethod
-    def _store():
-        return SimpleNamespace(
-            get_or_create_session=lambda source: SimpleNamespace(session_id="sid-1"),
-            load_transcript=lambda session_id: [],
-            append_to_transcript=lambda session_id, message, skip_db=False: None,
-        )
-
-    async def test_authorized_discord_message_is_sent_then_skipped(self):
+    async def test_normal_discord_plugin_hook_is_observer_only(self):
         bridge = self._load_bridge()
-        bridge._run_e3_sync = lambda text, context: {
-            "ok": True,
-            "content": "E3 says hello",
-            "workers": ["longcat-2.0"],
-            "family": "other",
-            "role": "builder",
-        }
+        self.assertFalse(hasattr(bridge, "_handle_gateway_message"))
+        self.assertFalse(hasattr(bridge, "_run_e3_sync"))
+        self.assertIsNone(await bridge._observe_only(object()))
 
-        class Adapter:
-            def __init__(self):
-                self.sent = []
-            async def send(self, chat_id, content, reply_to=None, metadata=None):
-                self.sent.append((chat_id, content, reply_to, metadata))
-                return SimpleNamespace(success=True)
-
-        class Store:
-            def __init__(self):
-                self.rows = []
-            def get_or_create_session(self, source):
-                return SimpleNamespace(session_id="sid-1")
-            def load_transcript(self, session_id):
-                return [{"role": "assistant", "content": "prior"}]
-            def append_to_transcript(self, session_id, message, skip_db=False):
-                self.rows.append((session_id, message))
-
-        adapter = Adapter()
-        store = Store()
-
-        result = await bridge._handle_gateway_message(
-            self._event(), self._gateway(adapter), store)
-
-        self.assertEqual(result["action"], "skip")
-        self.assertEqual(result["reason"], "handled-by-e3")
-        self.assertEqual(len(adapter.sent), 1)
-        self.assertIn("E3 says hello", adapter.sent[0][1])
-        self.assertIn("longcat-2.0", adapter.sent[0][1])
-        self.assertEqual([row[1]["role"] for row in store.rows],
-                         ["user", "assistant"])
-
-    async def test_prospective_thread_receives_verified_reply(self):
+    def test_plugin_registers_only_pre_dispatch_observer(self):
         bridge = self._load_bridge()
-        bridge._run_e3_sync = lambda text, context: {
-            "ok": True, "content": "thread reply", "workers": ["longcat-2.0"],
-        }
+        calls = []
 
-        class Adapter:
-            def __init__(self):
-                self.sent = []
-            async def send(self, chat_id, content, reply_to=None, metadata=None):
-                self.sent.append((chat_id, content, reply_to, metadata))
-                return SimpleNamespace(success=True)
+        class Context:
+            def register_hook(self, name, hook):
+                calls.append((name, hook))
 
-        class Store:
-            def get_or_create_session(self, source):
-                return SimpleNamespace(session_id="sid-1")
-            def load_transcript(self, session_id):
-                return []
-            def append_to_transcript(self, session_id, message, skip_db=False):
-                pass
-
-        adapter = Adapter()
-        result = await bridge._handle_gateway_message(
-            self._event(chat_id="parent-1", prospective_thread_id="thread-1"),
-            self._gateway(adapter), Store())
-        self.assertEqual(result["action"], "skip")
-        self.assertEqual(adapter.sent[0][0], "parent-1")
-        self.assertEqual(adapter.sent[0][3], {"thread_id": "thread-1"})
-
-    async def test_e3_failure_is_redacted_and_does_not_fall_through(self):
-        bridge = self._load_bridge()
-        bridge._run_e3_sync = lambda text, context: (_ for _ in ()).throw(
-            RuntimeError("internal-detail"))
-
-        class Adapter:
-            def __init__(self):
-                self.sent = []
-            async def send(self, chat_id, content, reply_to=None, metadata=None):
-                self.sent.append(content)
-                return SimpleNamespace(success=True)
-
-        adapter = Adapter()
-        result = await bridge._handle_gateway_message(
-            self._event(), self._gateway(adapter), self._store())
-        self.assertEqual(result, {"action": "skip", "reason": "e3-routing-error"})
-        self.assertEqual(len(adapter.sent), 1)
-        self.assertNotIn("internal-detail", adapter.sent[0])
-
-    async def test_empty_verified_content_is_not_delivered(self):
-        bridge = self._load_bridge()
-        bridge._run_e3_sync = lambda text, context: {
-            "ok": True, "content": " ", "workers": ["longcat-2.0"],
-        }
-
-        class Adapter:
-            def __init__(self):
-                self.sent = []
-            async def send(self, chat_id, content, reply_to=None, metadata=None):
-                self.sent.append(content)
-                return SimpleNamespace(success=True)
-
-        adapter = Adapter()
-        result = await bridge._handle_gateway_message(
-            self._event(), self._gateway(adapter), self._store())
-        self.assertEqual(result["reason"], "e3-empty-verified-content")
-        self.assertEqual(len(adapter.sent), 1)
-        self.assertIn("No verified response", adapter.sent[0])
-
-    async def test_adapter_delivery_failure_still_suppresses_native_dispatch(self):
-        bridge = self._load_bridge()
-        bridge._run_e3_sync = lambda text, context: {
-            "ok": True, "content": "verified", "workers": ["longcat-2.0"],
-        }
-
-        class Adapter:
-            async def send(self, chat_id, content, reply_to=None, metadata=None):
-                raise RuntimeError("transport unavailable")
-
-        result = await bridge._handle_gateway_message(
-            self._event(), self._gateway(Adapter()), self._store())
-        self.assertEqual(result, {"action": "skip", "reason": "e3-discord-send-failed"})
-
-    async def test_missing_adapter_suppresses_native_dispatch(self):
-        bridge = self._load_bridge()
-        gateway = SimpleNamespace(
-            adapters={}, _is_user_authorized_for_source=lambda src: True)
-        result = await bridge._handle_gateway_message(
-            self._event(), gateway, self._store())
-        self.assertEqual(result, {"action": "skip", "reason": "e3-adapter-unavailable"})
-
-    async def test_unauthorized_message_falls_through_to_hermes_auth(self):
-        bridge = self._load_bridge()
-        result = await bridge._handle_gateway_message(
-            self._event(), SimpleNamespace(
-                adapters={}, _is_user_authorized_for_source=lambda src: False),
-            SimpleNamespace())
-        self.assertIsNone(result)
-
+        bridge.register(Context())
+        self.assertEqual(calls[0][0], "pre_gateway_dispatch")
+        self.assertIs(calls[0][1], bridge._observe_only)
 
 class TestColdStartBenchmark(unittest.TestCase):
     """Test Cold-Start Benchmark / Qualification Harness."""

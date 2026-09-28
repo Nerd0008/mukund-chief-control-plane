@@ -6,14 +6,11 @@ Three providers, one contract
 ``deterministic``  declared rule output (title/company/location signals). Used
                    when no model provider is reachable, and always labelled as
                    NOT semantic JD analysis. Never claims to be a model pass.
-``deepseek``       the bulk semantic classifier for the whole candidate pool
-                   (batched chat completions through the existing
-                   ``exec-brain/deepseek_adapter.py``).
-``codex``          a bounded second pass over ambiguous / high-value candidates
-                   only (existing ``exec-brain/codex_adapter.py``). Codex is
-                   never called for every scanned posting: escalation is decided
-                   by the deterministic conditions in :func:`escalation_reason`
-                   and capped by ``codex_budget``.
+``e3``             the semantic classifier boundary for every AI request. E3
+                   selects the Stage-2 worker and records verification/evidence.
+``e3 second pass`` a bounded review over ambiguous / high-value candidates
+                   only. Escalation remains deterministic and capped by
+                   ``codex_budget``; Career Ops never selects Codex itself.
 
 Nothing here writes a tracker, submits anything or contacts anyone. Provider
 credentials are read by reference in the existing adapters (never printed).
@@ -185,70 +182,64 @@ def deterministic_classify(record: dict, *, mode: str = MODE_HIGH_RECALL) -> dic
 
 
 # --------------------------------------------------------------------------- #
-# DeepSeek bulk classification
+# E3 bulk classification
 # --------------------------------------------------------------------------- #
 
-def _deepseek_adapter(model: str):
+def _e3_service():
     _exec_brain_on_path()
-    import deepseek_adapter  # noqa: PLC0415
-    return deepseek_adapter.DeepSeekExecutionAdapter(model=model)
+    from e3_service import E3ApplicationService  # noqa: PLC0415
+    return E3ApplicationService()
 
 
 def deepseek_probe(model: str = "deepseek-flash") -> dict:
-    """Credential/reachability probe. Never returns or logs the key."""
+    """Compatibility name for the Stage-2 E3 readiness probe.
+
+    ``model`` is intentionally ignored: business code no longer selects a
+    provider/model.  The return shape remains stable for existing reports.
+    """
     try:
-        adapter = _deepseek_adapter(model)
+        service = _e3_service()
+        check = service.execute(objective="E3 readiness inspection",
+                                task_family="data-processing",
+                                required_role="data-analyst", dry_run=True)
     except Exception as exc:  # noqa: BLE001 - reported, never fatal
         return {"available": False, "reason": f"{type(exc).__name__}: {exc}",
                 "auth_source": None, "observed_models": [], "resolved_model": None}
-    health = adapter.check_health()
-    identity = adapter.get_identity() if health.get("status") == "healthy" else {}
-    observed = [m.get("id") for m in (identity.get("observed_models") or []) if m.get("id")]
-    resolved = model if model in observed else (observed[0] if observed else model)
     return {
-        "available": health.get("status") == "healthy",
-        "status": health.get("status"),
-        "reason": health.get("reason"),
-        "auth_source": health.get("auth_source"),
-        "observed_models": observed,
-        "model_requested": model,
-        "resolved_model": resolved,
-        "model_resolution": ("requested model observed at the provider" if resolved == model
-                             else "requested model not observed; using the first provider-observed id"
-                             if observed else "no model list observed; using the requested id"),
+        "available": check.get("status") == "DRY_RUN" and bool(check.get("routable_workers")),
+        "status": check.get("status"), "reason": check.get("error"),
+        "auth_source": "e3-stage2", "observed_models": [],
+        "model_requested": None, "resolved_model": None,
+        "model_resolution": "worker/model selection is owned by E3",
     }
 
 
-def _dispatch_batch(adapter, batch: list, resolved: str, timeout: int, max_tokens: int) -> tuple:
-    """One bulk request. Returns ``(payload_or_None, error_or_None, usage)``."""
-    result = adapter.dispatch({
-        "contract_id": "discovery-bulk-semantic",
-        "objective": build_bulk_prompt(batch),
-        "model": resolved,
-        "timeout": timeout,
-        "max_tokens": max_tokens,
-        "temperature": 0.0,
-    })
-    usage = result.get("usage") or {}
+def _dispatch_batch(service, batch: list, timeout: int) -> tuple:
+    """One bulk request. Returns ``(payload_or_None, error_or_None, metadata)``."""
+    result = service.execute(objective=build_bulk_prompt(batch),
+                             task_family="data-processing",
+                             required_role="data-analyst", timeout=timeout)
     if result.get("status") != "COMPLETED":
-        return None, {"error": result.get("error"), "exit_code": result.get("exit_code"),
-                      "finish_reason": result.get("finish_reason")}, usage
+        return None, {"error": result.get("error", "e3 unavailable")}, {}
     payload, err = parse_json_payload(result.get("content") or "")
     if err:
-        return None, {"error": err, "finish_reason": result.get("finish_reason")}, usage
+        return None, {"error": err}, {}
     if isinstance(payload, dict) and isinstance(payload.get("classifications"), list):
         payload = payload["classifications"]
     if not isinstance(payload, list):
-        return None, {"error": "payload was not a list",
-                      "finish_reason": result.get("finish_reason")}, usage
-    return payload, None, usage
+        return None, {"error": "payload was not a list"}, {}
+    return payload, None, {
+        "provider": result.get("provider") or "e3",
+        "model": result.get("model") or "unknown",
+        "worker_id": result.get("worker_id"),
+    }
 
 
 def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                            batch_size: int = DEFAULT_BATCH_SIZE, timeout: int = 120,
                            max_tokens: int = DEFAULT_MAX_TOKENS,
-                           adapter=None, mode: str = MODE_HIGH_RECALL) -> dict:
-    """Classify the candidate pool with DeepSeek in bounded batches.
+                           e3_service=None, mode: str = MODE_HIGH_RECALL) -> dict:
+    """Classify the candidate pool through E3 in bounded batches.
 
     A batch that returns no parseable JSON is retried once at half the batch
     size before it is recorded as a failure: a reasoning model that spends its
@@ -256,8 +247,8 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
     tokens, empty content) must not be reported as "no candidates".
     """
     out = {
-        "provider": "deepseek",
-        "model_requested": model,
+        "provider": "e3",
+        "model_requested": None,
         "model_observed": None,
         "model_identity_observed": False,
         "auth_source": None,
@@ -275,33 +266,33 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
         "classifications": {},
         "limitation": None,
     }
-    if adapter is None:
+    if e3_service is None:
         try:
-            adapter = _deepseek_adapter(model)
+            e3_service = _e3_service()
         except Exception as exc:  # noqa: BLE001
-            out["limitation"] = f"deepseek adapter unavailable: {type(exc).__name__}: {exc}"
+            out["limitation"] = f"E3 service unavailable: {type(exc).__name__}: {exc}"
             return out
-    health = adapter.check_health()
-    out["auth_source"] = health.get("auth_source")
-    if health.get("status") != "healthy":
-        out["limitation"] = (f"deepseek not healthy ({health.get('status')}: "
-                             f"{health.get('reason')}); no model pass was made")
+    readiness = e3_service.execute(objective="E3 readiness inspection",
+                                   task_family="data-processing",
+                                   required_role="data-analyst", dry_run=True)
+    out["auth_source"] = "e3-stage2"
+    if readiness.get("status") != "DRY_RUN" or not readiness.get("routable_workers"):
+        out["limitation"] = "E3 Stage 2 has no eligible semantic worker; no model pass was made"
         return out
-    identity = adapter.get_identity()
-    observed = [m.get("id") for m in (identity.get("observed_models") or []) if m.get("id")]
-    resolved = model if model in observed else (observed[0] if observed else model)
-    out["model_observed"] = resolved
-    out["model_identity_observed"] = bool(observed)
-    out["model_resolution"] = ("requested model observed at the provider" if resolved == model
-                               else "requested model not observed; used first provider-observed id"
-                               if observed else "model list not observed; requested id used unverified")
+    resolved, observed = "e3-selected", []
+    out["model_resolution"] = "worker/model selection is owned by E3"
 
     for start in range(0, len(records), batch_size):
         out["batches"] += 1
-        payload, error, usage = _dispatch_batch(adapter, records[start:start + batch_size],
-                                                resolved, timeout, max_tokens)
+        payload, error, metadata = _dispatch_batch(e3_service, records[start:start + batch_size], timeout)
         out["requests"] += 1
-        out["usage"] = _add_usage(out["usage"], usage)
+        out["usage"] = _add_usage(out["usage"], {})
+        if metadata:
+            resolved = metadata.get("model") or resolved
+            observed = [metadata.get("worker_id")] if metadata.get("worker_id") else []
+            out["provider"] = metadata.get("provider") or out["provider"]
+            out["model_observed"] = resolved
+            out["model_identity_observed"] = bool(observed)
         if error and len(records[start:start + batch_size]) > 1:
             # split once: a truncated/empty batch is retried in halves before failing
             out["split_retries"] += 1
@@ -312,11 +303,16 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
             for half in halves:
                 if not half:
                     continue
-                payload_h, error_h, usage_h = _dispatch_batch(adapter, half, resolved,
-                                                              timeout, max_tokens)
+                payload_h, error_h, metadata_h = _dispatch_batch(e3_service, half, timeout)
                 out["requests"] += 1
                 out["batches"] += 1
-                out["usage"] = _add_usage(out["usage"], usage_h)
+                out["usage"] = _add_usage(out["usage"], {})
+                if metadata_h:
+                    resolved = metadata_h.get("model") or resolved
+                    observed = [metadata_h.get("worker_id")] if metadata_h.get("worker_id") else []
+                    out["provider"] = metadata_h.get("provider") or out["provider"]
+                    out["model_observed"] = resolved
+                    out["model_identity_observed"] = bool(observed)
                 if error_h:
                     ok = False
                     out["errors"].append({"batch": out["batches"], "error": error_h.get("error"),
@@ -340,7 +336,7 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
         out["unclassified_by_provider"] += _count_missing(batch, payload)
         _record_batch(out, batch, payload, resolved, observed)
     if not out["classifications"]:
-        out["limitation"] = ("the deepseek pass produced no usable classifications; the funnel "
+        out["limitation"] = ("the E3 semantic pass produced no usable classifications; the funnel "
                             "records this instead of treating the pool as empty")
     return out
 
@@ -349,8 +345,8 @@ def _unclassified(record: dict, reason: str) -> dict:
     doc = build_classification(
         record, primary_label="ambiguous_review", confidence=None,
         reasons=[], uncertainty=[reason],
-        provider="deepseek", model="unreported", model_identity_observed=False,
-        prompt_version=PROMPT_VERSION, classifier="deepseek_bulk")
+        provider="e3", model="unreported", model_identity_observed=False,
+        prompt_version=PROMPT_VERSION, classifier="e3_bulk")
     doc["escalation_eligible"] = False
     doc["escalation_blocked_reason"] = "no usable first-pass classification"
     return doc
@@ -389,9 +385,9 @@ def _record_batch(out: dict, batch: list, payload: list, resolved: str, observed
             confidence=item.get("confidence") if isinstance(item.get("confidence"), (int, float)) else None,
             reasons=item.get("reasons") if isinstance(item.get("reasons"), list) else [],
             uncertainty=item.get("uncertainty") if isinstance(item.get("uncertainty"), list) else [],
-            provider="deepseek", model=resolved,
+            provider=out.get("provider") or "e3", model=resolved,
             model_identity_observed=bool(observed), prompt_version=PROMPT_VERSION,
-            classifier="deepseek_bulk")
+            classifier="e3_bulk")
         doc["rejected_by_guard"] = not doc["valid"]
         out["classifications"][cid] = doc
 
@@ -404,16 +400,16 @@ def escalation_reason(classification: dict) -> str | None:
     """Deterministic escalation conditions. ``None`` means: do not spend Codex."""
     if classification.get("escalation_eligible") is False:
         return None
-    if classification.get("classifier") != "deepseek_bulk":
+    if classification.get("classifier") != "e3_bulk":
         return None
     label = classification.get("primary_label")
     confidence = classification.get("confidence")
     if label in ("ambiguous_review",) or label not in LABELS:
-        return "deepseek_label_ambiguous_review"
+        return "semantic_label_ambiguous_review"
     if confidence is None:
-        return "deepseek_confidence_missing"
+        return "semantic_confidence_missing"
     if float(confidence) < CONFIDENCE_ESCALATE_BELOW:
-        return f"deepseek_confidence_below_{CONFIDENCE_ESCALATE_BELOW}"
+        return f"semantic_confidence_below_{CONFIDENCE_ESCALATE_BELOW}"
     if (label == "plausible_entry_level" and not classification.get("jd_available")
             and float(confidence) < HIGH_VALUE_GAP_CONFIDENCE_BELOW):
         return "high_value_plausible_without_jd_text"
@@ -454,8 +450,8 @@ def select_escalations(records: list, classifications: dict, *, budget: int) -> 
 
 
 def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDGET,
-                   timeout: int = 300, adapter=None, workdir: str | None = None) -> dict:
-    """Bounded Codex second pass. Never called for the whole raw scan."""
+                   timeout: int = 300, e3_service=None, workdir: str | None = None) -> dict:
+    """Bounded E3 second pass. Never called for the whole raw scan."""
     out = {
         "provider": "openai-codex-cli",
         "budget": int(budget),
@@ -476,46 +472,32 @@ def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDG
     if not pairs:
         out["limitation"] = "no candidate met the deterministic escalation conditions"
         return out
-    if adapter is None:
+    if e3_service is None:
         try:
-            _exec_brain_on_path()
-            import codex_adapter  # noqa: PLC0415
-            adapter = codex_adapter.CodexExecutionAdapter()
+            e3_service = _e3_service()
         except Exception as exc:  # noqa: BLE001
-            out["limitation"] = f"codex CLI unavailable: {type(exc).__name__}: {exc}"
+            out["limitation"] = f"E3 service unavailable: {type(exc).__name__}: {exc}"
             out["escalated"] = [{"candidate_id": c["candidate_id"], "reason": r, "result": "not_run"}
                                 for _rec, c, r in pairs]
             return out
-    try:
-        health = adapter.check_health()
-        out["cli_version"] = health.get("version")
-        out["resolved_executable"] = str(getattr(adapter, "executable", "")) or None
-    except Exception as exc:  # noqa: BLE001
-        out["errors"].append({"batch": 0, "error": f"{type(exc).__name__}: {exc}"})
 
     batch_size = 4
     for start in range(0, len(pairs), batch_size):
         chunk = pairs[start:start + batch_size]
         prompt = build_escalation_prompt([rec for rec, _c, _r in chunk],
                                          [c for _rec, c, _r in chunk])
-        contract = {"contract_id": "discovery-codex-second-pass", "objective": prompt,
-                    "timeout": timeout}
-        if workdir:
-            contract["working_directory"] = workdir
-        result = adapter.dispatch(contract)
+        result = e3_service.execute(objective=prompt, task_family="code",
+                                    required_role="builder", timeout=timeout,
+                                    context={"working_directory": workdir} if workdir else None)
         out["requests"] += 1
-        usage = result.get("usage_tokens") or {}
-        for value in usage.values():
-            if isinstance(value, int):
-                out["usage_tokens_total"] += value
         if result.get("status") != "COMPLETED":
             out["errors"].append({"batch": start // batch_size + 1, "error": result.get("error"),
-                                  "exit_code": result.get("exit_code")})
+                                  "exit_code": None})
             for _rec, cls, reason in chunk:
                 out["escalated"].append({"candidate_id": cls["candidate_id"], "reason": reason,
                                          "result": "failed"})
             continue
-        payload, err = parse_json_payload(result.get("final_message") or "")
+        payload, err = parse_json_payload(result.get("content") or "")
         if err:
             out["errors"].append({"batch": start // batch_size + 1, "error": err})
         by_id = {}
@@ -538,9 +520,9 @@ def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDG
                 confidence=item.get("confidence") if isinstance(item.get("confidence"), (int, float)) else None,
                 reasons=item.get("reasons") if isinstance(item.get("reasons"), list) else [],
                 uncertainty=item.get("uncertainty") if isinstance(item.get("uncertainty"), list) else [],
-                provider="openai-codex-cli", model=(out.get("cli_version") or "unknown"),
-                model_identity_observed=False, prompt_version=PROMPT_VERSION,
-                classifier="codex_second_pass",
+                provider=result.get("provider") or "e3", model=result.get("model") or "unknown",
+                model_identity_observed=bool(result.get("model")), prompt_version=PROMPT_VERSION,
+                classifier="e3_second_pass",
                 extra={"escalation_reason": reason,
                        "reviewed_first_pass": {"primary_label": cls.get("primary_label"),
                                                "confidence": cls.get("confidence")}})

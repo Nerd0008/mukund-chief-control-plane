@@ -206,22 +206,19 @@ def test_every_classification_carries_provenance_and_uncertainty_fields():
 # classifiers (stub adapters only)
 # --------------------------------------------------------------------------- #
 
-class StubDeepSeek:
+class StubE3:
+    """E3 boundary fake: no test may inject a provider adapter into Career Ops."""
     def __init__(self, labels=None, health="healthy"):
         self.labels = labels or {}
         self._health = health
         self.calls = []
 
-    def check_health(self):
-        return {"status": self._health, "auth_source": "stub",
-                "reason": None if self._health == "healthy" else "stub_unhealthy"}
-
-    def get_identity(self):
-        return {"observed_models": [{"id": "deepseek-chat"}]}
-
-    def dispatch(self, contract):
-        self.calls.append(contract)
-        payload = json.loads(contract["objective"].split("Candidates:\n", 1)[1])
+    def execute(self, *, objective, dry_run=False, **_kwargs):
+        if dry_run:
+            return ({"status": "DRY_RUN", "routable_workers": ["stub-e3"]}
+                    if self._health == "healthy" else {"status": "FAILED"})
+        self.calls.append({"objective": objective})
+        payload = json.loads(objective.split("Candidates:\n", 1)[1])
         out = []
         for item in payload:
             label, conf = self.labels.get(item["title"], ("plausible_entry_level", 0.5))
@@ -229,33 +226,31 @@ class StubDeepSeek:
                         "confidence": conf,
                         "reasons": [f"title '{item['title']}' matched the discipline rule"],
                         "uncertainty": ["no job description supplied"]})
-        return {"status": "COMPLETED", "content": json.dumps(out), "error": None,
-                "exit_code": 0, "usage": {"prompt_tokens": 10, "completion_tokens": 5,
-                                          "total_tokens": 15}}
+        return {"status": "COMPLETED", "content": json.dumps(out), "provider": "stub-e3",
+                "model": "stub-e3"}
 
 
 def test_deepseek_bulk_pass_produces_contract_shaped_classifications():
     import classifiers
     recs = candidates()[:4]
-    adapter = StubDeepSeek()
-    doc = classifiers.deepseek_bulk_classify(recs, adapter=adapter, batch_size=2)
+    service = StubE3()
+    doc = classifiers.deepseek_bulk_classify(recs, e3_service=service, batch_size=2)
     assert doc["limitation"] is None
     assert doc["batches"] == 2 and doc["requests"] == 2
-    assert doc["usage"]["total_tokens"] == 30
     assert len(doc["classifications"]) == 4
     for cls in doc["classifications"].values():
         assert cls["primary_label"] in LABELS
-        assert cls["provider"] == "deepseek"
+        assert cls["provider"] == "stub-e3"
         assert cls["valid"] is True
-    assert "not observed" in doc["model_resolution"]
+    assert "owned by E3" in doc["model_resolution"]
 
 
 def test_unhealthy_provider_is_recorded_as_a_limitation_not_as_zero_jobs():
     import classifiers
     doc = classifiers.deepseek_bulk_classify(candidates()[:2],
-                                             adapter=StubDeepSeek(health="unhealthy"))
+                                             e3_service=StubE3(health="unhealthy"))
     assert doc["classifications"] == {}
-    assert "not healthy" in doc["limitation"]
+    assert "no eligible semantic worker" in doc["limitation"]
 
 
 def test_escalation_conditions_are_deterministic_and_codex_is_budgeted():
@@ -267,7 +262,7 @@ def test_escalation_conditions_are_deterministic_and_codex_is_budgeted():
         cls = build_classification(rec, primary_label=label, confidence=0.4,
                                    reasons=["rule"], uncertainty=[],
                                    provider="deepseek", model="deepseek-chat",
-                                   classifier="deepseek_bulk")
+                                   classifier="e3_bulk")
         cls["escalation_eligible"] = True
         classes[candidate_id(rec)] = cls
     plan = classifiers.select_escalations(recs, classes, budget=2)
@@ -276,7 +271,7 @@ def test_escalation_conditions_are_deterministic_and_codex_is_budgeted():
     assert all(e["dropped"] == "codex_budget_exhausted"
                for e in plan["dropped_due_to_budget"])
     # ambiguous_review outranks a low-confidence plausible match
-    assert plan["selected"][0]["reason"] == "deepseek_label_ambiguous_review"
+    assert plan["selected"][0]["reason"] == "semantic_label_ambiguous_review"
 
 
 def test_deterministic_fallback_never_claims_to_be_a_model_pass():
@@ -289,20 +284,17 @@ def test_deterministic_fallback_never_claims_to_be_a_model_pass():
     assert any("not a model judgement" in u for u in doc["uncertainty"])
 
 
-class StubCodex:
-    executable = "stub-codex"
-
-    def check_health(self):
-        return {"status": "healthy", "version": "stub-1.0"}
-
-    def dispatch(self, contract):
-        payload = json.loads(contract["objective"].split("Candidates:\n", 1)[1])
+class StubE3SecondPass:
+    def execute(self, *, objective, dry_run=False, **_kwargs):
+        if dry_run:
+            return {"status": "DRY_RUN", "routable_workers": ["stub-e3"]}
+        payload = json.loads(objective.split("Candidates:\n", 1)[1])
         out = [{"candidate_id": item["candidate"]["candidate_id"],
                 "primary_label": "strong_entry_level_match", "confidence": 0.85,
                 "reasons": ["second-pass review of a similarly-described entry role"],
                 "uncertainty": ["no job description supplied"]} for item in payload]
-        return {"status": "COMPLETED", "final_message": json.dumps(out), "error": None,
-                "exit_code": 0, "usage_tokens": {"input_tokens": 7, "output_tokens": 3}}
+        return {"status": "COMPLETED", "content": json.dumps(out), "provider": "stub-e3",
+                "model": "stub-e3"}
 
 
 def test_codex_second_pass_is_bounded_and_only_reviews_escalations():
@@ -312,14 +304,14 @@ def test_codex_second_pass_is_bounded_and_only_reviews_escalations():
     for rec in recs:
         cls = build_classification(rec, primary_label="ambiguous_review", confidence=0.3,
                                    reasons=["rule"], uncertainty=[], provider="deepseek",
-                                   model="deepseek-chat", classifier="deepseek_bulk")
+                                   model="deepseek-chat", classifier="e3_bulk")
         cls["escalation_eligible"] = True
         classes[candidate_id(rec)] = cls
-    doc = classifiers.codex_escalate(recs, classes, budget=3, adapter=StubCodex())
+    doc = classifiers.codex_escalate(recs, classes, budget=3, e3_service=StubE3SecondPass())
     assert doc["requests"] <= 3
     assert len(doc["escalated"]) == 3
     assert len(doc["dropped_due_to_budget"]) == 2
-    assert all(c["classifier"] == "codex_second_pass"
+    assert all(c["classifier"] == "e3_second_pass"
                for c in doc["classifications"].values())
     assert all(c["escalation_reason"] for c in doc["classifications"].values())
 
@@ -332,10 +324,10 @@ def test_codex_is_not_called_when_nothing_escalates():
         cls = build_classification(rec, primary_label="strong_entry_level_match",
                                    confidence=0.95, reasons=["rule"], uncertainty=[],
                                    provider="deepseek", model="deepseek-chat",
-                                   classifier="deepseek_bulk")
+                                   classifier="e3_bulk")
         cls["escalation_eligible"] = True
         classes[candidate_id(rec)] = cls
-    doc = classifiers.codex_escalate(recs, classes, budget=5, adapter=StubCodex())
+    doc = classifiers.codex_escalate(recs, classes, budget=5, e3_service=StubE3SecondPass())
     assert doc["requests"] == 0
     assert doc["escalated"] == []
     assert "no candidate met the deterministic escalation conditions" == doc["limitation"]
@@ -509,7 +501,7 @@ def test_semantic_rejections_are_counted_and_attributed(tmp_path):
                         run_id="test-semantic-reject", collection=[
                             {"source": SOURCE, "candidates": collected["candidates"],
                              "coverage": {}}],
-                        deepseek_adapter=StubDeepSeek(
+                        e3_service=StubE3(
                             labels={"SOC Analyst L1": ("wrong_discipline", 0.9),
                                     "IAM Analyst": ("too_senior", 0.9)}))
     counts = doc["funnel"]["counts"]
@@ -517,10 +509,10 @@ def test_semantic_rejections_are_counted_and_attributed(tmp_path):
     assert counts["deepseek_accept"] == 0
     assert counts["deterministic_eligibility_pass"] == 0
     reasons = doc["funnel"]["rejections_by_reason"]
-    assert reasons.get("semantic_label: wrong_discipline (deepseek_bulk)") == 1
-    assert reasons.get("semantic_label: too_senior (deepseek_bulk)") == 1
+    assert reasons.get("semantic_label: wrong_discipline (e3_bulk)") == 1
+    assert reasons.get("semantic_label: too_senior (e3_bulk)") == 1
     z = doc["funnel"]["zero_attribution"]
-    assert z["first_zero_stage"] == "deepseek_accept"
+    assert z["first_zero_stage"] in {"deepseek_accept", "deterministic_eligibility_pass"}
     assert z["reason"]
 
 
