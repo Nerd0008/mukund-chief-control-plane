@@ -8,6 +8,7 @@ workflow objective.
 from __future__ import annotations
 
 import json
+import re
 from types import SimpleNamespace
 from typing import Any
 
@@ -42,6 +43,70 @@ def _offered_tool_names(tools: Any) -> set[str]:
         if isinstance(name, str) and name.strip():
             names.add(name.strip())
     return names
+
+
+_LONGCAT_TOOL_BLOCK = re.compile(
+    r"<longcat_tool_call>\s*(\{.*?\})\s*</longcat_tool_call>",
+    re.DOTALL | re.IGNORECASE,
+)
+
+
+def _normalize_longcat_tool_markup(text: str) -> str:
+    """Translate LongCat's documented XML tool shape to Hermes' standard bridge.
+
+    LongCat emits:
+      <longcat_tool_call>{"name": "...", "arguments": {...}}</longcat_tool_call>
+
+    Hermes' existing ACP bridge expects an OpenAI-shaped object inside
+    <tool_call> tags. Only syntactically valid LongCat blocks are rewritten;
+    malformed blocks remain ordinary non-executable text.
+    """
+    if not isinstance(text, str) or "<longcat_tool_call" not in text.lower():
+        return text
+
+    ordinal = 0
+
+    def _replace(match: re.Match[str]) -> str:
+        nonlocal ordinal
+        raw = match.group(1)
+        try:
+            obj = json.loads(raw)
+        except (TypeError, ValueError):
+            return match.group(0)
+        if not isinstance(obj, dict):
+            return match.group(0)
+        name = obj.get("name")
+        arguments = obj.get("arguments", {})
+        if not isinstance(name, str) or not name.strip():
+            return match.group(0)
+        if isinstance(arguments, str):
+            try:
+                json.loads(arguments)
+                arguments_json = arguments
+            except (TypeError, ValueError):
+                return match.group(0)
+        else:
+            try:
+                arguments_json = json.dumps(arguments, ensure_ascii=False)
+            except (TypeError, ValueError):
+                return match.group(0)
+
+        ordinal += 1
+        payload = {
+            "id": f"longcat_call_{ordinal}",
+            "type": "function",
+            "function": {
+                "name": name.strip(),
+                "arguments": arguments_json,
+            },
+        }
+        return (
+            "<tool_call>\n" +
+            json.dumps(payload, ensure_ascii=False) +
+            "\n</tool_call>"
+        )
+
+    return _LONGCAT_TOOL_BLOCK.sub(_replace, text)
 
 
 def _serialize_existing_tool_calls(calls: Any) -> str:
@@ -216,7 +281,8 @@ class E3ChatCompletions:
                 from agent.acp_openai_bridge import extract_tool_calls_from_text
             except ModuleNotFoundError:
                 from acp_openai_bridge import extract_tool_calls_from_text
-            extracted, cleaned = extract_tool_calls_from_text(content)
+            normalized = _normalize_longcat_tool_markup(content)
+            extracted, cleaned = extract_tool_calls_from_text(normalized)
             if extracted:
                 allowed = _offered_tool_names(tools)
                 if all(_tool_name(call) in allowed for call in extracted):
