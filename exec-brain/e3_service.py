@@ -76,3 +76,96 @@ class E3ApplicationService:
                 "provider": first.get("provider"), "model": first.get("model"),
                 "assignments": assignments,
                 "stage2_allowed_workers": state.get("allowed_workers", [])}
+
+
+    def execute_chat(self, *, messages: list[dict[str, Any]], objective: str,
+                     task_family: str = "other", required_role: str = "builder",
+                     risk_class: str = "R1", reasoning_depth: int = 1,
+                     timeout: int = 120, dry_run: bool = False) -> Dict[str, Any]:
+        """Route one Hermes chat-completions turn through E3 without flattening it.
+
+        This is deliberately separate from execute(). The ordinary execute()
+        method is the task/workflow boundary used by Chief departments;
+        execute_chat() is the provider-transport boundary used by Hermes'
+        native agent/tool loop.
+        """
+        from stage2_control import require_enabled
+        from task_fingerprint import TaskFingerprint
+        from e3_execution import ExecutionAdapterRegistry
+        from e3_shadow_orchestrator import E3ShadowOrchestrator
+
+        state = require_enabled()
+        registry = ExecutionAdapterRegistry(
+            allowed_workers=state.get("allowed_workers", []))
+        fp = TaskFingerprint(task_family=task_family,
+                             reasoning_depth=reasoning_depth,
+                             risk_class=risk_class,
+                             required_roles=[required_role],
+                             verification_type="deterministic")
+        db = self.db_path or (Path(__file__).resolve().parent / "orchestration.db")
+        factory = self.orchestrator_factory or E3ShadowOrchestrator
+        orch = factory(db_path=db)
+        plan = orch.planner.plan(objective, fp)
+        nodes = list(plan.get("nodes") or [])
+        if not nodes or orch.router is None:
+            return {"status": "FAILED", "provider_call_made": False,
+                    "error": "e3_chat_route_unavailable",
+                    "stage2_allowed_workers": state.get("allowed_workers", [])}
+
+        node = nodes[0]
+        proposed = orch.router.propose_candidates(node, fp.task_family, fp)
+        candidates = [
+            candidate for candidate in proposed
+            if registry.is_routable(candidate.worker_id)
+        ]
+        candidates = orch._apply_owner_route_preference(
+            candidates, node, fp.task_family)
+        if not candidates:
+            return {"status": "FAILED", "provider_call_made": False,
+                    "error": "e3_chat_no_eligible_worker",
+                    "stage2_allowed_workers": state.get("allowed_workers", [])}
+
+        chosen = candidates[0]
+        if dry_run:
+            return {"status": "DRY_RUN", "provider_call_made": False,
+                    "worker_id": chosen.worker_id, "provider": chosen.provider,
+                    "model": chosen.model,
+                    "stage2_allowed_workers": state.get("allowed_workers", [])}
+
+        adapter = registry.adapter_for(chosen.worker_id)
+        contract = {
+            "contract_id": f"chat-{plan.get('plan_id') or 'unknown'}",
+            "objective": objective,
+            "messages": list(messages or []),
+            "timeout": timeout,
+            "max_tokens": 1024,
+            "temperature": 0.0,
+        }
+        result = adapter.dispatch(contract)
+        e2_linkage = registry.report_usage(chosen.worker_id, result)
+        tool_calls = result.get("tool_calls") or []
+        content = result.get("content")
+        completed = (
+            result.get("status") == "COMPLETED"
+            and (content is not None or bool(tool_calls))
+        )
+        if not completed:
+            return {"status": "FAILED", "provider_call_made": True,
+                    "error": result.get("error") or "e3_chat_execution_incomplete",
+                    "worker_id": chosen.worker_id,
+                    "provider": result.get("provider") or chosen.provider,
+                    "model": result.get("model") or chosen.model,
+                    "finish_reason": result.get("finish_reason"),
+                    "usage": result.get("usage"),
+                    "e2_usage_linkage": e2_linkage,
+                    "stage2_allowed_workers": state.get("allowed_workers", [])}
+
+        return {"status": "COMPLETED", "provider_call_made": True,
+                "content": content or "", "tool_calls": tool_calls,
+                "finish_reason": result.get("finish_reason"),
+                "usage": result.get("usage"),
+                "worker_id": chosen.worker_id,
+                "provider": result.get("provider") or chosen.provider,
+                "model": result.get("model") or chosen.model,
+                "e2_usage_linkage": e2_linkage,
+                "stage2_allowed_workers": state.get("allowed_workers", [])}
