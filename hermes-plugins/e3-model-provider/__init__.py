@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 from providers import register_provider
@@ -52,7 +53,9 @@ class E3Profile(ProviderProfile):
                           and (candidate / "career-ops" / "discovery" / "scheduled_orchestrator.py").is_file()), runtime.parent)
         dispatcher = DefaultDepartmentDispatcher(
             career_ops=CareerOpsDepartment(repo_root=repo_root, allow_external=True))
-        return E3ModelClient(E3ApplicationService(), department_dispatcher=dispatcher)
+        return E3ModelClient(
+            E3ApplicationService(), department_dispatcher=dispatcher,
+            api_key="e3", base_url="e3://local")
 
 
 register_provider(E3Profile(
@@ -60,10 +63,15 @@ register_provider(E3Profile(
     aliases=("chief-e3",),
     display_name="Chief E3",
     description="Hermes tool loop backed by E3 Stage-2 selection",
-    auth_type="none",
+    auth_type="external_process",
     env_vars=(),
     base_url="e3://local",
     supports_health_check=False,
     supports_model_listing=False,
     fallback_models=("e3-auto",),
+    # Hermes resolves credentials before invoking create_client().  Use the
+    # supported external-process contract as a local launch-check carrier;
+    # create_client still returns the in-process E3 client and never spawns it.
+    process_command=sys.executable,
+    process_args=("-c", "pass"),
 ))

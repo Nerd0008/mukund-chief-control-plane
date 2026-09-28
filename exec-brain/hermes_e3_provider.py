@@ -64,6 +64,13 @@ class E3ChatCompletions:
 
 
 class E3ModelClient:
-    def __init__(self, service: Any, department_dispatcher: Any = None):
+    def __init__(self, service: Any, department_dispatcher: Any = None,
+                 api_key: str = "e3", base_url: str = "e3://local"):
+        # Hermes' routed OpenAI-compatible adapter reads these attributes
+        # before it hands requests to ``chat.completions``.  E3 is local and
+        # never uses the credential or URL for network I/O, but exposing the
+        # supported contract keeps native AIAgent initialization intact.
+        self.api_key = api_key
+        self.base_url = base_url
         self.chat = SimpleNamespace(completions=E3ChatCompletions(
             service, department_dispatcher=department_dispatcher))
