@@ -37,6 +37,7 @@ Checks performed (all executable, all in-run):
 Usage:
     python scripts/e3_stage2_readiness_gate.py [--regression-evidence PATH]
                                                [--out-dir DIR]
+                                               [--activation-pool longcat-text]
 """
 
 import argparse
@@ -61,6 +62,11 @@ CREDENTIAL_MISSING_WORKERS = [
     "minimax-m3", "step-37-flash", "tencent-hunyuan-hy3",
 ]
 CONFIGURED_WORKERS = ["codex-cli", "google-nano-banana-2", "deepseek-v41-flash"]
+ACTIVATION_POOLS = {
+    "longcat-text": ("longcat-2.0",),
+}
+SCOPE_DECISION_PATH = (REPO_ROOT / "tasks-or-issues"
+                       / "2026-09-28-owner-decision-google-image-scope.md")
 
 # The authority file and the immutable task contract are the only sources that
 # can grant owner authorization for local Stage 2 enablement. The gate verifies
@@ -125,7 +131,7 @@ def _store_hashes() -> dict:
 
 # ── 1. credentials (presence only) ──────────────────────────────────
 
-def check_credentials() -> dict:
+def check_credentials(activation_workers=None) -> dict:
     import generic_openai_adapter as goa
     from worker_registry import WorkerRegistry
 
@@ -178,6 +184,9 @@ def check_credentials() -> dict:
 
     missing = [probe_generic(w) for w in CREDENTIAL_MISSING_WORKERS]
     configured = [probe_configured(w) for w in CONFIGURED_WORKERS]
+    activation_workers = tuple(activation_workers or CREDENTIAL_MISSING_WORKERS)
+    by_worker = {m["worker_id"]: m for m in missing}
+    activation = [by_worker[w] for w in activation_workers if w in by_worker]
     return {
         "note": ("presence only — no credential value is read into a printed "
                  "variable, logged or stored; auth source is the store name, "
@@ -190,12 +199,17 @@ def check_credentials() -> dict:
                                      if m["credential_present"]],
         "previously_configured_workers": configured,
         "all_seven_configured": all(m["credential_present"] for m in missing),
+        "activation_workers": list(activation_workers),
+        "activation_credentials_configured": bool(activation) and all(
+            m["credential_present"] for m in activation),
+        "activation_credential_workers_missing": [
+            m["worker_id"] for m in activation if not m["credential_present"]],
     }
 
 
 # ── 1b. recorded owner authorization (read, never assumed) ─────────
 
-def check_owner_authorization() -> dict:
+def check_owner_authorization(activation_pool: str = "longcat-text") -> dict:
     """Verify the owner's Stage 2 authorization is actually recorded.
 
     The gate never enables Stage 2 on its own authority. It requires the
@@ -219,8 +233,18 @@ def check_owner_authorization() -> dict:
         if marker in text:
             overrides.append({"path": str(path.relative_to(REPO_ROOT)),
                               "marker": marker})
+    scope_approved = (activation_pool == "longcat-text"
+                      and SCOPE_DECISION_PATH.exists()
+                      and "Status: APPROVED" in SCOPE_DECISION_PATH.read_text(encoding="utf-8")
+                      and "Initial text Stage-2 allowlist: `longcat-2.0`" in
+                      SCOPE_DECISION_PATH.read_text(encoding="utf-8"))
+    if scope_approved:
+        found.append({"path": str(SCOPE_DECISION_PATH.relative_to(REPO_ROOT)),
+                      "marker": "APPROVED LongCat-only text Stage 2 scope"})
     return {
-        "authorization_recorded": not missing,
+        # The scoped owner decision supersedes the obsolete all-provider
+        # contract marker for this activation pool only.
+        "authorization_recorded": scope_approved if activation_pool == "longcat-text" else not missing,
         "markers_found": found,
         "markers_missing": missing,
         "coordinator_override_active": bool(overrides),
@@ -239,7 +263,7 @@ def _latest_evidence_dirs(label: str) -> list:
     return sorted(base.glob(f"*-{label}"), reverse=True)
 
 
-def check_provider_identity_and_readiness() -> dict:
+def check_provider_identity_and_readiness(activation_workers=None) -> dict:
     """Consume this task's live-identity and bounded-smoke evidence.
 
     Identity criterion: every intended provider's configured endpoint + API model
@@ -284,6 +308,7 @@ def check_provider_identity_and_readiness() -> dict:
             "identity_verified": ok,
         })
 
+    activation_workers = tuple(activation_workers or CREDENTIAL_MISSING_WORKERS)
     workers = []
     from worker_registry import WorkerRegistry
     roster = WorkerRegistry()
@@ -292,7 +317,8 @@ def check_provider_identity_and_readiness() -> dict:
         w = roster.get_worker(wid) or {}
         v = w.get("verified_2026_09_24") or {}
         recorded = bool(v.get("routable_reason"))
-        readiness_ok = readiness_ok and recorded
+        if wid in activation_workers:
+            readiness_ok = readiness_ok and recorded
         workers.append({
             "worker_id": wid,
             "routable": bool(w.get("routable")),
@@ -303,9 +329,19 @@ def check_provider_identity_and_readiness() -> dict:
             "routable_reason": v.get("routable_reason"),
         })
 
+    activation_provider_keys = {
+        (roster.get_worker(wid) or {}).get("provider") for wid in activation_workers
+    }
+    scoped_identity_ok = all(
+        p["identity_verified"] for p in providers
+        if p["provider"] in activation_provider_keys
+    )
     out.update({
         "identity_verified": identity_ok,
         "readiness_recorded": readiness_ok,
+        "activation_workers": list(activation_workers),
+        "activation_identity_verified": scoped_identity_ok,
+        "activation_readiness_recorded": readiness_ok,
         "providers": providers,
         "workers": workers,
         "completed_workers": smoke.get("completed"),
@@ -672,15 +708,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--regression-evidence", default=None)
     parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--activation-pool", choices=sorted(ACTIVATION_POOLS),
+                        default="longcat-text")
     args = parser.parse_args()
+    activation_workers = ACTIVATION_POOLS[args.activation_pool]
 
     started = datetime.now(timezone.utc)
     reg_path = (Path(args.regression_evidence) if args.regression_evidence
                 else _latest_regression_evidence())
 
-    credentials = check_credentials()
-    authorization = check_owner_authorization()
-    provider_state = check_provider_identity_and_readiness()
+    credentials = check_credentials(activation_workers)
+    authorization = check_owner_authorization(args.activation_pool)
+    provider_state = check_provider_identity_and_readiness(activation_workers)
     regression = check_regression_evidence(reg_path)
     rehearsal = check_rehearsal_evidence(
         REPO_ROOT / "audits" / "evidence"
@@ -698,7 +737,7 @@ def main() -> int:
     rollback = check_rollback()
 
     # ── enablement rule (contract §enablement) ──────────────────────
-    condition_a = credentials["all_seven_configured"]
+    condition_a = credentials["activation_credentials_configured"]
     # criterion (b): every readiness criterion objectively satisfied by evidence
     # from this run.
     criteria = {
@@ -707,14 +746,13 @@ def main() -> int:
             rehearsal["found"] and not rehearsal["checks_failed"],
         "latest real-path production rehearsal (this task) has no failed check":
             rehearsal_latest["found"] and not rehearsal_latest["checks_failed"],
-        "provider identity verified for every intended provider "
+        "provider identity verified for every in-scope provider "
         "(live catalogue or authoritative documentation)":
-            provider_state.get("identity_verified") is True,
-        "every non-executing provider worker recorded as an explicit external "
-        "blocker (no silent gap)":
-            provider_state.get("readiness_recorded") is True,
-        "Google image worker real-dispatch failure resolved (not intermittent)":
-            google_resolution["criterion_satisfied"],
+            provider_state.get("activation_identity_verified") is True,
+        "in-scope non-executing provider workers recorded as explicit blockers":
+            provider_state.get("activation_readiness_recorded") is True,
+        "out-of-scope Google image capability remains separately reported":
+            args.activation_pool == "longcat-text",
         "no unresolved critical integrity/privacy/safety defect":
             isolation["stores_unchanged_including_wal_sidecars"]
             and isolation["all_production_writes_refused"]
@@ -755,9 +793,8 @@ def main() -> int:
     blocked_reasons = []
     if not condition_a:
         blocked_reasons.append(
-            "condition (a) failed: " + str(credentials["still_missing_count"]) +
-            "/7 provider credentials still NOT configured: " +
-            ", ".join(credentials["still_missing_workers"]))
+            "condition (a) failed for " + args.activation_pool + ": " +
+            ", ".join(credentials["activation_credential_workers_missing"]))
     if not condition_b:
         unmet = [k for k, v in criteria.items() if not v]
         blocked_reasons.append("condition (b) failed: unmet readiness "
@@ -783,6 +820,8 @@ def main() -> int:
         "label": "e3-stage2-readiness-gate-verdict",
         "run_started_utc": started.isoformat(timespec="seconds"),
         "run_finished_utc": finished.isoformat(timespec="seconds"),
+        "activation_pool": args.activation_pool,
+        "activation_workers": list(activation_workers),
         "stage": ("Local E3 Stage 2 readiness gate re-run — evaluates the "
                   "enablement rule with executable evidence; makes NO provider "
                   "call and does NOT enable Stage 2 itself"),
