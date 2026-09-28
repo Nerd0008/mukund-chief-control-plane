@@ -9,26 +9,103 @@ class FakeE3:
     def __init__(self):
         self.calls = []
 
-    def execute(self, **kwargs):
+    def execute_chat(self, **kwargs):
         self.calls.append(kwargs)
         if len(self.calls) == 1:
-            return {"content": "", "tool_calls": [{"id": "t1", "type": "function",
-                                                     "function": {"name": "status", "arguments": "{}"}}],
-                    "worker_id": "longcat-2.0", "provider": "longcat", "model": "longcat-2.0"}
-        return {"content": "final", "worker_id": "codex-cli", "provider": "codex", "model": "codex"}
+            return {
+                "content": (
+                    '<tool_call>{"id":"t1","type":"function",'
+                    '"function":{"name":"status","arguments":"{}"}}</tool_call>'
+                ),
+                "worker_id": "longcat-2.0",
+                "provider": "longcat",
+                "model": "LongCat-2.0",
+            }
+        return {
+            "content": "final",
+            "worker_id": "longcat-2.0",
+            "provider": "longcat",
+            "model": "LongCat-2.0",
+        }
+
+    def execute(self, **kwargs):
+        raise AssertionError("tool-capable Hermes turns must use execute_chat")
 
 
-def test_hermes_loop_keeps_tool_iteration_on_e3_provider_boundary():
+def _tools():
+    return [{
+        "type": "function",
+        "function": {
+            "name": "status",
+            "description": "Read current status",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    }]
+
+
+def test_hermes_loop_converts_longcat_markup_to_native_tool_call():
     service = FakeE3()
     client = E3ModelClient(service)
     messages = [{"role": "user", "content": "inspect status"}]
-    first = client.chat.completions.create(model="e3-auto", messages=messages,
-                                            tools=[{"type": "function", "function": {"name": "status"}}])
+
+    first = client.chat.completions.create(
+        model="e3-auto", messages=messages, tools=_tools())
+
     assert first.choices[0].finish_reason == "tool_calls"
-    messages.extend([{"role": "assistant", "tool_calls": first.choices[0].message.tool_calls},
-                     {"role": "tool", "content": "healthy", "tool_call_id": "t1"}])
-    second = client.chat.completions.create(model="e3-auto", messages=messages,
-                                             tools=[{"type": "function", "function": {"name": "status"}}])
+    calls = first.choices[0].message.tool_calls
+    assert len(calls) == 1
+    assert calls[0].function.name == "status"
+
+    messages.extend([
+        {
+            "role": "assistant",
+            "content": first.choices[0].message.content,
+            "tool_calls": [{
+                "id": calls[0].id,
+                "type": "function",
+                "function": {
+                    "name": calls[0].function.name,
+                    "arguments": calls[0].function.arguments,
+                },
+            }],
+        },
+        {
+            "role": "tool",
+            "content": "healthy",
+            "tool_call_id": calls[0].id,
+            "name": "status",
+        },
+    ])
+
+    second = client.chat.completions.create(
+        model="e3-auto", messages=messages, tools=_tools())
+
+    assert second.choices[0].finish_reason == "stop"
     assert second.choices[0].message.content == "final"
     assert len(service.calls) == 2
-    assert all(call["context"]["hermes_tools_present"] for call in service.calls)
+    wire = service.calls[1]["messages"]
+    assert any("<tool_response>" in row.get("content", "") for row in wire)
+
+
+class UnknownToolE3:
+    def execute_chat(self, **kwargs):
+        return {
+            "content": (
+                '<tool_call>{"id":"x1","type":"function",'
+                '"function":{"name":"dangerous_unknown","arguments":"{}"}}</tool_call>'
+            ),
+            "worker_id": "longcat-2.0",
+            "provider": "longcat",
+            "model": "LongCat-2.0",
+        }
+
+
+def test_unknown_tool_markup_never_becomes_executable():
+    client = E3ModelClient(UnknownToolE3())
+    result = client.chat.completions.create(
+        model="e3-auto",
+        messages=[{"role": "user", "content": "inspect status"}],
+        tools=_tools(),
+    )
+    assert result.choices[0].finish_reason == "stop"
+    assert not getattr(result.choices[0].message, "tool_calls", None)
