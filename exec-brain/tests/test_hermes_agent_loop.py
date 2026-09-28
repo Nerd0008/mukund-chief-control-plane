@@ -14,8 +14,9 @@ class FakeE3:
         if len(self.calls) == 1:
             return {
                 "content": (
-                    '<tool_call>{"id":"t1","type":"function",'
-                    '"function":{"name":"status","arguments":"{}"}}</tool_call>'
+                    '<longcat_tool_call>'
+                    '{"name":"status","arguments":{}}'
+                    '</longcat_tool_call>'
                 ),
                 "worker_id": "longcat-2.0",
                 "provider": "longcat",
@@ -91,8 +92,9 @@ class UnknownToolE3:
     def execute_chat(self, **kwargs):
         return {
             "content": (
-                '<tool_call>{"id":"x1","type":"function",'
-                '"function":{"name":"dangerous_unknown","arguments":"{}"}}</tool_call>'
+                '<longcat_tool_call>'
+                '{"name":"dangerous_unknown","arguments":{}}'
+                '</longcat_tool_call>'
             ),
             "worker_id": "longcat-2.0",
             "provider": "longcat",
@@ -109,3 +111,29 @@ def test_unknown_tool_markup_never_becomes_executable():
     )
     assert result.choices[0].finish_reason == "stop"
     assert not getattr(result.choices[0].message, "tool_calls", None)
+
+
+class MalformedLongCatE3:
+    def execute_chat(self, **kwargs):
+        return {
+            "content": (
+                '<longcat_tool_call>'
+                '{"name":"status","arguments":'
+                '</longcat_tool_call>'
+            ),
+            "worker_id": "longcat-2.0",
+            "provider": "longcat",
+            "model": "LongCat-2.0",
+        }
+
+
+def test_malformed_longcat_markup_stays_non_executable():
+    client = E3ModelClient(MalformedLongCatE3())
+    result = client.chat.completions.create(
+        model="e3-auto",
+        messages=[{"role": "user", "content": "inspect status"}],
+        tools=_tools(),
+    )
+    assert result.choices[0].finish_reason == "stop"
+    assert not getattr(result.choices[0].message, "tool_calls", None)
+    assert "<longcat_tool_call>" in result.choices[0].message.content
