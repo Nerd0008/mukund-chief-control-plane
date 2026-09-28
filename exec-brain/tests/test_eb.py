@@ -332,6 +332,8 @@ class TestMatrix(EBTest):
                    # routing surfaces; naming them explicitly preserves this
                    # guard's fail-closed behavior for every other file.
                    "chief_routing.py", "discord_chief_bridge.py",
+                   "chief_context.py", "department_dispatch.py",
+                   "hermes_e3_provider.py", "e3_service.py",
                    # E3 orchestration modules + CLI bindings (deployed)
                    "e3_cli.py", "e3_planner.py", "e3_router.py",
                    "e3_team_assembly.py", "e3_integrator.py", "e3_verifier.py",
