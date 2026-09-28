@@ -13,6 +13,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -415,6 +416,15 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
         self.assertEqual(out["outcome"], "TEAM_INCOMPLETE")
         self.assertIn("escalation", out)
         self.assertEqual(self.adapter.calls, [])
+
+    def test_default_production_registry_requires_stage2_enablement(self):
+        """No injected test registry means a real-path Stage 2 gate."""
+        orch = E3ShadowOrchestrator(db_path=self.db)
+        fp, plan, _ = _plan_and_dag()
+        with patch("stage2_control.require_enabled",
+                   side_effect=RuntimeError("Stage 2 is disabled")):
+            with self.assertRaisesRegex(RuntimeError, "Stage 2 is disabled"):
+                orch.orchestrate_and_execute("task", fp, plan=plan)
 
 
 class TestDependencyOrderedMultiNodeExecution(unittest.TestCase):

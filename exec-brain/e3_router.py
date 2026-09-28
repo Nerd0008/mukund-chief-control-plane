@@ -57,6 +57,12 @@ class E3Router:
     def __init__(self, registry: CapabilityRegistry, worker_registry: Any = None,
                  e2_provider_state: Optional[Dict] = None):
         self.registry = registry
+        # Capability rows record evaluation state, but they are not execution
+        # authority.  Use the roster by default so callers cannot accidentally
+        # turn an arbitrary capability row into a production candidate.
+        if worker_registry is None:
+            from worker_registry import WorkerRegistry
+            worker_registry = WorkerRegistry()
         self.worker_registry = worker_registry
         self.e2_state = e2_provider_state if e2_provider_state is not None else {}
         self.meta_selector = MetaSelector(registry)
@@ -77,7 +83,7 @@ class E3Router:
                 # A capability row alone is not enough for production routing:
                 # the static worker registry remains the execution-readiness source.
                 worker = self._worker_record(wid)
-                if worker is not None and not worker.get("routable", False):
+                if worker is None or not worker.get("routable", False):
                     continue
 
                 confidence = self._compute_confidence(wid, task_family, state, historical_evidence)

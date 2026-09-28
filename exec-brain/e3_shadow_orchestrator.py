@@ -471,10 +471,13 @@ class E3ShadowOrchestrator:
         if adapter_registry is not None:
             registry = adapter_registry
         else:
-            from stage2_control import read_state
-            stage2_state = read_state()
-            allowed = (stage2_state.get("allowed_workers", [])
-                       if stage2_state.get("enabled") else None)
+            # A caller that did not explicitly provide a deterministic test
+            # registry is asking for the real execution path.  It must fail
+            # closed until the owner-recorded Stage 2 allowlist is live; an
+            # absent/disabled record must never mean "all routable workers".
+            from stage2_control import require_enabled
+            stage2_state = require_enabled()
+            allowed = stage2_state.get("allowed_workers", [])
             registry = ExecutionAdapterRegistry(allowed_workers=allowed)
 
         out: Dict[str, Any] = {

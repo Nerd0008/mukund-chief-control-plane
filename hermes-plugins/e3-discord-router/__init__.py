@@ -79,6 +79,46 @@ def _recent_context(messages: Iterable[Dict[str, Any]], max_messages: int = 12,
     return joined[-max_chars:]
 
 
+def _reply_target(source) -> Tuple[str, Dict[str, str]]:
+    """Return the Hermes Discord destination without guessing thread routing.
+
+    Hermes supplies ``chat_id`` for ordinary channels and existing threads.  A
+    channel message that Hermes will auto-thread carries
+    ``prospective_thread_id`` instead, while an existing Discord thread carries
+    ``thread_id``.  Discord's adapter documents ``metadata['thread_id']`` as
+    the authoritative target, so preserve either value when present.
+    """
+    chat_id = str(getattr(source, "chat_id", "") or "")
+    thread_id = (getattr(source, "thread_id", None)
+                 or getattr(source, "prospective_thread_id", None))
+    metadata = {"thread_id": str(thread_id)} if thread_id else {}
+    return chat_id, metadata
+
+
+async def _send_reply(adapter, source, event, content: str) -> bool:
+    """Best-effort delivery which never re-opens native Hermes dispatch."""
+    chat_id, metadata = _reply_target(source)
+    if not chat_id:
+        log.error("E3 bridge: Discord source has no chat_id")
+        return False
+    try:
+        sent = await adapter.send(
+            chat_id,
+            content,
+            reply_to=getattr(event, "message_id", None),
+            metadata=metadata or None,
+        )
+    except Exception as exc:
+        # Provider/runtime exception strings can contain sensitive diagnostic
+        # values.  Keep only their type in bridge logs.
+        log.error("E3 bridge Discord send raised (%s)", type(exc).__name__)
+        return False
+    if getattr(sent, "success", True) is False:
+        log.error("E3 bridge Discord send failed: %s", getattr(sent, "error", "unknown"))
+        return False
+    return True
+
+
 def _run_e3_sync(text: str, recent_context: str) -> Dict[str, Any]:
     root = _ensure_runtime_imports()
 
@@ -183,14 +223,21 @@ async def _handle_gateway_message(event, gateway, session_store, **kwargs):
     try:
         if not gateway._is_user_authorized_for_source(source):
             return None
-    except Exception:
-        log.exception("E3 bridge could not verify Discord authorization")
+    except Exception as exc:
+        log.error("E3 bridge could not verify Discord authorization (%s)", type(exc).__name__)
         return None
 
-    adapter = gateway.adapters.get(platform)
+    try:
+        adapter = (getattr(gateway, "adapters", {}) or {}).get(platform)
+    except Exception as exc:
+        log.error("E3 bridge could not resolve Discord adapter (%s)", type(exc).__name__)
+        adapter = None
     if adapter is None:
         log.error("E3 bridge: no Discord adapter for source platform")
-        return None
+        # This is an E3-owned authorized turn.  Suppress native MoA/OpenRouter
+        # even when delivery infrastructure is unavailable, rather than
+        # accidentally duplicating or changing the selected execution path.
+        return {"action": "skip", "reason": "e3-adapter-unavailable"}
 
     # Preserve conversation continuity because returning "skip" prevents the
     # normal Hermes agent path from writing this turn.
@@ -199,41 +246,48 @@ async def _handle_gateway_message(event, gateway, session_store, **kwargs):
     try:
         entry = session_store.get_or_create_session(source)
         history = session_store.load_transcript(entry.session_id) or []
-    except Exception:
-        log.exception("E3 bridge could not load session transcript")
+    except Exception as exc:
+        log.error("E3 bridge could not load session transcript (%s)", type(exc).__name__)
 
     context = _recent_context(history)
 
     try:
         result = await asyncio.to_thread(_run_e3_sync, text, context)
     except Exception as exc:
-        log.exception("E3 bridge execution failed")
-        message = f"⚠️ E3 routing failed before native Hermes dispatch: {type(exc).__name__}: {exc}"
-        await adapter.send(source.chat_id, message, reply_to=getattr(event, "message_id", None))
+        log.error("E3 bridge execution failed (%s)", type(exc).__name__)
+        # Exception strings may contain provider or runtime details.  Keep
+        # those in local logs and return a stable, non-sensitive user notice.
+        await _send_reply(
+            adapter, source, event,
+            "⚠️ E3 routing is temporarily unavailable. Please try again shortly.",
+        )
         return {"action": "skip", "reason": "e3-routing-error"}
 
     if not result.get("ok"):
-        workers = ", ".join(result.get("allowed_workers") or []) or "none"
-        message = (
-            "⚠️ E3 could not complete this request. "
-            f"Outcome: {result.get('error')}. Stage 2 workers: {workers}."
-        )
-        await adapter.send(source.chat_id, message, reply_to=getattr(event, "message_id", None))
+        workers = ", ".join(
+            str(worker) for worker in (result.get("allowed_workers") or []) if worker
+        ) or "none"
+        message = f"⚠️ E3 could not complete this request. Stage 2 workers: {workers}."
+        await _send_reply(adapter, source, event, message)
         return {"action": "skip", "reason": "e3-execution-incomplete"}
 
-    content = result["content"]
-    worker_text = ", ".join(result.get("workers") or []) or "unknown"
+    content = result.get("content")
+    if not isinstance(content, str) or not content.strip():
+        log.error("E3 bridge rejected empty verified content")
+        await _send_reply(
+            adapter, source, event,
+            "⚠️ E3 could not complete this request. No verified response was available.",
+        )
+        return {"action": "skip", "reason": "e3-empty-verified-content"}
+
+    worker_text = ", ".join(
+        str(worker) for worker in (result.get("workers") or []) if worker
+    ) or "unknown"
     # Keep the worker visible during acceptance. Once the bridge is proven, this
     # footer can be made optional without changing routing behavior.
     reply = f"{content}\n\n_E3 worker: {worker_text}_"
 
-    send_result = await adapter.send(
-        source.chat_id,
-        reply,
-        reply_to=getattr(event, "message_id", None),
-    )
-    if getattr(send_result, "success", True) is False:
-        log.error("E3 bridge Discord send failed: %s", getattr(send_result, "error", "unknown"))
+    if not await _send_reply(adapter, source, event, reply):
         return {"action": "skip", "reason": "e3-discord-send-failed"}
 
     if entry is not None:
@@ -246,8 +300,8 @@ async def _handle_gateway_message(event, gateway, session_store, **kwargs):
                 entry.session_id,
                 {"role": "assistant", "content": content},
             )
-        except Exception:
-            log.exception("E3 bridge could not append transcript")
+        except Exception as exc:
+            log.error("E3 bridge could not append transcript (%s)", type(exc).__name__)
 
     log.info(
         "E3 Discord dispatch complete family=%s role=%s workers=%s",
