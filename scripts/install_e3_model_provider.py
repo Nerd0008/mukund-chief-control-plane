@@ -8,13 +8,27 @@ approvals and the agent loop.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "hermes-plugins" / "e3-model-provider"
-TARGET = Path.home() / "AppData" / "Local" / "hermes" / "hermes-agent" / "plugins" / "model-providers" / "e3"
+
+
+def hermes_home() -> Path:
+    """Resolve the active Hermes profile home, honoring profile overrides."""
+    configured = os.environ.get("HERMES_HOME", "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    local_appdata = os.environ.get("LOCALAPPDATA", "")
+    if local_appdata:
+        return Path(local_appdata) / "hermes"
+    return Path.home() / ".hermes"
+
+
+TARGET = hermes_home() / "plugins" / "model-providers" / "e3"
 
 
 def install(*, target: Path = TARGET, dry_run: bool = False) -> dict:
@@ -47,9 +61,14 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--target", type=Path, default=TARGET)
+    ap.add_argument("--hermes-home", type=Path,
+                    help="active Hermes home; installs into <home>/plugins/model-providers/e3")
     ap.add_argument("--restore", type=Path)
     args = ap.parse_args()
-    print(restore(args.restore, target=args.target) if args.restore else install(target=args.target, dry_run=args.dry_run))
+    target = args.target
+    if args.hermes_home:
+        target = args.hermes_home / "plugins" / "model-providers" / "e3"
+    print(restore(args.restore, target=target) if args.restore else install(target=target, dry_run=args.dry_run))
     return 0
 
 

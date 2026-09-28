@@ -1,6 +1,7 @@
 """Hermes user model-provider plugin for the source-controlled E3 boundary."""
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from providers import register_provider
@@ -10,12 +11,27 @@ from providers.base import ProviderProfile
 class E3Profile(ProviderProfile):
     def create_client(self, **_kwargs):
         import sys
-        runtime = Path(__file__).resolve().parents[2] / "exec-brain"
+        configured = os.environ.get("HERMES_E3_RUNTIME_ROOT", "").strip()
+        if configured:
+            runtime = Path(configured).expanduser()
+        else:
+            local_appdata = os.environ.get("LOCALAPPDATA", "")
+            runtime = (Path(local_appdata) / "hermes" / "exec-brain"
+                       if local_appdata else Path.home() / ".hermes" / "exec-brain")
+        required = ("e3_service.py", "chief_routing.py", "department_dispatch.py")
+        missing = [name for name in required if not (runtime / name).is_file()]
+        if missing:
+            raise RuntimeError(f"E3 runtime root is incomplete: {runtime} ({', '.join(missing)})")
         if str(runtime) not in sys.path:
             sys.path.insert(0, str(runtime))
-        from e3_service import E3ApplicationService
         from hermes_e3_provider import E3ModelClient
-        return E3ModelClient(E3ApplicationService())
+        from e3_service import E3ApplicationService
+        from department_dispatch import CareerOpsDepartment, DefaultDepartmentDispatcher
+        source_root = os.environ.get("MUKUND_CHIEF_REPO_ROOT", "").strip()
+        repo_root = Path(source_root).expanduser() if source_root else runtime.parent
+        dispatcher = DefaultDepartmentDispatcher(
+            career_ops=CareerOpsDepartment(repo_root=repo_root, allow_external=True))
+        return E3ModelClient(E3ApplicationService(), department_dispatcher=dispatcher)
 
 
 register_provider(E3Profile(
