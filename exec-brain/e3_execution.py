@@ -153,6 +153,13 @@ def classify_dispatch_failure(output: Dict[str, Any]) -> str:
         return FAILURE_PROVIDER_ERROR
     if output.get("status") != "COMPLETED":
         return FAILURE_PROVIDER_ERROR
+    # A text worker that completed without any visible text did not deliver a
+    # verifiable response.  Treat that as a provider failure rather than a
+    # quality rejection so the approved alternate worker can be tried.  Image
+    # outputs are deliberately excluded: their independent image checks, not
+    # text presence, establish whether they are usable.
+    if not output.get("content_present") and not output.get("image_mime"):
+        return FAILURE_PROVIDER_ERROR
     return FAILURE_VERIFICATION_FAIL
 
 
@@ -438,6 +445,7 @@ class NodeExecutionResult:
 
     def __init__(self, node_id: str, worker_id: str, role: str):
         self.node_id = node_id
+        self.assigned_worker_id = worker_id
         self.worker_id = worker_id
         self.role = role
         self.state = "PLANNED"
@@ -454,6 +462,7 @@ class NodeExecutionResult:
         self.e2_request_ids: List[Optional[str]] = []
         self.evidence_id: Optional[str] = None
         self.blocking_reason: Optional[str] = None
+        self.failovers: List[Dict[str, Any]] = []
 
     @property
     def complete(self) -> bool:
@@ -463,6 +472,7 @@ class NodeExecutionResult:
         return {
             "node_id": self.node_id,
             "worker_id": self.worker_id,
+            "assigned_worker_id": self.assigned_worker_id,
             "role": self.role,
             "state": self.state,
             "dispatch_attempts": self.dispatch_attempts,
@@ -477,6 +487,7 @@ class NodeExecutionResult:
             "e2_request_ids": self.e2_request_ids,
             "evidence_id": self.evidence_id,
             "blocking_reason": self.blocking_reason,
+            "failovers": self.failovers,
         }
 
 
@@ -652,7 +663,8 @@ class E3ProductionExecutor:
                      dispatch_timeout: int = 120,
                      role_by_node: Optional[Dict[str, str]] = None,
                      max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES,
-                     return_verified_content: bool = False) -> Dict[str, Any]:
+                     return_verified_content: bool = False,
+                     fallback_workers_by_node: Optional[Dict[str, List[str]]] = None) -> Dict[str, Any]:
         """Execute every node of an assembled plan on the real execution path."""
         plan_id = plan.get("plan_id", "unknown")
         test_cases_by_node = verification_test_cases_by_node or {}
@@ -716,7 +728,8 @@ class E3ProductionExecutor:
                                node_test_cases,
                                max_repair_attempts, dispatch_timeout,
                                fingerprint, dag,
-                               max_content_stop_retries)
+                               max_content_stop_retries,
+                               (fallback_workers_by_node or {}).get(node_id, []))
 
         complete = all(r.complete for r in results) and bool(results)
         outcome = "EXECUTION_COMPLETE" if complete else "EXECUTION_INCOMPLETE"
@@ -762,7 +775,8 @@ class E3ProductionExecutor:
                       test_cases: Optional[List[Dict[str, Any]]],
                       max_repair_attempts: int, dispatch_timeout: int,
                       fingerprint: Any, dag: Any = None,
-                      max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES) -> None:
+                      max_content_stop_retries: int = DEFAULT_MAX_CONTENT_STOP_RETRIES,
+                      fallback_worker_ids: Optional[List[str]] = None) -> None:
         node_id = node["node_id"]
         objective = node.get("objective", "")
         attempts = 0
@@ -771,12 +785,15 @@ class E3ProductionExecutor:
         final_success = False
         corrections = 0
         same_request_retry = False
+        active_worker_id = worker_id
+        fallback_worker_ids = list(fallback_worker_ids or [])
         max_content_stop_retries = max(0, int(max_content_stop_retries))
         # Hard, total attempt bound: one initial dispatch + the bounded repair
         # budget + the bounded same-request content-stop retries. Every branch
         # below either breaks or consumes one of those two counters, so the loop
         # cannot run away; this guard is the belt-and-braces proof of that.
-        max_attempts = 1 + max(0, max_repair_attempts) + max_content_stop_retries
+        max_attempts = (1 + max(0, max_repair_attempts)
+                        + max_content_stop_retries + len(fallback_worker_ids))
 
         while True:
             attempts += 1
@@ -809,7 +826,7 @@ class E3ProductionExecutor:
             same_request_retry = False
 
             try:
-                dispatch_result = self._dispatch(node, worker_id, dispatch_objective,
+                dispatch_result = self._dispatch(node, active_worker_id, dispatch_objective,
                                                  dispatch_timeout)
             except WorkerNotRoutable as exc:
                 self._transition(dag, node_id, plan_id, "BLOCKED",
@@ -825,13 +842,14 @@ class E3ProductionExecutor:
                     "exit_code": -1, "runtime_s": 0.0,
                 }
 
-            e2_id = self.registry.report_usage(worker_id, dispatch_result)
+            e2_id = self.registry.report_usage(active_worker_id, dispatch_result)
             result.e2_request_ids.append(e2_id)
 
-            output = normalize_dispatch_output(worker_id, dispatch_result, node_id)
+            output = normalize_dispatch_output(active_worker_id, dispatch_result, node_id)
             result.output = output
             result.dispatch_attempts.append({
                 "attempt": attempts,
+                "worker_id": active_worker_id,
                 "dispatch_id": dispatch_result.get("dispatch_id"),
                 "status": dispatch_result.get("status"),
                 "provider": dispatch_result.get("provider"),
@@ -902,11 +920,43 @@ class E3ProductionExecutor:
 
             result.rejections.append({
                 "attempt": attempts,
+                "worker_id": active_worker_id,
                 "outcome": verification.outcome.value,
                 "issues": list(verification.issues),
                 "failure_class": failure_class,
                 "finish_reason": stop_reason,
             })
+
+            # The owner-approved fallback is strictly bounded and is only
+            # entered for a transport/provider/no-visible-text failure.  It is
+            # never used for a genuine quality verification rejection or for
+            # an image content-side stop.  Every target remains subject to the
+            # same Stage 2 routability gate before it can receive a request.
+            if failure_class == FAILURE_PROVIDER_ERROR and fallback_worker_ids:
+                next_worker_id = fallback_worker_ids.pop(0)
+                if self.registry.is_routable(next_worker_id):
+                    result.failovers.append({
+                        "attempt": attempts,
+                        "from_worker": active_worker_id,
+                        "to_worker": next_worker_id,
+                        "reason": "provider_error",
+                    })
+                    result.repairs.append({
+                        "attempt": attempts,
+                        "kind": "worker_failover",
+                        "from_worker": active_worker_id,
+                        "to_worker": next_worker_id,
+                        "reason": "provider_error",
+                    })
+                    self._transition(
+                        dag, node_id, plan_id, "REWORK",
+                        f"provider_failover:{active_worker_id}->{next_worker_id}",
+                        verification_reference=f"verify-{node_id}-{attempts}",
+                        attempts=attempts)
+                    active_worker_id = next_worker_id
+                    result.worker_id = next_worker_id
+                    same_request_retry = True
+                    continue
 
             if failure_class == FAILURE_PROVIDER_CONTENT_STOP:
                 # Provider content-side stop: the provider withheld the content.
@@ -947,7 +997,7 @@ class E3ProductionExecutor:
                 escalation = self.escalator.escalate(
                     trigger="provider_content_stop",
                     context=(
-                        f"worker {worker_id} node {node_id}: provider "
+                        f"worker {active_worker_id} node {node_id}: provider "
                         f"content-side stop finishReason={stop_reason}; "
                         f"{result.content_stop_retries} identical single-shot "
                         f"request(s) did not recover it and no image arrived"),
@@ -975,7 +1025,7 @@ class E3ProductionExecutor:
                     "escalation_id": escalation.escalation_id,
                     "trigger": escalation.trigger,
                     "node_id": node_id,
-                    "worker_id": worker_id,
+                    "worker_id": active_worker_id,
                     "finish_reason": stop_reason,
                     "content_stop_retries": result.content_stop_retries,
                 }
@@ -1016,7 +1066,7 @@ class E3ProductionExecutor:
 
         evidence_id = self.store.record_evidence({
             "evidence_id": None,
-            "worker_id": worker_id,
+            "worker_id": result.worker_id,
             "task_fingerprint": _fingerprint_repr(fingerprint),
             "role": role,
             "model": result.output.get("model") if result.output else None,

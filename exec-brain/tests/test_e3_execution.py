@@ -280,6 +280,73 @@ class TestExecutorPersistence(unittest.TestCase):
         self.assertEqual(read["node"]["state"], "FAILED")
         self.assertNotIn("COMPLETE", [e["new_state"] for e in read["state_events"]])
 
+    def test_provider_empty_longcat_fails_over_once_to_codex(self):
+        """A completed-but-empty text response is a provider failure, not a reply."""
+        longcat = FakeAdapter([None], provider="longcat", model="LongCat-Flash")
+        codex = FakeAdapter(["Codex fallback response"], provider="openai",
+                             model="codex-cli")
+        workers = {
+            "longcat-2.0": {"worker_id": "longcat-2.0", "provider": "longcat",
+                            "model": "LongCat-Flash", "routable": True},
+            "codex-cli": {"worker_id": "codex-cli", "provider": "openai",
+                          "model": "codex-cli", "routable": True},
+            "google-nano-banana-2": {
+                "worker_id": "google-nano-banana-2", "provider": "google",
+                "model": "gemini-image", "routable": True},
+        }
+        registry = ExecutionAdapterRegistry(
+            worker_registry=FakeWorkerRegistry(workers),
+            adapter_factories={
+                "longcat-2.0": lambda: longcat,
+                "codex-cli": lambda: codex,
+            },
+            usage_reporters={
+                "longcat-2.0": lambda _result: "e2-longcat",
+                "codex-cli": lambda _result: "e2-codex",
+            },
+        )
+        fp, plan, dag = _plan_and_dag(task_family="other")
+        node_id = plan["nodes"][0]["node_id"]
+        from e3_team_assembly import TeamAssignment
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(node_id, "longcat-2.0", "builder",
+                                               "HIGH", "owner primary"))
+        assembly.complete = True
+
+        run = E3ProductionExecutor(self.store, registry).execute_plan(
+            plan, dag, assembly, fp, "ordinary text task",
+            verification_test_cases_by_node={
+                node_id: [{"name": "visible", "field": "content_present",
+                           "expected": True}]},
+            role_by_node=self._role_by_node(plan),
+            max_repair_attempts=0,
+            fallback_workers_by_node={node_id: ["codex-cli"]},
+        )
+        node = run["nodes"][0]
+        self.assertEqual(run["outcome"], "EXECUTION_COMPLETE")
+        self.assertEqual(node["assigned_worker_id"], "longcat-2.0")
+        self.assertEqual(node["worker_id"], "codex-cli")
+        self.assertEqual([attempt["worker_id"] for attempt in node["dispatch_attempts"]],
+                         ["longcat-2.0", "codex-cli"])
+        self.assertEqual(node["failovers"], [{
+            "attempt": 1, "from_worker": "longcat-2.0",
+            "to_worker": "codex-cli", "reason": "provider_error",
+        }])
+        self.assertEqual(len(longcat.calls), 1)
+        self.assertEqual(len(codex.calls), 1)
+
+    def test_empty_text_is_provider_error_but_image_output_is_not(self):
+        self.assertEqual(
+            __import__("e3_execution").classify_dispatch_failure({
+                "status": "COMPLETED", "content_present": False,
+                "image_mime": None}),
+            "provider_error")
+        self.assertEqual(
+            __import__("e3_execution").classify_dispatch_failure({
+                "status": "COMPLETED", "content_present": False,
+                "image_mime": "image/png"}),
+            "verification_fail")
+
     def test_no_test_cases_blocks_without_dispatching(self):
         adapter = FakeAdapter(["anything"])
         fp, plan, dag = _plan_and_dag()
@@ -425,6 +492,22 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
                    side_effect=RuntimeError("Stage 2 is disabled")):
             with self.assertRaisesRegex(RuntimeError, "Stage 2 is disabled"):
                 orch.orchestrate_and_execute("task", fp, plan=plan)
+
+    def test_general_text_prefers_longcat_and_never_offers_google_as_fallback(self):
+        from e3_router import RouterCandidate
+        candidates = [
+            RouterCandidate("codex-cli", "openai", "codex-cli", "builder",
+                            "HIGH", [], "coding", score=100),
+            RouterCandidate("longcat-2.0", "longcat", "LongCat-Flash", "builder",
+                            "HIGH", [], "general", score=70),
+        ]
+        ordered = E3ShadowOrchestrator._apply_owner_route_preference(
+            candidates, {"capability_roles": ["builder"]}, "other")
+        self.assertEqual([candidate.worker_id for candidate in ordered],
+                         ["longcat-2.0", "codex-cli"])
+        registry = _registry(FakeAdapter(["x"]))
+        self.assertEqual(E3ShadowOrchestrator._approved_fallbacks(
+            {"capability_roles": ["vision"]}, "longcat-2.0", registry), [])
 
 
 class TestDependencyOrderedMultiNodeExecution(unittest.TestCase):

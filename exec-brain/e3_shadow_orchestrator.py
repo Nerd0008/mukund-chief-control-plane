@@ -140,6 +140,47 @@ class E3ShadowOrchestrator:
             self.con = sqlite3.connect(str(self.db_path))
             self.con.row_factory = sqlite3.Row
 
+    @staticmethod
+    def _is_image_node(node: Dict[str, Any]) -> bool:
+        """Whether a node is explicitly an image request, never inferred from text."""
+        roles = set(node.get("capability_roles") or [])
+        modalities = set(node.get("response_modalities") or [])
+        return bool(node.get("image_config") or "vision" in roles or "image" in modalities)
+
+    @classmethod
+    def _apply_owner_route_preference(cls, candidates: List[RouterCandidate],
+                                      node: Dict[str, Any], task_family: str) -> List[RouterCandidate]:
+        """Keep LongCat first for ordinary general-purpose text work.
+
+        Coding/repository work retains the ordinary evidence-based ranking,
+        whose Codex capability is purpose-built for it.  Image nodes are left
+        untouched so Google remains image-only.
+        """
+        general_families = {
+            "other", "writing", "research", "analysis", "summarization",
+            "decision-support", "monitoring",
+        }
+        if task_family not in general_families or cls._is_image_node(node):
+            return candidates
+        return sorted(candidates, key=lambda candidate: (
+            0 if candidate.worker_id == "longcat-2.0" else 1,
+            -candidate.score, candidate.worker_id, candidate.role,
+        ))
+
+    @classmethod
+    def _approved_fallbacks(cls, node: Dict[str, Any], primary_worker: str,
+                            registry: Any) -> List[str]:
+        """Return the explicit bounded text fallback for a primary failure.
+
+        Codex is the only approved automatic text fallback.  DeepSeek may lack
+        credit, Google is image-only, and no disabled provider may re-enter
+        routing through a fallback path.
+        """
+        if (primary_worker == "codex-cli" or cls._is_image_node(node)
+                or not registry.is_routable("codex-cli")):
+            return []
+        return ["codex-cli"]
+
     def rehearse(self, objective: str, fingerprint: TaskFingerprint,
                  simulate_outputs: Optional[Dict[str, Any]] = None,
                  verification_test_cases: Optional[List[Dict[str, Any]]] = None,
@@ -511,6 +552,9 @@ class E3ShadowOrchestrator:
                     candidate for candidate in proposed
                     if registry.is_routable(candidate.worker_id)
                 ]
+                candidates_by_node[node["node_id"]] = self._apply_owner_route_preference(
+                    candidates_by_node[node["node_id"]], node,
+                    fingerprint.task_family)
         out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
         out["candidate_rankings"] = {
             node_id: [
@@ -555,6 +599,15 @@ class E3ShadowOrchestrator:
             out["outcome"] = "TEAM_INCOMPLETE"
             return out
 
+        fallback_workers_by_node = {
+            assignment.node_id: self._approved_fallbacks(
+                next(node for node in plan["nodes"]
+                     if node["node_id"] == assignment.node_id),
+                assignment.worker_id, registry)
+            for assignment in assembly.assignments
+        }
+        out["fallback_workers_by_node"] = fallback_workers_by_node
+
         store = OrchestrationStore(self.db_path)
         try:
             executor = E3ProductionExecutor(store, registry,
@@ -566,6 +619,7 @@ class E3ShadowOrchestrator:
                 dispatch_timeout=dispatch_timeout,
                 role_by_node=role_by_node,
                 return_verified_content=return_verified_content,
+                fallback_workers_by_node=fallback_workers_by_node,
             )
         finally:
             store.close()
