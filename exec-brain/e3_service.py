@@ -136,7 +136,7 @@ class E3ApplicationService:
         contract = {
             "contract_id": f"chat-{plan.get('plan_id') or 'unknown'}",
             "objective": objective,
-            "messages": list(messages or []),
+            "provider_request_options": {"messages": list(messages or [])},
             "timeout": timeout,
             "max_tokens": 1024,
             "temperature": 0.0,
