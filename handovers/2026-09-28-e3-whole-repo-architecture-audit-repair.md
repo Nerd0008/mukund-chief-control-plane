@@ -139,6 +139,62 @@ Current integration/whole-company acceptance proves many components exist/work, 
 
 Add deterministic architecture tests so this class of regression cannot recur.
 
+## Persistent owner/project context is a release-blocking E3 requirement
+
+Observed live failure on 2026-09-28:
+
+The owner asked Discord/Chief:
+
+`Based on all our previous conversations, what do you know about me?`
+
+The E3/LongCat response only recovered a tiny amount of recent/project-local context and explicitly claimed it did not have access to stored profile/personal data beyond the chat. It identified only shallow facts such as the repository path, Career Ops scripts and current job-search work. This is unacceptable for the Chief architecture.
+
+Existing project evidence shows the system already had:
+- installed skill `mukund-owner-context`
+- installed skill `mukund-company-registry`
+- Chief/whole-company acceptance treating `state/current_company_state.md` and the live Chief session as context sources
+- Discord archive/sync infrastructure
+- E3 Context Compiler (A07)
+
+Therefore the new E3 path dropped the established persistent-context pipeline.
+
+Required repair:
+
+1. Define one bounded, source-provenanced Chief context contract.
+2. Chief/E1 must assemble context BEFORE E3 model selection/execution.
+3. Context sources should include, where relevant and permitted:
+   - owner-context skill/profile;
+   - company/project registry;
+   - canonical current company/project state;
+   - relevant department state;
+   - relevant recent Discord/session transcript;
+   - relevant historical Chief/Discord archive retrieval;
+   - task-specific canonical records (e.g. Career Ops trackers/job/application records).
+4. E3 receives compiled task context; individual models must not be expected to “remember” the owner from provider-side memory.
+5. Context must be bounded and relevance-filtered; do not dump the entire repo or all chat history into every prompt.
+6. Preserve provenance: the compiled context should record which source(s) contributed each section or at least a source manifest.
+7. Sensitive/secret-bearing sources remain excluded.
+8. The model must distinguish retrieved facts from inferences.
+9. Discord/session continuity must work across gateway restarts when persisted Chief context exists.
+10. A provider swap (LongCat → another worker) must not erase owner/project memory because memory belongs to Chief, not the provider.
+
+Add offline acceptance tests for at least:
+
+- owner identity/context retrieval:
+  query: `Based on all our previous conversations, what do you know about me?`
+  expected contract: the response context contains multiple canonical owner/project facts from persistent Chief sources, not only the current Discord transcript; the test may assert structured context inputs rather than exact prose.
+- job-search continuity:
+  a query about the existing job-search agent must resolve Career Ops/agent state without asking the owner to re-explain the subsystem.
+- provider independence:
+  the same compiled context object is supplied regardless of which eligible E3 worker is selected.
+- boundedness:
+  context compiler enforces a declared size/token/character budget and relevance selection.
+- provenance:
+  compiled context exposes source identifiers/hashes/paths without secret values.
+
+Do not solve this by hard-coding Mukund facts into the Discord plugin or LongCat prompt. Repair the shared Chief/E3 context pipeline.
+
+
 ## Scope: audit the entire repository
 
 Do not limit the search to known files.
