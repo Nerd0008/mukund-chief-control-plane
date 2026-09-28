@@ -18,18 +18,24 @@ lets the E3 planner/router choose only an eligible worker. It returns a verified
 stable failure category; it never falls through to a native model selector.
 
 Before that dispatch, `ChiefContextCompiler` selects bounded, relevant persistent sources
-from the canonical owner/project state and company registry. It includes source hashes and
-paths, labels retrieved facts separately from inferences, excludes secret-bearing fields,
-and carries the same package regardless of which E3 worker is selected. Recent transcript,
-department state and task records are optional bounded inputs; provider memory is never
-treated as the system's source of truth.
+from canonical project state, the live local `mukund-owner-context` and
+`mukund-company-registry` skills, local owner memory, and the append-only Discord/Chief
+archive when configured. It includes source hashes and safe paths, labels retrieved facts
+separately from inferences, excludes secret-bearing fields, and carries the same package
+regardless of which E3 worker is selected. Recent transcript, department state and task
+records are optional bounded inputs; provider memory is never treated as the system's
+source of truth.
 
 ## Discord and scheduled paths
 
 The Discord plugin is observer-only. It cannot reply, return `skip`, classify text, or call
 E3. Authenticated Discord traffic continues through Hermes' normal authorization/session
-path to the source-controlled Chief bridge. `department_dispatch.py` supplies the safe
-default handoff for a department workflow that has not been bound at deployment time.
+path to the reversible, source-controlled `install_discord_e3_bridge.py` seam. The seam
+invokes `dispatch_chief_message()` after authentication and carries session/tool/skill
+preservation metadata, while the normal Hermes agent loop remains available for turns
+outside the configured Chief channel. `CareerOpsDepartment` binds Career Ops to the
+existing scheduled orchestrator and run-health/summary readers; it returns a bounded
+read-only workflow result rather than a generic completion or placeholder handoff.
 
 Scheduled and background Career Ops workflows retain their deterministic collection,
 eligibility, dedupe, tracker and approval stages. Their semantic classifications call the

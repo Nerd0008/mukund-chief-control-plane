@@ -54,7 +54,7 @@ class ChiefRoutingTests(unittest.TestCase):
     def test_missing_department_handler_fails_closed(self):
         e3 = _E3()
         result = ChiefRouteSelector(e3).dispatch("review my CV")
-        self.assertEqual(result["status"], "DEPARTMENT_HANDOFF_REQUIRED")
+        self.assertEqual(result["status"], "DEPARTMENT_OWNER_GATE_REQUIRED")
         self.assertFalse(result["provider_call_made"])
         self.assertEqual(e3.calls, [])
 

@@ -52,6 +52,23 @@ def audit() -> dict:
     if "orchestrate_and_execute" in plugin or '"action": "skip"' in plugin:
         failures.append({"path": "hermes-plugins/e3-discord-router/__init__.py",
                          "kind": "normal_discord_consumed_before_chief"})
+    dispatcher = (ROOT / "exec-brain/department_dispatch.py").read_text(encoding="utf-8")
+    if "DEPARTMENT_HANDOFF_REQUIRED" in dispatcher or "class CareerOpsDepartment" not in dispatcher:
+        failures.append({"path": "exec-brain/department_dispatch.py",
+                         "kind": "implemented_department_resolved_to_placeholder"})
+    bridge_script = (ROOT / "scripts/install_discord_e3_bridge.py").read_text(encoding="utf-8")
+    for marker in ("CHIEF_E3_DISCORD_BRIDGE", "authenticated", "hermes_session_preserved"):
+        if marker not in bridge_script:
+            failures.append({"path": "scripts/install_discord_e3_bridge.py",
+                             "kind": "missing_discord_chief_integration_seam", "marker": marker})
+    context = (ROOT / "exec-brain/chief_context.py").read_text(encoding="utf-8")
+    for marker in ("owner-context-local", "company-registry-local", "discord-chief-history"):
+        if marker not in context:
+            failures.append({"path": "exec-brain/chief_context.py",
+                             "kind": "persistent_context_source_missing", "source": marker})
+    if "MoA" in bridge_script or "OpenRouter" in bridge_script:
+        failures.append({"path": "scripts/install_discord_e3_bridge.py",
+                         "kind": "native_provider_fallback_in_chief_seam"})
     for relative in ("exec-brain/chief_routing.py", "exec-brain/discord_chief_bridge.py",
                      "exec-brain/department_dispatch.py", "exec-brain/chief_context.py",
                      "exec-brain/e3_service.py",

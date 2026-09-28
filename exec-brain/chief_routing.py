@@ -63,7 +63,7 @@ class ChiefRouteSelector:
                     intent.department, message, context=context, dry_run=dry_run)
             else:
                 result = {
-                    "status": "DEPARTMENT_HANDOFF_REQUIRED",
+                    "status": "DEPARTMENT_OWNER_GATE_REQUIRED",
                     "provider_call_made": False,
                     "error": "department_handler_not_configured",
                 }

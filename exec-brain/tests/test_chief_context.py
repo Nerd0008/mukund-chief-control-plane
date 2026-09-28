@@ -1,4 +1,6 @@
 import sys
+import json
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -40,3 +42,26 @@ def test_context_package_is_provider_independent():
     one = _compiler().compile("company project")
     two = _compiler().compile("company project")
     assert one == two
+
+
+def test_live_owner_and_history_adapters_are_bounded_and_provenanced():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "skills/personal/mukund-owner-context").mkdir(parents=True)
+        (root / "skills/personal/mukund-company-registry/references").mkdir(parents=True)
+        (root / "skills/personal/mukund-owner-context/SKILL.md").write_text(
+            "Owner context fixture: personal preferences live locally.", encoding="utf-8")
+        (root / "skills/personal/mukund-company-registry/SKILL.md").write_text(
+            "Company registry fixture: Career Ops is a department.", encoding="utf-8")
+        history = root / "archive"
+        history.mkdir()
+        (history / "chief.jsonl").write_text(
+            json.dumps({"role": "owner", "content": "Previous Chief conversation fixture."}) + "\n",
+            encoding="utf-8")
+        compiler = ChiefContextCompiler(root=Path(__file__).resolve().parents[2], local_context_root=root,
+                                        history_root=history)
+        package = compiler.compile("Based on all our previous conversations, what do you know about me?")
+        ids = {row["source_id"] for row in package["source_manifest"]}
+        assert {"owner-context-local", "company-registry-local", "discord-chief-history"} <= ids
+        assert package["chars_included"] <= package["char_budget"]
+        assert compiler.validate(package) == []

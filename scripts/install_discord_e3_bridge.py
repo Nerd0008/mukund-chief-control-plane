@@ -33,12 +33,24 @@ HELPER = '''    async def _hmwa_try_chief_e3_dispatch(self, message_text, source
             sys.path.insert(0, runtime)
         try:
             from discord_chief_bridge import dispatch_chief_message
-            result = await asyncio.to_thread(dispatch_chief_message, message_text)
+            result = await asyncio.to_thread(
+                dispatch_chief_message,
+                message_text,
+                context={
+                    "platform": platform,
+                    "chat_id": str(source.chat_id or ""),
+                    "session_id": str(getattr(source, "session_id", "") or ""),
+                    "authenticated": True,
+                    "hermes_session_preserved": True,
+                    "hermes_tools_preserved": True,
+                    "hermes_skills_preserved": True,
+                },
+            )
         except Exception as exc:
             logger.exception("Chief E3 bridge failed before dispatch: %s", exc)
             return {"final_response": "Chief routing is unavailable; no native provider was used.",
                     "failed": True, "model": "e3-routing", "provider": "e3", "messages": [], "api_calls": 0}
-        if result.get("status") in {"COMPLETED", "DEPARTMENT_COMPLETED", "DEPARTMENT_HANDOFF_REQUIRED"}:
+        if result.get("status") in {"COMPLETED", "DEPARTMENT_COMPLETED"}:
             return {"final_response": result.get("content") or "",
                     "model": result.get("model") or "unknown",
                     "provider": result.get("provider") or "unknown",
