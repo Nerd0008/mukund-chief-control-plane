@@ -28,7 +28,13 @@ class E3Profile(ProviderProfile):
         from e3_service import E3ApplicationService
         from department_dispatch import CareerOpsDepartment, DefaultDepartmentDispatcher
         source_root = os.environ.get("MUKUND_CHIEF_REPO_ROOT", "").strip()
-        repo_root = Path(source_root).expanduser() if source_root else runtime.parent
+        candidates = ([Path(source_root).expanduser()] if source_root else []) + [
+            Path.home() / "Documents" / "mukund-chief-control-plane",
+            Path.home() / "Documents" / "Codex" / "mukund-chief-control-plane-owner-decisions",
+            runtime.parent,
+        ]
+        repo_root = next((candidate for candidate in candidates
+                          if (candidate / "career-ops").is_dir()), runtime.parent)
         dispatcher = DefaultDepartmentDispatcher(
             career_ops=CareerOpsDepartment(repo_root=repo_root, allow_external=True))
         return E3ModelClient(E3ApplicationService(), department_dispatcher=dispatcher)
