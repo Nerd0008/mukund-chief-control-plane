@@ -9,6 +9,16 @@ from providers.base import ProviderProfile
 
 
 class E3Profile(ProviderProfile):
+    def get_model_context_length(self, model: str) -> int | None:
+        """Declare the local E3 boundary's context bound to Hermes.
+
+        E3 is an in-process routing boundary, so Hermes must not try to
+        resolve ``e3-auto`` against a network provider catalog (which can
+        otherwise produce an OpenRouter metadata warning).  The bound is the
+        same conservative limit used by the E3 runtime.
+        """
+        return 256_000
+
     def create_client(self, **_kwargs):
         import sys
         configured = os.environ.get("HERMES_E3_RUNTIME_ROOT", "").strip()
