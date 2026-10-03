@@ -366,7 +366,9 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     text = "\n".join(header + [""] + blocks + tail)
 
     if len(text) > budget:
-        # Drop per-region detail from the bottom up, saying what was omitted.
+        # Drop per-region blocks from the bottom up, then trim job lines inside the
+        # last surviving block, always saying what was omitted. Never silently
+        # exceed the budget: a truncated message loses jobs without telling anyone.
         omitted = 0
         while len(text) > budget and len(blocks) > 1:
             blocks.pop()
@@ -374,6 +376,20 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
             text = "\n".join(
                 header
                 + [f"… {omitted} region block(s) omitted to fit the message limit."]
+                + [""] + blocks + tail
+            )
+        while len(text) > budget and blocks:
+            lines = blocks[-1].split("\n")
+            # Drop the last line (a URL) together with its preceding job line.
+            if len(lines) <= 1:
+                break
+            lines.pop()
+            blocks[-1] = "\n".join(lines)
+            text = "\n".join(
+                header
+                + [f"… {omitted} region block(s) omitted to fit the message limit."
+                   if omitted else
+                   "… some job lines omitted to fit the message limit."]
                 + [""] + blocks + tail
             )
 
