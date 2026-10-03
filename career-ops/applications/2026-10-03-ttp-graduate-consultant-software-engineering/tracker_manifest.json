@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "TTP Group (TTP plc)",
+      "title": "Graduate Consultant - Software Engineering - 2027",
+      "location": "Melbourn, Royston, UK (on-site five days a week; south of Cambridge)",
+      "salary": "Not published (job boards indicate \u00a332,000-\u00a342,000 for the Cyber/AI equivalent)",
+      "url": "https://jobs.smartrecruiters.com/TTP1/744000149037789-graduate-consultant-software-engineering-2027",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated",
+      "work_authorisation_risk": "Not assessed \u2014 owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a minimum 2:1 in Computer Science, Software Engineering or a closely related discipline, with strong A-Levels. The owner holds a BCA (CGPA 9.17, computing) and an MSc Information Security (Merit) but no A-Levels, and no formal software engineering employment. Also absent: no evidence of leading projects or managing client relationships, no manufacturing or hardware transfer experience, no 5G/antenna, drug-delivery or DMTA domain exposure. Genuine transferable evidence exists for prototyping, testing discipline, requirements gathering, Python/JavaScript and technical communication.",
+      "recommendation": "Applied per owner standing instruction. Fit is a stretch rather than a match: this is a first-principles engineering consultancy role asking for an engineering degree profile, and the owner's background is IT support plus security projects. The transferable case (prototype-test-document loop, requirements capture, multi-language academic base) is honest but the domain gap is real. NOTE: TTP also runs a 'Graduate Consultant - Cyber / AI - 2027' at the same location, which is a closer match to the owner's profile and has been flagged to him.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text supplied by owner via Discord 2026-10-03. Official SmartRecruiters URL located by Chief and verified live 2026-10-03 (TTP1 tenant, req 744000149037789). Recruits on a rolling basis with no fixed deadline; advert closes when spaces are filled.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

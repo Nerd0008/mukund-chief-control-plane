@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Graduate Consultant - Software Engineering",
+  "salutation": "Dear TTP Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Didwania_TTP_Graduate_Software_Engineering_Consultant_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\ttp_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Graduate Consultant role in Software Engineering at Melbourn because TTP does the thing I find most interesting: taking an ambiguous technical problem from a client and working it through to something that actually exists and works. A product development consultancy where engineers sit with the commercial question as well as the technical one is a harder place to learn than a single-product company, and it is the place I want to learn in. I am available to start in September 2027 and I am ready to work on site five days a week.",
+
+    "My academic background is a BCA in computer applications covering Python, Java, JavaScript, C++, C, MySQL, AI and machine learning, followed by an MSc in Information Security at Royal Holloway, awarded with Merit, with Secure Business Architectures and Critical Infrastructure Security among the modules. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. Across both degrees I have worked in several languages and several problem domains rather than specialising early, which is the habit a multi-disciplinary consultancy needs - I am comfortable being the least experienced person in a room full of specialists and picking up an unfamiliar field quickly.",
+
+    "I build and test rather than only study. I developed a Chrome extension in JavaScript with twenty-five detection patterns, and ran over 150 manual test cases against it to 93.7% accuracy, deliberately hunting for false positives because a tool that flags the wrong thing costs the user more time than it saves. I also developed a phishing-analysis prototype in Python with the Gmail API and an LLM, mapping findings to MITRE ATT&CK and keeping every result for a human to validate before anything is acted on. Prototype, measure, refine, document - that loop is what I enjoy, and it is what your description of invention through to transfer to manufacture is asking for at a larger scale.",
+
+    "The consulting half of the role is the half I have already been doing in a different setting. In my current IT support role I take four to five requests a day from colleagues, work out what they actually need rather than what they asked for, agree the change and then document it - requirements gathering with real constraints attached. At Co-op, as Person in Charge, I coordinate seven or eight people per shift and explain control requirements to colleagues who have no particular interest in them, which taught me to make a technical point land with an audience that did not ask for it. I am also used to being the person who raises the awkward question early rather than late.",
+
+    "I am drawn to TTP specifically because the work spans health tech, life science, energy and communications, and because an employee-owned firm has an obvious reason to develop its people properly. I would welcome the opportunity to discuss how my background could contribute to your project teams."
+  ]
+}
