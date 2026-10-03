@@ -638,12 +638,36 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
     if post_text and generate_image:
         image_prompt = build_image_prompt(post_text)
         image_bytes = generate_image_bytes(image_prompt)
+    # Run the news-claim gate here so every generated post carries a real,
+    # provenance-bearing verdict. A post is never handed on with a fabricated
+    # or absent gate record: the publish path refuses those outright.
+    news_fact_gate = factcheck_post(post_text, topic.get("sources") or [])
     return {
         "topic": topic,
         "post_text": post_text,
         "image_bytes": image_bytes,
+        "news_fact_gate": news_fact_gate,
+        "blocked": news_fact_gate.get("verdict") == "block",
         "generated_at": now_utc(),
     }
+
+
+def factcheck_post(post_text: str, sources: list) -> dict:
+    """Run the news-claim gate over a generated post.
+
+    Imported lazily so this module keeps working when the gate is unavailable;
+    in that case it returns a truthful ungated record rather than a pass.
+    """
+    if not post_text:
+        return {"verdict": "ungated", "available": False,
+                "reason": "no post text to check"}
+    try:
+        import linkedin_factcheck as fc
+    except Exception as exc:
+        return {"verdict": "ungated", "available": False,
+                "reason": f"fact gate unavailable: {exc}"}
+    return fc.verify_post(post_text, list(sources or []),
+                          use_llm=True, api_key=fc._load_api_key())
 
 
 def generate_post_from_narrative(idea: dict) -> dict:
