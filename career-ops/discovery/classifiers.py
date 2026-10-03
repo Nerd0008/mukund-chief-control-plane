@@ -22,6 +22,7 @@ credentials are read by reference in the existing adapters (never printed).
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -370,7 +371,8 @@ def _count_missing(batch: list, payload: list) -> int:
     return sum(1 for rec in batch if candidate_id(rec) not in returned)
 
 
-def _record_batch(out: dict, batch: list, payload: list, resolved: str, observed: list) -> None:
+def _record_batch(out: dict, batch: list, payload: list, resolved: str, observed: list,
+                  provider: str = "deepseek", classifier: str = "deepseek_bulk") -> None:
     """Turn one batch's model output into contract-shaped classifications."""
     by_id = {str(item.get("candidate_id")): item for item in payload
              if isinstance(item, dict) and item.get("candidate_id")}
@@ -389,9 +391,9 @@ def _record_batch(out: dict, batch: list, payload: list, resolved: str, observed
             confidence=item.get("confidence") if isinstance(item.get("confidence"), (int, float)) else None,
             reasons=item.get("reasons") if isinstance(item.get("reasons"), list) else [],
             uncertainty=item.get("uncertainty") if isinstance(item.get("uncertainty"), list) else [],
-            provider="deepseek", model=resolved,
+            provider=provider, model=resolved,
             model_identity_observed=bool(observed), prompt_version=PROMPT_VERSION,
-            classifier="deepseek_bulk")
+            classifier=classifier)
         doc["rejected_by_guard"] = not doc["valid"]
         out["classifications"][cid] = doc
 
@@ -451,6 +453,177 @@ def select_escalations(records: list, classifications: dict, *, budget: int) -> 
             "selected_pairs": [(rec, cls, reason) for _k, rec, cls, reason in selected],
             "dropped_due_to_budget": skipped,
             "eligible_for_escalation": len(ranked)}
+
+
+# --------------------------------------------------------------------------- #
+# codex bulk semantic pass
+# --------------------------------------------------------------------------- #
+
+#: Model the Codex CLI is told to use. The CLI must be told explicitly: the
+#: desktop app's ~/.codex/config.toml can name a slug the CLI rejects outright
+#: ("not supported when using Codex with a ChatGPT account"), and a rejected
+#: model yields zero classifications behind a clean exit code.
+CODEX_CLASSIFY_MODEL = os.environ.get("CAREER_OPS_CODEX_MODEL") or "gpt-6-sol"
+
+
+def codex_probe(model: str = CODEX_CLASSIFY_MODEL, *, adapter=None) -> dict:
+    """Reachability probe for the Codex CLI classifier (no credentials read here)."""
+    out = {"available": False, "status": None, "reason": None, "cli_version": None,
+           "resolved_executable": None, "model_requested": model}
+    if adapter is None:
+        try:
+            adapter = _codex_adapter()
+        except Exception as exc:  # noqa: BLE001 - reported, never fatal
+            out["reason"] = f"codex adapter unavailable: {type(exc).__name__}: {exc}"
+            return out
+    try:
+        health = adapter.check_health()
+    except Exception as exc:  # noqa: BLE001
+        out["reason"] = f"{type(exc).__name__}: {exc}"
+        return out
+    out["status"] = health.get("status")
+    out["cli_version"] = health.get("version")
+    out["resolved_executable"] = str(getattr(adapter, "executable", "")) or None
+    out["available"] = health.get("status") == "healthy"
+    if not out["available"]:
+        out["reason"] = health.get("reason") or health.get("status")
+    return out
+
+
+def codex_bulk_classify(records: list, *, model: str = CODEX_CLASSIFY_MODEL,
+                        batch_size: int = DEFAULT_BATCH_SIZE, timeout: int = 300,
+                        adapter=None, mode: str = MODE_HIGH_RECALL,
+                        workdir: str | None = None) -> dict:
+    """Classify the candidate pool with the Codex CLI as the semantic engine.
+
+    Used when the DeepSeek provider is unreachable (observed 2026-10-03:
+    ``Insufficient Balance``), which otherwise drops the whole pool onto the
+    declared deterministic rule classifier and accepts nothing.
+
+    Honesty rules carried over from the DeepSeek pass: a batch whose reply has no
+    parseable JSON is recorded as a failure and its candidates are marked
+    unclassified - never silently accepted. Model identity is *execution
+    observed*: the CLI does not expose a served-model field, so ``model`` is the
+    requested slug and ``model_identity_observed`` stays false.
+    """
+    out = {
+        "provider": "codex",
+        "model_requested": model,
+        "model_observed": None,
+        "model_identity_observed": False,
+        "auth_source": None,
+        "prompt_version": PROMPT_VERSION,
+        "batch_size": batch_size,
+        "requests": 0,
+        "batches": 0,
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+        "usage_reported_by_provider": True,
+        "errors": [],
+        "raw_responses": 0,
+        "split_retries": 0,
+        "classified": 0,
+        "unclassified_by_provider": 0,
+        "classifications": {},
+        "limitation": None,
+        "cli_version": None,
+        "resolved_executable": None,
+    }
+    if adapter is None:
+        try:
+            adapter = _codex_adapter()
+        except Exception as exc:  # noqa: BLE001
+            out["limitation"] = f"codex adapter unavailable: {type(exc).__name__}: {exc}"
+            return out
+    try:
+        health = adapter.check_health()
+        out["cli_version"] = health.get("version")
+        out["resolved_executable"] = str(getattr(adapter, "executable", "")) or None
+        if health.get("status") != "healthy":
+            out["limitation"] = (f"codex not healthy ({health.get('status')}: "
+                                 f"{health.get('reason')}); no model pass was made")
+            return out
+    except Exception as exc:  # noqa: BLE001
+        out["limitation"] = f"codex health check failed: {type(exc).__name__}: {exc}"
+        return out
+    out["model_observed"] = model
+
+    for start in range(0, len(records), batch_size):
+        out["batches"] += 1
+        batch = records[start:start + batch_size]
+        payload, error, usage = _dispatch_codex_batch(adapter, batch, model, timeout, workdir)
+        out["requests"] += 1
+        out["usage"] = _add_usage(out["usage"], usage)
+        if error and len(batch) > 1:
+            # One split retry: a batch that fails as a whole may pass in halves.
+            out["split_retries"] += 1
+            halves = [batch[:len(batch) // 2], batch[len(batch) // 2:]]
+            payload_items: list = []
+            ok = True
+            for half in halves:
+                if not half:
+                    continue
+                payload_h, error_h, usage_h = _dispatch_codex_batch(adapter, half, model,
+                                                                    timeout, workdir)
+                out["requests"] += 1
+                out["batches"] += 1
+                out["usage"] = _add_usage(out["usage"], usage_h)
+                if error_h:
+                    ok = False
+                    out["errors"].append({"batch": out["batches"], "error": error_h.get("error"),
+                                          "candidates_in_batch": len(half)})
+                else:
+                    payload_items.extend(payload_h)
+            if ok:
+                payload, error = payload_items, None
+        if error:
+            out["errors"].append({"batch": out["batches"], "error": error.get("error"),
+                                  "candidates_in_batch": len(batch)})
+            for rec in batch:
+                out["classifications"][candidate_id(rec)] = _unclassified(
+                    rec, "the codex classifier returned no parseable classification "
+                         "for this candidate")
+            continue
+        out["raw_responses"] += 1
+        out["classified"] += len(payload)
+        out["unclassified_by_provider"] += _count_missing(batch, payload)
+        _record_batch(out, batch, payload, model, [], provider="codex",
+                      classifier="codex_bulk")
+    if not out["classifications"]:
+        out["limitation"] = ("the codex pass produced no usable classifications; the funnel "
+                            "records this instead of treating the pool as empty")
+    return out
+
+
+def _dispatch_codex_batch(adapter, batch: list, model: str, timeout: int,
+                          workdir: str | None) -> tuple:
+    """One Codex classification request. Returns ``(payload_or_None, error_or_None, usage)``."""
+    contract = {
+        "contract_id": "discovery-bulk-semantic-codex",
+        "objective": build_bulk_prompt(batch),
+        "model": model,
+        "timeout": timeout,
+    }
+    if workdir:
+        contract["working_directory"] = workdir
+    result = adapter.dispatch(contract)
+    usage = result.get("usage_tokens") or {}
+    if result.get("status") != "COMPLETED":
+        return None, {"error": result.get("error") or result.get("status"),
+                      "exit_code": result.get("exit_code")}, usage
+    payload, err = parse_json_payload(result.get("final_message") or "")
+    if err:
+        return None, {"error": err}, usage
+    if isinstance(payload, dict) and isinstance(payload.get("classifications"), list):
+        payload = payload["classifications"]
+    if not isinstance(payload, list):
+        return None, {"error": "payload was not a list"}, usage
+    return payload, None, usage
+
+
+def _codex_adapter():
+    _exec_brain_on_path()
+    import codex_adapter  # noqa: PLC0415
+    return codex_adapter.CodexExecutionAdapter()
 
 
 def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDGET,

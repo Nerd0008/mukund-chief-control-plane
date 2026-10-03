@@ -26,6 +26,19 @@ CODEX_EXECUTABLE_ENV = ("CODEX_EXECUTABLE", "CODEX_CLI_PATH")
 CODEX_BIN_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "OpenAI" / "Codex" / "bin"
 
 
+def _default_model() -> str:
+    """Model slug for dispatches that do not name one.
+
+    The CLI must always be told which model to use. `~/.codex/config.toml` is
+    written by the Codex desktop app and can name a slug the CLI rejects outright
+    ("not supported when using Codex with a ChatGPT account"), which makes every
+    dispatch fail behind an otherwise clean exit code. Override with
+    CODEX_MODEL / CAREER_OPS_CODEX_MODEL.
+    """
+    return (os.environ.get("CODEX_MODEL") or os.environ.get("CAREER_OPS_CODEX_MODEL")
+            or "gpt-6-sol")
+
+
 def _codex_version_of(exe: Path) -> Optional[str]:
     """Return the CLI version string if `exe` is a working Codex CLI, else None."""
     try:
@@ -239,7 +252,7 @@ class CodexExecutionAdapter:
         dispatch_id = f"codex-{uuid.uuid4().hex[:12]}"
         contract_id = contract.get('contract_id', 'unknown')
         objective = contract.get('objective', '')
-        model = contract.get('model', None)
+        model = contract.get('model', None) or _default_model()
         timeout = contract.get('timeout', 300)
 
         # Build command with safe profile defaults
