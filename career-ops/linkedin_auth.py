@@ -218,6 +218,70 @@ def access_token_expiry() -> str | None:
     return value or None
 
 
+def _expiry_datetime() -> datetime | None:
+    raw = access_token_expiry()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def access_token_valid() -> bool:
+    """True when a stored access token exists and has not expired."""
+    if not read_secret(CRED_TARGETS["access_token"]):
+        return False
+    expiry = _expiry_datetime()
+    if expiry is None:
+        # No recorded expiry: presence alone is all that can be asserted.
+        return True
+    return expiry > datetime.now(timezone.utc)
+
+
+def oauth_ready() -> bool:
+    """True when the publish path has everything it needs to mint a request.
+
+    Client id and client secret are always required. For the token, either a
+    refresh token (the long-lived path) or a non-expired access token is
+    sufficient — LinkedIn does not always return a refresh token, and a valid
+    access token is enough to publish.
+    """
+    if not read_secret(CRED_TARGETS["client_id"]):
+        return False
+    if not read_secret(CRED_TARGETS["client_secret"]):
+        return False
+    if read_secret(CRED_TARGETS["refresh_token"]):
+        return True
+    return access_token_valid()
+
+
+def oauth_ready_detail() -> dict:
+    """Explain the oauth_ready() verdict without exposing any secret value."""
+    has_id = bool(read_secret(CRED_TARGETS["client_id"]))
+    has_secret = bool(read_secret(CRED_TARGETS["client_secret"]))
+    has_refresh = bool(read_secret(CRED_TARGETS["refresh_token"]))
+    has_access = bool(read_secret(CRED_TARGETS["access_token"]))
+    valid = access_token_valid()
+    if not has_id or not has_secret:
+        reason = "client id and/or client secret missing"
+    elif has_refresh:
+        reason = "client id + secret + refresh token present"
+    elif valid:
+        reason = "client id + secret + non-expired access token present (no refresh token)"
+    elif has_access:
+        reason = "stored access token has expired and no refresh token is stored"
+    else:
+        reason = "no access token and no refresh token stored"
+    return {"ready": oauth_ready(), "reason": reason,
+            "client_id_present": has_id, "client_secret_present": has_secret,
+            "refresh_token_present": has_refresh, "access_token_present": has_access,
+            "access_token_valid": valid, "access_token_expiry_utc": access_token_expiry()}
+
+
 def store_access_token(token: str, *, lifetime_days: int = DEFAULT_TOKEN_LIFETIME_DAYS,
                        expires_in_seconds: int | None = None) -> str:
     """Persist a fresh access token and its expiry. Returns the expiry (ISO)."""
@@ -234,6 +298,24 @@ def store_access_token(token: str, *, lifetime_days: int = DEFAULT_TOKEN_LIFETIM
 # --------------------------------------------------------------------------- #
 # HTTP transport (injectable so tests never touch the network)
 # --------------------------------------------------------------------------- #
+
+def put_bytes(url: str, payload: bytes, *, headers=None,
+              timeout: float = 60.0) -> dict:
+    """PUT raw bytes (image upload). Returns the same shape as the transport."""
+    req = urllib.request.Request(url, method="PUT", data=payload,
+                                 headers=headers or {})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return {"status": resp.status,
+                    "headers": dict(resp.headers.items()),
+                    "body": resp.read().decode("utf-8", "replace")}
+    except urllib.error.HTTPError as exc:
+        return {"status": exc.code,
+                "headers": dict(exc.headers.items()) if exc.headers else {},
+                "body": exc.read().decode("utf-8", "replace")}
+    except urllib.error.URLError as exc:
+        return {"status": 0, "headers": {}, "body": f"transport error: {exc.reason}"}
+
 
 def urllib_transport(method: str, url: str, *, headers=None, data=None,
                      timeout: float = 30.0) -> dict:
