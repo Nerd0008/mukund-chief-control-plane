@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "DHL Air (UK) Limited",
+      "title": "Airline IT Systems Engineer (12-month fixed-term contract)",
+      "location": "EMA Cargo West, East Midlands Airport, Derby, DE74 2TR",
+      "salary": "Competitive",
+      "url": "https://careers.dhl.com/global/en/job/DPDHGLOBALAV380052ENGLOBALEXTERNAL/Airline-IT-Systems-Engineer",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for existing experience in the same or a similar IT role or a bachelor's degree in an IT or computer science related degree, broad understanding of IT infrastructure and administration, Windows OS, Microsoft 365 and Active Directory, and knowledge of the aviation industry and airline IT systems is preferable. Not evidenced and not claimed: aviation industry experience, airline-specific IT systems knowledge, formal IT infrastructure administration at enterprise scale. Genuinely evidenced: Windows OS, Microsoft 365 and on-premises Active Directory daily use, first-line IT support for 15 colleagues across 15–20 devices, 4–5 daily access requests through AD with approval verification and time-limited permissions, 4–5 daily suspicious-email investigations, server health monitoring, network and website-access controls, Windows error-code root-cause tooling, hardware and software installation and configuration, documentation and escalation habits, customer service in hospitality, compliance checks and risk assessments as Person in Charge.",
+      "recommendation": "Applied per owner standing instruction. Fit is strong: the role is a direct match for the owner's current IT support work — first-line support, incident management, hardware and software procurement, user account maintenance, compliance with IT standards and information security policies. The owner's MSc Information Security and certifications (Security+, CC) provide the security-awareness dimension that a global logistics organisation like DHL values. The honest gap is aviation industry and airline-specific IT systems knowledge, which the cover letter addresses directly. No clearance or citizenship barrier. Closing date 31 October 2026.",
+      "discovery": "OWNER-SUPPLIED — JD text supplied by owner via Discord 2026-10-03, with the official DHL careers URL. URL verified live 2026-10-03. Requisition AV-380052. Closing date 31 October 2026 or once the position has been successfully filled. EMA Cargo West, East Midlands Airport, Derby, DE74 2TR. 12-month fixed-term contract. Rotating day/night shift pattern.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

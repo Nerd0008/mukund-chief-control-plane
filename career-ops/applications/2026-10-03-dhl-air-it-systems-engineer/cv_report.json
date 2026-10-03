@@ -1,0 +1,163 @@
+{
+  "ok": true,
+  "master": "C:\\Users\\mukun\\Downloads\\codex\\CV_FORMAT_MASTER.pdf",
+  "output": "C:\\Users\\mukun\\Downloads\\codex\\_CVs\\Mukund_DHL_IT_Systems_CV.pdf",
+  "page": {
+    "width": 595.5,
+    "height": 850.5,
+    "page_count": 1
+  },
+  "edits_applied": 8,
+  "spans_before": 81,
+  "spans_after": 81,
+  "measured": [
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "Seeking an IT systems engineer role to apply infrastructure, administration and support skills in an aviation environment.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        108.2
+      ],
+      "old_chars": 127,
+      "new_chars": 122,
+      "char_delta_pct": -3.9,
+      "old_width_pt": 503.67,
+      "new_width_pt": 482.95,
+      "available_pt": 552.0
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "experience, complemented by practical projects in endpoint troubleshooting, access management and service documentation. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        94.7
+      ],
+      "old_chars": 118,
+      "new_chars": 120,
+      "char_delta_pct": 1.7,
+      "old_width_pt": 478.27,
+      "new_width_pt": 500.59,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Windows OS, Microsoft 365, Active Directory, incident management",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        101.36,
+        138.74
+      ],
+      "old_chars": 69,
+      "new_chars": 64,
+      "char_delta_pct": -7.2,
+      "old_width_pt": 312.0,
+      "new_width_pt": 277.71,
+      "available_pt": 472.39
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Active Directory, user account administration",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        109.92,
+        148.92
+      ],
+      "old_chars": 77,
+      "new_chars": 69,
+      "char_delta_pct": -10.4,
+      "old_width_pt": 320.8,
+      "new_width_pt": 287.11,
+      "available_pt": 463.83
+    },
+    {
+      "find": "Python, PowerShell, SQL, API integration",
+      "replace": "Python, PowerShell, SQL, task automation",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        131.16,
+        160.27
+      ],
+      "old_chars": 40,
+      "new_chars": 40,
+      "char_delta_pct": 0.0,
+      "old_width_pt": 169.8,
+      "new_width_pt": 171.25,
+      "available_pt": 442.59
+    },
+    {
+      "find": "BitLocker, network segmentation, endpoint security ",
+      "replace": "Endpoint security, access control, device configuration ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        102.63,
+        171.74
+      ],
+      "old_chars": 50,
+      "new_chars": 55,
+      "char_delta_pct": 10.0,
+      "old_width_pt": 210.22,
+      "new_width_pt": 221.26,
+      "available_pt": 471.12
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "User support, technical documentation, escalation and reporting",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        144.2,
+        194.76
+      ],
+      "old_chars": 63,
+      "new_chars": 63,
+      "char_delta_pct": 0.0,
+      "old_width_pt": 257.23,
+      "new_width_pt": 254.45,
+      "available_pt": 429.55
+    },
+    {
+      "find": "problems, monitoring server health and maintaining password and website-access controls.",
+      "replace": "problems, monitoring server health and maintaining network and website-access controls.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        28.5,
+        398.98
+      ],
+      "old_chars": 88,
+      "new_chars": 87,
+      "char_delta_pct": -1.1,
+      "old_width_pt": 363.96,
+      "new_width_pt": 357.63,
+      "available_pt": 545.25
+    }
+  ],
+  "problems": [],
+  "verification": {
+    "untouched_spans_unchanged": true,
+    "moved": [],
+    "missing": [],
+    "all_replacements_present": true,
+    "page_geometry_unchanged": true,
+    "collateral_restored": [],
+    "cmap_repair": {
+      "streams_patched": 1,
+      "fonts": [
+        "DJJVLV+Times New Roman Regular"
+      ]
+    },
+    "non_breaking_spaces_remaining": 4,
+    "font_subsetting": {
+      "bytes_before": 828863,
+      "bytes_after": 188837
+    }
+  }
+}

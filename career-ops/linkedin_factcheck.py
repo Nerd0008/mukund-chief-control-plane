@@ -433,10 +433,18 @@ def verify_post(post_text: str, sources: list[str], *,
         record["llm_used"] = llm["used"]
         if llm["used"]:
             record["claims"] = llm["claims"]
+            record["judge_runs_used"] = llm.get("runs_used")
+            record["judge_runs_requested"] = llm.get("runs_requested")
             record["unsupported_claims"] = [
                 c for c in llm["claims"]
                 if str(c.get("verdict", "")).lower() in ("unsupported", "overstated")
             ]
+            disputed = [c for c in llm["claims"] if not c.get("unanimous", True)]
+            if disputed:
+                record["warnings"].append(
+                    f"{len(disputed)} claim(s) were not unanimous across "
+                    f"{llm.get('runs_used')} judge runs; the strictest majority "
+                    f"verdict was used")
         else:
             record["warnings"].append(f"claim model not used: {llm['reason']}")
 

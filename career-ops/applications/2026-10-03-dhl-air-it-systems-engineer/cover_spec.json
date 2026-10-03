@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Airline IT Systems Engineer",
+  "salutation": "Dear DHL Air Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_DHL_IT_Systems_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\dhl_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Airline IT Systems Engineer position at DHL Air UK because it combines the IT support work I already do with the infrastructure and administration depth I want to build. First-line support, incident management, hardware and software procurement, user account maintenance, and compliance with IT standards and information security policies are the core of my current role - the difference is that your version operates in a 24/7 aviation environment where system uptime directly affects cargo operations, and that is a challenge I want to take on. I am comfortable with rotating day/night shifts and the travel the role requires.",
+
+    "My background combines practical IT support with formal security training. I am an MSc Information Security graduate from Royal Holloway, awarded with Merit, with CompTIA Security+ and ISC2 Certified in Cybersecurity, preceded by a BCA in computer applications. That means I understand not only how to resolve a user's issue but why compliance with group IT standards, information security policies and regulatory requirements matters - which is central to a role that ensures airline systems remain compliant.",
+
+    "In my current IT support position I am the first point of contact for 15 colleagues across 15 to 20 devices, troubleshooting access and system problems, monitoring server health and maintaining network and website-access controls. I handle four to five access requests a day through on-premises Active Directory - verifying business approval, granting time-limited permissions and documenting the access period and any extension - and I investigate four to five suspicious emails a day, recording findings and alerting colleagues to recurring tactics. I also built a local tool that maps Windows error codes to their common causes and used it to trace intermittent server freezes to missing or corrupted DLLs, which is the kind of proactive troubleshooting and root-cause analysis your role requires rather than only ticket closure.",
+
+    "Two things in your requirements I want to be straightforward about. I work with Windows OS, Microsoft 365 and Active Directory daily and I am comfortable with hardware and software installation and configuration, but I have not worked in the aviation industry or with airline-specific IT systems, so that domain knowledge is something I would expect to learn quickly on the job rather than claim as existing experience. What I do bring is a genuine service mindset and documentation habit: at Co-op, as Person in Charge, I conduct weekly risk assessments and daily compliance checks, maintain the assessment records, and coordinate seven or eight colleagues per shift while explaining requirements to people who have no particular interest in them. I am used to being the person who keeps the record straight and follows the correct process.",
+
+    "What draws me to DHL Air specifically is that the IT function supports a global logistics operation where downtime has real-world consequences - a delayed cargo flight is not a movable deadline. I would welcome the opportunity to discuss how my support and infrastructure experience could contribute to your IT and Projects team."
+  ]
+}

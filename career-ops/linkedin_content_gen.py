@@ -675,19 +675,25 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
     # provenance-bearing verdict. A post is never handed on with a fabricated
     # or absent gate record: the publish path refuses those outright.
     news_fact_gate = factcheck_post(post_text, topic.get("sources") or [])
-    if post_text and news_fact_gate.get("verdict") != "pass":
+    verdict = news_fact_gate.get("verdict")
+    if post_text and verdict != "pass":
         report_problem(
-            f"news-claim gate did not pass (verdict={news_fact_gate.get('verdict')!r})",
+            f"news-claim gate did not pass (verdict={verdict!r})",
             detail=(f"topic: {topic.get('title', '')[:80]}\n"
                     f"reason: {news_fact_gate.get('reason', '')}\n"
                     f"unsupported: {news_fact_gate.get('unsupported_claims', [])[:3]}"))
+    # A post that did not pass the gate is quarantined, not returned as
+    # publishable. Returning it merely re-reported the same failure on every
+    # run and left a blocked post sitting in the batch. The text is kept for
+    # inspection, but `blocked` is True and the publisher will refuse it.
     return {
         "topic": topic,
         "post_text": post_text,
         "image_bytes": image_bytes,
         "news_fact_gate": news_fact_gate,
         "source_cache": source_cache,
-        "blocked": news_fact_gate.get("verdict") == "block",
+        "blocked": verdict != "pass",
+        "gate_verdict": verdict,
         "generated_at": now_utc(),
     }
 
@@ -697,6 +703,11 @@ def cache_topic_sources(topic: dict) -> dict:
 
     Returns {"cached": [urls], "failed": [urls]}. A failure is reported, never
     hidden: a post whose sources could not be read must be treated as ungated.
+
+    Only text fetched from the URL is cached. A caller must never pass its own
+    summary of an article: the gate would then judge the post against that
+    summary instead of the article, which produces a verdict about the summary,
+    not about the post.
     """
     try:
         import linkedin_factcheck as fc
@@ -709,7 +720,7 @@ def cache_topic_sources(topic: dict) -> dict:
             continue
         text = fc.fetch_source_text(url)
         if text:
-            fc.cache_source_text(url, text)
+            fc.cache_source_text(url, text, source="fetch")
             cached.append(url)
         else:
             failed.append(url)
