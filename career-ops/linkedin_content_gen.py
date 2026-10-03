@@ -336,6 +336,10 @@ def research_trending_topics(count: int = 6) -> list[dict]:
       professionals (engineers, IT, security teams).
     - "non_technical_impact": 1-2 sentences on how this directly affects everyday,
       non-technical people.
+    - "sources": a list of 1-3 full https:// URLs to the actual news articles or
+      primary sources reporting this story. These MUST be real, resolvable URLs you
+      found in search results. Never invent or guess a URL. If you cannot supply a
+      real one, use an empty list.
     """
 
     try:
@@ -377,11 +381,17 @@ def _parse_topics_json(raw_text: str, count: int) -> list[dict]:
     for item in data[:count]:
         if not isinstance(item, dict):
             continue
+        raw_sources = item.get("sources")
+        sources = []
+        if isinstance(raw_sources, list):
+            sources = [str(u).strip() for u in raw_sources
+                       if str(u).strip().lower().startswith(("http://", "https://"))]
         topics.append({
             "title": str(item.get("title", "")).strip(),
             "summary": str(item.get("summary", "")).strip(),
             "technical_impact": str(item.get("technical_impact", "")).strip(),
             "non_technical_impact": str(item.get("non_technical_impact", "")).strip(),
+            "sources": sources,
         })
     return topics
 
@@ -650,6 +660,30 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
         "blocked": news_fact_gate.get("verdict") == "block",
         "generated_at": now_utc(),
     }
+
+
+def cache_topic_sources(topic: dict) -> dict:
+    """Fetch and cache every source a topic cites, so claims can be grounded.
+
+    Returns {"cached": [urls], "failed": [urls]}. A failure is reported, never
+    hidden: a post whose sources could not be read must be treated as ungated.
+    """
+    try:
+        import linkedin_factcheck as fc
+    except Exception as exc:
+        return {"cached": [], "failed": [], "error": f"fact gate unavailable: {exc}"}
+    cached, failed = [], []
+    for url in (topic.get("sources") or []):
+        if fc.cached_source_text(url):
+            cached.append(url)
+            continue
+        text = fc.fetch_source_text(url)
+        if text:
+            fc.cache_source_text(url, text)
+            cached.append(url)
+        else:
+            failed.append(url)
+    return {"cached": cached, "failed": failed}
 
 
 def factcheck_post(post_text: str, sources: list) -> dict:
