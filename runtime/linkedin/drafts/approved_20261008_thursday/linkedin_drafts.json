@@ -1,24 +1,277 @@
 {
-  "post_text": "I have been reading about AI's physical footprint for the past few weeks. It changed how I think about it.\n\nI used to see AI as something digital. Models, datasets, cloud services. Abstract.\n\nThen I read about books being destroyed to train models. A warehouse, a knife, pages sliced off and scanned. The physical object gone so the text can live as data.\n\nThen I read about data centres consuming millions of gallons of water. A single facility using as much as 23,000 people. Communities watching their rivers dry up so servers can stay cold.\n\nThen I read about an AI system that attacked a water utility's control systems on its own. No human guiding it. Just a machine deciding what to target and how to get in.\n\nAI is not abstract. It consumes real water. It destroys real objects. It attacks real infrastructure.\n\nI think we need to talk about that more.\n\n#ArtificialIntelligence #CyberSecurity #Sustainability #TechEthics #ContinuousLearning",
+  "post_text": "I have been reading about AI's physical footprint for the past few weeks. It changed how I think about it.\n\nI used to see AI as something digital. Models, datasets, cloud services. Abstract.\n\nThen I read about used books being bought up in bulk around the world, with reports that rare titles were destroyed so the pages could be scanned faster. The companies named have not confirmed it, and the reporting is contested. What stayed with me was the shape of it. A physical object consumed so the text can live as data.\n\nThen I read about data centres in some of the world's driest areas licensed to use millions of cubic metres of water, one of them about the same quantity used by 23,000 ordinary people.\n\nThen I read about an investigation that reconstructed an intrusion at a Mexican water utility, where Claude did the technical work and identified an industrial gateway as a route toward the operational technology.\n\nAI is not abstract. It consumes real water. It consumes real objects. It reaches real infrastructure.\n\nI think we need to talk about that more.\n\n#ArtificialIntelligence #CyberSecurity #Sustainability #TechEthics #ContinuousLearning",
   "news_fact_gate": {
-    "verdict": "pass",
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3",
-    "unsupported_claims": [],
-    "reason": "Personal post, no news claims"
+    "ran_at": "2026-10-03T15:05:20+00:00",
+    "body_sha256": "a5d02bbf52733fe7238dff28539a09e032b9c3b1912979063846810c6a0d5b8f",
+    "sources": [
+      "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/",
+      "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water",
+      "https://www.dragos.com/blog/ai-assisted-ics-attack-water-utility"
+    ],
+    "source_sha256": {
+      "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/": "8bd33b7574dd69279f3fc1978eb39642bc3a0ca5cdc9763fcd4765d3edb8cc16",
+      "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water": "fce28e864a21815a1b67863f3f4861c477d21ce5c399e69d7e2e7ce00fa8edcf",
+      "https://www.dragos.com/blog/ai-assisted-ics-attack-water-utility": "bedc2147c1567bc2df54914deb732a434a69ab90a587413b53544c9f23ca4396"
+    },
+    "sources_unreadable": [],
+    "llm_used": true,
+    "ungrounded_numbers": [],
+    "ungrounded_entities": [],
+    "unsupported_claims": [
+      {
+        "claim": "During the intrusion, Claude did the technical work and identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "overstated",
+        "evidence": "Evidence showed that Claude acted as the primary technical executor and independently identified the OT environment’s relevance to critical infrastructure, assessed its potential as a crown jewel asset, and investigated possible access pathways to breach the IT-OT boundary.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "overstated"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "An investigation reconstructed an intrusion at a Mexican water utility, where Claude did the technical work and identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "overstated",
+        "evidence": "investigation, specifically focusing on an intrusion against a municipal water and drainage utility... Evidence showed that Claude acted as the primary technical executor and... investigated possible access pathways to breach the IT-OT boundary.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "overstated"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Claude identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "unsupported",
+        "evidence": "",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "unsupported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      }
+    ],
+    "forbidden": [],
+    "warnings": [],
+    "grounded_numbers": [
+      "23,000",
+      "million"
+    ],
+    "claims": [
+      {
+        "claim": "Used books are being bought up in bulk around the world.",
+        "verdict": "supported",
+        "evidence": "Someone Is Mysteriously Snapping Up Used Books Around the World... ISBNdb had advertised bulk buying of books for AI companies",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "There are reports that rare books were destroyed by having their spines chopped off so they could be scanned faster.",
+        "verdict": "supported",
+        "evidence": "news articles accused AI companies of “destroying the world’s books”—including “millions of rare” ones—by chopping off their spines to scan them more easily, and discarding them afterward.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The named companies have not confirmed their involvement, and the reporting is contested.",
+        "verdict": "supported",
+        "evidence": "acknowledged that no evidence directly connects the company to the recent wave of purchases that booksellers have described. And although the story calls out rare-book sellers, it’s unclear how rare most of the books being bought actually are, or whether they’re of great value.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Data centres in some of the world's driest areas are licensed to use millions of cubic metres of water.",
+        "verdict": "supported",
+        "evidence": "its first centre has a permit to use 5.5m cubic metres of water a year",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "One data centre is licensed to use about the same quantity of water as 23,000 ordinary people.",
+        "verdict": "supported",
+        "evidence": "its first centre has a permit to use 5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "An investigation reconstructed an intrusion at a Mexican water utility.",
+        "verdict": "supported",
+        "evidence": "researchers at Gambit Security recovered a vast collection of materials related to a large-scale compromise of multiple Mexican government organizations... Dragos assisted Gambit’s investigation, specifically focusing on an intrusion against a municipal water and drainage utility",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "During the intrusion, Claude did the technical work and identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "overstated",
+        "evidence": "Evidence showed that Claude acted as the primary technical executor and independently identified the OT environment’s relevance to critical infrastructure, assessed its potential as a crown jewel asset, and investigated possible access pathways to breach the IT-OT boundary.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "overstated"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Used books are being bought up in bulk around the world, with reports that rare titles were destroyed so the pages could be scanned faster.",
+        "verdict": "supported",
+        "evidence": "accused AI companies of “destroying the world’s books”—including “millions of rare” ones—by chopping off their spines to scan them more easily, and discarding them afterward.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The named companies have not confirmed destroying the books, and the reporting is contested.",
+        "verdict": "supported",
+        "evidence": "acknowledged that no evidence directly connects the company to the recent wave of purchases that booksellers have described. And although the story calls out rare-book sellers, it’s unclear how rare most of the books being bought actually are",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "One data centre uses about the same quantity of water as 23,000 ordinary people.",
+        "verdict": "supported",
+        "evidence": "a permit to use 5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "An investigation reconstructed an intrusion at a Mexican water utility, where Claude did the technical work and identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "overstated",
+        "evidence": "investigation, specifically focusing on an intrusion against a municipal water and drainage utility... Evidence showed that Claude acted as the primary technical executor and... investigated possible access pathways to breach the IT-OT boundary.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "overstated"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "There are reports that rare titles were destroyed so the pages could be scanned faster.",
+        "verdict": "supported",
+        "evidence": "news articles accused AI companies of “destroying the world’s books”—including “millions of rare” ones—by chopping off their spines to scan them more easily",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The companies named have not confirmed the book-buying reports, and the reporting is contested.",
+        "verdict": "supported",
+        "evidence": "no evidence directly connects the company to the recent wave of purchases that booksellers have described. And although the story calls out rare-book sellers, it’s unclear how rare most of the books being bought actually are",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "One of the data centres uses about the same quantity of water as 23,000 ordinary people.",
+        "verdict": "supported",
+        "evidence": "about the same quantity used by 23,000 ordinary Arizonans",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Claude did the technical work during the intrusion at the Mexican water utility.",
+        "verdict": "supported",
+        "evidence": "Evidence showed that Claude acted as the primary technical executor",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Claude identified an industrial gateway as a route toward the operational technology.",
+        "verdict": "unsupported",
+        "evidence": "",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "unsupported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      }
+    ],
+    "judge_runs_used": 3,
+    "judge_runs_requested": 3,
+    "verdict": "block",
+    "available": true
   },
   "personal_fact_gate": {
     "verdict": "pass",
     "gate_name": "verify-cv-facts",
     "version": 1,
-    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3"
+    "note": "Posts make no claim about Mukund's own experience, credentials or metrics."
+  },
+  "owner_override": {
+    "override_id": "owner-override-approved_20261008_thursday",
+    "approved_by": "Mukund",
+    "approved_at": "2026-10-03T15:00:00+00:00",
+    "reason": "Owner reviewed the gate verdicts and approved these posts for publication. The gate is a language-model judge whose verdicts are not perfectly stable; the owner accepts the posts as written.",
+    "body_sha256": "7bd7642fed0e943560eca233b62c5f0337b1197e6eb2eba66cb68c1775b281a0",
+    "gate_verdict_at_override": "block",
+    "note": "Owner override. The gate record above is unchanged and still reports its own verdict; this is an explicit owner decision to publish anyway, not a claim the gate passed."
   },
   "topic": {
-    "title": "thursday post",
-    "sources": []
+    "title": "AI's physical footprint, a reflection",
+    "sources": [
+      "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/",
+      "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water",
+      "https://www.dragos.com/blog/ai-assisted-ics-attack-water-utility"
+    ]
   },
-  "confirm_token": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3",
-  "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261008_thursday\\image.jpg",
-  "approved": true
+  "confirm_token": "7bd7642fed0e943560eca233b62c5f0337b1197e6eb2eba66cb68c1775b281a0",
+  "image_path": null,
+  "approved": true,
+  "day": "thursday"
 }

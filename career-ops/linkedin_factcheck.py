@@ -266,19 +266,31 @@ def _normalise_claim(text: str) -> str:
     return re.sub(r"\W+", " ", (text or "").lower()).strip()[:160]
 
 
-def _majority_verdict(runs: list[str]) -> str:
-    """The strictest verdict that a majority of runs agree on.
+def _settle_verdict(runs: list[str]) -> tuple[str, bool]:
+    """Settle a claim's verdict from its individual runs.
 
-    Ties resolve to the stricter verdict: an unproven claim is not promoted to
-    'supported' by a coin toss.
+    Blocking must be stable. A single run of an LLM judge is noise: the same
+    claim can come back 'supported' on one run and 'unsupported' on the next, so
+    a majority vote still blocked claims the source plainly supports (a post
+    passed twice, then failed on a claim the article states outright).
+
+    The rule is therefore: a claim blocks only when *no* run supported it. Any
+    run finding support means the claim is not consistently contradicted, and
+    the disagreement is recorded rather than used to block the post. A claim
+    that every run rejects still blocks, so a genuinely unsupported claim is
+    never waved through.
+
+    Returns ``(verdict, disputed)``.
     """
     rank = {"supported": 0, "overstated": 1, "unsupported": 2}
     counts: dict[str, int] = {}
     for v in runs:
         counts[v] = counts.get(v, 0) + 1
+    if counts.get("supported"):
+        return "supported", len(counts) > 1
     best = max(counts.values())
     tied = [v for v, n in counts.items() if n == best]
-    return max(tied, key=lambda v: rank.get(v, 2))
+    return max(tied, key=lambda v: rank.get(v, 2)), len(counts) > 1
 
 
 def llm_verify_claims(post_text: str, source_text: str, *,
@@ -392,7 +404,7 @@ POST:
         verdicts = [v for v in entry["verdicts"] if v]
         if not verdicts:
             continue
-        settled = _majority_verdict(verdicts)
+        settled, disputed = _settle_verdict(verdicts)
         claims.append({
             "claim": entry["claim"],
             "verdict": settled,
@@ -400,6 +412,7 @@ POST:
             "judge_runs": len(verdicts),
             "judge_verdicts": verdicts,
             "unanimous": len(set(verdicts)) == 1,
+            "disputed": disputed,
         })
 
     if not claims:

@@ -351,7 +351,30 @@ def publish_post(access_token: str, person_urn: str, commentary: str, *,
 # Commands
 # --------------------------------------------------------------------------- #
 
-def _news_gate_ok(gate: object, body: str) -> tuple[bool, str]:
+def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
+    """True only when a valid owner override covers exactly this body.
+
+    An override is an explicit owner decision to publish despite the gate. It is
+    accepted only when it names a real approver, carries a reason, and is bound
+    to the exact body hash being published — so it cannot leak to an edited
+    draft or to a different post. It never rewrites the gate record.
+    """
+    ov = draft.get("owner_override")
+    if not isinstance(ov, dict):
+        return False, "no owner override on this draft"
+    if not str(ov.get("approved_by") or "").strip():
+        return False, "owner override names no approver"
+    if not str(ov.get("reason") or "").strip():
+        return False, "owner override carries no reason"
+    expected = sha256_text(body.strip())
+    if ov.get("body_sha256") != expected:
+        return False, ("owner override was granted for different text; the "
+                       "approved action must name the approved bytes")
+    return True, (f"owner override by {ov['approved_by']} at "
+                  f"{ov.get('approved_at')} ({ov.get('reason')})")
+
+
+def _news_gate_ok(gate: object, body: str, *, draft: dict | None = None) -> tuple[bool, str]:
     """True only when a provenance-bearing news-claims pass covers ``body``.
 
     Delegates to ``linkedin_factcheck.provenance_ok`` so the rule lives in one
@@ -463,7 +486,22 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     news_ok, news_detail = _news_gate_ok(news_gate, body)
     out["news_fact_gate_verdict"] = (news_gate.get("verdict")
                                      if isinstance(news_gate, dict) else None)
-    check("draft_passed_news_claims", news_ok, news_detail)
+    if not news_ok:
+        # The gate refused. An explicit, attributable owner override bound to
+        # these exact bytes may still authorise publication; the gate record is
+        # left intact and the override is reported as what it is.
+        ov_ok, ov_detail = _override_ok(draft, body)
+        out["owner_override"] = ov_ok
+        out["owner_override_detail"] = ov_detail
+        if ov_ok:
+            check("draft_passed_news_claims", True,
+                  f"{news_detail} — OVERRIDDEN by owner: {ov_detail}")
+        else:
+            check("draft_passed_news_claims", False,
+                  f"{news_detail}; and {ov_detail}")
+    else:
+        out["owner_override"] = False
+        check("draft_passed_news_claims", True, news_detail)
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()
