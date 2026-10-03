@@ -131,7 +131,8 @@ def flat_post_draft(doc: dict) -> dict | None:
         if key in doc:
             draft[key] = doc[key]
     # The personal-claims gate is stored under its own name in this shape.
-    for key in ("fact_gate", "personal_fact_gate", "news_fact_gate"):
+    for key in ("fact_gate", "personal_fact_gate", "news_fact_gate",
+                "owner_override"):
         if isinstance(doc.get(key), dict):
             draft[key] = doc[key]
     return draft
