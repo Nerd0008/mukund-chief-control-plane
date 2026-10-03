@@ -174,14 +174,18 @@ def test_tracker_write_never_happens_real_workbooks_unchanged():
         assert sha256(djl.TRACKERS[region]) == digest, f"{region} workbook was modified"
 
 
-def test_budget_truncation_says_what_it_dropped(isolated):
+def test_budget_truncation_never_drops_a_region(isolated):
+    """Every region must survive truncation: the owner asked for all of them."""
     for region in djl.REGIONS:
         write_run(isolated, region, generated=NOW, accepted=[
             {"company": f"Co {i}", "title": f"Role {i}", "url": f"https://c{i}.example.org/j"}
             for i in range(10)])
     text, _ = djl.build_digest(26.0, 700, 25)
-    assert "omitted to fit the message limit" in text
-    assert len(text) <= 900  # budget honoured (with the omission note)
+    # Every region still appears, even under a tight budget.
+    for region in djl.REGIONS:
+        assert djl.REGION_LABEL[region] in text, f"{region} block was dropped"
+    assert "region(s) omitted" not in text
+    assert "more job(s) in this region not listed here" in text
 
 
 def test_max_per_region_summarises_the_rest(isolated):
@@ -189,5 +193,6 @@ def test_max_per_region_summarises_the_rest(isolated):
         {"company": f"Co {i}", "title": f"Role {i}", "url": f"https://c{i}.example.org/j"}
         for i in range(8)])
     text, _ = djl.build_digest(26.0, 100_000, 3)
-    assert "more in this run" in text
+    # The cap trims this region's own detail, and says how many it withheld.
+    assert "more job(s) in this region not listed here" in text
     assert "Co 3" not in text

@@ -287,19 +287,23 @@ def tracker_rows(region, want_date=None):
 # --------------------------------------------------------------------------- #
 def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[str, int]:
     now = dt.datetime.now(dt.timezone.utc)
-    blocks = []
+    sections = []          # one dict per region, always kept
     fresh_regions = 0
     total_jobs = 0
-    overall_notes = []
 
     for region in REGIONS:
-        doc, path = latest_run_doc(region)
+        doc, _path = latest_run_doc(region)
         label = REGION_LABEL[region]
 
         if doc is None:
-            blocks.append(f"**{label}** — UNKNOWN\nNo discovery run artifact found. "
-                          f"Nothing is invented to fill the gap.")
-            overall_notes.append(f"{region}: no run artifact")
+            sections.append({
+                "label": label,
+                "head": [f"**{label}** — UNKNOWN",
+                         "  No discovery run artifact found. Nothing is invented "
+                         "to fill the gap."],
+                "jobs": [],
+                "capped": 0,
+            })
             continue
 
         generated = parse_iso(doc.get("generated_at"))
@@ -310,44 +314,45 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         accepted = accepted_candidates(doc)
         tracked, tracker_error = tracker_rows(region, want_date=run_date)
 
-        lines = [f"**{label}** — {len(accepted)} job(s) found"
-                 + (f", {len(tracked)} added to tracker" if tracked else "")]
+        head = [f"**{label}** — {len(accepted)} job(s) found"
+                + (f", {len(tracked)} added to tracker" if tracked else "")]
 
         if stale:
             age_text = f"{age_h:.1f}h old" if age_h is not None else "no readable timestamp"
-            lines.append(f"  ⚠️ STALE/UNKNOWN — run is {age_text} (threshold {stale_hours}h). "
-                         f"NOT today's state.")
+            head.append(f"  ⚠️ STALE/UNKNOWN — run is {age_text} (threshold {stale_hours}h). "
+                        f"NOT today's state.")
         else:
             fresh_regions += 1
 
         if tracker_error:
-            lines.append(f"  (tracker not read: {tracker_error})")
+            head.append(f"  (tracker not read: {tracker_error})")
 
+        jobs = []
+        capped_out = 0
         if not accepted:
-            lines.append("  No accepted job in this run's own funnel output.")
+            head.append("  No accepted job in this run's own funnel output.")
             zero = (doc.get("funnel") or {}).get("zero_attribution") or {}
             first_zero = zero.get("first_zero_stage")
             if first_zero:
-                lines.append(f"  First zero stage: {first_zero} — {zero.get('reason', '')}")
+                head.append(f"  First zero stage: {first_zero} — {zero.get('reason', '')}")
         else:
             tracked_urls = {r["url"] for r in tracked if r["url"]}
             tracked_by_url = {r["url"]: r for r in tracked if r["url"]}
-            shown = accepted[:max_per_region]
-            for i, job in enumerate(shown, 1):
-                in_tracker = job["url"] and job["url"] in tracked_urls
+            for i, job in enumerate(accepted[:max_per_region], 1):
                 tag = ""
-                if in_tracker:
+                if job["url"] and job["url"] in tracked_urls:
                     tag = f"  [tracker {tracked_by_url[job['url']]['id']}]"
                 elif tracked_by_url:
                     tag = "  [not yet in tracker]"
-                lines.append(f"  {i}. {job['company']} — {job['title']}{tag}")
-                lines.append(f"     {job['url'] or 'URL: not stated by the source'}")
-            if len(accepted) > len(shown):
-                lines.append(f"  … {len(accepted) - len(shown)} more in this run "
-                             f"(see the run artifact).")
+                jobs.append([
+                    f"  {i}. {job['company']} — {job['title']}{tag}",
+                    f"     {job['url'] or 'URL: not stated by the source'}",
+                ])
+            capped_out = max(0, len(accepted) - len(jobs))
             total_jobs += len(accepted)
 
-        blocks.append("\n".join(lines))
+        sections.append({"label": label, "head": head, "jobs": jobs,
+                         "capped": capped_out})
 
     header = [
         "**Jobs found — with apply links**",
@@ -356,6 +361,8 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     if fresh_regions == 0:
         header.append("⚠️ No region produced a fresh discovery run — this digest is "
                       "UNKNOWN, not 'no jobs'.")
+    else:
+        header.append(f"{total_jobs} job(s) found across {len(REGIONS)} region(s).")
 
     tail = [
         "",
@@ -363,35 +370,35 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         "Links are the source's own URL; a pre-screened vacancy is not re-verified live.",
     ]
 
-    text = "\n".join(header + [""] + blocks + tail)
+    def render(dropped: dict) -> str:
+        blocks = []
+        for section in sections:
+            lines = list(section["head"])
+            lines.extend("\n".join(job) for job in section["jobs"])
+            withheld = section["capped"] + dropped.get(section["label"], 0)
+            if withheld:
+                lines.append(f"  … {withheld} more job(s) in this region not listed here.")
+            blocks.append("\n".join(lines))
+        return "\n".join(header + [""] + blocks + tail)
 
-    if len(text) > budget:
-        # Drop per-region blocks from the bottom up, then trim job lines inside the
-        # last surviving block, always saying what was omitted. Never silently
-        # exceed the budget: a truncated message loses jobs without telling anyone.
-        omitted = 0
-        while len(text) > budget and len(blocks) > 1:
-            blocks.pop()
-            omitted += 1
-            text = "\n".join(
-                header
-                + [f"… {omitted} region block(s) omitted to fit the message limit."]
-                + [""] + blocks + tail
-            )
-        while len(text) > budget and blocks:
-            lines = blocks[-1].split("\n")
-            # Drop the last line (a URL) together with its preceding job line.
-            if len(lines) <= 1:
-                break
-            lines.pop()
-            blocks[-1] = "\n".join(lines)
-            text = "\n".join(
-                header
-                + [f"… {omitted} region block(s) omitted to fit the message limit."
-                   if omitted else
-                   "… some job lines omitted to fit the message limit."]
-                + [""] + blocks + tail
-            )
+    # Enforce the budget by dropping JOB lines — never a whole region. Dropping a
+    # region would hide every vacancy in it, and the owner asked for all of them;
+    # the gateway chunks long messages anyway (Discord 2000 / Telegram 4096).
+    dropped: dict[str, int] = {}
+    text = render(dropped)
+    while len(text) > budget:
+        # Trim from the region with the most jobs still shown, so regions lose
+        # detail evenly instead of one region being emptied first.
+        candidate = max(
+            (s for s in sections if s["jobs"]),
+            key=lambda s: len(s["jobs"]),
+            default=None,
+        )
+        if candidate is None:
+            break
+        candidate["jobs"].pop()
+        dropped[candidate["label"]] = dropped.get(candidate["label"], 0) + 1
+        text = render(dropped)
 
     code = 0 if fresh_regions > 0 else 3
     return text, code
@@ -400,8 +407,11 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stale-hours", type=float, default=26.0)
-    parser.add_argument("--budget", type=int, default=1850,
-                        help="max characters to print (Discord message safety)")
+    parser.add_argument("--budget", type=int, default=4000,
+                        help="soft max characters before per-region job detail is "
+                             "trimmed. Set generously: the gateway chunks long "
+                             "messages (Discord 2000 / Telegram 4096), so a longer "
+                             "digest is delivered whole rather than losing jobs.")
     parser.add_argument("--max-per-region", type=int, default=25,
                         help="max jobs listed per region before summarising the rest")
     args = parser.parse_args()
