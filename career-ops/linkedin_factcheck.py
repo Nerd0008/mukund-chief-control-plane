@@ -42,6 +42,11 @@ GATE_VERSION = 1
 DEFAULT_MODEL = "gemini-pro-latest"
 USER_AGENT = "Mozilla/5.0 (compatible; ChiefFactGate/1.0)"
 
+# Browser-captured source articles, keyed by url hash. Publishers that block a
+# plain fetch (paywalls, bot walls) have their readable text captured through a
+# browser and cached here, so claims can still be grounded in the real article.
+SOURCE_CACHE_DIR = Path(__file__).resolve().parent.parent / "runtime" / "linkedin" / "sources"
+
 # Words that are capitalised for grammar or are generic to this domain, not
 # proper nouns that assert a fact about the world.
 ENTITY_ALLOWLIST = {
@@ -85,8 +90,43 @@ def strip_html(html: str) -> str:
     return re.sub(r"\s+", " ", html).strip()
 
 
+def source_cache_path(url: str) -> Path:
+    """Where a browser-captured copy of a source article is cached."""
+    return SOURCE_CACHE_DIR / f"{hashlib.sha256(url.encode('utf-8')).hexdigest()[:16]}.txt"
+
+
+def cached_source_text(url: str) -> str | None:
+    """Read a previously captured copy of ``url``, if one exists."""
+    path = source_cache_path(url)
+    if not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    return text if len(text) >= 400 else None
+
+
+def cache_source_text(url: str, text: str) -> Path:
+    """Store a captured copy of ``url`` so the gate can ground claims on it.
+
+    Needed because many publishers (The Atlantic among them) serve a stub or a
+    block page to a plain HTTP fetch, so the readable text has to be captured
+    through a browser and cached here.
+    """
+    SOURCE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path = source_cache_path(url)
+    header = f"# source-url: {url}\n"
+    path.write_text(header + text.strip() + "\n", encoding="utf-8")
+    return path
+
+
 def fetch_source_text(url: str, *, timeout: float = 30.0) -> str | None:
-    """Best-effort source text fetch. Returns None when it cannot be read."""
+    """Best-effort source text fetch, cache first.
+
+    Returns None when the article cannot be read; the caller then treats the
+    gate as ungrounded rather than assuming the claims are fine.
+    """
+    cached = cached_source_text(url)
+    if cached:
+        return cached
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
