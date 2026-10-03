@@ -295,6 +295,13 @@ def generate_linkedin_content(
     conflict — Audience/Tone/Structure above are just a default template, not fixed rules):
     - Every line must be written as "I" — never describe the author in third person, never
       write like a generic corporate listicle or a stranger's case study.
+    - Lead with the concrete event, not the theme. Open with a physical, specific detail —
+      a place, an object, an action. "It happens in a warehouse, with a knife." Not:
+      "AI training data raises important questions."
+    - Preserve the source's uncertainty. Where the article says a claim is unestablished,
+      say so in the post. "That part is not actually established." Never repeat a claim as fact.
+    - Keep paragraphs to 2-4 sentences. Blank line between them. No run-on analysis.
+    - End with a genuine question the reader could answer, not a rhetorical flourish.
     - Weave in the "About the author" details and User Preferences above naturally so this
       genuinely reads like this specific person wrote it, on this specific new topic.
     - If a User Preference contradicts the default Audience/Tone/Structure/Hashtag rules
