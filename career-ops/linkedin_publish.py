@@ -109,19 +109,55 @@ def load_drafts(path: str | Path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def flat_post_draft(doc: dict) -> dict | None:
+    """Normalise a single-post "approved" artefact into the draft shape.
+
+    ``runtime/linkedin/create_approved_drafts.py`` writes one post per file as
+    ``{post_text, news_fact_gate, personal_fact_gate, topic:{sources}}`` rather
+    than the ``drafts:[{kind:"post", body:...}]`` shape that
+    ``linkedin_workflow.py draft`` writes. Both are read here so the reviewed
+    bytes stay publishable without rewriting the artefact — the text is never
+    altered, only located.
+
+    Returns ``None`` when the document carries no usable post text, so an
+    unreadable artefact is reported rather than silently treated as empty.
+    """
+    text = doc.get("post_text") or doc.get("body") or doc.get("text")
+    if not isinstance(text, str) or not text.strip():
+        return None
+    draft: dict = {"kind": "post", "body": text,
+                   "blocked": bool(doc.get("blocked"))}
+    for key in ("status", "subtype", "publish_requires", "confirm_token"):
+        if key in doc:
+            draft[key] = doc[key]
+    # The personal-claims gate is stored under its own name in this shape.
+    for key in ("fact_gate", "personal_fact_gate", "news_fact_gate"):
+        if isinstance(doc.get(key), dict):
+            draft[key] = doc[key]
+    return draft
+
+
 def drafts_of_kind(doc: dict, kind: str) -> list:
     """Drafts of one kind out of a ``linkedin_workflow.py draft`` artefact.
 
     The live artefact is a flat ``drafts`` list where each entry carries a
     ``kind`` (``profile`` / ``post`` / ``outreach``). The ``posts`` / ``outreach``
-    keyed shape is accepted too so older artefacts keep working.
+    keyed shape is accepted too so older artefacts keep working, and a
+    single-post "approved" artefact (see :func:`flat_post_draft`) is read as one
+    ``post`` draft.
     """
     items = doc.get("drafts")
     if isinstance(items, list):
         return [d for d in items
                 if (d.get("kind") or "").casefold() == kind.casefold()]
     key = {"post": "posts", "outreach": "outreach"}.get(kind)
-    return list(doc.get(key) or []) if key else []
+    keyed = list(doc.get(key) or []) if key else []
+    if keyed:
+        return keyed
+    if kind.casefold() == "post":
+        flat = flat_post_draft(doc)
+        return [flat] if flat else []
+    return []
 
 
 def select_draft(doc: dict, kind: str, index: int) -> dict:
@@ -315,6 +351,39 @@ def publish_post(access_token: str, person_urn: str, commentary: str, *,
 # Commands
 # --------------------------------------------------------------------------- #
 
+def _news_gate_ok(gate: object, body: str) -> tuple[bool, str]:
+    """True only when a provenance-bearing news-claims pass covers ``body``.
+
+    Delegates to ``linkedin_factcheck.provenance_ok`` so the rule lives in one
+    place. A gate record that is absent, of another gate, produced for different
+    text, or of any verdict other than ``pass`` is refused. ``ungated`` in
+    particular is not a pass: it means the claims were never verified.
+    """
+    if gate is None:
+        return False, ("no news-claims gate record on this draft; the post's "
+                       "claims about the world were not checked")
+    try:
+        import linkedin_factcheck as fc
+    except Exception as exc:  # pragma: no cover - environment dependent
+        return False, (f"news-claims gate unavailable ({exc}); cannot verify "
+                       f"the post's claims about the world")
+    if not isinstance(gate, dict):
+        return False, "news-claims gate record is not a record"
+    if gate.get("gate_name") != fc.GATE_NAME:
+        return False, (f"news-claims gate record has no provenance "
+                       f"(gate_name={gate.get('gate_name')!r}); a verdict that "
+                       f"cannot name its gate is not a verdict")
+    ok, detail = fc.provenance_ok(gate, body)
+    if ok:
+        return True, "news-claims gate passed with provenance"
+    verdict = gate.get("verdict")
+    if verdict == "ungated":
+        return False, ("news-claims gate is 'ungated' ("
+                       + str(gate.get("reason") or "claims were not verified")
+                       + "); an unverified post is not a checked post")
+    return False, detail
+
+
 def _preflight(*, drafts_path, kind, index, approve, confirm_token,
                allow_duplicate, max_retries, ledger_path, require_credentials=True):
     """Every guard, evaluated without network access.
@@ -363,20 +432,38 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     check("body_within_linkedin_limit", len(body) <= MAX_PUBLISH_BODY_CHARS,
           f"{len(body)} chars (LinkedIn commentary limit {MAX_PUBLISH_BODY_CHARS})")
 
-    # Reuse the B20 review path rather than duplicating it: the draft generator
-    # runs the Career Ops install's fact gate and marks a draft `blocked` when it
-    # fails. A blocked draft is never publishable.
+    # Two independent gates must both pass before the account is touched.
+    #
+    # 1. The personal-claims gate (verify-cv-facts) checks Mukund's OWN claims.
+    # 2. The news-claims gate (linkedin_factcheck) checks claims about the world
+    #    against the article the post was built from. Its verdict is only
+    #    trustworthy when it proves it came from a real run over THIS text
+    #    (gate name + body hash), so provenance is required, not just "pass".
+    #
+    # Neither gate being absent is a pass. A draft that carries no verdict, or a
+    # verdict that cannot prove its own provenance, is refused: silence is not
+    # evidence that the text was checked.
     fact_gate = draft.get("fact_gate")
+    if fact_gate is None and isinstance(draft.get("personal_fact_gate"), dict):
+        # The single-post "approved" artefact names it personal_fact_gate.
+        fact_gate = draft.get("personal_fact_gate")
     verdict = fact_gate.get("verdict") if isinstance(fact_gate, dict) else None
     out["fact_gate_verdict"] = verdict
     out["draft_blocked_flag"] = bool(draft.get("blocked"))
-    review_ok = (not draft.get("blocked")) and verdict in (None, "pass", "passed")
-    check("draft_passed_review", review_ok,
-          f"fact gate verdict {verdict!r}; draft blocked={bool(draft.get('blocked'))}"
-          if not review_ok else
-          (f"fact gate verdict {verdict!r}, draft not blocked" if verdict is not None
-           else "no review verdict recorded in this artefact (older shape); "
-                "nothing is asserted about it"))
+    personal_ok = isinstance(fact_gate, dict) and verdict in ("pass", "passed")
+    check("draft_passed_review", personal_ok,
+          f"personal-claims gate verdict {verdict!r}; draft blocked="
+          f"{bool(draft.get('blocked'))}" if personal_ok else
+          (f"no personal-claims gate verdict recorded in this artefact "
+           f"(verdict={verdict!r}); nothing verified the author's own claims"
+           if verdict is None else
+           f"personal-claims gate verdict is {verdict!r}"))
+
+    news_gate = draft.get("news_fact_gate")
+    news_ok, news_detail = _news_gate_ok(news_gate, body)
+    out["news_fact_gate_verdict"] = (news_gate.get("verdict")
+                                     if isinstance(news_gate, dict) else None)
+    check("draft_passed_news_claims", news_ok, news_detail)
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()

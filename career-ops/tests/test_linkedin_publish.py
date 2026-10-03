@@ -45,8 +45,14 @@ FAKE_SECRET = "FAKE-CLIENT-SECRET-DO-NOT-LOG"
 # --------------------------------------------------------------------------- #
 
 def drafts_file(tmp_path: Path, body: str = "Notes from a recent project: example.",
-                *, blocked: bool = False, verdict: str | None = "pass") -> Path:
-    """A draft artefact in the same shape `linkedin_workflow.py draft` writes."""
+                *, blocked: bool = False, verdict: str | None = "pass",
+                news_verdict: str | None = "pass") -> Path:
+    """A draft artefact in the same shape `linkedin_workflow.py draft` writes.
+
+    ``news_verdict`` defaults to a provenance-bearing ``pass`` so the flow tests
+    exercise the publish path. Pass ``None`` to omit the news-claims record, or
+    another verdict to exercise the refusal.
+    """
     post = {"kind": "post", "topic": "Project note", "status": "draft_unsent",
             "publish_requires": "explicit owner authorization", "body": body,
             "blocked": blocked,
@@ -55,6 +61,13 @@ def drafts_file(tmp_path: Path, body: str = "Notes from a recent project: exampl
     if verdict is not None:
         post["fact_gate"] = {"verdict": verdict, "invented": [], "unsupportedFacts": [],
                              "forbidden": [], "available": True, "exit_code": 0}
+    if news_verdict is not None:
+        post["news_fact_gate"] = {
+            "gate_name": "linkedin-news-claims", "gate_version": 1,
+            "ran_at": "2026-09-24T22:00:00+00:00",
+            "body_sha256": lp.sha256_text(body.strip()),
+            "verdict": news_verdict, "unsupported_claims": [],
+        }
     p = tmp_path / "drafts.json"
     p.write_text(json.dumps({
         "ok": True,
@@ -186,7 +199,12 @@ class TestPublishGuards:
         assert out["draft_blocked_flag"] is True
         assert code == 1
 
-    def test_a_draft_with_no_recorded_review_says_so_instead_of_assuming_pass(self, tmp_path):
+    def test_a_draft_with_no_recorded_review_is_refused_not_assumed_pass(self, tmp_path):
+        """Silence is not evidence the text was checked.
+
+        A draft carrying no gate record at all used to be treated as reviewed.
+        It is now refused, and the report says plainly that nothing verified it.
+        """
         d = drafts_file(tmp_path, verdict=None)
         body_sha = lp.sha256_text("Notes from a recent project: example.")
         with configured()[0], configured()[1], configured()[2]:
@@ -194,10 +212,133 @@ class TestPublishGuards:
                                       "--confirm-token", body_sha, "--ledger",
                                       str(tmp_path / "ledger.jsonl")])
         checks = {c["check"]: c for c in out["checks"]}
-        assert checks["draft_passed_review"]["passed"] is True
-        assert "no review verdict recorded" in checks["draft_passed_review"]["detail"]
+        assert checks["draft_passed_review"]["passed"] is False
+        assert "nothing verified the author's own claims" in checks["draft_passed_review"]["detail"]
         assert out["fact_gate_verdict"] is None
+        assert code == 1
+
+
+# --------------------------------------------------------------------------- #
+# the news-claims gate is enforced, not decorative
+# --------------------------------------------------------------------------- #
+
+def news_gate(body: str, verdict: str, *, gate_name: str = "linkedin-news-claims",
+              sha: str | None = None, reason: str = "") -> dict:
+    """A news-claims gate record, with real provenance over ``body`` by default."""
+    import hashlib
+    return {
+        "gate_name": gate_name,
+        "gate_version": 1,
+        "ran_at": "2026-10-03T00:00:00+00:00",
+        "body_sha256": sha if sha is not None else hashlib.sha256(
+            body.strip().encode("utf-8")).hexdigest(),
+        "verdict": verdict,
+        "reason": reason,
+        "unsupported_claims": [] if verdict == "pass" else [{"claim": "x"}],
+    }
+
+
+def approved_file(tmp_path: Path, body: str, news: dict | None,
+                  *, personal: str = "pass", name: str = "approved.json") -> Path:
+    """A single-post approved artefact, the shape create_approved_drafts.py writes."""
+    doc = {
+        "post_text": body,
+        "news_fact_gate": news,
+        "personal_fact_gate": {"verdict": personal, "gate_name": "verify-cv-facts",
+                               "version": 1},
+        "topic": {"title": "t", "sources": []},
+        "confirm_token": lp.sha256_text(body),
+        "approved": True,
+    }
+    p = tmp_path / name
+    p.write_text(json.dumps(doc), encoding="utf-8")
+    return p
+
+
+class TestNewsClaimsGate:
+    def test_flat_approved_artefact_is_readable(self, tmp_path):
+        """The Oct 6-8 artefact shape must be selectable, not a LookupError."""
+        body = "A checked post body."
+        d = approved_file(tmp_path, body, news_gate(body, "pass"))
+        doc = lp.load_drafts(d)
+        draft = lp.select_draft(doc, "post", 0)
+        assert lp.draft_body(draft) == body
+
+    def test_a_provenance_bearing_pass_is_accepted(self, tmp_path):
+        body = "A checked post body."
+        d = approved_file(tmp_path, body, news_gate(body, "pass"))
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is True
+        assert out["news_fact_gate_verdict"] == "pass"
         assert code == 0
+
+    def test_a_blocked_news_gate_is_refused(self, tmp_path):
+        """The defect that let a blocked post stay publishable."""
+        body = "Data centres consume millions of gallons of water every day."
+        d = approved_file(tmp_path, body, news_gate(body, "block"))
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is False
+        assert out["news_fact_gate_verdict"] == "block"
+        assert code == 1
+
+    def test_an_ungated_news_record_is_refused(self, tmp_path):
+        body = "A post whose claims were never verified."
+        d = approved_file(tmp_path, body,
+                          news_gate(body, "ungated", reason="no source text could be read"))
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is False
+        assert "ungated" in checks["draft_passed_news_claims"]["detail"]
+        assert code == 1
+
+    def test_a_missing_news_record_is_refused(self, tmp_path):
+        body = "A post with no news gate record at all."
+        d = approved_file(tmp_path, body, None)
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is False
+        assert "not checked" in checks["draft_passed_news_claims"]["detail"]
+        assert code == 1
+
+    def test_a_forged_gate_name_is_refused(self, tmp_path):
+        """A hand-written verdict cannot name the gate, so it is not a verdict."""
+        body = "A post with a hand-written pass."
+        forged = {"verdict": "pass", "gate_name": "some-other-gate"}
+        d = approved_file(tmp_path, body, forged)
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is False
+        assert code == 1
+
+    def test_a_pass_for_different_text_is_refused(self, tmp_path):
+        """The approved action must name the approved bytes."""
+        body = "The text that will actually be published."
+        stale = news_gate(body, "pass", sha=lp.sha256_text("some earlier draft"))
+        d = approved_file(tmp_path, body, stale)
+        with configured()[0], configured()[1], configured()[2]:
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", lp.sha256_text(body),
+                                      "--ledger", str(tmp_path / "ledger.jsonl")])
+        checks = {c["check"]: c for c in out["checks"]}
+        assert checks["draft_passed_news_claims"]["passed"] is False
+        assert code == 1
 
 
 # --------------------------------------------------------------------------- #
@@ -370,10 +511,16 @@ class TestNoSecretLeakage:
 # --------------------------------------------------------------------------- #
 
 class TestRequestConstruction:
-    def test_linkedin_version_header_is_yyyy_mm(self):
+    def test_linkedin_version_header_is_pinned_to_a_known_active_version(self):
+        """The header must name an API version LinkedIn has actually activated.
+
+        October 2026 is not live yet, so the current month cannot be used; the
+        pin is July 2026 and must stay a yyyy-mm string.
+        """
         import datetime as dt
-        assert lp.linkedin_version_header(dt.datetime(2026, 9, 24, tzinfo=dt.timezone.utc)) \
-            == "202609"
+        header = lp.linkedin_version_header(dt.datetime(2026, 9, 24, tzinfo=dt.timezone.utc))
+        assert header == "202607"
+        assert len(header) == 6 and header.isdigit()
 
     def test_person_urn_resolution_reports_a_provider_error_truthfully(self):
         transport = StubTransport([{"status": 401, "headers": {}, "body": "bad token"}])
