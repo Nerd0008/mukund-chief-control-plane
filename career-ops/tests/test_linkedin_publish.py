@@ -85,6 +85,7 @@ def configured():
     return (
         mock.patch.object(auth, "presence", return_value=presence),
         mock.patch.object(auth, "resolve", side_effect=lambda p: (values[p], "credential_manager")),
+        mock.patch.object(auth, "access_token_expiry", return_value="2099-12-02T00:26:11Z"),
     )
 
 
@@ -146,7 +147,7 @@ class TestPublishGuards:
     def test_plan_passes_and_spends_nothing_when_approved_and_configured(self, tmp_path):
         d = drafts_file(tmp_path)
         body_sha = lp.sha256_text("Notes from a recent project: example.")
-        with configured()[0], configured()[1]:
+        with configured()[0], configured()[1], configured()[2]:
             code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--ledger",
                                       str(tmp_path / "ledger.jsonl")])
@@ -167,13 +168,13 @@ class TestPublishGuards:
                                   str(tmp_path / "ledger.jsonl")])
         checks = {c["check"]: c for c in out["checks"]}
         assert checks["oauth_credentials_present"]["passed"] is False
-        assert "owner setup required" in checks["oauth_credentials_present"]["detail"]
+        assert "no usable access token" in checks["oauth_credentials_present"]["detail"]
         assert code == 1
 
     def test_a_draft_blocked_by_the_fact_gate_is_never_publishable(self, tmp_path):
         d = drafts_file(tmp_path, blocked=True, verdict="fail")
         body_sha = lp.sha256_text("Notes from a recent project: example.")
-        with configured()[0], configured()[1]:
+        with configured()[0], configured()[1], configured()[2]:
             code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--ledger",
                                       str(tmp_path / "ledger.jsonl")])
@@ -186,7 +187,7 @@ class TestPublishGuards:
     def test_a_draft_with_no_recorded_review_says_so_instead_of_assuming_pass(self, tmp_path):
         d = drafts_file(tmp_path, verdict=None)
         body_sha = lp.sha256_text("Notes from a recent project: example.")
-        with configured()[0], configured()[1]:
+        with configured()[0], configured()[1], configured()[2]:
             code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--ledger",
                                       str(tmp_path / "ledger.jsonl")])
@@ -207,7 +208,7 @@ class TestPublishFlow:
         ledger = tmp_path / "ledger.jsonl"
         body_sha = lp.sha256_text("Notes from a recent project: example.")
         transport = StubTransport([])
-        with configured()[0], configured()[1], \
+        with configured()[0], configured()[1], configured()[2], \
                 mock.patch.object(auth, "urllib_transport", transport), \
                 mock.patch.object(lp.auth, "urllib_transport", transport):
             code, out = run(lp.main, ["publish", "--drafts", str(d), "--approve-publish",
@@ -226,7 +227,7 @@ class TestPublishFlow:
         transport = StubTransport([
             {"status": 200, "headers": {}, "body": json.dumps({"sub": "abc123"})},
             ok_post()])
-        with configured()[0], configured()[1], \
+        with configured()[0], configured()[1], configured()[2], \
                 mock.patch.object(auth, "urllib_transport", transport):
             code, out = run(lp.main, ["publish", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--no-backoff",
@@ -256,7 +257,7 @@ class TestPublishFlow:
         ledger.write_text(json.dumps({"at": "2026-09-24T22:10:00+00:00",
                                       "result": "published", "body_sha256": body_sha,
                                       "post_urn": "urn:li:share:1"}) + "\n", encoding="utf-8")
-        with configured()[0], configured()[1]:
+        with configured()[0], configured()[1], configured()[2]:
             code, out = run(lp.main, ["publish", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--ledger", str(ledger)])
         checks = {c["check"]: c for c in out["checks"]}
@@ -272,7 +273,7 @@ class TestPublishFlow:
         ledger.write_text(json.dumps({"at": "2026-09-24T22:10:00+00:00",
                                       "result": "published", "body_sha256": body_sha}) + "\n",
                           encoding="utf-8")
-        with configured()[0], configured()[1]:
+        with configured()[0], configured()[1], configured()[2]:
             code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--allow-duplicate",
                                       "--ledger", str(ledger)])
@@ -342,7 +343,7 @@ class TestNoSecretLeakage:
         body_sha = lp.sha256_text("Notes from a recent project: example.")
         transport = StubTransport([{"status": 200, "headers": {},
                                     "body": json.dumps({"sub": "abc123"})}, ok_post()])
-        with configured()[0], configured()[1], \
+        with configured()[0], configured()[1], configured()[2], \
                 mock.patch.object(auth, "urllib_transport", transport):
             code, out = run(lp.main, ["publish", "--drafts", str(d), "--approve-publish",
                                       "--confirm-token", body_sha, "--no-backoff",
