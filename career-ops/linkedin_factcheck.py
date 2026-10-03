@@ -152,9 +152,26 @@ def normalize_number(token: str) -> str:
     return token.replace(",", "").replace("_", "").rstrip(".").strip()
 
 
+def expand_number_words(text: str) -> str:
+    """Expand abbreviated number words so '5.5m' matches '5.5 million'."""
+    import re as _re
+    def _expand(m):
+        num = m.group(1)
+        word = m.group(2).lower()
+        if word in ('m', 'million'):
+            return f"{num} million"
+        if word in ('k', 'thousand'):
+            return f"{num} thousand"
+        if word in ('b', 'billion'):
+            return f"{num} billion"
+        return m.group(0)
+    return _re.sub(r'(\d+(?:\.\d+)?)\s*([mkb])\b', _expand, text, flags=_re.IGNORECASE)
+
+
 def check_numbers(post_text: str, source_text: str) -> list[dict]:
     """Every numeric claim in the post must appear in the source."""
-    src_norm = source_text.replace(",", "")
+    src_expanded = expand_number_words(source_text)
+    src_norm = src_expanded.replace(",", "")
     found = []
     for token in DIGIT_CLAIM.findall(post_prose(post_text)):
         norm = normalize_number(token)
@@ -165,7 +182,7 @@ def check_numbers(post_text: str, source_text: str) -> list[dict]:
                           "detail": f"'{token}' does not appear in any source"})
     for word in NUMBER_WORDS:
         if re.search(rf"\b{word}s?\b", post_prose(post_text), re.IGNORECASE) \
-                and not re.search(rf"\b{word}s?\b", source_text, re.IGNORECASE):
+                and not re.search(rf"\b{word}s?\b", src_expanded, re.IGNORECASE):
             found.append({"claim": word, "kind": "number_word",
                           "detail": f"'{word}' does not appear in any source"})
     return found
