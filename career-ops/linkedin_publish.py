@@ -65,6 +65,7 @@ RUNTIME_DIR = CONTROL_PLANE / "runtime" / "linkedin"
 PUBLISHED_LEDGER = RUNTIME_DIR / "published" / "posts.jsonl"
 
 POSTS_ENDPOINT = "https://api.linkedin.com/rest/posts"
+IMAGES_INIT_ENDPOINT = "https://api.linkedin.com/rest/images?action=initializeUpload"
 USERINFO_ENDPOINT = auth.USERINFO_URL
 
 # The only account mutation this module implements.
@@ -185,8 +186,9 @@ def record_result(record: dict, path: Path | None = None) -> str:
 # Request construction
 # --------------------------------------------------------------------------- #
 
-def build_post_payload(person_urn: str, commentary: str) -> dict:
-    return {
+def build_post_payload(person_urn: str, commentary: str,
+                       image_urn: str | None = None) -> dict:
+    payload = {
         "author": person_urn,
         "commentary": commentary,
         "visibility": "PUBLIC",
@@ -198,6 +200,57 @@ def build_post_payload(person_urn: str, commentary: str) -> dict:
         "lifecycleState": "PUBLISHED",
         "isReshareDisabledByAuthor": False,
     }
+    if image_urn:
+        payload["content"] = {"media": {"id": image_urn}}
+    return payload
+
+
+def initialize_image_upload(access_token: str, person_urn: str, *,
+                            transport=None) -> dict:
+    """Register an image upload and return its upload URL + image URN."""
+    transport = transport or auth.urllib_transport
+    body = json.dumps({"initializeUploadRequest": {"owner": person_urn}})
+    resp = transport("POST", IMAGES_INIT_ENDPOINT,
+                     headers={"Authorization": f"Bearer {access_token}",
+                              "Content-Type": "application/json",
+                              "X-Restli-Protocol-Version": "2.0.0",
+                              "LinkedIn-Version": linkedin_version_header()},
+                     data=body)
+    if resp.get("status") not in (200, 201):
+        return {"ok": False, "status": resp.get("status"),
+                "response_body": (resp.get("body") or "")[:800],
+                "error": "image initializeUpload failed"}
+    try:
+        value = json.loads(resp["body"])["value"]
+        return {"ok": True, "upload_url": value["uploadUrl"],
+                "image_urn": value["image"]}
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return {"ok": False, "status": resp.get("status"),
+                "response_body": (resp.get("body") or "")[:800],
+                "error": "image initializeUpload response unparsable"}
+
+
+def image_content_type(path: str | Path) -> str:
+    suffix = Path(path).suffix.lower()
+    return {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+            ".gif": "image/gif", ".webp": "image/webp"}.get(suffix, "image/jpeg")
+
+
+def upload_image_bytes(access_token: str, upload_url: str, image_bytes: bytes, *,
+                       content_type: str = "image/jpeg", transport=None) -> dict:
+    """PUT image bytes to the upload URL returned by LinkedIn."""
+    putter = getattr(transport, "put_bytes", None) if transport else None
+    if putter is None:
+        putter = auth.put_bytes
+    resp = putter(upload_url, image_bytes,
+                  headers={"Authorization": f"Bearer {access_token}",
+                           "Content-Type": content_type})
+    status = resp.get("status")
+    if status in (200, 201, 204):
+        return {"ok": True, "status": status}
+    return {"ok": False, "status": status,
+            "response_body": (resp.get("body") or "")[:800],
+            "error": "image byte upload failed"}
 
 
 def resolve_person_urn(access_token: str, *, transport=None) -> dict:
@@ -219,11 +272,12 @@ def resolve_person_urn(access_token: str, *, transport=None) -> dict:
 
 
 def publish_post(access_token: str, person_urn: str, commentary: str, *,
+                 image_urn: str | None = None,
                  transport=None, max_retries: int = DEFAULT_MAX_RETRIES,
                  sleep=None) -> dict:
     """POST the post. Bounded retries; 4xx is never retried."""
     transport = transport or auth.urllib_transport
-    body = json.dumps(build_post_payload(person_urn, commentary))
+    body = json.dumps(build_post_payload(person_urn, commentary, image_urn))
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
@@ -324,12 +378,9 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
                 "nothing is asserted about it"))
 
     pres = auth.presence()
-    oauth_ready = all(pres[k]["present"] for k in ("client_id", "client_secret", "refresh_token"))
-    check("oauth_credentials_present", oauth_ready,
-          "client id + client secret + refresh token resolve from the credential store"
-          if oauth_ready else
-          "no LinkedIn OAuth credential set is stored - owner setup required "
-          "(see career-ops/linkedin_auth.py)",
+    oauth_ready = auth.oauth_ready()
+    detail = auth.oauth_ready_detail()
+    check("oauth_credentials_present", oauth_ready, detail["reason"],
           blocking=require_credentials)
     out["oauth_credentials_present"] = oauth_ready
     out["credential_state"] = pres
@@ -367,6 +418,8 @@ def cmd_status(args) -> int:
         "implemented_account_mutations": list(SUPPORTED_KINDS),
         "still_refused_actions": list(STILL_BLOCKED_ACTIONS),
         "credentials": auth.presence(),
+        "oauth_ready": auth.oauth_ready(),
+        "oauth_detail": auth.oauth_ready_detail(),
         "access_token_expiry_utc": auth.access_token_expiry(),
         "published_records": len([r for r in ledger if r.get("result") == "published"]),
         "last_published": next((r for r in reversed(ledger)
@@ -422,6 +475,7 @@ def cmd_publish(args) -> int:
                      "network_calls_spent": 0, "external_actions_taken": [],
                      "would_post": {"endpoint": POSTS_ENDPOINT,
                                     "author": "urn:li:person:<resolved at publish time>",
+                                    "image": getattr(args, "image", None),
                                     "commentary_sha256": body_sha,
                                     "commentary_chars": len(body),
                                     "visibility": "PUBLIC",
@@ -440,6 +494,8 @@ def cmd_publish(args) -> int:
         return 0
 
     access_token, _ = auth.resolve("access_token")
+    if not auth.access_token_valid():
+        access_token = None
     if not access_token:
         client_id, _ = auth.resolve("client_id")
         client_secret, _ = auth.resolve("client_secret")
@@ -468,12 +524,46 @@ def cmd_publish(args) -> int:
         emit(base)
         return 1
 
+    image_urn = None
+    image_path = getattr(args, "image", None)
+    if image_path:
+        try:
+            image_bytes = Path(image_path).read_bytes()
+        except OSError as exc:
+            base.update({"ok": False, "performed": False,
+                         "blocker_category": "input",
+                         "reason": f"image not readable: {exc}"})
+            emit(base)
+            return 1
+        init = initialize_image_upload(access_token, urn["person_urn"])
+        if not init.get("ok"):
+            base.update({"ok": False, "performed": False,
+                         "blocker_category": "external_provider",
+                         "reason": init.get("error"), "status": init.get("status"),
+                         "image_upload": init})
+            emit(base)
+            return 1
+        put = upload_image_bytes(access_token, init["upload_url"], image_bytes,
+                                 content_type=image_content_type(image_path))
+        if not put.get("ok"):
+            base.update({"ok": False, "performed": False,
+                         "blocker_category": "external_provider",
+                         "reason": put.get("error"), "status": put.get("status"),
+                         "image_upload": put})
+            emit(base)
+            return 1
+        image_urn = init["image_urn"]
+        base["image_urn"] = image_urn
+        base["image_bytes_uploaded"] = len(image_bytes)
+
     result = publish_post(access_token, urn["person_urn"], body,
+                          image_urn=image_urn,
                           max_retries=args.max_retries,
                           sleep=None if args.no_backoff else __import__("time").sleep)
     record = {"result": "published" if result["ok"] else "failed",
               "kind": args.kind, "index": args.index, "body_sha256": body_sha,
               "post_urn": result.get("post_urn"), "post_url": result.get("post_url"),
+              "image_urn": image_urn,
               "http_status": result.get("status"), "attempts": result.get("attempts"),
               "approved": True}
     recorded_to = record_result(record, ledger_path)
@@ -519,6 +609,8 @@ def main(argv=None) -> int:
     p = sub.add_parser("publish"); common(p)
     p.add_argument("--dry-run", action="store_true",
                    help="validate everything and write a dry-run record, send nothing")
+    p.add_argument("--image", default=None,
+                   help="path to an image file to upload and attach to the post")
     p.set_defaults(fn=cmd_publish)
 
     args = ap.parse_args(argv)
