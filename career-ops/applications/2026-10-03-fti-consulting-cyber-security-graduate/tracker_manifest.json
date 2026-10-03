@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "FTI Consulting",
+      "title": "2027 Graduate Scheme, Cyber Security",
+      "location": "London (hybrid)",
+      "salary": "Not stated in posting",
+      "url": "https://fticonsulting.wd108.myworkdayjobs.com/FTIConsultingCareers/job/London-United-Kingdom/XMLNAME-2027-Graduate-Scheme--Cyber-Security_JR260938",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a minimum 2:1 university degree (or equivalent), preferably in an investigative, technical or scientific subject, with a clear interest in cybersecurity, strong Excel/PowerPoint skills, problem-solving and critical thinking, excellent communication, teamwork, initiative, and preferably previous cybersecurity experience, certifications, understanding of control and risk assessment frameworks, awareness of regulatory landscape, and experience with dashboards/data visualisation. Not evidenced and not claimed: formal cybersecurity work experience, digital forensic investigation experience, cybersecurity maturity assessment experience, threat intelligence generation, dashboard/data visualisation experience (PowerBI/Tableau). Genuinely evidenced: MSc Information Security (Merit), BCA, CompTIA Security+, ISC2 CC, IT support experience (M365, Active Directory, troubleshooting, endpoint support), Python/PowerShell/SQL, structured problem-solving (Windows error-code root-cause tool), InboxDefender project (93.7% accuracy, 25 patterns, MITRE ATT&CK), risk assessments, compliance checks, documentation, customer service, teamwork, initiative.",
+      "recommendation": "Applied per owner standing instruction. Fit is strong: the role is a cyber security graduate scheme in a consulting firm, and the owner's background is IT support and security with relevant certifications and projects. The honest gap is formal cybersecurity work experience and digital forensic investigation, which the posting says is 'highly desirable' but not required — they are 'keen to hear from applicants who have proven their technical aptitude in other contexts.' The owner's MSc Information Security, Security+, CC, and practical IT support experience with security-relevant projects (InboxDefender, AttackSurfaceIQ) provide that technical aptitude. No clearance or citizenship barrier. Application deadline 29 October 2026. September 2027 start date. No cover letter required.",
+      "discovery": "OWNER-SUPPLIED — JD text and URL supplied by owner via Discord 2026-10-03. Official Workday URL. Job ID JR260938. Posted 2 days ago. End date 30 October 2026. Application deadline 29 October 2026. London (hybrid). 5-step application process: online form + CV, skills test + video interview, competency-based interview (23-27 Nov 2026), assessment centre (7-11 Dec 2026), offers before Christmas.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
