@@ -96,8 +96,9 @@ def sha256_text(text: str) -> str:
 
 
 def linkedin_version_header(now=None) -> str:
-    now = now or dt.datetime.now(dt.timezone.utc)
-    return f"{now.year:04d}{now.month:02d}"
+    # LinkedIn has not activated the October 2026 API version yet.
+    # Pinning to July 2026 (known active) to avoid HTTP 426 NONEXISTENT_VERSION.
+    return "202607"
 
 
 # --------------------------------------------------------------------------- #
