@@ -1206,6 +1206,8 @@ def cmd_publish(args) -> int:
         argv.append("--dry-run")
     if args.allow_duplicate:
         argv.append("--allow-duplicate")
+    if args.image:
+        argv += ["--image", args.image]
     return lip.main(argv)
 
 
@@ -1249,10 +1251,9 @@ def cmd_publish_status(args) -> int:
         "generated_at": now_utc(),
         "implemented_account_mutations": list(lip.SUPPORTED_KINDS),
         "still_refused_actions": list(lip.STILL_BLOCKED_ACTIONS),
-        "oauth_credentials_present": all(pres[k]["present"]
-                                         for k in ("client_id", "client_secret",
-                                                   "refresh_token")),
+        "oauth_credentials_present": lia.oauth_ready(),
         "credentials": pres,
+        "oauth_detail": lia.oauth_ready_detail(),
         "access_token_expiry_utc": lia.access_token_expiry(),
         "published_records": len([r for r in lip.read_ledger()
                                   if r.get("result") == "published"]),
@@ -1261,9 +1262,8 @@ def cmd_publish_status(args) -> int:
         "network_calls_spent": 0,
         "external_actions_taken": [],
         "state": ("LIVE PATH CONFIGURED (owner OAuth present)"
-                  if all(pres[k]["present"] for k in ("client_id", "client_secret",
-                                                      "refresh_token"))
-                  else "READY_NEEDS_OWNER_CONFIG (no LinkedIn OAuth credential set stored)"),
+                  if lia.oauth_ready()
+                  else "READY_NEEDS_OWNER_CONFIG (no usable LinkedIn OAuth path)"),
     })
     return 0
 
@@ -1359,6 +1359,8 @@ def main(argv=None) -> int:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--allow-duplicate", action="store_true")
     p.add_argument("--max-retries", type=int, default=2)
+    p.add_argument("--image", default=None,
+                   help="path to an image to attach to the approved post")
     p.set_defaults(fn=cmd_publish)
 
     args = ap.parse_args(argv)
