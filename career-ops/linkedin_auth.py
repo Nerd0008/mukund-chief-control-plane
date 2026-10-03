@@ -82,6 +82,9 @@ ENV_VARS = {
 # refresh happens before an API call rather than as a failed call.
 DEFAULT_TOKEN_LIFETIME_DAYS = 60
 EXPIRY_TARGET = "chief-linkedin-access-token-expiry-utc"
+# Treat a token that is about to expire as unusable so a request is never
+# started with credentials that can expire mid-flight.
+ACCESS_TOKEN_SAFETY_SKEW_SECONDS = 300
 
 
 def now_utc() -> str:
@@ -218,6 +221,76 @@ def access_token_expiry() -> str | None:
     return value or None
 
 
+def _expiry_datetime(raw: str | None = None) -> datetime | None:
+    """Parse the recorded access-token expiry; invalid/missing values fail closed."""
+    raw = access_token_expiry() if raw is None else raw
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def access_token_valid(*, now: datetime | None = None,
+                       pres: dict | None = None,
+                       expiry_raw: str | None = None) -> bool:
+    """True only for a present token with a valid expiry beyond the safety skew."""
+    pres = pres or presence()
+    if not pres["access_token"]["present"]:
+        return False
+    expiry = _expiry_datetime(expiry_raw)
+    if expiry is None:
+        return False
+    now = now or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    return expiry > now.astimezone(timezone.utc) + timedelta(
+        seconds=ACCESS_TOKEN_SAFETY_SKEW_SECONDS)
+
+
+def oauth_ready_detail(*, now: datetime | None = None) -> dict:
+    """Explain readiness using presence + expiry metadata, never secret values."""
+    pres = presence()
+    expiry_raw = access_token_expiry()
+    usable_access = access_token_valid(now=now, pres=pres, expiry_raw=expiry_raw)
+    refresh_path = all(pres[k]["present"]
+                       for k in ("client_id", "client_secret", "refresh_token"))
+    ready = usable_access or refresh_path
+
+    if usable_access:
+        reason = "usable unexpired access token present"
+    elif refresh_path:
+        reason = "access token unavailable/expired but complete refresh path present"
+    elif pres["access_token"]["present"] and _expiry_datetime(expiry_raw) is None:
+        reason = "access token present but expiry is missing or invalid; failing closed"
+    elif pres["access_token"]["present"]:
+        reason = "access token expired/inside safety skew and refresh path is incomplete"
+    else:
+        reason = "no usable access token and refresh path is incomplete"
+
+    return {
+        "ready": ready,
+        "reason": reason,
+        "usable_access_token": usable_access,
+        "refresh_path_available": refresh_path,
+        "client_id_present": pres["client_id"]["present"],
+        "client_secret_present": pres["client_secret"]["present"],
+        "refresh_token_present": pres["refresh_token"]["present"],
+        "access_token_present": pres["access_token"]["present"],
+        "access_token_expiry_utc": expiry_raw,
+        "safety_skew_seconds": ACCESS_TOKEN_SAFETY_SKEW_SECONDS,
+    }
+
+
+def oauth_ready(*, now: datetime | None = None) -> bool:
+    """Canonical publish-readiness predicate."""
+    return bool(oauth_ready_detail(now=now)["ready"])
+
+
 def store_access_token(token: str, *, lifetime_days: int = DEFAULT_TOKEN_LIFETIME_DAYS,
                        expires_in_seconds: int | None = None) -> str:
     """Persist a fresh access token and its expiry. Returns the expiry (ISO)."""
@@ -234,6 +307,24 @@ def store_access_token(token: str, *, lifetime_days: int = DEFAULT_TOKEN_LIFETIM
 # --------------------------------------------------------------------------- #
 # HTTP transport (injectable so tests never touch the network)
 # --------------------------------------------------------------------------- #
+
+def put_bytes(url: str, payload: bytes, *, headers=None,
+              timeout: float = 60.0) -> dict:
+    """PUT raw bytes (image upload). Returns the same shape as the transport."""
+    req = urllib.request.Request(url, method="PUT", data=payload,
+                                 headers=headers or {})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return {"status": resp.status,
+                    "headers": dict(resp.headers.items()),
+                    "body": resp.read().decode("utf-8", "replace")}
+    except urllib.error.HTTPError as exc:
+        return {"status": exc.code,
+                "headers": dict(exc.headers.items()) if exc.headers else {},
+                "body": exc.read().decode("utf-8", "replace")}
+    except urllib.error.URLError as exc:
+        return {"status": 0, "headers": {}, "body": f"transport error: {exc.reason}"}
+
 
 def urllib_transport(method: str, url: str, *, headers=None, data=None,
                      timeout: float = 30.0) -> dict:
@@ -323,8 +414,8 @@ def cmd_status(args) -> int:
         "refresh_token_present": pres["refresh_token"]["present"],
         "access_token_present": pres["access_token"]["present"],
         "access_token_expiry_utc": access_token_expiry(),
-        "oauth_ready": all(pres[k]["present"]
-                           for k in ("client_id", "client_secret", "refresh_token")),
+        "oauth_ready": oauth_ready(),
+        "oauth_detail": oauth_ready_detail(),
         "secret_values_read": False,
         "note": ("Presence only: no secret value is read, printed or logged. A missing "
                  "credential means the owner has not completed LinkedIn app/OAuth setup "
