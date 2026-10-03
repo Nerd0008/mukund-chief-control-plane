@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import sys
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -162,10 +163,11 @@ class TestPublishGuards:
     def test_plan_reports_missing_credentials_without_inventing_them(self, tmp_path):
         d = drafts_file(tmp_path)
         body_sha = lp.sha256_text("Notes from a recent project: example.")
-        # No 'configured()' patch: the real store is empty on this host.
-        code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
-                                  "--confirm-token", body_sha, "--ledger",
-                                  str(tmp_path / "ledger.jsonl")])
+        # Isolate missing-credential coverage from the owner's real credential store.
+        with mock.patch.object(auth, 'read_secret', return_value=None), mock.patch.dict(os.environ, {}, clear=True):
+            code, out = run(lp.main, ["plan", "--drafts", str(d), "--approve-publish",
+                                      "--confirm-token", body_sha, "--ledger",
+                                      str(tmp_path / "ledger.jsonl")])
         checks = {c["check"]: c for c in out["checks"]}
         assert checks["oauth_credentials_present"]["passed"] is False
         assert "no usable access token" in checks["oauth_credentials_present"]["detail"]
