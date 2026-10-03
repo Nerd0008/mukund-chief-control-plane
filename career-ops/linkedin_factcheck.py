@@ -393,7 +393,9 @@ def cmd_verify(args) -> int:
                        model=args.model, forbidden_phrases=forbidden)
 
     if args.write_back:
-        draft["fact_gate"] = gate
+        # The news gate lands in its own field: linkedin_publish.py requires BOTH
+        # this and the personal-claims gate in fact_gate.
+        draft["news_fact_gate"] = gate
         draft["blocked"] = gate.get("verdict") == "block"
         if gate.get("verdict") == "block":
             draft["status"] = "blocked_fact_gate"
