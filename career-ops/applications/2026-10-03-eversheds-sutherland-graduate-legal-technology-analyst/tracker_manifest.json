@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Eversheds Sutherland",
+      "title": "Graduate Legal Technology Analyst",
+      "location": "Birmingham, United Kingdom",
+      "salary": "\u00a330,000 year one (rising to \u00a333,000 in year two)",
+      "url": "https://esi-vacancies.eversheds-sutherland.com/job/Birmingham-Graduate-Legal-Technology-Analyst/1436062433/",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated",
+      "work_authorisation_risk": "Not assessed \u2014 owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "Degree is in any discipline, so no qualification gap. Genuine gaps against the 'what you'll do' list: no legal-sector or practice-group experience, no process-mapping or requirements-gathering in a formal delivery role, no product/project delivery ownership, and no exposure to legal technology platforms. Relevant transferable evidence does exist: business-process observation and operational control review, stakeholder explanation of requirements, testing and documentation discipline, Python/PowerShell/SQL, and an AI-assisted analysis prototype with human validation.",
+      "recommendation": "Assessed and applied per owner standing instruction. Note for the record: the posting's stated deadline was 2 October 2026, and it was supplied on 3 October 2026, so the application window appears to have closed before submission. Deadline should be confirmed with the employer before any further effort is spent.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text and the official vacancy URL supplied by owner via Discord 2026-10-03. URL verified live by Chief 2026-10-03 (esi-vacancies.eversheds-sutherland.com, req 1436062433, posting dated 11 Sept 2026).",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
