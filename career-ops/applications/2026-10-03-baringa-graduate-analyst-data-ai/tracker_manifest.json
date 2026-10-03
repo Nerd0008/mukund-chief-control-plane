@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Baringa",
+      "title": "Graduate Analyst – Data, AI, Solutions & Engineering",
+      "location": "London (hybrid)",
+      "salary": "Not stated in posting",
+      "url": "https://job-boards.eu.greenhouse.io/baringa/jobs/4994128101",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated. Note: Baringa states they are unable to sponsor individuals for this opportunity; applicants must have permanent right to work in the UK now and in the future.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a degree in a relevant discipline such as Data Science, Computer Science, Mathematics, Statistics, Economics, Geography, Engineering, Physics or a related field, strong analytical and problem-solving skills, interest in using data and technology to support decision-making, ability to communicate ideas clearly, curiosity and initiative, collaborative approach, attention to detail, interest in developing both technical expertise and consulting skills, and enthusiasm for working with clients. Not evidenced and not claimed: formal consulting experience, client-facing project delivery, enterprise-scale data analysis or dashboard building. Genuinely evidenced: BCA and MSc Information Security (both relevant disciplines), Python/PowerShell/SQL for data analysis and task automation, structured problem-solving (Windows error-code root-cause tool), analytical mindset (risk assessments, compliance checks), attention to detail (documentation, records), collaborative approach (coordinating 7-8 colleagues per shift), communication skills (explaining requirements to non-technical people).",
+      "recommendation": "Applied per owner standing instruction. Fit is moderate: the role is a graduate analyst position in a consulting firm's data and AI practice, and the owner's background is IT support and security. The honest bridge is the analytical and technical skills - Python, PowerShell, SQL, structured problem-solving, attention to detail - which map onto the data analysis and decision-support aspects of the role. The consulting and client-facing dimension is a gap, but the posting explicitly aims at recent graduates and offers structured learning and mentoring, so the owner's lack of formal consulting experience is not a barrier. No clearance or citizenship barrier. Application window closes 19 October 2026. September 2027 start date.",
+      "discovery": "OWNER-SUPPLIED — JD text and URL supplied by owner via Discord 2026-10-03. Official Greenhouse URL. Job ID 4994128101. Posted 2026. Application window closes Monday 19 October 2026, 12pm GMT. Assessment centres New Year 2027. September 2027 start. London (hybrid). Business units hiring: Customer, Enterprise Value Creation, Organisation People & Change, Supply Chain & Procurement, Data AI Solutions & Engineering. Owner selected Data AI Solutions & Engineering as best fit.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

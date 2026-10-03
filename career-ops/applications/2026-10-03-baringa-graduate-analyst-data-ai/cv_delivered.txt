@@ -1,0 +1,101 @@
+                                           Mukund Didwania
+
+                      +44 7990920031 | mukunddidwania3@gmail.com | London, UK, E6 3AG
+                                       LinkedIn | GitHub | Right to work in the UK
+
+Professional Summary
+
+MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems
+
+experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation.
+Seeking a graduate analyst role to apply data and technical skills while developing hands-on industry experience in consulting.
+
+Technical Skills
+
+Security Analysis: Windows Event Logs, troubleshooting, endpoint support, MITRE ATT&CK
+Systems & Support: Windows, Microsoft 365, Azure Active Directory, account administration
+Scripting & Automation: Python, PowerShell, SQL, task automation
+Security Controls: Endpoint security, access control, device configuration
+Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF
+Communication & Support: User support, technical documentation, escalation and reporting
+
+Education
+
+MSc Information Security, Royal Holloway University of London, United Kingdom
+September 2024 - September 2025 | Merit
+Modules: Cryptography, Security Management, Critical Infrastructure Security,
+Secure Business Architectures, Digital Forensics and Network Security.
+Bachelor of Computer Applications , Maharashtra Institute of Technology World Peace University, India
+September 2021 - September 2024 | CGPA: 9.17
+Modules: Python, Java, JavaScript, C++, C, MySQL, AI & ML, Angular, Mobile Application Development.
+
+Work Experience
+
+IT Support Assistant, The Colourful Aura | London,UK | November 2024 - Present
+· Manage typically 4-5 access requests daily through on-premises Active Directory, verifying business approval, granting time-
+
+  limited permissions and documenting access periods and extensions.
+· Investigate 4-5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting
+
+  colleagues to recurring phishing tactics.
+· Serve as the first point of contact for IT issues for 15 employees across 15-20 devices, troubleshooting access and system
+
+  problems, monitoring server health and maintaining network and website-access controls.
+
+Person in Charge (PIC), Co-op | Fenchurch Street London, UK | November 2025 - Present
+· Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining
+
+  assessment records and identifying issues requiring corrective action.
+
+· Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through
+
+  internal reporting systems, apply temporary controls and escalate unresolved risks.
+
+· Coordinate 7-8 colleagues per shift, communicating control requirements, assigning corrective actions and following up
+  to ensure identified risks are addressed.
+
+Projects
+
+SafePaste - Sensitive Data Detection Browser Extension
+JavaScript, Manifest V3, HTML, CSS, Regular Expressions
+· Built a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials
+
+  and API keys before submitting pasted content.
+
+· Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the
+  browser to protect sensitive content.
+
+· Refined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and
+ choose whether to proceed.
+
+InboxDefender - Phishing Analysis
+Python ,Gmail API, LLM, MITRE ATT&CK, JSON
+
+· Designed and developed a phishing-analysis prototype to highlight suspicious email indicators and support manual triage,
+  with design reviews from an experienced SOC analyst.
+
+· Evaluated the prototype using a mixture of suspicious and legitimate business emails, keeping sensitive email data local and
+  using hardcoded MITRE ATT&CK mappings to contextualise findings.
+
+· Developing sandbox-based URL analysis to inspect linked content and enrich investigation reports, while keeping
+  sensitive email data local.
+
+AttackSurfaceIQ - Windows Event Log Analysis
+Python, Windows Event Logs, Network Analysis, PowerShell
+
+· Developed a local tool that maps Windows error codes to common causes, supporting investigation of system
+  faults across business devices.
+
+· Used the tool to investigate intermittent server freezes and crashes, identifying errors associated with missing or
+  corrupted DLLs and informing corrective action.
+
+· Designed the tool for internal troubleshooting, keeping log analysis local; currently developing background monitoring and
+  automated alerts for unexpected errors.
+
+Certifications
+
+· CompTIA Security+
+· ISC2 Certified in Cybersecurity (CC)
+· Ethical Hacking with Kali Linux, IBM
+· Cyber Security Job Simulation, Deloitte & Mastercard via Forage
+

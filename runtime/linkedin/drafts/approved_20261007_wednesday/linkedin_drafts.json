@@ -3,7 +3,7 @@
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-03T14:27:02+00:00",
+    "ran_at": "2026-10-03T14:40:44+00:00",
     "body_sha256": "83a376c0c69a331d2cac2814c8c122d441f179d730e444c8a6a7dd76633dedd8",
     "sources": [
       "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water"
@@ -33,9 +33,10 @@
       {
         "claim": "A data centre can be permitted to use 5.5 million cubic metres of water in a year.",
         "verdict": "supported",
-        "evidence": "its first centre has a permit to use 5.5m cubic metres of water a year",
-        "judge_runs": 2,
+        "evidence": "Google is developing two more... its first centre has a permit to use 5.5m cubic metres of water a year",
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
           "supported",
           "supported"
         ],
@@ -45,8 +46,10 @@
         "claim": "That is roughly the same amount used by 23,000 people.",
         "verdict": "supported",
         "evidence": "about the same quantity used by 23,000 ordinary Arizonans.",
-        "judge_runs": 1,
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
+          "supported",
           "supported"
         ],
         "unanimous": true
@@ -54,9 +57,11 @@
       {
         "claim": "The water is for cooling.",
         "verdict": "supported",
-        "evidence": "use water for cooling.",
-        "judge_runs": 1,
+        "evidence": "Datacentres... use water for cooling.",
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
+          "supported",
           "supported"
         ],
         "unanimous": true
@@ -65,8 +70,9 @@
         "claim": "Liquid is more efficient when you cool high-density racks, which are the ones mostly used for AI.",
         "verdict": "supported",
         "evidence": "liquid is more efficient when you try to cool down high-density racks, which are the ones that are mostly being used for AI.",
-        "judge_runs": 2,
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
           "supported",
           "supported"
         ],
@@ -75,12 +81,12 @@
       {
         "claim": "Data centres consume large quantities of fresh water, often drawn from local communities.",
         "verdict": "supported",
-        "evidence": "Amazon, Microsoft and Google are operating datacentres that use vast amounts of water in some of the world’s driest areas... with a potentially huge impact on populations already living with water scarcity.",
+        "evidence": "use vast amounts of water in some of the world’s driest areas... seawater also causes corrosion if used for cooling... Improving access to water in one area does nothing to help the community that has lost access to it far away.",
         "judge_runs": 3,
         "judge_verdicts": [
-          "overstated",
           "supported",
-          "supported"
+          "supported",
+          "overstated"
         ],
         "unanimous": false
       },
@@ -99,7 +105,7 @@
       {
         "claim": "One company asked to increase its water consumption by 48% at existing facilities.",
         "verdict": "supported",
-        "evidence": "Amazon in December asked the regional government for permission to increase water consumption at its three existing datacentres by 48%.",
+        "evidence": "Meanwhile, Amazon in December asked the regional government for permission to increase water consumption at its three existing datacentres by 48%.",
         "judge_runs": 3,
         "judge_verdicts": [
           "supported",
@@ -109,20 +115,9 @@
         "unanimous": true
       },
       {
-        "claim": "A campaign group has a name for what is happening: \"Your cloud is drying my river.\"",
+        "claim": "A campaign group has a name for what is happening: 'Your cloud is drying my river.'",
         "verdict": "supported",
         "evidence": "campaign group Tu Nube Seca Mi Río – Spanish for “Your cloud is drying my river”",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The companies involved have pledged to become \"water positive\" by 2030.",
-        "verdict": "supported",
-        "evidence": "claim that it will be “water positive” by 2030... Microsoft and Google have also pledged to become “water positive” by 2030",
         "judge_runs": 3,
         "judge_verdicts": [
           "supported",
@@ -132,11 +127,24 @@
         "unanimous": true
       },
       {
-        "claim": "One of their own sustainability experts warned that the offsetting approach is \"not ethical.\"",
+        "claim": "The companies involved have pledged to become 'water positive' by 2030.",
         "verdict": "supported",
-        "evidence": "with one of its own sustainability experts warning that its plans are “not ethical”.",
-        "judge_runs": 2,
+        "evidence": "it does claim that it will be “water positive” by 2030... Microsoft and Google have also pledged to become “water positive” by 2030",
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "One of their own sustainability experts warned that the offsetting approach is 'not ethical.'",
+        "verdict": "supported",
+        "evidence": "one of its own sustainability experts warning that its plans are “not ethical”... “I raised the issue in all the right places that this is not ethical,” said Nathan Wangusi, a former water sustainability manager at Amazon.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
           "supported",
           "supported"
         ],
@@ -155,50 +163,19 @@
         "unanimous": true
       },
       {
-        "claim": "Carbon is a global problem. Water is more localised. That difference is why the usual offsetting logic does not carry over.",
-        "verdict": "supported",
-        "evidence": "Water offsetting ca not work in the same way as carbon offsetting... 'Carbon is a global problem – water is more localised,' he said.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "A data centre can be permitted to use 5.5 million cubic metres of water in a year, which is roughly the same amount used by 23,000 people.",
-        "verdict": "supported",
-        "evidence": "...its first centre has a permit to use 5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The water used by data centres is for cooling.",
-        "verdict": "supported",
-        "evidence": "Datacentres, vast warehouses containing networked servers used for the remote storage and processing of data, as well as by information technology companies to train AI models such as ChatGPT , use water for cooling.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "A campaign group has a name meaning \"Your cloud is drying my river.\"",
-        "verdict": "supported",
-        "evidence": "...campaign group Tu Nube Seca Mi Río – Spanish for “Your cloud is drying my river”...",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
         "claim": "Carbon is a global problem, whereas water is more localised, which is why the usual offsetting logic does not carry over.",
         "verdict": "supported",
         "evidence": "Water offsetting ca not work in the same way as carbon offsetting... “Carbon is a global problem – water is more localised,” he said.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Carbon is a global problem. Water is more localised.",
+        "verdict": "supported",
+        "evidence": "“Carbon is a global problem – water is more localised,” he said.",
         "judge_runs": 2,
         "judge_verdicts": [
           "supported",
@@ -207,31 +184,12 @@
         "unanimous": true
       },
       {
-        "claim": "5.5 million cubic metres of water is roughly the same amount used by 23,000 people.",
+        "claim": "That difference is why the usual offsetting logic does not carry over.",
         "verdict": "supported",
-        "evidence": "5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
-        "judge_runs": 1,
+        "evidence": "Water offsetting ca not work in the same way as carbon offsetting, where a tonne of pollutants removed from the atmosphere can cancel out a tonne emitted elsewhere",
+        "judge_runs": 2,
         "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Liquid is more efficient when cooling high-density racks, which are mostly used for AI.",
-        "verdict": "supported",
-        "evidence": "liquid is more efficient when you try to cool down high-density racks, which are the ones that are mostly being used for AI.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "One of the companies' own sustainability experts warned that the offsetting approach is \"not ethical.\"",
-        "verdict": "supported",
-        "evidence": "one of its own sustainability experts warning that its plans are “not ethical”.",
-        "judge_runs": 1,
-        "judge_verdicts": [
+          "supported",
           "supported"
         ],
         "unanimous": true

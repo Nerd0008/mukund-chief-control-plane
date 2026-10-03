@@ -3,7 +3,7 @@
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-03T14:25:49+00:00",
+    "ran_at": "2026-10-03T14:39:11+00:00",
     "body_sha256": "eea8fd844ccb03eb2cf77ddd19e9ef667943e6b1823798a60f44bc4f47f0a7e1",
     "sources": [
       "https://www.dragos.com/blog/ai-assisted-ics-attack-water-utility"
@@ -21,19 +21,9 @@
     "grounded_numbers": [],
     "claims": [
       {
-        "claim": "An attacker with no background in industrial control systems found the door into one.",
+        "claim": "An attacker with no background in industrial control systems found an entry point because an AI model did the technical work for them.",
         "verdict": "supported",
-        "evidence": "In this case, the adversary did not demonstrate meaningful knowledge of OT or ICS.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The models did the technical work for the attacker, rather than the attacker using clever techniques.",
-        "verdict": "supported",
-        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used... but how the AI models rapidly operationalized them to execute a large portion of the technical work",
+        "evidence": "In this case, the adversary did not demonstrate meaningful knowledge of OT or ICS. Claude provided that context autonomously... rapidly operationalized them to execute a large portion of the technical work across the intrusion lifecycle.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -44,8 +34,9 @@
         "claim": "Dragos and Gambit Security reconstructed an intrusion against a municipal water and drainage utility serving Monterrey, Mexico.",
         "verdict": "supported",
         "evidence": "Gambit contacted Dragos to assist in the analysis of an intrusion affecting a municipal water and drainage utility serving the Monterrey metropolitan area in Mexico.",
-        "judge_runs": 1,
+        "judge_runs": 2,
         "judge_verdicts": [
+          "supported",
           "supported"
         ],
         "unanimous": true
@@ -77,9 +68,10 @@
       {
         "claim": "Claude read the internal enterprise network, spotted a server hosting an industrial gateway, and worked out that the interface sat close to the utility's operational environment.",
         "verdict": "supported",
-        "evidence": "Claude performed broad-ranging discovery and enumeration activities and identified a server hosting a vNode industrial gateway... assessed it as a strategically significant target due to its potential proximity to the water and drainage utility’s operational environment.",
-        "judge_runs": 1,
+        "evidence": "Claude performed broad-ranging discovery and enumeration activities and identified a server hosting a vNode industrial gateway... Claude correctly recognized the vNode interface as a gateway to OT-adjacent infrastructure and assessed it as a strategically significant target due to its potential proximity to the water and drainage utility’s operational environment.",
+        "judge_runs": 2,
         "judge_verdicts": [
+          "supported",
           "supported"
         ],
         "unanimous": true
@@ -87,7 +79,7 @@
       {
         "claim": "The adversary did not arrive intending to reach operational technology.",
         "verdict": "supported",
-        "evidence": "an adversary with no prior objective in OT targeting",
+        "evidence": "This investigation showed how commercial AI tools assisted an adversary with no prior objective in OT targeting to identify an OT environment",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -95,9 +87,9 @@
         "unanimous": true
       },
       {
-        "claim": "The AI work made operational technology visible.",
+        "claim": "The AI work made operational technology visible to the attacker.",
         "verdict": "supported",
-        "evidence": "adoption of commercial AI tools as an intrusion aid has made OT more visible to adversaries already operating within IT.",
+        "evidence": "these findings demonstrate how the adoption of commercial AI tools as an intrusion aid has made OT more visible to adversaries already operating within IT.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -105,7 +97,7 @@
         "unanimous": true
       },
       {
-        "claim": "The techniques used were not novel and are publicly documented.",
+        "claim": "Dragos says the techniques used were not novel and are publicly documented.",
         "verdict": "supported",
         "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources",
         "judge_runs": 1,
@@ -115,9 +107,190 @@
         "unanimous": true
       },
       {
-        "claim": "Current models do not add ICS-specific capabilities that did not already exist.",
+        "claim": "Current models do not add ICS-specific capability that did not already exist.",
         "verdict": "supported",
         "evidence": "current AI models do not provide novel ICS or OT-specific capabilities",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Public discussion has amplified fear about autonomous AI compromising infrastructure, but Dragos's investigation does not support this.",
+        "verdict": "supported",
+        "evidence": "While public discussion has, in some cases, amplified fear and hype around autonomous or agentic AI enabling infrastructure compromise and disruption, Dragos’s assessments from real-world investigations indicate that this level of capability is not currently observed in adversary activity across the ICS/OT threat landscape",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "AI models can rapidly operationalize known techniques against exposed systems to exploit weak authentication and default credentials.",
+        "verdict": "supported",
+        "evidence": "AI can rapidly operationalize known offensive security techniques against exposed systems, such as exploiting weak authentication and default credentials to gain access.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Prevention alone stops being a complete strategy.",
+        "verdict": "supported",
+        "evidence": "prevention-only OT security strategies will become less effective. [...] prevention-only security strategies are increasingly insufficient on their own",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "AI lowers the expertise needed to reach these systems.",
+        "verdict": "supported",
+        "evidence": "As AI tools become more capable of interpreting OT protocols, recognizing industrial software, and mapping IT-OT relationships, the adversary’s prerequisite skill and knowledge of OT decreases.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "An attacker with no background in industrial control systems found an entry point into one using an AI model.",
+        "verdict": "supported",
+        "evidence": "This investigation showed how commercial AI tools assisted an adversary with no prior objective in OT targeting to identify an OT environment and develop and refine a viable access pathway to OT infrastructure... the adversary did not demonstrate meaningful knowledge of OT or ICS.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The adversary did not arrive intending to reach operational technology; the AI work made it visible.",
+        "verdict": "supported",
+        "evidence": "This investigation showed how commercial AI tools assisted an adversary with no prior objective in OT targeting to identify an OT environment... made OT more visible to adversaries already operating within IT.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The techniques used were not novel and are documented publicly.",
+        "verdict": "supported",
+        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources...",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Current AI models do not add ICS-specific capability that did not already exist.",
+        "verdict": "supported",
+        "evidence": "...current AI models do not provide novel ICS or OT-specific capabilities...",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Public discussion has amplified fear about autonomous AI compromising infrastructure, which Dragos's investigation does not support.",
+        "verdict": "supported",
+        "evidence": "While public discussion has, in some cases, amplified fear and hype around autonomous or agentic AI enabling infrastructure compromise and disruption, Dragos’s assessments from real-world investigations indicate that this level of capability is not currently observed...",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "AI can rapidly operationalise known techniques against exposed systems, such as weak authentication and default credentials.",
+        "verdict": "supported",
+        "evidence": "...because AI can rapidly operationalize known offensive security techniques against exposed systems, such as exploiting weak authentication and default credentials to gain access.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "AI lowers the expertise needed to reach target systems.",
+        "verdict": "supported",
+        "evidence": "As AI tools become more capable of interpreting OT protocols, recognizing industrial software, and mapping IT-OT relationships, the adversary’s prerequisite skill and knowledge of OT decreases.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The attacker had no background or meaningful knowledge in industrial control systems.",
+        "verdict": "supported",
+        "evidence": "In this case, the adversary did not demonstrate meaningful knowledge of OT or ICS.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "A model did the technical work for the attacker, rather than the attacker using clever or sophisticated techniques.",
+        "verdict": "supported",
+        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources, but how the AI models rapidly operationalized them to execute a large portion of the technical work across the intrusion lifecycle.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Dragos and Gambit Security analyzed an intrusion against a municipal water and drainage utility serving Monterrey, Mexico.",
+        "verdict": "supported",
+        "evidence": "Gambit contacted Dragos to assist in the analysis of an intrusion affecting a municipal water and drainage utility serving the Monterrey metropolitan area in Mexico.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Claude read the internal enterprise network, spotted a server hosting an industrial gateway, and determined that the interface was close to the utility's operational environment.",
+        "verdict": "supported",
+        "evidence": "Claude performed broad-ranging discovery and enumeration activities and identified a server hosting a vNode industrial gateway... and assessed it as a strategically significant target due to its potential proximity to the water and drainage utility’s operational environment.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The adversary did not initially intend to reach operational technology.",
+        "verdict": "supported",
+        "evidence": "This investigation showed how commercial AI tools assisted an adversary with no prior objective in OT targeting to identify an OT environment",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "AI made the operational technology visible to the adversary.",
+        "verdict": "supported",
+        "evidence": "These findings demonstrate how the adoption of commercial AI tools as an intrusion aid has made OT more visible to adversaries already operating within IT.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The techniques used were not novel, many are publicly documented, and current AI models do not add ICS-specific capability that did not already exist.",
+        "verdict": "supported",
+        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources... current AI models do not provide novel ICS or OT-specific capabilities",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -135,7 +308,7 @@
         "unanimous": true
       },
       {
-        "claim": "Dragos's own investigation does not support the fear that autonomous AI is compromising infrastructure.",
+        "claim": "Dragos's investigations do not support the fear that autonomous AI is currently capable of compromising infrastructure.",
         "verdict": "supported",
         "evidence": "Dragos’s assessments from real-world investigations indicate that this level of capability is not currently observed in adversary activity across the ICS/OT threat landscape",
         "judge_runs": 1,
@@ -145,109 +318,7 @@
         "unanimous": true
       },
       {
-        "claim": "Models can rapidly operationalize known techniques against exposed systems by exploiting weak authentication and default credentials.",
-        "verdict": "supported",
-        "evidence": "AI can rapidly operationalize known offensive security techniques against exposed systems, such as exploiting weak authentication and default credentials",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Prevention alone stops being a complete strategy.",
-        "verdict": "supported",
-        "evidence": "prevention-only OT security strategies will become less effective. [...] prevention-only security strategies are increasingly insufficient on their own",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "AI lowers the expertise needed to reach these systems.",
-        "verdict": "supported",
-        "evidence": "As AI tools become more capable of interpreting OT protocols, recognizing industrial software, and mapping IT-OT relationships, the adversary’s prerequisite skill and knowledge of OT decreases.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "An attacker with no background in industrial control systems found a door into one because an AI model did the technical work.",
-        "verdict": "supported",
-        "evidence": "the adversary did not demonstrate meaningful knowledge of OT or ICS. Claude provided that context autonomously... with Claude serving as the primary technical executor of the intrusion",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Dragos and Gambit Security analyzed an intrusion against a municipal water and drainage utility serving Monterrey, Mexico.",
-        "verdict": "supported",
-        "evidence": "Gambit contacted Dragos to assist in the analysis of an intrusion affecting a municipal water and drainage utility serving the Monterrey metropolitan area in Mexico.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Claude scanned the enterprise network, identified a server with an industrial gateway, and determined it sat close to the operational environment.",
-        "verdict": "supported",
-        "evidence": "Claude performed broad-ranging discovery and enumeration activities and identified a server hosting a vNode industrial gateway... and assessed it as a strategically significant target due to its potential proximity to the water and drainage utility’s operational environment.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The adversary did not arrive with the intention of reaching operational technology, but AI made it visible.",
-        "verdict": "supported",
-        "evidence": "commercial AI tools assisted an adversary with no prior objective in OT targeting to identify an OT environment... made OT more visible to adversaries already operating within IT.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The techniques used in the attack were not novel and many are publicly documented.",
-        "verdict": "supported",
-        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Current AI models do not add new ICS-specific capabilities.",
-        "verdict": "supported",
-        "evidence": "current AI models do not provide novel ICS or OT-specific capabilities",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Dragos's investigation does not support public fears about autonomous AI compromising infrastructure.",
-        "verdict": "supported",
-        "evidence": "While public discussion has, in some cases, amplified fear and hype around autonomous or agentic AI enabling infrastructure compromise and disruption, Dragos’s assessments from real-world investigations indicate that this level of capability is not currently observed in adversary activity",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "AI can rapidly operationalize known techniques to exploit exposed systems, such as weak authentication and default credentials.",
+        "claim": "AI models can rapidly operationalize known techniques against exposed systems, such as exploiting weak authentication and default credentials.",
         "verdict": "supported",
         "evidence": "AI can rapidly operationalize known offensive security techniques against exposed systems, such as exploiting weak authentication and default credentials to gain access.",
         "judge_runs": 1,
@@ -259,7 +330,7 @@
       {
         "claim": "Prevention alone is no longer a complete security strategy.",
         "verdict": "supported",
-        "evidence": "as AI models continue to improve, prevention-only OT security strategies will become less effective.",
+        "evidence": "prevention-only security strategies are increasingly insufficient on their own",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -267,79 +338,9 @@
         "unanimous": true
       },
       {
-        "claim": "AI lowers the expertise needed for attackers to reach operational systems.",
+        "claim": "AI lowers the expertise needed for an attacker to reach operational technology systems.",
         "verdict": "supported",
         "evidence": "As AI tools become more capable of interpreting OT protocols, recognizing industrial software, and mapping IT-OT relationships, the adversary’s prerequisite skill and knowledge of OT decreases.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "An attacker with no background in industrial control systems found access to one using an AI model.",
-        "verdict": "supported",
-        "evidence": "the adversary did not demonstrate meaningful knowledge of OT or ICS. Claude provided that context autonomously.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Claude scanned the internal enterprise network, spotted a server hosting an industrial gateway, and recognized its proximity to the utility's operational environment.",
-        "verdict": "supported",
-        "evidence": "Claude performed broad-ranging discovery and enumeration activities and identified a server hosting a vNode industrial gateway... assessed it as a strategically significant target due to its potential proximity to the water and drainage utility’s operational environment.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The adversary did not arrive with the intention of reaching operational technology; the AI made it visible.",
-        "verdict": "supported",
-        "evidence": "assisted an adversary with no prior objective in OT targeting to identify an OT environment... made OT more visible to adversaries already operating within IT.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "The attack techniques were not novel and are publicly documented.",
-        "verdict": "supported",
-        "evidence": "What distinguished this campaign from conventional intrusions was not, by any means, the sophistication of techniques used, many of which are well-documented on publicly available resources",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Current AI models do not add novel ICS-specific capabilities that did not already exist.",
-        "verdict": "supported",
-        "evidence": "current AI models do not provide novel ICS or OT-specific capabilities",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "AI models can rapidly operationalise known techniques against exposed systems using weak authentication and default credentials.",
-        "verdict": "supported",
-        "evidence": "AI can rapidly operationalize known offensive security techniques against exposed systems, such as exploiting weak authentication and default credentials to gain access.",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true
-      },
-      {
-        "claim": "Prevention alone stops being a complete strategy against these attacks.",
-        "verdict": "supported",
-        "evidence": "prevention-only security strategies are increasingly insufficient on their own",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"

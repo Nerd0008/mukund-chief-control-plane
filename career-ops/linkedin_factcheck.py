@@ -480,6 +480,22 @@ POST:
             "reason": None}
 
 
+def combine_sources(source_texts: dict, *, per_source: int = 14000) -> str:
+    """Join source texts without silently dropping any of them.
+
+    Truncating the concatenation dropped whole sources: with three articles the
+    third was cut off entirely, so the judge reported its claims unsupported
+    because it never saw the article. Each source gets its own budget instead.
+    """
+    parts = []
+    for url, text in source_texts.items():
+        body = (text or "").strip()
+        if len(body) > per_source:
+            body = body[:per_source]
+        parts.append(f"[SOURCE: {url}]\n{body}")
+    return "\n\n".join(parts)
+
+
 def verify_post(post_text: str, sources: list[str], *,
                 source_texts: dict | None = None,
                 use_llm: bool = True,
@@ -502,7 +518,7 @@ def verify_post(post_text: str, sources: list[str], *,
         else:
             unavailable.append(url)
 
-    combined = "\n\n".join(source_texts.values())
+    combined = combine_sources(source_texts)
     body = post_prose(post_text)
 
     record: dict = {
