@@ -123,3 +123,83 @@ Incidents:
 - existing Discord cron/no_agent mechanism unchanged.
 
 Return changed files, tests, and PASS/BLOCKED. Do not redesign unrelated systems.
+
+## Implementation status — 2026-10-03
+
+Branch: `fix/e3-whole-repo-architecture`
+
+### LinkedIn code — IMPLEMENTED, runtime acceptance pending
+
+Changed:
+- `career-ops/linkedin_auth.py`
+- `career-ops/linkedin_publish.py`
+- `career-ops/linkedin_workflow.py`
+- `career-ops/tests/test_linkedin_readiness_regression.py`
+- `career-ops/tests/test_linkedin_publish.py`
+
+Commits:
+- `9528452a43bc1b292f55e301ad64ee84e6012128` — canonical expiry-aware `oauth_ready()` plus raw-byte image transport
+- `e6b5cee9ec031e745d3509153e3fcf0ec70edf46` — image-aware publisher contract
+- `8061ac678b2d546f70a5d3d560752f55dfdbee0b` — workflow image forwarding + canonical readiness
+- `1ebc188bd3d99598c2dd48b4325a5492589499c1` — focused readiness/image CLI regression tests
+- `ddaacd48ac8944359c451de3a96d35fd73706ffe` — align existing LinkedIn test fixtures with expiry-aware readiness
+
+Implemented semantics:
+- usable access token requires token presence + parseable expiry + expiry beyond a 300-second safety skew;
+- complete refresh grant remains an alternate READY path;
+- missing/invalid expiry fails closed;
+- status/preflight/workflow all use the same canonical readiness helper;
+- the workflow forwards `--image` to the image-aware publisher;
+- image upload uses initializeUpload -> raw byte PUT -> post with image URN;
+- no live LinkedIn post was made while implementing this repair.
+
+Offline regression coverage was added for the five required readiness cases, missing/invalid expiry behavior, safety skew, and workflow image-argument forwarding.
+
+**Status:** code review/structural checks complete. Full LinkedIn pytest/runtime acceptance is **BLOCKED in this chat** because the isolated execution environment cannot check out the repository and does not have the laptop's Hermes/Windows Credential Manager context. Run the focused tests and `linkedin_auth.py status` under the Hermes interpreter on the laptop before calling live acceptance PASS. No live LinkedIn post is required.
+
+Expected current laptop status after deployment:
+- access token present;
+- stored expiry `2026-12-02T00:26:11Z`;
+- refresh token absent;
+- `oauth_ready: true`.
+
+### Incident delivery — IMPLEMENTED, offline tests PASS, live deployment pending
+
+Changed:
+- `career-ops/incident_flush.py`
+- `career-ops/tests/test_incident_flush_ack.py`
+
+Commits:
+- `b5225285ecbce155ef2dd5bc793cbb6480e33156` — bind emitted incident batches to the exact Hermes cron execution and reconcile only after a durable delivery outcome
+- `804c6329ef039a9c9dfe6a326a78b0bb7d4bbc9c` — six ACK/grace/retry/restart regression tests
+
+Implementation:
+- preserves the existing deterministic `no_agent` stdout delivery mechanism;
+- persists `pending -> in_flight` before stdout emission;
+- binds the batch to the exact Hermes cron execution id from `~/.hermes/cron/executions.db`;
+- marks exactly those incident ids delivered only when that exact execution terminates with `status=completed` and `delivery_outcome=delivered`;
+- failed, unknown, missing or unconfirmed delivery evidence leaves the incidents pending;
+- keeps the existing 60-minute re-alert grace;
+- is idempotent after ACK and restart-safe between emission and ACK;
+- migrates the old row-index/timestamp grace-state shape without treating it as delivery confirmation.
+
+Executed offline:
+```
+python -m pytest -q career-ops/tests/test_incident_flush_ack.py
+...... [100%]
+6 passed
+```
+
+**Status:** offline acceptance **PASS**. Live acceptance remains **BLOCKED until the laptop-local incident wrapper/script is deployed or pointed at this committed implementation**, because the original live script was local-only and was not present on this branch when the repair started. After deployment, one controlled cron delivery should prove that the exact execution receives a positive Discord delivery outcome and the corresponding incident record becomes `delivered=true` without repeating.
+
+### Overall
+
+- No Hermes/E3 redesign.
+- No main merge.
+- No live LinkedIn post.
+- No autonomous application/outreach.
+- No secret values committed or printed.
+- Incident 60-minute grace retained.
+- Discord `no_agent` mechanism retained.
+
+Current branch head before this status-note commit: `ddaacd48ac8944359c451de3a96d35fd73706ffe`.
