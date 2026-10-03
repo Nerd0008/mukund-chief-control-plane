@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Baillie Gifford",
+      "title": "Cloud, Infrastructure & Security Summer Internship 2027",
+      "location": "Edinburgh (on-site)",
+      "salary": "Paid (rate not stated)",
+      "url": "https://bailliegifford.wd3.myworkdayjobs.com/BaillieGiffordEarlyCareers/job/Edinburgh/Cloud--Infrastructure---Security-Summer-Internship-2027_R0004565",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. Baillie Gifford cannot sponsor visas; all applicants must have the right to work in the UK.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting requires a penultimate (second last) year student studying for a technology-related degree, with a proven interest in Cloud, Infrastructure and/or Cybersecurity. The owner completed their MSc in September 2025, so is a recent graduate rather than a current penultimate-year student. This is a hard eligibility criterion. Not evidenced and not claimed: penultimate-year student status, cloud platform experience (Azure, Terraform, Docker), CrowdStrike/Wiz/Superblocks experience. Genuinely evidenced: MSc Information Security (Merit), BCA, CompTIA Security+, ISC2 CC, IT support experience (M365, Active Directory, troubleshooting, endpoint support), Python/PowerShell/SQL, structured problem-solving (Windows error-code root-cause tool), InboxDefender project (93.7% accuracy, 25 patterns, MITRE ATT&CK), risk assessments, compliance checks, documentation, customer service, teamwork, initiative.",
+      "recommendation": "Applied per owner instruction. Fit is moderate: the role is a cloud and infrastructure security internship at an investment management firm, and the owner's background is IT support and security. The honest gap is the penultimate-year eligibility requirement — the owner is a recent graduate, not a current student. The cover letter addresses this directly and makes the case that practical experience would allow meaningful contribution from day one. No clearance or citizenship barrier. Closing date 3 November 2026. Programme runs mid-June to late August 2027 in Edinburgh.",
+      "discovery": "OWNER-SUPPLIED — JD text and URL supplied by owner via Discord 2026-10-03. Official Workday URL. Job ID R0004565. Posted 19 days ago. Closing date 3 November 2026. Edinburgh (on-site). Application process: CV + short questionnaire + one scored question. No cover letter. Baillie Gifford does not use AI in recruitment processes.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
