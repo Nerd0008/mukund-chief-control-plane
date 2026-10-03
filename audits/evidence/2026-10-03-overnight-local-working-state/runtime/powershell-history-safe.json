@@ -1,0 +1,179 @@
+{
+  "path": "C:\\Users\\mukun\\AppData\\Roaming\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt",
+  "mtime_utc": "2026-10-02T15:18:31.783530+00:00",
+  "note": "No per-command timestamps; file last modified before overnight window.",
+  "selected": [
+    {
+      "line": 622,
+      "command": "python \"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\scripts\\sync_discord_chief.py\""
+    },
+    {
+      "line": 629,
+      "command": "[ C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 632,
+      "command": "[ C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 633,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane git status"
+    },
+    {
+      "line": 634,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 642,
+      "command": "git commit -m \"merge: preserve completed Gemini E3 provider setup\""
+    },
+    {
+      "line": 648,
+      "command": "git pull --ff-only"
+    },
+    {
+      "line": 650,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 653,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 654,
+      "command": "git pull`"
+    },
+    {
+      "line": 658,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 659,
+      "command": "git pull`"
+    },
+    {
+      "line": 671,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 672,
+      "command": "git stash push -u -m \"poller-recovery-2026-09-23\"`"
+    },
+    {
+      "line": 673,
+      "command": "git pull`"
+    },
+    {
+      "line": 677,
+      "command": "git pull`"
+    },
+    {
+      "line": 679,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 685,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 686,
+      "command": "git pull`"
+    },
+    {
+      "line": 688,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane`"
+    },
+    {
+      "line": 689,
+      "command": "git pull`"
+    },
+    {
+      "line": 697,
+      "command": "git commit -m \"merge: sync origin/main\""
+    },
+    {
+      "line": 699,
+      "command": "git checkout --theirs -- remote-queue/pending/agent-career-codex-style-open-web-job-research-2026-09-24.json`"
+    },
+    {
+      "line": 700,
+      "command": "git checkout --theirs -- remote-queue/pending/agent-career-priority-company-watchlist-engine-2026-09-24.json`"
+    },
+    {
+      "line": 701,
+      "command": "git checkout --theirs -- remote-queue/pending/agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24.json"
+    },
+    {
+      "line": 713,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 714,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 715,
+      "command": "git pull --rebase --autostash"
+    },
+    {
+      "line": 716,
+      "command": "git pull --rebase --autostash"
+    },
+    {
+      "line": 736,
+      "command": "git checkout-index -f -- remote-queue/pending/agent-career-scheduled-cutover-recovery-after-watchdog-2026-09-24.json"
+    },
+    {
+      "line": 746,
+      "command": "git checkout-index -f -- \"remote-queue/pending/$task\""
+    },
+    {
+      "line": 752,
+      "command": "cd C:\\Users\\mukun\\Documents\\Codex\\mukund-chief-control-plane-coordinator"
+    },
+    {
+      "line": 753,
+      "command": "cd \"$HOME\\Documents\\mukund-chief-control-plane\""
+    },
+    {
+      "line": 756,
+      "command": "cd C:\\Users\\mukun\\Documents\\mukund-chief-control-plane"
+    },
+    {
+      "line": 758,
+      "command": "git worktree add ..\\mukund-chief-control-plane-longcat origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 759,
+      "command": "cd ..\\mukund-chief-control-plane-longcat"
+    },
+    {
+      "line": 769,
+      "command": "git reset --hard origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 772,
+      "command": "git reset --hard origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 779,
+      "command": "git reset --hard origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 785,
+      "command": "git commit -m \"status: regenerate outputs for LongCat emergency recovery\""
+    },
+    {
+      "line": 789,
+      "command": "git reset --hard origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 807,
+      "command": "git reset --hard origin/fix/longcat-stage2-emergency"
+    },
+    {
+      "line": 816,
+      "command": "cd C:\\Users\\mukun\\Documents\\Codex\\mukund-chief-control-plane-owner-decisions"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+* fix/e3-whole-repo-architecture                 9101d2af [origin/fix/e3-whole-repo-architecture] test: verify LinkedIn readiness and live incident ACK reconciliation
++ longcat-stage2-emergency-local                 79194390 (C:/Users/mukun/Documents/mukund-chief-control-plane-longcat) [origin/fix/longcat-stage2-emergency: behind 11] test(e3): verified reply content stays gateway opt-in
+  main                                           860cb105 [origin/main] sync: Chief Discord transcript 2026-10-03 (4 msgs)
+  remotes/origin/HEAD                            -> origin/main
+  remotes/origin/codex/owner-local-only-20260925 473460fc test: record Chief routing recovery evidence
+  remotes/origin/codex/queue-test-isolation      cfddc7ad test: isolate remote queue CLI from live state
+  remotes/origin/fix/e3-whole-repo-architecture  9101d2af test: verify LinkedIn readiness and live incident ACK reconciliation
+  remotes/origin/fix/longcat-stage2-emergency    2355504d handover: make persistent Chief context a release-blocking E3 invariant
+  remotes/origin/main                            860cb105 sync: Chief Discord transcript 2026-10-03 (4 msgs)

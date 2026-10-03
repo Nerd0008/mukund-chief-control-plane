@@ -1,0 +1,20 @@
+[
+  {
+    "PID": 41648,
+    "Created": "2026-10-03T01:05:28.48814+01:00",
+    "User": "MISTY\\mukun",
+    "Executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe"
+  },
+  {
+    "PID": 23112,
+    "Created": "2026-10-03T01:05:28.515688+01:00",
+    "User": "MISTY\\mukun",
+    "Executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\.hermes-runtime\\python\\cpython-3.11-windows-x86_64-none\\python.exe"
+  },
+  {
+    "PID": 16752,
+    "Created": "2026-10-03T11:45:40.490337+01:00",
+    "User": "MISTY\\mukun",
+    "Executable": "C:\\Users\\mukun\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe"
+  }
+]

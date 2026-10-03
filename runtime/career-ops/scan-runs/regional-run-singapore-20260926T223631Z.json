@@ -1,0 +1,106 @@
+{
+  "run_id": "singapore-20260926T223631Z",
+  "region": "singapore",
+  "display_name": "Singapore",
+  "started_at": "2026-09-26T22:36:31+00:00",
+  "dry_run": true,
+  "applications_submitted": 0,
+  "employer_contacts": 0,
+  "canonical_workbook_written": false,
+  "lane_kind": "control-plane-lane",
+  "lane_ready": true,
+  "lane_missing": [],
+  "scheduled": true,
+  "scan": {
+    "ok": true,
+    "refused": false,
+    "exit_code": 0,
+    "duration_s": 6.0,
+    "dry_run": true,
+    "stdout_capture_ok": true,
+    "command": [
+      "node",
+      "scan.mjs",
+      "--dry-run",
+      "--quiet"
+    ],
+    "lane_env": {
+      "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\portals.yml",
+      "CAREER_OPS_PROFILE": "config/profile.yml",
+      "CAREER_OPS_PIPELINE": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\pipeline.md",
+      "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\scan-history.tsv"
+    },
+    "recorded_to": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\scan-singapore-20260926T223631Z.json",
+    "warning": null,
+    "counters": {
+      "jobs_found": 579,
+      "filtered_title": 531,
+      "filtered_location": 35,
+      "filtered_age": 4,
+      "duplicates": 2,
+      "new_offers_added": 7,
+      "errors": 3
+    },
+    "stdout_tail": "(s)\nNew offers added:      7\nTrust validation:      0 high, 7 medium, 0 low\nTrust flags:           company_domain_mismatch: 7\n\nErrors (3):\n  ✗ Glints — cyber security: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n  ✗ Glints — IT support: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n  ✗ Glints — information security: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n\nNew offers:\n  + WS Audiology | Intern - Information Security Risk & Compliance | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Singapore Exchange Limited | Intern - Information Security (Spring 2027, Jan to Jun) | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + WS Audiology | Intern - Information Security Automation & Integration | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Apple | Information Security Internship Program (FY27 Summer Intake) | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Ensign InfoSecurity (Singapore) Pte. Ltd. | Intern, Cyber Threat Intel | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Temasek International Pte. Ltd. | Cyber Security Associate - Temasek International Pte Ltd | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Mizuho Bank, Ltd | Intern, IT Service & Technology Support (Oct 2026 - Sep 2027) | Singapore [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+    "stderr_tail": ""
+  },
+  "candidates": {
+    "scan_offers_without_url": 7,
+    "url_bearing_candidates": 0,
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\pipeline.md",
+    "note": "scan offers carry no posting URL, so they are reported for URL resolution and can never become tracker rows on their own; only URL-bearing candidates can be accepted"
+  },
+  "idempotency": {
+    "run_key": "e1907bf11f68ebfd1bd3cd58bba3492e",
+    "previous_run_key": "e1907bf11f68ebfd1bd3cd58bba3492e",
+    "replay_of_previous_run": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "note": "a replayed run marks every accepted candidate duplicate-prior-run; the shared tracker dedupe independently refuses anything already in the workbook or a cross-month ledger"
+  },
+  "eligibility": {
+    "input": 0,
+    "accepted": 0,
+    "accepted_before_idempotency": 0,
+    "rejected": 0,
+    "duplicate_prior_run": 0,
+    "rejected_sample": []
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with the UK lane)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+    "counts": {
+      "input": 0,
+      "appended": 0,
+      "duplicates": 0,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "cross_month_index": {
+      "sources": {
+        "Singapore_Cybersecurity_Job_Tracker.pre-20260913.xlsx": 17,
+        "Singapore_Cybersecurity_Job_Tracker.xlsx": 5,
+        "ledger:data/singapore-shortlist-history.md": 22
+      },
+      "keys": 22
+    },
+    "outcomes": [],
+    "applied": false
+  },
+  "would_append": 0,
+  "manifest_written_to": null,
+  "finished_at": "2026-09-26T22:36:38+00:00",
+  "work_authorisation": {
+    "status": "UNKNOWN",
+    "basis": "config/profile.yml#location.authorized_in lists only \"United Kingdom\"; no owner-stated Singapore work pass or eligibility",
+    "current_permission": null,
+    "sponsorship_now": "UNKNOWN",
+    "tracker_visa_pathway": "WORK PASS UNKNOWN"
+  },
+  "status": "ok",
+  "writes": {
+    "canonical_workbook": false,
+    "tracker_dry_run_only": true,
+    "run_health_files": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json"
+  }
+}

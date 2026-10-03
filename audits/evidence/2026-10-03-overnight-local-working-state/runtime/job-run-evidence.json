@@ -1,0 +1,253 @@
+[
+  {
+    "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T003204Z.json",
+    "sha256": "b615bf6cfe88ed15f45c18ba3a4c664e300236a3f97eda765e043e0946b20f07",
+    "mtime_utc": "2026-10-03T00:35:49.631227+00:00",
+    "classification": "ignored runtime",
+    "run_id": "unified-uk-20261003T003204Z",
+    "finished_at": "2026-10-03T00:35:49+00:00",
+    "provider": "deepseek",
+    "model_observed": "deepseek-flash",
+    "classified": 0,
+    "errors": [
+      {
+        "batch": 2,
+        "error": "Insufficient Balance (request_id: 3a5bd4a6-9e5e-4fe9-9673-02fe8c2602c1)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 3,
+        "error": "Insufficient Balance (request_id: 59278f10-360e-47e7-ae49-b7e4485d9b74)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 3,
+        "error": "Insufficient Balance (request_id: f768418d-480d-4e6d-8803-d6f51d1ab289)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 5,
+        "error": "Insufficient Balance (request_id: 0f0ec715-f2a1-4e15-be2a-d221ba7894c0)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 6,
+        "error": "Insufficient Balance (request_id: af43b34b-e167-42af-b99a-2a046473f217)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 6,
+        "error": "Insufficient Balance (request_id: 2718860b-e3cc-4f51-b018-cd12948a2ac5)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 8,
+        "error": "Insufficient Balance (request_id: c36d35ee-7e85-4dcb-b4b1-0b49a2d9d8c1)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 9,
+        "error": "Insufficient Balance (request_id: 402327cb-1d05-48fd-891f-0e7e0a9b7153)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 9,
+        "error": "Insufficient Balance (request_id: ef1c778c-4159-45b4-ad7a-3c549d02d2e0)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 11,
+        "error": "Insufficient Balance (request_id: 9666cc42-1e8e-426e-80b4-845433bb4f20)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 12,
+        "error": "Insufficient Balance (request_id: 7ec3bef1-1ba7-4a28-a065-46835acf70a4)",
+        "finish_reason": null,
+        "candidates_in_batch": 2
+      },
+      {
+        "batch": 12,
+        "error": "Insufficient Balance (request_id: 222b9cde-3230-481e-98d0-032e856bc546)",
+        "finish_reason": null,
+        "candidates_in_batch": 6
+      }
+    ],
+    "live_research_operational": true,
+    "funnel": {
+      "discovered_raw": 523,
+      "canonical_candidates": 523,
+      "cross_source_duplicates_removed": 0,
+      "after_hard_negative_prefilter": 30,
+      "semantically_reviewed": 30,
+      "deepseek_accept": 0,
+      "codex_escalated": 0,
+      "codex_accept": 0,
+      "deterministic_eligibility_pass": 0,
+      "duplicates_removed": 0,
+      "tracker_candidates": 0,
+      "discovered_raw_by_source": {
+        "company-watch findings": 505,
+        "linkedin job-discovery export": 0,
+        "open-web research (codex-style)": 18,
+        "owner priority watchlist (company careers/ATS + role-family research)": 0,
+        "recruiter/intermediary watch findings": 0,
+        "regional run-health scan record": 0
+      }
+    },
+    "manifest_file": null
+  },
+  {
+    "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T010316Z.json",
+    "sha256": "10aac75efd24346af80a846b372ca46df09a86a62bd717bc88337985b7e0aeb3",
+    "mtime_utc": "2026-10-03T01:07:04.725435+00:00",
+    "classification": "ignored runtime",
+    "run_id": "unified-uk-20261003T010316Z",
+    "finished_at": "2026-10-03T01:07:04+00:00",
+    "provider": "deepseek",
+    "model_observed": "deepseek-flash",
+    "classified": 0,
+    "errors": [
+      {
+        "batch": 2,
+        "error": "Insufficient Balance (request_id: fad33255-0e2d-4d39-b82d-7b180679e65b)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 3,
+        "error": "Insufficient Balance (request_id: 6a1f24d8-3cf0-496a-9213-f9c200b5b730)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 3,
+        "error": "Insufficient Balance (request_id: 154f52fc-cd02-41f9-b94a-35b57e9868bd)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 5,
+        "error": "Insufficient Balance (request_id: 89cedf0c-8718-4d79-8fd6-3db949840857)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 6,
+        "error": "Insufficient Balance (request_id: e077bec8-a054-480c-8194-18bf7dffca47)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 6,
+        "error": "Insufficient Balance (request_id: 265b2009-c67e-476f-8444-3db5e31f2092)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 8,
+        "error": "Insufficient Balance (request_id: 592db5a7-42a2-4b4f-9384-4a59a98d5cc9)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 9,
+        "error": "Insufficient Balance (request_id: fb2e4320-aad9-4c2b-9ea2-e192f1d9318f)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 9,
+        "error": "Insufficient Balance (request_id: 97c59d6c-d8e6-4a79-afb9-c1013129bd06)",
+        "finish_reason": null,
+        "candidates_in_batch": 8
+      },
+      {
+        "batch": 11,
+        "error": "Insufficient Balance (request_id: 62ec2c09-f1ed-492d-8e81-280a526f10bc)",
+        "finish_reason": null,
+        "candidates_in_batch": 4
+      },
+      {
+        "batch": 12,
+        "error": "Insufficient Balance (request_id: a8f9d8e9-3cc9-4ca0-a12d-169f47e2829b)",
+        "finish_reason": null,
+        "candidates_in_batch": 3
+      },
+      {
+        "batch": 12,
+        "error": "Insufficient Balance (request_id: 3005b450-4794-4cd3-ac5d-3ecdb26b5003)",
+        "finish_reason": null,
+        "candidates_in_batch": 7
+      }
+    ],
+    "live_research_operational": true,
+    "funnel": {
+      "discovered_raw": 526,
+      "canonical_candidates": 526,
+      "cross_source_duplicates_removed": 0,
+      "after_hard_negative_prefilter": 31,
+      "semantically_reviewed": 31,
+      "deepseek_accept": 0,
+      "codex_escalated": 0,
+      "codex_accept": 0,
+      "deterministic_eligibility_pass": 0,
+      "duplicates_removed": 0,
+      "tracker_candidates": 0,
+      "discovered_raw_by_source": {
+        "company-watch findings": 505,
+        "linkedin job-discovery export": 0,
+        "open-web research (codex-style)": 21,
+        "owner priority watchlist (company careers/ATS + role-family research)": 0,
+        "recruiter/intermediary watch findings": 0,
+        "regional run-health scan record": 0
+      }
+    },
+    "manifest_file": null
+  },
+  {
+    "file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T011120Z.json",
+    "sha256": "45b4e5497c81938f53d1d6a9c908f3d94652973092acc9ba7a81d34b0d3bfa9e",
+    "mtime_utc": "2026-10-03T01:16:12.434989+00:00",
+    "classification": "ignored runtime",
+    "run_id": "unified-uk-20261003T011120Z",
+    "finished_at": "2026-10-03T01:16:12+00:00",
+    "provider": "codex",
+    "model_observed": "gpt-6-sol",
+    "classified": 30,
+    "errors": [],
+    "live_research_operational": true,
+    "funnel": {
+      "discovered_raw": 523,
+      "canonical_candidates": 523,
+      "cross_source_duplicates_removed": 0,
+      "after_hard_negative_prefilter": 30,
+      "semantically_reviewed": 30,
+      "deepseek_accept": 10,
+      "codex_escalated": 0,
+      "codex_accept": 0,
+      "deterministic_eligibility_pass": 1,
+      "duplicates_removed": 0,
+      "tracker_candidates": 1,
+      "discovered_raw_by_source": {
+        "company-watch findings": 505,
+        "linkedin job-discovery export": 0,
+        "open-web research (codex-style)": 18,
+        "owner priority watchlist (company careers/ATS + role-family research)": 0,
+        "recruiter/intermediary watch findings": 0,
+        "regional run-health scan record": 0
+      }
+    },
+    "manifest_file": null
+  }
+]

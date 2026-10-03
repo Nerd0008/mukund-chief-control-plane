@@ -1,0 +1,143 @@
+.........FF..........F....F.........F                                    [100%]
+================================== FAILURES ===================================
+________ test_a_refused_destination_is_blocked_and_never_called_empty _________
+
+    def test_a_refused_destination_is_blocked_and_never_called_empty():
+        web = _web([{"surface_scope": "indeed", "executed": True, "web_search_observed": True}],
+                   [_candidate("https://uk.indeed.com/viewjob?jk=1", "indeed",
+                               "validation_failed",
+                               fetch={"http_status": 403, "robots": "robots.txt allows this path"})])
+        cov = so.build_source_coverage(web, provider_available=True)
+        entry = cov["classes"]["public_indeed"]
+>       assert entry["state"] == "blocked"
+E       AssertionError: assert 'reached' == 'blocked'
+E         
+E         - blocked
+E         + reached
+
+career-ops\tests\test_scheduled_orchestrator.py:223: AssertionError
+_________________ test_a_robots_refusal_is_blocking_evidence __________________
+
+    def test_a_robots_refusal_is_blocking_evidence():
+        web = _web([{"surface_scope": "indeed", "executed": True, "web_search_observed": True}],
+                   [_candidate("https://uk.indeed.com/viewjob?jk=1", "indeed",
+                               "validation_failed",
+                               fetch={"http_status": None,
+                                      "robots": "robots.txt disallows '/viewjob' for this agent"})])
+        cov = so.build_source_coverage(web, provider_available=True)
+>       assert cov["classes"]["public_indeed"]["state"] == "blocked"
+E       AssertionError: assert 'reached' == 'blocked'
+E         
+E         - blocked
+E         + reached
+
+career-ops\tests\test_scheduled_orchestrator.py:235: AssertionError
+____________ test_require_live_web_exits_three_and_records_a_no_go ____________
+
+tmp_path = WindowsPath('C:/Users/mukun/AppData/Local/Temp/pytest-of-mukun/pytest-142/test_require_live_web_exits_th0')
+
+    def test_require_live_web_exits_three_and_records_a_no_go(tmp_path):
+>       rc, doc = run_cli(offline_argv(tmp_path, require_live_web=True))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+career-ops\tests\test_scheduled_orchestrator.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+career-ops\tests\test_scheduled_orchestrator.py:71: in run_cli
+    rc = getattr(so, fn_name)(argv)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+career-ops\discovery\scheduled_orchestrator.py:1219: in main
+    args = ap.parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\Lib\argparse.py:1877: in parse_args
+    self.error(msg % ' '.join(argv))
+..\..\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\Lib\argparse.py:2640: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = ArgumentParser(prog='__main__.py', usage=None, description='Unified scheduled Career discovery orchestrator', formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
+status = 2, message = '__main__.py: error: unrecognized arguments: True\n'
+
+    def exit(self, status=0, message=None):
+        if message:
+            self._print_message(message, _sys.stderr)
+>       _sys.exit(status)
+E       SystemExit: 2
+
+..\..\AppData\Local\hermes\hermes-agent\.hermes-runtime\python\cpython-3.11-windows-x86_64-none\Lib\argparse.py:2627: SystemExit
+---------------------------- Captured stderr call -----------------------------
+usage: __main__.py [-h] {policy,run,run-all,coverage,status,selftest} ...
+__main__.py: error: unrecognized arguments: True
+__________ test_run_all_aggregate_counts_are_the_sum_of_the_regions ___________
+
+tmp_path = WindowsPath('C:/Users/mukun/AppData/Local/Temp/pytest-of-mukun/pytest-142/test_run_all_aggregate_counts_0')
+
+    def test_run_all_aggregate_counts_are_the_sum_of_the_regions(tmp_path):
+        rc, doc = run_cli(["run-all", "--no-live", "--reuse-web-export", str(UNVERIFIED_EXPORT),
+                           "--skip-regional-scan", "--semantic", "off", "--no-lock",
+                           "--out-dir", str(tmp_path), "--web-out-dir", str(tmp_path / "web"),
+                           "--state-file-out", str(tmp_path / "state.json")])
+        assert rc == 0
+        for key, value in doc["funnel"]["counts"].items():
+            if isinstance(value, int) and key in so.COUNT_KEYS:
+>               assert value == sum(d["funnel"]["counts"].get(key, 0)
+                                    for d in doc["regions"].values())
+
+career-ops\tests\test_scheduled_orchestrator.py:393: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+.0 = <dict_valueiterator object at 0x00000224E30D9710>
+
+>   assert value == sum(d["funnel"]["counts"].get(key, 0)
+                        ^^^^^^^^^^^
+                        for d in doc["regions"].values())
+E   KeyError: 'funnel'
+
+career-ops\tests\test_scheduled_orchestrator.py:393: KeyError
+______________ test_the_brief_collector_reports_the_unified_run _______________
+
+tmp_path = WindowsPath('C:/Users/mukun/AppData/Local/Temp/pytest-of-mukun/pytest-142/test_the_brief_collector_repor0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000224E1B84B10>
+
+    def test_the_brief_collector_reports_the_unified_run(tmp_path, monkeypatch):
+        rc, unified = run_cli(["run-all", "--no-live", "--reuse-web-export",
+                               str(UNVERIFIED_EXPORT), "--skip-regional-scan", "--semantic",
+                               "off", "--no-lock", "--out-dir", str(tmp_path),
+                               "--web-out-dir", str(tmp_path / "web"),
+                               "--state-file-out", str(tmp_path / "state.json")])
+        assert rc == 0
+        cfg = daily_brief.load_config()
+        cfg["discovery"] = dict(cfg.get("discovery") or {}, latest=str(tmp_path / "latest.json"))
+        collected = daily_brief.collect_discovery_funnel(cfg)
+        assert collected["available"] is True
+        assert collected["run_kind"] == "career-ops.unified-scheduled-discovery"
+        assert collected["regions_covered"] == sorted(REGIONS)
+        assert collected["source_coverage"]["sources"]
+        assert collected["live_research"] is not None
+>       assert collected["production_ready"] is False
+E       assert True is False
+
+career-ops\tests\test_scheduled_orchestrator.py:511: AssertionError
+============================ slowest 15 durations =============================
+68.88s call     career-ops/tests/test_scheduled_orchestrator.py::test_the_brief_collector_reports_the_unified_run
+62.68s call     career-ops/tests/test_scheduled_orchestrator.py::test_run_all_produces_one_unified_funnel_and_manifest
+60.92s call     career-ops/tests/test_scheduled_orchestrator.py::test_the_brief_view_handles_the_unified_multi_region_shape
+58.32s call     career-ops/tests/test_scheduled_orchestrator.py::test_run_all_aggregate_counts_are_the_sum_of_the_regions
+31.71s call     career-ops/tests/test_scheduled_orchestrator.py::test_idempotency_key_is_recorded_and_a_replay_is_reported
+16.67s call     career-ops/tests/test_scheduled_orchestrator.py::test_the_offline_run_leaves_the_canonical_workbooks_byte_identical
+16.08s setup    career-ops/tests/test_scheduled_orchestrator.py::test_run_writes_region_run_health_and_manifest
+15.12s call     career-ops/tests/test_scheduled_orchestrator.py::test_compare_mode_runs_only_with_the_flag
+14.92s setup    career-ops/tests/test_scheduled_orchestrator.py::test_the_offline_run_leaves_the_canonical_workbooks_byte_identical
+0.02s call     career-ops/tests/test_scheduled_orchestrator.py::test_a_concurrent_run_is_skipped_by_the_lock
+0.01s call     career-ops/tests/test_scheduled_orchestrator.py::test_run_writes_region_run_health_and_manifest
+0.01s call     career-ops/tests/test_scheduled_orchestrator.py::test_require_live_web_exits_three_and_records_a_no_go
+0.01s setup    career-ops/tests/test_scheduled_orchestrator.py::test_cli_refuses_intern_only_without_the_explicit_compare_flag
+0.01s call     career-ops/tests/test_scheduled_orchestrator.py::test_cli_refuses_intern_only_without_the_explicit_compare_flag
+0.01s call     career-ops/tests/test_scheduled_orchestrator.py::test_selftest_passes
+=========================== short test summary info ===========================
+FAILED career-ops/tests/test_scheduled_orchestrator.py::test_a_refused_destination_is_blocked_and_never_called_empty
+FAILED career-ops/tests/test_scheduled_orchestrator.py::test_a_robots_refusal_is_blocking_evidence
+FAILED career-ops/tests/test_scheduled_orchestrator.py::test_require_live_web_exits_three_and_records_a_no_go
+FAILED career-ops/tests/test_scheduled_orchestrator.py::test_run_all_aggregate_counts_are_the_sum_of_the_regions
+FAILED career-ops/tests/test_scheduled_orchestrator.py::test_the_brief_collector_reports_the_unified_run
+5 failed, 32 passed in 346.38s (0:05:46)
+EXIT=1

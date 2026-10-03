@@ -47,6 +47,19 @@ USER_AGENT = "Mozilla/5.0 (compatible; ChiefFactGate/1.0)"
 # browser and cached here, so claims can still be grounded in the real article.
 SOURCE_CACHE_DIR = Path(__file__).resolve().parent.parent / "runtime" / "linkedin" / "sources"
 
+# A cached copy must be a real article, not a hand-written stand-in. Below this
+# many characters there is not enough text to ground a claim, so the gate treats
+# the source as unreadable instead of judging the post against a stub.
+MIN_GROUNDING_CHARS = 1500
+
+# The claim judge is a language model, so one run is not a stable verdict. Each
+# claim is judged this many times and the majority verdict wins; the individual
+# runs are recorded so a verdict can be audited. Without this, the same post
+# could be blocked today and passed tomorrow with nothing changed.
+JUDGE_RUNS = 3
+
+CACHE_META = re.compile(r"^#\s*source-(url|fetched|chars):\s*(.*)$", re.MULTILINE)
+
 # Words that are capitalised for grammar or are generic to this domain, not
 # proper nouns that assert a fact about the world.
 ENTITY_ALLOWLIST = {
@@ -95,26 +108,47 @@ def source_cache_path(url: str) -> Path:
     return SOURCE_CACHE_DIR / f"{hashlib.sha256(url.encode('utf-8')).hexdigest()[:16]}.txt"
 
 
-def cached_source_text(url: str) -> str | None:
-    """Read a previously captured copy of ``url``, if one exists."""
+def parse_cache_meta(text: str) -> dict:
+    """Read the provenance header a cached source carries."""
+    meta = {k: v.strip() for k, v in CACHE_META.findall(text or "")}
+    return meta
+
+
+def cached_source_text(url: str, *, min_chars: int = MIN_GROUNDING_CHARS) -> str | None:
+    """Read a previously captured copy of ``url``, if one exists.
+
+    A copy shorter than ``min_chars`` is not a readable article. It is treated as
+    absent rather than returned, because grounding a claim against a stub is how
+    a fabricated stand-in produced a false ``block``: the post was judged against
+    three hand-typed sentences instead of the real article.
+    """
     path = source_cache_path(url)
     if not path.exists():
         return None
     text = path.read_text(encoding="utf-8", errors="replace").strip()
-    return text if len(text) >= 400 else None
+    return text if len(text) >= min_chars else None
 
 
-def cache_source_text(url: str, text: str) -> Path:
+def cache_source_text(url: str, text: str, *,
+                      source: str = "unknown") -> Path:
     """Store a captured copy of ``url`` so the gate can ground claims on it.
 
     Needed because many publishers (The Atlantic among them) serve a stub or a
     block page to a plain HTTP fetch, so the readable text has to be captured
     through a browser and cached here.
+
+    ``source`` records where the text came from (``fetch``, ``browser``,
+    ``manual``) so a hand-written stand-in is distinguishable from a real
+    capture. It is provenance, not a claim that the text is trustworthy.
     """
     SOURCE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = source_cache_path(url)
-    header = f"# source-url: {url}\n"
-    path.write_text(header + text.strip() + "\n", encoding="utf-8")
+    body = text.strip()
+    header = (f"# source-url: {url}\n"
+              f"# source-fetched: {now_utc()}\n"
+              f"# source-chars: {len(body)}\n"
+              f"# source-origin: {source}\n")
+    path.write_text(header + body + "\n", encoding="utf-8")
     return path
 
 
@@ -205,9 +239,34 @@ def check_entities(post_text: str, source_text: str) -> list[dict]:
     return found
 
 
+def _normalise_claim(text: str) -> str:
+    return re.sub(r"\W+", " ", (text or "").lower()).strip()[:160]
+
+
+def _majority_verdict(runs: list[str]) -> str:
+    """The strictest verdict that a majority of runs agree on.
+
+    Ties resolve to the stricter verdict: an unproven claim is not promoted to
+    'supported' by a coin toss.
+    """
+    rank = {"supported": 0, "overstated": 1, "unsupported": 2}
+    counts: dict[str, int] = {}
+    for v in runs:
+        counts[v] = counts.get(v, 0) + 1
+    best = max(counts.values())
+    tied = [v for v, n in counts.items() if n == best]
+    return max(tied, key=lambda v: rank.get(v, 2))
+
+
 def llm_verify_claims(post_text: str, source_text: str, *,
-                      api_key: str | None, model: str = DEFAULT_MODEL) -> dict:
+                      api_key: str | None, model: str = DEFAULT_MODEL,
+                      runs: int = JUDGE_RUNS) -> dict:
     """Ask a model whether each factual claim is supported by the source.
+
+    The judge is a language model, so a single run is not a stable verdict: the
+    same post could be blocked on one run and pass on the next. Each claim is
+    therefore judged ``runs`` times and the majority verdict wins, with the
+    individual runs recorded for audit.
 
     Returns ``{"used": bool, "claims": [...], "reason": str|None}``. A failure
     here is reported as not-used, never as a pass.
@@ -247,23 +306,70 @@ POST:
 """
     try:
         client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(model=model, contents=prompt)
-        raw = str(getattr(resp, "text", "") or "")
     except Exception as exc:
-        return {"used": False, "claims": [], "reason": f"model call failed: {exc}"}
+        return {"used": False, "claims": [], "reason": f"model client failed: {exc}"}
 
-    match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if not match:
-        return {"used": False, "claims": [], "reason": "model returned no JSON"}
-    try:
-        parsed = json.loads(match.group(0))
-    except json.JSONDecodeError as exc:
-        return {"used": False, "claims": [], "reason": f"model JSON unparsable: {exc}"}
+    def one_run() -> list[dict] | None:
+        try:
+            resp = client.models.generate_content(model=model, contents=prompt)
+            raw = str(getattr(resp, "text", "") or "")
+        except Exception:
+            return None
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            return None
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return None
+        claims = parsed.get("claims")
+        return claims if isinstance(claims, list) else None
 
-    claims = parsed.get("claims")
-    if not isinstance(claims, list):
-        return {"used": False, "claims": [], "reason": "model JSON had no claims list"}
-    return {"used": True, "claims": claims, "reason": None}
+    all_runs: list[list[dict]] = []
+    for _ in range(max(1, runs)):
+        got = one_run()
+        if got is not None:
+            all_runs.append(got)
+
+    if not all_runs:
+        return {"used": False, "claims": [],
+                "reason": "model returned no usable JSON in any run"}
+
+    # Group the same claim across runs, then take the majority verdict.
+    grouped: dict[str, dict] = {}
+    for run_claims in all_runs:
+        for c in run_claims:
+            if not isinstance(c, dict):
+                continue
+            key = _normalise_claim(str(c.get("claim", "")))
+            if not key:
+                continue
+            entry = grouped.setdefault(key, {"claim": str(c.get("claim", "")),
+                                             "verdicts": [], "evidence": ""})
+            entry["verdicts"].append(str(c.get("verdict", "")).lower())
+            if c.get("evidence") and not entry["evidence"]:
+                entry["evidence"] = str(c["evidence"])
+
+    claims = []
+    for entry in grouped.values():
+        verdicts = [v for v in entry["verdicts"] if v]
+        if not verdicts:
+            continue
+        settled = _majority_verdict(verdicts)
+        claims.append({
+            "claim": entry["claim"],
+            "verdict": settled,
+            "evidence": entry["evidence"],
+            "judge_runs": len(verdicts),
+            "judge_verdicts": verdicts,
+            "unanimous": len(set(verdicts)) == 1,
+        })
+
+    if not claims:
+        return {"used": False, "claims": [],
+                "reason": "model returned no claims in any run"}
+    return {"used": True, "claims": claims,
+            "runs_used": len(all_runs), "runs_requested": runs, "reason": None}
 
 
 def verify_post(post_text: str, sources: list[str], *,

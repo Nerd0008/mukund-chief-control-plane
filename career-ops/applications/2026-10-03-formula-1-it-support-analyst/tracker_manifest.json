@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Formula 1",
+      "title": "IT Support Analyst",
+      "location": "Biggin Hill (travel to St James Market and Event Technical Centre)",
+      "salary": "Not stated in posting",
+      "url": "https://formulaone.wd3.myworkdayjobs.com/en-US/F1/job/Biggin-Hill/IT-Support-Analyst_JR101158",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for essential knowledge of Microsoft 365 Suite and Azure Active Directory, knowledge of operational Device Managers, operational knowledge of a wide range of IT and communication equipment, good customer service skills, and demonstrable understanding of IT Service best practices. Desirable: experience working in a global organisation across different time zones, ITIL Foundation, Office 365 Administration and Troubleshooting. Not evidenced and not claimed: enterprise-scale Azure AD administration, formal device-manager fleet operation, ITIL Foundation qualification, global multi-timezone support experience. Genuinely evidenced: Microsoft 365 and on-premises Active Directory daily use, first-line IT support for 15 colleagues across 15–20 devices, 4–5 daily access requests through AD with approval verification and time-limited permissions, 4–5 daily suspicious-email investigations, server health monitoring, network and website-access controls, Windows error-code root-cause tooling, documentation and escalation habits, customer service in hospitality, compliance checks and risk assessments as Person in Charge.",
+      "recommendation": "Applied per owner standing instruction. Fit is strong: the role is a direct match for the owner's current IT support work — hands-on and remote support, logged job management, hardware build and maintenance, documentation, escalation, change management process adherence. The owner's MSc Information Security and certifications (Security+, CC) provide the security-awareness dimension that a global organisation like F1 values. The honest gap is enterprise Azure AD and formal device management, which the cover letter addresses directly. No clearance or citizenship barrier. Closing date 7 October 2026.",
+      "discovery": "OWNER-SUPPLIED — JD text supplied by owner via Discord 2026-10-03. Official Workday URL verified live 2026-10-03. Requisition JR101158. Closing date 7 October 2026 (3 days from posting). Posted 3 days ago. Biggin Hill base with travel to St James Market and Event Technical Centre.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

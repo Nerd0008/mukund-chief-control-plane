@@ -1,0 +1,106 @@
+af28d6db405da04e364155a6b4acd87c0aa96d5a 2026-10-03 03:26:06 +0100 linkedin: cache topic sources before generation; report every failure
+
+career-ops/linkedin_content_gen.py
+3e82dedf77d8b96179e6b530db146a9536abd34f 2026-10-03 03:24:36 +0100 career-ops: incident flush for the #incidents cron delivery path
+
+career-ops/incident_flush.py
+c2d99c444b60920fe7aeb3be8feb4a794346ac34 2026-10-03 03:23:50 +0100 career-ops: incident reporter for Discord #incidents
+
+career-ops/incident_report.py
+ccdaa15d325d40e2a057d59d67bf8e2332b82548 2026-10-03 03:23:22 +0100 linkedin: topics carry source URLs; cache them for the fact gate
+
+career-ops/linkedin_content_gen.py
+e33c4b82bc460c5292ae42f1ec6e89bf7d88e582 2026-10-03 03:17:00 +0100 linkedin: run the news-claim gate inside content generation
+
+career-ops/linkedin_content_gen.py
+c1fb4f4d1f75278ecc8b88b73edc102d41b743c7 2026-10-03 03:13:42 +0100 linkedin factcheck: write the news verdict to news_fact_gate (publish requires both gates)
+
+career-ops/linkedin_factcheck.py
+0b1c124e430a96678cf3800cd303106dfa403b4c 2026-10-03 03:12:44 +0100 linkedin factcheck: cache browser-captured source articles
+
+career-ops/linkedin_factcheck.py
+8808c0ae0d89286d96322769e05f57e0caaba08b 2026-10-03 03:11:54 +0100 linkedin: news-claim fact gate + refuse unproven gate verdicts
+
+career-ops/applications/2026-09-25-buuk-infrastructure-graduate-cyber-security-analyst/cover_letter_buuk.pdf
+career-ops/applications/2026-09-25-buuk-infrastructure-graduate-cyber-security-analyst/cv_tailored_buuk_alt-run-2020.pdf
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/build_mks_edits.py
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cover_letter_mks.pdf
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cover_spec.json
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cv_edits.json
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cv_mukund_didwania_2026-09-25.pdf
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cv_tailor_report.json
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/cv_tailored_mks.pdf
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/jd.txt
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/jd_moore_kingston_smith_trca_analyst.pdf
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/jd_source.txt
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/preview/after.png
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/preview/before.png
+career-ops/applications/2026-09-25-moore-kingston-smith-technology-risk-controls-assurance-analyst/tracker_manifest.json
+career-ops/career_catchup.py
+career-ops/evidence/acceptance-20260930T144547Z.json
+career-ops/evidence/acceptance-20260930T145209Z.json
+career-ops/linkedin_factcheck.py
+career-ops/linkedin_publish.py
+career-ops/nightly_career_run.py
+career-ops/records/education/cbse_class_XII_2021_marksheet.pdf
+career-ops/records/education/cbse_class_X_2019_marksheet.pdf
+career-ops/records/education/school_education.json
+career-ops/run_nightly_career.cmd
+c901623864d60bc1ae39ac749ef7f371d05baf40 2026-10-03 03:07:20 +0100 career-ops: never drop a region from the daily job-links digest
+
+career-ops/daily_jobs_links.py
+career-ops/tests/test_daily_jobs_links.py
+217eda6f2b48afd1258eb17297ae66e76ca63a75 2026-10-03 03:04:22 +0100 career-ops: tests + honest truncation for the daily job-links digest
+
+career-ops/daily_jobs_links.py
+career-ops/tests/test_daily_jobs_links.py
+96391974f017823db3869f37750c00c853ae91f4 2026-10-03 03:03:23 +0100 career-ops: daily job-links digest (name + apply link per region)
+
+career-ops/daily_jobs_links.py
+e8e33659a2912f40d2256245ac299d78d90d2afc 2026-10-03 03:00:22 +0100 linkedin: send Content-Type on image byte upload (LinkedIn 400s without it)
+
+career-ops/linkedin_publish.py
+7eaebfe4781d7762382bd51b73247be4d0d86a0c 2026-10-03 02:59:19 +0100 linkedin: image upload support, pinned API version, oauth_ready accepts access token
+
+career-ops/linkedin_auth.py
+career-ops/linkedin_content_gen.py
+career-ops/linkedin_publish.py
+career-ops/linkedin_workflow.py
+4edcf322746322c73164c67aa2a319062a4a02f5 2026-10-03 02:11:14 +0100 career-ops: treat a zero-classification model pass as a failure, not a success
+
+career-ops/discovery/pipeline.py
+9749191541ed78a004fb76709db3e4cda120eb67 2026-10-03 01:49:00 +0100 exec-brain: deliver the Codex objective on stdin, not argv
+
+exec-brain/codex_adapter.py
+f4863fd9f489120d2fbf63d2c34f1b36525f2ce7 2026-10-03 01:47:13 +0100 career-ops: Codex CLI as the semantic classifier + adapter model fix
+
+career-ops/discovery/classifiers.py
+career-ops/discovery/pipeline.py
+career-ops/discovery/scheduled_orchestrator.py
+exec-brain/codex_adapter.py
+0fe5db68ca45128612555fc3225a82e47a9df769 2026-10-03 01:31:59 +0100 career-ops: fix Codex web-search research provider (live lane now operational)
+
+career-ops/discovery/web_research.py
+8d62e8bf7b26b4f74b315386afdd4c40f4b5cbf2 2026-10-03 01:26:41 +0100 career-ops: BDO 2027 Audit Technology Graduate Programme application package (J39)
+
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/README.md
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cover_letter_bdo.pdf
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cover_spec.json
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cv.txt
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cv_edits.json
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cv_mukund_didwania_2026-10-03.pdf
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cv_tailor_report.json
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/cv_tailored_bdo.pdf
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/jd.txt
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/job_record.json
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/preview/after.png
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/preview/before.png
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/preview/cover.png
+career-ops/applications/2026-10-03-bdo-audit-technology-graduate-programme/tracker_manifest.json
+795968d3e7b3806cafa77749e133e7e15b7c0ba9 2026-10-03 01:06:02 +0100 sync: Chief Discord transcript 2026-10-02, 2026-10-03 (11 msgs)
+
+conversations/discord/2026-10-02-chief.jsonl
+conversations/discord/2026-10-03-chief.jsonl
+3930ae97f981e6246352432c122bd0da66a1bda5 2026-10-03 00:36:02 +0100 sync: Chief Discord transcript 2026-10-02 (2 msgs)
+
+conversations/discord/2026-10-02-chief.jsonl

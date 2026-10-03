@@ -1,0 +1,318 @@
+--- af28d6db/career-ops/nightly_career_run.py
++++ 9101d2af/career-ops/nightly_career_run.py
+@@ -1,315 +0,0 @@
+-#!/usr/bin/env python3
+-"""Chief nightly career pipeline: scan every region, then maintain every tracker.
+-
+-Owner instruction (2026-09-25): "I want all the job search agents online and
+-reporting daily with excel tracker maintained for each agent."
+-
+-What this driver does, in order, once per night:
+-
+-  1. SCAN  — runs the unified scheduled orchestrator in `run-all` mode, so all
+-     four regional lanes (uk / dubai / japan / singapore) are scanned inside ONE
+-     bounded read-only run. Previously each region had its own task and they all
+-     raced a single global lock, so whichever region fired first held the lock and
+-     the rest exited `overlap_skipped` — effectively losing every night after the
+-     first region (root cause of the 2026-09-24 lost cycle).
+-  2. TRACK  — for each region, appends that region's own *eligible* tracker
+-     candidates into that region's own canonical workbook through the canonical
+-     writer (`career_ops_cli.py write`), which dedupes, allocates IDs, takes a
+-     hash-verified backup and re-verifies the workbook.
+-  3. VIEW   — refreshes the derived `Applied` sheet of the UK workbook.
+-
+-Safety properties:
+-  * READ-ONLY for the scan: no application, no outreach, no login, no browser.
+-  * Tracker writes go only through the canonical writer; owner-state columns are
+-    never touched by it.
+-  * SYNTHETIC GUARD: acceptance/fixture records (".invalid"/".test" hosts or
+-    "NOT A REAL VACANCY"-style markers) are filtered out before any write, so a
+-    validation artifact can never become a real tracker row.
+-  * `--dry-run-trackers` plans the appends without writing.
+-  * Every step is recorded in a JSON report that the daily Chief report reads.
+-
+-Usage:
+-  python career-ops/nightly_career_run.py                     # scan + tracker sync
+-  python career-ops/nightly_career_run.py --dry-run-trackers  # no tracker writes
+-  python career-ops/nightly_career_run.py --skip-scan         # tracker sync only
+-"""
+-from __future__ import annotations
+-
+-import argparse
+-import datetime as dt
+-import json
+-import os
+-import subprocess
+-import sys
+-from pathlib import Path
+-from urllib.parse import urlparse
+-
+-CONTROL_PLANE = Path(__file__).resolve().parent.parent
+-CAREER_OPS = CONTROL_PLANE / "career-ops"
+-RUNTIME = CONTROL_PLANE / "runtime" / "career-ops"
+-NIGHTLY_DIR = RUNTIME / "nightly"
+-SCAN_RUNS = RUNTIME / "scan-runs"
+-DISCOVERY = RUNTIME / "discovery"
+-LOCK = NIGHTLY_DIR / "nightly.lock"
+-PYTHON = Path(sys.executable)
+-
+-REGION_ORDER = ["uk", "dubai", "japan", "singapore"]
+-
+-# Records that exist only to prove the live-validation path works must never be
+-# written into a real workbook.
+-SYNTHETIC_HOST_SUFFIXES = (".invalid", ".test", ".example", ".localhost", ".local")
+-SYNTHETIC_MARKERS = ("not a real vacancy", "not-a-real", "fixture", "placeholder",
+-                     "dummy record", "lorem ipsum")
+-
+-
+-def now_utc() -> str:
+-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+-
+-
+-def write_json(path: Path, doc) -> None:
+-    path.parent.mkdir(parents=True, exist_ok=True)
+-    tmp = path.with_suffix(path.suffix + ".tmp")
+-    tmp.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
+-    tmp.replace(path)
+-
+-
+-def read_json(path: Path):
+-    try:
+-        return json.loads(path.read_text(encoding="utf-8"))
+-    except Exception:  # noqa: BLE001 - an unreadable artifact is reported, not fatal
+-        return None
+-
+-
+-def is_synthetic(rec: dict) -> str | None:
+-    """Return the reason a record looks like a test artifact, else None."""
+-    url = str(rec.get("url") or "")
+-    host = (urlparse(url).hostname or "").lower()
+-    for suffix in SYNTHETIC_HOST_SUFFIXES:
+-        if host.endswith(suffix):
+-            return f"url host '{host}' is a reserved test domain"
+-    blob = f"{rec.get('company') or ''} {rec.get('title') or ''}".lower()
+-    for marker in SYNTHETIC_MARKERS:
+-        if marker in blob:
+-            return f"company/title contains marker '{marker}'"
+-    return None
+-
+-
+-def acquire_lock(budget_seconds: int) -> dict:
+-    """Same staleness rule as the orchestrator lock: an older lock is replaced."""
+-    NIGHTLY_DIR.mkdir(parents=True, exist_ok=True)
+-    fresh_after = max(60, int(budget_seconds))
+-    if LOCK.exists():
+-        held = read_json(LOCK) or {}
+-        started = held.get("started_at")
+-        age = None
+-        if isinstance(started, str):
+-            try:
+-                age = (dt.datetime.now(dt.timezone.utc)
+-                       - dt.datetime.fromisoformat(started.replace("Z", "+00:00"))).total_seconds()
+-            except ValueError:
+-                age = None
+-        if age is not None and age < fresh_after:
+-            return {"acquired": False, "reason": f"another nightly run holds the lock "
+-                                                 f"({age:.0f}s old, pid {held.get('pid')})"}
+-    LOCK.write_text(json.dumps({"pid": os.getpid(), "started_at": now_utc()}, indent=2),
+-                    encoding="utf-8")
+-    return {"acquired": True}
+-
+-
+-def release_lock() -> None:
+-    try:
+-        LOCK.unlink()
+-    except OSError:
+-        pass
+-
+-
+-def run(cmd: list[str], *, timeout: int | None = None) -> dict:
+-    env = dict(os.environ)
+-    env["PYTHONIOENCODING"] = "utf-8"
+-    env["PYTHONUTF8"] = "1"
+-    try:
+-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+-                              encoding="utf-8", errors="replace", env=env)
+-        return {"cmd": cmd, "exit_code": proc.returncode,
+-                "stdout": proc.stdout or "", "stderr": proc.stderr or ""}
+-    except subprocess.TimeoutExpired as exc:
+-        return {"cmd": cmd, "exit_code": None, "timeout": True,
+-                "stdout": (exc.stdout or "") if isinstance(exc.stdout, str) else "",
+-                "stderr": f"timeout after {timeout}s"}
+-
+-
+-def scan(args) -> dict:
+-    NIGHTLY_DIR.mkdir(parents=True, exist_ok=True)
+-    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+-    cmd = [str(PYTHON), str(CAREER_OPS / "discovery" / "scheduled_orchestrator.py"),
+-           "run-all", "--scheduled", "--mode", args.mode,
+-           "--budget-seconds", str(args.budget_seconds),
+-           "--scan-timeout", str(args.scan_timeout),
+-           "--web-queries", str(args.web_queries),
+-           "--max-urls", str(args.max_urls),
+-           "--per-query-timeout", str(args.per_query_timeout),
+-           "--retries", str(args.retries),
+-           "--out-dir", str(DISCOVERY)]
+-    if args.require_live_web:
+-        cmd.append("--require-live-web")
+-    result = run(cmd, timeout=args.budget_seconds * len(REGION_ORDER) + 300)
+-    capture = NIGHTLY_DIR / f"{stamp}-scan-stdout.json"
+-    capture.write_text(result.get("stdout") or "", encoding="utf-8")
+-    doc = read_json(DISCOVERY / "latest.json") or {}
+-    funnel = doc.get("funnel") or {}
+-    return {
+-        "exit_code": result["exit_code"],
+-        "timed_out": bool(result.get("timeout")),
+-        "stdout_capture": str(capture),
+-        "production_ready": doc.get("production_ready"),
+-        "no_go": doc.get("no_go"),
+-        "live": doc.get("live"),
+-        "generated_at": doc.get("generated_at"),
+-        "run_id": doc.get("run_id"),
+-        "funnel_counts": funnel.get("counts") or {},
+-        "summary_line": doc.get("summary_line"),
+-        "stderr_tail": (result.get("stderr") or "")[-600:],
+-    }
+-
+-
+-def tracker_sync(args, regions: list[str], stamp: str) -> dict:
+-    per_region: dict[str, dict] = {}
+-    for region in regions:
+-        manifest_path = DISCOVERY / "unified" / region / "manifest-latest.json"
+-        entry: dict = {"manifest": str(manifest_path), "region": region}
+-        if not manifest_path.exists():
+-            entry.update({"ok": False, "error": "no per-region manifest produced by this run"})
+-            per_region[region] = entry
+-            continue
+-        manifest = read_json(manifest_path) or {}
+-        records = manifest.get("records") or []
+-        kept, dropped = [], []
+-        for rec in records:
+-            reason = is_synthetic(rec)
+-            (dropped if reason else kept).append({"company": rec.get("company"),
+-                                                  "title": rec.get("title"),
+-                                                  "url": rec.get("url"),
+-                                                  "reason": reason} if reason else rec)
+-        entry.update({"manifest_records": len(records), "eligible_records": len(kept),
+-                      "synthetic_filtered": len(dropped), "synthetic_examples": dropped[:5]})
+-        if not kept:
+-            entry.update({"ok": True, "skipped": "no eligible records to consider",
+-                          "appended": 0})
+-            per_region[region] = entry
+-            continue
+-        filtered = NIGHTLY_DIR / f"{stamp}-manifest-{region}.json"
+-        write_json(filtered, {"records": kept, "note": "synthetic records removed by "
+-                                                       "nightly_career_run.py"})
+-        cmd = [str(PYTHON), str(CAREER_OPS / "career_ops_cli.py"), "write",
+-               "--region", region, "--manifest", str(filtered)]
+-        if not args.dry_run_trackers:
+-            cmd.append("--apply")
+-        result = run(cmd, timeout=900)
+-        try:
+-            payload = json.loads(result.get("stdout") or "{}")
+-        except json.JSONDecodeError:
+-            payload = {}
+-        counts = payload.get("counts") or {}
+-        verification = payload.get("verification") or payload.get("verification_of_temp") or {}
+-        entry.update({
+-            "ok": result["exit_code"] == 0 and not payload.get("error"),
+-            "mode": payload.get("mode") or ("apply" if not args.dry_run_trackers else "dry-run"),
+-            "applied": bool(payload.get("applied")),
+-            "input": counts.get("input"), "appended": counts.get("appended"),
+-            "duplicates": counts.get("duplicates"), "rejected": counts.get("rejected"),
+-            "refreshed": counts.get("refreshed"),
+-            "duplicates_in_manifest": counts.get("duplicate_in_manifest"),
+-            "data_rows_before": payload.get("pre_data_rows"),
+-            "data_rows_after": payload.get("post_data_rows"),
+-            "tracker": Path(payload["tracker"]).name if payload.get("tracker") else None,
+-            "backup": payload.get("backup"),
+-            "workbook_sha256_before": (payload.get("tracker_sha256_before")
+-                                       or payload.get("before_hash")),
+-            "workbook_sha256_after": (payload.get("tracker_sha256_after")
+-                                      or payload.get("after_hash")),
+-            "verification_ok": bool(verification.get("ok")),
+-            "verification_problems": (verification.get("problems") or [])[:5],
+-            "error": payload.get("error"),
+-            "appended_ids": (payload.get("planned_rows") or [])[:25],
+-            "decisions": {d: sum(1 for o in (payload.get("outcomes") or [])
+-                                 if o.get("decision") == d)
+-                          for d in {o.get("decision") for o in (payload.get("outcomes") or [])}},
+-        })
+-        per_region[region] = entry
+-    return per_region
+-
+-
+-def applied_view(args) -> dict:
+-    if args.dry_run_trackers:
+-        return {"ok": True, "skipped": "dry-run: Applied sheet not refreshed"}
+-    result = run([str(PYTHON), str(CAREER_OPS / "applied_view.py"), "--apply"], timeout=600)
+-    try:
+-        payload = json.loads(result.get("stdout") or "{}")
+-    except json.JSONDecodeError:
+-        payload = {}
+-    return {"ok": result["exit_code"] == 0 and not payload.get("error"),
+-            "exit_code": result["exit_code"], "summary": payload.get("counts") or payload,
+-            "stderr_tail": (result.get("stderr") or "")[-300:]}
+-
+-
+-def main(argv=None) -> int:
+-    ap = argparse.ArgumentParser(description=__doc__,
+-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+-    ap.add_argument("--regions", default=",".join(REGION_ORDER))
+-    ap.add_argument("--skip-scan", action="store_true")
+-    ap.add_argument("--dry-run-trackers", action="store_true")
+-    ap.add_argument("--no-require-live-web", dest="require_live_web", action="store_false")
+-    ap.add_argument("--mode", default="high_recall")
+-    ap.add_argument("--budget-seconds", type=int, default=2700)
+-    ap.add_argument("--scan-timeout", type=int, default=900)
+-    ap.add_argument("--web-queries", type=int, default=8)
+-    ap.add_argument("--max-urls", type=int, default=24)
+-    ap.add_argument("--per-query-timeout", type=int, default=180)
+-    ap.add_argument("--retries", type=int, default=1)
+-    args = ap.parse_args(argv)
+-
+-    regions = [r.strip() for r in args.regions.split(",") if r.strip()]
+-    started = now_utc()
+-    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+-
+-    lock = acquire_lock(args.budget_seconds * len(regions) + 1800)
+-    if not lock["acquired"]:
+-        report = {"schema_version": 1, "kind": "career-ops.nightly-run",
+-                  "started_at": started, "finished_at": now_utc(), "skipped": True,
+-                  "reason": lock["reason"], "ok": True}
+-        write_json(NIGHTLY_DIR / "latest.json", report)
+-        print(json.dumps(report, indent=2))
+-        return 0
+-
+-    try:
+-        scan_block = {"skipped": "scan skipped by the caller"} if args.skip_scan else scan(args)
+-        trackers = tracker_sync(args, regions, stamp)
+-        view = applied_view(args)
+-    finally:
+-        release_lock()
+-
+-    scan_ok = bool(scan_block.get("skipped")) or scan_block.get("exit_code") in (0, 3)
+-    trackers_ok = all(t.get("ok") for t in trackers.values())
+-    report = {
+-        "schema_version": 1,
+-        "kind": "career-ops.nightly-run",
+-        "started_at": started,
+-        "finished_at": now_utc(),
+-        "regions": regions,
+-        "mode": args.mode,
+-        "dry_run_trackers": args.dry_run_trackers,
+-        "scan": scan_block,
+-        "trackers": trackers,
+-        "applied_view": view,
+-        "ok": bool(scan_ok and trackers_ok and view.get("ok")),
+-        "note": ("read-only discovery; tracker appends go only through the canonical writer "
+-                 "(dedupe + backup + verification); synthetic acceptance records are filtered"),
+-    }
+-    write_json(NIGHTLY_DIR / f"{stamp}-report.json", report)
+-    write_json(NIGHTLY_DIR / "latest.json", report)
+-    print(json.dumps(report, indent=2))
+-    return 0 if report["ok"] else 1
+-
+-
+-if __name__ == "__main__":
+-    raise SystemExit(main())

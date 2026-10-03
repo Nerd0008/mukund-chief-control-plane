@@ -1,0 +1,3182 @@
+[
+  {
+    "TimeCreated": "2026-10-03T03:58:04.3585882+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{fad1b65c-0692-40c6-bd33-f3eb8d23d6e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:58:04.3583305+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{fad1b65c-0692-40c6-bd33-f3eb8d23d6e4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:58:01.0728344+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{fad1b65c-0692-40c6-bd33-f3eb8d23d6e4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:58:01.0728333+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{fad1b65c-0692-40c6-bd33-f3eb8d23d6e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:58:01.0726094+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 39264."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:58:01.069123+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{fad1b65c-0692-40c6-bd33-f3eb8d23d6e4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:03.0755922+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{41e82294-255d-4c9c-b408-177968f8c14e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:03.0751414+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{41e82294-255d-4c9c-b408-177968f8c14e}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:01.0591148+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{41e82294-255d-4c9c-b408-177968f8c14e}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:01.0591134+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{41e82294-255d-4c9c-b408-177968f8c14e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:01.0588241+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 46264."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:56:01.0549428+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{41e82294-255d-4c9c-b408-177968f8c14e}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:03.0253783+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{0d38cd62-d939-4e76-8534-ad7404c70929}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:03.0250078+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{0d38cd62-d939-4e76-8534-ad7404c70929}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:01.045395+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{0d38cd62-d939-4e76-8534-ad7404c70929}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:01.0453935+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{0d38cd62-d939-4e76-8534-ad7404c70929}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:01.0450867+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 36268."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:54:01.0413678+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{0d38cd62-d939-4e76-8534-ad7404c70929}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:03.2498666+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{dde0efbe-6380-4407-ba0e-87f5d506ff56}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:03.249601+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{dde0efbe-6380-4407-ba0e-87f5d506ff56}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:01.0322444+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{dde0efbe-6380-4407-ba0e-87f5d506ff56}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:01.032243+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{dde0efbe-6380-4407-ba0e-87f5d506ff56}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:01.0319043+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 12928."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:52:01.0281655+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{dde0efbe-6380-4407-ba0e-87f5d506ff56}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:03.1110506+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c5404076-8945-4fda-a6bf-139ce6f52dbe}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:03.1107837+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c5404076-8945-4fda-a6bf-139ce6f52dbe}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:01.0249161+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c5404076-8945-4fda-a6bf-139ce6f52dbe}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:01.0249147+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c5404076-8945-4fda-a6bf-139ce6f52dbe}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:01.0246162+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 8448."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:50:01.0201812+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c5404076-8945-4fda-a6bf-139ce6f52dbe}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:03.0311836+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{0f24dff8-3f1b-49c5-af2a-42efca35c965}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:03.0309468+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{0f24dff8-3f1b-49c5-af2a-42efca35c965}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:01.0388233+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{0f24dff8-3f1b-49c5-af2a-42efca35c965}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:01.0388217+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{0f24dff8-3f1b-49c5-af2a-42efca35c965}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:01.0384462+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 27460."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:48:01.0190818+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{0f24dff8-3f1b-49c5-af2a-42efca35c965}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:04.0238247+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{baadd7f7-3660-436c-8659-e273f9aed901}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:04.023279+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{baadd7f7-3660-436c-8659-e273f9aed901}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:02.0149193+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{baadd7f7-3660-436c-8659-e273f9aed901}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:02.0149178+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{baadd7f7-3660-436c-8659-e273f9aed901}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:02.0145409+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 4164."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:46:02.0105087+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{baadd7f7-3660-436c-8659-e273f9aed901}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:03.9868896+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{68094b3e-845a-42ad-8d85-14f2aa61812b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:03.9866431+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{68094b3e-845a-42ad-8d85-14f2aa61812b}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:02.0013603+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{68094b3e-845a-42ad-8d85-14f2aa61812b}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:02.0013591+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{68094b3e-845a-42ad-8d85-14f2aa61812b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:02.001071+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 46640."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:44:01.9973401+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{68094b3e-845a-42ad-8d85-14f2aa61812b}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:04.0634987+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{b388bfd2-baef-415a-b9f0-86c375863913}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:04.0632502+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{b388bfd2-baef-415a-b9f0-86c375863913}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:01.9959059+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{b388bfd2-baef-415a-b9f0-86c375863913}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:01.9959043+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{b388bfd2-baef-415a-b9f0-86c375863913}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:01.9955549+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 50636."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:42:01.9919585+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{b388bfd2-baef-415a-b9f0-86c375863913}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:04.2707336+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{60de1353-0faa-4627-bd1f-6d2e497e9712}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:04.2704704+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{60de1353-0faa-4627-bd1f-6d2e497e9712}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:01.9834296+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{60de1353-0faa-4627-bd1f-6d2e497e9712}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:01.9834281+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{60de1353-0faa-4627-bd1f-6d2e497e9712}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:01.98313+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 42384."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:40:01.9795884+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{60de1353-0faa-4627-bd1f-6d2e497e9712}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:04.0427895+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{14ebf639-f58f-409c-bd2d-20641db95766}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:04.0423657+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{14ebf639-f58f-409c-bd2d-20641db95766}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:01.9731697+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{14ebf639-f58f-409c-bd2d-20641db95766}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:01.9731683+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{14ebf639-f58f-409c-bd2d-20641db95766}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:01.9728809+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 14288."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:38:01.9691016+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{14ebf639-f58f-409c-bd2d-20641db95766}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:04.2473027+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{9546aea1-8787-4da6-81b1-5ca90451ff4a}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:04.2465559+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{9546aea1-8787-4da6-81b1-5ca90451ff4a}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:02.2753882+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d8639618-4a62-48c8-b379-0d645303779c}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:02.2751197+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{d8639618-4a62-48c8-b379-0d645303779c}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.9720097+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{9546aea1-8787-4da6-81b1-5ca90451ff4a}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.9720083+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{9546aea1-8787-4da6-81b1-5ca90451ff4a}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.9717641+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 33284."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.9678579+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{9546aea1-8787-4da6-81b1-5ca90451ff4a}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.7992995+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{d8639618-4a62-48c8-b379-0d645303779c}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.799298+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d8639618-4a62-48c8-b379-0d645303779c}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.7989048+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 30832."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:36:01.7947119+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d8639618-4a62-48c8-b379-0d645303779c}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:03.9742203+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{8a41774e-b8f6-469c-9d58-dbff2083bfe4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:03.9740004+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{8a41774e-b8f6-469c-9d58-dbff2083bfe4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:01.9563878+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{8a41774e-b8f6-469c-9d58-dbff2083bfe4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:01.9563865+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{8a41774e-b8f6-469c-9d58-dbff2083bfe4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:01.9560317+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 30940."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:34:01.9525598+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{8a41774e-b8f6-469c-9d58-dbff2083bfe4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:03.9568994+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{919d1627-3abe-4116-b0e4-e13905e0be51}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:03.9566577+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{919d1627-3abe-4116-b0e4-e13905e0be51}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:01.9516276+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{919d1627-3abe-4116-b0e4-e13905e0be51}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:01.951626+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{919d1627-3abe-4116-b0e4-e13905e0be51}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:01.9512964+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 56076."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:32:01.9479253+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{919d1627-3abe-4116-b0e4-e13905e0be51}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:04.0649107+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{f67d762d-4321-41d5-a9bd-95670ecd2385}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:04.0643902+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{f67d762d-4321-41d5-a9bd-95670ecd2385}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:01.9458673+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{f67d762d-4321-41d5-a9bd-95670ecd2385}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:01.9458645+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{f67d762d-4321-41d5-a9bd-95670ecd2385}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:01.9453305+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 27324."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:30:01.9415386+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{f67d762d-4321-41d5-a9bd-95670ecd2385}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:04.278626+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{bc7b83ad-6f35-48ae-ac63-c6463160e50d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:04.2783645+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{bc7b83ad-6f35-48ae-ac63-c6463160e50d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:01.9419038+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{bc7b83ad-6f35-48ae-ac63-c6463160e50d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:01.9419026+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{bc7b83ad-6f35-48ae-ac63-c6463160e50d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:01.9416601+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 35356."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:28:01.9378044+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{bc7b83ad-6f35-48ae-ac63-c6463160e50d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:04.1403193+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{ec98426f-4dea-474e-bedd-12af9eb74a5c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:04.1400307+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{ec98426f-4dea-474e-bedd-12af9eb74a5c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:01.931488+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{ec98426f-4dea-474e-bedd-12af9eb74a5c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:01.9314859+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{ec98426f-4dea-474e-bedd-12af9eb74a5c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:01.9311432+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 3304."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:26:01.9271674+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{ec98426f-4dea-474e-bedd-12af9eb74a5c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:04.1051558+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{4be02aff-ec85-4c3f-9a6b-743ff58938f4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:04.1049153+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{4be02aff-ec85-4c3f-9a6b-743ff58938f4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:01.928815+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{4be02aff-ec85-4c3f-9a6b-743ff58938f4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:01.9288133+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{4be02aff-ec85-4c3f-9a6b-743ff58938f4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:01.9283539+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 39272."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:24:01.9243022+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{4be02aff-ec85-4c3f-9a6b-743ff58938f4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:04.055746+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{f9ee7134-299e-4173-8106-df35c59f7e1d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:04.0553739+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{f9ee7134-299e-4173-8106-df35c59f7e1d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:01.9173254+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{f9ee7134-299e-4173-8106-df35c59f7e1d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:01.9173241+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{f9ee7134-299e-4173-8106-df35c59f7e1d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:01.9170042+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 52160."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:22:01.9134909+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{f9ee7134-299e-4173-8106-df35c59f7e1d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:03.897153+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d9416a1c-0afe-4d7a-99a8-d5f74dcb0ee3}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:03.8969168+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d9416a1c-0afe-4d7a-99a8-d5f74dcb0ee3}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:01.9114505+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d9416a1c-0afe-4d7a-99a8-d5f74dcb0ee3}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:01.9114488+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d9416a1c-0afe-4d7a-99a8-d5f74dcb0ee3}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:01.9111687+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 9368."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:20:01.9069563+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d9416a1c-0afe-4d7a-99a8-d5f74dcb0ee3}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:04.0185013+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{16bc1eb5-258b-45b2-ba14-02ccdc4fff6f}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:04.0181151+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{16bc1eb5-258b-45b2-ba14-02ccdc4fff6f}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:01.9042184+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{16bc1eb5-258b-45b2-ba14-02ccdc4fff6f}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:01.9042169+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{16bc1eb5-258b-45b2-ba14-02ccdc4fff6f}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:01.9039256+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 7076."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:18:01.9000614+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{16bc1eb5-258b-45b2-ba14-02ccdc4fff6f}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:04.2896062+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d4411d4b-4d51-498e-a2d9-b397785901e2}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:04.2892371+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d4411d4b-4d51-498e-a2d9-b397785901e2}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:01.9017667+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d4411d4b-4d51-498e-a2d9-b397785901e2}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:01.9017655+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d4411d4b-4d51-498e-a2d9-b397785901e2}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:01.9014653+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 29592."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:16:01.896978+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d4411d4b-4d51-498e-a2d9-b397785901e2}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:04.0232803+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e12c45bd-2d56-4fc8-9f75-15c1df727cc8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:04.0228512+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{e12c45bd-2d56-4fc8-9f75-15c1df727cc8}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:01.8875762+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{e12c45bd-2d56-4fc8-9f75-15c1df727cc8}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:01.8875748+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e12c45bd-2d56-4fc8-9f75-15c1df727cc8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:01.8872489+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 30080."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:14:01.8832794+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e12c45bd-2d56-4fc8-9f75-15c1df727cc8}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:03.897083+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{fd01ddd8-3adf-4485-9062-a084f9dc9b51}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:03.8968474+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{fd01ddd8-3adf-4485-9062-a084f9dc9b51}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:01.8801146+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{fd01ddd8-3adf-4485-9062-a084f9dc9b51}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:01.8801129+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{fd01ddd8-3adf-4485-9062-a084f9dc9b51}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:01.8798401+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 12988."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:12:01.8756773+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{fd01ddd8-3adf-4485-9062-a084f9dc9b51}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:04.0840631+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c7c70597-aa47-4528-b3b7-e96145ff4588}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:04.0838196+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c7c70597-aa47-4528-b3b7-e96145ff4588}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:01.8683947+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c7c70597-aa47-4528-b3b7-e96145ff4588}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:01.8683935+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c7c70597-aa47-4528-b3b7-e96145ff4588}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:01.8680664+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 12104."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:10:01.8641598+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c7c70597-aa47-4528-b3b7-e96145ff4588}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:03.9425124+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{3fe99460-f0d1-496b-a34f-6313e8ad7b30}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:03.9421979+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{3fe99460-f0d1-496b-a34f-6313e8ad7b30}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:01.8539585+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{3fe99460-f0d1-496b-a34f-6313e8ad7b30}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:01.8539573+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{3fe99460-f0d1-496b-a34f-6313e8ad7b30}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:01.8536572+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 36164."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:08:01.8502102+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{3fe99460-f0d1-496b-a34f-6313e8ad7b30}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:04.0754848+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{70ed5570-084a-40b7-b2b4-dddda0bde3e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:04.075263+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{70ed5570-084a-40b7-b2b4-dddda0bde3e4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:02.3262078+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e346f963-beb7-4b16-aa7f-d57f90a88bff}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:02.3259309+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{e346f963-beb7-4b16-aa7f-d57f90a88bff}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8395709+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{70ed5570-084a-40b7-b2b4-dddda0bde3e4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8395695+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{70ed5570-084a-40b7-b2b4-dddda0bde3e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8393148+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 36236."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8347419+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{70ed5570-084a-40b7-b2b4-dddda0bde3e4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8093761+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{e346f963-beb7-4b16-aa7f-d57f90a88bff}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8093748+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e346f963-beb7-4b16-aa7f-d57f90a88bff}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.8091114+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 2860."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:06:01.7889151+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e346f963-beb7-4b16-aa7f-d57f90a88bff}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:04.2194793+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c52db7fc-8527-45d3-b27d-4b0f823eee1f}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:04.2191823+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c52db7fc-8527-45d3-b27d-4b0f823eee1f}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:01.829404+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c52db7fc-8527-45d3-b27d-4b0f823eee1f}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:01.8294026+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c52db7fc-8527-45d3-b27d-4b0f823eee1f}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:01.8290271+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 38652."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:04:01.8248866+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c52db7fc-8527-45d3-b27d-4b0f823eee1f}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:03.9467274+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{dc3cd235-e55c-449e-9591-8f00d41a5a67}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:03.9465018+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{dc3cd235-e55c-449e-9591-8f00d41a5a67}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:01.8220849+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{dc3cd235-e55c-449e-9591-8f00d41a5a67}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:01.8220834+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{dc3cd235-e55c-449e-9591-8f00d41a5a67}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:01.8217815+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 15612."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:02:01.8175079+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{dc3cd235-e55c-449e-9591-8f00d41a5a67}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:04.0006076+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{bdf3d563-b367-4129-95d0-d78e3d289443}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:04.0003379+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{bdf3d563-b367-4129-95d0-d78e3d289443}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8817776+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c9c1d7e1-abf6-4c1a-a8f2-2db32f6b23d8}\" instance of the \"\\ChiefLogRotation\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8813749+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefLogRotation\" , instance \"{c9c1d7e1-abf6-4c1a-a8f2-2db32f6b23d8}\" , action \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8059082+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{bdf3d563-b367-4129-95d0-d78e3d289443}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8059062+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{bdf3d563-b367-4129-95d0-d78e3d289443}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8056051+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53684."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.8013116+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{bdf3d563-b367-4129-95d0-d78e3d289443}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.4242731+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" in instance \"{c9c1d7e1-abf6-4c1a-a8f2-2db32f6b23d8}\" of task \"\\ChiefLogRotation\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.4242716+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c9c1d7e1-abf6-4c1a-a8f2-2db32f6b23d8}\" instance of the \"\\ChiefLogRotation\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.4239263+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefLogRotation\", instance \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" with process ID 11004."
+  },
+  {
+    "TimeCreated": "2026-10-03T03:00:01.41386+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c9c1d7e1-abf6-4c1a-a8f2-2db32f6b23d8}\" instance of task \"\\ChiefLogRotation\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:03.9698972+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{059b5c58-8e32-40d1-b683-a058698b3622}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:03.9696561+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{059b5c58-8e32-40d1-b683-a058698b3622}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:01.7976409+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{059b5c58-8e32-40d1-b683-a058698b3622}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:01.7976395+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{059b5c58-8e32-40d1-b683-a058698b3622}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:01.7973811+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53020."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:58:01.793908+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{059b5c58-8e32-40d1-b683-a058698b3622}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:03.913675+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5d899a75-305e-4c77-836d-5bc5dfc560ad}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:03.9133632+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5d899a75-305e-4c77-836d-5bc5dfc560ad}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:01.7925388+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5d899a75-305e-4c77-836d-5bc5dfc560ad}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:01.7925375+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5d899a75-305e-4c77-836d-5bc5dfc560ad}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:01.7922306+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 8752."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:56:01.7884465+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5d899a75-305e-4c77-836d-5bc5dfc560ad}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:03.8357999+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{366cb244-8b8e-486d-aa20-77743ee4319b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:03.8355242+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{366cb244-8b8e-486d-aa20-77743ee4319b}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:01.7961058+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{366cb244-8b8e-486d-aa20-77743ee4319b}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:01.7961042+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{366cb244-8b8e-486d-aa20-77743ee4319b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:01.7957212+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 44940."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:54:01.777124+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{366cb244-8b8e-486d-aa20-77743ee4319b}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:04.0631121+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{da55d529-b9b8-4ef4-99b0-5032685fcd0d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:04.0627144+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{da55d529-b9b8-4ef4-99b0-5032685fcd0d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:01.770491+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{da55d529-b9b8-4ef4-99b0-5032685fcd0d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:01.7704898+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{da55d529-b9b8-4ef4-99b0-5032685fcd0d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:01.7701933+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 48152."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:52:01.7667067+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{da55d529-b9b8-4ef4-99b0-5032685fcd0d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:04.0235984+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{03e2050b-e6de-47c3-9cf5-ccbb2e52b99a}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:04.0233779+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{03e2050b-e6de-47c3-9cf5-ccbb2e52b99a}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:01.7633431+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{03e2050b-e6de-47c3-9cf5-ccbb2e52b99a}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:01.7633416+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{03e2050b-e6de-47c3-9cf5-ccbb2e52b99a}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:01.7630466+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 22156."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:50:01.7594443+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{03e2050b-e6de-47c3-9cf5-ccbb2e52b99a}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:03.9482471+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{63c041a5-613d-401f-bdfe-e4076b2aef01}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:03.9479885+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{63c041a5-613d-401f-bdfe-e4076b2aef01}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:01.7492097+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{63c041a5-613d-401f-bdfe-e4076b2aef01}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:01.7492084+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{63c041a5-613d-401f-bdfe-e4076b2aef01}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:01.748881+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 44728."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:48:01.7452577+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{63c041a5-613d-401f-bdfe-e4076b2aef01}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:03.9022226+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5604a591-357e-40f0-8c84-fcf6e2398dbe}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:03.9019522+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5604a591-357e-40f0-8c84-fcf6e2398dbe}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:01.7427548+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5604a591-357e-40f0-8c84-fcf6e2398dbe}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:01.7427533+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5604a591-357e-40f0-8c84-fcf6e2398dbe}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:01.742464+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 46260."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:46:01.7385937+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5604a591-357e-40f0-8c84-fcf6e2398dbe}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:03.9721035+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{7bd48d73-fbe3-40b3-adeb-345d18ffcfe4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:03.9716949+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{7bd48d73-fbe3-40b3-adeb-345d18ffcfe4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:01.737356+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{7bd48d73-fbe3-40b3-adeb-345d18ffcfe4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:01.7373547+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{7bd48d73-fbe3-40b3-adeb-345d18ffcfe4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:01.7369855+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 3792."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:44:01.7328645+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{7bd48d73-fbe3-40b3-adeb-345d18ffcfe4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:03.8080628+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{44480afb-bbf9-4ec6-a55e-5569449120e8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:03.8078167+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{44480afb-bbf9-4ec6-a55e-5569449120e8}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:01.7240025+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{44480afb-bbf9-4ec6-a55e-5569449120e8}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:01.724001+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{44480afb-bbf9-4ec6-a55e-5569449120e8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:01.7236502+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 5600."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:42:01.7196238+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{44480afb-bbf9-4ec6-a55e-5569449120e8}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:04.1182303+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e045a3d6-18b5-47b7-bb06-6b2b3ba25a60}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:04.1179573+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{e045a3d6-18b5-47b7-bb06-6b2b3ba25a60}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:01.7207107+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{e045a3d6-18b5-47b7-bb06-6b2b3ba25a60}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:01.7207094+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e045a3d6-18b5-47b7-bb06-6b2b3ba25a60}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:01.7204325+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 51404."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:40:01.7167254+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e045a3d6-18b5-47b7-bb06-6b2b3ba25a60}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:03.9169077+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5b2c8b55-a4d3-4866-8185-c5a6b47cd7e5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:03.9164794+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5b2c8b55-a4d3-4866-8185-c5a6b47cd7e5}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:01.7162837+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5b2c8b55-a4d3-4866-8185-c5a6b47cd7e5}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:01.7162825+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5b2c8b55-a4d3-4866-8185-c5a6b47cd7e5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:01.7159605+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 18060."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:38:01.711938+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5b2c8b55-a4d3-4866-8185-c5a6b47cd7e5}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:03.945895+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{3d1d59c2-1ef7-441e-9120-dbb3875ffbe0}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:03.9456566+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{3d1d59c2-1ef7-441e-9120-dbb3875ffbe0}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:02.2470079+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{b98acd6d-f2c5-40cf-8b33-0f2ed55e7fb1}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:02.2467316+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{b98acd6d-f2c5-40cf-8b33-0f2ed55e7fb1}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7792871+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{b98acd6d-f2c5-40cf-8b33-0f2ed55e7fb1}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7792857+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{b98acd6d-f2c5-40cf-8b33-0f2ed55e7fb1}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7790521+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 41532."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7747014+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{b98acd6d-f2c5-40cf-8b33-0f2ed55e7fb1}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7015698+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{3d1d59c2-1ef7-441e-9120-dbb3875ffbe0}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7015686+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{3d1d59c2-1ef7-441e-9120-dbb3875ffbe0}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.7012021+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 28000."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:36:01.6969261+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{3d1d59c2-1ef7-441e-9120-dbb3875ffbe0}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:03.8008018+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d7884f44-cd8d-4390-9b44-fe4490881cae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:03.8003825+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d7884f44-cd8d-4390-9b44-fe4490881cae}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:01.6882262+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d7884f44-cd8d-4390-9b44-fe4490881cae}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:01.6882228+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d7884f44-cd8d-4390-9b44-fe4490881cae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:01.6877585+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 19748."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:34:01.6837177+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d7884f44-cd8d-4390-9b44-fe4490881cae}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:03.8124214+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{543175d4-448b-4db6-b4c8-896b67e5defc}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:03.8120227+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{543175d4-448b-4db6-b4c8-896b67e5defc}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:01.6803352+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{543175d4-448b-4db6-b4c8-896b67e5defc}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:01.6803337+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{543175d4-448b-4db6-b4c8-896b67e5defc}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:01.679984+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 30352."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:32:01.6760186+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{543175d4-448b-4db6-b4c8-896b67e5defc}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:05.8324799+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{53c36180-1758-4313-b796-536d68fbba4b}\" instance of the \"\\ChiefOperationalBackup\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:05.8320662+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefOperationalBackup\" , instance \"{53c36180-1758-4313-b796-536d68fbba4b}\" , action \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:04.0166015+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{20f55bc3-2407-40e5-9d77-4827450fc2d7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:04.0161702+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{20f55bc3-2407-40e5-9d77-4827450fc2d7}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.6723214+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{20f55bc3-2407-40e5-9d77-4827450fc2d7}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.6723189+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{20f55bc3-2407-40e5-9d77-4827450fc2d7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.6720352+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 44596."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.6675684+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{20f55bc3-2407-40e5-9d77-4827450fc2d7}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.4305006+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" in instance \"{53c36180-1758-4313-b796-536d68fbba4b}\" of task \"\\ChiefOperationalBackup\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.4304992+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{53c36180-1758-4313-b796-536d68fbba4b}\" instance of the \"\\ChiefOperationalBackup\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.4302012+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefOperationalBackup\", instance \"C:\\WINDOWS\\SYSTEM32\\cmd.exe\" with process ID 34780."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:30:01.4190699+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{53c36180-1758-4313-b796-536d68fbba4b}\" instance of task \"\\ChiefOperationalBackup\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:04.0626454+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{a325df85-450c-475a-98f5-ace934832d7b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:04.0621559+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{a325df85-450c-475a-98f5-ace934832d7b}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:01.6650284+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{a325df85-450c-475a-98f5-ace934832d7b}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:01.6650272+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{a325df85-450c-475a-98f5-ace934832d7b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:01.6647831+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 23508."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:28:01.6611842+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{a325df85-450c-475a-98f5-ace934832d7b}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:03.8402432+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e80c509e-2d58-4ed4-9249-55d3c73a8184}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:03.8398596+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{e80c509e-2d58-4ed4-9249-55d3c73a8184}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:01.6527375+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{e80c509e-2d58-4ed4-9249-55d3c73a8184}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:01.6527363+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e80c509e-2d58-4ed4-9249-55d3c73a8184}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:01.6524461+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53428."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:26:01.648892+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e80c509e-2d58-4ed4-9249-55d3c73a8184}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:03.7009823+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d650c81d-0a91-4d94-adc6-3e503548b871}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:03.7007134+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d650c81d-0a91-4d94-adc6-3e503548b871}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:01.6424296+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d650c81d-0a91-4d94-adc6-3e503548b871}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:01.6424283+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d650c81d-0a91-4d94-adc6-3e503548b871}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:01.6420867+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 16352."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:24:01.6376388+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d650c81d-0a91-4d94-adc6-3e503548b871}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:03.9262788+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{0cbe0a0c-a1c0-4a6c-9228-73ea8d2bf729}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:03.925979+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{0cbe0a0c-a1c0-4a6c-9228-73ea8d2bf729}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:01.6463525+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{0cbe0a0c-a1c0-4a6c-9228-73ea8d2bf729}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:01.6463512+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{0cbe0a0c-a1c0-4a6c-9228-73ea8d2bf729}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:01.6460864+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 40600."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:22:01.626841+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{0cbe0a0c-a1c0-4a6c-9228-73ea8d2bf729}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:03.7966152+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d48fa543-c093-4347-b98b-4bd263473f11}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:03.7963727+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d48fa543-c093-4347-b98b-4bd263473f11}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:01.6185382+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d48fa543-c093-4347-b98b-4bd263473f11}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:01.6185368+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d48fa543-c093-4347-b98b-4bd263473f11}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:01.6182798+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 48120."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:20:01.614613+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d48fa543-c093-4347-b98b-4bd263473f11}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:03.7751048+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{a69e0017-238e-4e16-9d3c-ecd7c8486620}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:03.7748556+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{a69e0017-238e-4e16-9d3c-ecd7c8486620}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:01.6111524+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{a69e0017-238e-4e16-9d3c-ecd7c8486620}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:01.6111509+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{a69e0017-238e-4e16-9d3c-ecd7c8486620}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:01.6107523+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 20448."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:18:01.6063523+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{a69e0017-238e-4e16-9d3c-ecd7c8486620}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:04.2181049+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{483883d6-250c-45cd-adb4-1f616cea18de}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:04.2178343+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{483883d6-250c-45cd-adb4-1f616cea18de}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:01.6100628+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{483883d6-250c-45cd-adb4-1f616cea18de}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:01.6100616+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{483883d6-250c-45cd-adb4-1f616cea18de}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:01.6097419+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 10588."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:16:01.6056094+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{483883d6-250c-45cd-adb4-1f616cea18de}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:04.0183787+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{27d64ed0-96ad-4155-8669-3513f33bfa70}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:04.0180746+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{27d64ed0-96ad-4155-8669-3513f33bfa70}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:01.6003733+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{27d64ed0-96ad-4155-8669-3513f33bfa70}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:01.6003722+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{27d64ed0-96ad-4155-8669-3513f33bfa70}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:01.6000469+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 52292."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:14:01.5967169+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{27d64ed0-96ad-4155-8669-3513f33bfa70}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:03.7322531+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{095b0fa7-fcdd-4a4d-8958-8e3bbe8574a7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:03.7319921+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{095b0fa7-fcdd-4a4d-8958-8e3bbe8574a7}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:01.590392+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{095b0fa7-fcdd-4a4d-8958-8e3bbe8574a7}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:01.5903906+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{095b0fa7-fcdd-4a4d-8958-8e3bbe8574a7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:01.5901508+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 15916."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:12:01.5857998+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{095b0fa7-fcdd-4a4d-8958-8e3bbe8574a7}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:03.6843673+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c749abe1-97e7-413f-9c64-9193925c1a79}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:03.6841044+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c749abe1-97e7-413f-9c64-9193925c1a79}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:01.588744+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c749abe1-97e7-413f-9c64-9193925c1a79}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:01.5887409+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c749abe1-97e7-413f-9c64-9193925c1a79}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:01.5881628+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 22404."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:10:01.5845449+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c749abe1-97e7-413f-9c64-9193925c1a79}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:03.9075298+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{70dde888-6c62-4174-9f28-15ee87d89bff}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:03.9072559+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{70dde888-6c62-4174-9f28-15ee87d89bff}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:01.5806766+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{70dde888-6c62-4174-9f28-15ee87d89bff}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:01.5806752+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{70dde888-6c62-4174-9f28-15ee87d89bff}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:01.5803504+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 50016."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:08:01.5765124+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{70dde888-6c62-4174-9f28-15ee87d89bff}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:04.140378+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{825c54d3-947b-4155-ba10-8100be82668d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:04.1401383+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{825c54d3-947b-4155-ba10-8100be82668d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:02.3840986+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{710275ba-339a-48ad-abfc-efafac578e1d}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:02.3838291+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{710275ba-339a-48ad-abfc-efafac578e1d}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.7710097+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{710275ba-339a-48ad-abfc-efafac578e1d}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.7710072+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{710275ba-339a-48ad-abfc-efafac578e1d}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.7706078+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 53524."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.765968+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{710275ba-339a-48ad-abfc-efafac578e1d}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.5667367+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{825c54d3-947b-4155-ba10-8100be82668d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.5667328+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{825c54d3-947b-4155-ba10-8100be82668d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.5661592+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 13216."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:06:01.5623192+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{825c54d3-947b-4155-ba10-8100be82668d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:03.9042718+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{7006149e-58a7-4fca-b0fc-ddd8da23b9b5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:03.9040151+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{7006149e-58a7-4fca-b0fc-ddd8da23b9b5}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:01.5635007+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{7006149e-58a7-4fca-b0fc-ddd8da23b9b5}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:01.5634992+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{7006149e-58a7-4fca-b0fc-ddd8da23b9b5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:01.5631909+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 1156."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:04:01.5590572+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{7006149e-58a7-4fca-b0fc-ddd8da23b9b5}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:03.6345333+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{56fa70d6-3c2e-4d72-ad78-ba03333cf28e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:03.634294+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{56fa70d6-3c2e-4d72-ad78-ba03333cf28e}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:01.5512391+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{56fa70d6-3c2e-4d72-ad78-ba03333cf28e}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:01.5512377+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{56fa70d6-3c2e-4d72-ad78-ba03333cf28e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:01.5509145+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 15316."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:02:01.54696+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{56fa70d6-3c2e-4d72-ad78-ba03333cf28e}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:03.9176087+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{642da4ec-2569-4df5-9346-4351da9b3d2e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:03.9172982+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{642da4ec-2569-4df5-9346-4351da9b3d2e}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:01.5389705+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{642da4ec-2569-4df5-9346-4351da9b3d2e}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:01.5389686+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{642da4ec-2569-4df5-9346-4351da9b3d2e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:01.5386377+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 46468."
+  },
+  {
+    "TimeCreated": "2026-10-03T02:00:01.5345247+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{642da4ec-2569-4df5-9346-4351da9b3d2e}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:04.1161819+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{59392522-8444-49ec-98c2-39fad0c20518}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:04.1159194+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{59392522-8444-49ec-98c2-39fad0c20518}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:01.5308469+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{59392522-8444-49ec-98c2-39fad0c20518}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:01.5308457+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{59392522-8444-49ec-98c2-39fad0c20518}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:01.5305636+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 9208."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:58:01.526702+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{59392522-8444-49ec-98c2-39fad0c20518}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:04.0138865+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{bd7ae12d-bed6-4d58-ae08-3c62d3f0b9c7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:04.0135484+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{bd7ae12d-bed6-4d58-ae08-3c62d3f0b9c7}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:01.5436831+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{bd7ae12d-bed6-4d58-ae08-3c62d3f0b9c7}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:01.5436811+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{bd7ae12d-bed6-4d58-ae08-3c62d3f0b9c7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:01.5432608+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 48144."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:56:01.5215885+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{bd7ae12d-bed6-4d58-ae08-3c62d3f0b9c7}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:03.8077218+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{abe63518-e3a2-4ce5-91e2-4f60eb0f100e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:03.8074414+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{abe63518-e3a2-4ce5-91e2-4f60eb0f100e}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:01.5251308+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{abe63518-e3a2-4ce5-91e2-4f60eb0f100e}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:01.5251292+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{abe63518-e3a2-4ce5-91e2-4f60eb0f100e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:01.5247962+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 34332."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:54:01.5205862+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{abe63518-e3a2-4ce5-91e2-4f60eb0f100e}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:04.3008518+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{68fd246c-b7f2-4148-852d-85393a5bfa4d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:04.300562+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{68fd246c-b7f2-4148-852d-85393a5bfa4d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:01.519277+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{68fd246c-b7f2-4148-852d-85393a5bfa4d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:01.5192742+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{68fd246c-b7f2-4148-852d-85393a5bfa4d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:01.5186372+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 42168."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:52:01.5109841+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{68fd246c-b7f2-4148-852d-85393a5bfa4d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:03.9107409+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{096e9486-f372-435d-9432-c8633ceb20c4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:03.9102931+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{096e9486-f372-435d-9432-c8633ceb20c4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:01.5084079+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{096e9486-f372-435d-9432-c8633ceb20c4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:01.5084066+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{096e9486-f372-435d-9432-c8633ceb20c4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:01.5080837+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 39148."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:50:01.504542+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{096e9486-f372-435d-9432-c8633ceb20c4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:03.8948242+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{4225b358-82e8-463d-a832-420d267b3241}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:03.8945653+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{4225b358-82e8-463d-a832-420d267b3241}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:01.4941223+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{4225b358-82e8-463d-a832-420d267b3241}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:01.494121+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{4225b358-82e8-463d-a832-420d267b3241}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:01.4937979+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 15176."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:48:01.4898073+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{4225b358-82e8-463d-a832-420d267b3241}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:03.822269+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{bc4ffd1d-a8a3-425b-8978-70892e1c14ae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:03.8220093+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{bc4ffd1d-a8a3-425b-8978-70892e1c14ae}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:01.4902059+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{bc4ffd1d-a8a3-425b-8978-70892e1c14ae}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:01.4902039+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{bc4ffd1d-a8a3-425b-8978-70892e1c14ae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:01.4896593+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 22196."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:46:01.4841713+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{bc4ffd1d-a8a3-425b-8978-70892e1c14ae}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:04.1626709+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5e6d31b5-3265-4313-aafb-49be5ff71b2c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:04.1621749+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5e6d31b5-3265-4313-aafb-49be5ff71b2c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:01.4799277+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5e6d31b5-3265-4313-aafb-49be5ff71b2c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:01.4799257+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5e6d31b5-3265-4313-aafb-49be5ff71b2c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:01.4795101+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 16536."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:44:01.4753998+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5e6d31b5-3265-4313-aafb-49be5ff71b2c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:03.9020493+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{53773113-ee28-4e2b-98e7-6172a5eda803}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:03.9016428+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{53773113-ee28-4e2b-98e7-6172a5eda803}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:01.4647839+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{53773113-ee28-4e2b-98e7-6172a5eda803}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:01.4647825+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{53773113-ee28-4e2b-98e7-6172a5eda803}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:01.4644186+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 34868."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:42:01.4605522+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{53773113-ee28-4e2b-98e7-6172a5eda803}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:04.1540164+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5cc053ae-2c8e-4eab-9808-78f1506d839d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:04.1537742+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5cc053ae-2c8e-4eab-9808-78f1506d839d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:01.4587188+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5cc053ae-2c8e-4eab-9808-78f1506d839d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:01.4587167+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5cc053ae-2c8e-4eab-9808-78f1506d839d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:01.4582408+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 45016."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:40:01.4545113+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5cc053ae-2c8e-4eab-9808-78f1506d839d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:03.7153228+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5e71f0d3-b539-4519-981e-9df6a8e4e385}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:03.7149396+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5e71f0d3-b539-4519-981e-9df6a8e4e385}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:01.4447478+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5e71f0d3-b539-4519-981e-9df6a8e4e385}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:01.4447459+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5e71f0d3-b539-4519-981e-9df6a8e4e385}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:01.4443491+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 30268."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:38:01.4395905+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5e71f0d3-b539-4519-981e-9df6a8e4e385}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:03.8830389+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c4bf4141-586a-4d31-be2c-6d537902ed99}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:03.8827284+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c4bf4141-586a-4d31-be2c-6d537902ed99}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:02.3968874+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c8dbe6d1-accb-48a6-a7fd-26a03d6590aa}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:02.3965867+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{c8dbe6d1-accb-48a6-a7fd-26a03d6590aa}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.7674143+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{c8dbe6d1-accb-48a6-a7fd-26a03d6590aa}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.7674114+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c8dbe6d1-accb-48a6-a7fd-26a03d6590aa}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.7670678+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 47080."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.7581649+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c8dbe6d1-accb-48a6-a7fd-26a03d6590aa}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.4330314+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c4bf4141-586a-4d31-be2c-6d537902ed99}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.43303+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c4bf4141-586a-4d31-be2c-6d537902ed99}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.4327247+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 45048."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:36:01.4291036+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c4bf4141-586a-4d31-be2c-6d537902ed99}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:03.5824198+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{3b5875be-774f-4f8f-a7d1-a50d81e75b14}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:03.5820689+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{3b5875be-774f-4f8f-a7d1-a50d81e75b14}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:01.4323229+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{3b5875be-774f-4f8f-a7d1-a50d81e75b14}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:01.4323208+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{3b5875be-774f-4f8f-a7d1-a50d81e75b14}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:01.4319564+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 25016."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:34:01.4281382+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{3b5875be-774f-4f8f-a7d1-a50d81e75b14}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:03.861023+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{f1d50144-63a4-44ab-8013-689969a31bd4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:03.8606441+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{f1d50144-63a4-44ab-8013-689969a31bd4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:01.4305521+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{f1d50144-63a4-44ab-8013-689969a31bd4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:01.4305475+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{f1d50144-63a4-44ab-8013-689969a31bd4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:01.4299317+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 56168."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:32:01.4254026+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{f1d50144-63a4-44ab-8013-689969a31bd4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:03.5311102+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{35991065-be61-4fa7-a3b6-25f93ca3a24b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:03.5306809+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{35991065-be61-4fa7-a3b6-25f93ca3a24b}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:01.428779+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{35991065-be61-4fa7-a3b6-25f93ca3a24b}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:01.4287775+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{35991065-be61-4fa7-a3b6-25f93ca3a24b}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:01.428465+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 27616."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:30:01.4236859+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{35991065-be61-4fa7-a3b6-25f93ca3a24b}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:03.9238036+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e88036a3-cf79-46bc-b078-afeeed94324c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:03.9233597+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{e88036a3-cf79-46bc-b078-afeeed94324c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:01.4151226+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{e88036a3-cf79-46bc-b078-afeeed94324c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:01.4151214+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e88036a3-cf79-46bc-b078-afeeed94324c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:01.4148706+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 33020."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:28:01.4102175+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e88036a3-cf79-46bc-b078-afeeed94324c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:03.5605326+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{5f3c0b88-fde2-4cf5-8b5d-e92537c77435}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:03.5601982+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{5f3c0b88-fde2-4cf5-8b5d-e92537c77435}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:01.4040538+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{5f3c0b88-fde2-4cf5-8b5d-e92537c77435}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:01.4040521+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{5f3c0b88-fde2-4cf5-8b5d-e92537c77435}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:01.4037209+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53280."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:26:01.3993178+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{5f3c0b88-fde2-4cf5-8b5d-e92537c77435}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:03.87181+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{d3760d7b-128e-446a-be3f-cfe755d8be9e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:03.8715071+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{d3760d7b-128e-446a-be3f-cfe755d8be9e}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:01.398409+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{d3760d7b-128e-446a-be3f-cfe755d8be9e}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:01.3984055+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{d3760d7b-128e-446a-be3f-cfe755d8be9e}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:01.3977869+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 38948."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:24:01.3917953+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{d3760d7b-128e-446a-be3f-cfe755d8be9e}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:03.7681196+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{e2b5ce58-ebd1-43a2-81e0-e826a2168f0c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:03.7677513+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{e2b5ce58-ebd1-43a2-81e0-e826a2168f0c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:01.38047+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{e2b5ce58-ebd1-43a2-81e0-e826a2168f0c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:01.380468+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{e2b5ce58-ebd1-43a2-81e0-e826a2168f0c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:01.3800756+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 31748."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:22:01.3754792+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{e2b5ce58-ebd1-43a2-81e0-e826a2168f0c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:03.398278+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{7eefdeb8-d721-4ebc-9191-ed5bf4341fb1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:03.3979668+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{7eefdeb8-d721-4ebc-9191-ed5bf4341fb1}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:01.3783676+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{7eefdeb8-d721-4ebc-9191-ed5bf4341fb1}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:01.3783664+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{7eefdeb8-d721-4ebc-9191-ed5bf4341fb1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:01.3780575+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 46760."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:20:01.3740698+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{7eefdeb8-d721-4ebc-9191-ed5bf4341fb1}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:04.0698699+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{2b9b97a1-e1f8-42ae-a98f-6705f10cd89c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:04.0695387+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{2b9b97a1-e1f8-42ae-a98f-6705f10cd89c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:01.3718604+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{2b9b97a1-e1f8-42ae-a98f-6705f10cd89c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:01.3718589+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{2b9b97a1-e1f8-42ae-a98f-6705f10cd89c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:01.371555+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 16452."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:18:01.3680465+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{2b9b97a1-e1f8-42ae-a98f-6705f10cd89c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:04.330525+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{7f65cd04-b586-4568-9109-5375254ae62c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:04.3302156+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{7f65cd04-b586-4568-9109-5375254ae62c}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:01.3716363+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{7f65cd04-b586-4568-9109-5375254ae62c}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:01.371633+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{7f65cd04-b586-4568-9109-5375254ae62c}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:01.3711255+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 12104."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:16:01.3658636+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{7f65cd04-b586-4568-9109-5375254ae62c}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:04.8120807+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{7710c209-355d-4a06-9905-579b6c9a44a8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:04.8118109+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{7710c209-355d-4a06-9905-579b6c9a44a8}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:01.3648358+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{7710c209-355d-4a06-9905-579b6c9a44a8}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:01.3648337+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{7710c209-355d-4a06-9905-579b6c9a44a8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:01.3644937+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 32088."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:14:01.3535584+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{7710c209-355d-4a06-9905-579b6c9a44a8}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:03.5960235+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{629cd09b-fb07-476e-8812-3538a2982115}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:03.5955921+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{629cd09b-fb07-476e-8812-3538a2982115}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:01.3574158+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{629cd09b-fb07-476e-8812-3538a2982115}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:01.3574143+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{629cd09b-fb07-476e-8812-3538a2982115}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:01.3571297+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 42168."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:12:01.3529584+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{629cd09b-fb07-476e-8812-3538a2982115}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:03.6545139+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{2b5ab6f5-99c0-4537-9f9d-2a33dc660df1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:03.6540972+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{2b5ab6f5-99c0-4537-9f9d-2a33dc660df1}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:01.3505349+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{2b5ab6f5-99c0-4537-9f9d-2a33dc660df1}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:01.3505337+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{2b5ab6f5-99c0-4537-9f9d-2a33dc660df1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:01.3502235+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 48044."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:10:01.3467252+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{2b5ab6f5-99c0-4537-9f9d-2a33dc660df1}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:03.3843892+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{2329e651-5bd0-48e6-b4b6-ceb99f2cd3c8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:03.3841866+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{2329e651-5bd0-48e6-b4b6-ceb99f2cd3c8}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:01.3415705+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{2329e651-5bd0-48e6-b4b6-ceb99f2cd3c8}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:01.3415688+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{2329e651-5bd0-48e6-b4b6-ceb99f2cd3c8}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:01.3412215+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53092."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:08:01.3371459+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{2329e651-5bd0-48e6-b4b6-ceb99f2cd3c8}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:05.1375336+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{13a5953a-eadc-4dea-8ac5-5798d4502a39}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:05.1372465+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\ChiefDiscordSync\" , instance \"{13a5953a-eadc-4dea-8ac5-5798d4502a39}\" , action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:02.9228494+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{f3cfa0b1-bef8-4241-93e7-5f9b796a4990}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:02.9225654+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{f3cfa0b1-bef8-4241-93e7-5f9b796a4990}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.7484559+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" in instance \"{13a5953a-eadc-4dea-8ac5-5798d4502a39}\" of task \"\\ChiefDiscordSync\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.7484538+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{13a5953a-eadc-4dea-8ac5-5798d4502a39}\" instance of the \"\\ChiefDiscordSync\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.7481745+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\ChiefDiscordSync\", instance \"C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" with process ID 47280."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.7442318+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{13a5953a-eadc-4dea-8ac5-5798d4502a39}\" instance of task \"\\ChiefDiscordSync\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.3270542+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{f3cfa0b1-bef8-4241-93e7-5f9b796a4990}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.3270528+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{f3cfa0b1-bef8-4241-93e7-5f9b796a4990}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.3267182+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 5468."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:06:01.322145+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{f3cfa0b1-bef8-4241-93e7-5f9b796a4990}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:03.8709038+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{08744c2e-de1f-4761-ab1d-21dfab82a0b7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:03.8704812+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{08744c2e-de1f-4761-ab1d-21dfab82a0b7}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:01.3255087+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{08744c2e-de1f-4761-ab1d-21dfab82a0b7}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:01.325507+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{08744c2e-de1f-4761-ab1d-21dfab82a0b7}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:01.3251013+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 21792."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:04:01.3200972+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{08744c2e-de1f-4761-ab1d-21dfab82a0b7}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:03.6092687+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{ab6f0b2e-36eb-4d80-8da4-fc2a82c5b7ad}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:03.6090108+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{ab6f0b2e-36eb-4d80-8da4-fc2a82c5b7ad}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:01.3154983+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{ab6f0b2e-36eb-4d80-8da4-fc2a82c5b7ad}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:01.3154969+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{ab6f0b2e-36eb-4d80-8da4-fc2a82c5b7ad}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:01.3151729+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 32024."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:02:01.3110422+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{ab6f0b2e-36eb-4d80-8da4-fc2a82c5b7ad}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:05.8210394+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{699ac1c8-5ead-49d4-819e-b47440d334f9}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:05.8207761+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{699ac1c8-5ead-49d4-819e-b47440d334f9}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:01.305965+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{699ac1c8-5ead-49d4-819e-b47440d334f9}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:01.3059627+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{699ac1c8-5ead-49d4-819e-b47440d334f9}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:01.3056646+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 52904."
+  },
+  {
+    "TimeCreated": "2026-10-03T01:00:01.301219+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{699ac1c8-5ead-49d4-819e-b47440d334f9}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:03.925072+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{322df49e-33a3-4850-bbab-611cb981d7ae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:03.9247592+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{322df49e-33a3-4850-bbab-611cb981d7ae}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:01.2905794+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{322df49e-33a3-4850-bbab-611cb981d7ae}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:01.2905782+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{322df49e-33a3-4850-bbab-611cb981d7ae}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:01.2903277+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 38528."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:58:01.2864165+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{322df49e-33a3-4850-bbab-611cb981d7ae}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:03.335712+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c80ea1be-480d-4d07-a49c-ee86ead3a52d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:03.335453+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c80ea1be-480d-4d07-a49c-ee86ead3a52d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:01.2852649+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c80ea1be-480d-4d07-a49c-ee86ead3a52d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:01.2852638+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c80ea1be-480d-4d07-a49c-ee86ead3a52d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:01.2849574+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 50204."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:56:01.2816226+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c80ea1be-480d-4d07-a49c-ee86ead3a52d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:03.4814576+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{6abd48ac-748c-40c4-92ca-39fd6584bbd1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:03.4812124+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{6abd48ac-748c-40c4-92ca-39fd6584bbd1}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:01.2754167+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{6abd48ac-748c-40c4-92ca-39fd6584bbd1}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:01.2754143+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{6abd48ac-748c-40c4-92ca-39fd6584bbd1}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:01.2750076+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 16120."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:54:01.2704461+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{6abd48ac-748c-40c4-92ca-39fd6584bbd1}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:04.6565965+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{3fd4d1d7-7723-436b-bb07-aea6ca84d06d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:04.6562407+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{3fd4d1d7-7723-436b-bb07-aea6ca84d06d}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:01.270963+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{3fd4d1d7-7723-436b-bb07-aea6ca84d06d}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:01.2709614+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{3fd4d1d7-7723-436b-bb07-aea6ca84d06d}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:01.2705808+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 11932."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:52:01.2652262+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{3fd4d1d7-7723-436b-bb07-aea6ca84d06d}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:03.5797292+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{96d2c517-e19c-479f-b1d9-ea4d83dc4139}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:03.5793316+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{96d2c517-e19c-479f-b1d9-ea4d83dc4139}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:01.2680745+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{96d2c517-e19c-479f-b1d9-ea4d83dc4139}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:01.2680714+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{96d2c517-e19c-479f-b1d9-ea4d83dc4139}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:01.2675688+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 4364."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:50:01.2631088+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{96d2c517-e19c-479f-b1d9-ea4d83dc4139}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:03.7396228+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{c707734b-c53a-4290-af00-cfc6c2f8f9a0}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:03.7390897+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{c707734b-c53a-4290-af00-cfc6c2f8f9a0}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:01.2574418+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{c707734b-c53a-4290-af00-cfc6c2f8f9a0}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:01.2574401+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{c707734b-c53a-4290-af00-cfc6c2f8f9a0}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:01.2572031+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 17248."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:48:01.2533133+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{c707734b-c53a-4290-af00-cfc6c2f8f9a0}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:03.3945995+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{473e7d9c-9f87-4e12-92fb-fff0e6554ac5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:03.3942141+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{473e7d9c-9f87-4e12-92fb-fff0e6554ac5}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:01.2516439+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{473e7d9c-9f87-4e12-92fb-fff0e6554ac5}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:01.2516413+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{473e7d9c-9f87-4e12-92fb-fff0e6554ac5}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:01.2509559+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 53472."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:46:01.2465352+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{473e7d9c-9f87-4e12-92fb-fff0e6554ac5}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:03.4194125+01:00",
+    "Id": 102,
+    "Message": "Task Scheduler successfully finished \"{a6b96d66-ebf1-44bb-986c-119b01de08e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:03.419051+01:00",
+    "Id": 201,
+    "Message": "Task Scheduler successfully completed task \"\\HermesRemoteQueuePoller\" , instance \"{a6b96d66-ebf1-44bb-986c-119b01de08e4}\" , action \"C:\\WINDOWS\\System32\\wscript.exe\" with return code 0."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:01.2395831+01:00",
+    "Id": 200,
+    "Message": "Task Scheduler launched action \"C:\\WINDOWS\\System32\\wscript.exe\" in instance \"{a6b96d66-ebf1-44bb-986c-119b01de08e4}\" of task \"\\HermesRemoteQueuePoller\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:01.2395806+01:00",
+    "Id": 100,
+    "Message": "Task Scheduler started \"{a6b96d66-ebf1-44bb-986c-119b01de08e4}\" instance of the \"\\HermesRemoteQueuePoller\" task for user \"MISTY\\mukun\"."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:01.23904+01:00",
+    "Id": 129,
+    "Message": "Task Scheduler launch task \"\\HermesRemoteQueuePoller\", instance \"C:\\WINDOWS\\System32\\wscript.exe\" with process ID 6860."
+  },
+  {
+    "TimeCreated": "2026-10-03T00:44:01.2351524+01:00",
+    "Id": 107,
+    "Message": "Task Scheduler launched \"{a6b96d66-ebf1-44bb-986c-119b01de08e4}\" instance of task \"\\HermesRemoteQueuePoller\" due to a time trigger condition."
+  }
+]

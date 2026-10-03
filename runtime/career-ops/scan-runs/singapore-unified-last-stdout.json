@@ -1,0 +1,882 @@
+{
+  "run_id": "unified-singapore-20261002T230002Z",
+  "region": "singapore",
+  "title_policy_mode": "high_recall",
+  "semantic": {
+    "provider": "none",
+    "requested": "auto",
+    "probe": {
+      "available": true,
+      "status": "healthy",
+      "reason": null,
+      "auth_source": "credential_manager",
+      "observed_models": [
+        "deepseek-flash",
+        "deepseek-v4-pro"
+      ],
+      "model_requested": "deepseek-flash",
+      "resolved_model": "deepseek-flash",
+      "model_resolution": "requested model observed at the provider"
+    },
+    "limitation": "deepseek answered but produced no usable classifications; the declared deterministic rule classifier was used instead — this is NOT a model pass",
+    "deepseek_attempt": {
+      "requests": 0,
+      "errors": [],
+      "limitation": "the deepseek pass produced no usable classifications; the funnel records this instead of treating the pool as empty",
+      "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    }
+  },
+  "codex": {
+    "provider": "openai-codex-cli",
+    "requested": false,
+    "requests": 0,
+    "limitation": "codex escalation disabled by the caller",
+    "escalated": [],
+    "dropped_due_to_budget": []
+  },
+  "prefilter": {
+    "counts": {
+      "input": 0,
+      "kept": 0,
+      "removed": 0
+    },
+    "mode": "high_recall"
+  },
+  "cross_source_dedupe": {
+    "engine": "discovery.pipeline.collapse_candidates (URL-normalised, then company+title)",
+    "counts": {
+      "raw_discoveries": 0,
+      "canonical_candidates": 0,
+      "cross_source_duplicates_removed": 0,
+      "multi_source_canonical_candidates": 0
+    },
+    "collapsed": [],
+    "by_source": {},
+    "note": "one vacancy is one canonical candidate whatever combination of regional scan, Company Watch, recruiter/intermediary watch and LinkedIn export discovered it; every discovery is preserved in the candidate's provenance. De-duplication here is in-run identity only and does not replace the shared tracker dedupe."
+  },
+  "canonical_candidates": [],
+  "priority_watchlist": {
+    "declared": false,
+    "counts": {
+      "canonical_candidates": 0,
+      "deterministic_eligibility_pass": 0,
+      "also_found_by_another_surface": 0
+    },
+    "companies": [],
+    "query_families": [],
+    "candidates": [],
+    "note": "the priority_watchlist flag is provenance from the owner's own company list. It makes a finding prominent in the brief and it NEVER bypasses the semantic stage or the deterministic eligibility gates; an absent block means the owner's watchlist did not run in this funnel, which is not a statement about the market"
+  },
+  "source_registry": {
+    "explicit records file": "collect_from_records",
+    "regional run-health scan record": "collect_from_scan_record",
+    "company-watch findings": "collect_from_company_watch",
+    "recruiter/intermediary watch findings": "collect_from_recruiter_watch",
+    "linkedin job-discovery export": "collect_from_linkedin",
+    "open-web research (codex-style)": "collect_from_web_research",
+    "owner priority watchlist (company careers/ATS + role-family research)": "collect_from_priority_watchlist"
+  },
+  "classifications": [],
+  "eligibility": {
+    "input": 0,
+    "decisions": [],
+    "passed": 0
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with Career Ops)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+    "counts": {},
+    "cross_month_index": {},
+    "outcomes": [],
+    "applied": false
+  },
+  "funnel": {
+    "counts": {
+      "discovered_raw": 0,
+      "canonical_candidates": 0,
+      "cross_source_duplicates_removed": 0,
+      "after_hard_negative_prefilter": 0,
+      "semantically_reviewed": 0,
+      "deepseek_accept": 0,
+      "codex_escalated": 0,
+      "codex_accept": 0,
+      "deterministic_eligibility_pass": 0,
+      "duplicates_removed": 0,
+      "tracker_candidates": 0,
+      "discovered_raw_by_source": {
+        "company-watch findings": 0,
+        "linkedin job-discovery export": 0,
+        "open-web research (codex-style)": 0,
+        "owner priority watchlist (company careers/ATS + role-family research)": 0,
+        "recruiter/intermediary watch findings": 0,
+        "regional run-health scan record": 0
+      }
+    },
+    "rejections_by_reason": {},
+    "zero_attribution": {
+      "first_zero_stage": "discovered_raw",
+      "reason": "collection returned no candidate records at all",
+      "skipped_not_applicable": {
+        "codex_accept": "Codex escalation disabled by the caller (--codex off)",
+        "codex_escalated": "Codex escalation disabled by the caller (--codex off)",
+        "deepseek_accept": "no DeepSeek pass was made in this run (provider: none); the declared deterministic rule classifier or an explicit provider choice was used instead"
+      },
+      "attribution_source": "funnel counters (not an inference about the job market or about real vacancies)"
+    },
+    "not_applicable_stages": {
+      "codex_accept": "Codex escalation disabled by the caller (--codex off)",
+      "codex_escalated": "Codex escalation disabled by the caller (--codex off)",
+      "deepseek_accept": "no DeepSeek pass was made in this run (provider: none); the declared deterministic rule classifier or an explicit provider choice was used instead"
+    },
+    "by_source": {
+      "company-watch findings": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      },
+      "linkedin job-discovery export": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      },
+      "open-web research (codex-style)": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      },
+      "owner priority watchlist (company careers/ATS + role-family research)": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      },
+      "recruiter/intermediary watch findings": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      },
+      "regional run-health scan record": {
+        "counts": {
+          "discovered": 0
+        },
+        "rejections_by_reason": {},
+        "not_applicable_stages": {},
+        "zero_attribution": {
+          "first_zero_stage": "discovered",
+          "reason": "this source returned no candidate records",
+          "not_applicable_stages": {},
+          "attribution_source": "per-source funnel counters (not an inference about the job market or about real vacancies)"
+        }
+      }
+    },
+    "shared_candidates": {
+      "counts": {
+        "raw_discoveries": 0,
+        "canonical_candidates": 0,
+        "cross_source_duplicates_removed": 0,
+        "multi_source_canonical_candidates": 0
+      },
+      "collapsed": [],
+      "by_source": {}
+    },
+    "notes": [
+      "source regional run-health scan record: {\"kind\": \"career-ops lane scan (regional worker, unchanged)\", \"available\": false, \"note\": \"no regional run-health record was produced, so this source contributed no candidate; the scan failure is recorded above rather than reported as zero vacancies\"}",
+      "source open-web research (codex-style): {\"kind\": \"open-web research export (codex-style active search)\", \"export_id\": \"webresearch-19bea852d85f8157\", \"region\": \"singapore\", \"provider\": \"codex-web-search\", \"provider_available\": false, \"provider_limitation\": \"no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research\", \"queries_executed\": 8, \"results_seen\": 0, \"candidate_urls\": 0, \"validated_live\": 0, \"validation_failed\": 0, \"duplicates_collapsed\": 0, \"search_listing_refused\": 0, \"fetch_states\": {\"validated_live\": 0, \"discovered_unverified\": 0, \"validation_failed\": 0, \"not_attempted\": 0}, \"rejections_by_reason\": {\"search_not_observed\": 8}, \"zero_attribution\": {\"search\": \"no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)\", \"results\": \"the executed queries returned no accessible results\", \"candidate_urls\": \"no candidate URL was discovered\"}, \"candidates_entering_this_funnel\": 0, \"candidates_excluded_before_the_funnel\": {}, \"candidates_without_a_declared_result_kind\": 0, \"result_kind_note\": \"every candidate carries the result_kind this surface declared\", \"note\": \"active open-web research (a generated query matrix, not a static provider scan). Public/search-index discovery only: no login, no account, no cookie or session, no CAPTCHA, no browser or GUI, and no scraping behind authentication. A result is only accepted when the research worker proves a live search happened.\", \"match_basis\": \"posting URL (tracking parameters removed) where present, else company + title; the same vacancy found by search, on an ATS board and in another surface collapses to one canonical candidate\"}",
+      "source company-watch findings: {}",
+      "source owner priority watchlist (company careers/ATS + role-family research): {}",
+      "source recruiter/intermediary watch findings: {}",
+      "source linkedin job-discovery export: {}"
+    ]
+  },
+  "jd_gap": {
+    "candidates": 0,
+    "with_job_description_text": 0,
+    "without_job_description_text": 0,
+    "limitation": null
+  },
+  "collection": [
+    {
+      "source": "regional run-health scan record",
+      "candidates": [],
+      "coverage": {
+        "kind": "career-ops lane scan (regional worker, unchanged)",
+        "available": false,
+        "note": "no regional run-health record was produced, so this source contributed no candidate; the scan failure is recorded above rather than reported as zero vacancies"
+      }
+    },
+    {
+      "available": true,
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-singapore-webresearch-19bea852d85f8157.json",
+      "candidates": [],
+      "coverage": {
+        "kind": "open-web research export (codex-style active search)",
+        "export_id": "webresearch-19bea852d85f8157",
+        "region": "singapore",
+        "provider": "codex-web-search",
+        "provider_available": false,
+        "provider_limitation": "no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research",
+        "queries_executed": 8,
+        "results_seen": 0,
+        "candidate_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "duplicates_collapsed": 0,
+        "search_listing_refused": 0,
+        "fetch_states": {
+          "validated_live": 0,
+          "discovered_unverified": 0,
+          "validation_failed": 0,
+          "not_attempted": 0
+        },
+        "rejections_by_reason": {
+          "search_not_observed": 8
+        },
+        "zero_attribution": {
+          "search": "no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)",
+          "results": "the executed queries returned no accessible results",
+          "candidate_urls": "no candidate URL was discovered"
+        },
+        "candidates_entering_this_funnel": 0,
+        "candidates_excluded_before_the_funnel": {},
+        "candidates_without_a_declared_result_kind": 0,
+        "result_kind_note": "every candidate carries the result_kind this surface declared",
+        "note": "active open-web research (a generated query matrix, not a static provider scan). Public/search-index discovery only: no login, no account, no cookie or session, no CAPTCHA, no browser or GUI, and no scraping behind authentication. A result is only accepted when the research worker proves a live search happened.",
+        "match_basis": "posting URL (tracking parameters removed) where present, else company + title; the same vacancy found by search, on an ATS board and in another surface collapses to one canonical candidate"
+      },
+      "source": "open-web research (codex-style)"
+    },
+    {
+      "source": "company-watch findings",
+      "candidates": [],
+      "coverage": {}
+    },
+    {
+      "source": "owner priority watchlist (company careers/ATS + role-family research)",
+      "candidates": [],
+      "coverage": {}
+    },
+    {
+      "source": "recruiter/intermediary watch findings",
+      "candidates": [],
+      "coverage": {}
+    },
+    {
+      "source": "linkedin job-discovery export",
+      "candidates": [],
+      "coverage": {}
+    }
+  ],
+  "safety": {
+    "canonical_workbook_written": false,
+    "applications_submitted": 0,
+    "employer_contacts": 0,
+    "browser_used": false,
+    "handoff": "manifest only; applying stays career_ops_cli.py write --apply",
+    "browser_or_gui_used": false,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false
+  },
+  "schema_version": 1,
+  "kind": "career-ops.unified-scheduled-region-run",
+  "generated_at": "2026-10-02T23:00:02+00:00",
+  "finished_at": "2026-10-02T23:01:07+00:00",
+  "scheduled_run": true,
+  "live": true,
+  "discovery_mode": "high_recall",
+  "production_discovery_policy": "high_recall",
+  "diagnostic_mode": false,
+  "budget": {
+    "overall_seconds": 2700,
+    "elapsed_seconds": 65.45,
+    "web_queries": 8,
+    "limit_per_query": 5,
+    "max_urls": 24,
+    "per_query_timeout_s": 180,
+    "scan_timeout_s": 900,
+    "retries": 1
+  },
+  "lanes": {
+    "regional_scan": {
+      "lane": "structured_regional_provider_scan",
+      "worker": "career-ops/regional_job_search.py (unchanged, dry-run)",
+      "attempts": [
+        {
+          "exit_code": 0,
+          "timed_out": false,
+          "error": null,
+          "duration_s": 7.16
+        }
+      ],
+      "retries_used": 0,
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_s": 7.16,
+      "run_health_file": null,
+      "scan_ok": null,
+      "error": null,
+      "block": {
+        "source": "regional run-health scan record",
+        "candidates": [],
+        "coverage": {
+          "kind": "career-ops lane scan (regional worker, unchanged)",
+          "available": false,
+          "note": "no regional run-health record was produced, so this source contributed no candidate; the scan failure is recorded above rather than reported as zero vacancies"
+        }
+      }
+    },
+    "web_research": {
+      "lane": "open_web_research",
+      "provider_kind": "codex",
+      "probe": {
+        "provider": "codex-web-search",
+        "available": false,
+        "web_search_observed": false,
+        "cli_version": null,
+        "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\node\\codex.CMD",
+        "reason": "no web_search tool event was observed in the Codex execution stream, so the installed runtime cannot be shown to perform live web research",
+        "executed_queries": []
+      },
+      "queries_selected": [
+        {
+          "query_id": "q-97d963bc2f82",
+          "surface_scope": "linkedin_jobs",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-09b11a3a9564",
+          "surface_scope": "indeed",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-7ec91fa8795d",
+          "surface_scope": "google_index",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-650bf8c3494a",
+          "surface_scope": "greenhouse",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-02936bdcabbf",
+          "surface_scope": "lever",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-887ead29a3fd",
+          "surface_scope": "ashby",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-c0c1998c04c8",
+          "surface_scope": "workday",
+          "role_family": "cross_family_entry"
+        },
+        {
+          "query_id": "q-c5c360c81a87",
+          "surface_scope": "workable",
+          "role_family": "cross_family_entry"
+        }
+      ],
+      "queries_selected_total": 8,
+      "matrix_size": 22,
+      "watchlist_companies": [],
+      "per_query_timeout_s": 180,
+      "export_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-singapore-webresearch-19bea852d85f8157.json",
+      "limitation": "no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research",
+      "block": {
+        "available": true,
+        "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-singapore-webresearch-19bea852d85f8157.json",
+        "candidates": [],
+        "coverage": {
+          "kind": "open-web research export (codex-style active search)",
+          "export_id": "webresearch-19bea852d85f8157",
+          "region": "singapore",
+          "provider": "codex-web-search",
+          "provider_available": false,
+          "provider_limitation": "no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research",
+          "queries_executed": 8,
+          "results_seen": 0,
+          "candidate_urls": 0,
+          "validated_live": 0,
+          "validation_failed": 0,
+          "duplicates_collapsed": 0,
+          "search_listing_refused": 0,
+          "fetch_states": {
+            "validated_live": 0,
+            "discovered_unverified": 0,
+            "validation_failed": 0,
+            "not_attempted": 0
+          },
+          "rejections_by_reason": {
+            "search_not_observed": 8
+          },
+          "zero_attribution": {
+            "search": "no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)",
+            "results": "the executed queries returned no accessible results",
+            "candidate_urls": "no candidate URL was discovered"
+          },
+          "candidates_entering_this_funnel": 0,
+          "candidates_excluded_before_the_funnel": {},
+          "candidates_without_a_declared_result_kind": 0,
+          "result_kind_note": "every candidate carries the result_kind this surface declared",
+          "note": "active open-web research (a generated query matrix, not a static provider scan). Public/search-index discovery only: no login, no account, no cookie or session, no CAPTCHA, no browser or GUI, and no scraping behind authentication. A result is only accepted when the research worker proves a live search happened.",
+          "match_basis": "posting URL (tracking parameters removed) where present, else company + title; the same vacancy found by search, on an ATS board and in another surface collapses to one canonical candidate"
+        },
+        "source": "open-web research (codex-style)"
+      },
+      "reused_export": false,
+      "telemetry": {
+        "queries_executed": 8,
+        "results_seen": 0,
+        "candidate_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "duplicates_collapsed": 0,
+        "search_listing_refused": 0,
+        "semantically_reviewed": 0,
+        "deterministic_eligibility_pass": 0,
+        "tracker_candidates": 0,
+        "fetch_states": {
+          "validated_live": 0,
+          "discovered_unverified": 0,
+          "validation_failed": 0,
+          "not_attempted": 0
+        },
+        "rejections_by_reason": {
+          "search_not_observed": 8
+        },
+        "zero_attribution": {
+          "search": "no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)",
+          "results": "the executed queries returned no accessible results",
+          "candidate_urls": "no candidate URL was discovered"
+        }
+      },
+      "provider": {
+        "provider": "codex-web-search",
+        "available": false,
+        "limitation": "no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research",
+        "requests": 8,
+        "cli_version": null,
+        "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\node\\codex.CMD",
+        "captured_from": null,
+        "captured_at": null,
+        "web_search_observed_queries": 0,
+        "queries_without_observed_search": 8
+      },
+      "queries_run": [
+        {
+          "query_id": "q-97d963bc2f82",
+          "query": "site:linkedin.com/jobs (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "linkedin_jobs",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-09b11a3a9564",
+          "query": "site:uk.indeed.com OR site:indeed.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "indeed",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-7ec91fa8795d",
+          "query": "(graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "google_index",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-650bf8c3494a",
+          "query": "site:job-boards.greenhouse.io (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "greenhouse",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-02936bdcabbf",
+          "query": "site:jobs.lever.co (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "lever",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-887ead29a3fd",
+          "query": "site:jobs.ashbyhq.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "ashby",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-c0c1998c04c8",
+          "query": "site:myworkdayjobs.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "workday",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        },
+        {
+          "query_id": "q-c5c360c81a87",
+          "query": "site:apply.workable.com (graduate OR junior OR analyst) (\"cyber security\" OR cybersecurity OR \"information security\" OR SOC) (Singapore)",
+          "surface_scope": "workable",
+          "executed": true,
+          "web_search_observed": false,
+          "results_seen": 0
+        }
+      ],
+      "candidates": [],
+      "source_coverage": {
+        "classes": {
+          "public_linkedin_jobs": {
+            "class": "public_linkedin_jobs",
+            "description": "public / indexed LinkedIn Jobs results (no login, no cookies, no browser automation)",
+            "surfaces": [
+              "linkedin_jobs"
+            ],
+            "queries_targeting": 1,
+            "queries_executed": 1,
+            "queries_with_observed_live_search": 0,
+            "result_urls_discovered": 0,
+            "job_posting_urls": 0,
+            "search_listing_urls": 0,
+            "validated_live": 0,
+            "validation_failed": 0,
+            "blocking_evidence": [],
+            "search_mechanism_available": false,
+            "state": "unavailable",
+            "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+            "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+          },
+          "public_indeed": {
+            "class": "public_indeed",
+            "description": "public Indeed results the search engine can reach",
+            "surfaces": [
+              "indeed"
+            ],
+            "queries_targeting": 1,
+            "queries_executed": 1,
+            "queries_with_observed_live_search": 0,
+            "result_urls_discovered": 0,
+            "job_posting_urls": 0,
+            "search_listing_urls": 0,
+            "validated_live": 0,
+            "validation_failed": 0,
+            "blocking_evidence": [],
+            "search_mechanism_available": false,
+            "state": "unavailable",
+            "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+            "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+          },
+          "web_index": {
+            "class": "web_index",
+            "description": "Google / web-indexed vacancy discovery",
+            "surfaces": [
+              "google_index"
+            ],
+            "queries_targeting": 1,
+            "queries_executed": 1,
+            "queries_with_observed_live_search": 0,
+            "result_urls_discovered": 0,
+            "job_posting_urls": 0,
+            "search_listing_urls": 0,
+            "validated_live": 0,
+            "validation_failed": 0,
+            "blocking_evidence": [],
+            "search_mechanism_available": false,
+            "state": "unavailable",
+            "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+            "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+          },
+          "ats_employer_careers": {
+            "class": "ats_employer_careers",
+            "description": "direct ATS / employer careers discovery",
+            "surfaces": [
+              "greenhouse",
+              "lever",
+              "ashby",
+              "workday",
+              "workable",
+              "smartrecruiters",
+              "icims",
+              "teamtailor",
+              "employer_careers"
+            ],
+            "queries_targeting": 5,
+            "queries_executed": 5,
+            "queries_with_observed_live_search": 0,
+            "result_urls_discovered": 0,
+            "job_posting_urls": 0,
+            "search_listing_urls": 0,
+            "validated_live": 0,
+            "validation_failed": 0,
+            "blocking_evidence": [],
+            "search_mechanism_available": false,
+            "state": "unavailable",
+            "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+            "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+          }
+        },
+        "order": [
+          "public_linkedin_jobs",
+          "public_indeed",
+          "web_index",
+          "ats_employer_careers"
+        ],
+        "states_vocabulary": {
+          "reached": "at least one result URL of this class was discovered by an executed query whose live search was observed",
+          "blocked": "the query was executed and a live search observed, but the class's own destinations were refused by the site (HTTP 401/403/429, robots.txt) or the search itself was refused — never reported as empty",
+          "unavailable": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+          "not_applicable": "this class was not attempted in this run by configuration, budget or because its data was supplied by another lane",
+          "searched_no_results": "the class's queries executed with an observed live search and returned no result URL of this class; this is a fact about this run's search, not a claim that the source is empty"
+        },
+        "note": "states are derived from this run's own query/result/validation evidence. A source class that was inaccessible or blocked is never called empty."
+      }
+    },
+    "company_watch": {
+      "lane": "company-watch findings",
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\company-watch\\findings-singapore-latest.json",
+      "present": false,
+      "available": false,
+      "stale": null,
+      "age_hours": null,
+      "reason": "the lane's own export is not present on this machine, so it contributes no candidate in this run (not 'no vacancies')",
+      "note": "Company Watch findings are discovery signals, not application records; the watch lane itself is unchanged and runs read-only",
+      "block": {
+        "source": "company-watch findings",
+        "candidates": [],
+        "coverage": {}
+      }
+    },
+    "priority_watchlist": {
+      "lane": "owner priority watchlist (company careers/ATS + role-family research)",
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\watchlist\\watchlist-singapore-latest.json",
+      "present": false,
+      "available": false,
+      "stale": null,
+      "age_hours": null,
+      "reason": "the lane's own export is not present on this machine, so it contributes no candidate in this run (not 'no vacancies')",
+      "note": "the owner's own company list is additive and optional; an absent list is a valid state and is never reported as a market fact",
+      "block": {
+        "source": "owner priority watchlist (company careers/ATS + role-family research)",
+        "candidates": [],
+        "coverage": {}
+      }
+    },
+    "recruiter_watch": {
+      "lane": "recruiter/intermediary watch findings",
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\recruiter-watch\\recruiter-watch-singapore-latest.json",
+      "present": false,
+      "available": false,
+      "stale": null,
+      "age_hours": null,
+      "reason": "the lane's own export is not present on this machine, so it contributes no candidate in this run (not 'no vacancies')",
+      "note": "read-only intermediary surface; no agency, recruiter or employer is contacted",
+      "block": {
+        "source": "recruiter/intermediary watch findings",
+        "candidates": [],
+        "coverage": {}
+      }
+    },
+    "linkedin_export": {
+      "lane": "linkedin job-discovery export",
+      "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\inbox\\linkedin-jobs-singapore.json",
+      "present": false,
+      "available": false,
+      "stale": null,
+      "age_hours": null,
+      "reason": "the lane's own export is not present on this machine, so it contributes no candidate in this run (not 'no vacancies')",
+      "note": "owner-exported discovery file only; no login, cookie, session, browser automation or LinkedIn mutation",
+      "block": {
+        "source": "linkedin job-discovery export",
+        "candidates": [],
+        "coverage": {}
+      }
+    }
+  },
+  "source_coverage": {
+    "classes": {
+      "public_linkedin_jobs": {
+        "class": "public_linkedin_jobs",
+        "description": "public / indexed LinkedIn Jobs results (no login, no cookies, no browser automation)",
+        "surfaces": [
+          "linkedin_jobs"
+        ],
+        "queries_targeting": 1,
+        "queries_executed": 1,
+        "queries_with_observed_live_search": 0,
+        "result_urls_discovered": 0,
+        "job_posting_urls": 0,
+        "search_listing_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "blocking_evidence": [],
+        "search_mechanism_available": false,
+        "state": "unavailable",
+        "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+        "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+      },
+      "public_indeed": {
+        "class": "public_indeed",
+        "description": "public Indeed results the search engine can reach",
+        "surfaces": [
+          "indeed"
+        ],
+        "queries_targeting": 1,
+        "queries_executed": 1,
+        "queries_with_observed_live_search": 0,
+        "result_urls_discovered": 0,
+        "job_posting_urls": 0,
+        "search_listing_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "blocking_evidence": [],
+        "search_mechanism_available": false,
+        "state": "unavailable",
+        "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+        "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+      },
+      "web_index": {
+        "class": "web_index",
+        "description": "Google / web-indexed vacancy discovery",
+        "surfaces": [
+          "google_index"
+        ],
+        "queries_targeting": 1,
+        "queries_executed": 1,
+        "queries_with_observed_live_search": 0,
+        "result_urls_discovered": 0,
+        "job_posting_urls": 0,
+        "search_listing_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "blocking_evidence": [],
+        "search_mechanism_available": false,
+        "state": "unavailable",
+        "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+        "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+      },
+      "ats_employer_careers": {
+        "class": "ats_employer_careers",
+        "description": "direct ATS / employer careers discovery",
+        "surfaces": [
+          "greenhouse",
+          "lever",
+          "ashby",
+          "workday",
+          "workable",
+          "smartrecruiters",
+          "icims",
+          "teamtailor",
+          "employer_careers"
+        ],
+        "queries_targeting": 5,
+        "queries_executed": 5,
+        "queries_with_observed_live_search": 0,
+        "result_urls_discovered": 0,
+        "job_posting_urls": 0,
+        "search_listing_urls": 0,
+        "validated_live": 0,
+        "validation_failed": 0,
+        "blocking_evidence": [],
+        "search_mechanism_available": false,
+        "state": "unavailable",
+        "state_rule": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+        "reason": "no live-search mechanism was available for this class's queries in this run (provider unavailable or no search event observed) — this is NOT evidence the source is empty"
+      }
+    },
+    "order": [
+      "public_linkedin_jobs",
+      "public_indeed",
+      "web_index",
+      "ats_employer_careers"
+    ],
+    "states_vocabulary": {
+      "reached": "at least one result URL of this class was discovered by an executed query whose live search was observed",
+      "blocked": "the query was executed and a live search observed, but the class's own destinations were refused by the site (HTTP 401/403/429, robots.txt) or the search itself was refused — never reported as empty",
+      "unavailable": "no live-search mechanism was available for this class's queries in this run (provider unavailable / no observed search)",
+      "not_applicable": "this class was not attempted in this run by configuration, budget or because its data was supplied by another lane",
+      "searched_no_results": "the class's queries executed with an observed live search and returned no result URL of this class; this is a fact about this run's search, not a claim that the source is empty"
+    },
+    "note": "states are derived from this run's own query/result/validation evidence. A source class that was inaccessible or blocked is never called empty."
+  },
+  "live_research": {
+    "mechanism": "codex-web-search",
+    "probe_available": false,
+    "live_search_queries_observed": 0,
+    "requests": 8,
+    "cli_version": null,
+    "resolved_executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\node\\codex.CMD",
+    "limitation": "no query produced a web_search tool event; the installed Codex runtime could not be shown to perform live web research",
+    "operational": false,
+    "provenance": "this run executed the queries live",
+    "note": "operational = at least one query in THIS run produced a proven live web search; a replayed capture or a fixture can never satisfy this"
+  },
+  "read_only": true,
+  "summary_line": "discovered_raw=0 canonical_candidates=0 cross_source_duplicates_removed=0 after_hard_negative_prefilter=0 semantically_reviewed=0 deepseek_accept=0 codex_escalated=0 codex_accept=0 deterministic_eligibility_pass=0 duplicates_removed=0 tracker_candidates=0 :: per-source zeroes company-watch findings:discovered, linkedin job-discovery export:discovered, open-web research (codex-style):discovered, owner priority watchlist (company careers/ATS + role-family research):discovered, recruiter/intermediary watch findings:discovered, regional run-health scan record:discovered :: funnel first reached zero at discovered_raw (collection returned no candidate records at all)",
+  "idempotency": {
+    "run_key": "85c04103c9d4430e",
+    "previous_run_key": "85c04103c9d4430e",
+    "idempotent_replay": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified-run-state.json",
+    "note": "a replayed key means the same candidate set and the same coverage states were produced before; this run is still a dry run and writes nothing"
+  },
+  "run_health_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\unified-singapore-20261002T230002Z.json",
+  "manifest_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\manifest-unified-singapore-20261002T230002Z.json",
+  "region_dir": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore",
+  "manifest": {
+    "candidates": 0,
+    "tracker_candidates": 0,
+    "manifest_records": 0
+  },
+  "production_ready": false,
+  "no_go": "no functioning current-web search mechanism was proven in this run; the live research lane is NOT production-ready and the schedule must not be treated as cut over (recorded blocker, no fixture fallback)"
+}

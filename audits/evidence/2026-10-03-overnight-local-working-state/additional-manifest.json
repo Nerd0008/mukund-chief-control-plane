@@ -1,0 +1,23 @@
+[
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T02:44:02+01:00",
+    "classification": "tracked changes preserved in poller stash",
+    "sha256": "87785f883bec8a1987e7bc22285473514a8604bdcff332ec1f56acfe06b5400d",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T02:44:02+01:00",
+    "classification": "tracked changes preserved in poller stash",
+    "sha256": "9d7dc7227efec29f6c079a9f9cf48625e66255126ab7b6bd420660b44ececcb0",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\AppData\\Local\\hermes\\exec-brain\\codex_adapter.py",
+    "timestamp": "2026-10-03T00:46:09.617125+00:00",
+    "classification": "outside repository runtime",
+    "sha256": "2bbbc4e28df6de2490e9bc84484da5f7f8e550d48c3d59e3db236bfdedff68f8",
+    "evidence_file": "outside-scripts/runtime-codex_adapter.py"
+  }
+]

@@ -1,0 +1,36 @@
+860cb105aff72e72145c01265620dd6d7ff7bb6d 2026-10-03T10:06:02+01:00 sync: Chief Discord transcript 2026-10-03 (4 msgs)
+af28d6db405da04e364155a6b4acd87c0aa96d5a 2026-10-03T03:26:06+01:00 linkedin: cache topic sources before generation; report every failure
+3e82dedf77d8b96179e6b530db146a9536abd34f 2026-10-03T03:24:36+01:00 career-ops: incident flush for the #incidents cron delivery path
+c2d99c444b60920fe7aeb3be8feb4a794346ac34 2026-10-03T03:23:50+01:00 career-ops: incident reporter for Discord #incidents
+ccdaa15d325d40e2a057d59d67bf8e2332b82548 2026-10-03T03:23:22+01:00 linkedin: topics carry source URLs; cache them for the fact gate
+e33c4b82bc460c5292ae42f1ec6e89bf7d88e582 2026-10-03T03:17:00+01:00 linkedin: run the news-claim gate inside content generation
+c1fb4f4d1f75278ecc8b88b73edc102d41b743c7 2026-10-03T03:13:42+01:00 linkedin factcheck: write the news verdict to news_fact_gate (publish requires both gates)
+0b1c124e430a96678cf3800cd303106dfa403b4c 2026-10-03T03:12:44+01:00 linkedin factcheck: cache browser-captured source articles
+8808c0ae0d89286d96322769e05f57e0caaba08b 2026-10-03T03:11:54+01:00 linkedin: news-claim fact gate + refuse unproven gate verdicts
+c901623864d60bc1ae39ac749ef7f371d05baf40 2026-10-03T03:07:20+01:00 career-ops: never drop a region from the daily job-links digest
+217eda6f2b48afd1258eb17297ae66e76ca63a75 2026-10-03T03:04:22+01:00 career-ops: tests + honest truncation for the daily job-links digest
+96391974f017823db3869f37750c00c853ae91f4 2026-10-03T03:03:23+01:00 career-ops: daily job-links digest (name + apply link per region)
+e8e33659a2912f40d2256245ac299d78d90d2afc 2026-10-03T03:00:22+01:00 linkedin: send Content-Type on image byte upload (LinkedIn 400s without it)
+7eaebfe4781d7762382bd51b73247be4d0d86a0c 2026-10-03T02:59:19+01:00 linkedin: image upload support, pinned API version, oauth_ready accepts access token
+4edcf322746322c73164c67aa2a319062a4a02f5 2026-10-03T02:11:14+01:00 career-ops: treat a zero-classification model pass as a failure, not a success
+9749191541ed78a004fb76709db3e4cda120eb67 2026-10-03T01:49:00+01:00 exec-brain: deliver the Codex objective on stdin, not argv
+f4863fd9f489120d2fbf63d2c34f1b36525f2ce7 2026-10-03T01:47:13+01:00 career-ops: Codex CLI as the semantic classifier + adapter model fix
+0fe5db68ca45128612555fc3225a82e47a9df769 2026-10-03T01:31:59+01:00 career-ops: fix Codex web-search research provider (live lane now operational)
+8d62e8bf7b26b4f74b315386afdd4c40f4b5cbf2 2026-10-03T01:26:41+01:00 career-ops: BDO 2027 Audit Technology Graduate Programme application package (J39)
+795968d3e7b3806cafa77749e133e7e15b7c0ba9 2026-10-03T01:06:02+01:00 sync: Chief Discord transcript 2026-10-02, 2026-10-03 (11 msgs)
+3930ae97f981e6246352432c122bd0da66a1bda5 2026-10-03T00:36:02+01:00 sync: Chief Discord transcript 2026-10-02 (2 msgs)
+0b4d9dbdcc8a4065319f104809eff5eb356c722a 2026-10-02T17:06:02+01:00 sync: Chief Discord transcript 2026-10-02 (2 msgs)
+3d6597657c12a667c53def0a39cded82193f78fa 2026-09-30T22:36:02+01:00 sync: Chief Discord transcript 2026-09-30 (3 msgs)
+0f02cf2b14c605ff1c0083dfcd0081f603ac71fe 2026-09-30T20:36:02+01:00 sync: Chief Discord transcript 2026-09-30 (4 msgs)
+f3ab9da1657308aac45278e6924e847a4d1a25be 2026-09-30T20:06:02+01:00 sync: Chief Discord transcript 2026-09-30 (6 msgs)
+40fda090074b3800a3c5b2873b0c99779a9ca722 2026-09-30T16:06:01+01:00 sync: Chief Discord transcript 2026-09-30 (2 msgs)
+95600d94655afc1095ea2089d4304511fabbe8aa 2026-09-30T15:36:01+01:00 sync: Chief Discord transcript 2026-09-30 (6 msgs)
+f5bff33a171d89ab57ee87b77aa714b4969ac4c8 2026-09-30T06:06:01+01:00 sync: Chief Discord transcript 2026-09-30 (2 msgs)
+efa2bc9792c053ff52dc2aa2e66fded52d3be3de 2026-09-29T23:36:02+01:00 sync: Chief Discord transcript 2026-09-29 (1 msgs)
+d36d233df0ec779e43667bc04557accfc870abb8 2026-09-28T23:06:01+01:00 sync: Chief Discord transcript 2026-09-28 (4 msgs)
+9d1b228db150b351798fada52b37bb692263ea4e 2026-09-28T21:06:01+01:00 sync: Chief Discord transcript 2026-09-28 (2 msgs)
+6ed2fc1cd803b02deb3dabb4bb5f2166a9af0b33 2026-09-28T20:36:01+01:00 sync: Chief Discord transcript 2026-09-28 (6 msgs)
+fe26dedf407254b684026fb71feca9a414f42f4e 2026-09-28T20:06:01+01:00 sync: Chief Discord transcript 2026-09-28 (3 msgs)
+f88f78248652ed33338763dc71becfa2a3aec130 2026-09-27T08:06:01+01:00 sync: Chief Discord transcript 2026-09-27 (5 msgs)
+fba8393697a119dd977b3e585d03a443c64b2d85 2026-09-26T06:06:02+01:00 sync: Chief Discord transcript 2026-09-26 (2 msgs)
+85e77a6622d87c3073e0c2f4d34256241e3b982d 2026-09-25T22:06:02+01:00 sync: Chief Discord transcript 2026-09-25 (2 msgs)

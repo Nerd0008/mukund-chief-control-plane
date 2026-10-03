@@ -1,0 +1,122 @@
+[
+  {
+    "file": "career-ops/career_catchup.py",
+    "overnight_sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/daily_jobs_links.py",
+    "overnight_sha256": "add3941d01d98f34e28e009c423d79c3c619712d9602476b1612b76a711489ca",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/linkedin_auth.py",
+    "overnight_sha256": "c450a4b8c1d980b5254ef348d04399fb6e888a0d653ce471ccd23fc713c5f022",
+    "current_sha256": "c1a79d015ed160e62466e0a5c78c5a37771cb2047d6bad51ba63386de84851ac",
+    "head_sha256": "c1a79d015ed160e62466e0a5c78c5a37771cb2047d6bad51ba63386de84851ac",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/linkedin_content_gen.py",
+    "overnight_sha256": "ee6d7bb1c313e0890b697598695be535877d10641beef4f7759d9c93549942f1",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/linkedin_factcheck.py",
+    "overnight_sha256": "d2a55915b2cdd2cdf1feabd75ba18c6b4e92a0202ffca7b860331f266fb21fcd",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/linkedin_publish.py",
+    "overnight_sha256": "5d26cba784af1f9ea7a6b16c225d43008930389feecd5a1457f6cc59ac6138d9",
+    "current_sha256": "ffa5f925048f3d553d15e26f85ab1dda312e84ff03027513de47a49bf583d75f",
+    "head_sha256": "ffa5f925048f3d553d15e26f85ab1dda312e84ff03027513de47a49bf583d75f",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/linkedin_workflow.py",
+    "overnight_sha256": "b0ea563b9a0692a585361037842dc3b6b4b3307fd856dabdb02d51e658f1e387",
+    "current_sha256": "971f0564123bc1787b53add66eca7c1f06da9fa53d14978dbe3fea9840401ce9",
+    "head_sha256": "971f0564123bc1787b53add66eca7c1f06da9fa53d14978dbe3fea9840401ce9",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/nightly_career_run.py",
+    "overnight_sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/run_nightly_career.cmd",
+    "overnight_sha256": "b502d4796785ef11044da4a50bb5c505c23d586033f526c9ab1abb3af71bf55a",
+    "current_sha256": null,
+    "head_sha256": null,
+    "missing_now": true,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/discovery/classifiers.py",
+    "overnight_sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "current_sha256": "e6457f14b5032472f41e3a387d5db8059c6003817a2e0abc2ae504f02ba1718a",
+    "head_sha256": "e6457f14b5032472f41e3a387d5db8059c6003817a2e0abc2ae504f02ba1718a",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/discovery/pipeline.py",
+    "overnight_sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "current_sha256": "185259f705128b96a4796a1e7cff5513b8aa7261f51b713bfd23c43a9f37ab6b",
+    "head_sha256": "185259f705128b96a4796a1e7cff5513b8aa7261f51b713bfd23c43a9f37ab6b",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/discovery/scheduled_orchestrator.py",
+    "overnight_sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "current_sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "head_sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "career-ops/discovery/web_research.py",
+    "overnight_sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "current_sha256": "11c02d9ca1083c5a218f39255d794df1e66cd8373c7fe49362f3a9a277fcd411",
+    "head_sha256": "11c02d9ca1083c5a218f39255d794df1e66cd8373c7fe49362f3a9a277fcd411",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "exec-brain/codex_adapter.py",
+    "overnight_sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "current_sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "head_sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "missing_now": false,
+    "same_as_overnight": false
+  },
+  {
+    "file": "remote_queue/poller.py",
+    "overnight_sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "current_sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "head_sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "missing_now": false,
+    "same_as_overnight": true
+  }
+]

@@ -1,0 +1,482 @@
+[
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.applied-view-20261003-011824.xlsx",
+    "mtime_utc": "2026-10-03T00:18:10.137830+00:00",
+    "sha256": "431d5ea3349513150fa59d52a76f463d970ff77fbf84884be8b884cec9b63789",
+    "bytes": 38425
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.applied-view-20261003-012626.xlsx",
+    "mtime_utc": "2026-10-03T00:26:25.239789+00:00",
+    "sha256": "c98395ef545a84daeaf4f7bb9d9e1b53e8febc557fbfbfd422f6a6def3acb120",
+    "bytes": 38813
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.applied-view-20261003-021911.xlsx",
+    "mtime_utc": "2026-10-03T01:18:58.079879+00:00",
+    "sha256": "e8387097281c4b84d3257f7bf6874fcd38df18fdf3d9256ffb632e9adb4defc9",
+    "bytes": 38961
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.owner-state-20261003-011810.xlsx",
+    "mtime_utc": "2026-10-03T00:17:54.712785+00:00",
+    "sha256": "cf2c5b4de502698bef5aa123c73122b5f237e5a856e8a0b1f7fdc38432034f41",
+    "bytes": 38310
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.owner-state-20261003-012625.xlsx",
+    "mtime_utc": "2026-10-03T00:18:24.322881+00:00",
+    "sha256": "de1c8ac727d508a7250f6893a66c31befdcc734a0fe2a2343a018de63ecc52b5",
+    "bytes": 38848
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\backups\\uk-cyber-job-tracker.pre-20261003-021857.xlsx",
+    "mtime_utc": "2026-10-03T00:26:26.631690+00:00",
+    "sha256": "28f64d51b62378fb10aa1c52ebb0879e0405aab001eb44987b8cc156d2f7e704",
+    "bytes": 38818
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\cover_letter_draft.html",
+    "mtime_utc": "2026-10-03T00:11:31.716434+00:00",
+    "sha256": "0739705f388d5e7777de3b9b5ec3f19d093092a63be966e7eb0afc62fd87be89",
+    "bytes": 5927
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\cover_letter_payload.json",
+    "mtime_utc": "2026-10-03T00:11:31.207931+00:00",
+    "sha256": "be2bb8936915e141129d5cd0a9fade25f73b861eb7954f5998c22ac5c19646db",
+    "bytes": 4431
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\cv_draft.md",
+    "mtime_utc": "2026-10-03T00:11:31.202411+00:00",
+    "sha256": "33c255cc8acd3cf2b43cc3ad262c4d4d44dd5e756bf7e86fc9632a01d2553eb4",
+    "bytes": 5858
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\cv_draft_provenance.json",
+    "mtime_utc": "2026-10-03T00:11:31.204920+00:00",
+    "sha256": "21300ac0f3ab10388d4d4c96d346562e837a18a91a2ac7eb6bf3baf1007b72c4",
+    "bytes": 17341
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\draft_result.json",
+    "mtime_utc": "2026-10-03T00:11:31.733990+00:00",
+    "sha256": "305e33e8ac620c022bfb21c8847f3ce7ae7ad3e7727e896e460479d0dbde3597",
+    "bytes": 7591
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\factgate\\factgate-cover.txt",
+    "mtime_utc": "2026-10-03T00:11:31.406363+00:00",
+    "sha256": "b15f567e9e143f69afa6c66feea016cb845540fc3abeeadc0f36cab7b6e6345b",
+    "bytes": 1895
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\cv-drafts\\bdo-audit-technology-2027\\factgate\\factgate-cv.txt",
+    "mtime_utc": "2026-10-03T00:11:31.218947+00:00",
+    "sha256": "33c255cc8acd3cf2b43cc3ad262c4d4d44dd5e756bf7e86fc9632a01d2553eb4",
+    "bytes": 5858
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified-run-state.json",
+    "mtime_utc": "2026-10-03T01:16:12.497997+00:00",
+    "sha256": "19859cd689a8d638f96e248d428526ea7e59157260ac8890e07f4d1ca5f605b2",
+    "bytes": 4549
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\latest.json",
+    "mtime_utc": "2026-10-02T23:01:07.847773+00:00",
+    "sha256": "f2ef5f49c1f6bf870bf3d068b1f5d9ab6f705a7ca2aaec9e9ff705870bb004f4",
+    "bytes": 41325
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\manifest-latest.json",
+    "mtime_utc": "2026-10-02T23:01:07.849775+00:00",
+    "sha256": "e5493d939a3ba9f87a4ab90d41ae5f490224f5c9c220fd341422a884ee35ae57",
+    "bytes": 2453
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\manifest-unified-singapore-20261002T230002Z.json",
+    "mtime_utc": "2026-10-02T23:01:07.844756+00:00",
+    "sha256": "e5493d939a3ba9f87a4ab90d41ae5f490224f5c9c220fd341422a884ee35ae57",
+    "bytes": 2453
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\singapore\\unified-singapore-20261002T230002Z.json",
+    "mtime_utc": "2026-10-02T23:01:07.841746+00:00",
+    "sha256": "f2ef5f49c1f6bf870bf3d068b1f5d9ab6f705a7ca2aaec9e9ff705870bb004f4",
+    "bytes": 41325
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\latest.json",
+    "mtime_utc": "2026-10-03T01:16:12.493993+00:00",
+    "sha256": "45b4e5497c81938f53d1d6a9c908f3d94652973092acc9ba7a81d34b0d3bfa9e",
+    "bytes": 1679157
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\manifest-latest.json",
+    "mtime_utc": "2026-10-03T01:16:12.495998+00:00",
+    "sha256": "3ebc88231206a70f40f2913ba63c7860ae7f2b0843e08da98611ca74a40f05cb",
+    "bytes": 3487
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\manifest-unified-uk-20261003T003204Z.json",
+    "mtime_utc": "2026-10-03T00:35:49.634229+00:00",
+    "sha256": "5d2ea62176ca3d221dee88de3ff8e9d1f7982926e768e2acd72645d94135732f",
+    "bytes": 2473
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\manifest-unified-uk-20261003T010316Z.json",
+    "mtime_utc": "2026-10-03T01:07:04.728439+00:00",
+    "sha256": "37290912b5e96e599305adf66f6be034818690495ee1eee2e01242dfc9270d02",
+    "bytes": 2473
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\manifest-unified-uk-20261003T011120Z.json",
+    "mtime_utc": "2026-10-03T01:16:12.436966+00:00",
+    "sha256": "3ebc88231206a70f40f2913ba63c7860ae7f2b0843e08da98611ca74a40f05cb",
+    "bytes": 3487
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T003204Z.json",
+    "mtime_utc": "2026-10-03T00:35:49.631227+00:00",
+    "sha256": "b615bf6cfe88ed15f45c18ba3a4c664e300236a3f97eda765e043e0946b20f07",
+    "bytes": 1668666
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T010316Z.json",
+    "mtime_utc": "2026-10-03T01:07:04.725435+00:00",
+    "sha256": "10aac75efd24346af80a846b372ca46df09a86a62bd717bc88337985b7e0aeb3",
+    "bytes": 1692493
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\discovery\\unified\\uk\\unified-uk-20261003T011120Z.json",
+    "mtime_utc": "2026-10-03T01:16:12.434989+00:00",
+    "sha256": "45b4e5497c81938f53d1d6a9c908f3d94652973092acc9ba7a81d34b0d3bfa9e",
+    "bytes": 1679157
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\job-intelligence\\submission-gate-log.jsonl",
+    "mtime_utc": "2026-10-03T00:50:10.737540+00:00",
+    "sha256": "ba9c8410a92af810546285103567f81dfd9ab3948059b91a242789c102148b6a",
+    "bytes": 955252
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\run-health\\tracker-writer.json",
+    "mtime_utc": "2026-10-03T01:44:02.267409+00:00",
+    "sha256": "efb7079db218b2f43cd621a29b127d15c88f015ec12663bae214ede363924ddf",
+    "bytes": 2955
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "mtime_utc": "2026-10-03T01:44:02.268409+00:00",
+    "sha256": "b6140e0f135dbfba96a9efce256c901c0208f559988a2ededf5570e46254f229",
+    "bytes": 1308
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-singapore-latest.json",
+    "mtime_utc": "2026-10-02T23:01:06.313365+00:00",
+    "sha256": "e72561fd86817159011b6681693e926ad1cb782e3e56ac2798738d0e5d64b18a",
+    "bytes": 6776
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-singapore-webresearch-19bea852d85f8157.json",
+    "mtime_utc": "2026-10-02T23:01:06.311363+00:00",
+    "sha256": "e72561fd86817159011b6681693e926ad1cb782e3e56ac2798738d0e5d64b18a",
+    "bytes": 6776
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-uk-latest.json",
+    "mtime_utc": "2026-10-03T01:14:40.212122+00:00",
+    "sha256": "2b3f85b033fb9a57c7dbc6b85a07fc615c97c992cd4e5de44b039817e19a829e",
+    "bytes": 68631
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-uk-webresearch-409f99959815570f.json",
+    "mtime_utc": "2026-10-03T00:35:39.764513+00:00",
+    "sha256": "8e8c4e4ab2a1e94cb65c7e73aba8b22e121e4b9ad4ef7b101efdcb9b45383aa7",
+    "bytes": 68746
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-uk-webresearch-69dd41584dda8b2f.json",
+    "mtime_utc": "2026-10-03T01:14:40.208129+00:00",
+    "sha256": "2b3f85b033fb9a57c7dbc6b85a07fc615c97c992cd4e5de44b039817e19a829e",
+    "bytes": 68631
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\web-research\\web-research-uk-webresearch-7f90a9df2c1358fc.json",
+    "mtime_utc": "2026-10-03T01:06:54.305866+00:00",
+    "sha256": "13521a45b93999f70736ac518f660b46088765076b6f0f81fd6c794fdc2c6c46",
+    "bytes": 76257
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\old_bot_posts_index.json",
+    "mtime_utc": "2026-10-03T02:00:41.714883+00:00",
+    "sha256": "427df35195dfe08b436fc2e543baddbf9c246f5f87514fbd6e29d6a835e5e98e",
+    "bytes": 11837
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\_aiwatchdog_candidates.json",
+    "mtime_utc": "2026-10-03T01:54:44.634377+00:00",
+    "sha256": "c85cb54224c6ec2fdc51ef5b8472cf8c1e69022d79a313c7a19c65ccb9209a12",
+    "bytes": 3158
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\20261003T002915Z\\linkedin_drafts.json",
+    "mtime_utc": "2026-10-03T00:29:15.724339+00:00",
+    "sha256": "de8531611f3b7bbd499e30e87ed9756b817fc30f0f2e9cf829e465381cc41a27",
+    "bytes": 27749
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\20261003T002915Z\\linkedin_drafts.md",
+    "mtime_utc": "2026-10-03T00:29:15.725333+00:00",
+    "sha256": "a853ec3219ba10c4e95dcce4d6d33a7559572bc57d3d00654147dcc9cb06296a",
+    "bytes": 4527
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\20261003T002915Z\\factgate\\factgate-linkedin-drafts.txt",
+    "mtime_utc": "2026-10-03T00:29:15.642442+00:00",
+    "sha256": "88e1a491033b021f78a142a6092c477a016ccb7d57e25582d30e4d961ac643f7",
+    "bytes": 3871
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\ai_watchdog_20261003\\image.jpg",
+    "mtime_utc": "2026-10-03T01:55:45.716542+00:00",
+    "sha256": "d8f61ff1bf8d09bd0ab0d2f794131d0523eacdc6682df2f18b876b1f665188cd",
+    "bytes": 711496
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\ai_watchdog_20261003\\linkedin_drafts.json",
+    "mtime_utc": "2026-10-03T02:12:21.410155+00:00",
+    "sha256": "4293906ce74e13b32befe6b37695cc08b95d96e7aa6f4dc8a086f7a9f79b7d4b",
+    "bytes": 4071
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\ai_watchdog_20261003\\factgate\\factgate-personal.txt",
+    "mtime_utc": "2026-10-03T02:12:20.612653+00:00",
+    "sha256": "8e9cc4a48592b48df7f9c3a2dd0ad5c125e67261f672cdf5f6f8bc362a76ce94",
+    "bytes": 1376
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_post\\image.jpg",
+    "mtime_utc": "2026-10-03T01:07:05.904055+00:00",
+    "sha256": "e03102f3f6a182ff8b0d9b24417996c709f0c430a6f0da219f19470e7397629d",
+    "bytes": 610622
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_post\\linkedin_drafts.json",
+    "mtime_utc": "2026-10-03T02:12:21.718558+00:00",
+    "sha256": "38e3f8f4620856aafe3eb1196066346d5e1461dbb92dec17be7cf691abba9634",
+    "bytes": 1799
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_post\\factgate\\factgate-personal.txt",
+    "mtime_utc": "2026-10-03T02:12:21.637722+00:00",
+    "sha256": "51d9baf5e4fda0dbba3fba338bd3dc136c472d37dcd579096d8e5f8b753dd22b",
+    "bytes": 630
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_with_image\\image.jpg",
+    "mtime_utc": "2026-10-03T01:27:09.013313+00:00",
+    "sha256": "e8e3e2a0bafd33b9b32a98b54ff9fc374ee84132ed9381c7e446442b0a17a4d6",
+    "bytes": 489754
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_with_image\\linkedin_drafts.json",
+    "mtime_utc": "2026-10-03T02:12:20.610671+00:00",
+    "sha256": "f99524ebf9ec217e5e3263fbc52e6e0d26c1125efc21c91d9f6a1bc673106103",
+    "bytes": 1799
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\sample_with_image\\factgate\\factgate-personal.txt",
+    "mtime_utc": "2026-10-03T02:12:20.510645+00:00",
+    "sha256": "51d9baf5e4fda0dbba3fba338bd3dc136c472d37dcd579096d8e5f8b753dd22b",
+    "bytes": 630
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\used_books_destruction_20261003\\factgate-input.txt",
+    "mtime_utc": "2026-10-03T02:08:35.301284+00:00",
+    "sha256": "20da94fd59023e1b1baab520b4e7986d374e24cfdd6bdcc2c9adc43c5e5ce46f",
+    "bytes": 1279
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\used_books_destruction_20261003\\linkedin_drafts.json",
+    "mtime_utc": "2026-10-03T02:15:58.776253+00:00",
+    "sha256": "d354101bc5b92abf4cefeef0e7d5002e5382dde879044a933c77fdbd337fea45",
+    "bytes": 4656
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\used_books_destruction_20261003\\source_used_books.txt",
+    "mtime_utc": "2026-10-03T02:10:49.338692+00:00",
+    "sha256": "5f7ed309f26bec87f78184bef3b4cbc4cd638917fd361c193d961872de4dc90f",
+    "bytes": 2549
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\used_books_destruction_20261003\\factgate\\factgate-personal.txt",
+    "mtime_utc": "2026-10-03T02:15:30.793534+00:00",
+    "sha256": "744114d3df262b75ec53afd74cfd5a9c25f3b7776fad08fe099093381e867fbc",
+    "bytes": 1243
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\handoffs\\linkedin-handoff-uk-20261003T005012Z.json",
+    "mtime_utc": "2026-10-03T00:50:12.753174+00:00",
+    "sha256": "f25172097252acfb654450a5335ea1c73a9bd61374058ed4ba27c52236d9a13e",
+    "bytes": 583
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\handoffs\\linkedin-handoff-uk-20261003T005014Z.json",
+    "mtime_utc": "2026-10-03T00:50:14.089388+00:00",
+    "sha256": "f25172097252acfb654450a5335ea1c73a9bd61374058ed4ba27c52236d9a13e",
+    "bytes": 583
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\handoffs\\linkedin-handoff-uk-20261003T005015Z.json",
+    "mtime_utc": "2026-10-03T00:50:15.000221+00:00",
+    "sha256": "f25172097252acfb654450a5335ea1c73a9bd61374058ed4ba27c52236d9a13e",
+    "bytes": 583
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\handoffs\\linkedin-handoff-uk-20261003T005016Z.json",
+    "mtime_utc": "2026-10-03T00:50:16.181255+00:00",
+    "sha256": "f25172097252acfb654450a5335ea1c73a9bd61374058ed4ba27c52236d9a13e",
+    "bytes": 583
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\published\\posts.jsonl",
+    "mtime_utc": "2026-10-03T02:16:13.858916+00:00",
+    "sha256": "2acff54d76eeac9e5aad313c0a8a99d9c57e142558698956013cf76222f80603",
+    "bytes": 2938
+  },
+  {
+    "path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\sources\\5a549506c3ce90cc.txt",
+    "mtime_utc": "2026-10-03T02:12:54.601594+00:00",
+    "sha256": "55bbc88d7a8251c33409189866cf2c88e8538eec9056f633f7341d71e810582c",
+    "bytes": 2661
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\scripts\\career_daily_jobs_links.py",
+    "mtime_utc": "2026-10-03T02:03:13.958128+00:00",
+    "sha256": "4e8a95d4b8bdcdfd91dc072e0d92755edfaf4431ec5038d543dfeef669bb57f1",
+    "bytes": 2015
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\scripts\\incident_flush.py",
+    "mtime_utc": "2026-10-03T02:24:46.719279+00:00",
+    "sha256": "b1fa1a35e75c3f980ffd1b9d74e006562c1526fba48263974097b23a426206cd",
+    "bytes": 1090
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\config\\config.yaml.good.20261003-004931",
+    "mtime_utc": "2026-10-02T23:49:30.958123+00:00",
+    "sha256": "fd72b6e435551ad021b3247fd187c409a63793fed598ab0dbac7463420d721b1",
+    "bytes": 4693
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\config\\config.yaml.good.20261003-004933",
+    "mtime_utc": "2026-10-02T23:49:32.916685+00:00",
+    "sha256": "c6bdec8d1327f138eaefb1098380a6b46ac8a2e50c44e15bc3dfd4ee40b5a739",
+    "bytes": 4675
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\e1-e2-exec-brain.db",
+    "mtime_utc": "2026-10-03T01:30:01.940109+00:00",
+    "sha256": "10bb5ed6233c8d8e25030898f7f7c55862863f93ebd3d4044951a5bcdaefdded",
+    "bytes": 77824
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\e2-governor.db",
+    "mtime_utc": "2026-10-03T01:30:01.959118+00:00",
+    "sha256": "abefdff7c54fd9792b582264de0b8c76b4dd37b89fd611572cf2c924ad64a5cd",
+    "bytes": 147456
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\e3-orchestration.db",
+    "mtime_utc": "2026-10-03T01:30:01.986163+00:00",
+    "sha256": "2056ebf3d36d51e6f1d0d6dff2275dbabd05742b11929c6a07a704b21d99862c",
+    "bytes": 258048
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\e3-orchestration.db-shm",
+    "mtime_utc": "2026-10-03T01:30:01.993167+00:00",
+    "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "bytes": 32768
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\e3-orchestration.db-wal",
+    "mtime_utc": "2026-10-03T01:30:01.992166+00:00",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-cron-executions.db",
+    "mtime_utc": "2026-10-03T01:30:05.793289+00:00",
+    "sha256": "fc026f9a25804e7cb1e4be129d97d7e525c08ffe6bfae7f516d13d4a910fcc70",
+    "bytes": 40960
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-cron-executions.db-shm",
+    "mtime_utc": "2026-10-03T01:30:05.799304+00:00",
+    "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "bytes": 32768
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-cron-executions.db-wal",
+    "mtime_utc": "2026-10-03T01:30:05.798290+00:00",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-kanban.db",
+    "mtime_utc": "2026-10-03T01:30:05.756457+00:00",
+    "sha256": "b7985707317a7d745a241e4a4c07efa76c779739d50791156ee54a231bec4aa6",
+    "bytes": 118784
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-kanban.db-shm",
+    "mtime_utc": "2026-10-03T01:30:05.761463+00:00",
+    "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "bytes": 32768
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-kanban.db-wal",
+    "mtime_utc": "2026-10-03T01:30:05.760461+00:00",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-shared-state.db",
+    "mtime_utc": "2026-10-03T01:30:05.775736+00:00",
+    "sha256": "cb97dd3a26c50e0bec1429d3c98ec487d6ac94094a2e2e25275dea2bfc724042",
+    "bytes": 155648
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-shared-state.db-shm",
+    "mtime_utc": "2026-10-03T01:30:05.781743+00:00",
+    "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "bytes": 32768
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-shared-state.db-wal",
+    "mtime_utc": "2026-10-03T01:30:05.780743+00:00",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-state.db",
+    "mtime_utc": "2026-10-03T01:30:04.876726+00:00",
+    "sha256": "87fc665ac4046cba439d1bd6a95b4b72330a254d1ba74e5a42ac06571a4d91b2",
+    "bytes": 103358464
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-state.db-shm",
+    "mtime_utc": "2026-10-03T01:30:05.102360+00:00",
+    "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+    "bytes": 32768
+  },
+  {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\backups\\operational\\snapshot-20261003T013001Z\\hermes-state.db-wal",
+    "mtime_utc": "2026-10-03T01:30:05.101362+00:00",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  }
+]

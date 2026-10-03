@@ -1,0 +1,18 @@
+commit 2ed2604d7bca72b7fb8ab5909b575a3e7d08b278
+Merge: 0fe5db68 8e025787
+Author: Nerd0008 <mukunddidwania08@gmail.com>
+Date:   Sat Oct 3 01:44:02 2026 +0100
+
+    On main: poller-autostash-20261003004401
+
+ career-ops/discovery/classifiers.py                | 180 ++++++++++++++++++++-
+ career-ops/discovery/pipeline.py                   | 103 ++++++++----
+ career-ops/linkedin_auth.py                        |  28 +++-
+ career-ops/linkedin_publish.py                     |   4 +-
+ career-ops/linkedin_workflow.py                    |   7 +-
+ remote-queue/logs/queue.log                        |  21 +++
+ runtime/career-ops/run-health/tracker-writer.json  |  16 +-
+ .../career-ops/scan-runs/regional-run-state.json   |   8 +-
+ 8 files changed, 316 insertions(+), 51 deletions(-)
+
+UNTRACKED TREE

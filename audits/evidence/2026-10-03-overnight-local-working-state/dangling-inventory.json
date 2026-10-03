@@ -1,0 +1,1209 @@
+{
+  "counts": {
+    "commit": 12935,
+    "blob": 39
+  },
+  "commits_in_window": [
+    {
+      "object": "5e05e49dfdd19d0d9723ac15776d930d1f6c8932",
+      "timestamp_utc": "2026-10-03T02:46:02+00:00",
+      "subject": "On main: poller-autostash-20261003024602-untracked"
+    },
+    {
+      "object": "7005183061f85c36c3f83e69c31eed30216a248d",
+      "timestamp_utc": "2026-10-03T02:16:02+00:00",
+      "subject": "On main: poller-autostash-20261003021602"
+    },
+    {
+      "object": "7c06f2a5c9518c73f20a7c5e7e134e58b6e2d32d",
+      "timestamp_utc": "2026-10-02T23:32:01+00:00",
+      "subject": "On main: poller-autostash-20261002233201-untracked"
+    },
+    {
+      "object": "21088c93b988c5898092d559354b465df5b952f9",
+      "timestamp_utc": "2026-10-03T00:18:02+00:00",
+      "subject": "On main: poller-autostash-20261003001801-untracked"
+    },
+    {
+      "object": "e608a67f1dd9e225ee38621b462767d0716e49c1",
+      "timestamp_utc": "2026-10-03T00:54:01+00:00",
+      "subject": "On main: poller-autostash-20261003005401"
+    },
+    {
+      "object": "1e0c8e095e182f2620e46d64174dfa2521c95d9a",
+      "timestamp_utc": "2026-10-03T01:52:02+00:00",
+      "subject": "On main: poller-autostash-20261003015202-untracked"
+    },
+    {
+      "object": "350cde384fe8d81a97c9b02fed0f85e91d9e5e57",
+      "timestamp_utc": "2026-10-03T02:22:02+00:00",
+      "subject": "On main: poller-autostash-20261003022202-untracked"
+    },
+    {
+      "object": "8a0e1268f4fe6a04ac8bb20608b72e21616ba463",
+      "timestamp_utc": "2026-10-02T23:32:01+00:00",
+      "subject": "On main: poller-autostash-20261002233201"
+    },
+    {
+      "object": "530f86376e0f30ffc1e3d9002fa0aa413fdd0076",
+      "timestamp_utc": "2026-10-03T01:18:02+00:00",
+      "subject": "On main: poller-autostash-20261003011801"
+    },
+    {
+      "object": "471018a0b4ea876976189b3289df382710ad7fd5",
+      "timestamp_utc": "2026-10-03T00:32:01+00:00",
+      "subject": "On main: poller-autostash-20261003003201"
+    },
+    {
+      "object": "6e11be1042bfdf02f3ad6460ff5c5e3cae2131dc",
+      "timestamp_utc": "2026-10-03T02:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003024402-untracked"
+    },
+    {
+      "object": "461480e80f92b303e79bf65547464c94e4cc25b1",
+      "timestamp_utc": "2026-10-03T02:02:02+00:00",
+      "subject": "On main: poller-autostash-20261003020202-untracked"
+    },
+    {
+      "object": "85157c8be2cd2801e3f1bd6bdb49b4a9f5adb978",
+      "timestamp_utc": "2026-10-03T00:58:01+00:00",
+      "subject": "On main: poller-autostash-20261003005801"
+    },
+    {
+      "object": "3a16ee7e7b8c7b8b568e70594db90844662ca636",
+      "timestamp_utc": "2026-10-03T00:30:02+00:00",
+      "subject": "On main: poller-autostash-20261003003001-untracked"
+    },
+    {
+      "object": "a219fc4f1017ffc845246980d6cfba310e3d5bea",
+      "timestamp_utc": "2026-10-03T01:42:02+00:00",
+      "subject": "On main: poller-autostash-20261003014202"
+    },
+    {
+      "object": "111a269a669dfbef2a14367b51f63cd34d6e96a8",
+      "timestamp_utc": "2026-10-03T00:28:02+00:00",
+      "subject": "On main: poller-autostash-20261003002801-untracked"
+    },
+    {
+      "object": "e61d1eee8b38ac2319255c2728093759d0e281c6",
+      "timestamp_utc": "2026-10-03T00:36:02+00:00",
+      "subject": "On main: poller-autostash-20261003003601-untracked"
+    },
+    {
+      "object": "3d1f2647038d0b8fcdb9df0963717eb98a7f920d",
+      "timestamp_utc": "2026-10-03T01:32:02+00:00",
+      "subject": "On main: poller-autostash-20261003013202-untracked"
+    },
+    {
+      "object": "3a2290d4f4237ed6a661da420c48d37f19beab4e",
+      "timestamp_utc": "2026-10-03T02:10:02+00:00",
+      "subject": "On main: poller-autostash-20261003021002-untracked"
+    },
+    {
+      "object": "97224ab48bc1734c069247597d79abc402376e5a",
+      "timestamp_utc": "2026-10-03T00:00:02+00:00",
+      "subject": "On main: poller-autostash-20261003000002"
+    },
+    {
+      "object": "a824e8b5ca8dd0fb7b96cefda3166670957e3583",
+      "timestamp_utc": "2026-10-02T23:46:01+00:00",
+      "subject": "On main: poller-autostash-20261002234601-untracked"
+    },
+    {
+      "object": "a028aa907767676c5114da674621948936950368",
+      "timestamp_utc": "2026-10-03T02:38:02+00:00",
+      "subject": "On main: poller-autostash-20261003023802-untracked"
+    },
+    {
+      "object": "f32826d22ea3f45dca42ecd6782c97f859a6ff1c",
+      "timestamp_utc": "2026-10-02T23:02:02+00:00",
+      "subject": "On main: poller-autostash-20261002230201-untracked"
+    },
+    {
+      "object": "bd2a3c2e0ec10c497f6630334c324b89238e054c",
+      "timestamp_utc": "2026-10-03T02:28:02+00:00",
+      "subject": "On main: poller-autostash-20261003022802-untracked"
+    },
+    {
+      "object": "432bccff064e9e830fd1670ef129d78b4837e693",
+      "timestamp_utc": "2026-10-03T00:02:02+00:00",
+      "subject": "On main: poller-autostash-20261003000201-untracked"
+    },
+    {
+      "object": "382c98a605362331243582b0e21025de354e6704",
+      "timestamp_utc": "2026-10-03T01:42:02+00:00",
+      "subject": "On main: poller-autostash-20261003014202-untracked"
+    },
+    {
+      "object": "203636c298cce9cd1c711bf9c59cf31dd2a0c63a",
+      "timestamp_utc": "2026-10-03T02:20:02+00:00",
+      "subject": "On main: poller-autostash-20261003022002-untracked"
+    },
+    {
+      "object": "423aeed69935cfc1f650880183ec6c8d0732d2ae",
+      "timestamp_utc": "2026-10-03T00:26:01+00:00",
+      "subject": "On main: poller-autostash-20261003002601"
+    },
+    {
+      "object": "7a3a268d78400dd15bf99bf06586545102983a54",
+      "timestamp_utc": "2026-10-02T23:22:01+00:00",
+      "subject": "On main: poller-autostash-20261002232201"
+    },
+    {
+      "object": "263b867c6e1868c20e54b8beaf1c14e05f225174",
+      "timestamp_utc": "2026-10-02T23:12:01+00:00",
+      "subject": "On main: poller-autostash-20261002231201-untracked"
+    },
+    {
+      "object": "d73bbed95bace4890be55ff88278ef29ed777ed1",
+      "timestamp_utc": "2026-10-02T23:02:01+00:00",
+      "subject": "On main: poller-autostash-20261002230201"
+    },
+    {
+      "object": "343e266d614b5a0cb304e04f1b891006b31d9870",
+      "timestamp_utc": "2026-10-02T23:54:02+00:00",
+      "subject": "On main: poller-autostash-20261002235401-untracked"
+    },
+    {
+      "object": "ba3e5e5816522a2f6617aabcdb64221304cf928e",
+      "timestamp_utc": "2026-10-03T02:50:01+00:00",
+      "subject": "On main: poller-autostash-20261003025001"
+    },
+    {
+      "object": "d53f6abf7ae5b3653ae0093a6a3568017c63e146",
+      "timestamp_utc": "2026-10-03T01:24:02+00:00",
+      "subject": "On main: poller-autostash-20261003012401"
+    },
+    {
+      "object": "30402a0cde9ef8fb41004c7c512f8b132379f6f9",
+      "timestamp_utc": "2026-10-02T23:20:01+00:00",
+      "subject": "On main: poller-autostash-20261002232001-untracked"
+    },
+    {
+      "object": "f4438e6d1df5ba2b5986f815f128ebdb5a3a9bc8",
+      "timestamp_utc": "2026-10-03T01:04:01+00:00",
+      "subject": "On main: poller-autostash-20261003010401"
+    },
+    {
+      "object": "ad48de97f2e0c9a071ee1143b0c37a45478e228c",
+      "timestamp_utc": "2026-10-03T00:10:01+00:00",
+      "subject": "On main: poller-autostash-20261003001001"
+    },
+    {
+      "object": "d84c8256ff82a4379fb5641c318ff9cee0975c5e",
+      "timestamp_utc": "2026-10-03T01:34:02+00:00",
+      "subject": "On main: poller-autostash-20261003013402"
+    },
+    {
+      "object": "ec4dce120bb3a88a622a185e121c421faf4aa70a",
+      "timestamp_utc": "2026-10-03T02:22:02+00:00",
+      "subject": "On main: poller-autostash-20261003022202"
+    },
+    {
+      "object": "d94ec6eda78a8da8d11a71c771f28164c4c0bd98",
+      "timestamp_utc": "2026-10-03T02:50:01+00:00",
+      "subject": "On main: poller-autostash-20261003025001-untracked"
+    },
+    {
+      "object": "e54e603b13d975fa66772d9574c699e4f2553a27",
+      "timestamp_utc": "2026-10-02T23:58:02+00:00",
+      "subject": "On main: poller-autostash-20261002235801-untracked"
+    },
+    {
+      "object": "4e50f206d178d4a66f6988567f31a7b9f27d612d",
+      "timestamp_utc": "2026-10-03T00:42:02+00:00",
+      "subject": "On main: poller-autostash-20261003004201-untracked"
+    },
+    {
+      "object": "08518a9dd0227869ce525a38b7c9593a9bee8eb7",
+      "timestamp_utc": "2026-10-03T01:40:02+00:00",
+      "subject": "On main: poller-autostash-20261003014002"
+    },
+    {
+      "object": "ee51fc746be3f4b3247d3a8b4adf0e4223aa759a",
+      "timestamp_utc": "2026-10-03T02:58:01+00:00",
+      "subject": "On main: poller-autostash-20261003025801"
+    },
+    {
+      "object": "13522213324a3bd3bc6fbacf9d0792d224e6fdb5",
+      "timestamp_utc": "2026-10-03T00:40:02+00:00",
+      "subject": "On main: poller-autostash-20261003004001-untracked"
+    },
+    {
+      "object": "2e52640a08058f9f711d0c8a8780950231037415",
+      "timestamp_utc": "2026-10-03T00:12:02+00:00",
+      "subject": "On main: poller-autostash-20261003001201-untracked"
+    },
+    {
+      "object": "d952caa80e8b213d26f10fe5b90b9f7ec7e5113e",
+      "timestamp_utc": "2026-10-03T01:38:02+00:00",
+      "subject": "On main: poller-autostash-20261003013802"
+    },
+    {
+      "object": "4757b63c9a6756f2a7cab03f31ebaf8e7494bb55",
+      "timestamp_utc": "2026-10-03T00:20:01+00:00",
+      "subject": "On main: poller-autostash-20261003002001"
+    },
+    {
+      "object": "8057fa819317f1bb8edeeb2e04d969d90e6abc9e",
+      "timestamp_utc": "2026-10-03T02:26:02+00:00",
+      "subject": "On main: poller-autostash-20261003022602-untracked"
+    },
+    {
+      "object": "9e572ade9f844e1dc43b28897c1256f3c556f7ca",
+      "timestamp_utc": "2026-10-03T00:24:01+00:00",
+      "subject": "On main: poller-autostash-20261003002401"
+    },
+    {
+      "object": "395838049af593e41e6f86b101c2e8c934f58a02",
+      "timestamp_utc": "2026-10-02T23:16:01+00:00",
+      "subject": "On main: poller-autostash-20261002231601"
+    },
+    {
+      "object": "0559b093d759159771f5fee81bddbba8e80a0985",
+      "timestamp_utc": "2026-10-03T02:56:01+00:00",
+      "subject": "On main: poller-autostash-20261003025601-untracked"
+    },
+    {
+      "object": "2f5ff41f3f364762d40f665edf4aaa10fa8fde4d",
+      "timestamp_utc": "2026-10-03T01:56:02+00:00",
+      "subject": "On main: poller-autostash-20261003015602"
+    },
+    {
+      "object": "8c60e0aad4fe734c7242b9728f6a4b8844781ec6",
+      "timestamp_utc": "2026-10-03T01:28:02+00:00",
+      "subject": "On main: poller-autostash-20261003012802"
+    },
+    {
+      "object": "d260c6c80303ac2196e356acc41e959d7691a6b1",
+      "timestamp_utc": "2026-10-03T00:34:01+00:00",
+      "subject": "On main: poller-autostash-20261003003401"
+    },
+    {
+      "object": "3461c8ae5253e3a63382e97749d863fb53d67980",
+      "timestamp_utc": "2026-10-03T01:46:02+00:00",
+      "subject": "On main: poller-autostash-20261003014602-untracked"
+    },
+    {
+      "object": "17621c91e51c33989dfb3e7191e7fad2d2b03131",
+      "timestamp_utc": "2026-10-03T02:58:01+00:00",
+      "subject": "On main: poller-autostash-20261003025801-untracked"
+    },
+    {
+      "object": "a86362c09a603d8ac54b4d026cf204982c99ab21",
+      "timestamp_utc": "2026-10-03T01:06:02+00:00",
+      "subject": "On main: poller-autostash-20261003010602-untracked"
+    },
+    {
+      "object": "5f6b64c888a3fc79e2196414a13664425745a1da",
+      "timestamp_utc": "2026-10-03T01:08:02+00:00",
+      "subject": "On main: poller-autostash-20261003010801-untracked"
+    },
+    {
+      "object": "546dbaecf28cb57de02a66951a9010622246ef4e",
+      "timestamp_utc": "2026-10-03T02:48:01+00:00",
+      "subject": "On main: poller-autostash-20261003024801"
+    },
+    {
+      "object": "546dc8f1aefce9842f621cb0cc560c88dafcc69b",
+      "timestamp_utc": "2026-10-03T01:26:02+00:00",
+      "subject": "On main: poller-autostash-20261003012601"
+    },
+    {
+      "object": "1e776210bd083faffa14206418c82bf4618372ed",
+      "timestamp_utc": "2026-10-03T00:32:02+00:00",
+      "subject": "On main: poller-autostash-20261003003201-untracked"
+    },
+    {
+      "object": "5f79926e41337d2837fc3076e124416d02bba7de",
+      "timestamp_utc": "2026-10-03T02:38:02+00:00",
+      "subject": "On main: poller-autostash-20261003023802"
+    },
+    {
+      "object": "227ac83d66ddfe136f84c19ad7bbf3c88032398c",
+      "timestamp_utc": "2026-10-03T01:20:02+00:00",
+      "subject": "On main: poller-autostash-20261003012001-untracked"
+    },
+    {
+      "object": "227a865a2a8a9992d4e186d9b279bd1a131a8e55",
+      "timestamp_utc": "2026-10-03T02:52:01+00:00",
+      "subject": "On main: poller-autostash-20261003025201"
+    },
+    {
+      "object": "897aa8ce2c18685eb296afa7e629bfd4d315ce35",
+      "timestamp_utc": "2026-10-03T00:28:01+00:00",
+      "subject": "On main: poller-autostash-20261003002801"
+    },
+    {
+      "object": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2",
+      "timestamp_utc": "2026-10-02T23:00:01+00:00",
+      "subject": "On main: poller-autostash-20261002230001"
+    },
+    {
+      "object": "9d7da62c1f393c67b8e9eb5300c32d3c1eff40e2",
+      "timestamp_utc": "2026-10-03T01:58:02+00:00",
+      "subject": "On main: poller-autostash-20261003015802-untracked"
+    },
+    {
+      "object": "b37f50c06d99d94026fed6e00b01bf59c56f9e76",
+      "timestamp_utc": "2026-10-02T23:34:01+00:00",
+      "subject": "On main: poller-autostash-20261002233401-untracked"
+    },
+    {
+      "object": "5782547a1abca12fee05dec0a40b851a7e1679bf",
+      "timestamp_utc": "2026-10-03T01:06:02+00:00",
+      "subject": "On main: poller-autostash-20261003010602"
+    },
+    {
+      "object": "73838237ed5cf289e88bee09bcf317e8aef074a0",
+      "timestamp_utc": "2026-10-03T01:26:02+00:00",
+      "subject": "On main: poller-autostash-20261003012601-untracked"
+    },
+    {
+      "object": "028b10eb4bc4b11d678ee59630e04b35de65fbc2",
+      "timestamp_utc": "2026-10-03T00:00:03+00:00",
+      "subject": "On main: poller-autostash-20261003000002-untracked"
+    },
+    {
+      "object": "0d8db0ba3849d8bd7720c22e2db0737e9b7392fa",
+      "timestamp_utc": "2026-10-02T23:24:01+00:00",
+      "subject": "On main: poller-autostash-20261002232401"
+    },
+    {
+      "object": "458e202e28848ec97a3c0cb8b6de4217f4003f2a",
+      "timestamp_utc": "2026-10-03T00:46:01+00:00",
+      "subject": "On main: poller-autostash-20261003004601"
+    },
+    {
+      "object": "329720a1b014feca4d8171ddd9b58be4e95c059d",
+      "timestamp_utc": "2026-10-03T01:02:01+00:00",
+      "subject": "On main: poller-autostash-20261003010201"
+    },
+    {
+      "object": "90999431a33ce3c632e0f3ca69143b8771fee49a",
+      "timestamp_utc": "2026-10-03T00:50:02+00:00",
+      "subject": "On main: poller-autostash-20261003005001-untracked"
+    },
+    {
+      "object": "4ba138c0c82d116dea332e887dfd1601be0a9846",
+      "timestamp_utc": "2026-10-02T23:50:01+00:00",
+      "subject": "On main: poller-autostash-20261002235001"
+    },
+    {
+      "object": "7ea15668b7b9ffadc0958c28de605cfa4a936dde",
+      "timestamp_utc": "2026-10-03T02:40:02+00:00",
+      "subject": "On main: poller-autostash-20261003024002"
+    },
+    {
+      "object": "71a3101b1f72f1d0995d0d1adf94b2d72d4bdf9a",
+      "timestamp_utc": "2026-10-03T01:30:02+00:00",
+      "subject": "On main: poller-autostash-20261003013002"
+    },
+    {
+      "object": "aea37043ebed859df501b70dbfb9d0c7f9a9f991",
+      "timestamp_utc": "2026-10-03T02:18:02+00:00",
+      "subject": "On main: poller-autostash-20261003021802-untracked"
+    },
+    {
+      "object": "d7a916be1984f9e62342e1e0190aadd57675e3cf",
+      "timestamp_utc": "2026-10-03T02:42:02+00:00",
+      "subject": "On main: poller-autostash-20261003024202-untracked"
+    },
+    {
+      "object": "d0aa660d32e49c1c66012b202a669a60ecfe7889",
+      "timestamp_utc": "2026-10-03T01:22:02+00:00",
+      "subject": "On main: poller-autostash-20261003012201"
+    },
+    {
+      "object": "30ad6495d4930df78733f82b04b4bd1f09ad94d4",
+      "timestamp_utc": "2026-10-03T02:32:02+00:00",
+      "subject": "On main: poller-autostash-20261003023202-untracked"
+    },
+    {
+      "object": "d4af46ed2d8060115ae667ced2ec2bde7b75dd4e",
+      "timestamp_utc": "2026-10-02T23:18:01+00:00",
+      "subject": "On main: poller-autostash-20261002231801-untracked"
+    },
+    {
+      "object": "80b360a8892bf2b6046a30b089b743a57132db9b",
+      "timestamp_utc": "2026-10-03T02:08:02+00:00",
+      "subject": "On main: poller-autostash-20261003020802"
+    },
+    {
+      "object": "9cb476da3a88ce2739abfcfefce033c3de147918",
+      "timestamp_utc": "2026-10-02T23:14:01+00:00",
+      "subject": "On main: poller-autostash-20261002231401-untracked"
+    },
+    {
+      "object": "84ba9475991aae910dd96ae733022df289d0f195",
+      "timestamp_utc": "2026-10-03T01:58:02+00:00",
+      "subject": "On main: poller-autostash-20261003015802"
+    },
+    {
+      "object": "96bc16bdb472104fad79e9c8ebafda27addc06fa",
+      "timestamp_utc": "2026-10-03T02:34:02+00:00",
+      "subject": "On main: poller-autostash-20261003023402"
+    },
+    {
+      "object": "66c0fc99a712a4de3b9cbd0d96f9851847e017fb",
+      "timestamp_utc": "2026-10-03T00:06:02+00:00",
+      "subject": "On main: poller-autostash-20261003000601-untracked"
+    },
+    {
+      "object": "9ac2446ec5395759ac75bff0c08933ddf9d7d078",
+      "timestamp_utc": "2026-10-03T02:54:01+00:00",
+      "subject": "On main: poller-autostash-20261003025401"
+    },
+    {
+      "object": "32c5d4d771a7f70e83679dcf317cc522c44b84a0",
+      "timestamp_utc": "2026-10-02T23:30:01+00:00",
+      "subject": "On main: poller-autostash-20261002233001-untracked"
+    },
+    {
+      "object": "46c5f21ff23cb1bfbb9fac61e20c033d80e80539",
+      "timestamp_utc": "2026-10-03T02:52:01+00:00",
+      "subject": "On main: poller-autostash-20261003025201-untracked"
+    },
+    {
+      "object": "80caec8744488bbf1376835cde494b1f86c1413f",
+      "timestamp_utc": "2026-10-02T23:26:01+00:00",
+      "subject": "On main: poller-autostash-20261002232601-untracked"
+    },
+    {
+      "object": "b3cad6d8ea6f75b227bb9ceb5401c882edd444ad",
+      "timestamp_utc": "2026-10-03T00:56:02+00:00",
+      "subject": "On main: poller-autostash-20261003005601-untracked"
+    },
+    {
+      "object": "16ce4a570a5cc7183da1cf6c1635599d9f712961",
+      "timestamp_utc": "2026-10-03T00:22:01+00:00",
+      "subject": "On main: poller-autostash-20261003002201"
+    },
+    {
+      "object": "d7ce960396aa440af5a5a2af946d7631c078cf96",
+      "timestamp_utc": "2026-10-03T00:42:01+00:00",
+      "subject": "On main: poller-autostash-20261003004201"
+    },
+    {
+      "object": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c",
+      "timestamp_utc": "2026-10-03T00:06:01+00:00",
+      "subject": "On main: poller-autostash-20261003000601"
+    },
+    {
+      "object": "1ad0b8a48ba177c3181bdbdf867742a65abd3ed0",
+      "timestamp_utc": "2026-10-03T00:38:02+00:00",
+      "subject": "On main: poller-autostash-20261003003801-untracked"
+    },
+    {
+      "object": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278",
+      "timestamp_utc": "2026-10-03T00:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003004401"
+    },
+    {
+      "object": "0dd4b2aaba370b2b9d42193cd83a1de38c621111",
+      "timestamp_utc": "2026-10-03T00:56:01+00:00",
+      "subject": "On main: poller-autostash-20261003005601"
+    },
+    {
+      "object": "c5da9a8477eb453ea3620c8a00fb5c29debdc67c",
+      "timestamp_utc": "2026-10-03T00:58:02+00:00",
+      "subject": "On main: poller-autostash-20261003005801-untracked"
+    },
+    {
+      "object": "e0dac41a0be0d2d2255a00eb448c1b84cc68993e",
+      "timestamp_utc": "2026-10-03T02:10:02+00:00",
+      "subject": "On main: poller-autostash-20261003021002"
+    },
+    {
+      "object": "aedc16ef22d18fc725aef976c8dadd030c22f906",
+      "timestamp_utc": "2026-10-03T00:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003001402"
+    },
+    {
+      "object": "41df64519017f0fef261f127853d8bc24f165059",
+      "timestamp_utc": "2026-10-02T23:38:01+00:00",
+      "subject": "On main: poller-autostash-20261002233801"
+    },
+    {
+      "object": "8fe02841838810b47ea01e4eaf1e4a4687c53987",
+      "timestamp_utc": "2026-10-03T00:04:02+00:00",
+      "subject": "On main: poller-autostash-20261003000401-untracked"
+    },
+    {
+      "object": "a7e07875f999f2e435b1f2f252992f31d0b62e3d",
+      "timestamp_utc": "2026-10-03T00:48:01+00:00",
+      "subject": "On main: poller-autostash-20261003004801"
+    },
+    {
+      "object": "eae138c2c0d62e6724b02ae5a08284ab53bea80f",
+      "timestamp_utc": "2026-10-03T00:54:02+00:00",
+      "subject": "On main: poller-autostash-20261003005401-untracked"
+    },
+    {
+      "object": "30e52ee50202ffb02bbc9d316c0ae15cfc9ec721",
+      "timestamp_utc": "2026-10-03T01:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003011401-untracked"
+    },
+    {
+      "object": "09e91684e1c2fb0899cbbec8c0e008b1506181f7",
+      "timestamp_utc": "2026-10-03T02:48:01+00:00",
+      "subject": "On main: poller-autostash-20261003024801-untracked"
+    },
+    {
+      "object": "fce964ffa6db50b42a931d26b44aaf10e1a796cf",
+      "timestamp_utc": "2026-10-02T23:10:01+00:00",
+      "subject": "On main: poller-autostash-20261002231001-untracked"
+    },
+    {
+      "object": "27eb2c18d2b92f30e21a9261b90f1f763170b2b5",
+      "timestamp_utc": "2026-10-03T00:24:02+00:00",
+      "subject": "On main: poller-autostash-20261003002401-untracked"
+    },
+    {
+      "object": "82efa43b436cf62127c576ca596756ff78b64549",
+      "timestamp_utc": "2026-10-03T01:50:02+00:00",
+      "subject": "On main: poller-autostash-20261003015002"
+    },
+    {
+      "object": "c6f21a06f0ba9272cd689703989f34aedb71b4a6",
+      "timestamp_utc": "2026-10-03T01:54:02+00:00",
+      "subject": "On main: poller-autostash-20261003015402"
+    },
+    {
+      "object": "aff304f374618ce51c6c6442a76b204ff1c65da8",
+      "timestamp_utc": "2026-10-03T01:20:02+00:00",
+      "subject": "On main: poller-autostash-20261003012001"
+    },
+    {
+      "object": "27f44ef412bd965a47cb4d3995cb10bbd35b27da",
+      "timestamp_utc": "2026-10-03T02:32:02+00:00",
+      "subject": "On main: poller-autostash-20261003023202"
+    },
+    {
+      "object": "b0f576885f049e480e159b6ebce2440659e83ff9",
+      "timestamp_utc": "2026-10-03T02:42:02+00:00",
+      "subject": "On main: poller-autostash-20261003024202"
+    },
+    {
+      "object": "b4f716ed4132a7fd34f9e9d84060bb528035b86f",
+      "timestamp_utc": "2026-10-02T23:24:01+00:00",
+      "subject": "On main: poller-autostash-20261002232401-untracked"
+    },
+    {
+      "object": "fcf7ba932ab94afb781b608760ca467c358a2c74",
+      "timestamp_utc": "2026-10-03T01:00:01+00:00",
+      "subject": "On main: poller-autostash-20261003010001"
+    },
+    {
+      "object": "fff7c0ccb07a391388f8c17c647b3e3970b3f4fe",
+      "timestamp_utc": "2026-10-03T02:06:02+00:00",
+      "subject": "On main: poller-autostash-20261003020602-untracked"
+    },
+    {
+      "object": "8afaa679d65db2f3d3120e2fd783062c0b8306bb",
+      "timestamp_utc": "2026-10-03T02:36:02+00:00",
+      "subject": "On main: poller-autostash-20261003023602-untracked"
+    },
+    {
+      "object": "2703f9c004a9d9aff5e32f3a1361787ee825427a",
+      "timestamp_utc": "2026-10-03T00:40:01+00:00",
+      "subject": "On main: poller-autostash-20261003004001"
+    },
+    {
+      "object": "2a0389fc8ef24ddca4d8ba39eed9bff639851aa1",
+      "timestamp_utc": "2026-10-02T23:48:02+00:00",
+      "subject": "On main: poller-autostash-20261002234801-untracked"
+    },
+    {
+      "object": "8e064da5f730da8816040d9d1b31b4c1cacf1cd2",
+      "timestamp_utc": "2026-10-02T23:50:02+00:00",
+      "subject": "On main: poller-autostash-20261002235001-untracked"
+    },
+    {
+      "object": "ae08af484e552bb828c28de0e3d827d4f24d8dd2",
+      "timestamp_utc": "2026-10-02T23:46:01+00:00",
+      "subject": "On main: poller-autostash-20261002234601"
+    },
+    {
+      "object": "a90c2d159802f8736c24b1394440610c02547e6a",
+      "timestamp_utc": "2026-10-03T01:18:02+00:00",
+      "subject": "On main: poller-autostash-20261003011801-untracked"
+    },
+    {
+      "object": "e30dd1088cdb0085f2e570ea2849205799a21ba0",
+      "timestamp_utc": "2026-10-02T23:22:01+00:00",
+      "subject": "On main: poller-autostash-20261002232201-untracked"
+    },
+    {
+      "object": "c70ec523a9f006b79c4bffdac15e0dfd0efe7091",
+      "timestamp_utc": "2026-10-03T01:16:02+00:00",
+      "subject": "On main: poller-autostash-20261003011601-untracked"
+    },
+    {
+      "object": "1e100fdb8a8622ee20d9be39c975fc9435c52ccf",
+      "timestamp_utc": "2026-10-03T01:28:02+00:00",
+      "subject": "On main: poller-autostash-20261003012802-untracked"
+    },
+    {
+      "object": "c011a753fa05aeb7ad42293ad92beef47a2cb081",
+      "timestamp_utc": "2026-10-03T01:52:02+00:00",
+      "subject": "On main: poller-autostash-20261003015202"
+    },
+    {
+      "object": "f311c7757f50618a6e331b82d89e50056f68edf0",
+      "timestamp_utc": "2026-10-02T23:36:01+00:00",
+      "subject": "On main: poller-autostash-20261002233601"
+    },
+    {
+      "object": "f313cd3e02e6ae393d4749a1e1431c006dbde158",
+      "timestamp_utc": "2026-10-03T00:16:02+00:00",
+      "subject": "On main: poller-autostash-20261003001601-untracked"
+    },
+    {
+      "object": "9f161155021e40e38982f007d1459b1edeef5659",
+      "timestamp_utc": "2026-10-02T23:40:30+00:00",
+      "subject": "On main: poller-autostash-20261002234030"
+    },
+    {
+      "object": "17185fac393ed3078e6de01a68b708a852101bd7",
+      "timestamp_utc": "2026-10-02T23:18:01+00:00",
+      "subject": "On main: poller-autostash-20261002231801"
+    },
+    {
+      "object": "b318651c9e8dfedb0e1fae5a09415f00ca664e7c",
+      "timestamp_utc": "2026-10-02T23:58:01+00:00",
+      "subject": "On main: poller-autostash-20261002235801"
+    },
+    {
+      "object": "6c19db4bf30366f4e146a01537b341b4ee3eb467",
+      "timestamp_utc": "2026-10-02T23:52:01+00:00",
+      "subject": "On main: poller-autostash-20261002235201"
+    },
+    {
+      "object": "b5190777d17a4662d7ca6ffa29ffb8c1b09daa46",
+      "timestamp_utc": "2026-10-03T01:10:02+00:00",
+      "subject": "On main: poller-autostash-20261003011001-untracked"
+    },
+    {
+      "object": "b71c8db5ca1b2afa0bca655233deb71d5fd077d5",
+      "timestamp_utc": "2026-10-03T00:10:02+00:00",
+      "subject": "On main: poller-autostash-20261003001001-untracked"
+    },
+    {
+      "object": "6921fd3339e17bfd4f251323e755156b1918fdfa",
+      "timestamp_utc": "2026-10-03T00:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003004401-untracked"
+    },
+    {
+      "object": "1c22ed08c1f57d52e664224f28565e32e9aae84c",
+      "timestamp_utc": "2026-10-02T23:20:01+00:00",
+      "subject": "On main: poller-autostash-20261002232001"
+    },
+    {
+      "object": "c522cdf5a833d97545fe6ae4534c1d87a5f06be3",
+      "timestamp_utc": "2026-10-03T01:36:02+00:00",
+      "subject": "On main: poller-autostash-20261003013602"
+    },
+    {
+      "object": "ee25e576a77205162927d898eac32050cf47c517",
+      "timestamp_utc": "2026-10-03T00:52:02+00:00",
+      "subject": "On main: poller-autostash-20261003005202-untracked"
+    },
+    {
+      "object": "df29b593bc1eccd77a08e4ed81a5f4eaf2054069",
+      "timestamp_utc": "2026-10-03T02:56:01+00:00",
+      "subject": "On main: poller-autostash-20261003025601"
+    },
+    {
+      "object": "452d875ab0e46b0b96f93049f918d97a41eacc44",
+      "timestamp_utc": "2026-10-03T00:30:01+00:00",
+      "subject": "On main: poller-autostash-20261003003001"
+    },
+    {
+      "object": "5d32e7ab7ec972a0bad9ab2ecfd120316c31f71a",
+      "timestamp_utc": "2026-10-03T00:36:01+00:00",
+      "subject": "On main: poller-autostash-20261003003601"
+    },
+    {
+      "object": "bc342dcc5167721ef7216f39274bafc13dea113c",
+      "timestamp_utc": "2026-10-03T02:02:02+00:00",
+      "subject": "On main: poller-autostash-20261003020202"
+    },
+    {
+      "object": "8a3519b7882187917374a64ff3f91cbbde6cd99e",
+      "timestamp_utc": "2026-10-02T23:00:01+00:00",
+      "subject": "On main: poller-autostash-20261002230001-untracked"
+    },
+    {
+      "object": "a735b3231c9d7a8f5a586303608e4175615d5bc4",
+      "timestamp_utc": "2026-10-03T00:18:01+00:00",
+      "subject": "On main: poller-autostash-20261003001801"
+    },
+    {
+      "object": "1e38f942be6dc4cb7bfc8043c5f84c452704d1c2",
+      "timestamp_utc": "2026-10-03T00:38:01+00:00",
+      "subject": "On main: poller-autostash-20261003003801"
+    },
+    {
+      "object": "983a81b7a23e2ce5ee1cbd54b0ce4c29b6084505",
+      "timestamp_utc": "2026-10-03T02:54:01+00:00",
+      "subject": "On main: poller-autostash-20261003025401-untracked"
+    },
+    {
+      "object": "a93acd830269ddfc464210c6363a8bdaa81ea461",
+      "timestamp_utc": "2026-10-02T23:48:01+00:00",
+      "subject": "On main: poller-autostash-20261002234801"
+    },
+    {
+      "object": "bb3b7de946c60dd2a1a481d2513082e414977e09",
+      "timestamp_utc": "2026-10-02T23:42:01+00:00",
+      "subject": "On main: poller-autostash-20261002234201-untracked"
+    },
+    {
+      "object": "123e85f758d706744e7259ff04aa61f4d861f35c",
+      "timestamp_utc": "2026-10-03T02:08:02+00:00",
+      "subject": "On main: poller-autostash-20261003020802-untracked"
+    },
+    {
+      "object": "243eebfa109331a7dea4d5e6e89e24402be909dc",
+      "timestamp_utc": "2026-10-03T01:36:02+00:00",
+      "subject": "On main: poller-autostash-20261003013602-untracked"
+    },
+    {
+      "object": "3442a117795a77f754e94dc6e9f540a7900c5b76",
+      "timestamp_utc": "2026-10-02T23:26:01+00:00",
+      "subject": "On main: poller-autostash-20261002232601"
+    },
+    {
+      "object": "ef45f114232129302e28d557ee0e584ef98b5ed0",
+      "timestamp_utc": "2026-10-03T02:24:02+00:00",
+      "subject": "On main: poller-autostash-20261003022402-untracked"
+    },
+    {
+      "object": "ed47157d9dbbac811ae2faf262920a5d767a85dd",
+      "timestamp_utc": "2026-10-02T23:30:01+00:00",
+      "subject": "On main: poller-autostash-20261002233001"
+    },
+    {
+      "object": "3c487f8cbb55ac9556a66a7064ed919128e1ace6",
+      "timestamp_utc": "2026-10-03T02:40:02+00:00",
+      "subject": "On main: poller-autostash-20261003024002-untracked"
+    },
+    {
+      "object": "d7496b89af3787b94e960dc124a51b988e8e6904",
+      "timestamp_utc": "2026-10-03T00:46:02+00:00",
+      "subject": "On main: poller-autostash-20261003004601-untracked"
+    },
+    {
+      "object": "0c51fd024f12cbb65d289167ea652896a0d189e2",
+      "timestamp_utc": "2026-10-02T23:06:01+00:00",
+      "subject": "On main: poller-autostash-20261002230601"
+    },
+    {
+      "object": "7a537b040f8907572756939dccbed43533c45cc1",
+      "timestamp_utc": "2026-10-03T01:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003014402"
+    },
+    {
+      "object": "f853a5feaf005a19fbc5fdd72a634816fc7ee4d2",
+      "timestamp_utc": "2026-10-03T01:32:02+00:00",
+      "subject": "On main: poller-autostash-20261003013202"
+    },
+    {
+      "object": "2254afa50536a7349e3fe25a5546765749480069",
+      "timestamp_utc": "2026-10-02T23:06:01+00:00",
+      "subject": "On main: poller-autostash-20261002230601-untracked"
+    },
+    {
+      "object": "1a554f1c9e5ea71254c73fd508e6a5e24e754fef",
+      "timestamp_utc": "2026-10-03T01:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003011401"
+    },
+    {
+      "object": "0256652351967dcb64689c971b164f036b00e93c",
+      "timestamp_utc": "2026-10-02T23:14:01+00:00",
+      "subject": "On main: poller-autostash-20261002231401"
+    },
+    {
+      "object": "2a56c31fa5e555a484985da0fbf29007467546c4",
+      "timestamp_utc": "2026-10-02T23:44:01+00:00",
+      "subject": "On main: poller-autostash-20261002234401-untracked"
+    },
+    {
+      "object": "7059adbe2f21843587fdb45e020e13b3e7933689",
+      "timestamp_utc": "2026-10-03T01:12:01+00:00",
+      "subject": "On main: poller-autostash-20261003011201"
+    },
+    {
+      "object": "ec59e3ba612ecb962d6642b0837a2719e0d3d658",
+      "timestamp_utc": "2026-10-02T23:56:01+00:00",
+      "subject": "On main: poller-autostash-20261002235601-untracked"
+    },
+    {
+      "object": "2c5df3ff32519ac463156112cbabdccd6d53eb6b",
+      "timestamp_utc": "2026-10-03T02:00:02+00:00",
+      "subject": "On main: poller-autostash-20261003020002-untracked"
+    },
+    {
+      "object": "2c63778f8ea639ac41c0d19c3f49b8a99a33532d",
+      "timestamp_utc": "2026-10-03T01:04:02+00:00",
+      "subject": "On main: poller-autostash-20261003010401-untracked"
+    },
+    {
+      "object": "286411a14fd16d8ed96d711026a6efdc317bd70f",
+      "timestamp_utc": "2026-10-03T02:34:02+00:00",
+      "subject": "On main: poller-autostash-20261003023402-untracked"
+    },
+    {
+      "object": "10671d037c69fdc0932e643dcf057b4a84ec152a",
+      "timestamp_utc": "2026-10-03T01:08:01+00:00",
+      "subject": "On main: poller-autostash-20261003010801"
+    },
+    {
+      "object": "2a679dbef98486c78c8e0a3de350dd0f88a42ee9",
+      "timestamp_utc": "2026-10-03T01:16:02+00:00",
+      "subject": "On main: poller-autostash-20261003011601"
+    },
+    {
+      "object": "f2679f908ba1f3a4cb395a2b4b90268c92aad06a",
+      "timestamp_utc": "2026-10-03T02:26:02+00:00",
+      "subject": "On main: poller-autostash-20261003022602"
+    },
+    {
+      "object": "a96d95c3cd5f8a6e74b44bb2ca8489a96516aa6f",
+      "timestamp_utc": "2026-10-03T00:20:02+00:00",
+      "subject": "On main: poller-autostash-20261003002001-untracked"
+    },
+    {
+      "object": "9e7355fee2147c7465e35fd17e3faa622c6f7b97",
+      "timestamp_utc": "2026-10-03T01:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003014402-untracked"
+    },
+    {
+      "object": "ca73ab5246fea1a6dbf6e6a992c9ae59ff82db2f",
+      "timestamp_utc": "2026-10-03T01:00:02+00:00",
+      "subject": "On main: poller-autostash-20261003010001-untracked"
+    },
+    {
+      "object": "e673f1f4721a8949cc24ffa258e77dddc297e1f8",
+      "timestamp_utc": "2026-10-03T00:04:01+00:00",
+      "subject": "On main: poller-autostash-20261003000401"
+    },
+    {
+      "object": "8a761f76f82c4defa9a2302630bf73871ef84f28",
+      "timestamp_utc": "2026-10-02T23:34:01+00:00",
+      "subject": "On main: poller-autostash-20261002233401"
+    },
+    {
+      "object": "26771153a8f1106d6493c40f66b1973d7386d29c",
+      "timestamp_utc": "2026-10-02T23:52:02+00:00",
+      "subject": "On main: poller-autostash-20261002235201-untracked"
+    },
+    {
+      "object": "837a098c656447e7d0d15303c8b4c04e33dc267d",
+      "timestamp_utc": "2026-10-02T23:42:01+00:00",
+      "subject": "On main: poller-autostash-20261002234201"
+    },
+    {
+      "object": "d97a65a1e1b5b2c5e9c9120501435ba6b8b07297",
+      "timestamp_utc": "2026-10-03T02:24:02+00:00",
+      "subject": "On main: poller-autostash-20261003022402"
+    },
+    {
+      "object": "397d3bdbbffc0b217821419362ca120478aba968",
+      "timestamp_utc": "2026-10-03T01:10:01+00:00",
+      "subject": "On main: poller-autostash-20261003011001"
+    },
+    {
+      "object": "7780b7e86cee9a19a0ffe1ec327ff5b3d1a48abf",
+      "timestamp_utc": "2026-10-02T23:44:01+00:00",
+      "subject": "On main: poller-autostash-20261002234401"
+    },
+    {
+      "object": "2086cf09cb7d27b4da89c9b7eef72bbfce23f458",
+      "timestamp_utc": "2026-10-02T23:36:01+00:00",
+      "subject": "On main: poller-autostash-20261002233601-untracked"
+    },
+    {
+      "object": "e786ef3e7074533593890f9dfdc6856f4886bc9e",
+      "timestamp_utc": "2026-10-03T01:50:02+00:00",
+      "subject": "On main: poller-autostash-20261003015002-untracked"
+    },
+    {
+      "object": "c8890f0e96c65c423da5204fa985c20c041bed5c",
+      "timestamp_utc": "2026-10-03T02:16:02+00:00",
+      "subject": "On main: poller-autostash-20261003021602-untracked"
+    },
+    {
+      "object": "3b911b9a6e96e8d658822db13a60300d2f1fcbca",
+      "timestamp_utc": "2026-10-03T01:48:02+00:00",
+      "subject": "On main: poller-autostash-20261003014802"
+    },
+    {
+      "object": "0b92d308fa89dc40935e033ded026eecb2b13b28",
+      "timestamp_utc": "2026-10-03T00:26:02+00:00",
+      "subject": "On main: poller-autostash-20261003002601-untracked"
+    },
+    {
+      "object": "92941927645fbd044c3858e314d47332c54455a8",
+      "timestamp_utc": "2026-10-03T01:48:02+00:00",
+      "subject": "On main: poller-autostash-20261003014802-untracked"
+    },
+    {
+      "object": "529505e8472fcf4d7afa1e0235800139e68b5119",
+      "timestamp_utc": "2026-10-03T02:20:02+00:00",
+      "subject": "On main: poller-autostash-20261003022002"
+    },
+    {
+      "object": "a498f7c4a26b45013fab8c9818b013c9760a6871",
+      "timestamp_utc": "2026-10-03T02:04:02+00:00",
+      "subject": "On main: poller-autostash-20261003020402"
+    },
+    {
+      "object": "119be9863db8b257a514961cff667b5a2e03b977",
+      "timestamp_utc": "2026-10-02T23:08:01+00:00",
+      "subject": "On main: poller-autostash-20261002230801"
+    },
+    {
+      "object": "a29ca95f2cbe706bee5f6b7920d1d109445af010",
+      "timestamp_utc": "2026-10-03T02:04:02+00:00",
+      "subject": "On main: poller-autostash-20261003020402-untracked"
+    },
+    {
+      "object": "3c9e255c4a032da87c25317ee17b21a58205bb4f",
+      "timestamp_utc": "2026-10-03T02:12:02+00:00",
+      "subject": "On main: poller-autostash-20261003021202"
+    },
+    {
+      "object": "19a3ed83d89a73e2d76e72d9bc96ac9a31be7713",
+      "timestamp_utc": "2026-10-03T01:46:02+00:00",
+      "subject": "On main: poller-autostash-20261003014602"
+    },
+    {
+      "object": "53a4fdb24b1d5f460f2c206141aa561842a8a91c",
+      "timestamp_utc": "2026-10-03T01:38:02+00:00",
+      "subject": "On main: poller-autostash-20261003013802-untracked"
+    },
+    {
+      "object": "caa89967ce3cd82a77e19fa866d8e2d1c5d477aa",
+      "timestamp_utc": "2026-10-02T23:12:01+00:00",
+      "subject": "On main: poller-autostash-20261002231201"
+    },
+    {
+      "object": "9aa997a8fca3f688c9682c0daa8ebc2d3d95d108",
+      "timestamp_utc": "2026-10-03T02:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003021402-untracked"
+    },
+    {
+      "object": "c1ab8ba2a07049f9bfcbc12d34101f9eaace8fe4",
+      "timestamp_utc": "2026-10-02T23:28:01+00:00",
+      "subject": "On main: poller-autostash-20261002232801"
+    },
+    {
+      "object": "19ad692f5fabeea156be6e167b6d81c8cdd5768f",
+      "timestamp_utc": "2026-10-03T02:46:02+00:00",
+      "subject": "On main: poller-autostash-20261003024602"
+    },
+    {
+      "object": "52af75cf91a0d0f01581f0ae50f74452969abb44",
+      "timestamp_utc": "2026-10-03T01:34:02+00:00",
+      "subject": "On main: poller-autostash-20261003013402-untracked"
+    },
+    {
+      "object": "ffaf0775e7c4f89f2fa37ad2cd8d43af65a72878",
+      "timestamp_utc": "2026-10-03T02:44:02+00:00",
+      "subject": "On main: poller-autostash-20261003024402"
+    },
+    {
+      "object": "01b19b2320a72cf9c4ed8d399a11da840464d1bc",
+      "timestamp_utc": "2026-10-03T02:06:02+00:00",
+      "subject": "On main: poller-autostash-20261003020602"
+    },
+    {
+      "object": "b2b3e5f4414e30523026ef815c0f91df67020c3e",
+      "timestamp_utc": "2026-10-03T02:12:02+00:00",
+      "subject": "On main: poller-autostash-20261003021202-untracked"
+    },
+    {
+      "object": "30b4136d07c46d9f8a114635a823644e1d3d7088",
+      "timestamp_utc": "2026-10-02T23:28:01+00:00",
+      "subject": "On main: poller-autostash-20261002232801-untracked"
+    },
+    {
+      "object": "05b56db21ebd01b37334e46c9e1910a138e95f55",
+      "timestamp_utc": "2026-10-03T00:16:01+00:00",
+      "subject": "On main: poller-autostash-20261003001601"
+    },
+    {
+      "object": "cdb683686fbbda1e5a1e09691eb658526ef901c0",
+      "timestamp_utc": "2026-10-03T01:40:02+00:00",
+      "subject": "On main: poller-autostash-20261003014002-untracked"
+    },
+    {
+      "object": "7fbed7aefacb5ff72e8f3ab1d9b430329910217e",
+      "timestamp_utc": "2026-10-03T00:22:02+00:00",
+      "subject": "On main: poller-autostash-20261003002201-untracked"
+    },
+    {
+      "object": "d1c05de3e7b2ed41726cb65b248e2bc333ead1f1",
+      "timestamp_utc": "2026-10-03T00:12:01+00:00",
+      "subject": "On main: poller-autostash-20261003001201"
+    },
+    {
+      "object": "57c461a6503536f0dd3c7ae6961ae6bf1d77be87",
+      "timestamp_utc": "2026-10-03T02:00:02+00:00",
+      "subject": "On main: poller-autostash-20261003020002"
+    },
+    {
+      "object": "bec465129be9f455ebfcfe48f8e524546d5b3090",
+      "timestamp_utc": "2026-10-02T23:08:01+00:00",
+      "subject": "On main: poller-autostash-20261002230801-untracked"
+    },
+    {
+      "object": "d0c485da11ad910a82fd304d83694b88fb7d8d82",
+      "timestamp_utc": "2026-10-03T01:02:02+00:00",
+      "subject": "On main: poller-autostash-20261003010201-untracked"
+    },
+    {
+      "object": "55c5d10c385deb1b16aa6d535bcaea9c0acf4bd3",
+      "timestamp_utc": "2026-10-03T01:30:02+00:00",
+      "subject": "On main: poller-autostash-20261003013002-untracked"
+    },
+    {
+      "object": "10c9f763908cac277db9a5fc7a9cbef9a46dcd14",
+      "timestamp_utc": "2026-10-03T02:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003021402"
+    },
+    {
+      "object": "f8cbc90d524c61be146656390ccfeb3bf5def9f8",
+      "timestamp_utc": "2026-10-03T01:22:02+00:00",
+      "subject": "On main: poller-autostash-20261003012201-untracked"
+    },
+    {
+      "object": "f3cec5f53dec6911666f59eb0599dbe21d870ce1",
+      "timestamp_utc": "2026-10-03T00:52:02+00:00",
+      "subject": "On main: poller-autostash-20261003005202"
+    },
+    {
+      "object": "4ccf4d3f678de43f1637a486be041facf469454b",
+      "timestamp_utc": "2026-10-02T23:04:01+00:00",
+      "subject": "On main: poller-autostash-20261002230401"
+    },
+    {
+      "object": "93d2b77e8bd004075041f260264dba555ed3cd7c",
+      "timestamp_utc": "2026-10-03T02:18:02+00:00",
+      "subject": "On main: poller-autostash-20261003021802"
+    },
+    {
+      "object": "a2d3eb1da9110a42b13901b5f5a32674757b6102",
+      "timestamp_utc": "2026-10-03T00:50:01+00:00",
+      "subject": "On main: poller-autostash-20261003005001"
+    },
+    {
+      "object": "19d41f04f29ad6a4279bb808ad7d84827197bb1d",
+      "timestamp_utc": "2026-10-03T01:24:02+00:00",
+      "subject": "On main: poller-autostash-20261003012401-untracked"
+    },
+    {
+      "object": "79d94529aa1f4e0faf21e807ab89f5adb85e0935",
+      "timestamp_utc": "2026-10-02T23:40:30+00:00",
+      "subject": "On main: poller-autostash-20261002234030-untracked"
+    },
+    {
+      "object": "b9dbd18ebef74fe0fe48b295c3ba4fbc76349191",
+      "timestamp_utc": "2026-10-03T02:30:02+00:00",
+      "subject": "On main: poller-autostash-20261003023002"
+    },
+    {
+      "object": "81df3bb818c5519e9d2b871ac6b29fe7d44bb106",
+      "timestamp_utc": "2026-10-02T23:04:01+00:00",
+      "subject": "On main: poller-autostash-20261002230401-untracked"
+    },
+    {
+      "object": "49e00f9ef5e231b56954a19dbc1463257cfabc10",
+      "timestamp_utc": "2026-10-03T01:12:02+00:00",
+      "subject": "On main: poller-autostash-20261003011201-untracked"
+    },
+    {
+      "object": "4de11faf96f27124daf269ff0be64eaba90d2d28",
+      "timestamp_utc": "2026-10-02T23:38:01+00:00",
+      "subject": "On main: poller-autostash-20261002233801-untracked"
+    },
+    {
+      "object": "00e417627e67c80914341dac78bc895c5b7a6079",
+      "timestamp_utc": "2026-10-03T00:08:01+00:00",
+      "subject": "On main: poller-autostash-20261003000801"
+    },
+    {
+      "object": "6de6dbced77a013712f8b3738c9cf550731b3517",
+      "timestamp_utc": "2026-10-03T00:14:02+00:00",
+      "subject": "On main: poller-autostash-20261003001402-untracked"
+    },
+    {
+      "object": "0fe99568a4824bfe5a9de2fc941a83d330bcedfb",
+      "timestamp_utc": "2026-10-02T23:16:01+00:00",
+      "subject": "On main: poller-autostash-20261002231601-untracked"
+    },
+    {
+      "object": "baf0ef8f53f46ba2ce1ffbfd7718c3439d87ea09",
+      "timestamp_utc": "2026-10-02T23:54:01+00:00",
+      "subject": "On main: poller-autostash-20261002235401"
+    },
+    {
+      "object": "7df123e5d5c89557c99057914ed6d3c3a2e16239",
+      "timestamp_utc": "2026-10-03T00:02:01+00:00",
+      "subject": "On main: poller-autostash-20261003000201"
+    },
+    {
+      "object": "77f201a732658af147af311d5884ea4909c75555",
+      "timestamp_utc": "2026-10-03T02:28:02+00:00",
+      "subject": "On main: poller-autostash-20261003022802"
+    },
+    {
+      "object": "67f32b64dd21c6e4baba6f2b4eac9265cc2050ed",
+      "timestamp_utc": "2026-10-03T02:30:02+00:00",
+      "subject": "On main: poller-autostash-20261003023002-untracked"
+    },
+    {
+      "object": "91f6c91544f811fdd14a2599f7bf268a45d100b2",
+      "timestamp_utc": "2026-10-03T00:08:02+00:00",
+      "subject": "On main: poller-autostash-20261003000801-untracked"
+    },
+    {
+      "object": "2ff7a92da18950622754765c8870d5a5489cd93f",
+      "timestamp_utc": "2026-10-03T01:56:02+00:00",
+      "subject": "On main: poller-autostash-20261003015602-untracked"
+    },
+    {
+      "object": "0cf9550afa5cd13752def2cd548662d59f4a0d83",
+      "timestamp_utc": "2026-10-03T00:34:02+00:00",
+      "subject": "On main: poller-autostash-20261003003401-untracked"
+    },
+    {
+      "object": "57f991b66a430fea0e90a78bb88ccd17386323c1",
+      "timestamp_utc": "2026-10-02T23:56:01+00:00",
+      "subject": "On main: poller-autostash-20261002235601"
+    },
+    {
+      "object": "05fbabf1ae5123690e68f155d4c00bced94de408",
+      "timestamp_utc": "2026-10-02T23:10:01+00:00",
+      "subject": "On main: poller-autostash-20261002231001"
+    },
+    {
+      "object": "88fba110f945230cd9ed52410fa65a90ccd798c5",
+      "timestamp_utc": "2026-10-03T00:48:02+00:00",
+      "subject": "On main: poller-autostash-20261003004801-untracked"
+    },
+    {
+      "object": "84feaf3f47a3f195288e250be1150f8f462c6b7b",
+      "timestamp_utc": "2026-10-03T01:54:02+00:00",
+      "subject": "On main: poller-autostash-20261003015402-untracked"
+    },
+    {
+      "object": "edfeb98891bb9144774e96292617aec1e8ce77b7",
+      "timestamp_utc": "2026-10-03T02:36:02+00:00",
+      "subject": "On main: poller-autostash-20261003023602"
+    }
+  ],
+  "relevant_blobs": []
+}

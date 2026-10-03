@@ -1,0 +1,256 @@
+{
+  "task": "agent-career-live-research-schedule-cutover-and-acceptance-2026-09-24",
+  "runner": "career-ops/run_scheduled_orchestrator_acceptance.py",
+  "stamp": "2026-09-30T14-51-01Z",
+  "started_at": "2026-09-30T14:51:01+00:00",
+  "finished_at": "2026-09-30T14:51:57+00:00",
+  "run_started_utc": "2026-09-30T14:51:01+00:00",
+  "run_finished_utc": "2026-09-30T14:51:57+00:00",
+  "code_sha": "95600d94655afc1095ea2089d4304511fabbe8aa",
+  "worktree_at_run": {
+    "modified_tracked": 2,
+    "untracked": 108
+  },
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "launcher_invokes_the_unified_orchestrator",
+      "ok": true,
+      "detail": {
+        "active_lines": 12
+      }
+    },
+    {
+      "check": "launcher_requires_a_live_current_web_mechanism",
+      "ok": true,
+      "detail": "--require-live-web present"
+    },
+    {
+      "check": "launcher_uses_the_high_recall_production_policy",
+      "ok": true,
+      "detail": "--mode high_recall present"
+    },
+    {
+      "check": "launcher_no_longer_runs_the_old_single_worker",
+      "ok": true,
+      "detail": "old worker only inside the documented rollback"
+    },
+    {
+      "check": "launcher_keeps_crlf_line_endings",
+      "ok": true,
+      "detail": "CRLF preserved (bytes)"
+    },
+    {
+      "check": "launcher_never_applies_or_submits",
+      "ok": true,
+      "detail": "read-only"
+    },
+    {
+      "check": "production_discovery_policy_is_high_recall",
+      "ok": true,
+      "detail": "high_recall"
+    },
+    {
+      "check": "owner_intern_rule_is_a_declared_diagnostic_only",
+      "ok": true,
+      "detail": "the owner's own Intern/Internship title filter (title_policy.py) kept for diagnostic/compare runs only; it is never the scheduled discovery gate"
+    },
+    {
+      "check": "five_coverage_states_are_declared",
+      "ok": true,
+      "detail": [
+        "blocked",
+        "not_applicable",
+        "reached",
+        "searched_no_results",
+        "unavailable"
+      ]
+    },
+    {
+      "check": "every_required_source_class_is_declared",
+      "ok": true,
+      "detail": [
+        "public_linkedin_jobs",
+        "public_indeed",
+        "web_index",
+        "ats_employer_careers"
+      ]
+    },
+    {
+      "check": "budgets_lock_and_rollback_are_declared",
+      "ok": true,
+      "detail": "budgets/lock/rollback/no-go present"
+    },
+    {
+      "check": "operational_documentation_covers_required_sections",
+      "ok": true,
+      "detail": "complete"
+    },
+    {
+      "check": "no_browser_or_gui_imports_on_this_path",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "check": "whole_company_regression_run_all_completes",
+      "ok": true,
+      "detail": {
+        "rc": 0
+      }
+    },
+    {
+      "check": "one_unified_run_covers_all_four_regions",
+      "ok": true,
+      "detail": [
+        "dubai",
+        "japan",
+        "singapore",
+        "uk"
+      ]
+    },
+    {
+      "check": "one_unified_candidate_manifest_is_written",
+      "ok": true,
+      "detail": {
+        "records": 5,
+        "tracker_candidates": 4
+      }
+    },
+    {
+      "check": "aggregate_counters_are_the_sum_of_the_regions",
+      "ok": true,
+      "detail": "sum verified"
+    },
+    {
+      "check": "every_region_records_a_source_coverage_matrix",
+      "ok": true,
+      "detail": {
+        "dubai": {
+          "public_linkedin_jobs": "not_applicable",
+          "public_indeed": "not_applicable",
+          "web_index": "not_applicable",
+          "ats_employer_careers": "reached"
+        },
+        "japan": {
+          "public_linkedin_jobs": "not_applicable",
+          "public_indeed": "not_applicable",
+          "web_index": "not_applicable",
+          "ats_employer_careers": "reached"
+        },
+        "singapore": {
+          "public_linkedin_jobs": "not_applicable",
+          "public_indeed": "not_applicable",
+          "web_index": "not_applicable",
+          "ats_employer_careers": "reached"
+        },
+        "uk": {
+          "public_linkedin_jobs": "not_applicable",
+          "public_indeed": "not_applicable",
+          "web_index": "not_applicable",
+          "ats_employer_careers": "reached"
+        }
+      }
+    },
+    {
+      "check": "no_coverage_state_is_the_bare_word_empty",
+      "ok": true,
+      "detail": "states restricted to the declared vocabulary"
+    },
+    {
+      "check": "daily_brief_reads_the_unified_source_coverage",
+      "ok": true,
+      "detail": [
+        "dubai",
+        "japan",
+        "singapore",
+        "uk"
+      ]
+    },
+    {
+      "check": "a_repeat_run_is_bounded_and_idempotent",
+      "ok": true,
+      "detail": "offline replay is not live proof"
+    },
+    {
+      "check": "canonical_workbooks_byte_identical_after_the_offline_regression",
+      "ok": true,
+      "detail": {
+        "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical_after_every_run",
+      "ok": true,
+      "detail": {
+        "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    }
+  ],
+  "counts": {
+    "checks": 23,
+    "passed": 23,
+    "failed": 0
+  },
+  "policy": {
+    "production_discovery_policy": "high_recall",
+    "diagnostic_mode": "intern_only",
+    "regions": [
+      "uk",
+      "dubai",
+      "japan",
+      "singapore"
+    ],
+    "source_classes": [
+      "public_linkedin_jobs",
+      "public_indeed",
+      "web_index",
+      "ats_employer_careers"
+    ],
+    "coverage_states": [
+      "blocked",
+      "not_applicable",
+      "reached",
+      "searched_no_results",
+      "unavailable"
+    ]
+  },
+  "live": {
+    "attempted": false
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c"
+    },
+    "dubai": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "canonical_workbook_writes": 0,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "linkedin_mutation": false,
+    "browser_or_gui_used": false,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "captcha_bypassed": false,
+    "scraping_behind_auth": false
+  },
+  "privacy_note": "raw result URLs are owner-private job-search data and stay under the git-ignored runtime/ tree; this evidence is aggregate only"
+}

@@ -1,0 +1,1507 @@
+[
+  {
+    "source": "795968d3:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "795968d3:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "795968d3:career-ops/linkedin_workflow.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "795968d3:career-ops/discovery/classifiers.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "795968d3:career-ops/discovery/pipeline.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "795968d3:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "795968d3:career-ops/discovery/web_research.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "snapshots\\795968d3\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "795968d3:exec-brain/codex_adapter.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "snapshots\\795968d3\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "795968d3:remote_queue/poller.py",
+    "timestamp": "2026-10-03T01:06:02+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "snapshots\\795968d3\\remote_queue\\poller.py"
+  },
+  {
+    "source": "4edcf322:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "4edcf322:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "4edcf322:career-ops/linkedin_workflow.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "4edcf322:career-ops/discovery/classifiers.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "4edcf322:career-ops/discovery/pipeline.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "4edcf322:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "4edcf322:career-ops/discovery/web_research.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "snapshots\\4edcf322\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "4edcf322:exec-brain/codex_adapter.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "evidence_file": "snapshots\\4edcf322\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "4edcf322:remote_queue/poller.py",
+    "timestamp": "2026-10-03T02:11:14+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "snapshots\\4edcf322\\remote_queue\\poller.py"
+  },
+  {
+    "source": "e8e33659:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "c450a4b8c1d980b5254ef348d04399fb6e888a0d653ce471ccd23fc713c5f022",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "e8e33659:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "4a0e70ad8df16d1ea3425932600e683ebf1ced858e4a54e30dae1d026c1f43fb",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "e8e33659:career-ops/linkedin_workflow.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "b0ea563b9a0692a585361037842dc3b6b4b3307fd856dabdb02d51e658f1e387",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "e8e33659:career-ops/linkedin_content_gen.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "432584719fdfb495b5353207c3b5d3f5247a483d4d595fa99029eb28062a9223",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\linkedin_content_gen.py"
+  },
+  {
+    "source": "e8e33659:career-ops/discovery/classifiers.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "e8e33659:career-ops/discovery/pipeline.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "e8e33659:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "e8e33659:career-ops/discovery/web_research.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "snapshots\\e8e33659\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "e8e33659:exec-brain/codex_adapter.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "evidence_file": "snapshots\\e8e33659\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "e8e33659:remote_queue/poller.py",
+    "timestamp": "2026-10-03T03:00:22+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "snapshots\\e8e33659\\remote_queue\\poller.py"
+  },
+  {
+    "source": "af28d6db:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "c450a4b8c1d980b5254ef348d04399fb6e888a0d653ce471ccd23fc713c5f022",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "af28d6db:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "5d26cba784af1f9ea7a6b16c225d43008930389feecd5a1457f6cc59ac6138d9",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "af28d6db:career-ops/linkedin_workflow.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "b0ea563b9a0692a585361037842dc3b6b4b3307fd856dabdb02d51e658f1e387",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "af28d6db:career-ops/linkedin_content_gen.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "ee6d7bb1c313e0890b697598695be535877d10641beef4f7759d9c93549942f1",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\linkedin_content_gen.py"
+  },
+  {
+    "source": "af28d6db:career-ops/linkedin_factcheck.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "d2a55915b2cdd2cdf1feabd75ba18c6b4e92a0202ffca7b860331f266fb21fcd",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\linkedin_factcheck.py"
+  },
+  {
+    "source": "af28d6db:career-ops/discovery/classifiers.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "af28d6db:career-ops/discovery/pipeline.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "af28d6db:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "af28d6db:career-ops/discovery/web_research.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "af28d6db:career-ops/nightly_career_run.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "af28d6db:career-ops/career_catchup.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "af28d6db:career-ops/run_nightly_career.cmd",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "af28d6db:career-ops/daily_jobs_links.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "add3941d01d98f34e28e009c423d79c3c619712d9602476b1612b76a711489ca",
+    "evidence_file": "snapshots\\af28d6db\\career-ops\\daily_jobs_links.py"
+  },
+  {
+    "source": "af28d6db:exec-brain/codex_adapter.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "evidence_file": "snapshots\\af28d6db\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "af28d6db:remote_queue/poller.py",
+    "timestamp": "2026-10-03T03:26:06+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "snapshots\\af28d6db\\remote_queue\\poller.py"
+  },
+  {
+    "source": "9101d2af:career-ops/linkedin_auth.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "c1a79d015ed160e62466e0a5c78c5a37771cb2047d6bad51ba63386de84851ac",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "9101d2af:career-ops/linkedin_publish.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "ffa5f925048f3d553d15e26f85ab1dda312e84ff03027513de47a49bf583d75f",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "9101d2af:career-ops/linkedin_workflow.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "971f0564123bc1787b53add66eca7c1f06da9fa53d14978dbe3fea9840401ce9",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "9101d2af:career-ops/discovery/classifiers.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "e6457f14b5032472f41e3a387d5db8059c6003817a2e0abc2ae504f02ba1718a",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "9101d2af:career-ops/discovery/pipeline.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "185259f705128b96a4796a1e7cff5513b8aa7261f51b713bfd23c43a9f37ab6b",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "9101d2af:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "9101d2af:career-ops/discovery/web_research.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "11c02d9ca1083c5a218f39255d794df1e66cd8373c7fe49362f3a9a277fcd411",
+    "evidence_file": "snapshots\\9101d2af\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "9101d2af:exec-brain/codex_adapter.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "snapshots\\9101d2af\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "9101d2af:remote_queue/poller.py",
+    "timestamp": "2026-10-03T11:29:41+01:00",
+    "classification": "tracked Git snapshot",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "snapshots\\9101d2af\\remote_queue\\poller.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\linkedin_auth.py",
+    "timestamp": "2026-10-03T10:24:05.537681+00:00",
+    "classification": "tracked",
+    "sha256": "c1a79d015ed160e62466e0a5c78c5a37771cb2047d6bad51ba63386de84851ac",
+    "evidence_file": "current\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\linkedin_publish.py",
+    "timestamp": "2026-10-03T10:24:05.538680+00:00",
+    "classification": "tracked",
+    "sha256": "ffa5f925048f3d553d15e26f85ab1dda312e84ff03027513de47a49bf583d75f",
+    "evidence_file": "current\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\linkedin_workflow.py",
+    "timestamp": "2026-10-03T10:24:05.539682+00:00",
+    "classification": "tracked",
+    "sha256": "971f0564123bc1787b53add66eca7c1f06da9fa53d14978dbe3fea9840401ce9",
+    "evidence_file": "current\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\discovery\\classifiers.py",
+    "timestamp": "2026-10-03T10:24:05.532671+00:00",
+    "classification": "tracked",
+    "sha256": "e6457f14b5032472f41e3a387d5db8059c6003817a2e0abc2ae504f02ba1718a",
+    "evidence_file": "current\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\discovery\\pipeline.py",
+    "timestamp": "2026-10-03T10:24:05.533681+00:00",
+    "classification": "tracked",
+    "sha256": "185259f705128b96a4796a1e7cff5513b8aa7261f51b713bfd23c43a9f37ab6b",
+    "evidence_file": "current\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\discovery\\scheduled_orchestrator.py",
+    "timestamp": "2026-10-03T10:24:05.534682+00:00",
+    "classification": "tracked",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "current\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\discovery\\web_research.py",
+    "timestamp": "2026-10-03T10:24:05.535681+00:00",
+    "classification": "tracked",
+    "sha256": "11c02d9ca1083c5a218f39255d794df1e66cd8373c7fe49362f3a9a277fcd411",
+    "evidence_file": "current\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\exec-brain\\codex_adapter.py",
+    "timestamp": "2026-10-03T10:24:05.550682+00:00",
+    "classification": "tracked",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "current\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\remote_queue\\poller.py",
+    "timestamp": "2026-09-24T20:21:54.732374+00:00",
+    "classification": "tracked",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "current\\remote_queue\\poller.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/linkedin_auth.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/linkedin_publish.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/linkedin_workflow.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97^3:career-ops/linkedin_content_gen.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "37c9350186e72ecddfe4b6afb1d7ab19d75ff442e3ddab09714f03c6340778fe",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\untracked\\career-ops\\linkedin_content_gen.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/discovery/classifiers.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/discovery/pipeline.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:career-ops/discovery/web_research.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97^3:career-ops/nightly_career_run.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97^3:career-ops/career_catchup.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:exec-brain/codex_adapter.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "9e7355fee2147c7465e35fd17e3faa622c6f7b97:remote_queue/poller.py",
+    "timestamp": "9e7355fee2147c7465e35fd17e3faa622c6f7b97 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\9e7355fee2147c7465e35fd17e3faa622c6f7b97\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/linkedin_auth.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "87785f883bec8a1987e7bc22285473514a8604bdcff332ec1f56acfe06b5400d",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/linkedin_publish.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "9d7dc7227efec29f6c079a9f9cf48625e66255126ab7b6bd420660b44ececcb0",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/linkedin_workflow.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/discovery/classifiers.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "8e31187081775d9435cf5faa32e2dad87893f01a4826bb16fa10a1135d9df22b",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/discovery/pipeline.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "843056ad46056c055314f1308e0f1a60817c490604e8381d7216eeb178158342",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "5f66fa53a242bcb83177bb468835c49c36a39065374e5f5f5e5fcaf8cd484aef",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:career-ops/discovery/web_research.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:exec-brain/codex_adapter.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "f992062f21d20ca204ce0193dbd1af730bc322bbb9b5d994f36f61c13e7aa9bc",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "7a537b040f8907572756939dccbed43533c45cc1:remote_queue/poller.py",
+    "timestamp": "7a537b040f8907572756939dccbed43533c45cc1 2026-10-03 02:44:02 +0100 On main: poller-autostash-20261003014402",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\7a537b040f8907572756939dccbed43533c45cc1\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/linkedin_auth.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "4b7df2e267e608bb9a7355dd8a33272f0e7d17ded70ae3bd1f4fc8ff2f7888aa",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/linkedin_publish.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "6a0528a7b40b96a8950b326db49bc3f8f7e07b43a2f97e654d5887fec2ab2cad",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/linkedin_workflow.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "00796be6e36a84eedea1985d984d54af139b9d63214b1eda88113ae1dbaca5a1",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/discovery/classifiers.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "0b7f76f8f2cc4efd87281d4b2f86d0eb84895c86ad635cb61fbbec72ee9bb198",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/discovery/pipeline.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "56ccb567b0e168670b4223f971ce6261e744a7c72a150bddd6b3772a62a968ec",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:career-ops/discovery/web_research.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "1b111bf55160934126c563e723bcb58d1da5e259a4e3397e12db328eafb7c2cc",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:exec-brain/codex_adapter.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278:remote_queue/poller.py",
+    "timestamp": "2ed2604d7bca72b7fb8ab5909b575a3e7d08b278 2026-10-03 01:44:02 +0100 On main: poller-autostash-20261003004401",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\2ed2604d7bca72b7fb8ab5909b575a3e7d08b278\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/linkedin_auth.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/linkedin_publish.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/linkedin_workflow.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/discovery/classifiers.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/discovery/pipeline.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:career-ops/discovery/web_research.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:exec-brain/codex_adapter.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c:remote_queue/poller.py",
+    "timestamp": "77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c 2026-10-03 01:06:01 +0100 On main: poller-autostash-20261003000601",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\77cfe2eb79da6eb2e5f2e294d76e1dbe7420e58c\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/linkedin_auth.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/linkedin_publish.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/linkedin_workflow.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/discovery/classifiers.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/discovery/pipeline.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:career-ops/discovery/web_research.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:exec-brain/codex_adapter.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "f311c7757f50618a6e331b82d89e50056f68edf0:remote_queue/poller.py",
+    "timestamp": "f311c7757f50618a6e331b82d89e50056f68edf0 2026-10-03 00:36:01 +0100 On main: poller-autostash-20261002233601",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\f311c7757f50618a6e331b82d89e50056f68edf0\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/linkedin_auth.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/linkedin_publish.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/linkedin_workflow.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/discovery/classifiers.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/discovery/pipeline.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:career-ops/discovery/web_research.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e^3:career-ops/nightly_career_run.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e^3:career-ops/career_catchup.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:exec-brain/codex_adapter.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "8a3519b7882187917374a64ff3f91cbbde6cd99e:remote_queue/poller.py",
+    "timestamp": "8a3519b7882187917374a64ff3f91cbbde6cd99e 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\8a3519b7882187917374a64ff3f91cbbde6cd99e\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/linkedin_auth.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/linkedin_publish.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/linkedin_workflow.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/discovery/classifiers.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/discovery/pipeline.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:career-ops/discovery/web_research.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:exec-brain/codex_adapter.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2:remote_queue/poller.py",
+    "timestamp": "3f7b5074b646c1248311b456fdcfaa812a5bdfb2 2026-10-03 00:00:01 +0100 On main: poller-autostash-20261002230001",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\3f7b5074b646c1248311b456fdcfaa812a5bdfb2\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/linkedin_auth.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/linkedin_publish.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/linkedin_workflow.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/discovery/classifiers.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/discovery/pipeline.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:career-ops/discovery/web_research.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241^3:career-ops/nightly_career_run.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241^3:career-ops/career_catchup.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:exec-brain/codex_adapter.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241:remote_queue/poller.py",
+    "timestamp": "7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\7a7c33f8c4efa369f9d301bd0eeae5b9b0a90241\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/linkedin_auth.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/linkedin_publish.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/linkedin_workflow.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/discovery/classifiers.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/discovery/pipeline.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:career-ops/discovery/web_research.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:exec-brain/codex_adapter.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "8a18314c472cda97ff607863869815d650b65b59:remote_queue/poller.py",
+    "timestamp": "8a18314c472cda97ff607863869815d650b65b59 2026-10-02 23:56:01 +0100 On main: poller-autostash-20261002225601",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\8a18314c472cda97ff607863869815d650b65b59\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/linkedin_auth.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/linkedin_publish.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/linkedin_workflow.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/discovery/classifiers.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/discovery/pipeline.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:career-ops/discovery/web_research.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11^3:career-ops/nightly_career_run.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11^3:career-ops/career_catchup.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:exec-brain/codex_adapter.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "4a1ba81c36c1768d6b430da7198ab5d242c52c11:remote_queue/poller.py",
+    "timestamp": "4a1ba81c36c1768d6b430da7198ab5d242c52c11 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\4a1ba81c36c1768d6b430da7198ab5d242c52c11\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/linkedin_auth.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/linkedin_publish.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/linkedin_workflow.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/discovery/classifiers.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/discovery/pipeline.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:career-ops/discovery/web_research.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:exec-brain/codex_adapter.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "5fcbc998a2381ca1fe867260f262df60e2bee55d:remote_queue/poller.py",
+    "timestamp": "5fcbc998a2381ca1fe867260f262df60e2bee55d 2026-10-02 23:52:01 +0100 On main: poller-autostash-20261002225201",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\5fcbc998a2381ca1fe867260f262df60e2bee55d\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/linkedin_auth.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/linkedin_publish.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/linkedin_workflow.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/discovery/classifiers.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/discovery/pipeline.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:career-ops/discovery/web_research.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858^3:career-ops/nightly_career_run.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858^3:career-ops/career_catchup.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:exec-brain/codex_adapter.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "c0f034e5094500ff217666373a1f8f333ba27858:remote_queue/poller.py",
+    "timestamp": "c0f034e5094500ff217666373a1f8f333ba27858 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\c0f034e5094500ff217666373a1f8f333ba27858\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/linkedin_auth.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/linkedin_publish.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/linkedin_workflow.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/discovery/classifiers.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/discovery/pipeline.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:career-ops/discovery/web_research.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:exec-brain/codex_adapter.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "b98894db9137a75725ee06b8de6b9a59f6726bea:remote_queue/poller.py",
+    "timestamp": "b98894db9137a75725ee06b8de6b9a59f6726bea 2026-10-02 23:50:01 +0100 On main: poller-autostash-20261002225001",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\b98894db9137a75725ee06b8de6b9a59f6726bea\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/linkedin_auth.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/linkedin_publish.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/linkedin_workflow.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/discovery/classifiers.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/discovery/pipeline.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:career-ops/discovery/web_research.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3^3:career-ops/nightly_career_run.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "ff532b4a738e9492d72bdab661b24831e5f24bbadda3b30f905d1b500cd1e8d0",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\untracked\\career-ops\\nightly_career_run.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3^3:career-ops/career_catchup.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "89638052ccc40d4e1fcc41058f14d19115b8382a370f2a78150fa7d946ddf419",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\untracked\\career-ops\\career_catchup.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3^3:career-ops/run_nightly_career.cmd",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "dd649d7f32f4286c1c390765a97d2d1d7de22238a4e9e04d1091f550653b86b5",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\untracked\\career-ops\\run_nightly_career.cmd"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:exec-brain/codex_adapter.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "c75b293a5e230151142b8eb5e696a86ecfeebec3:remote_queue/poller.py",
+    "timestamp": "c75b293a5e230151142b8eb5e696a86ecfeebec3 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601-untracked",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\c75b293a5e230151142b8eb5e696a86ecfeebec3\\tracked\\remote_queue\\poller.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/linkedin_auth.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "32aeadd2d0a6f24c449dfbc5b44cdd2470440a5ab1664b518987c50d3d276ecd",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\linkedin_auth.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/linkedin_publish.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "10dbf043d4d39e6fe483857a1ba2c78c5bf331ed970f4c708046d3b78d483f70",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\linkedin_publish.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/linkedin_workflow.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "1dd56f494af37975ae94d00f375284f92936d6656872c810aa7d23869ff1f327",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\linkedin_workflow.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/discovery/classifiers.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "22d441d788ea37347b5160a162e1d6d6341c99d5572c8dfdf67ee7ac64f0f384",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\discovery\\classifiers.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/discovery/pipeline.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "264afda9e750fea57d93403425774292c7f9da2c9f6a1147f2c4d0b9697cea41",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\discovery\\pipeline.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/discovery/scheduled_orchestrator.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "359d7ddb6f87a92db6e54f0dfe6bce90ecd704c841dce268570ebc04624931bb",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\discovery\\scheduled_orchestrator.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:career-ops/discovery/web_research.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "2043e28f9006f559ffc124b258fe8033ed050e2a4c4cdfc48ab8087d6331ce54",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\career-ops\\discovery\\web_research.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:exec-brain/codex_adapter.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "bda2d48d2f68217bcb22ad5fa4129f8c53747f73ae56a7044f230884373488a0",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\exec-brain\\codex_adapter.py"
+  },
+  {
+    "source": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995:remote_queue/poller.py",
+    "timestamp": "d6fcc087c0c1678971f008738eb4f9e3e4cfb995 2026-10-02 23:46:01 +0100 On main: poller-autostash-20261002224601",
+    "classification": "stash",
+    "sha256": "56f763d7f8f85aaed97f4ea30741e692cab7ed2fe3b9faf3b4c248b0901f7b6a",
+    "evidence_file": "stashes\\d6fcc087c0c1678971f008738eb4f9e3e4cfb995\\tracked\\remote_queue\\poller.py"
+  }
+]

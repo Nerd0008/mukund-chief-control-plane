@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""Bounded CATCH-UP for the nightly career pipeline (owner-authorised 2026-09-25).
+
+WHY THIS EXISTS
+---------------
+`ChiefCareerNightly` (23:30) runs the career nightly pipeline: all four regional
+discovery lanes in one bounded read-only pass, then each region's canonical Excel
+tracker maintained through the canonical writer. It is registered `Interactive only`
+- by design, so the user-scoped Credential Manager provider keys stay readable - so
+it only runs while the owner is signed in and the machine is awake.
+
+That is the observed failure mode: the 2026-09-24 UK cycle was killed mid-flight
+(`Last Result -1073741510` = STATUS_CONTROL_C_EXIT), so that night's cycle was lost
+and every downstream report truthfully said "0 new rows".
+
+The owner's decision (2026-09-25): "Add a bounded catch-up scan that fires when the
+machine is next awake and signed in."
+
+WHAT THIS DOES
+--------------
+Runs `career-ops/run_nightly_career.cmd` - the SAME launcher the scheduled task uses,
+never a copy - but only when it is genuinely needed. It is a guard, not a second
+pipeline: no discovery, classification, eligibility, dedupe or write logic lives here.
+
+Three guards, checked in order:
+
+1. `already_recent` - a nightly run finished within --min-age-hours (default 10h).
+   The normal case: tonight's 23:30 run did its job, so every periodic tick between
+   it and the next 23:30 is a cheap no-op.
+2. `run_in_flight` - a live process holds the unified-run lock, or the nightly
+   report file is being written. Never races another run.
+3. `stale_run` - a nightly run exists but is older than --min-age-hours, or no
+   nightly report exists at all: run the catch-up.
+
+Safety properties (unchanged from the pipeline it calls):
+  * discovery is read-only: no login, no browser, no cookie/session, no outreach;
+  * tracker writes go ONLY through the canonical writer, which dedupes, takes a
+    hash-verified backup, re-verifies the workbook and never touches owner columns;
+  * synthetic/fixture records are filtered before any write;
+  * bounded wall clock (--timeout-seconds), and every decision is logged so an
+    unattended run is auditable after the fact.
+
+Usage:
+  python career-ops/career_catchup.py --plan            # decision only, never runs
+  python career-ops/career_catchup.py                   # guard, then catch up if due
+  python career-ops/career_catchup.py --dry-run-trackers  # scan, plan appends, write nothing
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+CONTROL_PLANE = Path(__file__).resolve().parents[1]
+NIGHTLY_DIR = CONTROL_PLANE / "runtime" / "career-ops" / "nightly"
+NIGHTLY_REPORT = NIGHTLY_DIR / "latest.json"
+NIGHTLY_LAUNCHER = CONTROL_PLANE / "career-ops" / "run_nightly_career.cmd"
+LOCK_FILE = CONTROL_PLANE / "runtime" / "career-ops" / "discovery" / "unified-run.lock"
+LOG_FILE = NIGHTLY_DIR / "catchup-log.jsonl"
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def parse_iso(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def last_nightly() -> tuple[datetime | None, dict]:
+    """The last nightly run's finish time, from the pipeline's own report."""
+    try:
+        doc = json.loads(NIGHTLY_REPORT.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, ValueError):
+        return None, {}
+    return parse_iso(doc.get("finished_at")), doc
+
+
+def process_alive(pid: int) -> bool:
+    """Liveness of a lock holder. tasklist, not a signal: this is Windows."""
+    try:
+        proc = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return True  # cannot prove it is dead -> assume alive, do not race it
+    return str(pid) in (proc.stdout or "")
+
+
+def lock_holder() -> dict | None:
+    try:
+        lock = json.loads(LOCK_FILE.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, ValueError):
+        return None
+    pid = lock.get("pid")
+    if isinstance(pid, int) and process_alive(pid):
+        return lock
+    return None
+
+
+def decide(min_age_hours: float) -> dict:
+    """The guard decision. Pure read; no side effects."""
+    finished, doc = last_nightly()
+    if lock_holder() is not None:
+        return {"decision": "run_in_flight",
+                "reason": "a unified discovery run currently holds the lock"}
+
+    started = parse_iso(doc.get("started_at"))
+    if started is not None:
+        started_age = (datetime.now(timezone.utc) - started).total_seconds() / 3600.0
+        if started_age < 0.5 and finished is None:
+            return {"decision": "run_in_flight",
+                    "reason": f"a nightly run started {started_age * 60:.0f} min ago "
+                              f"and has not finished yet"}
+
+    if finished is None:
+        return {"decision": "stale_run",
+                "reason": "no completed nightly run is recorded (no readable "
+                          "runtime/career-ops/nightly/latest.json)"}
+
+    age_h = (datetime.now(timezone.utc) - finished).total_seconds() / 3600.0
+    if age_h < min_age_hours:
+        return {"decision": "already_recent",
+                "reason": f"the nightly pipeline finished {age_h:.1f}h ago "
+                          f"(threshold {min_age_hours}h) - no catch-up needed",
+                "last_finished_at": finished.isoformat()}
+    return {"decision": "stale_run",
+            "reason": f"the nightly pipeline last finished {age_h:.1f}h ago "
+                      f"(threshold {min_age_hours}h)",
+            "last_finished_at": finished.isoformat()}
+
+
+def append_log(record: dict) -> None:
+    try:
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_FILE.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except OSError as exc:  # pragma: no cover - environment specific
+        print(f"warning: could not append catch-up log: {exc}", file=sys.stderr)
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--min-age-hours", type=float, default=10.0,
+                        help="catch up only when the last nightly run is older than this")
+    parser.add_argument("--plan", action="store_true",
+                        help="report the decision and exit without running anything")
+    parser.add_argument("--dry-run-trackers", action="store_true",
+                        help="pass through: scan, plan the appends, write no workbook")
+    parser.add_argument("--timeout-seconds", type=int, default=2700,
+                        help="hard wall-clock bound for the catch-up run")
+    parser.add_argument("--web-queries", type=int, default=4,
+                        help="bounded web queries per region (same as the scheduled task)")
+    args = parser.parse_args(argv)
+
+    decision = decide(args.min_age_hours)
+    record = {"at": now_iso(), "guard": decision, "mode": "plan" if args.plan else "run"}
+
+    if args.plan or decision["decision"] != "stale_run":
+        record["ran"] = False
+        append_log(record)
+        print(json.dumps(record, indent=2, ensure_ascii=False))
+        return 0
+
+    if not NIGHTLY_LAUNCHER.exists():
+        record.update({"ran": False, "error": f"launcher missing: {NIGHTLY_LAUNCHER}"})
+        append_log(record)
+        print(json.dumps(record, indent=2, ensure_ascii=False))
+        return 4
+
+    cmd = [str(NIGHTLY_LAUNCHER), "--web-queries", str(args.web_queries)]
+    if args.dry_run_trackers:
+        cmd.append("--dry-run-trackers")
+
+    started = now_iso()
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              timeout=args.timeout_seconds, cwd=str(CONTROL_PLANE))
+        exit_code = proc.returncode
+        stderr_tail = (proc.stderr or "").strip()[-400:]
+    except subprocess.TimeoutExpired:
+        exit_code, stderr_tail = 124, f"timed out after {args.timeout_seconds}s"
+    except OSError as exc:
+        exit_code, stderr_tail = 5, str(exc)[:400]
+
+    finished_dt, doc = last_nightly()
+    record.update({
+        "ran": True,
+        "started_at": started,
+        "finished_at": now_iso(),
+        "exit_code": exit_code,
+        "stderr_tail": stderr_tail,
+        # After the fact, report the pipeline's own verdict - not our assumption.
+        "pipeline_ok": doc.get("ok"),
+        "pipeline_finished_at": doc.get("finished_at"),
+        "pipeline_scan_exit_code": (doc.get("scan") or {}).get("exit_code"),
+        "pipeline_scan_production_ready": (doc.get("scan") or {}).get("production_ready"),
+    })
+    append_log(record)
+    print(json.dumps(record, indent=2, ensure_ascii=False))
+    return 0 if exit_code == 0 else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

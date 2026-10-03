@@ -1,0 +1,57 @@
+--- e8e33659/exec-brain/codex_adapter.py
++++ 9101d2af/exec-brain/codex_adapter.py
+@@ -24,19 +24,6 @@
+ # the resolved path/version are ever recorded — never credentials.
+ CODEX_EXECUTABLE_ENV = ("CODEX_EXECUTABLE", "CODEX_CLI_PATH")
+ CODEX_BIN_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "OpenAI" / "Codex" / "bin"
+-
+-
+-def _default_model() -> str:
+-    """Model slug for dispatches that do not name one.
+-
+-    The CLI must always be told which model to use. `~/.codex/config.toml` is
+-    written by the Codex desktop app and can name a slug the CLI rejects outright
+-    ("not supported when using Codex with a ChatGPT account"), which makes every
+-    dispatch fail behind an otherwise clean exit code. Override with
+-    CODEX_MODEL / CAREER_OPS_CODEX_MODEL.
+-    """
+-    return (os.environ.get("CODEX_MODEL") or os.environ.get("CAREER_OPS_CODEX_MODEL")
+-            or "gpt-6-sol")
+ 
+ 
+ def _codex_version_of(exe: Path) -> Optional[str]:
+@@ -252,7 +239,7 @@
+         dispatch_id = f"codex-{uuid.uuid4().hex[:12]}"
+         contract_id = contract.get('contract_id', 'unknown')
+         objective = contract.get('objective', '')
+-        model = contract.get('model', None) or _default_model()
++        model = contract.get('model', None)
+         timeout = contract.get('timeout', 300)
+ 
+         # Build command with safe profile defaults
+@@ -277,14 +264,7 @@
+         if cwd:
+             cmd.extend(["--cd", cwd])
+ 
+-        # The prompt is delivered on stdin, never in argv. On Windows the resolver
+-        # can land on a shim (`codex.cmd`) that cmd.exe launches, and cmd.exe treats
+-        # a newline inside an argument as a command terminator: a multi-line prompt
+-        # is silently truncated to its first line, so the model answers a different
+-        # question (observed: a full classification prompt came back as "[]").
+-        # `-` tells Codex to read the prompt from stdin, so multi-line objectives
+-        # survive whichever executable resolved.
+-        cmd.append("-")
++        cmd.append(objective)
+ 
+         # Execute
+         start_time = time.time()
+@@ -294,8 +274,7 @@
+                 capture_output=True,
+                 text=True,
+                 timeout=timeout,
+-                cwd=cwd or ".",
+-                input=objective,
++                cwd=cwd or "."
+             )
+             elapsed = time.time() - start_time
+ 

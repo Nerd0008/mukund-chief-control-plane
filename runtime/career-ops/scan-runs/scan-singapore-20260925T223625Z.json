@@ -1,0 +1,25 @@
+{
+  "region": "singapore",
+  "command": [
+    "node",
+    "scan.mjs",
+    "--dry-run",
+    "--quiet"
+  ],
+  "cwd": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "lane_env": {
+    "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\portals.yml",
+    "CAREER_OPS_PROFILE": "config/profile.yml",
+    "CAREER_OPS_PIPELINE": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\pipeline.md",
+    "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\singapore\\scan-history.tsv"
+  },
+  "started_at": "2026-09-25T22:36:25+00:00",
+  "finished_at": "2026-09-25T22:36:31+00:00",
+  "duration_s": 5.6,
+  "exit_code": 0,
+  "dry_run": true,
+  "ok": true,
+  "stdout_capture_ok": true,
+  "stdout_tail": "Scanning 0 companies; 7 job boards; 0 local parser; 0 skipped — no provider matched via providers\n(dry run — no files will be written)\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPortal Scan — 2026-09-25\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCompanies scanned:     0\nJob boards scanned:    7\nTotal jobs found:      587\nFiltered by title:     536 removed\nFiltered by location:  38 removed\nFiltered by age:       4 removed\nFiltered by salary:    0 removed\nDuplicates:            3 skipped\nRecheck eligible:      0 old scan-history URL(s)\nNew offers added:      6\nTrust validation:      0 high, 6 medium, 0 low\nTrust flags:           company_domain_mismatch: 6\n\nErrors (3):\n  ✗ Glints — cyber security: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n  ✗ Glints — information security: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n  ✗ Glints — IT support: glints: HTTP 403 — <!doctype html>\n<head>\n    <meta charset=\"utf-8\" />\n    <title>Glints - Firewall</title>\n  <meta http-equiv=\"refresh\" content=\"360\"></head>\n\n\n\n<style>\n    body { text-align: center; padding: 150px; }\n\n\nNew offers:\n  + Ensign InfoSecurity (Singapore) Pte. Ltd. | Intern, Cyber Threat Intel | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Singapore Exchange Limited | Intern - Information Security (Spring 2027, Jan to Jun) | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Temasek International Pte. Ltd. | Cyber Security Associate - Temasek International Pte Ltd | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + WS Audiology | Intern - Information Security Risk & Compliance | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + Apple | Information Security Internship Program (FY27 Summer Intake) | Singapore [Trust: 85/100 — company_domain_mismatch]\n  + WS Audiology | Intern - Information Security Automation & Integration | Singapore [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+  "stderr_tail": ""
+}

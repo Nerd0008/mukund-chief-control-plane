@@ -1,0 +1,17 @@
+{
+  "file": {
+    "path": "C:\\Users\\mukun\\AppData\\Local\\hermes\\config.yaml",
+    "mtime_utc": "2026-10-02T23:49:32.916685+00:00",
+    "sha256": "c6bdec8d1327f138eaefb1098380a6b46ac8a2e50c44e15bc3dfd4ee40b5a739",
+    "bytes": 4675
+  },
+  "model": {
+    "default": "meituan/longcat-2.5-preview:free",
+    "provider": "nous",
+    "base_url": "https://inference-api.nousresearch.com/v1"
+  },
+  "terminal": {
+    "backend": "local",
+    "cwd": "."
+  }
+}

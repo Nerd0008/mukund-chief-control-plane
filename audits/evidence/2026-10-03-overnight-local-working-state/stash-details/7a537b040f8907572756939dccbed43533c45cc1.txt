@@ -1,0 +1,13 @@
+commit 7a537b040f8907572756939dccbed43533c45cc1
+Merge: 4edcf322 b878da75
+Author: Nerd0008 <mukunddidwania08@gmail.com>
+Date:   Sat Oct 3 02:44:02 2026 +0100
+
+    On main: poller-autostash-20261003014402
+
+ career-ops/linkedin_auth.py                        | 25 ++++++
+ career-ops/linkedin_publish.py                     | 89 ++++++++++++++++++++--
+ remote-queue/logs/queue.log                        | 32 ++++++++
+ runtime/career-ops/run-health/tracker-writer.json  | 16 ++--
+ .../career-ops/scan-runs/regional-run-state.json   |  8 +-
+ 5 files changed, 152 insertions(+), 18 deletions(-)

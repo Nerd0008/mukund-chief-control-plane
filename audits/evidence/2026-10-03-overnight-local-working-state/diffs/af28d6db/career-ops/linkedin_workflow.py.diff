@@ -1,0 +1,29 @@
+--- af28d6db/career-ops/linkedin_workflow.py
++++ 9101d2af/career-ops/linkedin_workflow.py
+@@ -1206,6 +1206,8 @@
+         argv.append("--dry-run")
+     if args.allow_duplicate:
+         argv.append("--allow-duplicate")
++    if args.image:
++        argv += ["--image", args.image]
+     return lip.main(argv)
+ 
+ 
+@@ -1261,7 +1263,7 @@
+         "external_actions_taken": [],
+         "state": ("LIVE PATH CONFIGURED (owner OAuth present)"
+                   if lia.oauth_ready()
+-                  else "READY_NEEDS_OWNER_CONFIG (no LinkedIn OAuth credential set stored)"),
++                  else "READY_NEEDS_OWNER_CONFIG (no usable LinkedIn OAuth path)"),
+     })
+     return 0
+ 
+@@ -1357,6 +1359,8 @@
+     p.add_argument("--dry-run", action="store_true")
+     p.add_argument("--allow-duplicate", action="store_true")
+     p.add_argument("--max-retries", type=int, default=2)
++    p.add_argument("--image", default=None,
++                   help="path to an image to attach to the approved post")
+     p.set_defaults(fn=cmd_publish)
+ 
+     args = ap.parse_args(argv)

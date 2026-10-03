@@ -1,0 +1,25 @@
+{
+  "region": "dubai",
+  "command": [
+    "node",
+    "scan.mjs",
+    "--dry-run",
+    "--quiet"
+  ],
+  "cwd": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "lane_env": {
+    "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\dubai\\portals.yml",
+    "CAREER_OPS_PROFILE": "config/profile.yml",
+    "CAREER_OPS_PIPELINE": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\dubai\\pipeline.md",
+    "CAREER_OPS_SCAN_HISTORY": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\lanes\\dubai\\scan-history.tsv"
+  },
+  "started_at": "2026-10-01T22:50:03+00:00",
+  "finished_at": "2026-10-01T22:51:34+00:00",
+  "duration_s": 90.6,
+  "exit_code": 0,
+  "dry_run": true,
+  "ok": true,
+  "stdout_capture_ok": true,
+  "stdout_tail": "Scanning 0 companies; 12 job boards; 0 local parser; 0 skipped — no provider matched via providers\n(dry run — no files will be written)\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPortal Scan — 2026-10-01\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCompanies scanned:     0\nJob boards scanned:    12\nTotal jobs found:      2710\nFiltered by title:     2570 removed\nFiltered by location:  139 removed\nFiltered by age:       0 removed\nFiltered by salary:    0 removed\nDuplicates:            0 skipped\nRecheck eligible:      0 old scan-history URL(s)\nNew offers added:      1\nTrust validation:      0 high, 1 medium, 0 low\nTrust flags:           company_domain_mismatch: 1\n\nNew offers:\n  + Riot Games | Software Engineering Intern - Summer 2027 (Remote) | Los Angeles, CA [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+  "stderr_tail": ""
+}

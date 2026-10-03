@@ -1,0 +1,17 @@
+{
+  "heading": "Application for IT Support Analyst",
+  "salutation": "Dear Formula 1 Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_F1_IT_Support_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\f1_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the IT Support Analyst role at Biggin Hill because it describes, almost line for line, the work I already do and want to keep doing at a larger scale. Providing hands-on and remote support to users, keeping logged jobs moving to resolution, building and maintaining hardware, and keeping documentation accurate are the daily reality of my current role - the difference is that your version of it runs across three sites and an event technical centre supporting Formula 1, and that is a step up I want to make. I am available to start at short notice and comfortable with the travel the role involves.",
+
+    "My background combines practical support work with formal security training. I am an MSc Information Security graduate from Royal Holloway, awarded with Merit, with CompTIA Security+ and ISC2 Certified in Cybersecurity, preceded by a BCA in computer applications. That means I understand not only how to resolve a user's issue but why access control, change management and documentation discipline exist - which matters in a role that follows a formal change process and supports senior staff.",
+
+    "In my current IT support position I am the first point of contact for 15 colleagues across 15 to 20 devices, troubleshooting access and system problems, monitoring server health and maintaining network and website-access controls. I handle four to five access requests a day through on-premises Active Directory - verifying business approval, granting time-limited permissions and documenting the access period and any extension - and I investigate four to five suspicious emails a day, recording findings and alerting colleagues to recurring tactics. I also built a local tool that maps Windows error codes to their common causes and used it to trace intermittent server freezes to missing or corrupted DLLs, which is the kind of proactive monitoring and root-cause work your job description asks for rather than only ticket closure.",
+
+    "Two things in your requirements I want to be straightforward about. I work with Microsoft 365 and Active Directory daily and I am comfortable with device management concepts, but I have not administered Azure Active Directory at enterprise scale or run a formal device-manager fleet, so those are areas I would expect to learn quickly on the job rather than claim as existing depth. What I do bring is a genuine service mindset and documentation habit: at Co-op, as Person in Charge, I conduct weekly risk assessments and daily compliance checks, maintain the assessment records, and coordinate seven or eight colleagues per shift while explaining requirements to people who have no particular interest in them. I am used to being the person who keeps the record straight and follows the escalation path.",
+
+    "What draws me to Formula 1 specifically is that the IT function supports people who cannot have downtime - a race weekend is not a movable deadline. I would welcome the opportunity to discuss how my support experience could contribute to your IT team."
+  ]
+}

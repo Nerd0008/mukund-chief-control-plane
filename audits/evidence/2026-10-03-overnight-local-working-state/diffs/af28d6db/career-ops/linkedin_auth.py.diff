@@ -1,0 +1,150 @@
+--- af28d6db/career-ops/linkedin_auth.py
++++ 9101d2af/career-ops/linkedin_auth.py
+@@ -82,6 +82,9 @@
+ # refresh happens before an API call rather than as a failed call.
+ DEFAULT_TOKEN_LIFETIME_DAYS = 60
+ EXPIRY_TARGET = "chief-linkedin-access-token-expiry-utc"
++# Treat a token that is about to expire as unusable so a request is never
++# started with credentials that can expire mid-flight.
++ACCESS_TOKEN_SAFETY_SKEW_SECONDS = 300
+ 
+ 
+ def now_utc() -> str:
+@@ -218,68 +221,74 @@
+     return value or None
+ 
+ 
+-def _expiry_datetime() -> datetime | None:
+-    raw = access_token_expiry()
++def _expiry_datetime(raw: str | None = None) -> datetime | None:
++    """Parse the recorded access-token expiry; invalid/missing values fail closed."""
++    raw = access_token_expiry() if raw is None else raw
+     if not raw:
+         return None
+     try:
+-        parsed = datetime.fromisoformat(raw)
+-    except ValueError:
++        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
++    except (TypeError, ValueError):
+         return None
+     if parsed.tzinfo is None:
+         parsed = parsed.replace(tzinfo=timezone.utc)
+-    return parsed
+-
+-
+-def access_token_valid() -> bool:
+-    """True when a stored access token exists and has not expired."""
+-    if not read_secret(CRED_TARGETS["access_token"]):
++    return parsed.astimezone(timezone.utc)
++
++
++def access_token_valid(*, now: datetime | None = None,
++                       pres: dict | None = None,
++                       expiry_raw: str | None = None) -> bool:
++    """True only for a present token with a valid expiry beyond the safety skew."""
++    pres = pres or presence()
++    if not pres["access_token"]["present"]:
+         return False
+-    expiry = _expiry_datetime()
++    expiry = _expiry_datetime(expiry_raw)
+     if expiry is None:
+-        # No recorded expiry: presence alone is all that can be asserted.
+-        return True
+-    return expiry > datetime.now(timezone.utc)
+-
+-
+-def oauth_ready() -> bool:
+-    """True when the publish path has everything it needs to mint a request.
+-
+-    Client id and client secret are always required. For the token, either a
+-    refresh token (the long-lived path) or a non-expired access token is
+-    sufficient — LinkedIn does not always return a refresh token, and a valid
+-    access token is enough to publish.
+-    """
+-    if not read_secret(CRED_TARGETS["client_id"]):
+         return False
+-    if not read_secret(CRED_TARGETS["client_secret"]):
+-        return False
+-    if read_secret(CRED_TARGETS["refresh_token"]):
+-        return True
+-    return access_token_valid()
+-
+-
+-def oauth_ready_detail() -> dict:
+-    """Explain the oauth_ready() verdict without exposing any secret value."""
+-    has_id = bool(read_secret(CRED_TARGETS["client_id"]))
+-    has_secret = bool(read_secret(CRED_TARGETS["client_secret"]))
+-    has_refresh = bool(read_secret(CRED_TARGETS["refresh_token"]))
+-    has_access = bool(read_secret(CRED_TARGETS["access_token"]))
+-    valid = access_token_valid()
+-    if not has_id or not has_secret:
+-        reason = "client id and/or client secret missing"
+-    elif has_refresh:
+-        reason = "client id + secret + refresh token present"
+-    elif valid:
+-        reason = "client id + secret + non-expired access token present (no refresh token)"
+-    elif has_access:
+-        reason = "stored access token has expired and no refresh token is stored"
++    now = now or datetime.now(timezone.utc)
++    if now.tzinfo is None:
++        now = now.replace(tzinfo=timezone.utc)
++    return expiry > now.astimezone(timezone.utc) + timedelta(
++        seconds=ACCESS_TOKEN_SAFETY_SKEW_SECONDS)
++
++
++def oauth_ready_detail(*, now: datetime | None = None) -> dict:
++    """Explain readiness using presence + expiry metadata, never secret values."""
++    pres = presence()
++    expiry_raw = access_token_expiry()
++    usable_access = access_token_valid(now=now, pres=pres, expiry_raw=expiry_raw)
++    refresh_path = all(pres[k]["present"]
++                       for k in ("client_id", "client_secret", "refresh_token"))
++    ready = usable_access or refresh_path
++
++    if usable_access:
++        reason = "usable unexpired access token present"
++    elif refresh_path:
++        reason = "access token unavailable/expired but complete refresh path present"
++    elif pres["access_token"]["present"] and _expiry_datetime(expiry_raw) is None:
++        reason = "access token present but expiry is missing or invalid; failing closed"
++    elif pres["access_token"]["present"]:
++        reason = "access token expired/inside safety skew and refresh path is incomplete"
+     else:
+-        reason = "no access token and no refresh token stored"
+-    return {"ready": oauth_ready(), "reason": reason,
+-            "client_id_present": has_id, "client_secret_present": has_secret,
+-            "refresh_token_present": has_refresh, "access_token_present": has_access,
+-            "access_token_valid": valid, "access_token_expiry_utc": access_token_expiry()}
++        reason = "no usable access token and refresh path is incomplete"
++
++    return {
++        "ready": ready,
++        "reason": reason,
++        "usable_access_token": usable_access,
++        "refresh_path_available": refresh_path,
++        "client_id_present": pres["client_id"]["present"],
++        "client_secret_present": pres["client_secret"]["present"],
++        "refresh_token_present": pres["refresh_token"]["present"],
++        "access_token_present": pres["access_token"]["present"],
++        "access_token_expiry_utc": expiry_raw,
++        "safety_skew_seconds": ACCESS_TOKEN_SAFETY_SKEW_SECONDS,
++    }
++
++
++def oauth_ready(*, now: datetime | None = None) -> bool:
++    """Canonical publish-readiness predicate."""
++    return bool(oauth_ready_detail(now=now)["ready"])
+ 
+ 
+ def store_access_token(token: str, *, lifetime_days: int = DEFAULT_TOKEN_LIFETIME_DAYS,
+@@ -405,8 +414,8 @@
+         "refresh_token_present": pres["refresh_token"]["present"],
+         "access_token_present": pres["access_token"]["present"],
+         "access_token_expiry_utc": access_token_expiry(),
+-        "oauth_ready": all(pres[k]["present"]
+-                           for k in ("client_id", "client_secret", "refresh_token")),
++        "oauth_ready": oauth_ready(),
++        "oauth_detail": oauth_ready_detail(),
+         "secret_values_read": False,
+         "note": ("Presence only: no secret value is read, printed or logged. A missing "
+                  "credential means the owner has not completed LinkedIn app/OAuth setup "

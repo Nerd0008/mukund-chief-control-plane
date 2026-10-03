@@ -1,0 +1,495 @@
+{
+  "acceptance_run": "20260930T144612Z",
+  "task": "agent-career-ops-tracker-writer-and-monthly-rollover-2026-09-23",
+  "roster": "B09",
+  "month_rotated": "2026-08",
+  "target_month": "2026-08",
+  "mode": "dated COPIES only; canonical workbooks read-only",
+  "no_external_actions": true,
+  "canonical_hashes_before": {
+    "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+    "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+    "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+    "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+  },
+  "stage_reversibility": {
+    "restored_from_backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\backups\\uk-uk-cyber-job-tracker.pre-rollover-20260930-154613.xlsx",
+    "restored_sha256": "ae1af9b9b2196ccc5f863fa2fbd6dc4f81b90f1accb492063f975a83cbaf98ad",
+    "equals_pre_rollover_hash": true,
+    "verification_ok": true,
+    "archive_removed": true,
+    "index_sources_with_archive": "uk-cyber-job-tracker.2026-08.xlsx",
+    "index_keys_with_archive": 160,
+    "index_keys_without_archive": 158,
+    "keys_dropped_when_archive_removed": 2,
+    "archive_was_present_in_index": true,
+    "note": "removing the archive removes exactly the rotated keys from the dedupe index"
+  },
+  "stage_run_health": {
+    "excel_is_source_of_truth": true,
+    "chief_state_role": "orchestration-only",
+    "jobs": {
+      "tracker-writer": {
+        "worker": "career-ops/tracker_writer.py",
+        "roster": "B08",
+        "runs_recorded": 4,
+        "last_region": "singapore",
+        "last_status": "ok",
+        "last_counts": {
+          "appended": 2,
+          "data_rows_after": 24,
+          "data_rows_before": 22,
+          "duplicates": 0,
+          "input": 2,
+          "refreshed": 0,
+          "rejected": 0
+        }
+      },
+      "monthly-rollover": {
+        "worker": "career-ops/tracker_rollover.py",
+        "roster": "B09",
+        "runs_recorded": 8,
+        "last_region": "singapore",
+        "last_status": "no_rows",
+        "last_counts": {
+          "archived_rows": 0,
+          "data_rows": 22,
+          "month_rows": 0,
+          "retained_rows": 22,
+          "rotated_out_of_canonical": 0,
+          "undated_rows": 0
+        }
+      }
+    },
+    "aggregate_only": true
+  },
+  "canonical_hashes_after": {
+    "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+    "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+    "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+    "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+  },
+  "canonical_workbooks_untouched": true,
+  "regions": {
+    "uk": {
+      "display_name": "United Kingdom",
+      "canonical": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\workbooks\\uk-uk-cyber-job-tracker.xlsx",
+      "copy_sha256_before_append": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+      "copy_sha256_before_rollover": "ae1af9b9b2196ccc5f863fa2fbd6dc4f81b90f1accb492063f975a83cbaf98ad",
+      "write": {
+        "exit_code": 0,
+        "applied": true,
+        "counts": {
+          "input": 2,
+          "appended": 2,
+          "duplicates": 0,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "verification_ok": true,
+        "error": null
+      },
+      "plan": {
+        "status": "planned",
+        "month_rows": 2,
+        "retained_rows": 38,
+        "undated_rows": 0,
+        "months_present": {
+          "2026-08": 2,
+          "2026-09": 38
+        },
+        "archive_filename": "uk-cyber-job-tracker.2026-08.xlsx",
+        "owner_state_conflicts": [],
+        "owner_columns_guarded": [
+          "J",
+          "K",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "owner_columns_automation_writable": []
+      },
+      "rollover": {
+        "status": "written",
+        "applied": true,
+        "ok": true,
+        "error": null,
+        "reason": null,
+        "counts": {
+          "data_rows": 40,
+          "month_rows": 2,
+          "retained_rows": 38,
+          "undated_rows": 0,
+          "archived_rows": 2,
+          "rotated_out_of_canonical": 2
+        },
+        "archive_filename": "uk-cyber-job-tracker.2026-08.xlsx",
+        "archive_sha256": "5d75172cb1d51c1ea9db8758b08c8ea1534e41c28fcdc343b511ac74a5b19929",
+        "archive_backup": null,
+        "canonical_untouched": false,
+        "canonical_backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\backups\\uk-uk-cyber-job-tracker.pre-rollover-20260930-154613.xlsx",
+        "canonical_data_rows": 38,
+        "canonical_verification_ok": true,
+        "canonical_owner_columns_unchanged": true
+      },
+      "archive_checks": {
+        "verification_ok": true,
+        "problems": [],
+        "sheets_match_canonical": true,
+        "data_rows": 2,
+        "table_ref": "A9:V11",
+        "validations": {
+          "J": 4,
+          "K": 4
+        },
+        "fit_tier_formula_cells": 0,
+        "duplicate_urls_in_workbook": []
+      },
+      "dedupe_proof": {
+        "appended": 0,
+        "decisions": [
+          "duplicate-cross-month"
+        ],
+        "cross_month_index": {
+          "rotated_url_keys": 2,
+          "rotated_url_keys_indexed": 2,
+          "all_rotated_rows_indexed": true,
+          "index_keys_total": 160,
+          "index_sources": {
+            "uk-cyber-job-tracker.xlsx": 38,
+            "uk-cyber-job-tracker.2026-08.xlsx": 2,
+            "ledger:data/scan-history.tsv": 146
+          },
+          "archive_in_index_sources": true
+        }
+      },
+      "second_run": {
+        "status": "no_rows",
+        "reason": "no canonical data row has date_found in 2026-08",
+        "applied": false
+      },
+      "archive_sha256_after_second_run": "5d75172cb1d51c1ea9db8758b08c8ea1534e41c28fcdc343b511ac74a5b19929",
+      "canonical_hash_after": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c"
+    },
+    "dubai": {
+      "display_name": "Dubai / UAE",
+      "canonical": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\workbooks\\dubai-Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "copy_sha256_before_append": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+      "copy_sha256_before_rollover": "059cac56e7ec108c40399057a696c6726c0049e22c5df70dda56179695306daf",
+      "write": {
+        "exit_code": 0,
+        "applied": true,
+        "counts": {
+          "input": 2,
+          "appended": 2,
+          "duplicates": 0,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "verification_ok": true,
+        "error": null
+      },
+      "plan": {
+        "status": "planned",
+        "month_rows": 2,
+        "retained_rows": 21,
+        "undated_rows": 0,
+        "months_present": {
+          "2026-08": 2,
+          "2026-09": 21
+        },
+        "archive_filename": "Dubai_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "owner_state_conflicts": [],
+        "owner_columns_guarded": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "owner_columns_automation_writable": [
+          "Z"
+        ]
+      },
+      "rollover": {
+        "status": "written",
+        "applied": true,
+        "ok": true,
+        "error": null,
+        "reason": null,
+        "counts": {
+          "data_rows": 23,
+          "month_rows": 2,
+          "retained_rows": 21,
+          "undated_rows": 0,
+          "archived_rows": 2,
+          "rotated_out_of_canonical": 2
+        },
+        "archive_filename": "Dubai_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "archive_sha256": "0454a28977cf1543fb7f36a9425b357a12cdeca82834c113af4f2bb204c0ec5d",
+        "archive_backup": null,
+        "canonical_untouched": false,
+        "canonical_backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\backups\\dubai-Dubai_Cybersecurity_Job_Tracker.pre-rollover-20260930-154616.xlsx",
+        "canonical_data_rows": 21,
+        "canonical_verification_ok": true,
+        "canonical_owner_columns_unchanged": true
+      },
+      "archive_checks": {
+        "verification_ok": true,
+        "problems": [],
+        "sheets_match_canonical": true,
+        "data_rows": 2,
+        "table_ref": "A1:Z3",
+        "validations": {
+          "H": 1,
+          "R": 1,
+          "S": 1,
+          "T": 1,
+          "U": 1
+        },
+        "fit_tier_formula_cells": 2,
+        "duplicate_urls_in_workbook": []
+      },
+      "dedupe_proof": {
+        "appended": 0,
+        "decisions": [
+          "duplicate-cross-month"
+        ],
+        "cross_month_index": {
+          "rotated_url_keys": 2,
+          "rotated_url_keys_indexed": 2,
+          "all_rotated_rows_indexed": true,
+          "index_keys_total": 28,
+          "index_sources": {
+            "Dubai_Cybersecurity_Job_Tracker.xlsx": 21,
+            "Dubai_Cybersecurity_Job_Tracker.2026-08.xlsx": 2,
+            "ledger:data/dubai-shortlist-history.md": 26
+          },
+          "archive_in_index_sources": true
+        }
+      },
+      "second_run": {
+        "status": "no_rows",
+        "reason": "no canonical data row has date_found in 2026-08",
+        "applied": false
+      },
+      "archive_sha256_after_second_run": "0454a28977cf1543fb7f36a9425b357a12cdeca82834c113af4f2bb204c0ec5d",
+      "canonical_hash_after": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "display_name": "Japan",
+      "canonical": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\workbooks\\japan-Japan_Cybersecurity_Job_Tracker.xlsx",
+      "copy_sha256_before_append": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+      "copy_sha256_before_rollover": "0c93051d29d0fd8b67e954eca17e75faee92f8c19262963b96f0a93ed2dfb64c",
+      "write": {
+        "exit_code": 0,
+        "applied": true,
+        "counts": {
+          "input": 2,
+          "appended": 2,
+          "duplicates": 0,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "verification_ok": true,
+        "error": null
+      },
+      "plan": {
+        "status": "planned",
+        "month_rows": 2,
+        "retained_rows": 41,
+        "undated_rows": 0,
+        "months_present": {
+          "2026-08": 2,
+          "2026-09": 41
+        },
+        "archive_filename": "Japan_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "owner_state_conflicts": [],
+        "owner_columns_guarded": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "owner_columns_automation_writable": [
+          "Z"
+        ]
+      },
+      "rollover": {
+        "status": "written",
+        "applied": true,
+        "ok": true,
+        "error": null,
+        "reason": null,
+        "counts": {
+          "data_rows": 43,
+          "month_rows": 2,
+          "retained_rows": 41,
+          "undated_rows": 0,
+          "archived_rows": 2,
+          "rotated_out_of_canonical": 2
+        },
+        "archive_filename": "Japan_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "archive_sha256": "ff1b534323dd72118b1bda8b781c8643229ceed160912d1eafaf12a4cbbf2edb",
+        "archive_backup": null,
+        "canonical_untouched": false,
+        "canonical_backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\backups\\japan-Japan_Cybersecurity_Job_Tracker.pre-rollover-20260930-154621.xlsx",
+        "canonical_data_rows": 41,
+        "canonical_verification_ok": true,
+        "canonical_owner_columns_unchanged": true
+      },
+      "archive_checks": {
+        "verification_ok": true,
+        "problems": [],
+        "sheets_match_canonical": true,
+        "data_rows": 2,
+        "table_ref": "A1:Z3",
+        "validations": {
+          "R": 1,
+          "S": 1,
+          "T": 1
+        },
+        "fit_tier_formula_cells": 2,
+        "duplicate_urls_in_workbook": []
+      },
+      "dedupe_proof": {
+        "appended": 0,
+        "decisions": [
+          "duplicate-cross-month"
+        ],
+        "cross_month_index": {
+          "rotated_url_keys": 2,
+          "rotated_url_keys_indexed": 2,
+          "all_rotated_rows_indexed": true,
+          "index_keys_total": 43,
+          "index_sources": {
+            "Japan_Cybersecurity_Job_Tracker.backup-20260913-115953.xlsx": 11,
+            "Japan_Cybersecurity_Job_Tracker.backup-20260914-014303.xlsx": 10,
+            "Japan_Cybersecurity_Job_Tracker.backup-20260915-014902.xlsx": 10,
+            "Japan_Cybersecurity_Job_Tracker.xlsx": 10,
+            "Japan_Cybersecurity_Job_Tracker.2026-08.xlsx": 2,
+            "ledger:data/japan-shortlist-history.md": 41
+          },
+          "archive_in_index_sources": true
+        }
+      },
+      "second_run": {
+        "status": "no_rows",
+        "reason": "no canonical data row has date_found in 2026-08",
+        "applied": false
+      },
+      "archive_sha256_after_second_run": "ff1b534323dd72118b1bda8b781c8643229ceed160912d1eafaf12a4cbbf2edb",
+      "canonical_hash_after": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "display_name": "Singapore",
+      "canonical": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "copy": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\workbooks\\singapore-Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "copy_sha256_before_append": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1",
+      "copy_sha256_before_rollover": "da085055c28e13fc039400bae771a5763356a735e9e555ecce1377b352817776",
+      "write": {
+        "exit_code": 0,
+        "applied": true,
+        "counts": {
+          "input": 2,
+          "appended": 2,
+          "duplicates": 0,
+          "rejected": 0,
+          "refreshed": 0
+        },
+        "verification_ok": true,
+        "error": null
+      },
+      "plan": {
+        "status": "planned",
+        "month_rows": 2,
+        "retained_rows": 22,
+        "undated_rows": 0,
+        "months_present": {
+          "2026-08": 2,
+          "2026-09": 22
+        },
+        "archive_filename": "Singapore_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "owner_state_conflicts": [],
+        "owner_columns_guarded": [
+          "R",
+          "S",
+          "T",
+          "U",
+          "V"
+        ],
+        "owner_columns_automation_writable": [
+          "Z"
+        ]
+      },
+      "rollover": {
+        "status": "written",
+        "applied": true,
+        "ok": true,
+        "error": null,
+        "reason": null,
+        "counts": {
+          "data_rows": 24,
+          "month_rows": 2,
+          "retained_rows": 22,
+          "undated_rows": 0,
+          "archived_rows": 2,
+          "rotated_out_of_canonical": 2
+        },
+        "archive_filename": "Singapore_Cybersecurity_Job_Tracker.2026-08.xlsx",
+        "archive_sha256": "c33ecb37116049baad121911dd72ea3fe28f2734cd0796c019e89ae63a076746",
+        "archive_backup": null,
+        "canonical_untouched": false,
+        "canonical_backup": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\rollover-acceptance\\20260930T144612Z\\backups\\singapore-Singapore_Cybersecurity_Job_Tracker.pre-rollover-20260930-154625.xlsx",
+        "canonical_data_rows": 22,
+        "canonical_verification_ok": true,
+        "canonical_owner_columns_unchanged": true
+      },
+      "archive_checks": {
+        "verification_ok": true,
+        "problems": [],
+        "sheets_match_canonical": true,
+        "data_rows": 2,
+        "table_ref": "A1:Z3",
+        "validations": {
+          "R": 1,
+          "S": 1,
+          "T": 1
+        },
+        "fit_tier_formula_cells": 2,
+        "duplicate_urls_in_workbook": []
+      },
+      "dedupe_proof": {
+        "appended": 0,
+        "decisions": [
+          "duplicate-cross-month"
+        ],
+        "cross_month_index": {
+          "rotated_url_keys": 2,
+          "rotated_url_keys_indexed": 2,
+          "all_rotated_rows_indexed": true,
+          "index_keys_total": 24,
+          "index_sources": {
+            "Singapore_Cybersecurity_Job_Tracker.pre-20260913.xlsx": 17,
+            "Singapore_Cybersecurity_Job_Tracker.xlsx": 5,
+            "Singapore_Cybersecurity_Job_Tracker.2026-08.xlsx": 2,
+            "ledger:data/singapore-shortlist-history.md": 22
+          },
+          "archive_in_index_sources": true
+        }
+      },
+      "second_run": {
+        "status": "no_rows",
+        "reason": "no canonical data row has date_found in 2026-08",
+        "applied": false
+      },
+      "archive_sha256_after_second_run": "c33ecb37116049baad121911dd72ea3fe28f2734cd0796c019e89ae63a076746",
+      "canonical_hash_after": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  }
+}

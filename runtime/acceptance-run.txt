@@ -1,0 +1,3 @@
+FAIL: 38/39 checks; evidence written to C:\Users\mukun\Documents\mukund-chief-control-plane\audits\evidence\2026-09-24T14-39-12Z-career-scheduled-orchestrator-cutover
+  FAILED launcher_keeps_crlf_line_endings: "CRLF preserved"
+EXIT=1

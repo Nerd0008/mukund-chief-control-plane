@@ -1,0 +1,289 @@
+{
+  "task": "agent-career-codex-style-open-web-job-research-2026-09-24",
+  "runner": "career-ops/run_web_research_acceptance.py",
+  "stamp": "2026-09-30T14-51-58Z",
+  "started_at": "2026-09-30T14:51:58+00:00",
+  "finished_at": "2026-09-30T14:51:59+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "check": "query_matrix_covers_role_families",
+      "ok": true,
+      "detail": [
+        "analyst",
+        "cross_family_entry",
+        "cybersecurity",
+        "graduate_new_grad",
+        "grc",
+        "iam",
+        "information_security",
+        "junior_associate",
+        "l1_tier1",
+        "level_coverage",
+        "soc_security_operations",
+        "technology_risk"
+      ]
+    },
+    {
+      "check": "query_matrix_covers_owner_ats_site_patterns",
+      "ok": true,
+      "detail": [
+        "ashby",
+        "employer_careers",
+        "google_index",
+        "greenhouse",
+        "icims",
+        "indeed",
+        "lever",
+        "linkedin_jobs",
+        "smartrecruiters",
+        "teamtailor",
+        "workable",
+        "workday"
+      ]
+    },
+    {
+      "check": "query_matrix_covers_broad_public_surfaces",
+      "ok": true,
+      "detail": [
+        "linkedin_jobs",
+        "indeed",
+        "google_index"
+      ]
+    },
+    {
+      "check": "query_matrix_is_per_region",
+      "ok": true,
+      "detail": [
+        "uk",
+        "dubai",
+        "japan",
+        "singapore"
+      ]
+    },
+    {
+      "check": "watchlist_hook_adds_company_queries_and_is_optional",
+      "ok": true,
+      "detail": {
+        "generic": 22,
+        "with_watchlist": 31
+      }
+    },
+    {
+      "check": "surface_classifier_maps_linkedin_indeed_ats_employer",
+      "ok": true,
+      "detail": "all ok"
+    },
+    {
+      "check": "captured_run_normalises_into_the_candidate_schema",
+      "ok": true,
+      "detail": {
+        "candidates": 5
+      }
+    },
+    {
+      "check": "per_result_provenance_is_complete",
+      "ok": true,
+      "detail": "query/surface/url/state/timestamp"
+    },
+    {
+      "check": "a_posting_seen_by_two_queries_collapses_to_one_candidate",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "check": "every_declared_telemetry_counter_exists",
+      "ok": true,
+      "detail": [
+        "candidate_urls",
+        "deterministic_eligibility_pass",
+        "discovered_unverified",
+        "duplicates_collapsed",
+        "fetch_states",
+        "queries_executed",
+        "rejections_by_reason",
+        "results_seen",
+        "search_listing_refused",
+        "semantically_reviewed",
+        "tracker_candidates",
+        "validated_live",
+        "validation_failed",
+        "zero_attribution"
+      ]
+    },
+    {
+      "check": "a_zero_is_attributable_to_the_failing_stage",
+      "ok": true,
+      "detail": {
+        "validation": "no discovered destination validated as live"
+      }
+    },
+    {
+      "check": "a_result_without_an_observed_search_is_never_accepted",
+      "ok": true,
+      "detail": {
+        "search_not_observed": 1
+      }
+    },
+    {
+      "check": "only_the_validated_destination_passes_the_gates",
+      "ok": true,
+      "detail": {
+        "accepted": "accepted",
+        "rejected": 3
+      }
+    },
+    {
+      "check": "unverified_and_failed_destinations_are_refused_by_the_gate",
+      "ok": true,
+      "detail": "deterministic gate reason present"
+    },
+    {
+      "check": "an_export_without_a_declared_result_kind_is_counted_not_guessed",
+      "ok": true,
+      "detail": "legacy export recorded as unclassified"
+    },
+    {
+      "check": "a_search_listing_page_is_never_written_as_a_vacancy",
+      "ok": true,
+      "detail": {
+        "decision": "rejected",
+        "tracker_candidates": 0
+      }
+    },
+    {
+      "check": "web_research_and_the_regional_lane_collapse_to_one_candidate",
+      "ok": true,
+      "detail": {
+        "shared": 1,
+        "sources": [
+          "explicit records file",
+          "open-web research (codex-style)"
+        ]
+      }
+    },
+    {
+      "check": "codex_provider_reports_unavailability_truthfully_when_absent",
+      "ok": true,
+      "detail": "Codex CLI unavailable: RuntimeError: Codex CLI not found (acceptance)"
+    },
+    {
+      "check": "lane_default_run_is_read_only_and_declares_zero_attribution",
+      "ok": true,
+      "detail": {
+        "search": "no live search was observed for the query, so no result from it is accepted (a memory recall is never treated as a search result)",
+        "queries": "no query was executed",
+        "candidate_urls": "no candidate URL was discovered"
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical",
+      "ok": true,
+      "detail": {
+        "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    },
+    {
+      "check": "canonical_workbooks_byte_identical_after_live_pass",
+      "ok": true,
+      "detail": {
+        "uk": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c",
+        "dubai": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca",
+        "japan": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89",
+        "singapore": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+      }
+    }
+  ],
+  "counts": {
+    "checks": 21,
+    "passed": 21,
+    "failed": 0
+  },
+  "matrix": {
+    "queries_uk": 22,
+    "surfaces": [
+      "ashby",
+      "employer_careers",
+      "google_index",
+      "greenhouse",
+      "icims",
+      "indeed",
+      "lever",
+      "linkedin_jobs",
+      "smartrecruiters",
+      "teamtailor",
+      "workable",
+      "workday"
+    ],
+    "families": [
+      "analyst",
+      "cross_family_entry",
+      "cybersecurity",
+      "graduate_new_grad",
+      "grc",
+      "iam",
+      "information_security",
+      "junior_associate",
+      "l1_tier1",
+      "level_coverage",
+      "soc_security_operations",
+      "technology_risk"
+    ]
+  },
+  "research_telemetry": {
+    "queries_executed": 4,
+    "results_seen": 6,
+    "candidate_urls": 5,
+    "validated_live": 0,
+    "validation_failed": 0,
+    "duplicates_collapsed": 1,
+    "search_listing_refused": 0,
+    "semantically_reviewed": 0,
+    "deterministic_eligibility_pass": 0,
+    "tracker_candidates": 0,
+    "discovered_unverified": 5,
+    "fetch_states": {
+      "validated_live": 0,
+      "discovered_unverified": 5,
+      "validation_failed": 0,
+      "not_attempted": 0
+    },
+    "rejections_by_reason": {},
+    "zero_attribution": {}
+  },
+  "live": {
+    "attempted": false
+  },
+  "canonical_workbooks": {
+    "uk": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+      "sha256": "10b4181f6af50eafed8a649a9195d77352beedea27cb3298bbc1f26e72562e9c"
+    },
+    "dubai": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Dubai_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "495edb450c5f00f235cdefcb73c28e396757ef050a219306cb3ef96c12a745ca"
+    },
+    "japan": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Japan_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "a8c4ef9014bd9b852d634bbe945fafe615e5aa873370cc96e7d940ee8df73c89"
+    },
+    "singapore": {
+      "path": "C:\\Users\\mukun\\Downloads\\codex\\Singapore_Cybersecurity_Job_Tracker.xlsx",
+      "sha256": "25c7b95b541a5072f2c1ab8a0cb0e123f78be62195ae3fadcedd7bf3b1e63bf1"
+    }
+  },
+  "safety": {
+    "canonical_workbook_writes": 0,
+    "applications_submitted": 0,
+    "employer_or_recruiter_contacts": 0,
+    "browser_or_gui_used": false,
+    "login_or_account_used": false,
+    "cookies_or_session_used": false,
+    "captcha_bypassed": false,
+    "scraping_behind_auth": false
+  },
+  "privacy_note": "raw result URLs are owner-private job-search data and stay under the git-ignored runtime directory; this evidence is aggregate only"
+}
