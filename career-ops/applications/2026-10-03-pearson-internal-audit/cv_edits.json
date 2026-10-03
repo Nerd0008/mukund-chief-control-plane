@@ -1,0 +1,40 @@
+{
+ "edits": [
+  {
+   "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+   "replace": "Seeking a graduate internal audit role to apply analytical skills while developing assurance and governance experience."
+  },
+  {
+   "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+   "replace": "experience, complemented by practical projects in control testing, risk assessment and data analysis. "
+  },
+  {
+   "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+   "replace": "Control testing, risk assessment, IT general controls, data analysis"
+  },
+  {
+   "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+   "replace": "Windows, Microsoft 365, Excel, Word, PowerPoint, Azure, account administration"
+  },
+  {
+   "find": "Python, PowerShell, SQL, API integration",
+   "replace": "Python, PowerShell, SQL, data analysis"
+  },
+  {
+   "find": "BitLocker, network segmentation, endpoint security ",
+   "replace": "Access control, endpoint security, evidence and records "
+  },
+  {
+   "find": "User support, technical documentation, stakeholder coordination",
+   "replace": "Audit reporting, technical documentation, stakeholder engagement"
+  },
+  {
+   "find": "problems, monitoring server health and maintaining password and website-access controls.",
+   "replace": "problems, monitoring server health and maintaining access and website controls."
+  },
+  {
+   "find": "\u2022 Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining    ",
+   "replace": "\u2022 Conduct weekly store-wide risk assessments and daily compliance checks, testing operational controls, maintaining    "
+  }
+ ]
+}

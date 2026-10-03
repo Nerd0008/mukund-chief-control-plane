@@ -1,0 +1,42 @@
+Application for Advanced Associate, Internal Audit, Controls, Compliance and Risk
+Dear Pearson Early Careers Team,
+I am applying for the Internal Audit graduate programme in London because it offers something rare in a
+first role: a view of how an entire global organisation actually works, rather than one corner of it.
+Auditing across financial processes, technology, cyber, HR and AI is the fastest way I can think of to
+understand how an organisation fits together, and I am attracted to the fact that the output is not just a
+finding but a recommendation a senior leader can act on. I am available to start by July 2027 and I am
+ready to commit to the ACCA qualification alongside the work.
+My academic background is an MSc in Information Security from Royal Holloway, awarded with Merit,
+with Security Management, Critical Infrastructure Security and Secure Business Architectures among the
+modules, preceded by a BCA in computer applications covering Python, Java, JavaScript, MySQL and
+AI and machine learning. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. A STEM
+route into internal audit means I arrive with the analytical and technical grounding your technology and
+AI audits need, and I am genuinely interested in the assurance side of that work - understanding whether
+a control is designed well, whether it is operating, and what evidence proves it.
+I already operate controls rather than only studying them. In my current IT support role I handle four to
+five access requests a day through on-premises Active Directory, and the process is a control loop: I
+verify that business approval exists, grant only time-limited permissions, then document the access
+period and any extension. I investigate four to five suspicious emails a day, checking sender and link
+domains for impersonation, recording findings and flagging recurring tactics to colleagues. Alongside
+that I built a local tool that maps Windows error codes to their common causes and used it to trace
+intermittent server freezes to errors associated with missing or corrupted DLLs, informing the corrective
+action taken. Testing whether something works, evidencing it, and recommending the fix is the same
+instinct your audit plan runs on.
+The reporting and stakeholder half of audit is where I have the most to build, and I would rather say that
+plainly. What I do have is practice at making findings land with people who did not ask for them. At
+Co-op, as Person in Charge, I conduct weekly store-wide risk assessments and daily compliance checks,
+review operational controls and maintain the assessment records, while coordinating seven or eight
+colleagues per shift and explaining control requirements to people with no particular interest in them. I
+also use Excel, Word and PowerPoint daily for reporting and records. I am careful with detail by habit: in
+my SafePaste project I ran over 150 manual test cases to 93.7% accuracy and deliberately hunted false
+positives, because a control that flags the wrong thing costs more than it catches.
+What attracts me to Pearson specifically is the breadth of the three-year programme and the fact that
+audits over the use of AI in the business are part of the plan. I have built with AI and I have seen where
+its outputs need validating, which should help me ask useful questions about how it is governed. I would
+welcome the opportunity to discuss how my background could contribute to your audit team.
+
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
+
