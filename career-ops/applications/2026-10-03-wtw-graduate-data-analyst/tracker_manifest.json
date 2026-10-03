@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "WTW",
+      "title": "2027 Corporate Risk & Broking – Graduate Data Analyst",
+      "location": "Ipswich (hybrid, 4 days/week in office)",
+      "salary": "Not stated in posting",
+      "url": "https://careers.wtwco.com/jobs/2027-corporate-risk-broking-graduate-data-analyst-ipswich-ipswich-england-united-kingdom",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a natural problem solver with a mathematical and analytical mind, able to work with and analyse data to draw meaningful conclusions, a confident communicator who knows how to build relationships and clearly convey complicated information, curious and eager to build and apply knowledge, comfortable working in a team, and at least 2:1 degree-qualified in any discipline. Not evidenced and not claimed: insurance industry knowledge, data strategy experience, dashboard/visualisation experience (PowerBI/Tableau), Level 6 Data Scientist apprenticeship. Genuinely evidenced: MSc Information Security (Merit), BCA, CompTIA Security+, ISC2 CC, IT support experience (M365, Active Directory, troubleshooting, endpoint support), Python/PowerShell/SQL, structured problem-solving (Windows error-code root-cause tool), InboxDefender project (93.7% accuracy, 25 patterns, MITRE ATT&CK), risk assessments, compliance checks, documentation, customer service, teamwork, initiative.",
+      "recommendation": "Applied per owner standing instruction. Fit is moderate: the role is a graduate data analyst position in an insurance broker, and the owner's background is IT support and security. The honest bridge is the analytical and technical skills (Python, PowerShell, SQL, structured problem-solving, attention to detail) which map onto the data analysis and decision-support aspects of the role. The insurance domain knowledge is a gap, but the posting explicitly states 'at least 2:1 degree-qualified in any discipline' and offers a Level 6 Data Scientist apprenticeship, so no prior insurance or data science experience is expected. No clearance or citizenship barrier. Closing date 9 October 2026. Two-year graduate programme.",
+      "discovery": "OWNER-SUPPLIED — JD text and URL supplied by owner via Discord 2026-10-03. Official WTW careers URL. Job ID 202605770. Ipswich (hybrid, 4 days/week in office). Closing date 9 October 2026. Two-year graduate programme. Level 6 Data Scientist apprenticeship. Application process: CV, online test + video interview, virtual assessment centre, offer.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
