@@ -1,0 +1,147 @@
+{
+  "ok": true,
+  "master": "C:\\Users\\mukun\\Downloads\\codex\\CV_FORMAT_MASTER.pdf",
+  "output": "C:\\Users\\mukun\\Downloads\\codex\\_CVs\\Mukund_Didwania_BDO_Audit_Technology_Graduate_CV.pdf",
+  "page": {
+    "width": 595.5,
+    "height": 850.5,
+    "page_count": 1
+  },
+  "edits_applied": 7,
+  "spans_before": 81,
+  "spans_after": 81,
+  "measured": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "Information Security MSc graduate from Royal Holloway with CompTIA Security+ and ISC2 CC, seeking a technology",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        81.2
+      ],
+      "old_chars": 112,
+      "new_chars": 110,
+      "char_delta_pct": -1.8,
+      "old_width_pt": 523.49,
+      "new_width_pt": 480.85,
+      "available_pt": 552.0
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "risk and audit graduate role. IT support and systems experience, with practical projects in phishing analysis,",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        94.7
+      ],
+      "old_chars": 118,
+      "new_chars": 110,
+      "char_delta_pct": -6.8,
+      "old_width_pt": 478.27,
+      "new_width_pt": 429.82,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "endpoint risk assessment and security automation; keen to apply analytical skills to IT controls and data analysis.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        108.2
+      ],
+      "old_chars": 127,
+      "new_chars": 115,
+      "char_delta_pct": -9.4,
+      "old_width_pt": 503.67,
+      "new_width_pt": 450.59,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Phishing analysis, access requests, Windows Event Logs, MITRE ATT&CK",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        101.36,
+        138.74
+      ],
+      "old_chars": 69,
+      "new_chars": 68,
+      "char_delta_pct": -1.4,
+      "old_width_pt": 312.0,
+      "new_width_pt": 305.68,
+      "available_pt": 472.39
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, Active Directory, access administration",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        109.92,
+        148.92
+      ],
+      "old_chars": 77,
+      "new_chars": 70,
+      "char_delta_pct": -9.1,
+      "old_width_pt": 320.8,
+      "new_width_pt": 291.8,
+      "available_pt": 463.83
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "Documentation, record keeping, user support, stakeholder coordination",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        144.2,
+        194.76
+      ],
+      "old_chars": 63,
+      "new_chars": 69,
+      "char_delta_pct": 9.5,
+      "old_width_pt": 257.23,
+      "new_width_pt": 283.5,
+      "available_pt": 429.55
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "ISO 27001, Cyber Essentials, GDPR, NIST CSF ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        128.4,
+        183.25
+      ],
+      "old_chars": 42,
+      "new_chars": 43,
+      "char_delta_pct": 2.4,
+      "old_width_pt": 193.58,
+      "new_width_pt": 196.45,
+      "available_pt": 445.35
+    }
+  ],
+  "problems": [],
+  "verification": {
+    "untouched_spans_unchanged": true,
+    "moved": [],
+    "missing": [],
+    "all_replacements_present": true,
+    "page_geometry_unchanged": true,
+    "collateral_restored": [],
+    "cmap_repair": {
+      "streams_patched": 1,
+      "fonts": [
+        "KYXQDG+Times New Roman Regular"
+      ]
+    },
+    "non_breaking_spaces_remaining": 4,
+    "font_subsetting": {
+      "bytes_before": 829523,
+      "bytes_after": 195392
+    }
+  }
+}

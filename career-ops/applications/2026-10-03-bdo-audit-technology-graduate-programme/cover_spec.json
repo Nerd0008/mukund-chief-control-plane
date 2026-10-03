@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Audit Technology Graduate Programme",
+  "salutation": "Dear BDO Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Didwania_BDO_Audit_Technology_Graduate_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\bdo_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Audit Technology Graduate Programme in London because it joins the two things I want to build a career on: technology and assurance. The Technology Risk Assurance team's work - IT general controls testing over financial applications, cyber security risk assessments, and database and operating system control testing - is the kind of work my information security training and my current systems role have prepared me for, and BDO's three-year programme offers the structure to develop it properly rather than piecemeal.",
+
+    "My MSc in Information Security from Royal Holloway, awarded with Merit, included Security Management with an ISO 27001 focus alongside digital forensics and network security, and I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. For the Controls team that means I already understand what a control is meant to achieve, what evidence shows it is operating, and why the gap between the two is where a finding comes from. For the Data team it means a methodical approach to testing and validating results, which is how I work by default.",
+
+    "In my current role as an IT Support Assistant I work on access control directly: I handle four to five access requests a day through on-premises Active Directory, confirming that approval exists before I grant anything, limiting permissions to exactly what was requested, and recording each access period and extension. That is the access management half of IT general controls, done manually and documented every time. I also investigate four to five suspicious emails daily, checking sender and link domains for impersonation, which is the same evidence-led habit a cyber security risk assessment depends on.",
+
+    "At Co-op, where I am Person in Charge, my assurance work is control-based rather than system-based: weekly risk assessments and daily compliance checks against operational controls, reviewing the evidence, recording what I find and escalating anything that needs corrective action. I do that while coordinating seven or eight colleagues, which has taught me to gather information from people who are busy and would rather not be answering questions - most of what evidence-gathering actually is. On the technical side, my projects have given me Python, PowerShell and pattern design work, tested properly: I built a detection extension and ran over 150 manual test cases to 93.7% accuracy, deliberately checking for false positives, because a test that flags the wrong thing is as much a finding as one that misses.",
+
+    "I am committed to balancing study with client work, and to preparing for and passing the CFAB and CISA exams within the programme's timeframe. I am at the start of my career, I want to learn audit technology properly from people who practise it to a professional standard, and I would welcome the chance to discuss how my background fits either the Data or the Controls team."
+  ]
+}

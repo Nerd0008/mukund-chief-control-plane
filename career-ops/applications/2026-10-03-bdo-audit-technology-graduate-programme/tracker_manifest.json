@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "BDO LLP",
+      "title": "2027 Audit Technology Graduate Programme - London (Technology Risk Assurance: Data or Controls)",
+      "location": "London, United Kingdom (must live within commutable distance; no relocation support)",
+      "salary": "\u00a333,000",
+      "url": "https://careers.bdo.co.uk/job/london/2027-audit-technology-graduate-programme/1469/45085583424",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no security clearance stated",
+      "work_authorisation_risk": "Not assessed \u2014 owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "Capability: no evidenced Alteryx, Databricks or SAS (named Data-team tools), and no audit/ITGC testing tooling or financial statement audit experience. Must not be claimed. Strong evidence exists for the Controls side: Active Directory access management with approval verification, ISO 27001 security management, weekly risk assessments and compliance checks, documented control testing, Python/PowerShell, 150+ documented test cases.",
+      "recommendation": "Controls team is the better fit on existing evidence; the Data team would need the analytics gap framed honestly as not yet used. Tailored CV and cover letter prepared and delivered 2026-10-03.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text and base CV supplied by owner via Discord 2026-10-03. Official Radancy ATS URL located via careers.bdo.co.uk sitemap and verified live by Chief 2026-10-03; closing date 15 Nov 2026 confirmed on the live page.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
