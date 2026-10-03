@@ -1,10 +1,10 @@
 {
-  "post_text": "A data centre can be permitted to use 5.5 million cubic metres of water in a year. That is roughly the same amount used by 23,000 people.\n\nThe water is for cooling. AI models run on dense racks of servers that generate enormous heat, and liquid cooling is more efficient than air. So data centres consume vast quantities of fresh water, often drawn from local communities.\n\nAn investigation found 38 active data centres in water-scarce areas, with 24 more under development. One company asked to increase its water consumption by 48% at existing facilities.\n\nA campaign group has a name for what is happening: \"Your cloud is drying my river.\"\n\nThe companies involved have pledged to become \"water positive\" by 2030. But one of their own sustainability experts warned that the offsetting approach is \"not ethical.\" Improving access to water in one area does nothing to help the community that has lost access to it far away.\n\nCarbon is a global problem. Water is more localised.\n\nShould companies building AI infrastructure be required to disclose their water consumption to the communities they draw from?\n\n#ArtificialIntelligence #DataCentres #WaterCrisis #Sustainability #TechEthics",
+  "post_text": "A data centre can be permitted to use 5.5 million cubic metres of water in a year. That is roughly the same amount used by 23,000 people.\n\nThe water is for cooling. Liquid is more efficient when you cool high-density racks, which are the ones mostly used for AI. So data centres consume large quantities of fresh water, often drawn from local communities.\n\nAn investigation found 38 active data centres in water-scarce areas, with 24 more under development. One company asked to increase its water consumption by 48% at existing facilities.\n\nA campaign group has a name for what is happening: \"Your cloud is drying my river.\"\n\nThe companies involved have pledged to become \"water positive\" by 2030. But one of their own sustainability experts warned that the offsetting approach is \"not ethical.\" Improving access to water in one area does nothing to help the community that has lost access to it far away.\n\nCarbon is a global problem. Water is more localised. That difference is why the usual offsetting logic does not carry over.\n\nShould companies building AI infrastructure be required to disclose their water consumption to the communities they draw from?\n\n#ArtificialIntelligence #DataCentres #WaterCrisis #Sustainability #TechEthics",
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-03T11:42:47+00:00",
-    "body_sha256": "d87aeab1e4350ec93fa6c9357d6bebb69b6ff0e80e083286969e4af7e9a14aca",
+    "ran_at": "2026-10-03T14:27:02+00:00",
+    "body_sha256": "83a376c0c69a331d2cac2814c8c122d441f179d730e444c8a6a7dd76633dedd8",
     "sources": [
       "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water"
     ],
@@ -12,31 +12,245 @@
       "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water": "fce28e864a21815a1b67863f3f4861c477d21ce5c399e69d7e2e7ce00fa8edcf"
     },
     "sources_unreadable": [],
-    "llm_used": false,
+    "llm_used": true,
     "ungrounded_numbers": [],
     "ungrounded_entities": [],
     "unsupported_claims": [],
     "forbidden": [],
     "warnings": [
-      "claim model not used: no model API key available"
+      "1 claim(s) were not unanimous across 3 judge runs; the strictest majority verdict was used"
     ],
-    "verdict": "ungated",
-    "reason": "claim model unavailable, so prose claims were not verified; deterministic checks alone cannot pass a post",
+    "grounded_numbers": [
+      "5.5",
+      "23,000",
+      "38",
+      "24",
+      "48",
+      "2030.",
+      "million"
+    ],
+    "claims": [
+      {
+        "claim": "A data centre can be permitted to use 5.5 million cubic metres of water in a year.",
+        "verdict": "supported",
+        "evidence": "its first centre has a permit to use 5.5m cubic metres of water a year",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "That is roughly the same amount used by 23,000 people.",
+        "verdict": "supported",
+        "evidence": "about the same quantity used by 23,000 ordinary Arizonans.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The water is for cooling.",
+        "verdict": "supported",
+        "evidence": "use water for cooling.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Liquid is more efficient when you cool high-density racks, which are the ones mostly used for AI.",
+        "verdict": "supported",
+        "evidence": "liquid is more efficient when you try to cool down high-density racks, which are the ones that are mostly being used for AI.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Data centres consume large quantities of fresh water, often drawn from local communities.",
+        "verdict": "supported",
+        "evidence": "Amazon, Microsoft and Google are operating datacentres that use vast amounts of water in some of the world’s driest areas... with a potentially huge impact on populations already living with water scarcity.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "overstated",
+          "supported",
+          "supported"
+        ],
+        "unanimous": false
+      },
+      {
+        "claim": "An investigation found 38 active data centres in water-scarce areas, with 24 more under development.",
+        "verdict": "supported",
+        "evidence": "SourceMaterial’s analysis identified 38 active datacentres owned by the big three tech firms in parts of the world already facing water scarcity, as well as 24 more under development.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "One company asked to increase its water consumption by 48% at existing facilities.",
+        "verdict": "supported",
+        "evidence": "Amazon in December asked the regional government for permission to increase water consumption at its three existing datacentres by 48%.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "A campaign group has a name for what is happening: \"Your cloud is drying my river.\"",
+        "verdict": "supported",
+        "evidence": "campaign group Tu Nube Seca Mi Río – Spanish for “Your cloud is drying my river”",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The companies involved have pledged to become \"water positive\" by 2030.",
+        "verdict": "supported",
+        "evidence": "claim that it will be “water positive” by 2030... Microsoft and Google have also pledged to become “water positive” by 2030",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "One of their own sustainability experts warned that the offsetting approach is \"not ethical.\"",
+        "verdict": "supported",
+        "evidence": "with one of its own sustainability experts warning that its plans are “not ethical”.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Improving access to water in one area does nothing to help the community that has lost access to it far away.",
+        "verdict": "supported",
+        "evidence": "Improving access to water in one area does nothing to help the community that has lost access to it far away.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Carbon is a global problem. Water is more localised. That difference is why the usual offsetting logic does not carry over.",
+        "verdict": "supported",
+        "evidence": "Water offsetting ca not work in the same way as carbon offsetting... 'Carbon is a global problem – water is more localised,' he said.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "A data centre can be permitted to use 5.5 million cubic metres of water in a year, which is roughly the same amount used by 23,000 people.",
+        "verdict": "supported",
+        "evidence": "...its first centre has a permit to use 5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "The water used by data centres is for cooling.",
+        "verdict": "supported",
+        "evidence": "Datacentres, vast warehouses containing networked servers used for the remote storage and processing of data, as well as by information technology companies to train AI models such as ChatGPT , use water for cooling.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "A campaign group has a name meaning \"Your cloud is drying my river.\"",
+        "verdict": "supported",
+        "evidence": "...campaign group Tu Nube Seca Mi Río – Spanish for “Your cloud is drying my river”...",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Carbon is a global problem, whereas water is more localised, which is why the usual offsetting logic does not carry over.",
+        "verdict": "supported",
+        "evidence": "Water offsetting ca not work in the same way as carbon offsetting... “Carbon is a global problem – water is more localised,” he said.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "5.5 million cubic metres of water is roughly the same amount used by 23,000 people.",
+        "verdict": "supported",
+        "evidence": "5.5m cubic metres of water a year – about the same quantity used by 23,000 ordinary Arizonans.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "Liquid is more efficient when cooling high-density racks, which are mostly used for AI.",
+        "verdict": "supported",
+        "evidence": "liquid is more efficient when you try to cool down high-density racks, which are the ones that are mostly being used for AI.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      },
+      {
+        "claim": "One of the companies' own sustainability experts warned that the offsetting approach is \"not ethical.\"",
+        "verdict": "supported",
+        "evidence": "one of its own sustainability experts warning that its plans are “not ethical”.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true
+      }
+    ],
+    "judge_runs_used": 3,
+    "judge_runs_requested": 3,
+    "verdict": "pass",
     "available": true
   },
-  "personal_fact_gate": {
-    "verdict": "pass",
-    "gate_name": "verify-cv-facts",
-    "version": 1,
-    "body_sha256": "242deae78796a1c62e9e8e78db0153a0dc1297aeeb7dcfe6bd21ba6c26aca465"
-  },
+  "personal_fact_gate": null,
   "topic": {
-    "title": "wednesday post",
+    "title": "AI data centres and water use",
     "sources": [
       "https://www.theguardian.com/environment/2025/apr/09/big-tech-datacentres-water"
     ]
   },
-  "confirm_token": "242deae78796a1c62e9e8e78db0153a0dc1297aeeb7dcfe6bd21ba6c26aca465",
+  "confirm_token": "4fe10d0e02bd56682001a50042da4f90112c798ad3fad34782d0b8bc22a54e73",
   "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261007_wednesday\\image.jpg",
-  "approved": true
+  "approved": true,
+  "day": "wednesday"
 }

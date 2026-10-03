@@ -222,6 +222,29 @@ def check_numbers(post_text: str, source_text: str) -> list[dict]:
     return found
 
 
+def _grounded_number_tokens(post_text: str, source_text: str) -> list[str]:
+    """Tokens in the post whose figures the source states exactly.
+
+    These are facts the deterministic check has already settled. Telling the
+    judge about them stops it contradicting an exact match it cannot see.
+    """
+    src_norm = expand_number_words(source_text).replace(",", "")
+    out: list[str] = []
+    for token in DIGIT_CLAIM.findall(post_prose(post_text)):
+        norm = normalize_number(token)
+        if len(norm) < 2:
+            continue
+        if norm in src_norm:
+            out.append(token)
+    for word in NUMBER_WORDS:
+        if re.search(rf"\b{word}s?\b", post_prose(post_text), re.IGNORECASE) \
+                and re.search(rf"\b{word}s?\b", src_norm, re.IGNORECASE):
+            out.append(word)
+    # De-duplicate, preserving order.
+    seen: set[str] = set()
+    return [t for t in out if not (t in seen or seen.add(t))]
+
+
 def check_entities(post_text: str, source_text: str) -> list[dict]:
     """Proper nouns in the post (excluding sentence-initial words) must appear."""
     found = []
@@ -260,7 +283,8 @@ def _majority_verdict(runs: list[str]) -> str:
 
 def llm_verify_claims(post_text: str, source_text: str, *,
                       api_key: str | None, model: str = DEFAULT_MODEL,
-                      runs: int = JUDGE_RUNS) -> dict:
+                      runs: int = JUDGE_RUNS,
+                      grounded_numbers: list[str] | None = None) -> dict:
     """Ask a model whether each factual claim is supported by the source.
 
     The judge is a language model, so a single run is not a stable verdict: the
@@ -277,6 +301,19 @@ def llm_verify_claims(post_text: str, source_text: str, *,
         from google import genai
     except Exception as exc:  # pragma: no cover - environment dependent
         return {"used": False, "claims": [], "reason": f"genai unavailable: {exc}"}
+
+    # A figure the deterministic check has already located in the source is
+    # verified by exact match, not by the model's judgement. Without this the
+    # judge rejected numbers that plainly appear in the article (for example a
+    # figure the source states as '5.5m' and the post spells out in full).
+    grounded = [n for n in (grounded_numbers or []) if n]
+    grounding_note = ""
+    if grounded:
+        grounding_note = (
+            "\nThese figures in the POST were confirmed to appear in the SOURCE "
+            "by exact text match: " + ", ".join(grounded) + ".\n"
+            "Any claim consisting only of those figures, or of a comparison "
+            "built from them, is 'supported'. Do not mark it unsupported.\n")
 
     prompt = f"""You are a strict fact-checker. Below is a SOURCE article and a
 POST written from it.
@@ -297,7 +334,7 @@ Rules:
 - Include only claims about the outside world. Ignore the author's opinions,
   feelings, questions and rhetorical framing.
 - Be strict. If the SOURCE does not clearly support it, it is not supported.
-
+{grounding_note}
 SOURCE:
 \"\"\"{source_text[:20000]}\"\"\"
 
@@ -527,7 +564,10 @@ def verify_post(post_text: str, sources: list[str], *,
             record["forbidden"].append(phrase)
 
     if use_llm:
-        llm = llm_verify_claims(body, combined, api_key=api_key, model=model)
+        grounded = _grounded_number_tokens(body, combined)
+        llm = llm_verify_claims(body, combined, api_key=api_key, model=model,
+                                grounded_numbers=grounded)
+        record["grounded_numbers"] = grounded
         record["llm_used"] = llm["used"]
         if llm["used"]:
             record["claims"] = llm["claims"]

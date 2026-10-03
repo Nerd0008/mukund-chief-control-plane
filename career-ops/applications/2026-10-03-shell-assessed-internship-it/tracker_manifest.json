@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Shell",
+      "title": "Assessed Internship – Information & Digital Technology",
+      "location": "London (Shell Centre)",
+      "salary": "Not stated in posting",
+      "url": "https://www.shell.com/careers.html",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting requires candidates to be pursuing a Bachelor or Master's degree in the UK and be in their penultimate year of study, on track for a 2:1 or above. The owner completed their MSc in September 2025, so is a recent graduate rather than a current penultimate-year student. This is a hard eligibility criterion. Not evidenced and not claimed: energy sector domain knowledge, penultimate-year student status. Genuinely evidenced: MSc Information Security (Merit), BCA, CompTIA Security+, ISC2 CC, IT support experience (M365, Active Directory, troubleshooting, endpoint support), Python/PowerShell/SQL, structured problem-solving, customer service, compliance checks, risk assessments.",
+      "recommendation": "Applied per owner instruction. Fit is moderate: the role is an IT internship in the energy sector, and the owner's background is IT support and security. The honest gap is the penultimate-year eligibility requirement — the owner is a recent graduate, not a current student. The cover letter addresses this directly and makes the case that practical experience would allow meaningful contribution from day one. No clearance or citizenship barrier. Deadline 31 January 2027. Programme duration 15 June 2027 – 4 September 2027.",
+      "discovery": "OWNER-SUPPLIED — JD text supplied by owner via Discord 2026-10-03. Shell careers website. Requisition R205154. Posted 18 days ago. Deadline 31 January 2027. London (Shell Centre). Programme covers Finance, Information & Digital Technology, Trading & Supply, Integrated Commercial. Shell matches candidates into a programme based on skills and preference.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
