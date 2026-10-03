@@ -938,8 +938,8 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                 "limitation": "semantic stage disabled by the caller",
                 "classifications": {}, "probe": None}
     if semantic in ("auto", "deepseek", "codex"):
-        # Provider order: DeepSeek when healthy (cheap, bulk), else the Codex CLI.
-        # `--semantic codex` pins Codex and never consults DeepSeek.
+        # Provider order: DeepSeek when it actually classifies (cheap, bulk), else
+        # the Codex CLI. `--semantic codex` pins Codex and never consults DeepSeek.
         if semantic in ("auto", "deepseek"):
             probe = deepseek_probe(deepseek_model)
             if probe["available"]:
@@ -949,17 +949,39 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                                              adapter=deepseek_adapter, mode=mode)
                 doc["requested"] = semantic
                 doc["probe"] = probe
-                if doc.get("classifications"):
+                if doc.get("classified"):
                     return doc
+                # The probe can pass while every request fails (observed: a valid
+                # key with "Insufficient Balance"). A pass that classified nothing
+                # still returns a full set of placeholder classifications, so the
+                # accept count is zero no matter what — never treat that as a
+                # successful model pass.
+                if semantic == "deepseek":
+                    doc["limitation"] = doc.get("limitation") or (
+                        "the deepseek pass classified no candidate; the funnel records "
+                        "this instead of treating the pool as empty")
+                    return doc
+                codex_doc = _codex_semantic_pass(candidates, batch_size=batch_size,
+                                                 timeout=timeout,
+                                                 codex_adapter=codex_adapter, mode=mode,
+                                                 codex_model=codex_model,
+                                                 codex_workdir=codex_workdir)
+                if codex_doc.get("classified"):
+                    codex_doc["requested"] = semantic
+                    codex_doc["deepseek_probe"] = probe
+                    codex_doc["deepseek_attempt"] = {
+                        k: doc.get(k) for k in ("requests", "errors", "limitation", "usage")}
+                    return codex_doc
                 fallback = {candidate_id(c): deterministic_classify(c, mode=mode)
                             for c in candidates}
-                return {"provider": "none", "requested": semantic, "probe": probe,
+                return {"provider": "none", "requested": semantic,
+                        "probe": probe, "codex_attempt": codex_doc,
                         "classifications": fallback,
-                        "limitation": ("deepseek answered but produced no usable "
-                                       "classifications; the declared deterministic rule "
-                                       "classifier was used instead — this is NOT a model pass"),
-                        "deepseek_attempt": {k: doc.get(k) for k in
-                                             ("requests", "errors", "limitation", "usage")}}
+                        "limitation": (f"no model provider was usable (deepseek: "
+                                       f"{doc.get('limitation') or 'classified nothing'}; "
+                                       f"codex: {codex_doc.get('limitation')}); the declared "
+                                       "deterministic rule classifier was used instead — "
+                                       "this is NOT a model pass")}
             if semantic == "deepseek":
                 raise SystemExit("--semantic deepseek requested but the provider is not "
                                  "healthy: " + str(probe.get("reason")))
@@ -968,7 +990,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                                              codex_adapter=codex_adapter, mode=mode,
                                              codex_model=codex_model,
                                              codex_workdir=codex_workdir)
-            if codex_doc.get("classifications"):
+            if codex_doc.get("classified"):
                 codex_doc["requested"] = semantic
                 codex_doc["deepseek_probe"] = probe
                 return codex_doc
@@ -987,7 +1009,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                                          codex_adapter=codex_adapter, mode=mode,
                                          codex_model=codex_model,
                                          codex_workdir=codex_workdir)
-        if codex_doc.get("classifications"):
+        if codex_doc.get("classified"):
             codex_doc["requested"] = semantic
             return codex_doc
         fallback = {candidate_id(c): deterministic_classify(c, mode=mode) for c in candidates}
