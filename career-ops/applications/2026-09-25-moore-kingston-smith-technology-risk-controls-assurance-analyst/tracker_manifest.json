@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-09-25",
+      "company": "Moore Kingston Smith",
+      "title": "Technology Risk & Controls Assurance Analyst",
+      "location": "City, London (hybrid)",
+      "salary": "\u00a330,000 - \u00a332,000",
+      "url": "https://mooreks.pinpointhq.com/en/postings/d456403a-2333-4202-9535-f22feda7b1b8",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated",
+      "work_authorisation_risk": "No sponsorship requirement or statement appears in the posting. The role is Permanent - Full Time, so employment beyond the Graduate visa expiry of 23 December 2027 would need sponsorship. Moore Kingston Smith is an accountancy firm and a plausible licensed sponsor, but the posting does not address it \u2014 must be raised before or during application. The 30 September 2026 deadline sits well inside current permission, so there is no barrier to applying.",
+      "key_gap": "No professional IT audit, ITGC/ITAC testing or client-liaison experience, and CISA is not yet held (the firm sponsors it, so this is expected of an entry-level hire). The desirable criterion 'internship or placement exposure to technology, audit, risk, compliance or data roles' is only partly evidenced \u2014 IT support, weekly control-based risk assessments and personal security projects sit adjacent to it but are not a formal placement. Everything else the JD lists as essential is evidenced.",
+      "recommendation": "APPLY IMMEDIATELY \u2014 the posting's application deadline is 30 September 2026, which is 5 days after the JD was supplied. Strong fit otherwise: entry-level and explicitly aimed at graduates, degree in Information Technology / Computer Science / Information Systems / Cyber Security preferred (MSc Information Security, Merit, satisfies this), supervised training with ISACA CISA sponsorship, and the role maps directly onto the owner's stated interest in GRC and cyber risk. Upwork-style no: this is a professional services firm and the JD asks for willingness to learn audit methodology, which the owner has.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text provided by owner via Discord 2026-09-25; canonical posting located and verified live by Chief the same day on Moore Kingston Smith's Pinpoint ATS (Early Careers board). Deadline 30 September 2026, compensation \u00a330,000-\u00a332,000, hybrid City of London, Permanent - Full Time all confirmed from the live posting.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

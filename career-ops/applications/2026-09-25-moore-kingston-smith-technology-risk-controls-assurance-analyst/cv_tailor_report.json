@@ -1,0 +1,300 @@
+{
+  "ok": true,
+  "master": "cv_mukund_didwania_2026-09-25.pdf",
+  "output": "C:\\Users\\mukun\\Downloads\\codex\\_CVs\\Mukund_Didwania_MooreKingstonSmith_TechRisk_Controls_Assurance_Analyst_CV.pdf",
+  "page": {
+    "width": 595.5,
+    "height": 850.5,
+    "page_count": 1
+  },
+  "edits_applied": 16,
+  "spans_before": 81,
+  "spans_after": 81,
+  "measured": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "Information Security MSc graduate (Merit) with CompTIA Security+ and ISC2 CC, seeking an entry-level",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        81.2
+      ],
+      "old_chars": 112,
+      "new_chars": 100,
+      "char_delta_pct": -10.7,
+      "old_width_pt": 523.49,
+      "new_width_pt": 426.06,
+      "available_pt": 552.0
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "technology assurance role. Control-focused work in access management, evidence collection, risk assessment",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        94.7
+      ],
+      "old_chars": 118,
+      "new_chars": 106,
+      "char_delta_pct": -10.2,
+      "old_width_pt": 478.27,
+      "new_width_pt": 436.44,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "and ISO 27001-aligned documentation, taking a methodical approach to testing and keeping a clear audit trail.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        108.2
+      ],
+      "old_chars": 127,
+      "new_chars": 109,
+      "char_delta_pct": -14.2,
+      "old_width_pt": 503.67,
+      "new_width_pt": 439.49,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Security Analysis: ",
+      "replace": "Controls Testing: ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        138.74
+      ],
+      "old_chars": 18,
+      "new_chars": 17,
+      "char_delta_pct": -5.6,
+      "old_width_pt": 79.6,
+      "new_width_pt": 76.91,
+      "available_pt": 78.11
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Access control administration, evidence collection, control reviews",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        101.36,
+        138.74
+      ],
+      "old_chars": 69,
+      "new_chars": 67,
+      "char_delta_pct": -2.9,
+      "old_width_pt": 312.0,
+      "new_width_pt": 267.72,
+      "available_pt": 472.39
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, Active Directory, access administration",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        109.92,
+        148.92
+      ],
+      "old_chars": 77,
+      "new_chars": 70,
+      "char_delta_pct": -9.1,
+      "old_width_pt": 320.8,
+      "new_width_pt": 291.8,
+      "available_pt": 463.83
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "ISO 27001, Cyber Essentials, GDPR, NIST CSF",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        128.4,
+        183.25
+      ],
+      "old_chars": 42,
+      "new_chars": 43,
+      "char_delta_pct": 2.4,
+      "old_width_pt": 193.58,
+      "new_width_pt": 193.96,
+      "available_pt": 445.35
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "Documentation, stakeholder coordination, clear written communication",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        144.2,
+        194.76
+      ],
+      "old_chars": 63,
+      "new_chars": 68,
+      "char_delta_pct": 7.9,
+      "old_width_pt": 257.23,
+      "new_width_pt": 284.6,
+      "available_pt": 429.55
+    },
+    {
+      "find": "\u2022 Manage typically 4\u20135 access requests daily through on-premises Active Directory, verifying business approval, granting time-",
+      "replace": "\u2022 Administer 4\u20135 access requests daily in on-premises Active Directory, verifying approval before granting time-",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        343.41
+      ],
+      "old_chars": 126,
+      "new_chars": 112,
+      "char_delta_pct": -11.1,
+      "old_width_pt": 508.82,
+      "new_width_pt": 450.72,
+      "available_pt": 552.0
+    },
+    {
+      "find": "limited permissions and documenting access periods and extensions.",
+      "replace": "limited permissions, and recording every access period for later audit.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        28.5,
+        354.25
+      ],
+      "old_chars": 66,
+      "new_chars": 71,
+      "char_delta_pct": 7.6,
+      "old_width_pt": 274.3,
+      "new_width_pt": 277.96,
+      "available_pt": 545.25
+    },
+    {
+      "find": "\u2022 Investigate 4\u20135 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting ",
+      "replace": "\u2022 Investigate 4\u20135 suspicious emails daily, checking sender and link domains for impersonation, recording findings and ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        366.02
+      ],
+      "old_chars": 128,
+      "new_chars": 117,
+      "char_delta_pct": -8.6,
+      "old_width_pt": 519.92,
+      "new_width_pt": 473.72,
+      "available_pt": 552.0
+    },
+    {
+      "find": "\u2022 Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining    ",
+      "replace": "\u2022 Test weekly store-wide controls through risk assessments and daily compliance checks, reviewing evidence and spotting ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        423.8
+      ],
+      "old_chars": 117,
+      "new_chars": 119,
+      "char_delta_pct": 1.7,
+      "old_width_pt": 490.7,
+      "new_width_pt": 488.91,
+      "available_pt": 552.0
+    },
+    {
+      "find": "assessment records and identifying issues requiring corrective action.",
+      "replace": "weak points in process and recording every issue that needs corrective action.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        28.5,
+        434.6
+      ],
+      "old_chars": 70,
+      "new_chars": 78,
+      "char_delta_pct": 11.4,
+      "old_width_pt": 275.73,
+      "new_width_pt": 309.2,
+      "available_pt": 545.25
+    },
+    {
+      "find": "\u2022 Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through  ",
+      "replace": "\u2022 Record and escalate 15+ operational issues weekly, including product-date exceptions and safety concerns, and apply ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        447.61
+      ],
+      "old_chars": 121,
+      "new_chars": 117,
+      "char_delta_pct": -3.3,
+      "old_width_pt": 499.43,
+      "new_width_pt": 476.51,
+      "available_pt": 552.0
+    },
+    {
+      "find": "internal reporting systems, apply temporary controls and escalate unresolved risks.",
+      "replace": "temporary controls and escalate unresolved risks through internal reporting systems.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        28.5,
+        459.87
+      ],
+      "old_chars": 83,
+      "new_chars": 84,
+      "char_delta_pct": 1.2,
+      "old_width_pt": 329.07,
+      "new_width_pt": 335.79,
+      "available_pt": 545.25
+    },
+    {
+      "find": "\u2022 Developed a local tool that maps Windows error codes to common causes, supporting investigation of system ",
+      "replace": "\u2022 Developed a local tool that maps Windows error codes to known causes, supporting consistent investigation of system ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        718.77
+      ],
+      "old_chars": 107,
+      "new_chars": 117,
+      "char_delta_pct": 9.3,
+      "old_width_pt": 444.45,
+      "new_width_pt": 480.09,
+      "available_pt": 552.0
+    }
+  ],
+  "problems": [],
+  "verification": {
+    "untouched_spans_unchanged": true,
+    "moved": [],
+    "missing": [],
+    "all_replacements_present": true,
+    "page_geometry_unchanged": true,
+    "collateral_restored": [
+      {
+        "text": "faults across business devices.",
+        "font": "TimesNewRomanPSMT",
+        "origin": [
+          28.5,
+          728.47
+        ]
+      }
+    ],
+    "cmap_repair": {
+      "streams_patched": 1,
+      "fonts": [
+        "OQCUFT+Times New Roman Regular"
+      ]
+    },
+    "non_breaking_spaces_remaining": 4,
+    "font_subsetting": {
+      "bytes_before": 1502857,
+      "bytes_after": 226184
+    }
+  }
+}

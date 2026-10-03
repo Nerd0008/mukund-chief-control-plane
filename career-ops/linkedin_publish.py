@@ -60,6 +60,7 @@ CONTROL_PLANE = CAREER_OPS_DIR.parent
 sys.path.insert(0, str(CAREER_OPS_DIR))
 
 import linkedin_auth as auth  # noqa: E402
+import linkedin_factcheck as news  # noqa: E402
 
 RUNTIME_DIR = CONTROL_PLANE / "runtime" / "linkedin"
 PUBLISHED_LEDGER = RUNTIME_DIR / "published" / "posts.jsonl"
@@ -328,6 +329,34 @@ def publish_post(access_token: str, person_urn: str, commentary: str, *,
 # Commands
 # --------------------------------------------------------------------------- #
 
+def _personal_gate_ok(fact_gate, draft) -> tuple[bool, str]:
+    """Validate the Career Ops personal-claims gate record.
+
+    That gate (verify-cv-facts.mjs) is run by linkedin_workflow.py and
+    does not carry the news gate's provenance fields. It is accepted only when
+    it is a real verdict dict with a passing verdict AND the draft is not
+    flagged blocked. A bare or absent record is refused: a verdict nobody ran
+    is not evidence.
+    """
+    if not isinstance(fact_gate, dict):
+        return False, ("no personal-claims gate record on the draft; run "
+                       "linkedin_workflow.py draft (or pass the gate verdict) "
+                       "before publishing")
+    verdict = fact_gate.get("verdict")
+    if verdict not in ("pass", "passed"):
+        return False, f"personal-claims gate verdict is {verdict!r}"
+    if fact_gate.get("available") is False:
+        return False, ("personal-claims gate reported available=false, so it "
+                       "did not actually run")
+    if draft.get("blocked"):
+        return False, "draft is flagged blocked"
+    if "gate_name" not in fact_gate and "checks" not in fact_gate             and "invented" not in fact_gate and "unsupportedFacts" not in fact_gate:
+        return False, ("personal-claims gate record carries no run detail "
+                       "(no checks/invented/unsupportedFacts); it cannot be "
+                       "shown to be the product of a real gate run")
+    return True, f"personal-claims gate verdict {verdict!r} with run detail"
+
+
 def _preflight(*, drafts_path, kind, index, approve, confirm_token,
                allow_duplicate, max_retries, ledger_path, require_credentials=True):
     """Every guard, evaluated without network access.
@@ -376,20 +405,35 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     check("body_within_linkedin_limit", len(body) <= MAX_PUBLISH_BODY_CHARS,
           f"{len(body)} chars (LinkedIn commentary limit {MAX_PUBLISH_BODY_CHARS})")
 
-    # Reuse the B20 review path rather than duplicating it: the draft generator
-    # runs the Career Ops install's fact gate and marks a draft `blocked` when it
-    # fails. A blocked draft is never publishable.
+    # Two independent gates, both required.
+    #
+    # 1. The Career Ops install's personal-claims gate (verify-cv-facts.mjs),
+    #    which checks the draft makes no claim about Mukund himself that his CV
+    #    does not support.
+    # 2. The news-claim gate (linkedin_factcheck.py), which checks the factual
+    #    claims the post makes about the world against its cited sources.
+    #
+    # A verdict is only accepted when it PROVES it came from a real run over
+    # this exact text. A missing verdict, or one that cannot name its gate and
+    # carry a matching body hash, is treated as no verdict at all — a hand-
+    # written {"verdict": "pass"} must never be usable as a green light.
     fact_gate = draft.get("fact_gate")
     verdict = fact_gate.get("verdict") if isinstance(fact_gate, dict) else None
     out["fact_gate_verdict"] = verdict
     out["draft_blocked_flag"] = bool(draft.get("blocked"))
-    review_ok = (not draft.get("blocked")) and verdict in (None, "pass", "passed")
+
+    personal_ok, personal_detail = news.provenance_ok(
+        fact_gate, body) if fact_gate and fact_gate.get("gate_name") == news.GATE_NAME \
+        else _personal_gate_ok(fact_gate, draft)
+    out["personal_claims_gate"] = {"ok": personal_ok, "detail": personal_detail}
+
+    news_gate = draft.get("news_fact_gate")
+    news_ok, news_detail = news.provenance_ok(news_gate, body)
+    out["news_claims_gate"] = {"ok": news_ok, "detail": news_detail}
+
+    review_ok = personal_ok and news_ok and not draft.get("blocked")
     check("draft_passed_review", review_ok,
-          f"fact gate verdict {verdict!r}; draft blocked={bool(draft.get('blocked'))}"
-          if not review_ok else
-          (f"fact gate verdict {verdict!r}, draft not blocked" if verdict is not None
-           else "no review verdict recorded in this artefact (older shape); "
-                "nothing is asserted about it"))
+          f"personal-claims gate: {personal_detail}; news-claims gate: {news_detail}")
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()

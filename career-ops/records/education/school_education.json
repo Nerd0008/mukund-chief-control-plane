@@ -1,0 +1,72 @@
+{
+  "_note": "School-level education, transcribed by direct visual read of the owner's CBSE mark sheets on 2026-09-25. Marks are transcribed literally from the documents; percentages are computed in 'derived' fields. Source PDFs sit alongside this file. Use this to answer education fields on application forms. Do NOT add school-level education to the CV — with two degrees including a UK Master's it is not needed and would break the fixed one-page layout.",
+  "_source_documents": {
+    "class_x": "cbse_class_X_2019_marksheet.pdf",
+    "class_xii": "cbse_class_XII_2021_marksheet.pdf"
+  },
+  "candidate_name_on_documents": "MUKUND DIDWANIA",
+  "school": {
+    "name": "The Asian School, Indira Nagar, Dehradun",
+    "state": "Uttarakhand, India",
+    "board": "Central Board of Secondary Education (CBSE)",
+    "board_notes": "School codes differ between the two documents: Class X shows 57140, Class XII shows 81478."
+  },
+  "class_x": {
+    "qualification": "All India Secondary School Examination (AISSE), Class X",
+    "board": "CBSE",
+    "year_of_examination": 2019,
+    "date_on_certificate": "06/05/2019",
+    "document_note": "This copy is a DUPLICATE issued 01-12-2023 (Reg.No. U119571400221).",
+    "roll_no": "5303052",
+    "result": "PASS",
+    "uk_equivalence": "UK universities' published India entry requirements map CBSE AISSE Class X at grade A1-C1 to GCSE grade 5/B and grade 4/C.",
+    "subjects": [
+      {"code": "101", "subject": "English Comm.",   "theory": 60, "internal_practical": 20, "total": 80, "grade": "B2"},
+      {"code": "002", "subject": "Hindi Course-A",  "theory": 67, "internal_practical": 19, "total": 86, "grade": "B1"},
+      {"code": "041", "subject": "Mathematics",     "theory": 53, "internal_practical": 18, "total": 71, "grade": "B1"},
+      {"code": "086", "subject": "Science",         "theory": 54, "internal_practical": 19, "total": 73, "grade": "B1"},
+      {"code": "087", "subject": "Social Science",  "theory": 75, "internal_practical": 19, "total": 94, "grade": "A2"},
+      {"code": "402", "subject": "Info Technology (Additional Subject)", "theory": 47, "internal_practical": 50, "total": 97, "grade": "A1"}
+    ],
+    "derived": {
+      "marks_obtained": 501,
+      "marks_max": 600,
+      "percentage": 83.5,
+      "english_percentage": 80,
+      "mathematics_percentage": 71,
+      "science_percentage": 73
+    }
+  },
+  "class_xii": {
+    "qualification": "Senior School Certificate Examination (AISSCE), Class XII",
+    "board": "CBSE",
+    "year_of_examination": 2021,
+    "date_on_certificate": "30-07-21",
+    "roll_no": "25608405",
+    "registration_no": "U221/81478/0056",
+    "result": "PASS",
+    "stream": "Science (Physics, Chemistry, Mathematics, Computer Science)",
+    "uk_equivalence": "UK universities' published India entry requirements treat CBSE Class XII as A-level standard.",
+    "subjects": [
+      {"code": "301", "subject": "English Core",           "theory": 71, "internal_practical": 20, "total": 91, "grade": "B1"},
+      {"code": "042", "subject": "Physics",                "theory": 47, "internal_practical": 28, "total": 75, "grade": "C1"},
+      {"code": "043", "subject": "Chemistry",              "theory": 37, "internal_practical": 28, "total": 65, "grade": "D1"},
+      {"code": "083", "subject": "Computer Science (New)", "theory": 52, "internal_practical": 30, "total": 82, "grade": "C1"},
+      {"code": "041", "subject": "Mathematics",            "theory": 45, "internal_practical": 19, "total": 64, "grade": "C2"},
+      {"code": "034", "subject": "Hind Music.Vocal",       "theory": 25, "internal_practical": 69, "total": 94, "grade": "B2"},
+      {"code": "500", "subject": "Work Experience",        "total": null, "grade": "A1"},
+      {"code": "502", "subject": "Health & Physical Education", "total": null, "grade": "A1"},
+      {"code": "503", "subject": "General Studies",        "total": null, "grade": "A1"}
+    ],
+    "derived": {
+      "marks_obtained_six_graded_subjects": 471,
+      "marks_max_six_graded_subjects": 600,
+      "percentage_six_subjects": 78.5,
+      "best_five_obtained": 407,
+      "best_five_max": 500,
+      "percentage_best_five": 81.4,
+      "english_percentage": 91,
+      "_advice": "Quote the conservative all-six-subjects figure (78.5%) for consistency. The best-five figure (81.4%) is a legitimate CBSE convention but only use one figure per application."
+    }
+  }
+}
