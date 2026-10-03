@@ -354,8 +354,14 @@ def research_trending_topics(count: int = 6) -> list[dict]:
             ),
         )
         raw_text = str(response.text) if response.text else ""
-        return _parse_topics_json(raw_text, count)
-    except Exception:
+        topics = _parse_topics_json(raw_text, count)
+        if not topics:
+            report_problem("trending-topic research returned no topics",
+                           detail=(raw_text or "")[:800])
+        return topics
+    except Exception as exc:
+        report_problem("trending-topic research failed",
+                       detail=f"{type(exc).__name__}: {exc}")
         return []
 
 
@@ -643,6 +649,16 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
         f"Technical impact: {topic['technical_impact']}\n"
         f"Non-technical impact: {topic['non_technical_impact']}"
     )
+    # Cache the topic's sources BEFORE generating, so the news-claim gate has
+    # real article text to ground the post against instead of returning ungated.
+    source_cache = cache_topic_sources(topic)
+    if source_cache.get("failed"):
+        report_problem(
+            f"{len(source_cache['failed'])} source(s) could not be cached for topic "
+            f"'{topic.get('title', '')[:60]}'",
+            detail=("The news-claim gate will treat this post as ungated.\n"
+                    + "\n".join(source_cache["failed"])))
+
     post_text = generate_linkedin_content(content, source_type="LinkedIn prompt")
     image_bytes = None
     if post_text and generate_image:
@@ -652,11 +668,18 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
     # provenance-bearing verdict. A post is never handed on with a fabricated
     # or absent gate record: the publish path refuses those outright.
     news_fact_gate = factcheck_post(post_text, topic.get("sources") or [])
+    if post_text and news_fact_gate.get("verdict") != "pass":
+        report_problem(
+            f"news-claim gate did not pass (verdict={news_fact_gate.get('verdict')!r})",
+            detail=(f"topic: {topic.get('title', '')[:80]}\n"
+                    f"reason: {news_fact_gate.get('reason', '')}\n"
+                    f"unsupported: {news_fact_gate.get('unsupported_claims', [])[:3]}"))
     return {
         "topic": topic,
         "post_text": post_text,
         "image_bytes": image_bytes,
         "news_fact_gate": news_fact_gate,
+        "source_cache": source_cache,
         "blocked": news_fact_gate.get("verdict") == "block",
         "generated_at": now_utc(),
     }
@@ -684,6 +707,21 @@ def cache_topic_sources(topic: dict) -> dict:
         else:
             failed.append(url)
     return {"cached": cached, "failed": failed}
+
+
+def report_problem(summary: str, detail: str = "", *,
+                   source: str = "linkedin weekly posts") -> dict:
+    """Report a breakage to the incident log for #incidents.
+
+    Never raises and never invents success: if the report cannot be recorded,
+    the failure is printed instead. Silent failure is the thing to avoid.
+    """
+    try:
+        import incident_report as ir
+        return ir.report(source=source, summary=summary, detail=detail)
+    except Exception as exc:
+        print(f"INCIDENT (could not be logged): {summary} :: {detail} :: {exc}")
+        return {"delivered": False, "error": str(exc)}
 
 
 def factcheck_post(post_text: str, sources: list) -> dict:
