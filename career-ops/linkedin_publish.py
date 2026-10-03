@@ -239,14 +239,26 @@ def initialize_image_upload(access_token: str, person_urn: str, *,
                 "error": "image initializeUpload response unparsable"}
 
 
+def image_content_type(path: str | Path) -> str:
+    """LinkedIn's byte upload rejects a request with no Content-Type (HTTP 400)."""
+    suffix = Path(path).suffix.lower()
+    return {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+            ".gif": "image/gif", ".webp": "image/webp"}.get(suffix, "image/jpeg")
+
+
 def upload_image_bytes(access_token: str, upload_url: str, image_bytes: bytes,
-                       *, transport=None) -> dict:
-    """PUT the image bytes to the upload URL LinkedIn returned."""
+                       *, content_type: str = "image/jpeg",
+                       transport=None) -> dict:
+    """PUT the image bytes to the upload URL LinkedIn returned.
+
+    Content-Type is required: without it LinkedIn answers HTTP 400.
+    """
     putter = getattr(transport, "put_bytes", None) if transport else None
     if putter is None:
         putter = auth.put_bytes
     resp = putter(upload_url, image_bytes,
-                  headers={"Authorization": f"Bearer {access_token}"})
+                  headers={"Authorization": f"Bearer {access_token}",
+                           "Content-Type": content_type})
     status = resp.get("status")
     if status in (200, 201, 204):
         return {"ok": True, "status": status}
@@ -544,7 +556,8 @@ def cmd_publish(args) -> int:
                          "image_upload": init})
             emit(base)
             return 1
-        put = upload_image_bytes(access_token, init["upload_url"], image_bytes)
+        put = upload_image_bytes(access_token, init["upload_url"], image_bytes,
+                                 content_type=image_content_type(image_path))
         if not put.get("ok"):
             base.update({"ok": False, "performed": False,
                          "blocker_category": "external_provider",
