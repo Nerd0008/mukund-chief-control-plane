@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "Telent Technology Services Ltd (part of M Group)",
+      "title": "Graduate Network Engineer",
+      "location": "Farnborough, UK (Telecom division; two-year programme with six-month rotations)",
+      "salary": "\u00a329,000 per annum plus benefits",
+      "url": "https://jobs.mgroupltd.com/vacancies/49768/graduate-network-engineer.html",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no clearance stated. Standard 2:2 STEM degree requirement, no sponsorship restriction stated in the posting.",
+      "work_authorisation_risk": "Not assessed \u2014 owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a minimum 2:2 Honours Degree in a relevant STEM subject achieved within the last two years. The owner holds an MSc Information Security (Merit, Sep 2025) and a BCA in computing (CGPA 9.17, Sep 2024) \u2014 both within the window and both STEM. Directly evidenced: troubleshooting, server health monitoring, access control administration, security fundamentals, documentation, team coordination. Not evidenced and not claimed: enterprise routing/switching configuration (Cisco/Juniper), CCNA or equivalent networking certification, firewall administration, cloud platform deployment (AWS/Azure networking specifically), network automation tooling (Ansible/Terraform), IET accreditation progress.",
+      "recommendation": "Applied per owner standing instruction. Fit is moderate and honest: this is an operational network and infrastructure role, and the owner's nearest genuine evidence is IT support with network-adjacent duties (network and website-access controls, server health monitoring, access requests, endpoint troubleshooting) plus security fundamentals from the MSc and certifications. The networking-specific configuration gap is real and is not overstated in the documents; the CV and cover letter lead on troubleshooting method, security-aware reasoning and documented operational support, which is what a graduate network engineer actually does in year one.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text supplied by owner via Discord 2026-10-03. Official M Group vacancies board URL located by Chief and verified live 2026-10-03 (req 49768). Site search is an ASP.NET postback form: query-string keyword parameters are ignored, so the search must be driven through the form's btnSearch control.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

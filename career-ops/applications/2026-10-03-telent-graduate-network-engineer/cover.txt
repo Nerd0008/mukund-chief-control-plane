@@ -1,0 +1,41 @@
+Application for Graduate Network Engineer
+Dear Telent Early Careers Team,
+I am applying for the Graduate Network Engineer role in Farnborough because Telent works on
+infrastructure that people depend on continuously rather than occasionally. Keeping the UK's critical
+digital infrastructure running is a job where a misconfigured change is felt immediately by real users, and
+that is the kind of environment I want to learn in. I am available for the September 2027 intake and ready
+to work towards IET accreditation through the rotations your two-year programme offers.
+My academic background is an MSc in Information Security from Royal Holloway, awarded with Merit,
+with Network Security, Critical Infrastructure Security and Secure Business Architectures among the
+modules, preceded by a BCA covering Python, Java, JavaScript, C++, MySQL and AI. I hold CompTIA
+Security+ and ISC2 Certified in Cybersecurity. For a network engineering team this matters in a specific
+way: I understand not only how traffic and services are meant to be configured, but why segmentation,
+access control and monitoring exist in the first place, which makes me quicker to recognise when a
+design choice creates a risk rather than only when it creates an outage.
+I have applied that to real systems rather than only to coursework. I developed a local tool that maps
+Windows error codes to their common causes, and used it to investigate intermittent server freezes and
+crashes, tracing them to errors associated with missing or corrupted DLLs and informing the corrective
+action taken. I also developed a phishing-analysis prototype in Python with the Gmail API and an LLM,
+mapping findings to MITRE ATT&CK and keeping every result for a human to validate before anything
+is acted on. Diagnose from evidence, fix the cause rather than the symptom, document it so the next
+person does not repeat the work - that is the loop the troubleshooting and documentation side of your role
+runs on.
+In my current IT support role I am the first point of contact for 15 colleagues across 15 to 20 devices,
+troubleshooting access and system problems, monitoring server health and maintaining network and
+website-access controls, while handling four to five access requests a day through on-premises Active
+Directory. That has given me a practical grounding in the unglamorous half of operational support:
+checking what a user actually needs, making a change without breaking the person next to them, and
+recording what was done. At Co-op, as Person in Charge, I coordinate seven or eight colleagues per shift
+and explain control requirements to people with no particular interest in them, which taught me to make a
+technical point land with a non-technical audience - useful in a business that works alongside customers
+and technology partners.
+What attracts me to Telent specifically is the breadth of the graduate programme: six-month rotations
+across departments, exposure to cloud platforms, automation and security alongside networking, and a
+mentorship structure rather than being left to work it out alone. I would welcome the opportunity to
+discuss how my background could contribute to your engineering teams.
+
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
+
