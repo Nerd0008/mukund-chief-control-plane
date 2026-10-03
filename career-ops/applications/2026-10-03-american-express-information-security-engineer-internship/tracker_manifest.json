@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "American Express",
+      "title": "Campus - Internship Programme - Undergraduate - Information Security Engineer - 2027 (UK - Burgess Hill)",
+      "location": "Burgess Hill, West Sussex, United Kingdom (Hybrid) \u2014 AMEX Sussex House, RH15 9AQ",
+      "salary": "Competitive base salary (not published)",
+      "url": "https://careers.americanexpress.com/en/sites/CX_1/job/26013761/",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass \u2014 no security clearance stated; offer conditional on a background verification check",
+      "work_authorisation_risk": "Not assessed \u2014 owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for candidates currently enrolled in a full-time Bachelor's degree with an expected graduation date in 2028; the owner completed his BCA in 2024 and his MSc in 2025, so the enrolment window does not match. Capability match is otherwise strong: access management via Active Directory with approval verification and time-limited permissions, alert triage and phishing investigation, endpoint support, security documentation and remediation tracking, risk assessments and compliance checks, Python scripting, MITRE ATT&CK mapping, ISO 27001 / GDPR / NIST CSF familiarity.",
+      "recommendation": "Capability fit is high and the responsibilities map closely to existing evidence (IAM, endpoint, alert triage, documentation, AI-assisted analysis with human validation). Recorded as applied per owner standing instruction; the enrolment-window wording is noted in this file only.",
+      "discovery": "OWNER-SUPPLIED \u2014 JD text supplied by owner via Discord 2026-10-03. Official Workday-hosted careers URL located by Chief and verified live 2026-10-03 (Job Identification 26013761; posting date 14/09/2026; Apply Before 23/10/2026, 12:00 AM).",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}

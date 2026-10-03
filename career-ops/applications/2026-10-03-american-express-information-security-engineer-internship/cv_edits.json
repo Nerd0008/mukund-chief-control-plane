@@ -1,0 +1,35 @@
+{
+  "purpose": "American Express Campus Internship Programme 2027 - Undergraduate Information Security Engineer (Burgess Hill) tailoring",
+  "master": "CV_FORMAT_MASTER.pdf == Mukund_CV_BASE_2026-09-25.pdf (owner-designated base, authoritative and factual)",
+  "constraint": "layout preserved: each edit keeps its span origin, font and size; +/-15% character budget and rendered-width gate enforced by cv_tailor.py",
+  "edits": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "Information Security MSc graduate from Royal Holloway with CompTIA Security+ and ISC2 CC, seeking an information"
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "security internship. IT support and systems experience, with practical projects in phishing analysis, endpoint"
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "protection and security monitoring; keen to support identity and access management, documentation and compliance."
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Phishing analysis, security monitoring, Windows Event Logs, MITRE ATT&CK"
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, Active Directory, access management, endpoint protection"
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "ISO 27001, Cyber Essentials, GDPR, NIST CSF "
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "User support, documentation, reporting, stakeholder coordination"
+    }
+  ]
+}

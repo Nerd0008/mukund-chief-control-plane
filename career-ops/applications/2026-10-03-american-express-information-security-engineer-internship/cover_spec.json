@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Undergraduate Information Security Engineer Internship 2027",
+  "salutation": "Dear American Express Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Didwania_AmericanExpress_Information_Security_Engineer_Intern_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\amex_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Information Security Engineer internship at Burgess Hill because I want to learn how security controls are actually designed, documented and improved inside a global enterprise - not only how they are described in a framework. American Express works across identities, endpoints, applications, infrastructure and monitoring at a scale where assurance has to be systematic, and a ten-week programme inside Enterprise Technology Services is the environment in which I would learn fastest.",
+
+    "My MSc in Information Security at Royal Holloway, awarded with Merit, covered Security Management with an ISO 27001 focus, Critical Infrastructure Security, Digital Forensics and Network Security, and I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. That gives me the grounding this role asks for: network protocols and security fundamentals, identity and access management, data protection, and how regulatory expectations translate into controls a team can be measured against. For your engineers, it means I can be useful from the first week rather than needing the concepts explained from scratch.",
+
+    "The responsibilities in this posting are close to what I already do. As an IT Support Assistant I administer access requests through on-premises Active Directory, confirming approval exists before granting anything and limiting permissions to exactly what was requested with a recorded expiry - identity and access management work, carried out manually and documented every time. I investigate four to five suspicious emails a day, checking sender and link domains for impersonation, and I support fifteen colleagues across fifteen to twenty devices, monitoring server health and maintaining access controls. That is the endpoint, identity and alert-triage side of security operations, and it is where my attention to detail was built.",
+
+    "Documentation and reporting are the part of my current work I would bring most directly. At Co-op, as Person in Charge, I run weekly risk assessments and daily compliance checks against operational controls, maintain the assessment records, document incidents through internal reporting systems, track corrective actions and escalate anything unresolved. I have also developed a phishing-analysis prototype in Python with the Gmail API and an LLM, mapping findings to MITRE ATT&CK so they can be triaged in context, and I keep every result for a human to validate before anything is acted on - the same discipline your team describes for AI-enabled detection and triage. I keep sensitive data local by default, because discretion is not optional in this work.",
+
+    "I am genuinely interested in secure architecture, cloud security and AI-enabled security workflows, and I am at the stage where learning from engineers who do this daily is worth more to me than any title. I would welcome the opportunity to discuss how my background could support your team over the summer."
+  ]
+}
