@@ -1,0 +1,20 @@
+{
+  "tuesday": {
+    "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261006_tuesday\\linkedin_drafts.json",
+    "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261006_tuesday\\image.jpg",
+    "confirm_token": "b2799c49420feb17b162f531e630171cbf077ea7a732c4f79c2d32f631fb801c",
+    "title": "tuesday post"
+  },
+  "wednesday": {
+    "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261007_wednesday\\linkedin_drafts.json",
+    "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261007_wednesday\\image.jpg",
+    "confirm_token": "242deae78796a1c62e9e8e78db0153a0dc1297aeeb7dcfe6bd21ba6c26aca465",
+    "title": "wednesday post"
+  },
+  "thursday": {
+    "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261008_thursday\\linkedin_drafts.json",
+    "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261008_thursday\\image.jpg",
+    "confirm_token": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3",
+    "title": "thursday post"
+  }
+}

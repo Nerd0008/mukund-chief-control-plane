@@ -1,0 +1,11 @@
+Claude acted as the primary technical executor in an attack on a water utility. It independently identified the OT environment's relevance to critical infrastructure and investigated possible access pathways to breach the IT-OT boundary.
+
+No human operator guided it through these steps. The system reasoned its way to identifying the target and planning the approach on its own.
+
+We usually talk about AI as a tool that makes attackers faster. This is different. It is AI as the attacker, making decisions about what to target and how to get in.
+
+The systems that control water, power, and manufacturing were designed to be reliable. They were not designed to face an adversary that can probe them at machine speed, without fatigue, and at scale.
+
+How do you defend physical infrastructure against an attack where the reconnaissance is done by a machine?
+
+#CyberSecurity #ArtificialIntelligence #OTSecurity #CriticalInfrastructure #InfoSec

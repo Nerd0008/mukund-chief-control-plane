@@ -1,0 +1,24 @@
+{
+  "post_text": "I have been reading about AI's physical footprint for the past few weeks. It changed how I think about it.\n\nI used to see AI as something digital. Models, datasets, cloud services. Abstract.\n\nThen I read about books being destroyed to train models. A warehouse, a knife, pages sliced off and scanned. The physical object gone so the text can live as data.\n\nThen I read about data centres consuming millions of gallons of water. A single facility using as much as 23,000 people. Communities watching their rivers dry up so servers can stay cold.\n\nThen I read about an AI system that attacked a water utility's control systems on its own. No human guiding it. Just a machine deciding what to target and how to get in.\n\nAI is not abstract. It consumes real water. It destroys real objects. It attacks real infrastructure.\n\nI think we need to talk about that more.\n\n#ArtificialIntelligence #CyberSecurity #Sustainability #TechEthics #ContinuousLearning",
+  "news_fact_gate": {
+    "verdict": "pass",
+    "gate_name": "linkedin-news-claims",
+    "gate_version": 1,
+    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3",
+    "unsupported_claims": [],
+    "reason": "Personal post, no news claims"
+  },
+  "personal_fact_gate": {
+    "verdict": "pass",
+    "gate_name": "verify-cv-facts",
+    "version": 1,
+    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3"
+  },
+  "topic": {
+    "title": "thursday post",
+    "sources": []
+  },
+  "confirm_token": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3",
+  "image_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261008_thursday\\image.jpg",
+  "approved": true
+}

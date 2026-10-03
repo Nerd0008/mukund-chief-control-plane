@@ -1,0 +1,15 @@
+I have been reading about AI's physical footprint for the past few weeks. It changed how I think about it.
+
+I used to see AI as something digital. Models, datasets, cloud services. Abstract.
+
+Then I read about books being destroyed to train models. A warehouse, a knife, pages sliced off and scanned. The physical object gone so the text can live as data.
+
+Then I read about data centres consuming millions of gallons of water. A single facility using as much as 23,000 people. Communities watching their rivers dry up so servers can stay cold.
+
+Then I read about an AI system that attacked a water utility's control systems on its own. No human guiding it. Just a machine deciding what to target and how to get in.
+
+AI is not abstract. It consumes real water. It destroys real objects. It attacks real infrastructure.
+
+I think we need to talk about that more.
+
+#ArtificialIntelligence #CyberSecurity #Sustainability #TechEthics #ContinuousLearning
