@@ -1,0 +1,42 @@
+Application for Graduate Data Consultant
+Dear GHD Advisory Recruitment Team,
+I am applying for the Graduate Data Consultant position in GHD's London Advisory team because it
+combines the analytical and technical work I already do with the consulting and client-facing dimension I
+want to build. Supporting the analysis of complex datasets, contributing to analytical models and
+decision-support tools, and helping design data solutions and dashboards are the core of the role - and
+while I am early in my career, the structured learning, mentoring and hands-on project experience GHD
+offers is exactly the environment I need to develop both technical and consulting skills. I am available for
+a September 2027 start and comfortable with the hybrid working arrangement.
+My background combines practical IT support and security work with formal analytical training. I am an
+MSc Information Security graduate from Royal Holloway, awarded with Merit, with CompTIA
+Security+ and ISC2 Certified in Cybersecurity, preceded by a BCA in computer applications. That means
+I understand not only how to resolve technical problems but how to approach complex challenges in a
+structured way - which is central to a role that requires strong analytical and problem-solving skills and
+the ability to translate client requirements into practical solutions.
+In my current IT support position I am the first point of contact for 15 colleagues across 15 to 20 devices,
+troubleshooting access and system problems, monitoring server health and maintaining network and
+website-access controls. I handle four to five access requests a day through on-premises Active Directory
+- verifying business approval, granting time-limited permissions and documenting the access period and
+any extension - and I investigate four to five suspicious emails a day, recording findings and alerting
+colleagues to recurring tactics. I also built a local tool that maps Windows error codes to their common
+causes and used it to trace intermittent server freezes to missing or corrupted DLLs, which is the kind of
+structured problem-solving and root-cause analysis your role requires. My technical skills include
+Python, PowerShell and SQL, which I use for task automation and data analysis.
+Two things in your requirements I want to be straightforward about. I have not worked in a formal data
+consulting role or built dashboards and visualisations for clients, so that experience is something I would
+expect to develop through GHD's structured learning and mentoring rather than claim as existing depth.
+What I do bring is a genuine analytical mindset and attention to detail: at Co-op, as Person in Charge, I
+conduct weekly risk assessments and daily compliance checks, maintain the assessment records, and
+coordinate seven or eight colleagues per shift while explaining requirements to people who have no
+particular interest in them. I am used to being the person who keeps the record straight and follows the
+correct process, and I am comfortable working with people from different backgrounds and disciplines.
+What draws me to GHD specifically is that the Data & Insights team works across infrastructure,
+transport, energy, water and government - sectors where data-driven decisions have real-world impact on
+communities and the environment. I would welcome the opportunity to discuss how my analytical and
+technical skills could contribute to your team.
+
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
+

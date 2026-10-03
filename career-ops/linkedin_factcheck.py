@@ -372,6 +372,77 @@ POST:
             "runs_used": len(all_runs), "runs_requested": runs, "reason": None}
 
 
+def llm_check_no_world_claims(post_text: str, *, api_key: str | None,
+                              model: str = DEFAULT_MODEL,
+                              runs: int = JUDGE_RUNS) -> dict:
+    """Decide whether a source-less post asserts any checkable claim at all.
+
+    A personal reflection cites no article, so there is nothing to ground it
+    against — which previously left every such post permanently ``ungated`` and
+    therefore unpublishable. The honest rule is narrower than that: a post with
+    no sources may pass only if it makes no factual claim about the outside
+    world. If it does assert one, it needs a source and stays ungated.
+
+    Returns ``{"used": bool, "claims": [...], "reason": str|None}`` where any
+    returned claim means the post asserted something checkable.
+    """
+    if not api_key:
+        return {"used": False, "claims": [], "reason": "no model API key available"}
+    try:
+        from google import genai
+    except Exception as exc:  # pragma: no cover - environment dependent
+        return {"used": False, "claims": [], "reason": f"genai unavailable: {exc}"}
+
+    prompt = f"""You are a strict fact-checker. The POST below cites no source.
+
+List every factual claim it makes about the outside world: events, numbers,
+organisations, people, what happened, what someone said, what something is or
+does. Ignore the author's own opinions, feelings, memories of their own life,
+questions and rhetorical framing.
+
+Return ONLY JSON, no prose, in exactly this shape:
+{{"claims": [{{"claim": "<the claim, quoted or closely paraphrased>"}}]}}
+
+If the post makes no factual claim about the outside world, return
+{{"claims": []}}.
+Be strict. A general statement presented as a fact about the world counts.
+
+POST:
+\"\"\"{post_text}\"\"\"
+"""
+    try:
+        client = genai.Client(api_key=api_key)
+    except Exception as exc:
+        return {"used": False, "claims": [], "reason": f"model client failed: {exc}"}
+
+    seen: dict[str, str] = {}
+    for _ in range(max(1, runs)):
+        try:
+            resp = client.models.generate_content(model=model, contents=prompt)
+            raw = str(getattr(resp, "text", "") or "")
+        except Exception:
+            continue
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            continue
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            continue
+        claims = parsed.get("claims")
+        if not isinstance(claims, list):
+            continue
+        for c in claims:
+            if isinstance(c, dict) and c.get("claim"):
+                seen[_normalise_claim(str(c["claim"]))] = str(c["claim"])
+    if not seen and not any(True for _ in ()):
+        # No run produced a usable list; report not-used rather than "no claims".
+        return {"used": False, "claims": [],
+                "reason": "model returned no usable JSON in any run"}
+    return {"used": True, "claims": [{"claim": t} for t in seen.values()],
+            "reason": None}
+
+
 def verify_post(post_text: str, sources: list[str], *,
                 source_texts: dict | None = None,
                 use_llm: bool = True,
@@ -414,6 +485,33 @@ def verify_post(post_text: str, sources: list[str], *,
     }
 
     if not source_texts:
+        # No article to ground against. A post may still be publishable if it
+        # asserts nothing checkable — a personal reflection cites no source by
+        # nature. If it does assert something about the world, it needs a source
+        # and stays ungated. Either way the model decides, not an assumption.
+        if use_llm and not sources:
+            check = llm_check_no_world_claims(body, api_key=api_key, model=model)
+            record["llm_used"] = check["used"]
+            if check["used"] and not check["claims"]:
+                record.update({
+                    "verdict": "pass",
+                    "available": True,
+                    "basis": "no-source post with no checkable claims about the world",
+                    "reason": ("no source cited and the post asserts no factual "
+                               "claim about the outside world"),
+                })
+                return record
+            if check["used"]:
+                record["world_claims"] = check["claims"]
+                record.update({
+                    "verdict": "ungated",
+                    "available": True,
+                    "reason": (f"no source cited but the post asserts "
+                               f"{len(check['claims'])} factual claim(s) about the "
+                               f"world, which cannot be grounded"),
+                })
+                return record
+            record["warnings"].append(f"no-claims check not used: {check['reason']}")
         record.update({
             "verdict": "ungated",
             "available": False,

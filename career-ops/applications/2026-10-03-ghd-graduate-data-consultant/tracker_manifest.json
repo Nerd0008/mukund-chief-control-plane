@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-03",
+      "company": "GHD Advisory",
+      "title": "Graduate Data Consultant",
+      "location": "London (hybrid, 3 days/week in office)",
+      "salary": "Not stated in posting",
+      "url": "https://ejov.fa.ca2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX/job/28880",
+      "date_type": {"date_found": "date"},
+      "live_status": "Live",
+      "clearance_check": "Pass — no security clearance, citizenship or residency condition stated. No driving licence requirement stated.",
+      "work_authorisation_risk": "Not assessed — owner instruction 2026-10-03: do not discuss visa status for any application.",
+      "key_gap": "The posting asks for a degree in a relevant discipline such as Data Science, Computer Science, Mathematics, Statistics, Economics, Geography, Engineering, Physics or a related field, strong analytical and problem-solving skills, interest in using data and technology to support decision-making, ability to communicate ideas clearly, curiosity and initiative, collaborative approach, attention to detail, interest in developing both technical expertise and consulting skills, and enthusiasm for working with clients. Not evidenced and not claimed: formal data consulting experience, dashboard and visualisation building for clients, client-facing project delivery. Genuinely evidenced: BCA and MSc Information Security (both relevant disciplines), Python/PowerShell/SQL for data analysis and task automation, structured problem-solving (Windows error-code root-cause tool), analytical mindset (risk assessments, compliance checks), attention to detail (documentation, records), collaborative approach (coordinating 7-8 colleagues per shift), communication skills (explaining requirements to non-technical people).",
+      "recommendation": "Applied per owner standing instruction. Fit is moderate: the role is data consulting focused, and the owner's background is IT support and security. The honest bridge is the analytical and technical skills - Python, PowerShell, SQL, structured problem-solving, attention to detail - which map onto the data analysis and decision-support aspects of the role. The consulting and client-facing dimension is a gap, but the posting explicitly aims at recent graduates and offers structured learning and mentoring, so the owner's lack of formal consulting experience is not a barrier. No clearance or citizenship barrier. September 2027 start date.",
+      "discovery": "OWNER-SUPPLIED — URL supplied by owner via Discord 2026-10-03. Official Oracle Cloud careers URL verified live 2026-10-03. Job ID 28880. Posted 10/02/2026. Floor 10, London, EC4A 4AB. September 2027 Graduate Data Consultant intake. Hybrid role, 3 days/week in office.",
+      "prior_company_signal": "None searched"
+    }
+  ]
+}
