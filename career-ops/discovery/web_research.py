@@ -54,6 +54,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -79,6 +80,14 @@ DEFAULT_CAPTURED = CAREER_OPS / "tests" / "fixtures" / "discovery" / "web-resear
     "captured-codex-search.json"
 DEFAULT_WATCHLIST = CONTROL_PLANE / "runtime" / "career-ops" / "web-research" / \
     "company-watchlist.json"
+
+#: Model the research worker runs on. The owner's Codex install is configured for
+#: the GPT-6-Sol family; the CLI must be told explicitly because the desktop-app
+#: config (`~/.codex/config.toml`) names a slug the *CLI* rejects outright
+#: ("The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT
+#: account"), and a rejected model means zero live searches. Override with
+#: CAREER_OPS_CODEX_MODEL when the family moves on.
+CODEX_RESEARCH_MODEL = os.environ.get("CAREER_OPS_CODEX_MODEL") or "gpt-6-sol"
 
 #: retrieval policy for URL validation.
 USER_AGENT = "MukundCareerOpsBot/1.0 (+read-only job-posting liveness check)"
@@ -439,10 +448,11 @@ class CodexWebSearchProvider(ResearchProvider):
     name = "codex-web-search"
 
     def __init__(self, executable: str | Path | None = None, *, sandbox: str = "read-only",
-                 workdir: str | Path | None = None):
+                 workdir: str | Path | None = None, model: str | None = None):
         self._executable_override = executable
         self.sandbox = sandbox
         self.workdir = str(workdir) if workdir else str(CONTROL_PLANE)
+        self.model = model or CODEX_RESEARCH_MODEL
         self._resolved = None
 
     def resolve(self):
@@ -484,13 +494,22 @@ class CodexWebSearchProvider(ResearchProvider):
     def _run_one(self, exe, query: str, *, limit: int, timeout: int) -> dict:
         import subprocess  # noqa: PLC0415
         prompt = CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
+        # The prompt is passed on STDIN, not argv. On Windows the resolver lands on
+        # `codex.CMD` (an npm shim) and cmd.exe treats an embedded newline in an
+        # argument as a command terminator, so a multi-line argv prompt is silently
+        # truncated to its first line: the agent then asks a clarifying question and
+        # no web_search ever runs. `-` + input= is the CLI's documented stdin path.
+        # `--model` is passed EXPLICITLY because the desktop-app config names a slug
+        # the CLI rejects.
         cmd = [str(exe), "exec", "--json", "--skip-git-repo-check",
-               "--sandbox", self.sandbox, "--cd", self.workdir, prompt]
+               "--sandbox", self.sandbox, "--cd", self.workdir,
+               "--model", self.model, "-"]
         out = {"query": query, "results": [], "web_search_observed": False,
-               "executed_queries": [], "cli_version": None, "error": None,
-               "raw_events": 0, "elapsed_s": None}
+               "executed_queries": [], "cli_version": None, "model": self.model,
+               "error": None, "raw_events": 0, "elapsed_s": None}
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                                  input=prompt)
         except Exception as exc:  # noqa: BLE001
             out["error"] = f"{type(exc).__name__}: {exc}"
             return out
@@ -506,21 +525,26 @@ class CodexWebSearchProvider(ResearchProvider):
         out["raw_events"] = len(events)
         final_message = None
         for event in events:
-            if event.get("type") != "item.completed":
-                continue
-            item = event.get("item") or {}
-            if item.get("type") == "web_search":
-                out["web_search_observed"] = True
-                if item.get("query"):
-                    out["executed_queries"].append(item["query"])
-            elif item.get("type") in ("agent_message", "message"):
-                message = item.get("text") or item.get("content")
-                if isinstance(message, list):
-                    message = "".join(p.get("text", "") for p in message
-                                      if isinstance(p, dict))
-                if message:
-                    final_message = message
-        if proc.returncode != 0 and final_message is None:
+            if event.get("type") == "item.completed":
+                item = event.get("item") or {}
+                if item.get("type") == "web_search":
+                    out["web_search_observed"] = True
+                    if item.get("query"):
+                        out["executed_queries"].append(item["query"])
+                elif item.get("type") in ("agent_message", "message"):
+                    message = item.get("text") or item.get("content")
+                    if isinstance(message, list):
+                        message = "".join(p.get("text", "") for p in message
+                                          if isinstance(p, dict))
+                    if message:
+                        final_message = message
+            elif event.get("type") in ("error", "turn.failed"):
+                # A model/transport error (e.g. a model slug the account cannot
+                # use) is recorded verbatim: it is the reason zero searches ran.
+                err = event.get("message") or (event.get("error") or {}).get("message")
+                if err:
+                    out["error"] = str(err)[:400]
+        if proc.returncode != 0 and out["error"] is None:
             out["error"] = (proc.stderr or "").strip()[:400] or f"exit code {proc.returncode}"
         if not out["web_search_observed"]:
             # Fail truthfully: no live search was observed, so no result is accepted.
