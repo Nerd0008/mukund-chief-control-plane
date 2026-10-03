@@ -277,7 +277,14 @@ class CodexExecutionAdapter:
         if cwd:
             cmd.extend(["--cd", cwd])
 
-        cmd.append(objective)
+        # The prompt is delivered on stdin, never in argv. On Windows the resolver
+        # can land on a shim (`codex.cmd`) that cmd.exe launches, and cmd.exe treats
+        # a newline inside an argument as a command terminator: a multi-line prompt
+        # is silently truncated to its first line, so the model answers a different
+        # question (observed: a full classification prompt came back as "[]").
+        # `-` tells Codex to read the prompt from stdin, so multi-line objectives
+        # survive whichever executable resolved.
+        cmd.append("-")
 
         # Execute
         start_time = time.time()
@@ -287,7 +294,8 @@ class CodexExecutionAdapter:
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=cwd or "."
+                cwd=cwd or ".",
+                input=objective,
             )
             elapsed = time.time() - start_time
 
