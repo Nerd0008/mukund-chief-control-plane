@@ -221,8 +221,8 @@ def accepted_candidates(doc):
     return out
 
 
-def tracker_rows(region, want_date=None):
-    """Rows from a region's canonical workbook. Read-only; never writes."""
+def tracker_rows(region, limit=10):
+    """Most recent rows from a region's canonical workbook. Read-only; never writes."""
     try:
         from openpyxl import load_workbook
     except ImportError:  # pragma: no cover - environment specific
@@ -276,10 +276,11 @@ def tracker_rows(region, want_date=None):
         }
         if is_synthetic(record["company"], record["title"], record["url"]):
             continue
-        if want_date is not None and record["date"] != want_date:
-            continue
         out.append(record)
-    return out, None
+
+    # Sort by date descending (newest first), then by ID descending for stability
+    out.sort(key=lambda r: (r["date"] or dt.date.min, r["id"]), reverse=True)
+    return out[:limit], None
 
 
 # --------------------------------------------------------------------------- #
@@ -295,15 +296,30 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         doc, _path = latest_run_doc(region)
         label = REGION_LABEL[region]
 
+        # Always read tracker rows — they are the primary source for the digest.
+        # Read more than max_per_region so the digest can show "N more" when truncated.
+        tracked, tracker_error = tracker_rows(region, limit=max(max_per_region * 3, 50))
+
         if doc is None:
-            sections.append({
-                "label": label,
-                "head": [f"**{label}** — UNKNOWN",
-                         "  No discovery run artifact found. Nothing is invented "
-                         "to fill the gap."],
-                "jobs": [],
-                "capped": 0,
-            })
+            head = [f"**{label}** — {len(tracked)} job(s) in tracker"]
+            if tracker_error:
+                head.append(f"  (tracker not read: {tracker_error})")
+            jobs = []
+            capped_out = 0
+            if tracked:
+                for i, job in enumerate(tracked[:max_per_region], 1):
+                    jobs.append([
+                        f"  {i}. {job['company']} — {job['title']}  [{job['id']}]",
+                        f"     {job['url'] or 'URL: not stated by the source'}",
+                    ])
+                capped_out = max(0, len(tracked) - len(jobs))
+                total_jobs += len(tracked)
+                fresh_regions += 1
+            else:
+                head.append("  No discovery run artifact found. Nothing is invented "
+                            "to fill the gap.")
+            sections.append({"label": label, "head": head, "jobs": jobs,
+                             "capped": capped_out})
             continue
 
         generated = parse_iso(doc.get("generated_at"))
@@ -312,10 +328,9 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
 
         run_date = generated.date() if generated else None
         accepted = accepted_candidates(doc)
-        tracked, tracker_error = tracker_rows(region, want_date=run_date)
 
-        head = [f"**{label}** — {len(accepted)} job(s) found"
-                + (f", {len(tracked)} added to tracker" if tracked else "")]
+        head = [f"**{label}** — {len(tracked)} job(s) in tracker"
+                + (f", {len(accepted)} found today" if accepted else "")]
 
         if stale:
             age_text = f"{age_h:.1f}h old" if age_h is not None else "no readable timestamp"
@@ -329,27 +344,26 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
 
         jobs = []
         capped_out = 0
-        if not accepted:
-            head.append("  No accepted job in this run's own funnel output.")
-            zero = (doc.get("funnel") or {}).get("zero_attribution") or {}
-            first_zero = zero.get("first_zero_stage")
-            if first_zero:
-                head.append(f"  First zero stage: {first_zero} — {zero.get('reason', '')}")
+        if not tracked:
+            head.append("  No jobs in tracker.")
+            if not accepted:
+                zero = (doc.get("funnel") or {}).get("counts", {}).get("zero_attribution") or {}
+                first_zero = zero.get("first_zero_stage")
+                if first_zero:
+                    head.append(f"  First zero stage: {first_zero} — {zero.get('reason', '')}")
         else:
             tracked_urls = {r["url"] for r in tracked if r["url"]}
             tracked_by_url = {r["url"]: r for r in tracked if r["url"]}
-            for i, job in enumerate(accepted[:max_per_region], 1):
+            for i, job in enumerate(tracked[:max_per_region], 1):
                 tag = ""
                 if job["url"] and job["url"] in tracked_urls:
-                    tag = f"  [tracker {tracked_by_url[job['url']]['id']}]"
-                elif tracked_by_url:
-                    tag = "  [not yet in tracker]"
+                    tag = f"  [{job['id']}]"
                 jobs.append([
                     f"  {i}. {job['company']} — {job['title']}{tag}",
                     f"     {job['url'] or 'URL: not stated by the source'}",
                 ])
-            capped_out = max(0, len(accepted) - len(jobs))
-            total_jobs += len(accepted)
+            capped_out = max(0, len(tracked) - len(jobs))
+            total_jobs += len(tracked)
 
         sections.append({"label": label, "head": head, "jobs": jobs,
                          "capped": capped_out})
@@ -412,7 +426,7 @@ def main() -> int:
                              "trimmed. Set generously: the gateway chunks long "
                              "messages (Discord 2000 / Telegram 4096), so a longer "
                              "digest is delivered whole rather than losing jobs.")
-    parser.add_argument("--max-per-region", type=int, default=25,
+    parser.add_argument("--max-per-region", type=int, default=10,
                         help="max jobs listed per region before summarising the rest")
     args = parser.parse_args()
 

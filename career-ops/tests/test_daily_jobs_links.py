@@ -11,8 +11,9 @@ The contracts pinned here:
    the source's own URL and is never invented.
 3. **Synthetic guard** - validation/fixture records never surface as real jobs.
 4. **Stale honesty** - an old run is labelled STALE and the exit code says so.
-5. **Acceptance gate is the pipeline's own** - only `accepted` classifications
-   are listed; this script does not re-judge the funnel.
+5. **Tracker rows are the primary source** - the digest shows the most recent
+   rows from each region's canonical workbook, not the discovery run's accepted
+   candidates.
 
 Run:  python -m pytest career-ops/tests/test_daily_jobs_links.py -v
 """
@@ -31,7 +32,6 @@ CAREER_OPS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CAREER_OPS))
 
 import daily_jobs_links as djl  # noqa: E402
-
 NOW = dt.datetime.now(dt.timezone.utc)
 
 
@@ -41,7 +41,7 @@ def sha256(path: Path) -> str:
 
 def write_run(tmp_path: Path, region: str, *, generated: dt.datetime,
               accepted: list[dict], first_zero: str | None = None) -> Path:
-    """Write a minimal unified run document the way the pipeline writes one."""
+    """Writer a minimal unified run document the way the pipeline writes one."""
     directory = tmp_path / "discovery" / "unified" / region
     directory.mkdir(parents=True, exist_ok=True)
     classifications = []
@@ -71,12 +71,47 @@ def write_run(tmp_path: Path, region: str, *, generated: dt.datetime,
         "region": region,
         "generated_at": generated.isoformat(),
         "classifications": classifications,
-        "funnel": {"counts": {"tracker_candidates": 0},
-                   "zero_attribution": {"first_zero_stage": first_zero,
-                                        "reason": "test fixture"}},
+        "funnel": {
+            "counts": {
+                "tracker_candidates": 0,
+                "zero_attribution": {
+                    "first_zero_stage": first_zero,
+                    "reason": "test fixture",
+                },
+            },
+        },
     }
     path = directory / f"unified-{region}-TEST.json"
     path.write_text(json.dumps(doc), encoding="utf-8")
+    return path
+
+
+def write_tracker_rows(tmp_path: Path, region: str, rows: list[dict]) -> Path:
+    """Write a minimal tracker workbook with the given rows."""
+    from openpyxl import Workbook
+
+    path = tmp_path / f"{region}.xlsx"
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Jobs"
+
+    schema = djl.TRACKER_SCHEMA[region]
+    header = [schema["id"], schema["date"], schema["company"], schema["title"],
+              schema["url"], schema["status"]]
+    ws.append(header)
+
+    for i, row in enumerate(rows, 1):
+        ws.append([
+            row.get("id", f"J{i}"),
+            row.get("date", NOW.date()),
+            row.get("company", f"Co {i}"),
+            row.get("title", f"Role {i}"),
+            row.get("url", f"https://example.org/j{i}"),
+            row.get("status", ""),
+        ])
+
+    wb.save(path)
+    wb.close()
     return path
 
 
@@ -97,11 +132,11 @@ def test_missing_run_is_unknown_never_no_jobs(isolated):
     assert "0 job(s) found" not in text
 
 
-def test_accepted_listed_with_source_url_and_rejected_excluded(isolated):
-    write_run(isolated, "uk", generated=NOW, accepted=[
-        {"company": "Hoxhunt", "title": "Junior Security Engineer, GRC",
+def test_tracker_rows_listed_with_source_url(isolated):
+    write_tracker_rows(isolated, "uk", [
+        {"id": "J1", "company": "Hoxhunt", "title": "Junior Security Engineer, GRC",
          "url": "https://jobs.ashbyhq.com/hoxhunt/abc"},
-        {"company": "PA Consulting", "title": "Graduate Cyber Analyst",
+        {"id": "J2", "company": "PA Consulting", "title": "Graduate Cyber Analyst",
          "url": "https://www.consultancy.uk/jobs/49848/pa"},
     ])
     text, code = djl.build_digest(26.0, 100_000, 25)
@@ -109,15 +144,13 @@ def test_accepted_listed_with_source_url_and_rejected_excluded(isolated):
     assert "Hoxhunt — Junior Security Engineer, GRC" in text
     assert "https://jobs.ashbyhq.com/hoxhunt/abc" in text
     assert "PA Consulting — Graduate Cyber Analyst" in text
-    assert "Rejected Co" not in text
-    assert "Senior Architect" not in text
 
 
 def test_synthetic_records_never_surface(isolated):
-    write_run(isolated, "uk", generated=NOW, accepted=[
-        {"company": "NOT A REAL VACANCY", "title": "Validation",
+    write_tracker_rows(isolated, "uk", [
+        {"id": "J1", "company": "NOT A REAL VACANCY", "title": "Validation",
          "url": "https://example.invalid/job"},
-        {"company": "Real Co", "title": "SOC Analyst", "url": "https://real.example.org/j"},
+        {"id": "J2", "company": "Real Co", "title": "SOC Analyst", "url": "https://real.example.org/j"},
     ])
     text, _ = djl.build_digest(26.0, 100_000, 25)
     assert "Real Co" in text
@@ -129,6 +162,10 @@ def test_stale_run_is_labelled_and_exit_code_signals_it(isolated):
     old = NOW - dt.timedelta(hours=200)
     write_run(isolated, "uk", generated=old, accepted=[
         {"company": "Old Co", "title": "Old Role", "url": "https://old.example.org/j"}])
+    write_tracker_rows(isolated, "uk", [
+        {"id": "J1", "company": "Old Co", "title": "Old Role",
+         "url": "https://old.example.org/j"},
+    ])
     text, code = djl.build_digest(26.0, 100_000, 25)
     assert "STALE/UNKNOWN" in text
     assert "NOT today's state" in text
@@ -177,8 +214,9 @@ def test_tracker_write_never_happens_real_workbooks_unchanged():
 def test_budget_truncation_never_drops_a_region(isolated):
     """Every region must survive truncation: the owner asked for all of them."""
     for region in djl.REGIONS:
-        write_run(isolated, region, generated=NOW, accepted=[
-            {"company": f"Co {i}", "title": f"Role {i}", "url": f"https://c{i}.example.org/j"}
+        write_tracker_rows(isolated, region, [
+            {"id": f"J{i}", "company": f"Co {i}", "title": f"Role {i}",
+             "url": f"https://c{i}.example.org/j"}
             for i in range(10)])
     text, _ = djl.build_digest(26.0, 700, 25)
     # Every region still appears, even under a tight budget.
@@ -189,8 +227,9 @@ def test_budget_truncation_never_drops_a_region(isolated):
 
 
 def test_max_per_region_summarises_the_rest(isolated):
-    write_run(isolated, "uk", generated=NOW, accepted=[
-        {"company": f"Co {i}", "title": f"Role {i}", "url": f"https://c{i}.example.org/j"}
+    write_tracker_rows(isolated, "uk", [
+        {"id": f"J{i}", "company": f"Co {i}", "title": f"Role {i}",
+         "url": f"https://c{i}.example.org/j"}
         for i in range(8)])
     text, _ = djl.build_digest(26.0, 100_000, 3)
     # The cap trims this region's own detail, and says how many it withheld.
