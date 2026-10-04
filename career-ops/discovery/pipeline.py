@@ -62,6 +62,9 @@ from classifiers import (  # noqa: E402
     DEFAULT_CODEX_BUDGET,
     DEFAULT_MAX_TOKENS,
     codex_escalate,
+    codex_bulk_classify,
+    codex_probe,
+    CODEX_CLASSIFY_MODEL,
     deepseek_bulk_classify,
     deepseek_probe,
     deterministic_classify,
@@ -926,40 +929,73 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
 def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     batch_size: int, timeout: int, mode: str,
                     max_tokens: int | None = None,
-                    e3_service=None) -> dict:
+                    deepseek_adapter=None, codex_adapter=None,
+                    codex_model: str | None = None,
+                    codex_workdir: str | None = None) -> dict:
     max_tokens = max_tokens or DEFAULT_MAX_TOKENS
     if semantic == "off":
         return {"provider": "none", "requested": "off",
                 "limitation": "semantic stage disabled by the caller",
                 "classifications": {}, "probe": None}
-    if semantic in ("auto", "deepseek"):
-        probe = deepseek_probe(deepseek_model)
-        if probe["available"]:
-            doc = deepseek_bulk_classify(candidates, model=deepseek_model,
-                                         batch_size=batch_size, timeout=timeout,
-                                         max_tokens=max_tokens,
-                                         e3_service=e3_service, mode=mode)
-            doc["requested"] = semantic
-            doc["probe"] = probe
-            if doc.get("classifications"):
-                return doc
-            fallback = {candidate_id(c): deterministic_classify(c, mode=mode) for c in candidates}
-            return {"provider": "none", "requested": semantic, "probe": probe,
+    if semantic in ("auto", "deepseek", "codex"):
+        # Provider order: DeepSeek when healthy (cheap, bulk), else the Codex CLI.
+        # `--semantic codex` pins Codex and never consults DeepSeek.
+        if semantic in ("auto", "deepseek"):
+            probe = deepseek_probe(deepseek_model)
+            if probe["available"]:
+                doc = deepseek_bulk_classify(candidates, model=deepseek_model,
+                                             batch_size=batch_size, timeout=timeout,
+                                             max_tokens=max_tokens,
+                                             adapter=deepseek_adapter, mode=mode)
+                doc["requested"] = semantic
+                doc["probe"] = probe
+                if doc.get("classifications"):
+                    return doc
+                fallback = {candidate_id(c): deterministic_classify(c, mode=mode)
+                            for c in candidates}
+                return {"provider": "none", "requested": semantic, "probe": probe,
+                        "classifications": fallback,
+                        "limitation": ("deepseek answered but produced no usable "
+                                       "classifications; the declared deterministic rule "
+                                       "classifier was used instead — this is NOT a model pass"),
+                        "deepseek_attempt": {k: doc.get(k) for k in
+                                             ("requests", "errors", "limitation", "usage")}}
+            if semantic == "deepseek":
+                raise SystemExit("--semantic deepseek requested but the provider is not "
+                                 "healthy: " + str(probe.get("reason")))
+            # auto: DeepSeek unreachable -> fall through to the Codex CLI.
+            codex_doc = _codex_semantic_pass(candidates, batch_size=batch_size, timeout=timeout,
+                                             codex_adapter=codex_adapter, mode=mode,
+                                             codex_model=codex_model,
+                                             codex_workdir=codex_workdir)
+            if codex_doc.get("classifications"):
+                codex_doc["requested"] = semantic
+                codex_doc["deepseek_probe"] = probe
+                return codex_doc
+            fallback = {candidate_id(c): deterministic_classify(c, mode=mode)
+                        for c in candidates}
+            return {"provider": "none", "requested": semantic,
+                    "probe": probe, "codex_attempt": codex_doc,
                     "classifications": fallback,
-                    "limitation": ("deepseek answered but produced no usable classifications; "
-                                   "the declared deterministic rule classifier was used "
-                                   "instead — this is NOT a model pass"),
-                    "deepseek_attempt": {k: doc.get(k) for k in
-                                         ("requests", "errors", "limitation", "usage")}}
-        if semantic == "deepseek":
-            raise SystemExit("--semantic deepseek requested but the provider is not healthy: "
-                             + str(probe.get("reason")))
+                    "limitation": (f"no model provider was usable (deepseek: "
+                                   f"{probe.get('status')} {probe.get('reason')}; codex: "
+                                   f"{codex_doc.get('limitation')}); the declared "
+                                   "deterministic rule classifier was used instead — "
+                                   "this is NOT a model pass")}
+        # semantic == "codex": pinned
+        codex_doc = _codex_semantic_pass(candidates, batch_size=batch_size, timeout=timeout,
+                                         codex_adapter=codex_adapter, mode=mode,
+                                         codex_model=codex_model,
+                                         codex_workdir=codex_workdir)
+        if codex_doc.get("classifications"):
+            codex_doc["requested"] = semantic
+            return codex_doc
         fallback = {candidate_id(c): deterministic_classify(c, mode=mode) for c in candidates}
-        return {"provider": "none", "requested": semantic, "probe": probe,
-                "classifications": fallback,
-                "limitation": (f"deepseek unavailable ({probe.get('status')}: "
-                               f"{probe.get('reason')}); the declared deterministic rule "
-                               "classifier was used instead — this is NOT a model pass")}
+        return {"provider": "none", "requested": semantic, "probe": None,
+                "codex_attempt": codex_doc, "classifications": fallback,
+                "limitation": (f"codex unavailable ({codex_doc.get('limitation')}); the "
+                               "declared deterministic rule classifier was used instead — "
+                               "this is NOT a model pass")}
     if semantic == "deterministic":
         return {"provider": "none", "requested": semantic, "probe": None,
                 "limitation": "deterministic rule classifier selected by the caller",
@@ -968,12 +1004,27 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
     raise SystemExit(f"unknown semantic provider '{semantic}'")
 
 
+def _codex_semantic_pass(candidates: list, *, batch_size: int, timeout: int,
+                         codex_adapter=None, mode: str,
+                         codex_model: str | None = None,
+                         codex_workdir: str | None = None) -> dict:
+    """Run the Codex CLI as the bulk semantic classifier (DeepSeek fallback)."""
+    model = codex_model or CODEX_CLASSIFY_MODEL
+    probe = codex_probe(model)
+    doc = codex_bulk_classify(candidates, batch_size=batch_size, timeout=timeout,
+                              adapter=codex_adapter, mode=mode,
+                              model=model, workdir=codex_workdir)
+    doc["probe"] = probe
+    return doc
+
+
 def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                deepseek_model: str, batch_size: int, codex_budget: int,
                codex_enabled: bool, timeout: int, run_id: str,
                max_tokens: int | None = None,
-               e3_service=None,
+               deepseek_adapter=None, codex_adapter=None,
                codex_workdir: str | None = None,
+               codex_model: str | None = None,
                collection: list | None = None) -> dict:
     policy = rjs.load_policy()
     schedules = rjs.load_schedules()
@@ -1013,7 +1064,9 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     # 2. semantic ----------------------------------------------------------- #
     semantic_doc = _semantic_stage(kept, semantic=semantic, deepseek_model=deepseek_model,
                                    batch_size=batch_size, timeout=timeout, mode=mode,
-                                   max_tokens=max_tokens, e3_service=e3_service)
+                                   max_tokens=max_tokens, deepseek_adapter=deepseek_adapter,
+                                   codex_adapter=codex_adapter, codex_model=codex_model,
+                                   codex_workdir=codex_workdir)
     classifications = semantic_doc.get("classifications") or {}
     funnel.set("semantically_reviewed", len(classifications))
     for rec in kept:
@@ -1038,13 +1091,21 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                            "semantic stage disabled by the caller (--semantic off)")
     else:
         accepted = [c for c in kept if classifications.get(candidate_id(c), {}).get("accepted")]
-        if semantic_doc.get("provider") == "deepseek":
+        provider = semantic_doc.get("provider")
+        if provider == "deepseek":
             funnel.set("deepseek_accept", len(accepted))
+        elif provider == "codex":
+            # A Codex semantic pass ran. The stage counter keeps its historic name
+            # (the funnel schema is consumed downstream), but the doc records which
+            # provider actually produced the acceptances.
+            funnel.set("deepseek_accept", len(accepted))
+            funnel.note("semantic pass provider: codex (deepseek was unreachable); "
+                        "the deepseek_accept counter reports this pass's acceptances")
         else:
             funnel.set("deepseek_accept", 0)
             funnel.skip("deepseek_accept",
                         f"no DeepSeek pass was made in this run (provider: "
-                        f"{semantic_doc.get('provider')}); the declared deterministic rule "
+                        f"{provider}); the declared deterministic rule "
                         "classifier or an explicit provider choice was used instead")
 
     # 3. bounded Codex second pass ------------------------------------------ #
@@ -1053,7 +1114,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                  "escalated": [], "dropped_due_to_budget": []}
     if codex_enabled:
         codex_doc = codex_escalate(kept, classifications, budget=codex_budget,
-                                   timeout=timeout, e3_service=e3_service,
+                                   timeout=timeout, adapter=codex_adapter,
                                    workdir=codex_workdir)
         codex_cls = codex_doc.get("classifications") or {}
         effective = dict(classifications)
@@ -1255,7 +1316,7 @@ def priority_watchlist_block(candidates: list, passed: list) -> dict:
 
 def compare_modes(candidates: list, *, region: str, semantic: str,
                   deepseek_model: str, batch_size: int, timeout: int,
-                  e3_service=None) -> dict:
+                  deepseek_adapter=None) -> dict:
     """Old strict intern-only policy vs the new high-recall pipeline.
 
     Runs over the SAME candidate set. Never writes a canonical tracker: no
@@ -1316,7 +1377,7 @@ def compare_modes(candidates: list, *, region: str, semantic: str,
                               semantic="auto" if semantic == "auto" else "deepseek",
                               deepseek_model=deepseek_model, batch_size=batch_size,
                               timeout=timeout, mode=MODE_HIGH_RECALL,
-                              e3_service=e3_service)
+                              deepseek_adapter=deepseek_adapter)
         semantic_doc = {k: v for k, v in doc.items() if k != "classifications"}
         semantic_doc["labels"] = dict(Counter(
             c.get("primary_label") for c in (doc.get("classifications") or {}).values()))
@@ -1460,6 +1521,7 @@ def cmd_run(args) -> int:
                      batch_size=args.batch_size, codex_budget=args.codex_budget,
                      codex_enabled=(args.codex != "off"), timeout=args.timeout,
                      run_id=run_id, codex_workdir=str(args.workdir or CONTROL_PLANE),
+                     codex_model=getattr(args, "codex_model", None),
                      max_tokens=args.max_tokens, collection=collection)
     doc["schema_version"] = SCHEMA_VERSION
     doc["started_at"] = None
@@ -1558,10 +1620,12 @@ def main(argv=None) -> int:
                    help=("owner priority watchlist lane export from "
                          "discovery/watchlist.py (B27) — additive to the market search"))
     p.add_argument("--title-mode", choices=list(MODES), default=DEFAULT_MODE)
-    p.add_argument("--semantic", choices=("auto", "deepseek", "deterministic", "off"),
+    p.add_argument("--semantic", choices=("auto", "deepseek", "codex", "deterministic", "off"),
                    default=DEFAULT_SEMANTIC)
     p.add_argument("--codex", choices=("on", "off"), default="on")
     p.add_argument("--codex-budget", type=int, default=DEFAULT_CODEX_BUDGET)
+    p.add_argument("--codex-model", default=CODEX_CLASSIFY_MODEL,
+                   help="model slug passed to the Codex CLI semantic pass")
     p.add_argument("--model", default="deepseek-flash")
     p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     p.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS,

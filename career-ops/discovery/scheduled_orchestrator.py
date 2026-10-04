@@ -631,7 +631,8 @@ def run_region(region: str, args, *, deadline: float | None = None,
         deepseek_model=args.model, batch_size=args.batch_size,
         codex_budget=args.codex_budget, codex_enabled=(args.codex == "on"),
         timeout=args.per_query_timeout, run_id=run_id,
-        max_tokens=args.max_tokens, collection=collection)
+        max_tokens=args.max_tokens, collection=collection,
+        codex_model=getattr(args, "codex_model", None))
 
     mechanism = live_mechanism_summary(lanes["web_research"])
     out_dir = Path(args.out_dir) if args.out_dir else DEFAULT_RUNTIME_DIR
@@ -1192,9 +1193,12 @@ def main(argv=None) -> int:
         sp.add_argument("--budget-seconds", type=int, default=DEFAULT_BUDGET_SECONDS)
         sp.add_argument("--retries", type=int, default=DEFAULT_RETRIES)
         sp.add_argument("--ingest-stale-hours", type=float, default=DEFAULT_INGEST_STALE_HOURS)
-        sp.add_argument("--semantic", choices=("auto", "deepseek", "deterministic", "off"),
+        sp.add_argument("--semantic", choices=("auto", "deepseek", "codex", "deterministic", "off"),
                         default=DEFAULT_SEMANTIC)
         sp.add_argument("--model", default="deepseek-flash")
+        sp.add_argument("--codex-model", default=None,
+                        help="model slug for the Codex CLI semantic pass "
+                             "(default: the discovery default)")
         sp.add_argument("--batch-size", type=int, default=8)
         sp.add_argument("--max-tokens", type=int, default=None)
         sp.add_argument("--codex", choices=("on", "off"), default=DEFAULT_CODEX_ESCALATION)
