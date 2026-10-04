@@ -272,9 +272,14 @@ ROLE_FAMILIES = {
 #: shorter shape (a few ORs per clause) returns live results on every ATS surface.
 DISCIPLINE_CLAUSE = ('("cyber security" OR cybersecurity OR "information security" OR SOC)')
 
-#: The owner's own query shape used "a few ORs per clause"; the entry clause keeps
-#: to the three levels that actually surface early-career postings.
-ENTRY_TERMS_SHORT = ("graduate", "junior", "analyst")
+#: The owner's target is graduate schemes and internships (config/profile.yml
+#: ``target_roles`` = "* Intern" / "* Internship"; the UK workbook carries a
+#: dedicated "UK graduate and internship" sheet). The entry clause therefore
+#: leads with those terms. ``analyst`` is deliberately NOT here: it surfaces
+#: mid-level postings (e.g. "Incident Response Analyst") that the owner does not
+#: want, and it was the main source of non-graduate noise. ``ENTRY_TERMS_SHORT``
+#: stays short on purpose — the measured constraint above still applies.
+ENTRY_TERMS_SHORT = ("graduate", "intern", "internship", "junior")
 ENTRY_CLAUSE = "(" + " OR ".join(ENTRY_TERMS_SHORT) + ")"
 
 #: Level terms that need their own bounded query because they are not in
