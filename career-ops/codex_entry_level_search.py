@@ -351,10 +351,12 @@ def main() -> int:
 
     from openpyxl import load_workbook  # noqa: F401  (already imported above)
 
-    # Determine the ID scheme: UK uses "J###", others use date-based IDs
-    has_id_col = "Job ID" in cols
+    # Determine the ID scheme: UK uses "J###", others use date-based IDs.
+    # Check the actual ID value, not just the column name - some regional
+    # trackers have an unused "Job ID" column that would cause a false match.
+    has_id_col = bool(last_id) and str(last_id).startswith("J")
     base = 0
-    if has_id_col and last_id:
+    if has_id_col:
         try:
             base = int(str(last_id).lstrip("J"))
         except ValueError:
