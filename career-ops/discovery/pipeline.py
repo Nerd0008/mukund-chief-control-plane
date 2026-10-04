@@ -438,6 +438,8 @@ def collect_from_web_research(path: Path, region: str) -> dict:
         }
         if fetch_state == "validation_failed":
             excluded["destination_not_validated_live"] += 1
+        elif fetch_state == "bot_wall":
+            excluded["destination_bot_wall"] += 1
         elif fetch_state == "discovered_unverified":
             excluded["destination_not_verified"] += 1
         if result_kind == "search_listing":
@@ -461,6 +463,7 @@ def collect_from_web_research(path: Path, region: str) -> dict:
             "candidate_urls": telemetry.get("candidate_urls"),
             "validated_live": telemetry.get("validated_live"),
             "validation_failed": telemetry.get("validation_failed"),
+            "bot_wall": telemetry.get("bot_wall", 0),
             "duplicates_collapsed": telemetry.get("duplicates_collapsed"),
             "search_listing_refused": telemetry.get("search_listing_refused"),
             "fetch_states": telemetry.get("fetch_states"),
@@ -572,6 +575,8 @@ def collect_from_priority_watchlist(path: Path, region: str) -> dict:
         per_company[name] = per_company.get(name, 0) + 1
         if fetch_state == "validation_failed":
             excluded["destination_not_validated_live"] += 1
+        elif fetch_state == "bot_wall":
+            excluded["destination_bot_wall"] += 1
         elif fetch_state == "discovered_unverified":
             excluded["destination_not_verified"] += 1
         if result_kind == "search_listing":
@@ -871,8 +876,13 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     # fetch/validation state may only reach the tracker when its destination was
     # actually validated live. A surface that declares no fetch_state (the
     # regional scan, Company Watch, …) is unaffected.
+    # Exception: bot_wall (403/429) means the page is live but blocks automated
+    # access — the vacancy is real, just unverifiable by bot. Allow through with
+    # a flag so the tracker records it as unverified.
     fetch_state = rec.get("fetch_state")
-    if fetch_state and fetch_state != "validated_live":
+    if fetch_state == "bot_wall":
+        flags.append("destination behind bot wall (403/429) — live but unverified by bot")
+    elif fetch_state and fetch_state != "validated_live":
         reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
                        f"discovered-but-unverified or failed destination is never written")
 

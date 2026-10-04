@@ -1,0 +1,42 @@
+Application for Graduate Data Analyst - Corporate Risk & Broking
+Dear WTW Recruitment Team,
+I am applying for the Graduate Data Analyst position in WTW's Corporate Risk & Broking team because
+it combines the analytical and technical work I already do with the data strategy and insurance domain I
+want to build. The opportunity to work on a Global Specialities data strategy, gain practical experience
+with analytical tools, and study towards a Level 6 Data Scientist apprenticeship is exactly the
+environment I need to grow both technically and professionally. I am available to start in 2027 and
+comfortable with the hybrid working arrangement in Ipswich.
+My background combines practical IT support and security work with formal analytical training. I am an
+MSc Information Security graduate from Royal Holloway, awarded with Merit, with CompTIA
+Security+ and ISC2 Certified in Cybersecurity, preceded by a BCA in computer applications. That means
+I understand not only how to resolve technical problems but how to approach complex challenges in a
+structured way, which is central to a role that requires a mathematical and analytical mind and the ability
+to draw meaningful conclusions from data.
+In my current IT support position I am the first point of contact for 15 colleagues across 15 to 20 devices,
+troubleshooting access and system problems, monitoring server health and maintaining network and
+website-access controls. I handle four to five access requests a day through on-premises Active
+Directory, verifying business approval, granting time-limited permissions and documenting the access
+period and any extension. I investigate four to five suspicious emails a day, recording findings and
+alerting colleagues to recurring tactics. I also built a local tool that maps Windows error codes to their
+common causes and used it to trace intermittent server freezes to missing or corrupted DLLs, which is
+the kind of structured problem-solving and root-cause analysis WTW values. My technical skills include
+Python, PowerShell and SQL, which I use for task automation and data analysis.
+Two things I want to be straightforward about. I have not worked in the insurance industry, so that
+domain knowledge is something I would expect to develop through WTW's graduate programme and
+apprenticeship rather than claim as existing experience. What I do bring is a genuine analytical mindset
+and attention to detail. At Co-op, as Person in Charge, I conduct weekly risk assessments and daily
+compliance checks, maintain the assessment records, and coordinate seven or eight colleagues per shift
+while explaining requirements to people who have no particular interest in them. I am used to being the
+person who keeps the record straight and follows the correct process, and I am comfortable working with
+people from different backgrounds and disciplines.
+What draws me to WTW specifically is the focus on data-led insight across sectors including cyber,
+financial institutions, marine and construction. The opportunity to contribute to that work through a
+structured graduate programme with real responsibility and a Level 6 Data Scientist apprenticeship is
+exactly the kind of challenge I am looking for. I would welcome the opportunity to discuss how my skills
+and experience could contribute to your team.
+
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
+

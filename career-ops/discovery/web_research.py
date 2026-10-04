@@ -99,9 +99,10 @@ FETCH_TIMEOUT = 12
 FETCH_VALIDATED_LIVE = "validated_live"
 FETCH_DISCOVERED_UNVERIFIED = "discovered_unverified"
 FETCH_VALIDATION_FAILED = "validation_failed"
+FETCH_BOT_WALL = "bot_wall"
 FETCH_NOT_ATTEMPTED = "not_attempted"
 FETCH_STATES = (FETCH_VALIDATED_LIVE, FETCH_DISCOVERED_UNVERIFIED,
-                FETCH_VALIDATION_FAILED, FETCH_NOT_ATTEMPTED)
+                FETCH_VALIDATION_FAILED, FETCH_BOT_WALL, FETCH_NOT_ATTEMPTED)
 
 # --------------------------------------------------------------------------- #
 # surfaces — which discovery surface a result URL belongs to
@@ -839,8 +840,12 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
                 record["error"] = f"page states the posting is closed: {record['expired_marker']}"
     except urllib.error.HTTPError as exc:
         record["http_status"] = exc.code
-        record["status"] = FETCH_VALIDATION_FAILED
-        record["error"] = f"HTTP {exc.code}"
+        if exc.code in (403, 429):
+            record["status"] = FETCH_BOT_WALL
+            record["error"] = f"HTTP {exc.code} (bot wall — page is live but blocks automated access)"
+        else:
+            record["status"] = FETCH_VALIDATION_FAILED
+            record["error"] = f"HTTP {exc.code}"
     except Exception as exc:  # noqa: BLE001
         record["status"] = FETCH_VALIDATION_FAILED
         record["error"] = f"{type(exc).__name__}: {exc}"
@@ -949,7 +954,7 @@ def normalise_result(*, result: dict, query_entry: dict, fetch: dict | None,
 # --------------------------------------------------------------------------- #
 
 TELEMETRY_KEYS = ("queries_executed", "results_seen", "candidate_urls", "validated_live",
-                  "validation_failed", "duplicates_collapsed", "search_listing_refused",
+                  "validation_failed", "bot_wall", "duplicates_collapsed", "search_listing_refused",
                   "semantically_reviewed", "deterministic_eligibility_pass", "tracker_candidates")
 
 
@@ -1010,6 +1015,8 @@ def run_research(queries: list, provider, *, region: str, limit_per_query: int =
             state = candidate["fetch_state"]
             if state == FETCH_VALIDATED_LIVE:
                 telemetry["validated_live"] += 1
+            elif state == FETCH_BOT_WALL:
+                telemetry["bot_wall"] = telemetry.get("bot_wall", 0) + 1
             elif state == FETCH_VALIDATION_FAILED:
                 telemetry["validation_failed"] += 1
                 rejections.setdefault("validation_failed", 0)

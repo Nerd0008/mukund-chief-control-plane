@@ -1,0 +1,176 @@
+{
+  "run_id": "uk-20261004T141806Z",
+  "region": "uk",
+  "display_name": "United Kingdom",
+  "started_at": "2026-10-04T14:18:06+00:00",
+  "dry_run": true,
+  "applications_submitted": 0,
+  "employer_contacts": 0,
+  "canonical_workbook_written": false,
+  "lane_kind": "career-ops-install-lane",
+  "lane_ready": true,
+  "lane_missing": [],
+  "scheduled": true,
+  "scan": {
+    "ok": true,
+    "refused": false,
+    "exit_code": 0,
+    "duration_s": 84.2,
+    "dry_run": true,
+    "stdout_capture_ok": true,
+    "command": [
+      "node",
+      "scan.mjs",
+      "--dry-run",
+      "--quiet"
+    ],
+    "lane_env": {
+      "CAREER_OPS_PORTALS": "portals.yml",
+      "CAREER_OPS_PROFILE": "config/profile.yml",
+      "CAREER_OPS_PIPELINE": "data/pipeline.md",
+      "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+    },
+    "recorded_to": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\scan-uk-20261004T141806Z.json",
+    "warning": null,
+    "counters": {
+      "jobs_found": 2800,
+      "filtered_title": 2658,
+      "filtered_location": 139,
+      "filtered_age": 1,
+      "duplicates": 1,
+      "new_offers_added": 1,
+      "errors": null
+    },
+    "stdout_tail": "Scanning 0 companies; 12 job boards; 0 local parser; 0 skipped — no provider matched via providers\n(dry run — no files will be written)\n\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPortal Scan — 2026-10-04\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCompanies scanned:     0\nJob boards scanned:    12\nTotal jobs found:      2800\nFiltered by title:     2658 removed\nFiltered by location:  139 removed\nFiltered by age:       1 removed\nFiltered by salary:    0 removed\nDuplicates:            1 skipped\nRecheck eligible:      59 old scan-history URL(s)\nNew offers added:      1\nTrust validation:      0 high, 1 medium, 0 low\nTrust flags:           company_domain_mismatch: 1\n\nNew offers:\n  + Celonis | Technology & Management Consulting Intern (Value Engineering - UKI Market) | London, United Kingdom [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+    "stderr_tail": ""
+  },
+  "candidates": {
+    "scan_offers_without_url": 1,
+    "url_bearing_candidates": 93,
+    "source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+    "note": "scan offers carry no posting URL, so they are reported for URL resolution and can never become tracker rows on their own; only URL-bearing candidates can be accepted"
+  },
+  "idempotency": {
+    "run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
+    "previous_run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
+    "replay_of_previous_run": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "note": "a replayed run marks every accepted candidate duplicate-prior-run; the shared tracker dedupe independently refuses anything already in the workbook or a cross-month ledger"
+  },
+  "eligibility": {
+    "input": 93,
+    "accepted": 0,
+    "accepted_before_idempotency": 2,
+    "rejected": 91,
+    "duplicate_prior_run": 2,
+    "rejected_sample": [
+      {
+        "company": "Crown Agents Bank",
+        "title": "Information Security Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "One Big Circle",
+        "title": "IT & Security Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Alpha FMC",
+        "title": "Junior IT Support Engineer",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "City IT / CEF",
+        "title": "IT Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Scottish Government",
+        "title": "IT Service Desk Analyst (4456)",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "The Pensions Regulator",
+        "title": "Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Vp plc",
+        "title": "IT Service Desk Analyst (1st Line)",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Mid Yorkshire Teaching NHS Trust",
+        "title": "Service Desk Analyst",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Silver Birch Care",
+        "title": "IT Support Specialist",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      },
+      {
+        "company": "Sherwood Forest Hospitals NHS Foundation Trust",
+        "title": "Service Desk Technician",
+        "reasons": [
+          "title matches none of the owner's positive terms ['Intern', 'Internship']"
+        ]
+      }
+    ]
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with the UK lane)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+    "counts": {
+      "input": 0,
+      "appended": 0,
+      "duplicates": 0,
+      "rejected": 0,
+      "refreshed": 0
+    },
+    "cross_month_index": {
+      "sources": {
+        "uk-cyber-job-tracker.xlsx": 57,
+        "ledger:data/scan-history.tsv": 146
+      },
+      "keys": 177
+    },
+    "outcomes": [],
+    "applied": false
+  },
+  "would_append": 0,
+  "manifest_written_to": null,
+  "finished_at": "2026-10-04T14:19:31+00:00",
+  "work_authorisation": {
+    "status": "authorised",
+    "basis": "config/profile.yml#location.visa_status — UK Graduate-visa work authorisation through 23 Dec 2027",
+    "current_permission": true,
+    "sponsorship_now": "not required",
+    "tracker_visa_pathway": null
+  },
+  "status": "ok",
+  "writes": {
+    "canonical_workbook": false,
+    "tracker_dry_run_only": true,
+    "run_health_files": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json"
+  }
+}
