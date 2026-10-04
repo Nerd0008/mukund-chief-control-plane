@@ -919,7 +919,7 @@ LANE_TELEMETRY_KEYS = (
     "companies_in_watchlist", "companies_checked", "companies_with_careers_source",
     "companies_unavailable_or_unknown", "queries_planned", "queries_executed",
     "searches_observed", "results_seen", "candidate_urls", "validated_live",
-    "validation_failed", "duplicates_collapsed", "search_listing_refused",
+    "validation_failed", "bot_wall", "duplicates_collapsed", "search_listing_refused",
     "findings", "candidates_after_funnel", "tracker_candidates",
 )
 
@@ -1037,7 +1037,7 @@ def run_lane(companies: list, *, region: str, provider, fetcher=None, page_valid
                 if c.get("result_kind") == wr.RESULT_KIND_SEARCH_LISTING),
             "destinations_not_validated_live": sum(
                 1 for c in company_candidates
-                if c.get("fetch_state") != wr.FETCH_VALIDATED_LIVE),
+                if c.get("fetch_state") not in (wr.FETCH_VALIDATED_LIVE, wr.FETCH_BOT_WALL)),
             "candidates_after_funnel": None,
             "tracker_candidates": None,
             "access_blocking_reason": blocking,
@@ -1048,7 +1048,7 @@ def run_lane(companies: list, *, region: str, provider, fetcher=None, page_valid
             # are a sum of what was actually observed, never a re-derivation
             "provider_telemetry": {k: telemetry.get(k, 0) for k in
                                    ("results_seen", "candidate_urls", "validated_live",
-                                    "validation_failed", "duplicates_collapsed",
+                                    "validation_failed", "bot_wall", "duplicates_collapsed",
                                     "search_listing_refused")},
         })
 
@@ -1093,7 +1093,7 @@ def apply_discovered_careers_surfaces(health: list, candidates: list, companies:
     for cand in candidates:
         if cand.get("watchlist_query_family") != FAMILY_CAREERS:
             continue
-        if cand.get("fetch_state") != wr.FETCH_VALIDATED_LIVE:
+        if cand.get("fetch_state") not in (wr.FETCH_VALIDATED_LIVE, wr.FETCH_BOT_WALL):
             continue
         if cand.get("result_kind") == wr.RESULT_KIND_SEARCH_LISTING:
             continue
@@ -1222,7 +1222,7 @@ def _assemble_lane(companies: list, health: list, candidates: list,
             telemetry[key] = telemetry.get(key, 0) + (h.get(key) or 0)
     # the research lane's own counters, summed from the per-company observations
     for key in ("results_seen", "candidate_urls", "validated_live", "validation_failed",
-                "duplicates_collapsed", "search_listing_refused"):
+                "bot_wall", "duplicates_collapsed", "search_listing_refused"):
         telemetry[key] = sum((h.get("provider_telemetry", {}) or {}).get(key, 0) for h in health)
     lane = {
         "schema_version": SCHEMA_VERSION,
