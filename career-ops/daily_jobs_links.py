@@ -83,32 +83,32 @@ TRACKER_SCHEMA = {
     "dubai": {
         "header_row": 1,
         "sheet": None,
-        "id": "Job ID",
+        "id": None,  # No ID column in Dubai tracker
         "date": "Date Found",
         "company": "Company",
         "title": "Job Title",
         "url": "Direct Application URL",
-        "status": "Application Status",
+        "status": None,  # No status column
     },
     "japan": {
         "header_row": 1,
         "sheet": None,
-        "id": "ID",
+        "id": None,  # No ID column in Japan tracker
         "date": "Date Added",
         "company": "Company",
         "title": "Role Title",
         "url": "Direct Application URL",
-        "status": "Status",
+        "status": None,  # No status column
     },
     "singapore": {
         "header_row": 1,
         "sheet": None,
-        "id": "Job ID",
+        "id": None,  # No ID column in Singapore tracker
         "date": "Date Found",
         "company": "Company",
         "title": "Job Title",
         "url": "Direct Application URL",
-        "status": "Application Status",
+        "status": None,  # No status column
     },
 }
 
@@ -116,6 +116,7 @@ SYNTHETIC_HOST_SUFFIXES = (".invalid", ".test", ".example", ".localhost", ".loca
 SYNTHETIC_MARKERS = ("NOT A REAL VACANCY", "SYNTHETIC", "FIXTURE", "PLACEHOLDER")
 
 _HYPERLINK_RE = re.compile(r'HYPERLINK\(\s*"([^"]+)"', re.IGNORECASE)
+_LINKLOCATION_RE = re.compile(r'linkLocation=(https?://[^\s,]+)', re.IGNORECASE)
 
 
 # --------------------------------------------------------------------------- #
@@ -141,6 +142,11 @@ def as_url(value):
     if not text:
         return ""
     match = _HYPERLINK_RE.search(text)
+    if match:
+        return match.group(1).strip()
+    # openpyxl returns "HYPERLINK is not implemented. linkLocation=URL" for
+    # formulas it cannot evaluate - extract the URL from that text
+    match = _LINKLOCATION_RE.search(text)
     if match:
         return match.group(1).strip()
     if text.lower().startswith("http"):
@@ -248,31 +254,41 @@ def tracker_rows(region, limit=10):
     header: list[str] = []
     for i, row in enumerate(rows):
         values = [str(v).strip() if v is not None else "" for v in row]
-        if schema["id"] in values:
+        # Detect header by looking for date + company + title columns
+        joined = " ".join(v.lower() for v in values if v)
+        if ("date" in joined and "company" in joined
+                and ("job title" in joined or "role title" in joined)):
             header_idx = i
             header = values
             break
     if header_idx is None:
         return [], "header row not found"
 
-    index = {name: header.index(name) for name in
-             (schema["id"], schema["date"], schema["company"], schema["title"],
-              schema["url"], schema["status"]) if name in header}
+    # Build index map only for columns that exist
+    index = {}
+    for key in ("id", "date", "company", "title", "url", "status"):
+        col_name = schema.get(key)
+        if col_name and col_name in header:
+            index[key] = header.index(col_name)
 
     out = []
     for row in rows[header_idx + 1:]:
-        if not row or not row[index[schema["id"]]]:
+        # Skip empty rows - check if company or title has data
+        company_val = row[index["company"]] if "company" in index else None
+        title_val = row[index["title"]] if "title" in index else None
+        if not company_val and not title_val:
             continue
         record = {
-            "id": str(row[index[schema["id"]]]).strip(),
-            "date": cell_date(row[index[schema["date"]]]),
-            "company": (str(row[index[schema["company"]]]).strip()
-                        if row[index[schema["company"]]] is not None else ""),
-            "title": (str(row[index[schema["title"]]]).strip()
-                      if row[index[schema["title"]]] is not None else ""),
-            "url": as_url(row[index[schema["url"]]]),
-            "status": (str(row[index[schema["status"]]]).strip()
-                       if row[index[schema["status"]]] is not None else ""),
+            "id": (str(row[index["id"]]).strip() if "id" in index and row[index["id"]]
+                   else ""),
+            "date": cell_date(row[index["date"]]) if "date" in index else None,
+            "company": (str(row[index["company"]]).strip()
+                        if "company" in index and row[index["company"]] is not None else ""),
+            "title": (str(row[index["title"]]).strip()
+                      if "title" in index and row[index["title"]] is not None else ""),
+            "url": as_url(row[index["url"]]) if "url" in index else "",
+            "status": (str(row[index["status"]]).strip()
+                       if "status" in index and row[index["status"]] is not None else ""),
         }
         if is_synthetic(record["company"], record["title"], record["url"]):
             continue
@@ -362,7 +378,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
             tracked_by_url = {r["url"]: r for r in tracked if r["url"]}
             for i, job in enumerate(tracked[:max_per_region], 1):
                 tag = ""
-                if job["url"] and job["url"] in tracked_urls:
+                if job["url"] and job["url"] in tracked_urls and job["id"]:
                     tag = f"  [{job['id']}]"
                 jobs.append([
                     f"  {i}. {job['company']} — {job['title']}{tag}",

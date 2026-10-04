@@ -193,10 +193,18 @@ SENIOR_MARKERS = (
 
 
 def _tracker_columns(ws) -> dict:
-    """Map header name -> column index (1-based) from the tracker's header row."""
+    """Map header name -> column index (1-based) from the tracker's header row.
+
+    The four trackers do not share a schema. The UK one has 'Job ID' and
+    'Official URL'; the others use 'Date Found'/'Date Added' and
+    'Direct Application URL'. We scan the first 12 rows for the row that
+    looks like a header (has a 'Company' or 'Job Title'/'Role Title' cell)
+    and map every header name we find.
+    """
     for row in ws.iter_rows(min_row=1, max_row=12):
         vals = [(c.value if isinstance(c.value, str) else None) for c in row]
-        if vals and vals[0] and "job id" in str(vals[0]).lower():
+        joined = " ".join(v.lower() for v in vals if v)
+        if "company" in joined and ("job title" in joined or "role title" in joined):
             return {str(v).strip(): c.column for v, c in zip(vals, row) if v}
     return {}
 
@@ -207,13 +215,22 @@ def read_tracker_urls(path: Path):
     wb = load_workbook(path)
     ws = wb.active
     cols = _tracker_columns(ws)
-    url_col = cols.get("Official URL") or cols.get("URL")
+
+    # URL column: UK uses "Official URL", others use "Direct Application URL"
+    url_col = (cols.get("Official URL") or cols.get("Direct Application URL")
+               or cols.get("URL"))
+
+    # ID column: only the UK tracker has one
+    id_col = cols.get("Job ID")
+
     urls = set()
-    last_row, last_id = 9, None
-    for row in ws.iter_rows(min_row=10, values_only=False):
+    last_row, last_id = 1, None
+    for row in ws.iter_rows(min_row=2, values_only=False):
+        # Track the last row that has any data in column A
         if row[0].value:
             last_row = row[0].row
-            last_id = str(row[0].value)
+            if id_col and len(row) >= id_col and row[id_col - 1].value:
+                last_id = str(row[id_col - 1].value)
         if url_col and len(row) >= url_col and row[url_col - 1].value:
             urls.add(str(row[url_col - 1].value).strip().lower().rstrip("/"))
     return urls, ws, wb, cols, last_row, last_id
@@ -281,7 +298,7 @@ def main() -> int:
 
     (existing_urls, ws, wb, cols, last_row, last_id) = read_tracker_urls(tracker)
     print(f"Tracker: {tracker.name}")
-    print(f"Existing rows: {last_row - 9} (last id {last_id})")
+    print(f"Existing rows: {last_row - 1} (last id {last_id})")
     print(f"Running {args.batches} batch(es) from offset {offset} of {len(batches)}")
 
     seen = set(existing_urls)
@@ -334,23 +351,50 @@ def main() -> int:
 
     from openpyxl import load_workbook  # noqa: F401  (already imported above)
 
-    base = int(str(last_id).lstrip("J") or 0) if last_id else 0
+    # Determine the ID scheme: UK uses "J###", others use date-based IDs
+    has_id_col = "Job ID" in cols
+    base = 0
+    if has_id_col and last_id:
+        try:
+            base = int(str(last_id).lstrip("J"))
+        except ValueError:
+            base = 0
+
     for i, job in enumerate(collected):
         r = last_row + 1 + i
-        ws.cell(row=r, column=1, value=f"J{base + 1 + i}")
-        ws.cell(row=r, column=2, value=datetime.now().replace(hour=0, minute=0,
-                                                              second=0, microsecond=0))
-        ws.cell(row=r, column=3, value=job["company"])
-        ws.cell(row=r, column=4, value=job["title"])
-        ws.cell(row=r, column=5, value=job["location"])
-        ws.cell(row=r, column=9, value="Uncertain")
-        ws.cell(row=r, column=10, value="To Review")
-        if cols.get("Official URL"):
-            ws.cell(row=r, column=cols["Official URL"], value=job["url"])
-        if cols.get("Discovery"):
-            ws.cell(row=r, column=cols["Discovery"], value="Codex direct search")
+        now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        if has_id_col:
+            # UK schema: Job ID, Date Found, Company, Job Title, Location, ...
+            ws.cell(row=r, column=cols["Job ID"], value=f"J{base + 1 + i}")
+            ws.cell(row=r, column=cols.get("Date Found", 2), value=now)
+            ws.cell(row=r, column=cols.get("Company", 3), value=job["company"])
+            ws.cell(row=r, column=cols.get("Job Title", 4), value=job["title"])
+            ws.cell(row=r, column=cols.get("Location", 5), value=job["location"])
+            if cols.get("Official URL"):
+                ws.cell(row=r, column=cols["Official URL"], value=job["url"])
+            if cols.get("Discovery"):
+                ws.cell(row=r, column=cols["Discovery"], value="Codex direct search")
+        else:
+            # Regional schema: Date Found/Added, Company, Job Title/Role Title,
+            # Location, Direct Application URL, ...
+            date_col = cols.get("Date Found") or cols.get("Date Added") or 1
+            company_col = cols.get("Company") or 2
+            title_col = cols.get("Job Title") or cols.get("Role Title") or 3
+            loc_col = cols.get("Location") or 4
+            url_col = cols.get("Direct Application URL") or cols.get("URL") or 5
+
+            ws.cell(row=r, column=date_col, value=now)
+            ws.cell(row=r, column=company_col, value=job["company"])
+            ws.cell(row=r, column=title_col, value=job["title"])
+            ws.cell(row=r, column=loc_col, value=job["location"])
+            ws.cell(row=r, column=url_col, value=job["url"])
+
     wb.save(tracker)
-    print(f"\nWrote {len(collected)} rows; tracker now ends at J{base + len(collected)}")
+    if has_id_col:
+        print(f"\nWrote {len(collected)} rows; tracker now ends at J{base + len(collected)}")
+    else:
+        print(f"\nWrote {len(collected)} rows to {tracker.name}")
     return 0
 
 
