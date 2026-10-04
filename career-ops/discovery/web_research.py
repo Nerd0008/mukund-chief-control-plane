@@ -311,6 +311,11 @@ OWNER_ATS_SITE_QUERIES = (
     ("smartrecruiters", "site:jobs.smartrecruiters.com"),
     ("icims", "site:icims.com/jobs"),
     ("teamtailor", "site:teamtailor.com/jobs"),
+    ("reed", "site:reed.co.uk"),
+    ("cwjobs", "site:cwjobs.co.uk"),
+    ("totaljobs", "site:totaljobs.com"),
+    ("monster", "site:monster.co.uk"),
+    ("ziprecruiter", "site:ziprecruiter.com"),
 )
 
 #: Broad public search surfaces added on top of the owner's ATS site queries.
@@ -381,6 +386,14 @@ def build_query_matrix(region: str, *, families: tuple = tuple(ROLE_FAMILIES),
         add("level_coverage", "employer_careers",
             f"{LEVEL_COVERAGE_CLAUSE} {DISCIPLINE_CLAUSE} {location_clause}",
             provenance="level-term coverage (new grad / associate / L1 / entry level)")
+
+        # 5. broad cyber security queries — no entry-level requirement.
+        #    The classifier filters for graduate/internship roles. This surfaces
+        #    jobs that don't have "graduate" or "intern" in the title but are
+        #    still entry-level (e.g., "Security Analyst", "SOC Analyst").
+        add("broad_cyber", "employer_careers",
+            f"{DISCIPLINE_CLAUSE} {location_clause}",
+            provenance="broad cyber security search — classifier filters for entry-level")
 
     # 4. company watchlist hooks (optional — the generic search works without it)
     for company in (include_watchlist or []):
