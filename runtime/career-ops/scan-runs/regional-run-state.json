@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-04T17:35:24+00:00",
+  "updated_at": "2026-10-04T18:04:08+00:00",
   "regions": {
     "uk": {
-      "last_run_id": "uk-20261004T173402Z",
+      "last_run_id": "uk-20261004T180222Z",
       "last_run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
-      "last_run_at": "2026-10-04T17:35:24+00:00",
+      "last_run_at": "2026-10-04T18:04:08+00:00",
       "last_status": "ok",
       "last_candidates": 93,
       "last_accepted": 0,
       "last_would_append": 0,
-      "runs": 5
+      "runs": 6
     },
     "dubai": {
       "last_run_id": "dubai-20260924T001612Z",

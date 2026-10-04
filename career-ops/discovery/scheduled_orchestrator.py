@@ -113,7 +113,7 @@ LOCK_FILE = DEFAULT_RUNTIME_DIR / "unified-run.lock"
 STATE_FILE = DEFAULT_RUNTIME_DIR / "unified-run-state.json"
 
 # --- per-source budgets (bounded so one blocked site cannot eat the whole scan) --- #
-DEFAULT_WEB_QUERIES = 22
+DEFAULT_WEB_QUERIES = 28
 DEFAULT_LIMIT_PER_QUERY = 10
 DEFAULT_MAX_URLS = 60
 DEFAULT_PER_QUERY_TIMEOUT = 180
