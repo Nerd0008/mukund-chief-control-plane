@@ -565,6 +565,7 @@ def _class_state(entry: dict) -> dict:
             "job_posting_urls": entry.get("job_posting_urls"),
             "validated_live": entry.get("validated_live"),
             "validation_failed": entry.get("validation_failed"),
+            "bot_wall": entry.get("bot_wall", 0),
             "blocking_evidence": entry.get("blocking_evidence") or []}
 
 
