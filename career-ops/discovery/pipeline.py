@@ -949,7 +949,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                                              adapter=deepseek_adapter, mode=mode)
                 doc["requested"] = semantic
                 doc["probe"] = probe
-                if doc.get("classifications"):
+                if doc.get("classified", 0) > 0:
                     return doc
                 fallback = {candidate_id(c): deterministic_classify(c, mode=mode)
                             for c in candidates}
