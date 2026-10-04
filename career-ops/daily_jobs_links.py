@@ -278,8 +278,14 @@ def tracker_rows(region, limit=10):
             continue
         out.append(record)
 
-    # Sort by date descending (newest first), then by ID descending for stability
-    out.sort(key=lambda r: (r["date"] or dt.date.min, r["id"]), reverse=True)
+    # Sort by date descending (newest first), then by numeric ID descending.
+    # The ID must be parsed numerically: as strings "J99" > "J130", which put
+    # older jobs at the top of the digest once the tracker passed J99.
+    def _id_key(rec):
+        digits = "".join(ch for ch in rec["id"] if ch.isdigit())
+        return int(digits) if digits else 0
+
+    out.sort(key=lambda r: (r["date"] or dt.date.min, _id_key(r)), reverse=True)
     return out[:limit], None
 
 
@@ -421,11 +427,13 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stale-hours", type=float, default=26.0)
-    parser.add_argument("--budget", type=int, default=4000,
+    parser.add_argument("--budget", type=int, default=14000,
                         help="soft max characters before per-region job detail is "
                              "trimmed. Set generously: the gateway chunks long "
                              "messages (Discord 2000 / Telegram 4096), so a longer "
-                             "digest is delivered whole rather than losing jobs.")
+                             "digest is delivered whole rather than losing jobs. "
+                             "40 jobs x 2 lines needs ~12k, so the default clears "
+                             "a full 10-per-region digest.")
     parser.add_argument("--max-per-region", type=int, default=10,
                         help="max jobs listed per region before summarising the rest")
     args = parser.parse_args()
