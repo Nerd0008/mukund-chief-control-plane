@@ -440,7 +440,7 @@ def test_partial_thread_conflict_stays_review_only(conflict):
     raw["thread_id"] = "t1"
     report = reconcile([raw], existing)
     assert not report["proposed_records"]
-    assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region evidence"
+    assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region/reference evidence"
 
 
 def test_long_scan_resolves_current_token_before_each_request():
@@ -463,3 +463,11 @@ def test_calendar_resolves_current_token_without_gmail_mutation():
     calendar = DeadlineCalendar(lambda: "fresh-fake-token", transport=transport)
     calendar._call("GET", "careerabc")
     assert calls == [("GET", "fresh-fake-token")]
+
+
+def test_thread_does_not_merge_different_application_references():
+    existing = reconcile([mail(body="Thank you for applying. Application ID: FIRST")], [])["proposed_records"]
+    raw = mail("next", body="Your application has been received. Application ID: SECOND")
+    report = reconcile([raw], existing)
+    assert not report["proposed_records"]
+    assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region/reference evidence"
