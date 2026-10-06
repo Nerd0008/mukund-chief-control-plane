@@ -1,0 +1,8 @@
+{
+  "regional_profiles": "career-ops/regional_profiles.json",
+  "calendar_id": "primary",
+  "backfill_days": 30,
+  "scan_interval_minutes": 60,
+  "max_messages": 2000,
+  "automatic_writes_default": false
+}

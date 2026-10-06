@@ -1,44 +1,6 @@
 #!/usr/bin/env python3
-"""Read-only Gmail API adapter — interface + credential probe, no owner OAuth yet.
-
-Status of this module (truthful, 2026-09-24)
--------------------------------------------
-* **The interface and the credential probe are implemented and tested.**
-* **The HTTP fetch path has NEVER been executed on this machine.** No Gmail
-  credentials or token exist here, so it is reported as
-  ``fetch_path_executed: false`` / ``verification: "UNVERIFIED"`` everywhere it
-  appears. It must not be described as working until it has actually run.
-* Nothing in this module is imported by the mailbox->signal parser: the payload
-  shape a fetch returns is identical to a Gmail API JSON export, and
-  ``application_inbox.parse_gmail_api_message`` is what converts it. That split
-  is deliberate — the conversion is tested from fixtures, so only the HTTP call
-  itself is unverified.
-
-Capability boundary
--------------------
-Read-only scope only (``gmail.readonly``). This module cannot send, reply,
-forward, archive, delete, move, label or mark anything read; there is no code
-path for those actions and ``application_inbox.guard_action`` refuses them.
-
-Owner step (recorded in tasks-or-issues/overnight-owner-actions-2026-09-24.md)
-----------------------------------------------------------------------------
-1. In Google Cloud Console create/select a project, enable **Gmail API**.
-2. Configure the OAuth consent screen as ``External`` / ``Testing`` and add
-   Mukund's own address as a test user.
-3. Create an OAuth client of type **Desktop app** and download the client JSON.
-4. Save it to the ``credential_path`` in
-   ``career-ops/application_inbox_config.json#adapters.gmail_readonly``
-   (default ``C:\\Users\\mukun\\AppData\\Local\\hermes\\secrets\\gmail-readonly\\credentials.json``).
-   Never commit it; the repo path is outside the repository.
-5. Authorise the scope ``https://www.googleapis.com/auth/gmail.readonly`` once
-   and place the resulting refresh token JSON at ``token_path``.
-6. Set ``adapters.gmail_readonly.enabled`` to ``true``.
-
-Until step 5 is done the adapter returns ``available: false`` and the monitor
-continues on the owner-exported local mailbox path.
-
-This module deliberately never reads or prints credential *contents*: only the
-existence of the files is reported.
+"""Legacy read-only adapter using Career Ops Windows Credential Manager OAuth.
+See docs/gmail-application-monitor.md. Plaintext credential files are not used.
 """
 
 from __future__ import annotations
@@ -76,10 +38,11 @@ def token_path(cfg: dict) -> Path:
 
 def adapter_status(cfg: dict) -> dict:
     """Truthful readiness report. Reports presence, never contents."""
-    cred = credential_path(cfg)
-    tok = token_path(cfg)
-    credentials_present = bool(str(cred)) and cred.exists()
-    token_present = bool(str(tok)) and tok.exists()
+    from career_google_auth import status as oauth_status
+    secure = oauth_status()
+    cred, tok = Path(""), Path("")
+    credentials_present = secure["present"]["client_id"] and secure["present"]["client_secret"]
+    token_present = secure["oauth_ready"]
     enabled = bool(cfg.get("enabled"))
     if not enabled:
         reason = ("adapter is disabled in configuration; the owner-exported local mailbox "
@@ -112,13 +75,9 @@ def adapter_status(cfg: dict) -> dict:
 
 
 OWNER_ACTION = (
-    "Complete the Gmail read-only OAuth step: create a Desktop-app OAuth client with the "
-    "Gmail API enabled, save its client JSON to the adapter's credential_path "
-    "(C:\\Users\\mukun\\AppData\\Local\\hermes\\secrets\\gmail-readonly\\credentials.json), "
-    "authorise the scope https://www.googleapis.com/auth/gmail.readonly once and save the "
-    "resulting refresh token to token_path (token.json), then set "
-    "adapters.gmail_readonly.enabled=true. Only the owner can do this; it is the one step "
-    "that cannot be engineered around safely."
+    "Enable Gmail and Calendar APIs, create a Desktop OAuth client, run "
+    "career_google_auth.py store-client (hidden prompts), then authorize. "
+    "Credentials are stored only in Windows Credential Manager."
 )
 
 
@@ -127,31 +86,10 @@ def _read_json(path: Path) -> dict:
 
 
 def _access_token(cfg: dict) -> str:
-    """Exchange the stored refresh token for an access token.
+    """Use secure shared OAuth; never read plaintext credentials."""
+    from career_google_auth import access_token
+    return access_token()
 
-    Never executed on this machine (no token exists). Only the token endpoint is
-    contacted; no credential value is logged or returned to a caller that
-    reports it.
-    """
-    import urllib.parse
-    import urllib.request
-
-    client = _read_json(credential_path(cfg))
-    block = client.get("installed") or client.get("web") or client
-    token = _read_json(token_path(cfg))
-    refresh = token.get("refresh_token")
-    if not refresh:
-        raise RuntimeError("stored token has no refresh_token; re-run the owner OAuth step")
-    payload = urllib.parse.urlencode({
-        "client_id": block["client_id"],
-        "client_secret": block["client_secret"],
-        "refresh_token": refresh,
-        "grant_type": "refresh_token",
-    }).encode("ascii")
-    req = urllib.request.Request(TOKEN_ENDPOINT, data=payload, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - fixed https endpoint
-        body = json.loads(resp.read().decode("utf-8"))
-    return body["access_token"]
 
 
 def fetch(cfg: dict, *, limit: int | None = None) -> dict:
