@@ -234,9 +234,8 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
             tracker = WorkbookTracker(profiles, runtime / "backups")
         records, fingerprints = tracker.read()
         if reader is None:
-            token = access_token()
-            reader = GmailReader(token)
-            calendar = DeadlineCalendar(token, config["calendar_id"])
+            reader = GmailReader(access_token)
+            calendar = DeadlineCalendar(access_token, config["calendar_id"])
         window = reader.read_window(state.get("history_id"), days=config["backfill_days"],
                                     max_messages=config["max_messages"])
         report = reconcile(window["messages"], records, state.get("processed_ids", []))

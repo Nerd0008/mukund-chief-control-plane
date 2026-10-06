@@ -441,3 +441,25 @@ def test_partial_thread_conflict_stays_review_only(conflict):
     report = reconcile([raw], existing)
     assert not report["proposed_records"]
     assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region evidence"
+
+
+def test_long_scan_resolves_current_token_before_each_request():
+    issued = iter(["old-fake-token", "renewed-fake-token"])
+    tokens = []
+    def transport(method, url, **kwargs):
+        tokens.append(kwargs["token"])
+        return {}
+    reader = GmailReader(lambda: next(issued), transport, request_interval=0)
+    reader._get("/profile")
+    reader._get("/messages")
+    assert tokens == ["old-fake-token", "renewed-fake-token"]
+
+
+def test_calendar_resolves_current_token_without_gmail_mutation():
+    calls = []
+    def transport(method, url, **kwargs):
+        calls.append((method, kwargs["token"]))
+        return {"id": "careerabc"}
+    calendar = DeadlineCalendar(lambda: "fresh-fake-token", transport=transport)
+    calendar._call("GET", "careerabc")
+    assert calls == [("GET", "fresh-fake-token")]

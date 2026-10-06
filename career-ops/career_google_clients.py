@@ -35,7 +35,7 @@ class GmailReader:
         while True:
             try:
                 return self._transport("GET", GMAIL + path + ("?" + urlencode(params) if params else ""),
-                                       token=self._token)
+                                       token=self._token() if callable(self._token) else self._token)
             except GoogleError as exc:
                 if exc.reason not in {"rateLimitExceeded", "userRateLimitExceeded"} or self._quota_recoveries >= 2:
                     raise
