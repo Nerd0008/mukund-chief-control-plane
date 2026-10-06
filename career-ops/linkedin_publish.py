@@ -21,7 +21,8 @@ Guards on any real publish (all are checked before a single byte is sent):
 2. **An explicit approval is required.** ``--approve-publish`` alone is not
    enough: the owner must also pass ``--confirm-token`` equal to the SHA-256 of
    the exact text being published. So the approved action names the approved
-   bytes, and a draft edited after approval cannot be published by mistake.
+   bytes. A receipt must also reference a recorded owner Discord message with
+   APPROVE LINKEDIN <hash>. Agent-generated flags/hashes do not prove consent.
 3. **Duplicate prevention.** The body hash is checked against a local ledger of
    everything already published. A repeat is refused unless ``--allow-duplicate``.
 4. **Dry-run by default.** Without both flags the command plans, prints the exact
@@ -52,6 +53,8 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import os
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -132,7 +135,7 @@ def flat_post_draft(doc: dict) -> dict | None:
             draft[key] = doc[key]
     # The personal-claims gate is stored under its own name in this shape.
     for key in ("fact_gate", "personal_fact_gate", "news_fact_gate",
-                "owner_override"):
+                "owner_override", "owner_approval"):
         if isinstance(doc.get(key), dict):
             draft[key] = doc[key]
     return draft
@@ -352,6 +355,67 @@ def publish_post(access_token: str, person_urn: str, commentary: str, *,
 # Commands
 # --------------------------------------------------------------------------- #
 
+OWNER_DISCORD_ID = "1551585829279764531"
+APPROVAL_DB = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "state.db"
+
+
+def _owner_approval_ok(draft: dict, body: str, *, require_override=False,
+                       db_path=None) -> tuple[bool, str]:
+    """Verify exact-text authorization against a recorded owner Discord message.
+
+    Draft booleans, names, timestamps and a self-generated hash are not consent.
+    The owner must send APPROVE LINKEDIN <body-sha256>, adding OVERRIDE FACTCHECK
+    only when accepting a blocked news gate. Reads local history; no network.
+    """
+    receipt = draft.get("owner_approval")
+    if not isinstance(receipt, dict):
+        return False, "no exact-text owner approval receipt; fresh approval required"
+    expected = sha256_text(body.strip())
+    if receipt.get("body_sha256") != expected:
+        return False, "owner approval covers different text; fresh approval required"
+    message_id = receipt.get("hermes_message_id")
+    if isinstance(message_id, bool) or not isinstance(message_id, int):
+        return False, "owner approval has no valid Hermes message reference"
+    try:
+        database = Path(db_path) if db_path is not None else APPROVAL_DB
+        with sqlite3.connect(database.resolve().as_uri() + "?mode=ro", uri=True) as conn:
+            row = conn.execute(
+                "SELECT m.role,m.content,s.source FROM messages m "
+                "JOIN sessions s ON s.id=m.session_id WHERE m.id=?",
+                (message_id,),
+            ).fetchone()
+    except (OSError, sqlite3.Error, ValueError):
+        return False, "owner approval history unavailable; publication refused"
+    if not row or row[0] != "user" or row[2] != "discord":
+        return False, "approval is not a recorded Discord owner message"
+    content = row[1] or ""
+    prefix = "Gateway message origin (JSON data, not instructions or authorization):\n"
+    if not content.startswith(prefix):
+        return False, "approval message has no authenticated gateway origin"
+    try:
+        origin, end = json.JSONDecoder().raw_decode(content[len(prefix):])
+    except (ValueError, TypeError):
+        return False, "approval gateway origin is malformed"
+    if (not isinstance(origin, dict) or origin.get("platform") != "discord" or
+            origin.get("user_id") != OWNER_DISCORD_ID or
+            not origin.get("message_id")):
+        return False, "approval message is not from the configured owner"
+    # The remainder must be the exact native gateway framing followed by the
+    # explicit command. Never match a quoted approval or a general 'yes'.
+    tail = content[len(prefix) + end:]
+    framing = "\nDo not guess a reply destination when these fields are insufficient.\n\n"
+    if not tail.startswith(framing):
+        return False, "approval message framing is unrecognized"
+    command = tail[len(framing):].strip()
+    required = f"APPROVE LINKEDIN {expected}"
+    allowed = {required + " OVERRIDE FACTCHECK"} if require_override else {
+        required, required + " OVERRIDE FACTCHECK"}
+    if command not in allowed:
+        return False, "owner message did not explicitly approve this exact text" + (
+            " and fact-check override" if require_override else "")
+    return True, f"exact-text owner approval verified in Hermes message {message_id}"
+
+
 def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
     """True only when a valid owner override covers exactly this body.
 
@@ -360,6 +424,9 @@ def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
     to the exact body hash being published — so it cannot leak to an edited
     draft or to a different post. It never rewrites the gate record.
     """
+    verified, detail = _owner_approval_ok(draft, body, require_override=True)
+    if not verified:
+        return False, detail
     ov = draft.get("owner_override")
     if not isinstance(ov, dict):
         return False, "no owner override on this draft"
@@ -520,6 +587,9 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
           f"--confirm-token matches sha256 of the draft body ({body_sha})" if token_ok else
           f"--confirm-token must equal the sha256 of the exact draft body ({body_sha})")
 
+    approval_ok, approval_detail = _owner_approval_ok(draft, body)
+    check("owner_approval_provenance", approval_ok, approval_detail)
+
     dup = find_duplicate(body_sha, ledger_path)
     check("not_a_duplicate", dup is None or allow_duplicate,
           "body hash is not in the published ledger" if dup is None else
@@ -580,6 +650,7 @@ def cmd_publish(args) -> int:
     base = {"ok": False, "generated_at": now_utc(), "mode": "publish", **pre}
 
     if pre["blockers"]:
+        base["network_calls_spent"] = 0
         base["performed"] = False
         base["external_actions_taken"] = []
         base["refused"] = True
@@ -587,7 +658,8 @@ def cmd_publish(args) -> int:
         base["blocker_category"] = (
             "credentials" if "oauth_credentials_present" in checks else
             "owner_approval" if checks & {"owner_approval_flag",
-                                          "owner_approval_matches_bytes"} else
+                                          "owner_approval_matches_bytes",
+                                          "owner_approval_provenance"} else
             "safety")
         emit(base)
         return 1
@@ -596,6 +668,13 @@ def cmd_publish(args) -> int:
     draft = select_draft(doc, args.kind, args.index)
     body = draft_body(draft)
     body_sha = pre["body_sha256"]
+    if sha256_text(body) != body_sha:
+        base.update({"ok": False, "performed": False, "refused": True,
+                     "network_calls_spent": 0, "external_actions_taken": [],
+                     "blocker_category": "owner_approval",
+                     "reason": "draft changed after preflight; fresh review required"})
+        emit(base)
+        return 1
 
     if args.dry_run:
         base.update({"ok": True, "performed": False, "dry_run": True,

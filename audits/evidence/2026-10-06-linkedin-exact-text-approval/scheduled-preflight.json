@@ -1,0 +1,35 @@
+[
+  {
+    "day": "tuesday",
+    "publish_allowed": false,
+    "approval_check": {
+      "check": "owner_approval_provenance",
+      "passed": false,
+      "detail": "no exact-text owner approval receipt; fresh approval required",
+      "blocking": true
+    },
+    "provider_calls": 0
+  },
+  {
+    "day": "wednesday",
+    "publish_allowed": false,
+    "approval_check": {
+      "check": "owner_approval_provenance",
+      "passed": false,
+      "detail": "no exact-text owner approval receipt; fresh approval required",
+      "blocking": true
+    },
+    "provider_calls": 0
+  },
+  {
+    "day": "thursday",
+    "publish_allowed": false,
+    "approval_check": {
+      "check": "owner_approval_provenance",
+      "passed": false,
+      "detail": "no exact-text owner approval receipt; fresh approval required",
+      "blocking": true
+    },
+    "provider_calls": 0
+  }
+]
