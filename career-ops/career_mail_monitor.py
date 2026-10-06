@@ -127,8 +127,9 @@ def reconcile(messages, existing, processed=()):
             continue
         if candidates:
             record = candidates[0]
-            if signal.get("company") and signal.get("role") and pair(record) != pair(signal):
-                signal.update(needs_review=True, review_reason="thread conflicts with company/role evidence")
+            if any(signal.get(key) and identity_key(signal[key]) != identity_key(record.get(key))
+                   for key in ("company", "role", "region")):
+                signal.update(needs_review=True, review_reason="thread conflicts with company/role/region evidence")
                 review.append(signal)
                 continue
             counts["matched_existing"] += 1

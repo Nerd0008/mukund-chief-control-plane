@@ -431,3 +431,13 @@ def test_role_substring_does_not_match_different_role():
     existing = reconcile([mail()], [])["proposed_records"]
     report = reconcile([unlabelled("Company: Acme\nRole: Senior Graduate Engineer\nYour application has been received.")], existing)
     assert not report["proposed_records"]
+
+
+@pytest.mark.parametrize("conflict", ["Company: Other", "Region: Dubai"])
+def test_partial_thread_conflict_stays_review_only(conflict):
+    existing = reconcile([mail()], [])["proposed_records"]
+    raw = unlabelled(conflict + "\nPlease complete your online assessment.")
+    raw["thread_id"] = "t1"
+    report = reconcile([raw], existing)
+    assert not report["proposed_records"]
+    assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region evidence"
