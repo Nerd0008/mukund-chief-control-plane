@@ -32,7 +32,7 @@ Relative deadlines are explicitly DERIVED from the received timestamp. Date-only
 Gmail exposes GET-only allowlisted endpoints. No sending, replying, deleting, archiving, labels or read-state changes exist. No applications, outreach, model calls or unrelated runtime changes occur. Google Calendar can be displayed on iPhone by adding the same Google account and enabling Calendars; no Apple automation is needed.
 
 ## Verification
-148 offline tests passed across `tests/test_career_mail_monitor.py` and `tests/test_application_inbox.py` using Hermes Python. Includes requested classification/deadline/dedupe/calendar/extension/rejection/alert/safety cases and partial-failure recovery. Fixtures use fake transports and temporary workbooks, with zero live API calls. Live OAuth and read-only Gmail/Calendar access are verified. Mailbox identity coverage is reported in the private dry run; Calendar writes remain untested and disabled pending owner approval.
+151 offline tests passed across `tests/test_career_mail_monitor.py` and `tests/test_application_inbox.py` using Hermes Python. Includes requested classification/deadline/dedupe/calendar/extension/rejection/alert/safety cases and partial-failure recovery. Fixtures use fake transports and temporary workbooks, with zero live API calls. Live OAuth and read-only Gmail/Calendar access are verified. Mailbox identity coverage is reported in the private dry run; Calendar writes remain untested and disabled pending owner approval.
 
 Primary references: [Desktop OAuth](https://developers.google.com/identity/protocols/oauth2/native-app), [Gmail sync](https://developers.google.com/workspace/gmail/api/guides/sync), [Calendar scopes](https://developers.google.com/workspace/calendar/api/auth), [event insert IDs](https://developers.google.com/workspace/calendar/api/v3/reference/events/insert).
 
@@ -42,3 +42,6 @@ Desktop OAuth client and tokens were securely installed under MISTY\mukun; both 
 Gmail request pacing is 1 second (at most 60 requests/minute). New projects have 6,000 units/user/minute and messages.get costs 20 units, so the previous 0.15-second rate was excessive: [current quota reference](https://developers.google.com/workspace/gmail/api/reference/quota). Initial quota errors did not advance checkpoints or mutate Gmail/workbooks/calendar.
 
 Quota recovery is bounded to two 60-second waits per scan, only for allowlisted rate-limit errors; permission failures stop immediately. Backfill requests recruitment-related results only.
+
+## Identity and long-scan repair (7 October 2026)
+Company and role extraction stays inside a single sentence/line, including standard application-opportunity wording. Exact full-role and employer evidence can resolve a unique canonical region; incomplete or conflicting identities/references remain review-only. Both Google clients resolve the current secure access token at each request so a long scan cannot retain an expired startup token. The first repair dry run failed at token expiry without advancing any checkpoint or writing workbooks/events; a retry followed the tested fix.
