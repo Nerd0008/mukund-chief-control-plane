@@ -35,3 +35,8 @@ Gmail exposes GET-only allowlisted endpoints. No sending, replying, deleting, ar
 134 offline tests passed across `tests/test_career_mail_monitor.py` and `tests/test_application_inbox.py` using Hermes Python. Includes requested classification/deadline/dedupe/calendar/extension/rejection/alert/safety cases and partial-failure recovery. Fixtures use fake transports and temporary workbooks, with zero live API calls. Live OAuth, mailbox classification quality and Calendar delivery remain unverified until owner consent and subsequent acceptance.
 
 Primary references: [Desktop OAuth](https://developers.google.com/identity/protocols/oauth2/native-app), [Gmail sync](https://developers.google.com/workspace/gmail/api/guides/sync), [Calendar scopes](https://developers.google.com/workspace/calendar/api/auth), [event insert IDs](https://developers.google.com/workspace/calendar/api/v3/reference/events/insert).
+
+## Laptop activation (6 October 2026)
+Desktop OAuth client and tokens were securely installed under MISTY\mukun; both APIs are enabled and the two-scope consent succeeded. No credential values are recorded here. The Hermes `career-gmail-monitor` skill is installed in its operations skill directory and native skills_list verified discovery. Automatic writes/scheduling remain disabled pending initial reconciliation review.
+
+Gmail request pacing is 0.5 seconds (at most 120 requests/minute). New projects have 6,000 units/user/minute and messages.get costs 20 units, so the previous 0.15-second rate was excessive: [current quota reference](https://developers.google.com/workspace/gmail/api/reference/quota). Initial quota errors did not advance checkpoints or mutate Gmail/workbooks/calendar.

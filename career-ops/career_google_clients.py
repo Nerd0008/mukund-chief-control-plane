@@ -5,6 +5,7 @@ import datetime as dt
 import re
 import hashlib
 import json
+import time
 from urllib.parse import quote, urlencode
 
 from career_google_auth import GoogleError, http_json
@@ -14,12 +15,20 @@ CALENDAR = "https://www.googleapis.com/calendar/v3/calendars"
 
 
 class GmailReader:
-    def __init__(self, token, transport=http_json):
+    def __init__(self, token, transport=http_json, *, request_interval=0.5, clock=time.monotonic, sleep=time.sleep):
         self._token, self._transport = token, transport
+        self._interval, self._clock, self._sleep = request_interval, clock, sleep
+        self._last_request = None
 
     def _get(self, path, **params):
         if path.rsplit("/", 1)[-1] in {"send", "modify", "batchModify", "batchDelete", "trash", "untrash", "insert", "import"} or not re.fullmatch(r"/(profile|messages|history|messages/[a-zA-Z0-9_-]+)", path):
             raise ValueError("Gmail path is not allowlisted")
+        now = self._clock()
+        if self._last_request is not None:
+            delay = self._interval - (now - self._last_request)
+            if delay > 0:
+                self._sleep(delay)
+        self._last_request = self._clock()
         return self._transport("GET", GMAIL + path + ("?" + urlencode(params) if params else ""),
                                token=self._token)
 

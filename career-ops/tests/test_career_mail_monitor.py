@@ -331,3 +331,11 @@ def test_calendar_failure_replays_pending_after_saved_message(tracker,tmp_path):
     assert len(replay['proposed_calendar_events'])==1
     apply_report(replay,tracker,DeadlineCalendar('FAKE',transport=CalendarTransport()),tmp_path/'audit.json')
     records,_=tracker.read();assert not records[0]['calendar_pending']
+
+
+def test_gmail_requests_are_paced_without_retry():
+    ticks=[0.0];delays=[];calls=[]
+    def sleep(delay):delays.append(delay);ticks[0]+=delay
+    reader=GmailReader('FAKE',lambda *a,**k:calls.append(a) or {},clock=lambda:ticks[0],sleep=sleep)
+    reader._get('/profile');reader._get('/history');reader._get('/messages')
+    assert len(calls)==3 and delays==[0.5,0.5]
