@@ -32,8 +32,9 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 class GoogleError(RuntimeError):
     """Safe diagnostic: never includes response bodies, URLs or tokens."""
 
-    def __init__(self, operation, status=None):
+    def __init__(self, operation, status=None, reason=None):
         self.status = status
+        self.reason = reason
         super().__init__(f"Google {operation} failed" + (f" (HTTP {status})" if status else ""))
 
 
@@ -55,7 +56,13 @@ def http_json(method, url, *, token=None, data=None, form=False):
             raw = response.read()
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as exc:
-        raise GoogleError("request", exc.code) from None
+        try:
+            body = json.loads(exc.read()).get("error", {})
+            reasons = [e.get("reason") for e in body.get("errors", [])]
+            reason = next((r for r in reasons if r in {"rateLimitExceeded", "userRateLimitExceeded", "dailyLimitExceeded", "insufficientPermissions", "forbidden"}), None)
+        except (ValueError, TypeError):
+            reason = None
+        raise GoogleError("request" + (" " + reason if reason else ""), exc.code, reason) from None
     except (OSError, ValueError, urllib.error.URLError):
         raise GoogleError("request") from None
 

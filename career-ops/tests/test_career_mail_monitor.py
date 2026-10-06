@@ -338,4 +338,28 @@ def test_gmail_requests_are_paced_without_retry():
     def sleep(delay):delays.append(delay);ticks[0]+=delay
     reader=GmailReader('FAKE',lambda *a,**k:calls.append(a) or {},clock=lambda:ticks[0],sleep=sleep)
     reader._get('/profile');reader._get('/history');reader._get('/messages')
-    assert len(calls)==3 and delays==[0.5,0.5]
+    assert len(calls)==3 and delays==[1.0,1.0]
+
+
+def test_quota_recovery_is_bounded_and_permission_errors_not_retried():
+    waits=[];calls=[]
+    def denied(*a,**k):
+        calls.append(1);raise auth.GoogleError('request',403,'rateLimitExceeded')
+    reader=GmailReader('FAKE',denied,sleep=waits.append)
+    with pytest.raises(auth.GoogleError):reader._get('/profile')
+    assert len(calls)==3 and waits==[60,60]
+    calls.clear();waits.clear()
+    def forbidden(*a,**k):
+        calls.append(1);raise auth.GoogleError('request',403,'insufficientPermissions')
+    with pytest.raises(auth.GoogleError):GmailReader('FAKE',forbidden,sleep=waits.append)._get('/profile')
+    assert len(calls)==1 and waits==[]
+
+
+def test_backfill_query_is_recruitment_scoped():
+    urls=[]
+    def transport(method,url,**kwargs):
+        urls.append(url);return {'historyId':'1'} if '/profile' in url else {'messages':[]}
+    GmailReader('FAKE',transport).read_window()
+    from urllib.parse import urlsplit,parse_qs
+    q=parse_qs(urlsplit(urls[1]).query)['q'][0]
+    assert q.startswith('after:') and 'application' in q and 'assessment' in q

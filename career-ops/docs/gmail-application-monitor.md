@@ -39,4 +39,6 @@ Primary references: [Desktop OAuth](https://developers.google.com/identity/proto
 ## Laptop activation (6 October 2026)
 Desktop OAuth client and tokens were securely installed under MISTY\mukun; both APIs are enabled and the two-scope consent succeeded. No credential values are recorded here. The Hermes `career-gmail-monitor` skill is installed in its operations skill directory and native skills_list verified discovery. Automatic writes/scheduling remain disabled pending initial reconciliation review.
 
-Gmail request pacing is 0.5 seconds (at most 120 requests/minute). New projects have 6,000 units/user/minute and messages.get costs 20 units, so the previous 0.15-second rate was excessive: [current quota reference](https://developers.google.com/workspace/gmail/api/reference/quota). Initial quota errors did not advance checkpoints or mutate Gmail/workbooks/calendar.
+Gmail request pacing is 1 second (at most 60 requests/minute). New projects have 6,000 units/user/minute and messages.get costs 20 units, so the previous 0.15-second rate was excessive: [current quota reference](https://developers.google.com/workspace/gmail/api/reference/quota). Initial quota errors did not advance checkpoints or mutate Gmail/workbooks/calendar.
+
+Quota recovery is bounded to two 60-second waits per scan, only for allowlisted rate-limit errors; permission failures stop immediately. Backfill requests recruitment-related results only.

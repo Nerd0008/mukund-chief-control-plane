@@ -10,15 +10,18 @@ from urllib.parse import quote, urlencode
 
 from career_google_auth import GoogleError, http_json
 
+RECRUITMENT_QUERY = "{application assessment interview recruiter candidate hirevue shl cappfinity testgorilla deadline offer rejection unsuccessful withdrawal}"
+
 GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
 CALENDAR = "https://www.googleapis.com/calendar/v3/calendars"
 
 
 class GmailReader:
-    def __init__(self, token, transport=http_json, *, request_interval=0.5, clock=time.monotonic, sleep=time.sleep):
+    def __init__(self, token, transport=http_json, *, request_interval=1.0, clock=time.monotonic, sleep=time.sleep):
         self._token, self._transport = token, transport
         self._interval, self._clock, self._sleep = request_interval, clock, sleep
         self._last_request = None
+        self._quota_recoveries = 0
 
     def _get(self, path, **params):
         if path.rsplit("/", 1)[-1] in {"send", "modify", "batchModify", "batchDelete", "trash", "untrash", "insert", "import"} or not re.fullmatch(r"/(profile|messages|history|messages/[a-zA-Z0-9_-]+)", path):
@@ -29,8 +32,16 @@ class GmailReader:
             if delay > 0:
                 self._sleep(delay)
         self._last_request = self._clock()
-        return self._transport("GET", GMAIL + path + ("?" + urlencode(params) if params else ""),
-                               token=self._token)
+        while True:
+            try:
+                return self._transport("GET", GMAIL + path + ("?" + urlencode(params) if params else ""),
+                                       token=self._token)
+            except GoogleError as exc:
+                if exc.reason not in {"rateLimitExceeded", "userRateLimitExceeded"} or self._quota_recoveries >= 2:
+                    raise
+                self._quota_recoveries += 1
+                self._sleep(60)
+                self._last_request = self._clock()
 
     def read_window(self, checkpoint=None, *, days=30, max_messages=2000, now=None):
         """Complete pagination or fail without advancing the caller's checkpoint.
@@ -75,7 +86,7 @@ class GmailReader:
             cutoff = int(((now or dt.datetime.now(dt.timezone.utc)) - dt.timedelta(days=days)).timestamp())
             page = None
             while True:
-                params = {"q": f"after:{cutoff}", "maxResults": 500, "includeSpamTrash": "false"}
+                params = {"q": f"after:{cutoff} " + RECRUITMENT_QUERY, "maxResults": 500, "includeSpamTrash": "false"}
                 if page:
                     params["pageToken"] = page
                 result = self._get("/messages", **params)
