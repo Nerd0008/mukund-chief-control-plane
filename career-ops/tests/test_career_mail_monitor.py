@@ -371,3 +371,63 @@ def test_unresolved_application_still_reports_assessment_and_deadline():
     assert report['counts']['assessments_interviews']==1
     assert report['counts']['exact_deadlines']==1
     assert report['needs_review'] and not report['proposed_calendar_events']
+
+
+def unlabelled(body, subject="Your application"):
+    return {"message_id": "unlabelled", "thread_id": "unlabelled-thread",
+            "received_at": "2026-10-02T10:00:00+00:00", "subject": subject, "body": body}
+
+
+def test_role_capture_stops_at_sentence_not_later_at():
+    parsed = parse_message(unlabelled("Thank you for your application for our 2027 Summer Intern – Product Analyst, EMEA opportunity! We invite you to provide more details and outline next steps at your convenience."))
+    assert parsed["role"] == "2027 Summer Intern – Product Analyst, EMEA"
+    assert parsed["company"] is None
+
+
+def test_application_phrase_identity():
+    parsed = parse_message(unlabelled("Thank you for applying for the Graduate Engineer role at Acme."))
+    assert parsed["company"] == "Acme"
+    assert parsed["role"] == "Graduate Engineer"
+
+
+def test_unique_canonical_full_identity_mentions_resolve_region():
+    existing = reconcile([mail()], [])["proposed_records"]
+    report = reconcile([unlabelled("Acme recruitment: Your application for Graduate Engineer has been received.")], existing)
+    assert report["counts"]["matched_existing"] == 1
+    assert report["proposed_records"][0]["region"] == "uk"
+
+
+def test_typography_only_matching():
+    existing = reconcile([mail()], [])["proposed_records"]
+    existing[0]["role"] = "Graduate – Engineer"
+    report = reconcile([unlabelled("Company: Acme\nRole: Graduate - Engineer\nYour application has been received.")], existing)
+    assert report["counts"]["matched_existing"] == 1
+    assert report["proposed_records"][0]["role"] == "Graduate – Engineer"
+
+
+def test_employer_alone_does_not_select_job():
+    existing = reconcile([mail()], [])["proposed_records"]
+    report = reconcile([unlabelled("Acme: Please complete your online assessment.")], existing)
+    assert not report["proposed_records"]
+    assert len(report["needs_review"]) == 1
+
+
+def test_same_role_at_two_regions_is_ambiguous():
+    existing = reconcile([mail()], [])["proposed_records"]
+    other = copy.deepcopy(existing[0])
+    other.update(application_id="another", region="dubai")
+    report = reconcile([unlabelled("Acme: Your application for Graduate Engineer has been received.")], existing + [other])
+    assert not report["proposed_records"]
+    assert report["needs_review"][0]["review_reason"] == "multiple canonical applications match"
+
+
+def test_explicit_conflicting_company_does_not_match_mentions():
+    existing = reconcile([mail()], [])["proposed_records"]
+    report = reconcile([unlabelled("Company: Other\nRole: Graduate Engineer\nYour application has been received. Acme is an unrelated customer.")], existing)
+    assert not report["proposed_records"]
+
+
+def test_role_substring_does_not_match_different_role():
+    existing = reconcile([mail()], [])["proposed_records"]
+    report = reconcile([unlabelled("Company: Acme\nRole: Senior Graduate Engineer\nYour application has been received.")], existing)
+    assert not report["proposed_records"]

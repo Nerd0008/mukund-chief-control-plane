@@ -28,7 +28,7 @@ PATTERNS = [
     ("psychometric_assessment", r"psychometric|situational judg(?:e)?ment|\bsjt\b|numerical (?:assessment|reasoning|test)|verbal (?:assessment|reasoning|test)"),
     ("online_assessment", r"online assessment|complete (?:an |the |your )?assessment|shl|cappfinity|testgorilla"),
     ("application_under_review", r"application (?:is |has been )?(?:under review|being reviewed)|reviewing your application"),
-    ("application_received", r"received your application|application (?:has been |was |is )?received"),
+    ("application_received", r"received your application|application (?:has been |was |is )?received|your application for [^\n.!?]{2,180}? has been received"),
     ("application_confirmation", r"thank(?:s| you) for (?:applying|your application)|application (?:confirmation|has been submitted)"),
     ("recruiter_update", r"update (?:on|regarding) your application|application update|recruitment update"),
 ]
@@ -91,6 +91,46 @@ def extract_deadline(text, received_at, message_id, thread_id):
     return base
 
 
+def identity_key(value):
+    """Normalize typography only; never fuzzy-match different jobs/employers."""
+    import unicodedata
+    value = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    return " ".join(re.findall(r"[^\W_]+", value))
+
+
+def identity_text(raw):
+    mail = parse_gmail_api_message(raw) if "payload" in raw else dict(raw)
+    return (mail.get("subject") or "") + "\n" + strip_quoted(mail.get("body") or "")
+
+
+def extract_identity(text):
+    company = role = None
+    evidence = []
+    for field, value in re.findall(r"(?im)^\s*(company|employer|role|position|job title)\s*:\s*([^\n]+)", text):
+        if field.lower() in {"company", "employer"}:
+            company = value.strip()[:200]
+        else:
+            role = value.strip()[:200]
+        evidence.append("explicit " + field.lower() + " field")
+    # Bound captures to one sentence/line. 'at' in a later paragraph is not an employer.
+    match = re.search(r"(?:applying|application)\s+(?:for|to)\s+(?:(?:the|our)\s+)?([^\n.!?]{2,180}?)\s+(?:role\s+)?(?:at|with)\s+([^\n.!?]{2,100})(?=[.!?\n]|$)", text, re.I)
+    if match:
+        role = role or match.group(1).strip()
+        company = company or match.group(2).strip()
+        evidence.append("bounded application role at employer phrase")
+    if not role:
+        match = re.search(r"(?:applying|application)\s+for\s+(?:(?:the|our)\s+)?([^\n.!?]{2,180}?)\s+(?:opportunity|position|role)(?=[.!?\n]|$)", text, re.I)
+        if match:
+            role = match.group(1).strip()
+            evidence.append("bounded application role phrase")
+    if not company:
+        match = re.search(r"thank(?:s| you) for applying (?:to|at|with)\s+([^\n.!?]{2,100})(?=[.!?\n]|$)", text, re.I)
+        if match:
+            company = match.group(1).strip()
+            evidence.append("explicit applying to employer phrase")
+    return company, role, evidence
+
+
 def parse_message(raw):
     mail = parse_gmail_api_message(raw) if "payload" in raw else dict(raw)
     mid = mail.get("_gmail_id") or mail.get("message_id")
@@ -104,15 +144,7 @@ def parse_message(raw):
     kind = next((name for name, pattern in PATTERNS if re.search(pattern, text, re.I)), None)
     if not kind or not mid or not thread:
         return None
-    company = role = None
-    for field, value in re.findall(r"(?im)^\s*(company|employer|role|position|job title)\s*:\s*([^\n]+)", text):
-        if field.lower() in {"company", "employer"}:
-            company = value.strip()[:200]
-        else:
-            role = value.strip()[:200]
-    match = re.search(r"(?:applying|application)\s+(?:for|to)\s+(?:the\s+)?(.+?)\s+(?:role\s+)?(?:at|with)\s+([^\n.!]+)", text, re.I)
-    if match:
-        role, company = role or match.group(1).strip(), company or match.group(2).strip()
+    company, role, identity_evidence = extract_identity(text)
     region = mail.get("region")
     if not region:
         named = re.findall(r"(?im)^\s*(?:region|location)\s*:\s*([^\n]+)", text)
@@ -127,7 +159,7 @@ def parse_message(raw):
                      if re.search(r"\b" + name + r"\b", text, re.I)), None)
     urls = [clean_url(u) for u in re.findall(r"https?://[^\s<>\"']+", text)]
     deadline = extract_deadline(text, received, mid, thread)
-    return {"company": company, "role": role, "region": region, "latest_status": kind,
+    return {"company": company, "role": role, "region": region, "identity_evidence": identity_evidence, "latest_status": kind,
             "current_stage": "assessment" if assessment and "assessment" in assessment else
             "interview" if assessment else kind,
             "assessment_type": assessment, "assessment_provider": provider,

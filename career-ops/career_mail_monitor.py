@@ -16,7 +16,7 @@ import tempfile
 
 from career_google_auth import GoogleError, access_token, status
 from career_google_clients import GmailReader, DeadlineCalendar
-from career_mail_parser import parse_message, stable_id, calendar_event
+from career_mail_parser import parse_message, stable_id, calendar_event, identity_key, identity_text
 from career_mail_tracker import WorkbookTracker
 
 REPO = Path(__file__).resolve().parent.parent
@@ -42,7 +42,36 @@ def read_json(path, default):
 
 
 def pair(record):
-    return tuple(str(record.get(k) or "").strip().casefold() for k in ("company", "role"))
+    return tuple(identity_key(record.get(k)) for k in ("company", "role"))
+
+
+def canonical_candidates(signal, raw, records):
+    """Require both exact normalized employer and full role evidence.
+
+    No sender-domain guesses, substring job matches, or single-company matches.
+    Ambiguous regions/application identities remain review-only.
+    """
+    text = " " + identity_key(identity_text(raw)) + " "
+    matches = []
+    for record in records:
+        company, role = pair(record)
+        if not company or not role:
+            continue
+        if signal.get("application_identity") and record.get("application_identity") and signal["application_identity"] != record["application_identity"]:
+            continue
+        if signal.get("region") and record.get("region") != signal["region"]:
+            continue
+        if signal.get("company"):
+            company_matches = identity_key(signal["company"]) == company
+        else:
+            company_matches = len(company) >= 3 and " " + company + " " in text
+        if signal.get("role"):
+            role_matches = identity_key(signal["role"]) == role
+        else:
+            role_matches = len(role) >= 5 and " " + role + " " in text
+        if company_matches and role_matches:
+            matches.append(record)
+    return matches
 
 
 def time_key(stamp):
@@ -89,10 +118,8 @@ def reconcile(messages, existing, processed=()):
         elif extracted_deadline.get("kind"):
             counts[extracted_deadline["kind"].lower() + "_deadlines"] += 1
         candidates = [r for r in records if thread in r.get("thread_ids", [])]
-        if not candidates and signal.get("company") and signal.get("role"):
-            candidates = [r for r in records if pair(r) == pair(signal) and
-                          (not signal.get("application_identity") or not r.get("application_identity") or
-                           r["application_identity"] == signal["application_identity"])]
+        if not candidates:
+            candidates = canonical_candidates(signal, raw, records)
         if len(candidates) > 1:
             signal["needs_review"] = True
             signal["review_reason"] = "multiple canonical applications match"
@@ -105,6 +132,7 @@ def reconcile(messages, existing, processed=()):
                 review.append(signal)
                 continue
             counts["matched_existing"] += 1
+            signal.setdefault("identity_evidence", []).append("unique canonical company/full-role or Gmail thread match")
             signal.update(company=record["company"], role=record["role"], region=record["region"])
             signal["needs_review"] = bool(signal["deadline"]["needs_review"])
         elif not all(signal.get(k) for k in ("company", "role", "region")) or signal["region"] not in {"uk", "dubai", "japan", "singapore"}:
