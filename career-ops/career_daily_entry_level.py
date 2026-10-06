@@ -75,6 +75,15 @@ def main() -> int:
         print(f"ERROR: digest script missing at {DIGEST}", file=sys.stderr)
         failures.append("digest missing")
 
+    # Copy UK tracker to a stable location for daily delivery
+    uk_tracker = CONTROL_PLANE / "runtime" / "career-ops" / "uk-cyber-job-tracker-latest.xlsx"
+    uk_tracker.parent.mkdir(parents=True, exist_ok=True)
+    src = Path(r"C:\Users\mukun\Downloads\codex\uk-cyber-job-tracker.xlsx")
+    if src.exists():
+        import shutil
+        shutil.copy2(src, uk_tracker)
+        print(f"\nTracker copied to: {uk_tracker}", flush=True)
+
     if failures:
         print("\nREGION FAILURES: " + "; ".join(failures), file=sys.stderr)
     return 0
