@@ -1,6 +1,6 @@
 A data centre can be permitted to use 5.5 million cubic metres of water in a year. That is roughly the same amount used by 23,000 people.
 
-The water is for cooling. Liquid is more efficient when you cool high-density racks, which are the ones mostly used for AI. So data centres consume large quantities of fresh water, often drawn from local communities.
+The water is for cooling. AI models run on dense racks of servers that generate enormous heat, and liquid cooling is more efficient than air. So data centres consume vast quantities of fresh water, often drawn from local communities.
 
 An investigation found 38 active data centres in water-scarce areas, with 24 more under development. One company asked to increase its water consumption by 48% at existing facilities.
 
@@ -8,7 +8,7 @@ A campaign group has a name for what is happening: "Your cloud is drying my rive
 
 The companies involved have pledged to become "water positive" by 2030. But one of their own sustainability experts warned that the offsetting approach is "not ethical." Improving access to water in one area does nothing to help the community that has lost access to it far away.
 
-Carbon is a global problem. Water is more localised. That difference is why the usual offsetting logic does not carry over.
+Carbon is a global problem. Water is more localised.
 
 Should companies building AI infrastructure be required to disclose their water consumption to the communities they draw from?
 

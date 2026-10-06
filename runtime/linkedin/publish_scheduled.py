@@ -39,6 +39,18 @@ def main():
     confirm_token = draft['confirm_token']
     image_path = draft.get('image_path')
     
+    # Verify the draft matches the frozen approved text BEFORE publishing
+    verify_script = CONTROL_PLANE / "runtime" / "linkedin" / "verify_draft.py"
+    verify_result = subprocess.run(
+        [str(PYTHON), str(verify_script), str(draft_dir)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
+    if verify_result.returncode != 0:
+        print(f"VERIFICATION FAILED: {verify_result.stdout.strip()}")
+        print("Refusing to publish - draft text does not match approved text")
+        sys.exit(1)
+    print(f"Verification passed: {verify_result.stdout.strip()}")
+
     # Build command
     cmd = [
         str(PYTHON), str(PUBLISH_SCRIPT), "publish",

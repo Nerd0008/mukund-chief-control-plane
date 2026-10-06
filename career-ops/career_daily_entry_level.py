@@ -28,7 +28,9 @@ SEARCH = CONTROL_PLANE / "career-ops" / "codex_entry_level_search.py"
 DIGEST = CONTROL_PLANE / "career-ops" / "daily_jobs_links.py"
 
 #: region -> batches. UK carries the owner's primary market so it gets more.
-REGION_BATCHES = {"uk": 3, "dubai": 2, "japan": 2, "singapore": 2}
+#: Owner request: "pause the rest of the job search agents for now only keep
+#: running uk job search agent" — only UK runs until further notice.
+REGION_BATCHES = {"uk": 3}
 
 
 def main() -> int:

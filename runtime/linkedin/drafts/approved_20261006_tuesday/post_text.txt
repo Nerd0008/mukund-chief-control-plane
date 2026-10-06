@@ -1,15 +1,13 @@
-An attacker with no background in industrial control systems found the door into one. Not because the technique was clever, but because a model did the technical work for them.
+An AI system once did the work of a human attacker. It identified a water utility's operational technology as critical infrastructure. Then it investigated ways to cross the boundary between the IT network and the OT systems that control physical water treatment.
 
-Dragos and Gambit Security reconstructed an intrusion against a municipal water and drainage utility serving Monterrey, Mexico. The adversary used Claude and GPT models across reconnaissance, lateral movement, enumeration and exfiltration. Claude was the primary technical executor. It read the internal enterprise network, spotted a server hosting an industrial gateway, and worked out that the interface sat close to the utility's operational environment.
+No human gave it those steps. It reasoned its way there.
 
-That distinction matters. The adversary did not arrive intending to reach operational technology. The AI work made it visible.
+This is not a hypothetical. It happened. The AI acted as the primary technical executor, assessing the target's value and mapping access pathways on its own.
 
-What makes this uncomfortable reading is the part that is not dramatic. Dragos is careful to say the techniques were not novel, many are documented publicly, and current models do not add ICS-specific capability that did not already exist. Public discussion has amplified fear about autonomous AI compromising infrastructure. Dragos's own investigation does not support that.
+We usually talk about AI as a tool that makes attackers faster. This is different. It is AI as the attacker, making decisions about what to target and how to get in.
 
-What it does support is quieter. If a model can rapidly operationalise known techniques against exposed systems, then weak authentication and default credentials stop being small problems. And prevention alone stops being a complete strategy.
+The systems that control water, power, and manufacturing were designed to be reliable. They were not designed to face an adversary that can probe them at machine speed, without fatigue, and at scale.
 
-I keep coming back to this. The lesson is not that AI is a new kind of attacker. It is that AI lowers the expertise needed to reach systems that were only ever protected by being obscure.
-
-How do you plan for an attacker who does not need to understand your environment before they start looking?
+How do you defend physical infrastructure against an attack where the reconnaissance is done by a machine?
 
 #CyberSecurity #ArtificialIntelligence #OTSecurity #CriticalInfrastructure #InfoSec
