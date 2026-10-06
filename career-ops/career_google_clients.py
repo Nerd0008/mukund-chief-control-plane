@@ -111,7 +111,7 @@ class DeadlineCalendar:
         url = base if method == "POST" else base + "/" + event_id
         if method != "GET":
             url += "?sendUpdates=none"
-        return self._transport(method, url, token=self._token, data=body)
+        return self._transport(method, url, token=self._token() if callable(self._token) else self._token, data=body)
 
     def ensure(self, event):
         """Deterministic client event ID recovers insert-success/local-save failure."""
