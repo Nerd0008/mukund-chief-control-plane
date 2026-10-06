@@ -363,3 +363,11 @@ def test_backfill_query_is_recruitment_scoped():
     from urllib.parse import urlsplit,parse_qs
     q=parse_qs(urlsplit(urls[1]).query)['q'][0]
     assert q.startswith('after:') and 'application' in q and 'assessment' in q
+
+
+def test_unresolved_application_still_reports_assessment_and_deadline():
+    message=assess();message['body']=message['body'].replace('Company: Acme','Company:').replace('Role: Graduate Engineer','Role:').replace('Region: UK','Region:')
+    report=reconcile([message],[])
+    assert report['counts']['assessments_interviews']==1
+    assert report['counts']['exact_deadlines']==1
+    assert report['needs_review'] and not report['proposed_calendar_events']

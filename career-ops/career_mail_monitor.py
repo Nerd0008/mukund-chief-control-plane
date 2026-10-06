@@ -81,6 +81,13 @@ def reconcile(messages, existing, processed=()):
         if mid in seen or any(mid in r.get("seen_message_ids", []) for r in records):
             counts["duplicates"] += 1
             continue
+        if signal.get("assessment_type"):
+            counts["assessments_interviews"] += 1
+        extracted_deadline = signal["deadline"]
+        if extracted_deadline.get("needs_review"):
+            counts["ambiguous_deadlines"] += 1
+        elif extracted_deadline.get("kind"):
+            counts[extracted_deadline["kind"].lower() + "_deadlines"] += 1
         candidates = [r for r in records if thread in r.get("thread_ids", [])]
         if not candidates and signal.get("company") and signal.get("role"):
             candidates = [r for r in records if pair(r) == pair(signal) and
@@ -134,12 +141,6 @@ def reconcile(messages, existing, processed=()):
             record["needs_review"] = True
             record["review_reason"] = "received timestamp is unavailable"
         record["confidence"] = "high" if not record.get("needs_review") else "needs_review"
-        if record.get("assessment_type"):
-            counts["assessments_interviews"] += 1
-        if deadline.get("needs_review"):
-            counts["ambiguous_deadlines"] += 1
-        elif deadline.get("kind"):
-            counts[deadline["kind"].lower() + "_deadlines"] += 1
         if record.get("needs_review"):
             review.append(copy.deepcopy(record))
         changed[record["application_id"]] = record
