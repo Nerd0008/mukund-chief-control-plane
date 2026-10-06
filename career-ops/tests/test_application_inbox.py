@@ -33,6 +33,13 @@ PROFILES = ai.load_profiles(CFG)
 REGIONS = list(PROFILES["regions"])
 
 
+@pytest.fixture(autouse=True)
+def isolate_laptop_oauth(monkeypatch):
+    """Offline inbox tests never inspect the owner's actual Credential Manager."""
+    import career_google_auth
+    monkeypatch.setattr(career_google_auth, "read_secret", lambda target: None)
+
+
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
