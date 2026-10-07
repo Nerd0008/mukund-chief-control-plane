@@ -181,3 +181,13 @@ def test_generic_platform_domain_cannot_identify_employer():
     raw=mail('Your application for Graduate Engineer has been received. https://myworkday.com/help',subject='Application received')
     a=analyze_signal(raw,[record(role='Graduate Engineer',canonical_job_host='myworkday.com')])
     assert a['category']!='confident existing application match'
+
+
+def test_named_full_role_cybersecurity_word_boundary():
+    a=analyze_signal(mail('Company: Acme\nThank you for your application. The role of Graduate - Cybersecurity.',subject='Application received'),[record(role='Graduate Cyber Security')])
+    assert a['category']=='confident existing application match'
+
+
+def test_portal_application_to_title_without_article():
+    a=analyze_signal(mail('Company: Acme\nThank you for your application to IT Support Engineer (SYS-6942)\nWe will consider it.',subject='Application received'),[record(role='IT Support Engineer (SYS-6942)')])
+    assert a['role']=='IT Support Engineer (SYS-6942)'

@@ -10,6 +10,11 @@ PLATFORMS=('workday','workable','lever','teamtailor','canditech','hirevue','succ
 def has_phrase(phrase,text):
     return ' '+identity_key(phrase)+' ' in ' '+identity_key(text)+' '
 
+def has_full_role(phrase,text):
+    def normalize(v):
+        return re.sub(r'\bcyber security\b','cybersecurity',identity_key(v))
+    return ' '+normalize(phrase)+' ' in ' '+normalize(text)+' '
+
 def company_named(record,mail):
     text=mail['subject']+'\n'+mail['body']
     if any(has_phrase(a,text) for a in company_aliases(record['company'])):return True
@@ -77,7 +82,7 @@ def fields(raw,records):
                 elif not re.search(r'(?i)application|thank|update',subject):signal['company']=pieces[-1].strip()
     if not signal.get('role'):
 
-        for pattern in [r'for the position of\s+([^.!?]{2,180}?)(?: has been| that requires| and are currently|\n\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to the\s+([^\n.!?]{2,180})(?:\n|$)']:
+        for pattern in [r'for the position of\s+([^.!?]{2,180}?)(?: has been| that requires| and are currently|\n\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to (?:the\s+)?([^\n.!?]{2,180})(?:\n|$)']:
             m=re.search(pattern,text,re.I)
             if m:
                 signal['role']=clean_role(m.group(1));evidence.append('explicit portal position phrase');break
@@ -108,12 +113,12 @@ def fields(raw,records):
         if len(paired)==1:
             signal['company']=paired[0]['company'];evidence.append('unique named employer and complete canonical role')
     if not signal.get('company') and not signal.get('role'):
-        named_pairs=[r for r in records if company_named(r,mail) and has_phrase(r['role'],text)]
+        named_pairs=[r for r in records if company_named(r,mail) and has_full_role(r['role'],text)]
         if len(named_pairs)==1:
             signal.update(company=named_pairs[0]['company'],role=named_pairs[0]['role']);evidence.append('canonical employer host and complete named role')
     # Candidate full role is actually mentioned, not inferred from a unique company.
     if signal.get('company') and not signal.get('role'):
-        possible={r['role'] for r in records if company_key(signal['company']) in company_aliases(r['company']) and has_phrase(r['role'],text)}
+        possible={r['role'] for r in records if company_key(signal['company']) in company_aliases(r['company']) and has_full_role(r['role'],text)}
         if len(possible)==1:signal['role']=possible.pop();evidence.append('full canonical role named in subject/body')
     # Portal references are retained only from explicit application/requisition evidence.
     refs=re.findall(r'(?i)\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|[A-Z]{3}\d{4}[A-Z]{2}|SYS-\d{4,})\b',subject+'\n'+body)
