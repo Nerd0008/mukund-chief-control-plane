@@ -20,7 +20,19 @@ def fields(raw,records):
     if signal is None:return None
     mail=mail_fields(raw);subject=mail['subject'];body=mail['body'];text=subject+'\n'+body
     signal['role']=clean_role(signal.get('role')) or None
+    if signal.get('role') and len(role_key(signal['role']).split())<2:signal['role']=None
+    explicit_company=bool(re.search(r'(?im)^\s*(?:company|employer)\s*:',text))
+    if signal.get('company') and ',' in signal['company']:signal['company']=signal['company'].split(',')[0].strip()
+    if str(signal.get('company') or '').startswith('Finance at '):signal['company']=signal['company'][len('Finance at '):]
     evidence=signal.setdefault('identity_evidence',[])
+    # Employer explicitly named in the subject outranks names in privacy footers.
+    subject_employer=None
+    for pattern in [r'(?i)^(?:thank you for applying to|your application (?:with|to)|confirming your) ([^!\n]+?)(?: job application)?[!]?$' ,r'(?i)^next step with ([^!\n]+)[!]?$']:
+        m=re.search(pattern,subject)
+        if m and not re.search(r'(?i)programme|internship|campus|join us',m.group(1)):
+            subject_employer=m.group(1).strip();break
+    if subject_employer and not explicit_company:
+        signal['company']=subject_employer;explicit_company=True;evidence.append('explicit employer subject')
     known=[]
     for record in records:
         # Canonical employer variants are audited by the matcher: collisions remain review-only.
@@ -29,8 +41,9 @@ def fields(raw,records):
         for record in records:
             if any(has_phrase(a,text) for a in company_aliases(record['company'])):known.append(record['company'])
     families={company_key(c.split('(')[0].split('/')[0]) for c in known}
-    if len(families)==1 and known and (not signal.get('company') or any(company_key(signal['company']) in company_aliases(c) for c in known)):
-        signal['company']=known[0];evidence.append('employer named in subject/body and canonical employer index')
+    if len(families)==1 and known and (not explicit_company or not signal.get('company') or any(company_key(signal['company']) in company_aliases(c) for c in known)):
+        signal['company']=next(iter(families));evidence.append('employer named in subject/body and canonical employer index')
+    signal['employer_named_candidates']=sorted(set(known))
     # Explicit employer phrases for employers absent from the tracker.
     if not signal.get('company'):
         for pattern in [r'thank you for (?:your application|applying) to ([^\n.!?]{2,90})',r'thank you for your interest in ([^\n.!?]{2,90}?)(?: and| where|,|\n|$)',r'(?:career at|invited by) ([^\n.!?]{2,80}?)(?: to |\n|$)']:
@@ -39,11 +52,31 @@ def fields(raw,records):
                 value=m.group(1).strip()
                 if not re.search(r'(?i)programme|join us|role|position|internship|^us$|^our |^the engineering',value) and len(value.split())<=7:
                     signal['company']=value;evidence.append('explicit employer phrase');break
+    if not signal.get('company'):
+        m=re.search(r'(?i)^(?:your application (?:with|to)|confirming your) (.+?)(?: job application)?$',subject)
+        if m:signal['company']=m.group(1).strip();evidence.append('explicit employer in subject')
+        else:
+            pieces=re.split(r'\s+[–—-]\s+',subject)
+            if len(pieces)>=2:
+                if re.search(r'(?i)^(?:application received|thank)',pieces[-1]):signal['company']=pieces[0].strip()
+                elif not re.search(r'(?i)application|thank|update',subject):signal['company']=pieces[-1].strip()
     if not signal.get('role'):
-        for pattern in [r'for the position of\s+([^\n.!?]{2,180}?)(?: has been| that requires|\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to the\s+([^\n.!?]{2,180})(?:\n|$)']:
+
+        for pattern in [r'for the position of\s+([^.!?]{2,180}?)(?: has been| that requires| and are currently|\n\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to the\s+([^\n.!?]{2,180})(?:\n|$)']:
             m=re.search(pattern,text,re.I)
             if m:
                 signal['role']=clean_role(m.group(1));evidence.append('explicit portal position phrase');break
+    if not signal.get('role'):
+        m=re.search(r'\b(?:R\d{6,}|WD\d{6,}|JR-\d{6,})\s+([^\n]{3,180})',subject)
+        if m:
+            value=m.group(1)
+            if signal.get('company') and value.lower().startswith(str(signal['company']).lower()+' '):value=value[len(signal['company']):].strip()
+            signal['role']=clean_role(value);evidence.append('role named after explicit requisition reference')
+    # Trim explicit employer and portal reference from a captured role.
+    if signal.get('role') and signal.get('company'):
+        value=signal['role']
+        if re.search(r'(?i)\s+at\s+',value): value=re.split(r'(?i)\s+at\s+',value)[0]
+        signal['role']=clean_role(value).strip(' ,')
     # Subject "Employer - Role - Thank you ..." / "Role - Employer".
     parts=re.split(r'\s+[–—-]\s+',subject)
     if len(parts)>=2 and signal.get('company'):
@@ -61,6 +94,11 @@ def fields(raw,records):
     if not signal.get('application_identity') and len(set(refs))==1:
         signal['application_identity']=refs[0];signal['reference_type']='requisition';evidence.append('explicit portal requisition reference')
     sender=mail.get('from') or ''
+    if signal.get('role') and len(role_key(signal['role']).split())<2:signal['role']=None
+    context=raw.get('_identity_context') or {}
+    for field in ('company','role','region'):
+        if not signal.get(field) and context.get(field):
+            signal[field]=context[field];evidence.append(context.get('method','message thread/reference context')+' supplied '+field)
     signal['platform_sender']=any(p in sender.lower() for p in PLATFORMS)
     return signal
 
@@ -82,7 +120,14 @@ def resolve(raw,records):
     reference=[r for r in records if ref and signal.get('reference_type')!='candidate' and (r.get('application_identity')==ref or ref in r.get('job_reference_ids',[]))]
     thread=[r for r in records if signal['gmail_thread_id'] in r.get('thread_ids',[])]
     if reference:return signal,[r for r in reference if compatible(signal,r)],'application/reference ID'
-    if thread:return signal,thread,'Gmail thread'
+    if thread:
+        consistent=[r for r in thread if compatible(signal,r) and (not signal.get('role') or role_key(signal['role'])==role_key(r['role']))]
+        if consistent:return signal,consistent,'Gmail thread'
+        # Gmail can group same-subject receipts for different roles at one employer.
+        # A contradictory thread must not override a distinct complete identity.
+        alternatives=[r for r in records if compatible(signal,r) and signal.get('company') and signal.get('role') and role_key(signal['role'])==role_key(r['role'])]
+        if alternatives:return signal,alternatives,'company + normalized full role (reused thread)'
+        return signal,thread,'Gmail thread' 
     candidates=[r for r in records if compatible(signal,r) and signal.get('company') and signal.get('role') and role_key(signal['role'])==role_key(r['role'])]
     return signal,candidates,'company + normalized full role' if candidates else None
 

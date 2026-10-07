@@ -60,6 +60,17 @@ class WorkbookTracker:
                         "company": str(company), "role": str(role), "seen_message_ids": [],
                         "thread_ids": [], "owner_confirmed_fields": ["company", "role"]}
                     record.update(region=region, row=row)
+                    # Public posting references only; never retain URL queries or fragments.
+                    import re
+                    from urllib.parse import urlsplit, parse_qs
+                    url = str(cells[ci(fm["url"]) - 1] or "") if fm.get("url") else ""
+                    parsed = urlsplit(url)
+                    refs = re.findall(r"\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|SYS-\d{4,})\b", parsed.path, re.I)
+                    for key, values in parse_qs(parsed.query).items():
+                        if key.lower() in {"jobid", "requisitionid", "reqid"}:
+                            refs.extend(v for v in values if re.fullmatch(r"[A-Za-z0-9_-]{3,40}",v))
+                    record["job_reference_ids"] = sorted(set(refs))
+                    record["canonical_job_host"] = parsed.hostname or ""
                     record["canonical_owner_status"] = cells[ci(cfg["status_columns"]["application_status"]) - 1]
                     records.append(record)
             finally:

@@ -12,9 +12,14 @@ class VisibleMail(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag in {'style','script','head'}: self.hidden += 1
         if tag in {'br','p','div','li','tr','td','h1','h2'}: self.out.append('\n')
+        if tag in {'span','a','b','strong'}: self.out.append(' ')
+        if tag=='img':
+            alt=dict(attrs).get('alt','')
+            if len(alt)<=100 and alt:self.out.append(' '+alt+' ')
     def handle_endtag(self, tag):
         if tag in {'style','script','head'}: self.hidden = max(0, self.hidden-1)
         if tag in {'p','div','li','tr','td','h1','h2'}: self.out.append('\n')
+        if tag in {'span','a','b','strong'}: self.out.append(' ')
     def handle_data(self,data):
         if not self.hidden:self.out.append(data)
 
@@ -66,6 +71,9 @@ TIME=r'(?<!\d)(\d{1,2})(?::(\d{2}))\s*(am|pm)?\b|(?<!\d)(\d{1,2})\s*(am|pm)\b'
 
 def deadline(text,received_at,message_id,thread_id):
     text=visible(text)
+    numbers={'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'fourteen':14}
+    text=re.sub(r'\n(?=\s*(?:\d|'+ '|'.join(numbers) +r')\b)',' ',text,flags=re.I)
+    text=re.sub(r'(?i)(?<=\s)('+ '|'.join(numbers) +r')(?=\s+(?:hours?|days?))',lambda m:str(numbers[m.group().lower()]),text)
     base={'source_message_id':message_id,'source_thread_id':thread_id,'kind':None,'value':None,'timezone':None,'needs_review':False}
     clauses=[]
     # Only action timing, not employer-response estimates or generic FAQs.

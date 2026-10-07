@@ -120,7 +120,7 @@ def extract_identity(text):
         company = company or match.group(2).strip()
         evidence.append("bounded application role at employer phrase")
     if not role:
-        match = re.search(r"(?:applying|application)\s+for\s+(?:(?:the|our)\s+)?([^\n.!?]{2,180}?)\s+(?:opportunity|position|role)(?=[.!?\n]|$)", text, re.I)
+        match = re.search(r"(?:applying|application)\s+(?:for|to)\s+(?:(?:the|our)\s+)?([^\n.!?]{2,180}?)\s+(?:opportunity|position|role)(?=[.!?\n]|$)", text, re.I)
         if match:
             role = match.group(1).strip()
             evidence.append("bounded application role phrase")
@@ -135,7 +135,7 @@ def extract_identity(text):
     for pattern in (
         r"(?:applying|application) (?:for|to) (?:(?:the|our) )?(?:(?:role|position) of )?([^\n.!?]{2,180}?) (?:role,|opportunity at|(?:vacancy|role) at)",
         r"your application for (?:(?:the )?position of )?([^\n.!?]{2,180}?)(?:, and| has been received| and are currently| job was|\n)",
-        r"role of\s+([^\n.!?]{2,150})",
+        r"role of\s+([^\n.!?]{2,150}?)(?:\s+at |\n|$)",
         r"thank you for your interest in ([^\n.!?]{2,150}) and your application",
     ):
         found = re.search(pattern,text,re.I)
@@ -173,7 +173,7 @@ def parse_message(raw):
     provider = next((name for name in ("SHL", "Cappfinity", "HireVue", "TestGorilla", "Codility", "HackerRank")
                      if re.search(r"\b" + name + r"\b", text, re.I)), None)
     urls = [clean_url(u) for u in re.findall(r"https?://[^\s<>\"']+", text)]
-    deadline = extract_deadline(text, received, mid, thread)
+    deadline = extract_deadline(text, raw.get("_deadline_received_at") or received, mid, thread)
     return {"company": company, "role": role, "region": region, "identity_evidence": identity_evidence, "latest_status": kind,
             "current_stage": "assessment" if assessment and "assessment" in assessment else
             "interview" if assessment else kind,

@@ -86,7 +86,53 @@ def time_key(stamp):
         return 0
 
 
+def prepare_messages(messages, records):
+    """Use only unambiguous shared thread/reference evidence across notifications."""
+    import re
+    from career_mail_parser import mail_fields
+    contexts = {}
+    parsed = {}
+    duplicate_anchors = {}
+    for raw in messages:
+        signal, candidates, method = resolve(raw, records)
+        if signal is None: continue
+        mid = signal["gmail_message_id"]
+        parsed[mid] = signal
+        keys = [("thread", signal["gmail_thread_id"])]
+        if signal.get("application_identity") and signal.get("reference_type") != "candidate":
+            keys.insert(0, ("reference", signal["application_identity"]))
+        if signal.get("company") and signal.get("role"):
+            for key in keys: contexts.setdefault(key, []).append(signal)
+        mail = mail_fields(raw)
+        text = re.sub(r"https?://\S+", "[URL]", mail["body"])
+        fingerprint = hashlib.sha256(" ".join(text.split()).encode()).hexdigest()
+        duplicate_key = (signal["gmail_thread_id"], fingerprint)
+        stamp = signal["last_update_timestamp"]
+        if duplicate_key not in duplicate_anchors or time_key(stamp) < time_key(duplicate_anchors[duplicate_key]):
+            duplicate_anchors[duplicate_key] = stamp
+        signal["duplicate_key"] = duplicate_key
+    prepared = []
+    for raw in messages:
+        clone = dict(raw)
+        mid = raw.get("id") or raw.get("message_id")
+        signal = parsed.get(mid)
+        if signal:
+            keys = [("thread", signal["gmail_thread_id"])]
+            if signal.get("application_identity") and signal.get("reference_type") != "candidate":keys.insert(0,("reference",signal["application_identity"]))
+            for key in keys:
+                anchors = contexts.get(key, [])
+                identities = {(company_key(a["company"]), role_key(a["role"])) for a in anchors}
+                if len(identities) == 1:
+                    anchor = anchors[0]
+                    clone["_identity_context"] = {"company": anchor["company"], "role": anchor["role"], "region": anchor.get("region"), "method": "shared " + key[0] + " evidence"}
+                    break
+            clone["_deadline_received_at"] = duplicate_anchors[signal["duplicate_key"]]
+        prepared.append(clone)
+    return prepared
+
+
 def reconcile(messages, existing, processed=()):
+    messages = prepare_messages(messages, existing)
     records = copy.deepcopy(existing)
     seen = set(processed)
     changed, review, events, new_ids = {}, [], {}, set()
@@ -182,7 +228,8 @@ def reconcile(messages, existing, processed=()):
     return {"counts": counts, "proposed_records": list(changed.values()),
             "needs_review": review, "proposed_calendar_events": list(events.values()),
             "processed_ids": sorted(new_ids), "gmail_mutations": 0,
-            "model_calls": 0, "tracker_writes": 0, "calendar_writes": 0}
+            "model_calls": 0, "tracker_writes": 0, "calendar_writes": 0,
+            "signal_analysis": [analyze_signal(raw, existing, item=f"S{i:02}") for i, raw in enumerate(messages, 1)]}
 
 
 def analyze_signal(raw, records, *, item=None):
@@ -193,6 +240,16 @@ def analyze_signal(raw, records, *, item=None):
         return {"item": item, "gmail_message_id": raw.get("id") or raw.get("message_id"),
                 "category": "false positive / generic recruitment content", "reasons": ["survey, marketing or no current recruitment event"],
                 "received_date": mail.get("received_at")}
+    import re
+    from career_mail_parser import mail_fields
+    mail = mail_fields(raw)
+    text = mail["subject"] + "\n" + mail["body"]
+    # Date/period fragments only; no body excerpts or assessment URLs in analysis.
+    signal["timing_evidence"] = {
+        "date_fragments": re.findall(r"\b(?:\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]{3,9}(?:\s+\d{4})?|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2})\b", text)[:12],
+        "period_fragments": re.findall(r"(?i)\b(?:within|active for|next)\s+(?:the\s+)?(?:\d+|one|two|three|five|seven|ten)\s+(?:(?:calendar|working|business)\s+)?(?:hours?|days?|weeks?)",text)[:12],
+        "explicit_timezone": bool(re.search(r"\b(?:UTC|GMT|BST|JST|SGT|GST)\b",text)),
+    }
     signal["item"] = item
     signal["received_date"] = signal.get("assessment_received_date") or signal.get("last_update_timestamp")
     signal["candidate_count"] = len(candidates)

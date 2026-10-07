@@ -106,3 +106,56 @@ def test_different_explicit_cities_not_merged():
     raw=mail("Company: Acme\nRole: Grad Cybersecurity Analyst - Chester\nYour application has been received.")
     r=reconcile([raw],[record(role="Graduate Cybersecurity Analyst - London")])
     assert not r["proposed_records"]
+
+
+def test_wrapped_portal_role_does_not_truncate():
+    raw=mail("Thank you for your interest in Johnson Controls. Your application for the position of Technical\nSupport Advisor has been received.","Johnson Controls - Application received")
+    a=analyze_signal(raw,[record(company="Johnson Controls / ADT",role="Technical Support Advisor")])
+    assert a["category"]=="confident existing application match"
+
+def test_pimco_portal_receipt_role_without_for():
+    p=parse_message(mail("Thank you for applying to our 2027 Summer Intern – Product Analyst, EMEA opportunity! Your application has been received.","Thank you for applying to PIMCO!"))
+    assert p["role"]=="2027 Summer Intern – Product Analyst, EMEA"
+
+def test_role_of_does_not_include_employer():
+    p=parse_message(mail("Thank you for applying for the role of Graduate Analyst at Acme.","Application received"))
+    assert p["role"]=="Graduate Analyst"
+
+def test_logo_alt_can_identify_explicit_employer():
+    assert "Acme" in visible('<div><img alt="Acme"><p>Welcome</p></div>')
+
+def test_inline_html_word_boundaries():
+    assert "Analyst role" in visible('<span>Analyst</span><span>role</span>')
+
+
+def test_current_role_can_disambiguate_reused_thread():
+    rows=[record(role="Graduate Engineer"),record(role="Internship Analyst")]
+    rows[0]["thread_ids"]=["t"]
+    raw=mail("Company: Acme\nRole: Intern Analyst\nYour application has been received.")
+    r=reconcile([raw],rows)
+    assert r["proposed_records"][0]["role"]=="Internship Analyst"
+
+def test_thread_evidence_recovers_missing_role():
+    confirmation=mail("Company: Acme\nRole: Graduate Engineer\nThank you for applying.",mid="a")
+    assessment=mail("Please complete your online assessment.",subject="Assessment invitation",mid="b")
+    r=reconcile([confirmation,assessment],[record(role="Graduate Engineer")])
+    assert r["counts"]["matched_existing"]==2
+    assert all(x["category"]=="confident existing application match" for x in r["signal_analysis"])
+
+def test_conflicting_thread_context_not_inherited():
+    first=mail("Company: Acme\nRole: Graduate Engineer\nThank you for applying.",mid="a")
+    second=mail("Company: Acme\nRole: Internship Analyst\nThank you for applying.",mid="b")
+    third=mail("Please complete your online assessment.",subject="Assessment invitation",mid="c")
+    r=reconcile([first,second,third],[record(role="Graduate Engineer"),record(role="Internship Analyst")])
+    a=next(x for x in r["signal_analysis"] if x["gmail_message_id"]=="c")
+    assert a["needs_review"] and not a.get("role")
+
+def test_repeated_invite_does_not_shift_relative_deadline():
+    first=mail("Company: Acme\nRole: Graduate Engineer\nPlease complete your assessment within 5 days.",subject="Assessment invitation",mid="a")
+    later=dict(first,message_id="b",received_at="2026-10-02T10:00:00+00:00")
+    r=reconcile([first,later],[record(role="Graduate Engineer")])
+    assert {x["deadline"]["value"] for x in r["signal_analysis"]}=={"2026-10-06T10:00:00+00:00"}
+
+def test_wrapped_word_number_relative_period():
+    d=extract_deadline("Please complete the assessment within the next\nthree days.","2026-10-01T10:00:00+00:00","m","t")
+    assert d["value"]=="2026-10-04T10:00:00+00:00"
