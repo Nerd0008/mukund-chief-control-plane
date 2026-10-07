@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "TSG",
+      "title": "Trainee SOC Analyst (12 months fixed term)",
+      "location": "Newcastle upon Tyne",
+      "url": "https://careers.tsg.com/job/trainee-soc-analyst-%2812-months-fixed-term%29-365.aspx",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.5,
+      "notes": "Existing tracker row J64 (found 2026-10-04 by Codex direct search). User confirmed not previously applied. Marked Applied 2026-10-07 via application_state.py. Clearance filter clean. Fit 8.5: direct overlap with current IT support work (alert triage, joiners/movers/leavers, AD access admin, phishing investigation). Gaps: no commercial MDR/SOC experience, Microsoft security stack not used in customer context."
+    }
+  ]
+}
