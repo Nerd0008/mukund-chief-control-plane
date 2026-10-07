@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Graduate SOC Analyst",
+  "salutation": "Dear CyPro Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_CyPro_SOC_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\cypro_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Graduate SOC Analyst role at CyPro. A SOC role at a growing firm where analysts contribute to detection engineering, automation and tooling rather than following a fixed rota is what I want, and I am based in London within commuting distance of Canary Wharf.",
+
+    "To answer the point your advert raises directly, a SOC role involves continuous monitoring of security telemetry to detect activity that warrants investigation. An analyst assesses alert severity and business impact, triages and investigates, then moves to containment and remediation through the team's established runbooks. The work also covers reducing false positives, writing up incidents clearly enough for a client to act on, and feeding what was learned back into detection rules. I have studied the frameworks behind this and I have done a smaller version of it at work.",
+
+    "In my current IT support role I investigate four to five suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics. I manage four to five access requests a day through Active Directory with a clear audit trail, and I am the first point of contact for 15 colleagues, monitoring server health and maintaining access controls. Outside work I built a phishing analysis prototype that highlights suspicious email indicators and maps findings to MITRE ATT&CK techniques, and a diagnostic tool that traces Windows error codes to root causes, which I used to identify missing and corrupted DLLs behind intermittent server freezes.",
+
+    "On the qualifications, I should be straightforward. I hold an MSc in Information Security from Royal Holloway with Merit and a BCA from MIT World Peace University in India, along with CompTIA Security+ and ISC2 Certified in Cybersecurity. My A-level equivalent is the Indian CBSE Class XII, which does not map neatly onto a BBB profile, so I would rather state that than have it assumed. I have not used Microsoft Sentinel or Defender in a commercial environment, and I have not written KQL. What I do have is Python and PowerShell for scripting and automation, familiarity with how AI agents can streamline repetitive tasks, and a track record of learning tooling quickly.",
+
+    "What attracts me to CyPro is the emphasis on shaping how the function works rather than slotting into an established one. I would welcome the opportunity to discuss how my experience could contribute to your SOC. Thank you for considering my application."
+  ]
+}
