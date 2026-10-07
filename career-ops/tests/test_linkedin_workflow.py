@@ -45,7 +45,7 @@ def signals() -> list[dict]:
 
 def one_job(**kw) -> list[dict]:
     base = {"company": "Example Analytics Ltd", "title": "Cyber Security Intern",
-            "location": "London, United Kingdom", "posted_at": "2026-09-20",
+            "location": "London, United Kingdom", "posted_at": __import__("datetime").date.today().isoformat(),
             "url": "https://job-boards.greenhouse.io/exampleanalytics/jobs/999000111",
             "source": "linkedin-fixture", "signal_kind": "job_signal",
             "provenance": {"file": "fixture", "file_sha256": "x", "index": 0}}
@@ -201,7 +201,7 @@ def test_dedupe_merges_the_same_posting_within_one_batch():
     assert len(result["job_decisions"]) == 1
     merged = result["job_decisions"][0]
     assert merged["location"] == "London, United Kingdom"
-    assert merged["posted_at"] == "2026-09-20"
+    assert merged["posted_at"] == one_job()[0]["posted_at"]
     assert merged["merged_signals"] == 1
     assert merged["owner_filter_eligible"] is True
     assert merged["merged_provenance"], "merged provenance must be retained"
@@ -347,7 +347,7 @@ def test_handoff_manifest_records_posted_date_when_known():
     manifest = liw.build_handoff_manifest(CFG, "uk", dedupe)
     record = manifest["records"][0]
     posted = manifest["provenance_targets"]["posted_date"]
-    assert posted and record[posted] == "2026-09-20"
+    assert posted and record[posted] == one_job()[0]["posted_at"]
 
 
 def test_ineligible_signal_is_excluded_from_the_manifest_by_default():
@@ -514,3 +514,7 @@ def test_no_canonical_asset_is_modified_by_a_draft_run(tmp_path):
     before = {k: cvw.sha256_file(p) for k, p in paths.items()}
     liw.build_linkedin_drafts(CFG, out_dir=tmp_path, scratch=tmp_path / "fg")
     assert {k: cvw.sha256_file(p) for k, p in paths.items()} == before
+
+def test_expired_posting_remains_ineligible():
+    job=one_job(posted_at='2026-01-01')
+    assert liw.dedupe_signals(CFG,'uk',job)['job_decisions'][0]['owner_filter_eligible'] is False
