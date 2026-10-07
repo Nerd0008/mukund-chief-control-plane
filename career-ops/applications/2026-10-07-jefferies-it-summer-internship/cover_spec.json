@@ -1,0 +1,17 @@
+{
+  "heading": "Application for 2027 Information Technology Summer Internship Programme",
+  "salutation": "Dear Jefferies Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Jefferies_IT_Internship_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\jefferies_it_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the 2027 Information Technology Summer Internship Programme in London. Technology that supports trading, research and banking colleagues directly is the environment I want to learn in, and I am available for a June 2027 start.",
+
+    "My technical foundation comes from an MSc in Information Security at Royal Holloway, awarded with Merit, and a BCA in computer applications, where my modules included Python, Java, JavaScript, C++, SQL and mobile application development. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. Alongside formal study I build tools to solve problems I run into: a phishing analysis prototype in Python that maps findings to MITRE ATT&CK techniques, a diagnostic tool that traces Windows error codes to their root causes, and a Chrome extension built with JavaScript and Manifest V3.",
+
+    "My current IT support role gives me daily practice in the parts of technology work that involve other people. I am the first point of contact for 15 colleagues across 15 to 20 devices, troubleshooting access and system problems, monitoring server health and maintaining access controls. I handle four to five access requests a day through Active Directory with a clear audit trail, and use PowerShell and Python to automate repetitive checks. At Co-op I introduced documentation that cut incident management time by more than half, which meant working out what needed recording and why before writing anything down. That kind of process thinking is what I would bring to a team building tools for the business.",
+
+    "On the qualifications, I should be straightforward. Your advert asks for penultimate-year students graduating in 2028. I completed my MSc in 2025, so I do not meet that timeline. I also do not have commercial experience with the specific stack you list, such as KDB, Bloomberg API or Snowflake. What I do have is SQL at intermediate level, Python including pandas, JavaScript, a working knowledge of AWS fundamentals, and a record of learning new tooling quickly when a problem requires it. I would rather state the gap than have it assumed.",
+
+    "What attracts me to Jefferies is the positioning of IT as a source of competitive advantage rather than a support function, and the range of work across applications, data and AI. I would welcome the opportunity to discuss how my technical and analytical background could contribute to your team. Thank you for considering my application."
+  ]
+}
