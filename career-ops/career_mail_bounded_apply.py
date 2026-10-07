@@ -131,7 +131,7 @@ def stage_workbooks(plan,profiles,before,root):
             from career_mail_tracker import HEADERS
             email_columns={c.column for c in new[cfg['header_row']] if c.value in HEADERS.values()}
             added_rows={r['row'] for r in plan['records'] if r['region']==region and r.get('owner_confirmed_application') and not any(x['write']['row']==r['row'] and not x['new'] for x in receipts)}
-            new_allowed={ci(cfg['id']['column']),ci(cfg['field_map']['company']),ci(cfg['field_map']['title']),ci(cfg['status_columns']['application_status'])}
+            new_allowed={ci((cfg.get('id') or cfg.get('mail_identity'))['column']),ci(cfg['field_map']['company']),ci(cfg['field_map']['title']),ci(cfg['status_columns']['application_status'])}
             for row in ws:
                 for cell in row:
                     if cell.column in email_columns:continue

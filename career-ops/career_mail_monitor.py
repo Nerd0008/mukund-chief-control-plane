@@ -308,7 +308,7 @@ def apply_report(report, tracker, calendar, audit_path):
     return receipt
 
 
-def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracker=None):
+def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracker=None, baseline_report=None):
     runtime = Path(runtime)
     runtime.mkdir(parents=True, exist_ok=True)
     lock = runtime / "scan.lock"
@@ -318,6 +318,19 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
         if apply and not approved.get("approved_report_id"):
             raise ValueError("automatic writes disabled: owner must approve the initial dry-run report")
         state = read_json(runtime / "checkpoint.json", {})
+        baseline_source = "checkpoint" if state.get("history_id") else "none"
+        if baseline_report is not None:
+            if apply:
+                raise ValueError("baseline rehearsal is dry-run only")
+            baseline = read_json(baseline_report, {})
+            if baseline.get("report_id") != report_hash(baseline) or not str(baseline.get("checkpoint_proposed", "")).isdigit():
+                raise ValueError("baseline report is invalid")
+            if not state.get("history_id"):
+                # A starting cursor is not an acknowledgement of unresolved signals.
+                # Dedupe still uses canonical seen_message_ids, not baseline processed_ids.
+                state = {**state, "history_id": baseline["checkpoint_proposed"]}
+                baseline_source = "verified dry-run baseline"
+
         if tracker is None:
             profiles = read_json(REPO / config["regional_profiles"], {})
             tracker = WorkbookTracker(profiles, runtime / "backups")
@@ -328,7 +341,7 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
         window = reader.read_window(state.get("history_id"), days=config["backfill_days"],
                                     max_messages=config["max_messages"])
         report = reconcile(window["messages"], records, state.get("processed_ids", []))
-        report.update(mode="apply" if apply else "dry-run", scan_mode=window["mode"],
+        report.update(mode="apply" if apply else "dry-run", scan_mode=window["mode"], baseline_source=baseline_source,
                       checkpoint_proposed=window["checkpoint"], workbook_fingerprints=fingerprints,
                       generated_at=dt.datetime.now(dt.timezone.utc).isoformat())
         report["report_id"] = report_hash(report)
@@ -354,7 +367,7 @@ def schedule_plan(config):
     return {"task_name": "ChiefCareerGmailMonitor", "install_enabled": False,
             "interval_minutes": config["scan_interval_minutes"],
             "interpreter": str(Path(os.environ.get("LOCALAPPDATA", "")) / "hermes/hermes-agent/venv/Scripts/python.exe"),
-            "arguments": f'"{Path(__file__).resolve()}" scan --apply', "working_directory": str(REPO),
+            "arguments": f'"{Path(__file__).resolve()}" scan', "working_directory": str(REPO),
             "principal": "current owner, interactive token", "overlap": "refuse overlapping scan",
             "note": "Do not install/enable before OAuth and approved initial dry-run."}
 
@@ -366,6 +379,7 @@ def main(argv=None):
     parser.add_argument("--runtime", default=str(RUNTIME))
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--approve-report")
+    parser.add_argument("--baseline-report", help="Verified previous dry-run report: incremental rehearsal only; never enables writes")
     args = parser.parse_args(argv)
     config = read_json(args.config, {})
     root = Path(args.runtime)
@@ -383,7 +397,7 @@ def main(argv=None):
                                                       "approved_at": dt.datetime.now(dt.timezone.utc).isoformat()})
             result = {"writes_enabled": True, "tracker_writes": 0, "calendar_writes": 0}
         else:
-            report = run_scan(config, root, apply=args.apply)
+            report = run_scan(config, root, apply=args.apply, baseline_report=args.baseline_report)
             # Summary stdout has counts only. Detailed private report stays local.
             result = {k: report[k] for k in ("mode", "scan_mode", "report_id", "counts", "gmail_mutations",
                                            "model_calls", "tracker_writes", "calendar_writes")}
