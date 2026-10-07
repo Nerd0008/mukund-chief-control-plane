@@ -201,3 +201,13 @@ def test_role_of_sentence_period_is_title_boundary():
 def test_application_to_sentence_period_is_title_boundary():
     a=analyze_signal(mail('Company: Acme\nThank you for your application to IT Support Engineer (SYS-6942).',subject='Application received'),[record(role='IT Support Engineer (SYS-6942)')])
     assert a['role']=='IT Support Engineer (SYS-6942)'
+
+
+def test_non_title_prose_and_link_not_a_role():
+    a=analyze_signal(mail('Company: Acme\nThank you for your application for be considered, but to help us achieve this, we would ask you to complete a short survey via this link: https://acme.example/private?token=hidden role.\nPlease complete an assessment.',subject='Assessment invitation'),[])
+    assert not a['role'] and 'hidden' not in str(a)
+
+
+def test_umbrella_early_careers_scheme_not_specific_application():
+    a=analyze_signal(mail('Company: Acme\nRole: Acme Early Careers Scheme\nPlease complete an assessment.',subject='Assessment invitation'),[record(role='Graduate Engineer')])
+    assert not a['role'] and a['category']!='confident existing application match'

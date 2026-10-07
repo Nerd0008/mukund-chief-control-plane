@@ -126,6 +126,9 @@ def fields(raw,records):
     if signal.get('company') and not signal.get('role'):
         possible={r['role'] for r in records if company_key(signal['company']) in company_aliases(r['company']) and has_full_role(r['role'],text)}
         if len(possible)==1:signal['role']=possible.pop();evidence.append('full canonical role named in subject/body')
+    # Prose/footer links and umbrella schemes are not a specific job identity.
+    if signal.get('role') and re.search(r'(?i)https?://|would ask|help us|be considered|short survey|your application|early careers scheme',signal['role']):
+        signal['role']=None;evidence.append('discarded non-title prose or umbrella programme')
     # Portal references are retained only from explicit application/requisition evidence.
     refs=re.findall(r'(?i)\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|[A-Z]{3}\d{4}[A-Z]{2}|SYS-\d{4,})\b',subject+'\n'+body)
     if not signal.get('application_identity') and len(set(refs))==1:
