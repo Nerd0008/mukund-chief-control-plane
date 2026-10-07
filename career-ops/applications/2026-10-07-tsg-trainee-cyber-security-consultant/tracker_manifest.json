@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "TSG",
+      "title": "Trainee Cyber Security Consultant (12 Months Fixed Term)",
+      "location": "Newcastle upon Tyne",
+      "url": "https://careers.tsg.com/job/trainee-cyber-security-consultant-%2812-months-fixed-term%29-364.aspx",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.0,
+      "notes": "Existing tracker row J65 (found 2026-10-04 by Codex direct search). User confirmed not previously applied. Marked Applied 2026-10-07 via application_state.py. Clearance filter clean. Fit 8.0: strong match for Cyber Controls service delivery, risk assessment, control validation, frameworks (ISO27001/Cyber Essentials/NIST), customer reporting. Gap: no customer-facing consulting delivery, no commercial Microsoft security stack experience. Note: near-duplicate listing J77 (row 86, Technology Services Group, same role) exists in tracker."
+    }
+  ]
+}
