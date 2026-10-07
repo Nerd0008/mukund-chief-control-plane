@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Analyst Graduate Programme 26/27",
+  "salutation": "Dear Turnkey Consulting Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Turnkey_IAM_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\turnkey_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Analyst Graduate Programme, with a preference for the Identity Access and Management practice. The work described there, access provisioning and deprovisioning, joiner-mover-leaver processes, authentication and authorisation, is what I already handle day to day in a smaller setting, and I want to build on it properly under experienced consultants. I am available to start in November 2026.",
+
+    "My background combines formal security training with hands-on access administration. I hold an MSc in Information Security from Royal Holloway, awarded with Merit, and a BCA in computer applications, along with CompTIA Security+ and ISC2 Certified in Cybersecurity. My MSc covered security management, critical infrastructure security and secure business architectures, which gave me a grounding in the governance side of identity work rather than only the tooling.",
+
+    "The clearest match to your IAM practice is my current role. I manage four to five access requests a day through on-premises Active Directory, verifying business approval before granting time-limited permissions, documenting access periods and extensions, and maintaining a clear audit trail. I handle account creation, permission changes and deprovisioning, which is the joiner-mover-leaver process in practice. I also support user access reviews and raise access-related risks when I see them, such as permissions that outlast their business need. At Co-op I conduct weekly risk assessments and daily compliance checks, maintaining records and following up until identified risks are addressed, which is the control discipline your Risk, Security and Controls practice describes.",
+
+    "On the eligibility criteria, I should be straightforward. I hold an honours degree and permanent right to work in the UK. My school qualifications are Indian CBSE Class XII rather than A-levels, with strong results in English and Computer Science. I also do not have commercial experience with SailPoint, CyberArk or SAP, which your advert mentions, though I have the Active Directory and access governance foundations those tools build on.",
+
+    "What attracts me to Turnkey is the consulting model. Working across client environments rather than inside one organisation would expose me to a range of governance and control problems, and the structured progression through CISMP to a specialist certification matches how I want to develop. I would welcome the opportunity to discuss how my access management experience could contribute to your team. Thank you for considering my application."
+  ]
+}

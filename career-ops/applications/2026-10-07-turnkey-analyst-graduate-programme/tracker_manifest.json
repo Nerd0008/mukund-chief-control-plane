@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "Turnkey Consulting",
+      "title": "Analyst Graduate Programme 26/27",
+      "location": "Greater London",
+      "url": "https://turnkeyconsulting.hire.trakstar.com/jobs/fk0zrm4",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.5,
+      "notes": "Existing tracker row J78 (found 2026-10-04 by Codex direct search). Marked Applied 2026-10-07 via application_state.py. Salary 33,500, 3 days London office, start Nov 2026, closing 18 Oct 2026. Clearance filter clean (permanent right to work required, no sponsorship). Best-fit practice area: Identity Access and Management (IAM) - direct match with daily AD access provisioning, JML process, access reviews, audit trail. Alternative: Risk, Security and Controls (GRC) - matches Co-op risk assessment and compliance work. CV and covering letter both mandatory; missing either means rejection. Gaps: no SailPoint, CyberArk or SAP experience."
+    }
+  ]
+}
