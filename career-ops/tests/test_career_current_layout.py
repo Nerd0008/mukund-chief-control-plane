@@ -57,3 +57,7 @@ def test_expired_history_falls_back_to_bounded_get_only_backfill():
         raise AssertionError(url)
     result=GmailReader('fake',transport,request_interval=0).read_window('100',days=30,max_messages=10)
     assert result['mode']=='expired_history_backfill';assert result['gmail_mutations']==0;assert all(m=='GET' for m,u in calls);assert 'after%3A' in calls[-1][1]
+
+def test_html_image_boolean_alt_does_not_abort_scan():
+    from career_mail_rules import visible
+    assert 'application' in visible('<div>Your application<img alt></div>')

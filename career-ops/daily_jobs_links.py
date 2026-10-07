@@ -70,16 +70,6 @@ REGION_LABEL = {
 
 # Each region's workbook uses its own column names (its own schema is truth).
 TRACKER_SCHEMA = {
-    "uk": {
-        "header_row": 2,
-        "sheet": "Jobs",
-        "id": None,
-        "date": "Date Found",
-        "company": "Company",
-        "title": "Role Title",
-        "url": "Apply Link",
-        "status": "Status",
-    },
     "dubai": {
         "header_row": 1,
         "sheet": None,
@@ -110,6 +100,16 @@ TRACKER_SCHEMA = {
         "url": "Direct Application URL",
         "status": None,  # No status column
     },
+}
+
+# UK columns have one authority: regional_profiles.json.
+_profile = json.loads(Path(__file__).with_name('regional_profiles.json').read_text())['regions']['uk']
+_headers = _profile['required_headers']
+TRACKERS['uk'] = Path(_profile['tracker'])
+TRACKER_SCHEMA['uk'] = {
+    'header_row': _profile['header_row'], 'sheet': _profile['sheet'], 'id': None,
+    **{name: _headers[_profile['field_map'][key]] for name,key in [('date','date_found'),('company','company'),('title','title'),('url','url')]},
+    'status': _headers[_profile['status_columns']['application_status']],
 }
 
 SYNTHETIC_HOST_SUFFIXES = (".invalid", ".test", ".example", ".localhost", ".local")
