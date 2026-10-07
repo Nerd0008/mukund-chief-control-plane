@@ -598,6 +598,12 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
             result["reason"] = "no changes required: nothing to append or refresh"
         return result
 
+    # Optional automation columns are declared by the same regional profile.
+    for column, header in cfg.get("optional_headers", {}).items():
+        cell = tr.ws[f"{column}{cfg['header_row']}"]
+        if cell.value not in (None, header):
+            raise ValueError("optional tracker metadata column is occupied")
+        cell.value = header
     # ---- build the write ------------------------------------------------- #
     append_row = tr.last_data_row() + 1
     style_template_row = tr.last_data_row()

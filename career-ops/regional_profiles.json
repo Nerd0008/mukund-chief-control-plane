@@ -33,13 +33,22 @@
         "company": "B",
         "title": "C",
         "url": "D",
-        "deadline": "E"
+        "deadline": "E",
+        "source": "AB",
+        "notes": "AC",
+        "posted_date": "AD",
+        "last_checked": "AE"
       },
       "owner_columns": [
         "E",
         "F"
       ],
-      "refreshable_columns": [],
+      "refreshable_columns": [
+        "AB",
+        "AC",
+        "AD",
+        "AE"
+      ],
       "defaults": {
         "application_status": "Not Applied"
       },
@@ -88,6 +97,12 @@
       "status_aliases": {
         "To Review": "Not Applied",
         "Not Applying": "Not Applied"
+      },
+      "optional_headers": {
+        "AB": "Career Ops Discovery Source",
+        "AC": "Career Ops Discovery Notes",
+        "AD": "Career Ops Posted Date",
+        "AE": "Career Ops Last Checked"
       }
     },
     "dubai": {
@@ -470,5 +485,6 @@
         "path": "data/singapore-shortlist-history.md"
       }
     }
-  }
+  },
+  "accepted_mail_state": "hermes/runtime/career-ops/gmail-monitor/bounded-apply-c974caa7"
 }

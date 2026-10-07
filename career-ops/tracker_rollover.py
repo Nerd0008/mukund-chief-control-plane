@@ -243,6 +243,10 @@ def _archive_rows(path: Path, cfg: dict) -> list[tuple]:
 
 def _set_table_ref(ws, cfg: dict, data_row_count: int) -> str:
     """Point the table at exactly the archived/retained rows (min one data row)."""
+    if not cfg.get("table"):
+        from openpyxl.utils import get_column_letter
+        ws.auto_filter.ref = f"A{cfg['header_row']}:{get_column_letter(ws.max_column)}{cfg['first_data_row'] + max(data_row_count, 1) - 1}"
+        return ws.auto_filter.ref
     table = ws.tables[cfg["table"]]
     start_ref = table.ref.split(":")[0]
     start_col = re.sub(r"[0-9]", "", start_ref)

@@ -328,8 +328,10 @@ def test_owner_column_guard_is_explicit_about_automation_writable_columns():
         assert set(cfg["owner_columns"]) == set(guarded) | set(automation)
         assert "V" in guarded  # applied date is owner-only
     guarded_uk, automation_uk = ro._guarded_owner_columns(cfg_of("uk"))
-    assert automation_uk == []
-    assert set(guarded_uk) == set(cfg_of("uk")["owner_columns"])
+    cfg = cfg_of("uk")
+    assert set(automation_uk) == set(cfg["owner_columns"]) & set(cfg["field_map"].values())
+    assert "F" in guarded_uk
+    assert set(guarded_uk) | set(automation_uk) == set(cfg["owner_columns"])
 
 
 def test_archive_only_leaves_the_canonical_untouched(prepared, run_env):

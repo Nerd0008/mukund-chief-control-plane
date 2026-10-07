@@ -5,6 +5,7 @@ to the right of each existing layout; owner-owned cells are never overwritten.
 """
 from __future__ import annotations
 
+import copy
 import contextlib
 import datetime as dt
 import hashlib
@@ -36,6 +37,8 @@ def digest(path):
 class WorkbookTracker:
     def __init__(self, profiles, backup_dir):
         self.profiles, self.backup_dir = resolve_profiles(profiles)["regions"], Path(backup_dir)
+        self.accepted_state = (Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / profiles["accepted_mail_state"]
+                               if profiles.get("accepted_mail_state") else None)
 
     def read(self):
         records, fingerprints = [], {}
@@ -78,7 +81,52 @@ class WorkbookTracker:
                     records.append(record)
             finally:
                 wb.close()
+        if self.accepted_state:
+            records = self._with_accepted_state(records)
         return records, fingerprints
+
+    def _with_accepted_state(self, records):
+        """Recover dedupe evidence from the hash-verified, already-applied snapshot.
+
+        This does not restore or write a workbook, acknowledge review-only mail,
+        authorize new writes, or replace current owner fields.
+        """
+        root = self.accepted_state
+        receipt = json.loads((root / "result.json").read_text())
+        audit = json.loads((root / "apply-audit.json").read_text())
+        if receipt.get("status") != "PASS" or audit.get("state") != "applied":
+            raise ValueError("accepted mailbox state has no successful apply receipt")
+        prior_profiles = {"regions": {}}
+        for region, cfg in self.profiles.items():
+            snapshot = root / "staged" / (region + ".xlsx")
+            if not snapshot.exists():
+                continue
+            if digest(snapshot) != receipt.get("after_hashes", {}).get(region):
+                raise ValueError("accepted mailbox snapshot fingerprint differs from receipt")
+            prior_profiles["regions"][region] = {**cfg, "tracker": str(snapshot)}
+        prior, _ = WorkbookTracker(prior_profiles, self.backup_dir).read()
+        restored = 0
+        for old in prior:
+            if not old.get("seen_message_ids"):
+                continue
+            matches = [r for r in records if r["region"] == old["region"]
+                       and r["company"].casefold() == old["company"].casefold()
+                       and r["role"].casefold() == old["role"].casefold()
+                       and r.get("canonical_job_host") == old.get("canonical_job_host")]
+            if len(matches) != 1:
+                raise ValueError("accepted mailbox identity needs fresh owner reconciliation")
+            current = matches[0]
+            if current.get("seen_message_ids"):
+                # Current persisted metadata is stronger than the historical snapshot.
+                current["seen_message_ids"] = sorted(set(current["seen_message_ids"]) | set(old["seen_message_ids"]))
+                continue
+            protected = {k: current.get(k) for k in ("company", "role", "region", "row", "canonical_owner_status", "job_reference_ids", "canonical_job_host")}
+            current.update(copy.deepcopy(old))
+            current.update(protected)
+            current["accepted_state_source"] = "verified previously applied snapshot"
+            restored += 1
+        self.accepted_state_recovered_records = restored
+        return records
 
     def upsert(self, record):
         region = record.get("region")
