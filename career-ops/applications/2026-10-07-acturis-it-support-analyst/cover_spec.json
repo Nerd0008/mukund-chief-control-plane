@@ -1,0 +1,17 @@
+{
+  "heading": "Application for IT Support Analyst",
+  "salutation": "Dear Acturis Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_Acturis_IT_Support_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\acturis_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the IT Support Analyst role at Acturis. A varied workload across end-user devices, server and virtual desktop environments, systems administration and PowerShell automation is the mix I want, and the transparent progression structure matters to me at this stage of my career.",
+
+    "I have around two years of hands-on IT support experience, which matches the level you are looking for. In my current role at The Colourful Aura I am the first point of contact for 15 colleagues across 15 to 20 devices, diagnosing and resolving hardware, software and access problems, monitoring server health and maintaining password and website-access controls. I manage four to five access requests a day through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions. I also investigate four to five suspicious emails daily, recording findings and alerting colleagues to recurring tactics.",
+
+    "Automation is where I have added most value beyond the ticket queue. I built a local diagnostic tool that maps Windows error codes to their common causes and used it to trace intermittent server freezes and crashes to missing or corrupted DLLs, which informed corrective action. I use PowerShell and Python for repetitive checks and reporting, and I have applied that same instinct at Co-op, where I introduced documentation that cut incident management time by more than half. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity, and I am an MSc Information Security graduate from Royal Holloway with Merit.",
+
+    "On the qualifications you ask for, I should be straightforward. My degrees are a BCA from MIT World Peace University in India and an MSc from Royal Holloway, both completed with strong results, and my school record in India was strong in the subjects closest to this work. I have not supported virtual desktop environments or managed a server estate at your scale, so those are areas I would expect to learn on the job rather than claim as existing experience. What I bring is a habit of following technical problems to a real root cause and explaining the outcome to people who need it in plain terms.",
+
+    "What draws me to Acturis is the combination of start-up pace with established scale, and the emphasis on ownership rather than task completion. I would welcome the opportunity to discuss how my experience could contribute to your IT team. Thank you for considering my application."
+  ]
+}
