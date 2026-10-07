@@ -148,7 +148,7 @@ def stage_workbooks(plan,profiles,before,root):
         cfg=staged['regions'][region];path=Path(cfg['tracker']);wb=openpyxl.load_workbook(path)
         from openpyxl.utils import column_index_from_string as ci
         for record in plan['records']:
-            if record['region']==region and record.get('owner_confirmed_application'):
+            if record['region']==region and record.get('owner_confirmed_application') and any(x['application_id']==record['application_id'] and x['new'] for x in receipts):
                 wb[cfg['sheet']].cell(record['row'],ci(cfg['status_columns']['application_status']),'Applied')
         wb.save(path);wb.close()
         original=openpyxl.load_workbook(profiles['regions'][region]['tracker']);updated=openpyxl.load_workbook(path)

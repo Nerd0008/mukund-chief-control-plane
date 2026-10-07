@@ -114,3 +114,10 @@ def test_reused_thread_does_not_hide_distinct_full_role():
     one=row();one['thread_ids']=['t'];two=dict(row(),application_id='other',role='Internship Analyst',row=3)
     s=signal(role='Internship Analyst')
     assert b.fresh_candidates(s,[one,two])==[two]
+
+
+def test_previously_confirmed_application_preserves_new_owner_status(tmp_path):
+    path=tmp_path/'w.xlsx';workbook(path);w=openpyxl.load_workbook(path);w['Jobs']['J2']='Rejected';w.save(path);w.close();cfg=profiles(path);records,before=WorkbookTracker(cfg,tmp_path/'backup').read()
+    r,_=b.merge_signal(records[0],signal());r['owner_confirmed_application']=True
+    staged,_=b.stage_workbooks({'records':[r]},cfg,before,tmp_path/'stage')
+    w=openpyxl.load_workbook(tmp_path/'stage'/'uk.xlsx');assert w['Jobs']['J2'].value=='Rejected';w.close()
