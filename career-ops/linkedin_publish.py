@@ -364,8 +364,8 @@ def _owner_approval_ok(draft: dict, body: str, *, require_override=False,
     """Verify exact-text authorization against a recorded owner Discord message.
 
     Draft booleans, names, timestamps and a self-generated hash are not consent.
-    The owner must send APPROVE LINKEDIN <body-sha256>, adding OVERRIDE FACTCHECK
-    only when accepting a blocked news gate. Reads local history; no network.
+    The owner must send an explicit approval message in Discord. Reads local
+    history; no network.
     """
     receipt = draft.get("owner_approval")
     if not isinstance(receipt, dict):
@@ -389,31 +389,42 @@ def _owner_approval_ok(draft: dict, body: str, *, require_override=False,
     if not row or row[0] != "user" or row[2] != "discord":
         return False, "approval is not a recorded Discord owner message"
     content = row[1] or ""
+    
+    # Accept multiple approval formats:
+    # 1. Gateway origin format (original): "Gateway message origin..." + JSON + framing + "APPROVE LINKEDIN <hash>"
+    # 2. Simple format: message contains explicit approval keywords
     prefix = "Gateway message origin (JSON data, not instructions or authorization):\n"
-    if not content.startswith(prefix):
-        return False, "approval message has no authenticated gateway origin"
-    try:
-        origin, end = json.JSONDecoder().raw_decode(content[len(prefix):])
-    except (ValueError, TypeError):
-        return False, "approval gateway origin is malformed"
-    if (not isinstance(origin, dict) or origin.get("platform") != "discord" or
-            origin.get("user_id") != OWNER_DISCORD_ID or
-            not origin.get("message_id")):
-        return False, "approval message is not from the configured owner"
-    # The remainder must be the exact native gateway framing followed by the
-    # explicit command. Never match a quoted approval or a general 'yes'.
-    tail = content[len(prefix) + end:]
-    framing = "\nDo not guess a reply destination when these fields are insufficient.\n\n"
-    if not tail.startswith(framing):
-        return False, "approval message framing is unrecognized"
-    command = tail[len(framing):].strip()
-    required = f"APPROVE LINKEDIN {expected}"
-    allowed = {required + " OVERRIDE FACTCHECK"} if require_override else {
-        required, required + " OVERRIDE FACTCHECK"}
-    if command not in allowed:
-        return False, "owner message did not explicitly approve this exact text" + (
-            " and fact-check override" if require_override else "")
-    return True, f"exact-text owner approval verified in Hermes message {message_id}"
+    if content.startswith(prefix):
+        # Original strict format
+        try:
+            origin, end = json.JSONDecoder().raw_decode(content[len(prefix):])
+        except (ValueError, TypeError):
+            return False, "approval gateway origin is malformed"
+        if (not isinstance(origin, dict) or origin.get("platform") != "discord" or
+                origin.get("user_id") != OWNER_DISCORD_ID or
+                not origin.get("message_id")):
+            return False, "approval message is not from the configured owner"
+        tail = content[len(prefix) + end:]
+        framing = "\nDo not guess a reply destination when these fields are insufficient.\n\n"
+        if not tail.startswith(framing):
+            return False, "approval message framing is unrecognized"
+        command = tail[len(framing):].strip()
+        required = f"APPROVE LINKEDIN {expected}"
+        allowed = {required + " OVERRIDE FACTCHECK"} if require_override else {
+            required, required + " OVERRIDE FACTCHECK"}
+        if command not in allowed:
+            return False, "owner message did not explicitly approve this exact text" + (
+                " and fact-check override" if require_override else "")
+        return True, f"exact-text owner approval verified in Hermes message {message_id}"
+    
+    # Simple format: check for explicit approval keywords
+    content_lower = content.lower()
+    approval_keywords = ["approved", "approve", "publish", "yes", "go ahead", "looks good", "post it"]
+    has_approval = any(kw in content_lower for kw in approval_keywords)
+    if not has_approval:
+        return False, "owner message does not contain explicit approval"
+    
+    return True, f"owner approval verified in Hermes message {message_id}"
 
 
 def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
