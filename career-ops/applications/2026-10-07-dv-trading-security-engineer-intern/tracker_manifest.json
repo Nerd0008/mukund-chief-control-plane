@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "DV Trading",
+      "title": "Security Engineer Intern — Summer 2027",
+      "location": "London",
+      "url": "https://job-boards.greenhouse.io/dvtrading/jobs/4736603005",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.0,
+      "notes": "Existing tracker row J87 (found 2026-10-04 by Codex direct search). Marked Applied 2026-10-07 via application_state.py. Clearance filter clean. Fit 8.0: detection triage, documentation, phishing investigation, MITRE ATT&CK detection tuning, Python/PowerShell automation, Windows/Linux familiarity, risk assessment all evidenced. Eligibility barrier: advert requires currently pursuing a degree; user completed MSc 2025. Disclosed in cover letter. Note: same role appears three times in tracker (J61 jointheintake listing, J87 greenhouse listing, J150 brightnetwork listing) - all same DV Trading posting, never previously applied."
+    }
+  ]
+}

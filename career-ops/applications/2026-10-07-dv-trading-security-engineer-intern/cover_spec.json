@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Security Engineer Intern - Summer 2027",
+  "salutation": "Dear DV Trading Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_DV_Security_Intern_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\dv_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Security Engineer Intern position in London for summer 2027. Getting hands-on exposure to a real trading firm's security programme, with scoped projects across operations, detection and risk, is exactly the kind of grounding I am looking for before settling into a specialism.",
+
+    "My background combines security training with day-to-day operational work. I hold an MSc in Information Security from Royal Holloway, awarded with Merit, and a BCA in computer applications, along with CompTIA Security+ and ISC2 Certified in Cybersecurity. My MSc covered digital forensics, network security, critical infrastructure security and secure business architectures, which gave me the conceptual grounding for detection and risk work.",
+
+    "In my current IT support role I already triage and document security events. I investigate four to five suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics. I manage four to five access requests a day through Active Directory with a clear audit trail. Outside work I built a phishing analysis prototype that maps findings to MITRE ATT&CK techniques, where I refined detection rules through manual testing specifically to reduce false positives. That tuning work is the closest thing I have to what your advert describes under maintaining security tooling. I also built a diagnostic tool that traces Windows error codes to root causes, which I used to identify missing and corrupted DLLs behind intermittent server freezes.",
+
+    "I want to be direct about where I would be starting. Your advert asks for candidates currently pursuing a degree. I completed my MSc in 2025, so I am not currently enrolled, and I would rather state that than have it discovered later. I have not worked with a commercial SIEM or enterprise security tooling, and my scripting is at a practical rather than advanced level. What I do bring is working familiarity with Windows and Linux, networking fundamentals from my MSc, Python and PowerShell for automation, and a habit of following technical problems to a real root cause rather than a symptom.",
+
+    "What attracts me to DV Trading is the scale and pace of a proprietary trading environment, where security decisions affect live operations rather than a static system. I would welcome the opportunity to discuss how my experience could contribute to your security team. Thank you for considering my application."
+  ]
+}
