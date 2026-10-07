@@ -1,0 +1,52 @@
+{
+  "code_commit": "569eb871",
+  "branch": "fix/e3-whole-repo-architecture",
+  "accepted_apply_commit": "ee1e861c18fb705c24027578ba0db5cecad8de87",
+  "primary_layout_repair": "PASS",
+  "release_regression": "BLOCKED",
+  "focused_tests": {
+    "passed": 314,
+    "failed": 0
+  },
+  "whole_career_ops_tests": {
+    "passed": 751,
+    "failed": 15
+  },
+  "production_command": "career-ops/career_mail_monitor.py scan",
+  "dry_run": {
+    "mode": "incremental",
+    "messages_read": 30,
+    "recruitment_signals": 9,
+    "matched_existing": 1,
+    "proposed_new_rows": 0,
+    "new_review_signals": 8,
+    "original_review_signals_preserved": 45,
+    "report_id": "4254052c711b4eca234bf17a799fb56bf53f775d764c16889890d176fd548a8c",
+    "oauth_ready": true,
+    "tracker_writes": 0,
+    "calendar_writes": 0,
+    "gmail_mutations": 0,
+    "checkpoint_written": false,
+    "model_calls": 0,
+    "workbooks_unchanged": true
+  },
+  "accepted_state": {
+    "snapshot_records_recovered_in_memory": 17,
+    "authorised_signal_replay": 20,
+    "duplicate_signals_avoided": 20,
+    "proposed_authorised_writes": 0,
+    "existing_review_events_verified_get_only": 3,
+    "expired_history_fixture_replay_duplicates": 20,
+    "expired_history_fixture_tracker_proposals": 0,
+    "expired_history_fixture_calendar_proposals": 0
+  },
+  "scheduled_writes_enabled": false,
+  "unattended_write_readiness": "BLOCKED",
+  "remaining_failures": {
+    "japan_table_extent": 2,
+    "singapore_duplicate_url": 7,
+    "discovery_e3_contract_drift": 6
+  },
+  "canonical_workbook_repairs_performed": false,
+  "main_merged": false
+}
