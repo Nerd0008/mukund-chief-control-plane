@@ -409,8 +409,32 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
         got = last - cfg["first_data_row"] + 1
         if got != expect_data_rows:
             problems.append(f"data row count {got} != expected {expect_data_rows}")
-    if dupes:
-        problems.append(f"duplicate URL keys inside workbook: {dupes[:5]}")
+    # Preserve explicitly linked duplicate discovery rows without merging owner applications.
+    acknowledged = []
+    unresolved_dupes = []
+    for key in dupes:
+        matching = [r for r in range(cfg["first_data_row"], ws.max_row + 1)
+                    if normalize_url(ws.cell(r, url_idx).value) == key]
+        id_cfg = cfg.get("id")
+        note_col = cfg.get("field_map", {}).get("notes")
+        canonical = [r for r in matching if id_cfg and ws[f"{id_cfg['column']}{r}"].value]
+        safe = len(canonical) == 1 and bool(note_col)
+        if safe:
+            base = canonical[0]
+            identity = str(ws[f"{id_cfg['column']}{base}"].value)
+            for r in matching:
+                if r == base:
+                    continue
+                same_identity = all(ws[f"{cfg['field_map'][k]}{r}"].value ==
+                                    ws[f"{cfg['field_map'][k]}{base}"].value
+                                    for k in ("company", "title"))
+                marker = f"Career Ops duplicate discovery of {identity}; owner records preserved."
+                empty_owned = all(ws[f"{c}{r}"].value in (None, "")
+                                  for c in cfg.get("owner_columns", []) if c != note_col)
+                safe = safe and same_identity and empty_owned and ws[f"{note_col}{r}"].value == marker
+        (acknowledged if safe else unresolved_dupes).append(key)
+    if unresolved_dupes:
+        problems.append(f"duplicate URL keys inside workbook: {unresolved_dupes[:5]}")
 
     owned_ok = True
     if pre_owned:
@@ -440,6 +464,7 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
         "validations": {col: len(v) for col, v in dvs.items()},
         "owner_columns_unchanged": owned_ok,
         "duplicate_urls_in_workbook": dupes,
+        "acknowledged_duplicate_discoveries": acknowledged,
         "formula_error_cells": bad[:10],
         "cross_month_duplicate_notes": cross_dupes,
     }
