@@ -1,0 +1,40 @@
+{
+  "edits": [
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "experience, complemented by practical projects in phishing analysis, endpoint security and automation. "
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "Seeking a graduate technology role in security engineering, network operations or technology support to build practical skills."
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Alert triage, Windows Event Logs, network analysis, MITRE ATT&CK"
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Linux, Microsoft 365, Azure, virtualisation, endpoint configuration"
+    },
+    {
+      "find": "Python, PowerShell, SQL, API integration",
+      "replace": "Python, PowerShell, SQL, automation scripting"
+    },
+    {
+      "find": "• Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting ",
+      "replace": "• Triage 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and escalating "
+    },
+    {
+      "find": "colleagues to recurring phishing tactics.",
+      "replace": "recurring phishing tactics to the team."
+    },
+    {
+      "find": "• Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system ",
+      "replace": "• Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and endpoint "
+    },
+    {
+      "find": "• Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining    ",
+      "replace": "• Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls and documenting"
+    }
+  ]
+}
