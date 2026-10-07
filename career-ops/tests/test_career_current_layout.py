@@ -61,3 +61,32 @@ def test_expired_history_falls_back_to_bounded_get_only_backfill():
 def test_html_image_boolean_alt_does_not_abort_scan():
     from career_mail_rules import visible
     assert 'application' in visible('<div>Your application<img alt></div>')
+
+def accepted_fixture(tmp_path, monkeypatch):
+    monkeypatch.setenv('LOCALAPPDATA',str(tmp_path))
+    p=tmp_path/'tracker.xlsx';workbook(p);cfg=profiles(p)
+    tracker=WorkbookTracker(cfg,tmp_path/'b');records,_=tracker.read();record=records[0]
+    record.update(seen_message_ids=['accepted-message'],thread_ids=['accepted-thread'],latest_status='assessment')
+    tracker.upsert(record)
+    root=tmp_path/'accepted';(root/'staged').mkdir(parents=True)
+    snapshot=root/'staged/uk.xlsx';snapshot.write_bytes(p.read_bytes())
+    (root/'result.json').write_text(json.dumps({'status':'PASS','after_hashes':{'uk':digest(snapshot)}}))
+    (root/'apply-audit.json').write_text('{"state":"applied"}')
+    workbook(p)  # simulate the external six-column workbook replacement
+    cfg['accepted_mail_state']='accepted'
+    return p,cfg,snapshot
+
+def test_accepted_snapshot_recovers_dedupe_without_restoring_workbook(tmp_path,monkeypatch):
+    p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);before=digest(p)
+    tracker=WorkbookTracker(cfg,tmp_path/'b');records,_=tracker.read()
+    assert records[0]['seen_message_ids']==['accepted-message'];assert digest(p)==before
+    assert records[0]['row']==3 and records[0]['canonical_owner_status']=='Applied'
+    assert tracker.accepted_state_recovered_records==1
+
+def test_accepted_snapshot_tampering_aborts(tmp_path,monkeypatch):
+    p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);snapshot.write_bytes(snapshot.read_bytes()+b'changed')
+    with pytest.raises(ValueError,match='fingerprint'):WorkbookTracker(cfg,tmp_path/'b').read()
+
+def test_ambiguous_snapshot_identity_is_never_fuzzily_merged(tmp_path,monkeypatch):
+    p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);wb=openpyxl.load_workbook(p);ws=wb['Jobs'];ws['B4']='Owner Company';ws['C4']='Owner Role';wb.save(p);wb.close()
+    with pytest.raises(ValueError,match='reconciliation'):WorkbookTracker(cfg,tmp_path/'b').read()

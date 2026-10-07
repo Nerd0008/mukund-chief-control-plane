@@ -4,5 +4,6 @@
   "backfill_days": 30,
   "scan_interval_minutes": 60,
   "max_messages": 2000,
-  "automatic_writes_default": false
+  "automatic_writes_default": false,
+  "initial_baseline_report": "hermes/runtime/career-ops/gmail-monitor/second-pass/a191abb9ad2c06899968be0bf13020e9a75dc2798595c2eab59f260fcec6fa54-baseline.json"
 }

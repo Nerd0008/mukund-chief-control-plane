@@ -319,6 +319,8 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
             raise ValueError("automatic writes disabled: owner must approve the initial dry-run report")
         state = read_json(runtime / "checkpoint.json", {})
         baseline_source = "checkpoint" if state.get("history_id") else "none"
+        if baseline_report is None and not apply and not state.get("history_id") and config.get("initial_baseline_report"):
+            baseline_report = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / config["initial_baseline_report"]
         if baseline_report is not None:
             if apply:
                 raise ValueError("baseline rehearsal is dry-run only")
