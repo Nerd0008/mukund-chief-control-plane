@@ -516,3 +516,18 @@ def test_the_brief_collector_reports_the_unified_run(tmp_path, monkeypatch):
     assert collected["live_research"] is not None
     assert collected["production_ready"] is False
     assert collected["no_go"]
+
+def test_no_live_disables_default_provider_probe_and_semantic_escalation(tmp_path,monkeypatch):
+    factory=so.wr.make_provider
+    def offline_factory(kind,**kwargs):
+        assert kind=='none'
+        return factory(kind,**kwargs)
+    monkeypatch.setattr(so.wr,'make_provider',offline_factory)
+    funnel=so.pipeline.run_funnel
+    def offline_funnel(*args,**kwargs):
+        assert kwargs['semantic']=='off' and kwargs['codex_enabled'] is False
+        return funnel(*args,**kwargs)
+    monkeypatch.setattr(so.pipeline,'run_funnel',offline_funnel)
+    argv=offline_argv(tmp_path);argv[argv.index('--codex')+1]='on';argv[argv.index('--semantic')+1]='auto'
+    rc,doc=run_cli(argv)
+    assert rc==0 and doc['codex']['requests']==0 and doc['semantic']['requested']=='off'

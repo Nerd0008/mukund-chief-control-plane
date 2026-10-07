@@ -220,7 +220,7 @@ def test_rollover_archives_and_rotates(region, prepared, run_env):
             assert aws[f"{letter}{r}"].value == value, (letter, r, value, aws[f"{letter}{r}"].value)
     # table ref covers exactly the archived rows
     tref = aws.tables[cfg["table"]].ref if cfg.get("table") else aws.auto_filter.ref
-    assert int(tref.split(":")[1].replace(tref.split(":")[1][0], "")) >= cfg["first_data_row"] + 1
+    assert openpyxl.utils.cell.range_boundaries(tref)[3] >= cfg["first_data_row"] + 1
     awb.close()
 
     # --- canonical workbook: rotated, verified, backed up ----------------- #
