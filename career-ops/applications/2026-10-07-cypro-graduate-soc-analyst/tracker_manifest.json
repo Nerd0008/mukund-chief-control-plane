@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "CyPro",
+      "title": "Graduate SOC Analyst",
+      "location": "London",
+      "url": "https://cypro.co.uk/careers/graduate-soc-analyst/",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.5,
+      "notes": "Existing tracker row J74 (found 2026-10-04 by Codex direct search). Marked Applied 2026-10-07 via application_state.py. Clearance filter clean (UK based required, no sponsorship). Fit 8.5: alert triage, incident response, phishing investigation, MITRE ATT&CK, automation all evidenced. Start Sep/Oct 2026. Disclosed gaps: no commercial Sentinel/Defender or KQL experience; CBSE Class XII does not map to BBB A-level."
+    }
+  ]
+}
