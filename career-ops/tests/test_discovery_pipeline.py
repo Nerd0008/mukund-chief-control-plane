@@ -275,7 +275,7 @@ def test_escalation_conditions_are_deterministic_and_codex_is_budgeted():
     assert all(e["dropped"] == "codex_budget_exhausted"
                for e in plan["dropped_due_to_budget"])
     # ambiguous_review outranks a low-confidence plausible match
-    assert plan["selected"][0]["reason"] == "semantic_label_ambiguous_review"
+    assert plan["selected"][0]["reason"] == "deepseek_label_ambiguous_review"
 
 
 def test_deterministic_fallback_never_claims_to_be_a_model_pass():
