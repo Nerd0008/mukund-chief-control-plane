@@ -108,3 +108,9 @@ def test_new_compact_application_preserves_existing_cells(tmp_path):
 def test_owner_unicode_dash_location_matches_source_title():
     from career_mail_rules import role_key
     assert role_key('Graduate Security Risk Consultant - London')==role_key('Graduate Security Risk Consultant \u2014 London')
+
+
+def test_reused_thread_does_not_hide_distinct_full_role():
+    one=row();one['thread_ids']=['t'];two=dict(row(),application_id='other',role='Internship Analyst',row=3)
+    s=signal(role='Internship Analyst')
+    assert b.fresh_candidates(s,[one,two])==[two]

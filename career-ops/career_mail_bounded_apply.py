@@ -42,8 +42,9 @@ def fresh_candidates(signal,records):
     referenced=[r for r in records if ref and signal.get('reference_type')!='candidate' and (ref==r.get('application_identity') or ref in r.get('job_reference_ids',[]))]
     threaded=[r for r in records if signal.get('gmail_thread_id') in r.get('thread_ids',[])]
     pairs=[r for r in records if signal.get('company') and signal.get('role') and company_key(signal['company']) in company_aliases(r['company']) and role_key(signal['role'])==role_key(r['role'])]
-    ranked=referenced or threaded or pairs
-    return [r for r in ranked if compatible(signal,r) and (not signal.get('role') or role_key(signal['role'])==role_key(r['role']) or bool(referenced))]
+    if referenced:return [r for r in referenced if compatible(signal,r)]
+    consistent=[r for r in threaded if compatible(signal,r) and (not signal.get('role') or role_key(signal['role'])==role_key(r['role']))]
+    return consistent or [r for r in pairs if compatible(signal,r)]
 
 def merge_signal(record,signal):
     result=copy.deepcopy(record)
