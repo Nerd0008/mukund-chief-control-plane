@@ -282,7 +282,9 @@ def _write_rows(ws, cfg: dict, rows: list[list], first: int, styles: list[list] 
 def _clear_block(ws, first: int, last: int, ncols: int) -> None:
     for r in range(first, last + 1):
         for c in range(1, ncols + 1):
-            ws.cell(row=r, column=c).value = None
+            cell = ws.cell(row=r, column=c)
+            cell.value = None
+            cell.hyperlink = None  # otherwise openpyxl restores the old URL on reload
 
 
 # --------------------------------------------------------------------------- #

@@ -90,3 +90,8 @@ def test_accepted_snapshot_tampering_aborts(tmp_path,monkeypatch):
 def test_ambiguous_snapshot_identity_is_never_fuzzily_merged(tmp_path,monkeypatch):
     p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);wb=openpyxl.load_workbook(p);ws=wb['Jobs'];ws['B4']='Owner Company';ws['C4']='Owner Role';wb.save(p);wb.close()
     with pytest.raises(ValueError,match='reconciliation'):WorkbookTracker(cfg,tmp_path/'b').read()
+
+def test_rollover_clears_hyperlinks_before_reusing_plain_range_rows(tmp_path):
+    from tracker_rollover import _clear_block
+    p=tmp_path/'tracker.xlsx';workbook(p);wb=openpyxl.load_workbook(p);ws=wb['Jobs'];ws['D3']='https://example.test';ws['D3'].hyperlink='https://example.test';_clear_block(ws,3,3,6);wb.save(p);wb.close()
+    wb=openpyxl.load_workbook(p);assert wb['Jobs']['D3'].value is None and wb['Jobs']['D3'].hyperlink is None;wb.close()
