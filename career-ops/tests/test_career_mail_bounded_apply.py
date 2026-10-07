@@ -103,3 +103,8 @@ def test_new_compact_application_preserves_existing_cells(tmp_path):
     cfg=b.resolve_profiles(profiles(p));before={'uk':digest(p)};c,r=b.CONFIRMED['S23'];record={'application_id':'newapp','company':c,'role':r,'region':'uk','owner_confirmed_application':True}
     staged,receipts=b.stage_workbooks({'records':[record]},cfg,before,tmp_path/'stage')
     assert receipts[0]['new'] and digest(p)==before['uk']
+
+
+def test_owner_unicode_dash_location_matches_source_title():
+    from career_mail_rules import role_key
+    assert role_key('Graduate Security Risk Consultant - London')==role_key('Graduate Security Risk Consultant \u2014 London')

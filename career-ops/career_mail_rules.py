@@ -48,7 +48,7 @@ def company_aliases(text):
 
 LOCATIONS=r'London|Chester|Burgess Hill|Knutsford|Ipswich|United Kingdom|UK|Dubai|Singapore|Japan|Tokyo'
 def role_key(text):
-    value=visible(str(text or ''))
+    value=visible(str(text or '')).replace('\u2014','-').replace('\u2013','-')
     value=re.sub(r'(?i)^(?:(?:the|our)\s+)?(?:(?:role|position)\s+of\s+|(?:role|position)\s+)','',value)
     value=re.sub(r'(?i)\s+(?:role|vacancy|opportunity)$','',value)
     value=re.sub(r'(?i)\s*(?:[-,]|\()\s*(?:'+LOCATIONS+r')(?:\s*\))?\s*$','',value)
