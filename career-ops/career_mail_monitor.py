@@ -319,10 +319,11 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
             raise ValueError("automatic writes disabled: owner must approve the initial dry-run report")
         state = read_json(runtime / "checkpoint.json", {})
         baseline_source = "checkpoint" if state.get("history_id") else "none"
-        if baseline_report is None and not apply and not state.get("history_id") and config.get("initial_baseline_report"):
+        automatic_baseline = baseline_report is None and not state.get("history_id") and bool(config.get("initial_baseline_report"))
+        if automatic_baseline:
             baseline_report = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / config["initial_baseline_report"]
         if baseline_report is not None:
-            if apply:
+            if apply and not automatic_baseline:
                 raise ValueError("baseline rehearsal is dry-run only")
             baseline = read_json(baseline_report, {})
             if baseline.get("report_id") != report_hash(baseline) or not str(baseline.get("checkpoint_proposed", "")).isdigit():
@@ -351,7 +352,32 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
             # Private report only: never commit the read checkpoint or write a tracker/event.
             atomic_json(runtime / "last-dry-run.json", report)
             return report
-        receipt = apply_report(report, tracker, calendar, runtime / (report["report_id"] + "-audit.json"))
+        # An offline proposal is not automatic write authority. Only confident
+        # existing identities or explicitly confirmed applications may be written.
+        analysis = {s.get("gmail_message_id"): s for s in report["signal_analysis"]}
+        allowed = [r for r in report["proposed_records"] if not r.get("needs_review")
+                   and r.get("confidence") == "high"
+                   and (r.get("owner_confirmed_application") or r.get("row")
+                        and analysis.get(r.get("gmail_message_id"), {}).get("category")
+                            == "confident existing application match")]
+        allowed_ids = {r["application_id"] for r in allowed}
+        for r in report["proposed_records"]:
+            if r not in allowed and not any(v.get("gmail_message_id") == r.get("gmail_message_id") for v in report["needs_review"]):
+                report["needs_review"].append({**r, "needs_review": True,
+                                              "review_reason": "automatic write authority not established"})
+        _, current_fingerprints = tracker.read()
+        if current_fingerprints != fingerprints:
+            raise ValueError("concurrent tracker drift; checkpoint not advanced")
+        apply_plan = {**report, "proposed_records": allowed,
+                      "proposed_calendar_events": [e for e in report["proposed_calendar_events"]
+                          if e["extendedProperties"]["private"]["careerOpsApplication"] in allowed_ids]}
+        receipt = apply_report(apply_plan, tracker, calendar, runtime / (report["report_id"] + "-audit.json"))
+        # Retain uncertain notifications durably even after advancing Gmail history.
+        review_path = runtime / "pending-review.json"
+        pending = read_json(review_path, {})
+        for signal in report["needs_review"]:
+            pending[signal["gmail_message_id"]] = signal
+        atomic_json(review_path, pending)
         report["tracker_writes"] = len(receipt)
         report["calendar_writes"] = sum("calendar_event_id" in r for r in receipt)
         atomic_json(runtime / "checkpoint.json", {
