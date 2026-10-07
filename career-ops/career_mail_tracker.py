@@ -50,6 +50,7 @@ class WorkbookTracker:
                 state_column = headers.get(HEADERS["state_json"])
                 fm = cfg["field_map"]
                 for row, cells in enumerate(ws.iter_rows(min_row=cfg["first_data_row"], values_only=True), cfg["first_data_row"]):
+                    cells = tuple(cells) + (None,) * max(0, max(ci(fm["company"]), ci(fm["title"]), ci(fm.get("url") or "A"), ci(cfg["status_columns"]["application_status"]), state_column or 0) - len(cells))
                     company = cells[ci(fm["company"]) - 1]
                     role = cells[ci(fm["title"]) - 1]
                     if not company or not role:
