@@ -13,25 +13,7 @@ APPROVED_REPORT='c974caa787d82e6f31176e57dbab4d725bf4ed595e673ceeaceda4c906cb339
 CONFIRMED={'S23':('Amey','Graduate Digital Technology Consultant'), 'S24':('Menzies','Graduate Programme 2027 — Technology Risk Auditing'), 'S25':('EY','Consultant — Cyber Security Analyst — Consulting Service Delivery, FS'), 'S26':('Arup','Graduate Security Risk Consultant — London')}
 REVIEW_DEADLINES={'FTI Consulting':'2026-10-08T16:21:32Z','Shell':'2026-10-10T14:40:23Z','National Highways':'2026-10-14T11:34:00Z'}
 
-def resolve_profiles(profiles):
-    """Recognize only the exact compact UK layout, never guess column positions."""
-    import openpyxl
-    result=copy.deepcopy(profiles);cfg=result['regions']['uk'];path=Path(cfg['tracker'])
-    wb=openpyxl.load_workbook(path,read_only=True)
-    try:
-        ws=wb[cfg['sheet']]
-        if ws.max_row<2:raise ValueError('canonical UK layout unrecognized; no write allowed')
-        compact=[c.value for c in ws[2][:6]]
-        if compact==['Date Found','Company','Role Title','Apply Link','Application Deadline','Status']:
-            cfg.update(header_row=2,first_data_row=3,table=None,field_map={'date_found':'A','company':'B','title':'C','url':'D'},status_columns={'application_status':'F'},id={'column':'G','style':'mail','prefix':'UK'},bounded_job_id_header='Career Ops Job ID',owner_columns=['A','B','C','D','E','F'])
-        else:
-            from openpyxl.utils import column_index_from_string as ci
-            company=ws.cell(cfg['header_row'],ci(cfg['field_map']['company'])).value
-            title=ws.cell(cfg['header_row'],ci(cfg['field_map']['title'])).value
-            if 'company' not in str(company).lower() or not any(word in str(title).lower() for word in ('role','title')):
-                raise ValueError('canonical UK layout unrecognized; no write allowed')
-    finally:wb.close()
-    return result
+from career_tracker_layout import resolve_profiles
 
 def validate_report(report):
     if report.get('report_id')!=APPROVED_REPORT or report_hash(report)!=APPROVED_REPORT:
@@ -132,14 +114,6 @@ def stage_workbooks(plan,profiles,before,root):
         src=Path(profiles['regions'][region]['tracker']);target=root/(region+'.xlsx');shutil.copy2(src,target)
         if digest(target)!=before[region]:raise ValueError('workbook changed before staging')
         staged['regions'][region]['tracker']=str(target)
-    for region in touched:
-        cfg=staged['regions'][region]
-        if cfg.get('bounded_job_id_header'):
-            wb=openpyxl.load_workbook(cfg['tracker']);ws=wb[cfg['sheet']]
-            from openpyxl.utils import column_index_from_string as ci
-            cell=ws.cell(cfg['header_row'],ci(cfg['id']['column']))
-            if cell.value not in (None,cfg['bounded_job_id_header']):raise ValueError('reserved job ID column is occupied')
-            cell.value=cfg['bounded_job_id_header'];wb.save(cfg['tracker']);wb.close()
     tracker=WorkbookTracker(staged,root/'staging-backups');receipts=[]
     for record in plan['records']:
         receipts.append({'application_id':record['application_id'],'new':not bool(record.get('row')),'region':record['region'],'write':tracker.upsert(record)})

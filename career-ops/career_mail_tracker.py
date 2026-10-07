@@ -19,6 +19,7 @@ from openpyxl.utils import column_index_from_string as ci, get_column_letter
 from openpyxl.utils.cell import range_boundaries
 
 from career_mail_parser import stable_id
+from career_tracker_layout import resolve_profiles, validate_sheet
 
 FIELDS = ["application_id", "application_date", "source_application_channel", "current_stage",
           "latest_status", "assessment_type", "assessment_provider", "assessment_received_date",
@@ -34,7 +35,7 @@ def digest(path):
 
 class WorkbookTracker:
     def __init__(self, profiles, backup_dir):
-        self.profiles, self.backup_dir = profiles["regions"], Path(backup_dir)
+        self.profiles, self.backup_dir = resolve_profiles(profiles)["regions"], Path(backup_dir)
 
     def read(self):
         records, fingerprints = [], {}
@@ -46,6 +47,7 @@ class WorkbookTracker:
             wb = openpyxl.load_workbook(path, read_only=True, data_only=False)
             try:
                 ws = wb[cfg["sheet"]]
+                validate_sheet(ws, cfg)
                 headers = {str(c.value): c.column for c in ws[cfg["header_row"]] if c.value}
                 state_column = headers.get(HEADERS["state_json"])
                 fm = cfg["field_map"]
@@ -93,7 +95,15 @@ class WorkbookTracker:
             wb = openpyxl.load_workbook(path)
             try:
                 ws = wb[cfg["sheet"]]
+                validate_sheet(ws, cfg)
                 headers = {str(c.value): c.column for c in ws[cfg["header_row"]] if c.value}
+                identity = cfg.get("id") or cfg.get("mail_identity")
+                if cfg.get("mail_identity"):
+                    spec = cfg["mail_identity"]
+                    cell = ws.cell(cfg["header_row"], ci(spec["column"]))
+                    if cell.value not in (None, spec["header"]):
+                        raise ValueError("reserved email identity column is occupied")
+                    cell.value = spec["header"]
                 cols = {}
                 for key, header in HEADERS.items():
                     if header not in headers:
@@ -113,22 +123,23 @@ class WorkbookTracker:
                             or str(ws.cell(row, ci(fm["title"])).value or "").casefold() != record["role"].casefold()):
                         raise ValueError("canonical row changed identity; reconciliation required")
                 else:
-                    id_col = ci(cfg["id"]["column"])
+                    id_col = ci(identity["column"]) if identity else None
                     occupied = [n for n in range(cfg["first_data_row"], ws.max_row + 1)
                                 if ws.cell(n, ci(cfg["field_map"]["company"])).value]
                     row = max(occupied, default=cfg["first_data_row"] - 1) + 1
                     if row > cfg.get("license_free_rows", 1000):
                         raise ValueError("canonical tracker capacity reached")
-                    style = cfg["id"].get("style")
+                    style = identity.get("style") if identity else None
                     if style == "sequential":
-                        prefix = cfg["id"]["prefix"]
+                        prefix = identity["prefix"]
                         import re
                         nums = [int(m.group(1)) for n in occupied if
                                 (m := re.fullmatch(re.escape(prefix) + r"(\d+)", str(ws.cell(n, id_col).value or "")))]
                         job_id = prefix + str(max(nums, default=0) + 1)
                     else:
-                        job_id = cfg["id"]["prefix"] + "-MAIL-" + record["application_id"][:12]
-                    ws.cell(row, id_col, job_id)
+                        job_id = (identity or {}).get("prefix", region.upper()) + "-MAIL-" + record["application_id"][:12]
+                    if id_col:
+                        ws.cell(row, id_col, job_id)
                     for key, value in (("company", record["company"]), ("title", record["role"])):
                         cell = ws.cell(row, ci(cfg["field_map"][key]), value)
                         cell.data_type = "s"

@@ -147,6 +147,8 @@ class Tracker:
         self.cfg = cfg
         self.wb = openpyxl.load_workbook(self.path, data_only=False)
         self.ws = self.wb[cfg["sheet"]]
+        from career_tracker_layout import validate_sheet
+        validate_sheet(self.ws, cfg)
         self.header_row = cfg["header_row"]
         self.first_data_row = cfg["first_data_row"]
 
@@ -174,10 +176,10 @@ class Tracker:
         return column_index_from_string(self.cfg["dedupe"]["url_column"])
 
     def last_data_row(self) -> int:
-        idx = self.url_col_idx()
+        columns = {self.url_col_idx()} | {column_index_from_string(self.cfg["field_map"][k]) for k in ("company", "title")}
         last = self.first_data_row - 1
         for r in range(self.first_data_row, self.ws.max_row + 1):
-            if self.ws.cell(row=r, column=idx).value not in (None, ""):
+            if any(self.ws.cell(row=r, column=c).value not in (None, "") for c in columns):
                 last = r
         return last
 

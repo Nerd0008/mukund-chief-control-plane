@@ -234,7 +234,7 @@ def test_manifest_cannot_set_application_state(tmp_path):
     last = max(r for r in range(cfg["first_data_row"], ws.max_row + 1)
                if ws.cell(row=r, column=url_col).value not in (None, ""))
     scol = tw.column_index_from_string(cfg["status_columns"]["application_status"])
-    assert ws.cell(row=last, column=scol).value == "To Review", \
+    assert ws.cell(row=last, column=scol).value == cfg["defaults"]["application_status"] != "Applied", \
         "manifest smuggled an application status"
     wb.close()
 

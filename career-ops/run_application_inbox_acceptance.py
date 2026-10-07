@@ -61,8 +61,7 @@ def pick_rows(index: dict, cfg: dict, region: str, want: int = 3) -> list[dict]:
     """
     pre = {s.casefold() for s in cfg["pre_application_states"].get(region, [])}
     rows = [r for r in index["regions"][region]["rows"]
-            if r.get("url") and r.get("url_key") and r.get("id")
-            and len(str(r["id"])) >= 3
+            if r.get("url") and r.get("url_key") and (region == "uk" or (r.get("id") and len(str(r["id"])) >= 3))
             and str(r.get("application_status") or "").casefold() in pre]
     return rows[:want]
 
@@ -108,10 +107,10 @@ def build_derived_mailbox(out_dir: Path, index: dict, profiles: dict, cfg: dict)
             "to": "mukund@example.com",
             "subject": f"Outcome of your application ({r['id']})",
             "body": ("Unfortunately, we will not be proceeding with your application for the "
-                     + str(r["title"]) + " role. Your reference is " + str(r["id"]) + "."),
+                     + str(r["title"]) + " role. Your reference is " + (str(r["id"]) if r.get("id") else str(r["url"])) + "."),
         })
         generated.append({"case": "id_reference_rejection", "region": "uk",
-                          "row_id": r["id"], "expected_basis": "explicit_canonical_reference_in_message"})
+                          "row_id": r["id"], "expected_basis": "explicit_canonical_reference_in_message" if r.get("id") else "posting_url_in_message"})
     if len(uk_rows) > 2:
         r = uk_rows[2]
         msgs.append({

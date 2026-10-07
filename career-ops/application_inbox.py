@@ -285,7 +285,7 @@ def build_canonical_index(cfg: dict, profiles: dict | None = None,
             continue
         entry["sha256"] = sha256_file(path)
         fm = cfg_r.get("field_map", {})
-        id_col = cfg_r["id"]["column"]
+        id_col = (cfg_r.get("id") or {}).get("column")
         status_col = cfg_r["status_columns"]["application_status"]
         tr = tw.Tracker(path, cfg_r)
         try:

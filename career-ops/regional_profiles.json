@@ -14,11 +14,20 @@
       "header_row": 2,
       "first_data_row": 3,
       "last_data_row": 167,
-      "expected_sheets": ["Jobs"],
+      "expected_sheets": [
+        "Jobs"
+      ],
       "license_free_rows": 500,
       "id": null,
-      "dedupe": {"url_column": "D", "company_column": "B", "title_column": "C"},
-      "date_type": {"date_found": "date", "deadline": "date"},
+      "dedupe": {
+        "url_column": "D",
+        "company_column": "B",
+        "title_column": "C"
+      },
+      "date_type": {
+        "date_found": "date",
+        "deadline": "date"
+      },
       "field_map": {
         "date_found": "A",
         "company": "B",
@@ -26,21 +35,34 @@
         "url": "D",
         "deadline": "E"
       },
-      "owner_columns": ["E", "F"],
+      "owner_columns": [
+        "E",
+        "F"
+      ],
       "refreshable_columns": [],
       "defaults": {
-        "application_status": "To Review"
+        "application_status": "Not Applied"
       },
-      "status_columns": {"application_status": "F"},
-      "number_formats": {"A": "yyyy-mm-dd", "E": "yyyy-mm-dd"},
+      "status_columns": {
+        "application_status": "F"
+      },
+      "number_formats": {
+        "A": "yyyy-mm-dd",
+        "E": "yyyy-mm-dd"
+      },
       "validations": {
-        "F": {"type": "list", "formula1": "\"Applied,Assessment Pending,Interview Scheduled,Rejected,Not Applied\"", "extend_from": 3, "extend_to": 500}
+        "F": {
+          "type": "list",
+          "formula1": "\"Applied,Assessment Pending,Interview Scheduled,Rejected,Not Applied\"",
+          "extend_from": 3,
+          "extend_to": 500
+        }
       },
       "status_values": {
         "applied": "Applied",
         "rejected": "Rejected",
         "not_applied": "Not Applied",
-        "to_review": "To Review"
+        "to_review": "Not Applied"
       },
       "dedupe_ledger": {
         "kind": "scan-history-tsv",
@@ -48,6 +70,20 @@
         "url_col": 0,
         "company_col": 4,
         "title_col": 3
+      },
+      "required_headers": {
+        "A": "Date Found",
+        "B": "Company",
+        "C": "Role Title",
+        "D": "Apply Link",
+        "E": "Application Deadline",
+        "F": "Status"
+      },
+      "mail_identity": {
+        "column": "G",
+        "header": "Career Ops Job ID",
+        "prefix": "UK",
+        "style": "mail"
       }
     },
     "dubai": {
@@ -58,11 +94,28 @@
       "header_row": 1,
       "first_data_row": 2,
       "last_data_row": 22,
-      "expected_sheets": ["Job Tracker"],
+      "expected_sheets": [
+        "Job Tracker"
+      ],
       "license_free_rows": 1000,
-      "id": {"column": "Y", "style": "regional-dated", "prefix": "DUBAI", "date_format": "%Y-%m-%d", "separator": "-"},
-      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
-      "date_type": {"date_found": "date", "posted_date": "date", "deadline": "date", "last_checked": "date"},
+      "id": {
+        "column": "Y",
+        "style": "regional-dated",
+        "prefix": "DUBAI",
+        "date_format": "%Y-%m-%d",
+        "separator": "-"
+      },
+      "dedupe": {
+        "url_column": "E",
+        "company_column": "B",
+        "title_column": "C"
+      },
+      "date_type": {
+        "date_found": "date",
+        "posted_date": "date",
+        "deadline": "date",
+        "last_checked": "date"
+      },
       "field_map": {
         "date_found": "A",
         "company": "B",
@@ -84,9 +137,33 @@
         "source": "X",
         "notes": "Z"
       },
-      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Priority\",IF(I{row}>=4,\"Strong\",IF(I{row}>=3.5,\"Near Match\",\"Low\"))))"}},
-      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
-      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "formula_map": {
+        "fit_tier": {
+          "column": "J",
+          "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Priority\",IF(I{row}>=4,\"Strong\",IF(I{row}>=3.5,\"Near Match\",\"Low\"))))"
+        }
+      },
+      "owner_columns": [
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "Z"
+      ],
+      "refreshable_columns": [
+        "F",
+        "G",
+        "H",
+        "K",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "W",
+        "X"
+      ],
       "defaults": {
         "application_status": "New",
         "selected": "No",
@@ -94,14 +171,51 @@
         "cover_letter_status": "Not Started",
         "visa_pathway": "Visa unknown"
       },
-      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
-      "number_formats": {"A": "yyyy-mm-dd", "F": "yyyy-mm-dd", "G": "yyyy-mm-dd", "I": "0.0", "L": "0", "W": "yyyy-mm-dd"},
+      "status_columns": {
+        "application_status": "R",
+        "selected": "S",
+        "cv_status": "T",
+        "cover_letter_status": "U"
+      },
+      "number_formats": {
+        "A": "yyyy-mm-dd",
+        "F": "yyyy-mm-dd",
+        "G": "yyyy-mm-dd",
+        "I": "0.0",
+        "L": "0",
+        "W": "yyyy-mm-dd"
+      },
       "validations": {
-        "H": {"type": "list", "formula1": "\"Explicit visa assistance,Visa unknown,No visa pathway\"", "extend_from": 2, "extend_to": 1000},
-        "R": {"type": "list", "formula1": "\"New,Reviewed,Selected,Preparing Documents,Ready to Apply,Application Started,Submitted,Interview,Rejected,Closed\"", "extend_from": 2, "extend_to": 1000},
-        "S": {"type": "list", "formula1": "\"No,Yes\"", "extend_from": 2, "extend_to": 1000},
-        "T": {"type": "list", "formula1": "\"Not Started,Drafted,Tailored,Final\"", "extend_from": 2, "extend_to": 1000},
-        "U": {"type": "list", "formula1": "\"Not Started,Drafted,Tailored,Final\"", "extend_from": 2, "extend_to": 1000}
+        "H": {
+          "type": "list",
+          "formula1": "\"Explicit visa assistance,Visa unknown,No visa pathway\"",
+          "extend_from": 2,
+          "extend_to": 1000
+        },
+        "R": {
+          "type": "list",
+          "formula1": "\"New,Reviewed,Selected,Preparing Documents,Ready to Apply,Application Started,Submitted,Interview,Rejected,Closed\"",
+          "extend_from": 2,
+          "extend_to": 1000
+        },
+        "S": {
+          "type": "list",
+          "formula1": "\"No,Yes\"",
+          "extend_from": 2,
+          "extend_to": 1000
+        },
+        "T": {
+          "type": "list",
+          "formula1": "\"Not Started,Drafted,Tailored,Final\"",
+          "extend_from": 2,
+          "extend_to": 1000
+        },
+        "U": {
+          "type": "list",
+          "formula1": "\"Not Started,Drafted,Tailored,Final\"",
+          "extend_from": 2,
+          "extend_to": 1000
+        }
       },
       "dedupe_ledger": {
         "kind": "shortlist-history-md",
@@ -116,11 +230,28 @@
       "header_row": 1,
       "first_data_row": 2,
       "last_data_row": 42,
-      "expected_sheets": ["Job Tracker"],
+      "expected_sheets": [
+        "Job Tracker"
+      ],
       "license_free_rows": 501,
-      "id": {"column": "Y", "style": "regional-dated", "prefix": "JP", "date_format": "%Y%m%d", "separator": "-"},
-      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
-      "date_type": {"date_found": "iso_string", "posted_date": "iso_string", "deadline": "iso_string", "last_checked": "iso_string"},
+      "id": {
+        "column": "Y",
+        "style": "regional-dated",
+        "prefix": "JP",
+        "date_format": "%Y%m%d",
+        "separator": "-"
+      },
+      "dedupe": {
+        "url_column": "E",
+        "company_column": "B",
+        "title_column": "C"
+      },
+      "date_type": {
+        "date_found": "iso_string",
+        "posted_date": "iso_string",
+        "deadline": "iso_string",
+        "last_checked": "iso_string"
+      },
       "field_map": {
         "date_found": "A",
         "company": "B",
@@ -142,9 +273,33 @@
         "source": "X",
         "notes": "Z"
       },
-      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"}},
-      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
-      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "formula_map": {
+        "fit_tier": {
+          "column": "J",
+          "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"
+        }
+      },
+      "owner_columns": [
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "Z"
+      ],
+      "refreshable_columns": [
+        "F",
+        "G",
+        "H",
+        "K",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "W",
+        "X"
+      ],
       "defaults": {
         "application_status": "Pending",
         "selected": "No",
@@ -152,12 +307,36 @@
         "cover_letter_status": "Not started",
         "visa_pathway": "JAPAN WORK VISA UNKNOWN"
       },
-      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
-      "number_formats": {"A": "@", "I": "0.0", "W": "@"},
+      "status_columns": {
+        "application_status": "R",
+        "selected": "S",
+        "cv_status": "T",
+        "cover_letter_status": "U"
+      },
+      "number_formats": {
+        "A": "@",
+        "I": "0.0",
+        "W": "@"
+      },
       "validations": {
-        "R": {"type": "list", "formula1": "\"Pending,Selected,CV Tailored,Applied,Closed,Discarded\"", "extend_from": 2, "extend_to": 501},
-        "S": {"type": "list", "formula1": "\"Yes,No\"", "extend_from": 2, "extend_to": 501},
-        "T": {"type": "list", "formula1": "\"Not started,Drafted,Ready,Uploaded,N/A\"", "extend_from": 2, "extend_to": 501}
+        "R": {
+          "type": "list",
+          "formula1": "\"Pending,Selected,CV Tailored,Applied,Closed,Discarded\"",
+          "extend_from": 2,
+          "extend_to": 501
+        },
+        "S": {
+          "type": "list",
+          "formula1": "\"Yes,No\"",
+          "extend_from": 2,
+          "extend_to": 501
+        },
+        "T": {
+          "type": "list",
+          "formula1": "\"Not started,Drafted,Ready,Uploaded,N/A\"",
+          "extend_from": 2,
+          "extend_to": 501
+        }
       },
       "dedupe_ledger": {
         "kind": "shortlist-history-md",
@@ -172,11 +351,28 @@
       "header_row": 1,
       "first_data_row": 2,
       "last_data_row": 23,
-      "expected_sheets": ["Job Tracker"],
+      "expected_sheets": [
+        "Job Tracker"
+      ],
       "license_free_rows": 503,
-      "id": {"column": "Y", "style": "regional-dated", "prefix": "SG", "date_format": "%Y%m%d", "separator": "-"},
-      "dedupe": {"url_column": "E", "company_column": "B", "title_column": "C"},
-      "date_type": {"date_found": "date", "posted_date": "date", "deadline": "date", "last_checked": "date"},
+      "id": {
+        "column": "Y",
+        "style": "regional-dated",
+        "prefix": "SG",
+        "date_format": "%Y%m%d",
+        "separator": "-"
+      },
+      "dedupe": {
+        "url_column": "E",
+        "company_column": "B",
+        "title_column": "C"
+      },
+      "date_type": {
+        "date_found": "date",
+        "posted_date": "date",
+        "deadline": "date",
+        "last_checked": "date"
+      },
       "field_map": {
         "date_found": "A",
         "company": "B",
@@ -198,9 +394,33 @@
         "source": "X",
         "notes": "Z"
       },
-      "formula_map": {"fit_tier": {"column": "J", "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"}},
-      "owner_columns": ["R", "S", "T", "U", "V", "Z"],
-      "refreshable_columns": ["F", "G", "H", "K", "M", "N", "O", "P", "Q", "W", "X"],
+      "formula_map": {
+        "fit_tier": {
+          "column": "J",
+          "template": "=IF(I{row}=\"\",\"\",IF(I{row}>=4.5,\"Strong\",IF(I{row}>=3.5,\"Good\",\"Review\")))"
+        }
+      },
+      "owner_columns": [
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "Z"
+      ],
+      "refreshable_columns": [
+        "F",
+        "G",
+        "H",
+        "K",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "W",
+        "X"
+      ],
       "defaults": {
         "application_status": "Pending",
         "selected": "No",
@@ -208,12 +428,38 @@
         "cover_letter_status": "Not Started",
         "visa_pathway": "WORK PASS UNKNOWN"
       },
-      "status_columns": {"application_status": "R", "selected": "S", "cv_status": "T", "cover_letter_status": "U"},
-      "number_formats": {"A": "yyyy-mm-dd", "F": "yyyy-mm-dd", "G": "yyyy-mm-dd", "I": "0.0", "W": "yyyy-mm-dd"},
+      "status_columns": {
+        "application_status": "R",
+        "selected": "S",
+        "cv_status": "T",
+        "cover_letter_status": "U"
+      },
+      "number_formats": {
+        "A": "yyyy-mm-dd",
+        "F": "yyyy-mm-dd",
+        "G": "yyyy-mm-dd",
+        "I": "0.0",
+        "W": "yyyy-mm-dd"
+      },
       "validations": {
-        "R": {"type": "list", "formula1": "\"Pending,Applied,Interview,Offer,Rejected,Withdrawn,Closed\"", "extend_from": 2, "extend_to": 501},
-        "S": {"type": "list", "formula1": "\",Yes,No\"", "extend_from": 2, "extend_to": 501},
-        "T": {"type": "list", "formula1": "\"Not Started,Drafted,Ready,Submitted,Not Needed\"", "extend_from": 2, "extend_to": 501}
+        "R": {
+          "type": "list",
+          "formula1": "\"Pending,Applied,Interview,Offer,Rejected,Withdrawn,Closed\"",
+          "extend_from": 2,
+          "extend_to": 501
+        },
+        "S": {
+          "type": "list",
+          "formula1": "\",Yes,No\"",
+          "extend_from": 2,
+          "extend_to": 501
+        },
+        "T": {
+          "type": "list",
+          "formula1": "\"Not Started,Drafted,Ready,Submitted,Not Needed\"",
+          "extend_from": 2,
+          "extend_to": 501
+        }
       },
       "dedupe_ledger": {
         "kind": "shortlist-history-md",
