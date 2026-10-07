@@ -426,7 +426,7 @@ def main() -> int:
             return
         if os.name == "nt":
             try:
-                subprocess.run(
+                taskkill = subprocess.run(
                     ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
                     capture_output=True,
                     text=True,
@@ -434,7 +434,14 @@ def main() -> int:
                     errors="replace",
                     timeout=20,
                 )
-                return
+                # ``taskkill`` can return nonzero (for example when the
+                # process has exited between poll and termination, or when a
+                # constrained console cannot terminate its child).  Only a
+                # confirmed zero result may suppress the direct-process
+                # fallback below; returning on any result leaks the child and
+                # defeats the watchdog.
+                if taskkill.returncode == 0:
+                    return
             except Exception:
                 pass
         try:

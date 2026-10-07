@@ -83,7 +83,7 @@ def cmd_e3_verify_db(args):
 def cmd_e3_execute(args):
     """Drive the real E3 production execution leg on the local path."""
     from stage2_control import require_enabled
-    require_enabled()
+    stage2_state = require_enabled()
     if _module_dir() not in sys.path:
         sys.path.insert(0, _module_dir())
     from e3_execution import ExecutionAdapterRegistry
@@ -91,7 +91,8 @@ def cmd_e3_execute(args):
     from task_fingerprint import TaskFingerprint
 
     db = _db_path(args)
-    registry = ExecutionAdapterRegistry()
+    registry = ExecutionAdapterRegistry(
+        allowed_workers=stage2_state.get("allowed_workers", []))
     routable = registry.routable_worker_ids()
 
     fp = TaskFingerprint(task_family=args.family, reasoning_depth=args.reasoning,
