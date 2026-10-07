@@ -159,3 +159,25 @@ def test_repeated_invite_does_not_shift_relative_deadline():
 def test_wrapped_word_number_relative_period():
     d=extract_deadline("Please complete the assessment within the next\nthree days.","2026-10-01T10:00:00+00:00","m","t")
     assert d["value"]=="2026-10-04T10:00:00+00:00"
+
+
+def test_privacy_footer_company_cannot_override_explicit_employer():
+    raw=mail("Thank you for applying for the Graduate Auditor role with Menzies. This takes time.","Application received")
+    a=analyze_signal(raw,[record(company="Takes",role="Graduate Auditor")])
+    assert a["company"]=="Menzies" and a["category"]!="confident existing application match"
+
+def test_candidate_id_is_not_application_reference():
+    raw=mail("Candidate ID: PERSON1\nCompany: Acme\nRole: Internship Analyst\nYour application has been received.")
+    a=analyze_signal(raw,[record(role="Graduate Engineer",application_identity="PERSON1")])
+    assert a["category"]!="confident existing application match"
+
+
+def test_canonical_employer_host_requires_full_role():
+    raw=mail('Your application for Graduate Engineer has been received. https://careers.acme.example/jobs/help',subject='Application received')
+    a=analyze_signal(raw,[record(role='Graduate Engineer',canonical_job_host='careers.acme.example')])
+    assert a['category']=='confident existing application match'
+
+def test_generic_platform_domain_cannot_identify_employer():
+    raw=mail('Your application for Graduate Engineer has been received. https://myworkday.com/help',subject='Application received')
+    a=analyze_signal(raw,[record(role='Graduate Engineer',canonical_job_host='myworkday.com')])
+    assert a['category']!='confident existing application match'

@@ -1,5 +1,7 @@
 """Evidence-ranked matching; no edit-distance, semantic model, or company-only merge."""
 import re
+from urllib.parse import urlsplit
+from email.utils import parseaddr
 from career_mail_parser import parse_message, mail_fields, identity_key
 from career_mail_rules import company_key, company_aliases, role_key
 
@@ -8,10 +10,22 @@ PLATFORMS=('workday','workable','lever','teamtailor','canditech','hirevue','succ
 def has_phrase(phrase,text):
     return ' '+identity_key(phrase)+' ' in ' '+identity_key(text)+' '
 
+def company_named(record,mail):
+    text=mail['subject']+'\n'+mail['body']
+    if any(has_phrase(a,text) for a in company_aliases(record['company'])):return True
+    host=str(record.get('canonical_job_host') or '').removeprefix('www.').lower()
+    if not host or host in {'myworkday.com','myworkdayjobs.com','greenhouse.io','jobs.lever.co','smartrecruiters.com'}:return False
+    _,sender=parseaddr(mail.get('from') or '')
+    domains=[sender.rsplit('@',1)[-1].lower()]
+    domains += [(urlsplit(u).hostname or '').removeprefix('www.').lower() for u in re.findall(r'https?://[^\s<>"\']+',text)]
+    return any(d==host or d.endswith('.'+host) for d in domains)
+
+
 def clean_role(value):
     value=re.sub(r'\s+',' ',value or '')
     value=re.sub(r'(?i)^(?:(?:the|our) )?(?:(?:role|position) of |(?:role|position) )','',value or '').strip()
     value=re.sub(r'(?i)(?:opportunity|vacancy|role)$','',value).strip()
+    value=re.sub(r'(?i)^(?:the|our)\s+','',value)
     value=re.sub(r'(?i)\s+(?:ID )?[A-Z]{0,4}-?\d{5,}\s*$','',value).strip()
     return value
 
@@ -33,16 +47,17 @@ def fields(raw,records):
             subject_employer=m.group(1).strip();break
     if subject_employer and not explicit_company:
         signal['company']=subject_employer;explicit_company=True;evidence.append('explicit employer subject')
+    named_explicit=bool(signal.get('company'))
     known=[]
     for record in records:
         # Canonical employer variants are audited by the matcher: collisions remain review-only.
         if any(has_phrase(a,subject) for a in company_aliases(record['company'])):known.append(record['company'])
     if not known:
         for record in records:
-            if any(has_phrase(a,text) for a in company_aliases(record['company'])):known.append(record['company'])
+            if company_named(record,mail):known.append(record['company'])
     families={company_key(c.split('(')[0].split('/')[0]) for c in known}
-    if len(families)==1 and known and (not explicit_company or not signal.get('company') or any(company_key(signal['company']) in company_aliases(c) for c in known)):
-        signal['company']=next(iter(families));evidence.append('employer named in subject/body and canonical employer index')
+    if len(families)==1 and known and (not signal.get('company') or any(company_key(signal['company']) in company_aliases(c) for c in known)):
+        signal['company']=known[0].split('(')[0].split('/')[0].strip();evidence.append('employer named in subject/body and canonical employer index')
     signal['employer_named_candidates']=sorted(set(known))
     # Explicit employer phrases for employers absent from the tracker.
     if not signal.get('company'):
@@ -77,6 +92,9 @@ def fields(raw,records):
         value=signal['role']
         if re.search(r'(?i)\s+at\s+',value): value=re.split(r'(?i)\s+at\s+',value)[0]
         signal['role']=clean_role(value).strip(' ,')
+    if not signal.get('role'):
+        m=re.search(r'(?i)\b(?:role|position) of\s+([^.!?]{2,160}?)(?:\n\n|Your application| at |$)', ' '.join(text.split()))
+        if m:signal['role']=clean_role(m.group(1));evidence.append('wrapped role-of phrase')
     # Subject "Employer - Role - Thank you ..." / "Role - Employer".
     parts=re.split(r'\s+[–—-]\s+',subject)
     if len(parts)>=2 and signal.get('company'):
@@ -85,6 +103,14 @@ def fields(raw,records):
                 adjacent=parts[i+1] if i==0 else parts[i-1]
                 if not re.search(r'(?i)application|thank|update|received',adjacent):
                     signal['role']=clean_role(adjacent);evidence.append('employer/role subject layout')
+    if not signal.get('company') and signal.get('role'):
+        paired=[r for r in records if role_key(signal['role'])==role_key(r['role']) and company_named(r,mail)]
+        if len(paired)==1:
+            signal['company']=paired[0]['company'];evidence.append('unique named employer and complete canonical role')
+    if not signal.get('company') and not signal.get('role'):
+        named_pairs=[r for r in records if company_named(r,mail) and has_phrase(r['role'],text)]
+        if len(named_pairs)==1:
+            signal.update(company=named_pairs[0]['company'],role=named_pairs[0]['role']);evidence.append('canonical employer host and complete named role')
     # Candidate full role is actually mentioned, not inferred from a unique company.
     if signal.get('company') and not signal.get('role'):
         possible={r['role'] for r in records if company_key(signal['company']) in company_aliases(r['company']) and has_phrase(r['role'],text)}

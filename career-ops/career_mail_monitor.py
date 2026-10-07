@@ -246,7 +246,7 @@ def analyze_signal(raw, records, *, item=None):
     text = mail["subject"] + "\n" + mail["body"]
     # Date/period fragments only; no body excerpts or assessment URLs in analysis.
     signal["timing_evidence"] = {
-        "date_fragments": re.findall(r"\b(?:\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]{3,9}(?:\s+\d{4})?|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2})\b", text)[:12],
+        "date_fragments": [m.group() for m in re.finditer(r"\b(?:\d{1,2}(?:st|nd|rd|th)?\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?:\s+\d{4})?|\d{4}-\d{2}-\d{2})\b",text,re.I)][:12],
         "period_fragments": re.findall(r"(?i)\b(?:within|active for|next)\s+(?:the\s+)?(?:\d+|one|two|three|five|seven|ten)\s+(?:(?:calendar|working|business)\s+)?(?:hours?|days?|weeks?)",text)[:12],
         "explicit_timezone": bool(re.search(r"\b(?:UTC|GMT|BST|JST|SGT|GST)\b",text)),
     }
