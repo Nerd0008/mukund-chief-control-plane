@@ -1,0 +1,36 @@
+Application for Cybersecurity Graduate Programme
+Dear National Highways Recruitment Team,
+I am applying for the Cybersecurity Graduate Programme at National Highways because it combines the
+analytical and technical work I already do with the critical infrastructure protection I want to build. The
+opportunity to safeguard the digital and operational technology that supports the UK's road network
+while gaining hands-on experience across a large and complex organisation is exactly the environment I
+need to grow. I am available to start in September 2027 and comfortable with the Manchester location
+and hybrid working arrangement.
+My background combines practical IT support and security work with formal analytical training. I am an
+MSc Information Security graduate from Royal Holloway, awarded with Merit, with CompTIA
+Security+ and ISC2 Certified in Cybersecurity, preceded by a BCA in computer applications. That means
+I understand not only how to resolve technical problems but how to approach complex challenges in a
+structured way, which is central to a role that requires critical thinking, problem solving and a positive
+mindset.
+In my current IT support position I am the first point of contact for 15 colleagues across 15 to 20 devices,
+troubleshooting access and system problems, monitoring server health and maintaining network and
+website-access controls. I handle four to five access requests a day through on-premises Active Directory
+and investigate four to five suspicious emails a day, recording findings and alerting colleagues to
+recurring tactics. I also built a local tool that maps Windows error codes to their common causes and
+used it to trace intermittent server freezes to missing or corrupted DLLs. My technical skills include
+Python, PowerShell and SQL, which I use for task automation and data analysis.
+Two things I want to be straightforward about. I have not worked in critical infrastructure or transport, so
+that domain knowledge is something I would expect to develop through National Highways' graduate
+programme rather than claim as existing experience. What I do bring is a genuine analytical mindset and
+attention to detail. At Co-op, as Person in Charge, I conduct weekly risk assessments and daily
+compliance checks, maintain the assessment records, and coordinate seven or eight colleagues per shift
+while explaining requirements to people who have no particular interest in them.
+What draws me to National Highways specifically is the focus on protecting the digital and operational
+technology that keeps the country moving. The opportunity to contribute to that work through a
+structured three-year graduate programme with real responsibility, dedicated mentorship and a clear
+pathway to a permanent cybersecurity role is exactly the kind of challenge I am looking for. I would
+welcome the opportunity to discuss how my skills and experience could contribute to your team.
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
