@@ -1,0 +1,66 @@
+{
+  "oauth_ready": true,
+  "snapshot_dependency": false,
+  "canonical_metadata_records": 17,
+  "authorised_signals": 20,
+  "duplicate_signals_avoided": 20,
+  "repeat_tracker_writes": 0,
+  "protected_review_only_signals": 45,
+  "calendar_events_verified": 3,
+  "calendar_requests_get_only": 3,
+  "report_id": "8530fe3adab65692b9467cdbeea6cf167d325c1895f2868dea71a7b5c8a40136",
+  "scan_mode": "incremental",
+  "counts": {
+    "ambiguous_deadlines": 0,
+    "assessments_interviews": 0,
+    "derived_deadlines": 0,
+    "duplicates": 0,
+    "exact_deadlines": 0,
+    "ignored": 21,
+    "likely_applications": 9,
+    "matched_existing": 1,
+    "messages_read": 30,
+    "proposed_new_rows": 0
+  },
+  "gmail_mutations": 0,
+  "tracker_writes": 0,
+  "calendar_writes": 0,
+  "checkpoint_exists": false,
+  "automatic_writes_enabled": false,
+  "owner_cells_unchanged": true,
+  "scan_fingerprints_current": true,
+  "workbook_hashes": {
+    "uk": {
+      "before_hash": "f1e35aeb27cfad1d700e4899a7ad780c191932af5d643603b45882ab4f3fc084",
+      "after_hash": "cd82b749f382545c7c88168d1fb03d86123662c21bf90f81dbc8f373ff9676a5",
+      "changed_parts": [
+        "xl/worksheets/sheet1.xml"
+      ],
+      "restored": 17,
+      "skipped": 0,
+      "authorised_signals": 20
+    },
+    "japan": {
+      "before_hash": "048e03da0d19f99137e0ec704f718f6a23bab0ecfd948ecacdb07b4f1a496e51",
+      "after_hash": "537224cb2c215341d3ebe10a8d556e27c9c9629df0840830243d1d285fcbfda0",
+      "changed_parts": [
+        "xl/tables/table1.xml"
+      ],
+      "resolution": "Extend table and table filter through populated row62; no cells changed"
+    },
+    "singapore": {
+      "before_hash": "1919f3d7cee2e3b799da36ae4699a9cd417fcbd66c542607cef1680e34b32609",
+      "after_hash": "5cf05863d67ab47ecf793e626016e52a0badd0bf55ac137937264f69b0ac02a3",
+      "changed_parts": [
+        "xl/worksheets/sheet1.xml"
+      ],
+      "resolution": "Preserve rows17/33 and URL; explicitly mark non-owner discovery row33 as duplicate of original ID"
+    }
+  },
+  "full_regression": {
+    "passed": 773,
+    "failed": 0
+  },
+  "native_contract_commit": "019e7a8576d7524be9f1cb1a973b984c19e67714",
+  "release_ready": true
+}
