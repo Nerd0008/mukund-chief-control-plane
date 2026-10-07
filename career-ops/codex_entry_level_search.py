@@ -195,11 +195,9 @@ SENIOR_MARKERS = (
 def _tracker_columns(ws) -> dict:
     """Map header name -> column index (1-based) from the tracker's header row.
 
-    The four trackers do not share a schema. The UK one has 'Job ID' and
-    'Official URL'; the others use 'Date Found'/'Date Added' and
-    'Direct Application URL'. We scan the first 12 rows for the row that
-    looks like a header (has a 'Company' or 'Job Title'/'Role Title' cell)
-    and map every header name we find.
+    The UK tracker has a title row at row 1 and headers at row 2.
+    Regional trackers have headers at row 1. We scan for the row that
+    contains 'Company' and ('Job Title' or 'Role Title').
     """
     for row in ws.iter_rows(min_row=1, max_row=12):
         vals = [(c.value if isinstance(c.value, str) else None) for c in row]
@@ -216,11 +214,11 @@ def read_tracker_urls(path: Path):
     ws = wb.active
     cols = _tracker_columns(ws)
 
-    # URL column: UK uses "Official URL", others use "Direct Application URL"
-    url_col = (cols.get("Official URL") or cols.get("Direct Application URL")
-               or cols.get("URL"))
+    # URL column: UK uses "Apply Link", others use "Direct Application URL"
+    url_col = (cols.get("Apply Link") or cols.get("Official URL")
+               or cols.get("Direct Application URL") or cols.get("URL"))
 
-    # ID column: only the UK tracker has one
+    # ID column: UK tracker no longer has one
     id_col = cols.get("Job ID")
 
     urls = set()
@@ -351,9 +349,8 @@ def main() -> int:
 
     from openpyxl import load_workbook  # noqa: F401  (already imported above)
 
-    # Determine the ID scheme: UK uses "J###", others use date-based IDs.
-    # Check the actual ID value, not just the column name - some regional
-    # trackers have an unused "Job ID" column that would cause a false match.
+    # Determine the schema: UK uses the new 5-field format, regional uses old format
+    is_uk_new = "Apply Link" in cols
     has_id_col = bool(last_id) and str(last_id).startswith("J")
     base = 0
     if has_id_col:
@@ -366,8 +363,16 @@ def main() -> int:
         r = last_row + 1 + i
         now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        if has_id_col:
-            # UK schema: Job ID, Date Found, Company, Job Title, Location, ...
+        if is_uk_new:
+            # New UK schema: Date Found, Company, Role Title, Apply Link, Application Deadline, Status
+            ws.cell(row=r, column=1, value=now)
+            ws.cell(row=r, column=2, value=job["company"])
+            ws.cell(row=r, column=3, value=job["title"])
+            ws.cell(row=r, column=4, value=job["url"])
+            ws.cell(row=r, column=5, value="")  # Deadline unknown from search
+            ws.cell(row=r, column=6, value="Not Applied")
+        elif has_id_col:
+            # Old UK schema: Job ID, Date Found, Company, Job Title, Location, ...
             ws.cell(row=r, column=cols["Job ID"], value=f"J{base + 1 + i}")
             ws.cell(row=r, column=cols.get("Date Found", 2), value=now)
             ws.cell(row=r, column=cols.get("Company", 3), value=job["company"])
@@ -393,7 +398,9 @@ def main() -> int:
             ws.cell(row=r, column=url_col, value=job["url"])
 
     wb.save(tracker)
-    if has_id_col:
+    if is_uk_new:
+        print(f"\nWrote {len(collected)} rows to {tracker.name}")
+    elif has_id_col:
         print(f"\nWrote {len(collected)} rows; tracker now ends at J{base + len(collected)}")
     else:
         print(f"\nWrote {len(collected)} rows to {tracker.name}")

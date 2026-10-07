@@ -71,14 +71,14 @@ REGION_LABEL = {
 # Each region's workbook uses its own column names (its own schema is truth).
 TRACKER_SCHEMA = {
     "uk": {
-        "header_row": 9,
+        "header_row": 2,
         "sheet": "Jobs",
-        "id": "Job ID",
+        "id": None,
         "date": "Date Found",
         "company": "Company",
-        "title": "Job Title",
-        "url": "Official URL",
-        "status": "Application Status",
+        "title": "Role Title",
+        "url": "Apply Link",
+        "status": "Status",
     },
     "dubai": {
         "header_row": 1,
