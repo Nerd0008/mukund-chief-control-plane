@@ -68,11 +68,11 @@
     },
     "uk": {
       "applied": true,
-      "at": "2026-10-07T13:38:46+00:00",
+      "at": "2026-10-07T13:51:00+00:00",
       "counts": {
         "appended": 1,
-        "data_rows_after": 162,
-        "data_rows_before": 161,
+        "data_rows_after": 163,
+        "data_rows_before": 162,
         "duplicates": 0,
         "input": 1,
         "refreshed": 0,
@@ -90,11 +90,11 @@
   },
   "last_run": {
     "applied": true,
-    "at": "2026-10-07T13:38:46+00:00",
+    "at": "2026-10-07T13:51:00+00:00",
     "counts": {
       "appended": 1,
-      "data_rows_after": 162,
-      "data_rows_before": 161,
+      "data_rows_after": 163,
+      "data_rows_before": 162,
       "duplicates": 0,
       "input": 1,
       "refreshed": 0,
@@ -111,9 +111,9 @@
   },
   "owns": "deduplicated append into a canonical regional workbook",
   "roster": "B08",
-  "runs_recorded": 191,
+  "runs_recorded": 193,
   "schema_version": 1,
   "title": "Excel Tracker Writer",
-  "updated_at": "2026-10-07T13:38:46+00:00",
+  "updated_at": "2026-10-07T13:51:00+00:00",
   "worker": "career-ops/tracker_writer.py"
 }
