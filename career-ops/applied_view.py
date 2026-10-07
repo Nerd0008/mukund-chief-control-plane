@@ -1,97 +1,92 @@
 #!/usr/bin/env python3
-"""Build/refresh the "Applied" sheet inside the canonical UK tracker.
+"""Report the applied jobs from the canonical UK tracker.
 
 Owner instruction (2026-09-25): a tracker, with every JD supplied logged as an
 applied job.
 
-Deliberately NOT a second workbook — the September audit found trackers in five
-locations with no single source of truth. This keeps one file: the "Applied"
-sheet is a derived read-only view of the Jobs sheet, regenerated from it, so it
-can never disagree with the application records.
+Owner instruction (2026-10-07): the UK tracker is now a single "Jobs" sheet with
+exactly five fields (Date Found, Company, Role Title, Apply Link, Application
+Deadline) plus Status. That schema has no room for a derived "Applied" sheet, so
+this tool no longer writes one INTO the canonical workbook — adding a sheet back
+would violate the schema the owner defined.
 
-Safety:
-  * the Jobs sheet is compared cell-by-cell before/after and any drift aborts;
-  * sheet order is preserved, "Applied" is appended LAST so sheetnames[0] stays
-    "Jobs" (the tracker writer asserts that);
-  * a hash-verified backup is written before the workbook is replaced.
+What it does now:
+  * prints the applied rows (read-only, always safe);
+  * optionally writes them to a SEPARATE workbook outside the canonical file
+    (`--out`), for a shareable view;
+  * with `--apply`, writes that separate workbook (never the tracker).
+
+The Status column plus the sheet's own auto-filter is the in-workbook view.
 
 Usage:
-  python career-ops/applied_view.py            # dry run, reports what it would do
-  python career-ops/applied_view.py --apply    # write, with backup + re-verify
+  python career-ops/applied_view.py                      # report only
+  python career-ops/applied_view.py --out <path.xlsx>    # also write the view
+  python career-ops/applied_view.py --out <path.xlsx> --apply
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
 import hashlib
-import shutil
+import json
 import sys
 from pathlib import Path
 
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.utils import column_index_from_string, get_column_letter
+from openpyxl.utils import get_column_letter
 
-CONTROL_PLANE = Path(__file__).resolve().parent.parent
-TRACKER = Path(r"C:\Users\mukun\Downloads\codex\uk-cyber-job-tracker.xlsx")
-BACKUP_DIR = CONTROL_PLANE / "runtime" / "career-ops" / "backups"
-SHEET = "Applied"
-JOBS = "Jobs"
-HEADER_ROW = 9
-FIRST_DATA_ROW = 10
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# Jobs column -> Applied column heading
+from tracker_writer import load_profiles, region_config  # noqa: E402
+
+BACKUP_DIR = REPO / "runtime" / "career-ops" / "backups"
+DEFAULT_OUT = REPO / "runtime" / "career-ops" / "uk-applied-view.xlsx"
+
+#: Canonical field -> heading in the derived view.
 COLUMNS = [
-    ("A", "Job ID"),
-    ("B", "Date Found"),
-    ("C", "Company"),
-    ("D", "Job Title"),
-    ("E", "Location"),
-    ("F", "Salary"),
-    ("H", "Fit Score"),
-    ("I", "Live Status"),
-    ("J", "Application Status"),
-    ("K", "Priority"),
-    ("O", "Official URL"),
-    ("S", "Date Selected"),
-    ("T", "Date Applied"),
-    ("U", "Tailored CV Path"),
-    ("V", "Personal Notes"),
+    ("date_found", "Date Found"),
+    ("company", "Company"),
+    ("title", "Role Title"),
+    ("url", "Apply Link"),
+    ("deadline", "Application Deadline"),
+    ("_status", "Status"),
 ]
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def snapshot_jobs(ws) -> list[tuple]:
-    """Every cell of the Jobs sheet, so drift can be detected."""
-    return [tuple(ws.cell(r, c).value for c in range(1, ws.max_column + 1))
-            for r in range(1, ws.max_row + 1)]
-
-
-def applied_rows(ws) -> list[list]:
-    """Jobs rows whose Application Status is exactly 'Applied'."""
+def applied_rows(ws, cfg: dict) -> list[list]:
+    """Rows whose Status is exactly 'Applied' (the profile's own status value)."""
+    from openpyxl.utils import column_index_from_string
+    wanted = (cfg.get("status_values") or {}).get("applied", "Applied")
+    scol = column_index_from_string(cfg["status_columns"]["application_status"])
+    fmap = cfg["field_map"]
     out = []
-    for r in range(FIRST_DATA_ROW, ws.max_row + 1):
-        if not ws.cell(r, 1).value:
+    for r in range(cfg["first_data_row"], ws.max_row + 1):
+        if str(ws.cell(row=r, column=scol).value or "").strip() != wanted:
             continue
-        if str(ws.cell(r, 10).value or "").strip() == "Applied":
-            out.append([ws.cell(r, column_index_from_string(col)).value
-                        for col, _ in COLUMNS])
+        row = [ws.cell(row=r, column=column_index_from_string(fmap[key])).value
+               if key in fmap else ws.cell(row=r, column=scol).value
+               for key, _ in COLUMNS]
+        row[-1] = ws.cell(row=r, column=scol).value
+        out.append(row)
     return out
 
 
-def build(wb, rows: list[list]) -> None:
-    if SHEET in wb.sheetnames:
-        del wb[SHEET]
-    ws = wb.create_sheet(SHEET)          # appended last: sheetnames[0] stays "Jobs"
-
+def build_view(rows: list[list]) -> openpyxl.Workbook:
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    assert ws is not None
+    ws.title = "Applied"
     ws["A1"] = "Applied jobs"
     ws["A1"].font = Font(bold=True, size=14)
-    ws["A2"] = (f"Derived from the Jobs sheet — generated {dt.date.today().isoformat()}. "
-                f"Do not edit: rows appear here automatically when Application Status is set to "
-                f"'Applied' on Jobs.")
+    ws["A2"] = (f"Derived from the canonical tracker's Jobs sheet — generated "
+                f"{dt.date.today().isoformat()}. Read-only view; edit Status on the "
+                f"tracker itself.")
     ws["A2"].font = Font(italic=True, size=9, color="555555")
 
     for i, (_, heading) in enumerate(COLUMNS, start=1):
@@ -106,75 +101,66 @@ def build(wb, rows: list[list]) -> None:
             if isinstance(value, dt.datetime):
                 cell.number_format = "yyyy-mm-dd"
 
-    widths = {"A": 8, "B": 12, "C": 26, "D": 34, "E": 34, "F": 11, "H": 9,
-              "I": 11, "J": 17, "K": 9, "O": 52, "S": 13, "T": 13, "U": 60, "V": 60}
+    widths = {"A": 12, "B": 26, "C": 40, "D": 52, "E": 16, "F": 18}
     for col, w in widths.items():
         ws.column_dimensions[col].width = w
     ws.freeze_panes = "A5"
     ws.auto_filter.ref = f"A4:{get_column_letter(len(COLUMNS))}{max(4, 4 + len(rows))}"
+    return wb
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--region", default="uk")
+    ap.add_argument("--out", default=str(DEFAULT_OUT),
+                    help="separate workbook for the view (never the canonical tracker)")
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
 
-    if not TRACKER.exists():
-        print(f"tracker not found: {TRACKER}")
+    profiles = load_profiles()
+    cfg = dict(region_config(profiles, args.region))
+    cfg["_region"] = args.region
+    tracker = Path(cfg["tracker"])
+    if not tracker.exists():
+        print(f"tracker not found: {tracker}")
         return 1
 
-    before_hash = sha256(TRACKER)
-    wb = openpyxl.load_workbook(TRACKER)
-    jobs = wb[JOBS]
-    jobs_before = snapshot_jobs(jobs)
-    sheet_order_before = list(wb.sheetnames)
-    rows = applied_rows(jobs)
+    before_hash = sha256(tracker)
+    wb = openpyxl.load_workbook(tracker)
+    ws = wb[cfg["sheet"]]
+    rows = applied_rows(ws, cfg)
+    wb.close()
 
-    print(f"tracker            : {TRACKER}")
-    print(f"sha256 before      : {before_hash}")
-    print(f"sheets             : {sheet_order_before}")
-    print(f"applied rows found : {len(rows)}")
-    for row in rows:
-        print(f"   {row[0]}  {row[12] if isinstance(row[12], str) else row[12]}  "
-              f"{row[2]}  |  {row[3]}")
-
-    build(wb, rows)
-
-    # ---- the Jobs sheet must be byte-for-byte the same content ------------- #
-    jobs_after = snapshot_jobs(wb[JOBS])
-    if jobs_before != jobs_after:
-        diffs = [(i + 1, a, b) for i, (a, b) in enumerate(zip(jobs_before, jobs_after)) if a != b]
-        print(f"\n!! Jobs sheet changed in {len(diffs)} row(s) — ABORTING")
-        for d in diffs[:5]:
-            print(f"   row {d[0]}: {d[1]!r} -> {d[2]!r}")
-        return 1
-    if wb.sheetnames[0] != JOBS:
-        print(f"\n!! first sheet is now {wb.sheetnames[0]!r} — ABORTING")
-        return 1
-    print(f"\nJobs sheet unchanged, first sheet still {JOBS!r}")
-    print(f"sheet order after  : {wb.sheetnames}")
-
-    if not args.apply:
-        print("\nDRY RUN — nothing written. Re-run with --apply.")
+    if args.json:
+        print(json.dumps({
+            "tracker": str(tracker),
+            "tracker_sha256": before_hash,
+            "applied_count": len(rows),
+            "rows": [dict(zip([h for _, h in COLUMNS], r)) for r in rows],
+        }, indent=2, default=str))
         return 0
 
-    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup = BACKUP_DIR / f"uk-cyber-job-tracker.applied-view-{stamp}.xlsx"
-    shutil.copy2(TRACKER, backup)
+    print(f"tracker            : {tracker}")
+    print(f"sha256             : {before_hash}")
+    print(f"applied rows found : {len(rows)}")
+    for row in rows:
+        print(f"   {row[0]}  {row[1]}  |  {row[2]}")
 
-    tmp = TRACKER.with_suffix(".tmp.xlsx")
-    wb.save(tmp)
-    tmp.replace(TRACKER)
+    if sha256(tracker) != before_hash:
+        print("\n!! tracker changed while reading — ABORTING")
+        return 1
 
-    after_hash = sha256(TRACKER)
-    check = openpyxl.load_workbook(TRACKER)
-    ok = (check.sheetnames[0] == JOBS and SHEET in check.sheetnames
-          and snapshot_jobs(check[JOBS]) == jobs_before)
-    print(f"\nbackup             : {backup}")
-    print(f"sha256 after       : {after_hash}")
-    print(f"re-verified        : {ok}")
-    return 0 if ok else 1
+    out = Path(args.out)
+    if not args.apply:
+        print(f"\nDRY RUN — nothing written. Would write the view to {out}.")
+        return 0
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    build_view(rows).save(out)
+    print(f"\nwrote view         : {out}")
+    print(f"tracker untouched  : {sha256(tracker) == before_hash}")
+    return 0
 
 
 if __name__ == "__main__":

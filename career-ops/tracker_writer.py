@@ -153,7 +153,15 @@ class Tracker:
     # -- structure -------------------------------------------------------- #
 
     def table(self):
-        tname = self.cfg["table"]
+        """Return the sheet's table object, or None for schemas without one.
+
+        The post-2026-10-07 UK schema is a plain filtered range rather than a
+        ListObject, so `table` is null in the regional profile. Every caller
+        must tolerate None.
+        """
+        tname = self.cfg.get("table")
+        if not tname:
+            return None
         if tname not in self.ws.tables:
             raise AssertionError(f"table '{tname}' not found in sheet '{self.ws.title}'")
         return self.ws.tables[tname]
@@ -211,7 +219,10 @@ class Tracker:
         return snap
 
     def ids(self) -> list:
-        col = self.cfg["id"]["column"]
+        id_cfg = self.cfg.get("id")
+        if not id_cfg:
+            return []
+        col = id_cfg["column"]
         last = self.last_data_row()
         out = []
         for r in range(self.first_data_row, last + 1):
@@ -338,8 +349,10 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
             problems.append(f"expected sheet {name!r} missing")
 
     ws = wb[cfg["sheet"]]
-    tname = cfg["table"]
-    if tname not in ws.tables:
+    tname = cfg.get("table")
+    if not tname:
+        table_ref = None
+    elif tname not in ws.tables:
         problems.append(f"table {tname!r} missing")
         table_ref = None
     else:
@@ -481,7 +494,7 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
     outcomes = []
     plan_rows = []
     next_seq = (_next_sequential_id(existing_ids, cfg["id"]["prefix"], cfg["id"].get("start", 1))
-                if cfg["id"]["style"] == "sequential" else 0)
+                if (cfg.get("id") or {}).get("style") == "sequential" else 0)
     planned_url_keys = set()
     planned_pair_keys = set()
 
@@ -529,24 +542,26 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
             plan_rows.append({"kind": "refresh", "row": int(matched_row), "record": record})
             continue
 
-        # assign an id
+        # assign an id (schemas without an id column keep record["id"] unset)
         rid = record.get("id")
-        if not rid:
-            if cfg["id"]["style"] == "sequential":
-                rid = f"{cfg['id']['prefix']}{next_seq}"
+        id_cfg = cfg.get("id")
+        if not rid and id_cfg:
+            if id_cfg["style"] == "sequential":
+                rid = f"{id_cfg['prefix']}{next_seq}"
                 next_seq += 1
             else:
                 used = _next_regional_id(existing_ids + [p["record"].get("id", "") for p in plan_rows],
-                                         cfg["id"]["prefix"], cfg["id"]["date_format"],
-                                         cfg["id"]["separator"], today)
+                                         id_cfg["prefix"], id_cfg["date_format"],
+                                         id_cfg["separator"], today)
                 rid = used
-        if str(rid) in existing_ids:
+        if rid and str(rid) in existing_ids:
             entry["decision"] = "rejected"
             entry["reason"] = f"generated id {rid} already exists"
             outcomes.append(entry)
             continue
-        existing_ids.append(str(rid))
-        record["id"] = str(rid)
+        if rid:
+            existing_ids.append(str(rid))
+            record["id"] = str(rid)
         planned_url_keys.add(url_key)
         if pkey.strip("|"):
             planned_pair_keys.add(pkey)
@@ -608,8 +623,10 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
             col = spec["column"]
             if tr.ws[f"{col}{r}"].value in (None, ""):
                 tr.ws[f"{col}{r}"] = spec["template"].format(row=r)
-        # id
-        tr.ws[f"{cfg['id']['column']}{r}"] = record["id"]
+        # id (schemas without an id column simply have none to write)
+        id_cfg = cfg.get("id")
+        if id_cfg and record.get("id"):
+            tr.ws[f"{id_cfg['column']}{r}"] = record["id"]
         # carry cell style from the row above so borders/fill match the table
         for c in range(1, tr.ws.max_column + 1):
             src = tr.ws.cell(row=style_template_row, column=c)
@@ -638,28 +655,51 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
     if appends:
         new_last = append_row + len(appends) - 1
         table = tr.table()
-        start_ref, end_ref = table.ref.split(":")
-        start_col = re.sub(r"[0-9]", "", start_ref)
-        start_row = int(re.sub(r"[^0-9]", "", start_ref))
-        end_col = re.sub(r"[0-9]", "", end_ref)
-        end_row = max(new_last, int(re.sub(r"[^0-9]", "", end_ref)))
-        table.ref = f"{start_col}{start_row}:{end_col}{end_row}"
-        if table.autoFilter is not None:
-            table.autoFilter.ref = table.ref
+        if table is not None:
+            start_ref, end_ref = table.ref.split(":")
+            start_col = re.sub(r"[0-9]", "", start_ref)
+            start_row = int(re.sub(r"[^0-9]", "", start_ref))
+            end_col = re.sub(r"[0-9]", "", end_ref)
+            end_row = max(new_last, int(re.sub(r"[^0-9]", "", end_ref)))
+            table.ref = f"{start_col}{start_row}:{end_col}{end_row}"
+            if table.autoFilter is not None:
+                table.autoFilter.ref = table.ref
+        else:
+            # No ListObject: keep the sheet's own auto-filter covering the new rows.
+            af = tr.ws.auto_filter
+            if af is not None and af.ref:
+                m = re.match(r"^([A-Z]+)(\d+):([A-Z]+)(\d+)$", af.ref)
+                if m and int(m.group(4)) < new_last:
+                    af.ref = f"{m.group(1)}{m.group(2)}:{m.group(3)}{new_last}"
         # number formats
         for col, fmt in cfg.get("number_formats", {}).items():
             for r in range(append_row, new_last + 1):
                 tr.ws[f"{col}{r}"].number_format = fmt
         # extend data validations that do not already cover the new rows
         for col, spec in cfg.get("validations", {}).items():
+            ranges = _dv_map(tr.ws).get(col, [])
             covered = False
-            for rng, _t, f1 in _dv_map(tr.ws).get(col, []):
+            for rng, _t, f1 in ranges:
                 if f1 != spec["formula1"]:
                     continue
                 m = re.match(r"^([A-Z]+)(\d+):([A-Z]+)(\d+)$", rng)
                 if m and int(m.group(4)) >= new_last:
                     covered = True
-            if not covered:
+            if covered:
+                continue
+            # Reuse an existing matching rule by widening it, rather than adding a
+            # second overlapping range for the same list (which openpyxl writes
+            # as a duplicate DataValidation entry).
+            widened = False
+            for dv in tr.ws.data_validations.dataValidation:
+                if dv.formula1 != spec["formula1"]:
+                    continue
+                m = re.match(r"^([A-Z]+)(\d+):([A-Z]+)(\d+)$", str(dv.sqref).strip())
+                if m and m.group(1) == m.group(3) == col and int(m.group(2)) <= spec["extend_from"]:
+                    dv.sqref = f"{col}{m.group(2)}:{col}{max(spec['extend_to'], new_last)}"
+                    widened = True
+                    break
+            if not widened:
                 from openpyxl.worksheet.datavalidation import DataValidation
                 dv = DataValidation(type=spec["type"], formula1=spec["formula1"], allow_blank=True)
                 tr.ws.add_data_validation(dv)

@@ -274,12 +274,16 @@ def cmd_summary(args) -> int:
         tr = tracker_writer.Tracker(path, cfg)
         rows = tr.data_rows()
         status_idx = tracker_writer.column_index_from_string(cfg["status_columns"]["application_status"]) - 1
-        id_idx = tracker_writer.column_index_from_string(cfg["id"]["column"]) - 1
+        id_cfg = cfg.get("id")
+        id_idx = (tracker_writer.column_index_from_string(id_cfg["column"]) - 1) if id_cfg else None
+        # Schemas with no id column are keyed by application URL instead.
+        url_idx = tracker_writer.column_index_from_string(cfg["dedupe"]["url_column"]) - 1
         ids = tr.ids()
         from collections import Counter
         statuses = Counter(str(r[status_idx]) for r in rows if r[status_idx] not in (None, ""))
         actionable_states = ("to review", "new", "reviewed", "pending")
-        actionable = [str(r[id_idx]) for r in rows
+        actionable = [str(r[id_idx]) if id_idx is not None else str(r[url_idx])
+                      for r in rows
                       if str(r[status_idx]).lower() in actionable_states]
         out["regions"][region] = {
             "available": True,
@@ -290,6 +294,7 @@ def cmd_summary(args) -> int:
             "last_id": ids[-1] if ids else None,
             "status_counts": dict(statuses),
             "actionable_ids": actionable[:25],
+            "id_column": bool(id_cfg),
             "owner_columns_untouched_by_automation": cfg["owner_columns"],
             "excel_is_source_of_truth": True,
         }

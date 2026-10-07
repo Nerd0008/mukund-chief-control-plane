@@ -89,7 +89,10 @@ def test_profile_structure_matches_workbook(region):
     tr = tw.Tracker(Path(cfg["tracker"]), cfg)
     try:
         assert tr.ws.title == cfg["sheet"]
-        assert cfg["table"] in tr.ws.tables
+        # A ListObject is optional: the post-2026-10-07 UK schema is a plain
+        # filtered range, so `table` is null there and must not be asserted.
+        if cfg.get("table"):
+            assert cfg["table"] in tr.ws.tables
         # header row must contain the dedupe url column header
         hdr = tr.headers()
         url_col = tw.column_index_from_string(cfg["dedupe"]["url_column"])
@@ -97,8 +100,9 @@ def test_profile_structure_matches_workbook(region):
         # owner columns must be inside the used range
         for c in cfg["owner_columns"]:
             assert tw.column_index_from_string(c) <= tr.ws.max_column
-        # ids are readable and non-empty
-        assert tr.ids(), "no ids found"
+        # ids are readable and non-empty where the schema has an id column
+        if cfg.get("id"):
+            assert tr.ids(), "no ids found"
     finally:
         tr.wb.close()
 
@@ -226,9 +230,12 @@ def test_manifest_cannot_set_application_state(tmp_path):
     assert res["applied"], res.get("error")
     wb = openpyxl.load_workbook(copy)
     ws = wb[cfg["sheet"]]
+    url_col = tw.column_index_from_string(cfg["dedupe"]["url_column"])
     last = max(r for r in range(cfg["first_data_row"], ws.max_row + 1)
-               if ws.cell(row=r, column=15).value not in (None, ""))
-    assert ws[f"J{last}"].value == "To Review", "manifest smuggled an application status"
+               if ws.cell(row=r, column=url_col).value not in (None, ""))
+    scol = tw.column_index_from_string(cfg["status_columns"]["application_status"])
+    assert ws.cell(row=last, column=scol).value == "To Review", \
+        "manifest smuggled an application status"
     wb.close()
 
 
@@ -279,12 +286,14 @@ def test_apply_is_reversible_and_verified(region, workspace, tmp_path):
     assert res["verification"]["owner_columns_unchanged"] is True
     assert res["verification"]["duplicate_urls_in_workbook"] == []
 
-    # ids are unique and follow the region convention
+    # ids are unique and follow the region convention (skipped where the
+    # schema has no id column, e.g. the post-2026-10-07 UK tracker)
     tr2 = tw.Tracker(copy, cfg)
-    ids = tr2.ids()
-    assert len(ids) == len(set(ids))
-    for rid in res["planned_rows"]:
-        assert rid in ids
+    if cfg.get("id"):
+        ids = tr2.ids()
+        assert len(ids) == len(set(ids))
+        for rid in res["planned_rows"]:
+            assert rid in ids
     # fit-tier formula present on every appended row where the region uses one
     if cfg.get("formula_map"):
         col = next(iter(cfg["formula_map"].values()))["column"]
@@ -341,7 +350,14 @@ def test_summary_reports_real_ids_not_dates(region):
     cfg = dict(tw.region_config(PROFILES, region))
     cfg["region"] = region
     tr = tw.Tracker(Path(cfg["tracker"]), cfg)
-    real_ids = set(tr.ids())
+    # Where the schema has no id column, actionable rows are keyed by URL.
+    if cfg.get("id"):
+        real_ids = set(tr.ids())
+    else:
+        ucol = tw.column_index_from_string(cfg["dedupe"]["url_column"])
+        real_ids = {str(tr.ws.cell(row=r, column=ucol).value)
+                    for r in range(cfg["first_data_row"], tr.ws.max_row + 1)
+                    if tr.ws.cell(row=r, column=ucol).value}
     tr.wb.close()
     for aid in data["actionable_ids"]:
         assert aid in real_ids, f"{aid!r} is not a real id in region {region}"
