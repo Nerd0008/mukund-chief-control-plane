@@ -13,6 +13,25 @@ APPROVED_REPORT='c974caa787d82e6f31176e57dbab4d725bf4ed595e673ceeaceda4c906cb339
 CONFIRMED={'S23':('Amey','Graduate Digital Technology Consultant'), 'S24':('Menzies','Graduate Programme 2027 — Technology Risk Auditing'), 'S25':('EY','Consultant — Cyber Security Analyst — Consulting Service Delivery, FS'), 'S26':('Arup','Graduate Security Risk Consultant — London')}
 REVIEW_DEADLINES={'FTI Consulting':'2026-10-08T16:21:32Z','Shell':'2026-10-10T14:40:23Z','National Highways':'2026-10-14T11:34:00Z'}
 
+def resolve_profiles(profiles):
+    """Recognize only the exact compact UK layout, never guess column positions."""
+    import openpyxl
+    result=copy.deepcopy(profiles);cfg=result['regions']['uk'];path=Path(cfg['tracker'])
+    wb=openpyxl.load_workbook(path,read_only=True)
+    try:
+        ws=wb[cfg['sheet']]
+        compact=[c.value for c in ws[2][:6]]
+        if compact==['Date Found','Company','Role Title','Apply Link','Application Deadline','Status']:
+            cfg.update(header_row=2,first_data_row=3,table=None,field_map={'date_found':'A','company':'B','title':'C','url':'D'},status_columns={'application_status':'F'},id={'column':'G','style':'mail','prefix':'UK'},owner_columns=['A','B','C','D','E','F'])
+        else:
+            from openpyxl.utils import column_index_from_string as ci
+            company=ws.cell(cfg['header_row'],ci(cfg['field_map']['company'])).value
+            title=ws.cell(cfg['header_row'],ci(cfg['field_map']['title'])).value
+            if 'company' not in str(company).lower() or not any(word in str(title).lower() for word in ('role','title')):
+                raise ValueError('canonical UK layout unrecognized; no write allowed')
+    finally:wb.close()
+    return result
+
 def validate_report(report):
     if report.get('report_id')!=APPROVED_REPORT or report_hash(report)!=APPROVED_REPORT:
         raise ValueError('owner approval is bound to a different or modified report')
