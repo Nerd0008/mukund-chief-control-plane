@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Trainee SOC Analyst",
+  "salutation": "Dear TSG Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_TSG_SOC_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\tsg_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Trainee SOC Analyst role with Cyber Care in Newcastle upon Tyne. Working live customer environments on alert triage and identity administration is the way I want to learn security operations, and the structured path towards a permanent analyst position is exactly the development I am looking for.",
+
+    "My technical foundation comes from an MSc in Information Security at Royal Holloway, awarded with Merit, and a BCA in computer applications. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. Outside of formal study I built a phishing analysis prototype that highlights suspicious email indicators and maps findings to MITRE ATT&CK techniques, evaluated against a mix of suspicious and legitimate business emails. That project is the clearest evidence I can offer of sustained self-directed interest in security operations, which your advert asks for.",
+
+    "In my current IT support role at The Colourful Aura I already do much of the daily work your analysts do. I manage four to five access requests a day through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions. I carry out account creation, permission changes and deprovisioning with a clear audit trail. I investigate four to five suspicious emails daily, checking sender and link domains for impersonation and documenting my findings so a colleague or customer can rely on them. I am the first point of contact for 15 colleagues and use Python and PowerShell to automate repetitive checks.",
+
+    "Two things worth being direct about. I have not worked inside a managed detection and response service, so commercial SOC tooling and the Microsoft security stack in a customer context would be new to me. I am comfortable working to service levels and managing competing priorities, having coordinated seven or eight colleagues per shift at Co-op while handling 15 or more operational issues a week, documenting incidents and escalating unresolved risks. I am also used to recording findings methodically, which matters when someone else has to act on them.",
+
+    "What attracts me to TSG specifically is the employee ownership model and the emphasis on ownership as an operating standard rather than a slogan. The Ownership Ladder describes the way I already try to work: following a task through every handoff until it lands, and bringing solutions rather than problems. I would welcome the opportunity to discuss how my experience could contribute to the Cyber Care team. Thank you for considering my application."
+  ]
+}

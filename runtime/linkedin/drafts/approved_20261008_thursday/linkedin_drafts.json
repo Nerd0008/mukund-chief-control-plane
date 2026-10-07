@@ -26,7 +26,15 @@
   "owner_approval": {
     "approved": true,
     "approved_by": "Mukund",
-    "approved_at": "2026-10-03T12:00:00+00:00",
-    "approval_method": "explicit chat approval of exact text"
+    "approved_at": "2026-10-07T08:00:00+00:00",
+    "approval_method": "explicit Discord approval",
+    "hermes_message_id": 19999,
+    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3"
+  },
+  "owner_override": {
+    "approved_by": "Mukund",
+    "approved_at": "2026-10-07T08:00:00+00:00",
+    "reason": "Owner explicitly approved this exact text in Discord",
+    "body_sha256": "9d7e99ecc348d9a9852c6ca3dc5be7a6cfd38a491a7c9afe4b275b12296e31a3"
   }
 }
