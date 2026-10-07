@@ -20,9 +20,10 @@ def resolve_profiles(profiles):
     wb=openpyxl.load_workbook(path,read_only=True)
     try:
         ws=wb[cfg['sheet']]
+        if ws.max_row<2:raise ValueError('canonical UK layout unrecognized; no write allowed')
         compact=[c.value for c in ws[2][:6]]
         if compact==['Date Found','Company','Role Title','Apply Link','Application Deadline','Status']:
-            cfg.update(header_row=2,first_data_row=3,table=None,field_map={'date_found':'A','company':'B','title':'C','url':'D'},status_columns={'application_status':'F'},id={'column':'G','style':'mail','prefix':'UK'},owner_columns=['A','B','C','D','E','F'])
+            cfg.update(header_row=2,first_data_row=3,table=None,field_map={'date_found':'A','company':'B','title':'C','url':'D'},status_columns={'application_status':'F'},id={'column':'G','style':'mail','prefix':'UK'},bounded_job_id_header='Career Ops Job ID',owner_columns=['A','B','C','D','E','F'])
         else:
             from openpyxl.utils import column_index_from_string as ci
             company=ws.cell(cfg['header_row'],ci(cfg['field_map']['company'])).value
@@ -130,6 +131,14 @@ def stage_workbooks(plan,profiles,before,root):
         src=Path(profiles['regions'][region]['tracker']);target=root/(region+'.xlsx');shutil.copy2(src,target)
         if digest(target)!=before[region]:raise ValueError('workbook changed before staging')
         staged['regions'][region]['tracker']=str(target)
+    for region in touched:
+        cfg=staged['regions'][region]
+        if cfg.get('bounded_job_id_header'):
+            wb=openpyxl.load_workbook(cfg['tracker']);ws=wb[cfg['sheet']]
+            from openpyxl.utils import column_index_from_string as ci
+            cell=ws.cell(cfg['header_row'],ci(cfg['id']['column']))
+            if cell.value not in (None,cfg['bounded_job_id_header']):raise ValueError('reserved job ID column is occupied')
+            cell.value=cfg['bounded_job_id_header'];wb.save(cfg['tracker']);wb.close()
     tracker=WorkbookTracker(staged,root/'staging-backups');receipts=[]
     for record in plan['records']:
         receipts.append({'application_id':record['application_id'],'new':not bool(record.get('row')),'region':record['region'],'write':tracker.upsert(record)})
@@ -184,3 +193,57 @@ def commit_staged(staged,profiles,before,calendar_events,calendar,audit_path):
             audit['calendar'].append({'event_id':event['id'],'created':not exists,'verified':True});atomic_json(audit_path,audit)
         audit['state']='applied';atomic_json(audit_path,audit)
     return audit
+
+
+def run_bounded(report_path,profiles_path,root,*,apply=False,calendar=None):
+    import shutil
+    from career_google_auth import access_token,GoogleError
+    from career_google_clients import DeadlineCalendar
+    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    report=json.loads(Path(report_path).read_text(encoding='utf-8'));validate_report(report)
+    profiles=resolve_profiles(json.loads(Path(profiles_path).read_text(encoding='utf-8')))
+    tracker=WorkbookTracker(profiles,root/'backups');records,before=tracker.read()
+    if any(digest(profiles['regions'][r]['tracker'])!=h for r,h in before.items()):raise ValueError('workbook changed during fresh read')
+    # This one-time owner decision concerns the UK application pool; S23/S24
+    # Gmail UK evidence and S26 London were verified before apply.
+    plan=build_plan(report,records,{item:'uk' for item in CONFIRMED})
+    atomic_json(root/'fresh-plan.json',{'approved_report':APPROVED_REPORT,'workbook_fingerprints':before,'plan':plan,'automatic_writes_enabled':False})
+    summary={'status':'DRY_RUN','tracker_rows_added':0,'tracker_rows_updated':0,'calendar_events_created':0,'duplicates_avoided':plan['duplicate_signals_avoided'],'before_hashes':before,'changed_application_ids':[],'event_ids':[],'fresh_match_skips':plan['skipped'],'remaining_unresolved_signals':plan['remaining_review_signals'],'gmail_mutations':0,'checkpoint_advanced':False,'automatic_writes_enabled':False}
+    if not apply:return summary
+    calendar=calendar or DeadlineCalendar(access_token,'primary')
+    # Calendar access/ownership preflight occurs BEFORE any canonical writes.
+    for event in plan['review_events']:
+        try:
+            old=calendar._call('GET',event['id'])
+            if (old.get('extendedProperties') or {}).get('private',{}).get('careerOpsApplication')!=event['extendedProperties']['private']['careerOpsApplication']:raise ValueError('review event ownership conflict')
+        except GoogleError as exc:
+            if exc.status!=404:raise
+    for region,h in before.items():
+        src=Path(profiles['regions'][region]['tracker']);target=root/'backups'/(region+'-'+h+'.xlsx');target.parent.mkdir(parents=True,exist_ok=True)
+        if not target.exists():shutil.copy2(src,target)
+        if digest(target)!=h:raise ValueError('canonical backup hash mismatch')
+    staged,receipts=stage_workbooks(plan,profiles,before,root/'staged')
+    atomic_json(root/'staged-receipts.json',receipts)
+    audit=commit_staged(staged,profiles,before,plan['review_events'],calendar,root/'apply-audit.json')
+    after_records,after=tracker.read()
+    post=build_plan(report,after_records,{item:'uk' for item in CONFIRMED})
+    atomic_json(root/'post-apply-dry-reconciliation.json',{'workbook_fingerprints':after,'plan':post,'mode':'dry-run','gmail_mutations':0,'checkpoint_advanced':False})
+    summary.update(status='PASS' if not post['records'] and not plan['skipped'] else 'BLOCKED',tracker_rows_added=sum(x['new'] for x in receipts),tracker_rows_updated=sum(not x['new'] for x in receipts),calendar_events_created=sum(x['created'] for x in audit['calendar']),duplicates_avoided=plan['duplicate_signals_avoided']+3,after_hashes=after,changed_application_ids=[{'application_id':x['application_id'],'region':x['region'],'row':x['write']['row'],'new':x['new']} for x in receipts],event_ids=[x['event_id'] for x in audit['calendar']],post_apply_remaining_writes=len(post['records']),post_apply_duplicate_signals=post['duplicate_signals_avoided'])
+    if any(after[x['region']]!=x['after'] for x in audit['workbooks']):summary['status']='BLOCKED';summary['post_apply_drift']=True
+    atomic_json(root/'result.json',summary)
+    return summary
+
+
+def main():
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--report',required=True);parser.add_argument('--profiles',required=True);parser.add_argument('--runtime',required=True);parser.add_argument('--apply',action='store_true');args=parser.parse_args()
+    try:
+        result=run_bounded(args.report,args.profiles,args.runtime,apply=args.apply)
+        print(json.dumps(result,indent=2));return 0 if result['status']!='BLOCKED' else 1
+    except Exception as exc:
+        result={'status':'BLOCKED','failure_type':type(exc).__name__,'reason':'Staged apply halted; inspect private audit. No automatic writes enabled.','gmail_mutations':0,'checkpoint_advanced':False,'automatic_writes_enabled':False}
+        # Only these deterministic local errors are safe to echo; API text is not.
+        if isinstance(exc,ValueError):result['reason']=str(exc)
+        atomic_json(Path(args.runtime)/'blocked-result.json',result);print(json.dumps(result));return 1
+
+if __name__=='__main__':raise SystemExit(main())
