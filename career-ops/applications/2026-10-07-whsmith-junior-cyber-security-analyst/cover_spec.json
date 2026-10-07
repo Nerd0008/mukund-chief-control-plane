@@ -1,0 +1,17 @@
+{
+  "heading": "Application for Junior Cyber Security Analyst",
+  "salutation": "Dear WHSmith Recruitment Team,",
+  "out": "C:\\Users\\mukun\\Downloads\\codex\\_cover\\Mukund_WHSmith_Cyber_Cover_Letter.pdf",
+  "qa": "C:\\Users\\mukun\\Downloads\\codex\\work\\base\\whsmith_cover_qa.png",
+  "paragraphs": [
+    "I am applying for the Junior Cyber Security Analyst role at WHSmith Europe in Aldgate. The breadth of the role is what attracts me: monitoring and incident response alongside vulnerability management, governance and security awareness means I would build a rounded foundation rather than a narrow specialism, and I am based in London.",
+
+    "I hold an MSc in Information Security from Royal Holloway, awarded with Merit, and a BCA in computer applications, along with CompTIA Security+ and ISC2 Certified in Cybersecurity. My MSc covered cryptography, security management, critical infrastructure security, secure business architectures and digital forensics. I also built a phishing analysis prototype that highlights suspicious email indicators and maps findings to MITRE ATT&CK techniques, which is the hands-on project work your advert lists as desirable.",
+
+    "The day-to-day duties overlap closely with what I already do. In my current IT support role I investigate four to five suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics. I manage four to five access requests a day through Active Directory with a clear audit trail, and support user access reviews by verifying business approval before granting time-limited permissions. I am the first point of contact for 15 colleagues, monitor server health and maintain access controls. Outside work I built a diagnostic tool that traces Windows error codes to root causes and used it to identify missing and corrupted DLLs behind intermittent server freezes.",
+
+    "I should be straightforward about where I am starting from. I have not worked with a commercial SIEM or run vulnerability scans at scale, so those would be new. What I bring is comfort with frameworks rather than only tools, having studied ISO 27001, PCI DSS, GDPR and the NIST Cybersecurity Framework, and a track record of completing repetitive checks to a consistent standard. At Co-op I conduct weekly risk assessments and daily compliance checks, maintain the assessment records and follow up until identified risks are addressed, which is the discipline governance work depends on. I also introduced documentation that cut incident management time by more than half.",
+
+    "What draws me to WHSmith is that the advert values aptitude and curiosity over qualifications on paper, and that the team invests in development. That matches how I have built my skills so far, largely through self-directed work alongside formal study. I would welcome the opportunity to discuss how I could contribute to your Information Security team. Thank you for considering my application."
+  ]
+}

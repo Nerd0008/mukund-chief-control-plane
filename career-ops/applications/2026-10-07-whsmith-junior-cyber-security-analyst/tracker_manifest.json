@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "WHSmith",
+      "title": "Junior Cyber Security Analyst",
+      "location": "London",
+      "url": "https://jobs.dayforcehcm.com/en-GB/whsmith/whstravelcareerssiteinternal/jobs/18714",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.5,
+      "notes": "Existing tracker row J75 (found 2026-10-04 by Codex direct search, hirelyuk listing). Marked Applied 2026-10-07 via application_state.py. Req 3695, Aldgate City of London, Grade C. Expires 15 Oct 2026. Clearance filter clean. Fit 8.5: alert triage, phishing investigation, access reviews, GRC frameworks (PCI DSS, ISO27001, NIST), security awareness all match. Desirable criteria largely met: degree, hands-on projects, frameworks awareness, CompTIA Security+. Gaps: no commercial SIEM or vulnerability scanning at scale."
+    }
+  ]
+}
