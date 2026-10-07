@@ -84,6 +84,10 @@
         "header": "Career Ops Job ID",
         "prefix": "UK",
         "style": "mail"
+      },
+      "status_aliases": {
+        "To Review": "Not Applied",
+        "Not Applying": "Not Applied"
       }
     },
     "dubai": {

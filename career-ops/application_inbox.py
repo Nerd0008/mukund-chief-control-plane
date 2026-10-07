@@ -294,7 +294,7 @@ def build_canonical_index(cfg: dict, profiles: dict | None = None,
                 entry["rows"].append(normalize_row(
                     region, r, id=d.get(id_col), company=d.get(fm.get("company")),
                     title=d.get(fm.get("title")), location=d.get(fm.get("location")),
-                    url=d.get(fm.get("url")), application_status=d.get(status_col)))
+                    url=d.get(fm.get("url")), application_status=__import__("career_tracker_layout").normalize_status(d.get(status_col), cfg_r)))
         finally:
             tr.wb.close()
         index_rows(entry["rows"], index)
@@ -680,6 +680,7 @@ def proposal_for(kind: str, region: str, current_status: str | None, cfg: dict) 
     mapping = (cfg["status_map"].get(region) or {}).get(kind)
     pre_states = [s.casefold() for s in cfg["pre_application_states"].get(region, [])]
     current = (str(current_status).strip() if current_status not in (None, "") else None)
+    current = __import__("career_tracker_layout").normalize_status(current, load_profiles(cfg)["regions"][region])
     implies = bool(cfg["classification"]["kinds"].get(kind, {}).get("implies_application"))
     unrecorded = implies and (current is None or current.casefold() in pre_states)
     if mapping is None:

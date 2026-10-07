@@ -395,8 +395,9 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
     for r in range(cfg["first_data_row"], ws.max_row + 1):
         v = ws.cell(row=r, column=url_idx).value
         if v not in (None, ""):
-            last = r
             url_keys.append(normalize_url(v))
+        if any(ws.cell(r, column_index_from_string(cfg["field_map"][k])).value not in (None, "") for k in ("company", "title", "url")):
+            last = r
     dupes = sorted({k for k in url_keys if url_keys.count(k) > 1})
 
     if table_ref:

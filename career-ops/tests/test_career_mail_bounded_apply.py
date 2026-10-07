@@ -87,20 +87,26 @@ def test_exclusive_commit_and_audit(tmp_path):
     assert audit['state']=='applied' and audit['workbooks'][0]['after']==before['uk']
 
 
+def compact_profiles(path):
+    source=json.loads((Path(__file__).resolve().parents[1]/'regional_profiles.json').read_text())
+    cfg=copy.deepcopy(source['regions']['uk']);cfg['tracker']=str(path)
+    return {'regions':{'uk':cfg}}
+
+
 def test_exact_compact_profile_resolved_without_modifying_file(tmp_path):
     p=tmp_path/'compact.xlsx';w=openpyxl.Workbook();s=w.active;s.title='Jobs';s.append(['Owner tracker']);s.append(['Date Found','Company','Role Title','Apply Link','Application Deadline','Status']);s.append(['2026-10-01','Acme','Graduate Engineer','https://example.test',None,'Applied']);w.save(p);w.close();before=digest(p)
-    cfg=b.resolve_profiles(profiles(p));records,_=WorkbookTracker(cfg,tmp_path/'backup').read()
+    cfg=b.resolve_profiles(compact_profiles(p));records,_=WorkbookTracker(cfg,tmp_path/'backup').read()
     assert len(records)==1 and records[0]['company']=='Acme' and cfg['regions']['uk']['field_map']['company']=='B' and digest(p)==before
 
 
 def test_unknown_layout_is_not_guessed(tmp_path):
     p=tmp_path/'bad.xlsx';w=openpyxl.Workbook();w.active.title='Jobs';w.active.append(['Unrecognized']);w.save(p);w.close()
-    with pytest.raises(ValueError,match='unrecognized'):b.resolve_profiles(profiles(p))
+    with pytest.raises(ValueError,match='unrecognized'):b.resolve_profiles(compact_profiles(p))
 
 
 def test_new_compact_application_preserves_existing_cells(tmp_path):
     p=tmp_path/'compact.xlsx';w=openpyxl.Workbook();s=w.active;s.title='Jobs';s.append(['Owner tracker']);s.append(['Date Found','Company','Role Title','Apply Link','Application Deadline','Status']);s.append(['2026-10-01','Acme','Graduate Engineer','https://example.test',None,'Applied']);w.save(p);w.close()
-    cfg=b.resolve_profiles(profiles(p));before={'uk':digest(p)};c,r=b.CONFIRMED['S23'];record={'application_id':'newapp','company':c,'role':r,'region':'uk','owner_confirmed_application':True}
+    cfg=b.resolve_profiles(compact_profiles(p));before={'uk':digest(p)};c,r=b.CONFIRMED['S23'];record={'application_id':'newapp','company':c,'role':r,'region':'uk','owner_confirmed_application':True}
     staged,receipts=b.stage_workbooks({'records':[record]},cfg,before,tmp_path/'stage')
     assert receipts[0]['new'] and digest(p)==before['uk']
 

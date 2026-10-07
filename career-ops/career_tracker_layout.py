@@ -7,7 +7,7 @@ from openpyxl.utils import column_index_from_string as ci
 def validate_sheet(ws, cfg):
     for column, expected in cfg.get("required_headers", {}).items():
         if ws.cell(cfg["header_row"], ci(column)).value != expected:
-            raise ValueError("canonical tracker headers differ from the authoritative profile")
+            raise ValueError("canonical tracker layout unrecognized: headers differ from the authoritative profile")
 
 def resolve_profiles(profiles):
     result = copy.deepcopy(profiles)
@@ -20,3 +20,6 @@ def resolve_profiles(profiles):
             finally:
                 wb.close()
     return result
+
+def normalize_status(value, cfg):
+    return cfg.get("status_aliases", {}).get(value, value)
