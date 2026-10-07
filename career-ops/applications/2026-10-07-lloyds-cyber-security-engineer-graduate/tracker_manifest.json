@@ -1,0 +1,15 @@
+{
+  "records": [
+    {
+      "date_found": "2026-10-04",
+      "company": "Lloyds Banking Group",
+      "title": "Cyber Security Engineer Graduate Scheme",
+      "location": "Edinburgh",
+      "url": "https://lbg.wd3.myworkdayjobs.com/Graduate_careers/job/Edinburgh/Cyber-Security-Engineer-Graduate-Scheme--Edinburgh-_163314-1",
+      "priority": "High",
+      "status": "Applied",
+      "fit": 8.0,
+      "notes": "Existing tracker row J84 (found 2026-10-04 by Codex direct search). Marked Applied 2026-10-07 via application_state.py. Salary 48,500, 2-year programme starting Sep 2027, closes 29 Nov 2026. Clearance filter clean (no sponsorship available, no clearance or citizenship requirement). Fit 8.0: strong Python foundation (explicit requirement), security automation, detection logic, MITRE ATT&CK, JavaScript, Azure. Gaps: no Kubernetes, Docker, Terraform or CI/CD experience; cloud at foundational level. Note: same programme also listed as J117 (Manchester) - one application per programme."
+    }
+  ]
+}

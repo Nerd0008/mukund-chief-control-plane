@@ -1,0 +1,34 @@
+Application for Cyber Security Engineer Graduate Scheme
+Dear Lloyds Banking Group Recruitment Team,
+I am applying for the Cyber Security Engineer Graduate Scheme in Edinburgh. Building security into
+systems rather than adding it afterwards is the direction I want my career to take, and the emphasis on
+secure design, detection capability and automation in the Chief Security Office is the work I am aiming
+for.
+My strongest asset for this role is Python. I use it for scripting and automation, and I have built two
+working tools with it. The first is a phishing analysis prototype that highlights suspicious email indicators
+and maps findings to MITRE ATT&CK techniques, keeping sensitive email data local. The second maps
+Windows error codes to their common causes, and I used it to trace intermittent server freezes to missing
+or corrupted DLLs. I also built a Chrome extension in JavaScript with 25 detection patterns, tested across
+150 manual cases to 93.7% accuracy, which gave me direct experience of shipping something and then
+reducing its false positives through testing.
+My formal background is an MSc in Information Security from Royal Holloway, awarded with Merit,
+and a BCA in computer applications where my modules included Python, Java, JavaScript, C++, SQL
+and mobile development. I hold CompTIA Security+ and ISC2 Certified in Cybersecurity. In my current
+IT support role I am the first point of contact for 15 colleagues, monitor server health, maintain access
+controls and use PowerShell and Python to automate repetitive checks. At Co-op I introduced
+documentation that cut incident management time by more than half.
+I should be straightforward about where I would be starting. My experience is with established
+infrastructure rather than cloud-native engineering, so the deployment tooling and CI/CD pipelines you
+mention would be new to me, and my cloud knowledge is at a foundational level rather than production
+scale. I am drawn to this scheme precisely because it builds those skills in a structured way, with the
+cloud certifications and the Security Engineering Guild you describe. What I bring is the Python
+foundation you ask for, a habit of automating manual work, and a record of learning tooling quickly
+when a problem requires it.
+What attracts me to Lloyds is the scale of what the Chief Security Office protects and the framing of
+security as something that lets the business move faster rather than something that slows it down. I would
+welcome the opportunity to discuss how my technical background could contribute to your security
+engineering teams. Thank you for considering my application.
+Kind regards,
+Mukund Didwania
+mukunddidwania3@gmail.com
+LinkedIn
