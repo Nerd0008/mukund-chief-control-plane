@@ -1,0 +1,69 @@
+{
+  "approved_report_id": "8ea70b89b478e7e16e4a66eb1969e5352b8a55ca115854da79e16162110dec58",
+  "automatic_writes_enabled": true,
+  "calendar_events_verified": 3,
+  "calendar_writes": 0,
+  "canonical_snapshot_dependency": false,
+  "checkpoint_after": {
+    "history_id": "1022094",
+    "last_completed_at": "2026-10-07T20:50:05.724198+00:00",
+    "processed_message_count": 9
+  },
+  "checkpoint_before": {},
+  "counts": {
+    "ambiguous_deadlines": 0,
+    "assessments_interviews": 0,
+    "derived_deadlines": 0,
+    "duplicates": 0,
+    "exact_deadlines": 0,
+    "ignored": 21,
+    "likely_applications": 9,
+    "matched_existing": 1,
+    "messages_read": 30,
+    "proposed_new_rows": 0
+  },
+  "gmail_mutations": 0,
+  "historical_authorised_duplicates": 20,
+  "historical_review_only": 45,
+  "mode": "apply",
+  "model_calls": 0,
+  "oauth_ready": true,
+  "pending_review_total": 53,
+  "repeat_historical_writes": 0,
+  "scan_lock_released": true,
+  "scan_mode": "incremental",
+  "scheduled_apply_report_id": "f5ddf0ddbde301a6397c685d187316adb2bfda40d697ff9f2830d1843d8f497a",
+  "tracker_writes": 1,
+  "verdict": "PASS",
+  "workbook_fingerprints_after": {
+    "dubai": "d3e9e894cc2bb1be85f8a8b075b2d093cd750a9a50bdb07ac7c77a0f91c38c38",
+    "japan": "537224cb2c215341d3ebe10a8d556e27c9c9629df0840830243d1d285fcbfda0",
+    "singapore": "5cf05863d67ab47ecf793e626016e52a0badd0bf55ac137937264f69b0ac02a3",
+    "uk": "aabff69f74b8007ba1c07d0eef840f5b647d226c7ab29780ca10707261a3ba24"
+  },
+  "scheduled_task": {
+    "TaskName": "ChiefCareerGmailMonitor",
+    "Enabled": true,
+    "State": "Ready",
+    "Principal": "MISTY\\mukun",
+    "LogonType": "Interactive",
+    "Executable": "C:\\Users\\mukun\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\python.exe",
+    "Arguments": "\"C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\career_mail_monitor.py\" scan --apply",
+    "WorkingDirectory": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane",
+    "Interval": "PT1H",
+    "LogonTrigger": true,
+    "Overlap": "IgnoreNew",
+    "StartWhenAvailable": true,
+    "LastTaskResult": 0,
+    "LastRunTime": "2026-10-07T21:49:31.0000000+01:00",
+    "NextRunTime": "2026-10-07T22:49:30.0000000+01:00"
+  },
+  "regression": {
+    "passed": 779,
+    "failed": 0
+  },
+  "activation_guard_tests": {
+    "passed": 6,
+    "failed": 0
+  }
+}
