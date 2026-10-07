@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "tracker_rows_added": 4,
+  "tracker_rows_updated": 13,
+  "calendar_events_created": 3,
+  "duplicates_avoided": 3,
+  "before_hashes": {
+    "dubai": "d3e9e894cc2bb1be85f8a8b075b2d093cd750a9a50bdb07ac7c77a0f91c38c38",
+    "japan": "048e03da0d19f99137e0ec704f718f6a23bab0ecfd948ecacdb07b4f1a496e51",
+    "singapore": "1919f3d7cee2e3b799da36ae4699a9cd417fcbd66c542607cef1680e34b32609",
+    "uk": "604193ca4116a645733dc05d11fb1d4ff72918f14a29869cc8ba2a254a14cc44"
+  },
+  "after_hashes": {
+    "dubai": "d3e9e894cc2bb1be85f8a8b075b2d093cd750a9a50bdb07ac7c77a0f91c38c38",
+    "japan": "048e03da0d19f99137e0ec704f718f6a23bab0ecfd948ecacdb07b4f1a496e51",
+    "singapore": "1919f3d7cee2e3b799da36ae4699a9cd417fcbd66c542607cef1680e34b32609",
+    "uk": "5be314e7e81393675e165485c9a94829dce79568b3634695163d8d957c8bc2b6"
+  },
+  "post_apply_remaining_writes": 0,
+  "post_apply_duplicate_signals": 20,
+  "gmail_mutations": 0,
+  "checkpoint_advanced": false,
+  "automatic_writes_enabled": false,
+  "approved_report": "c974caa787d82e6f31176e57dbab4d725bf4ed595e673ceeaceda4c906cb339f",
+  "remaining_review_signals": 45,
+  "focused_tests": {
+    "passed": 138,
+    "failed": 0
+  },
+  "private_evidence": "Mailbox-specific plan/receipts remain private outside Git.",
+  "legacy_inbox_test_limit": "Two real-workbook tests failed against stale global UK profile; this apply uses exact compact layout adapter and does not enable general automation."
+}
