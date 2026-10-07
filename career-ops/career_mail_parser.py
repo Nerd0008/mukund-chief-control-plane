@@ -7,6 +7,7 @@ import re
 from urllib.parse import urlsplit, urlunsplit
 
 from application_inbox import parse_gmail_api_message, strip_quoted
+from career_mail_rules import visible, deadline as reliable_deadline
 
 UTC = dt.timezone.utc
 ZONES = {"BST": dt.timezone(dt.timedelta(hours=1)), "GMT": UTC, "UTC": UTC,
@@ -44,51 +45,51 @@ def clean_url(url):
 
 
 def extract_deadline(text, received_at, message_id, thread_id):
-    base = {"source_message_id": message_id, "source_thread_id": thread_id,
-            "kind": None, "value": None, "timezone": None, "needs_review": False}
-    candidates = []
-    # Restrict dates to explicit deadline language rather than newsletter dates.
-    expression = (r"(?:complete by|deadline(?: is|:| extended to| has been extended to)?|due(?: by)?|"
-                  r"expires(?: on)?|until)\s+(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})"
-                  r"(?:\s+(?:at\s+)?(\d{1,2}):(\d{2})(?:\s+([A-Z]{2,4}))?)?")
-    for match in re.finditer(expression, text, re.I):
-        day, month, year, hour, minute, zone = match.groups()
-        try:
-            date = dt.date(int(year), MONTHS[month.lower()], int(day))
-            if hour is None:
-                candidates.append({**base, "kind": "EXACT", "value": date.isoformat(),
-                                   "date_only": True, "reason": "explicit date-only deadline"})
-            else:
-                tz = ZONES.get((zone or "").upper())
-                if tz is None:
-                    return {**base, "needs_review": True, "reason": "deadline time has no unambiguous timezone"}
-                stamp = dt.datetime.combine(date, dt.time(int(hour), int(minute)), tz)
-                candidates.append({**base, "kind": "EXACT", "value": stamp.isoformat(),
-                                   "date_only": False, "timezone": zone.upper(),
-                                   "reason": "explicit deadline date, time and timezone"})
-        except (ValueError, KeyError):
-            return {**base, "needs_review": True, "reason": "invalid or unsupported deadline date"}
-    for match in re.finditer(r"within\s+(\d+)\s+(business\s+|working\s+)?days", text, re.I):
-        if match.group(2):
-            return {**base, "needs_review": True, "reason": "business-day deadline needs a holiday/calendar policy"}
-        try:
-            received = dt.datetime.fromisoformat(received_at.replace("Z", "+00:00"))
-            if received.tzinfo is None:
-                raise ValueError("naive received timestamp")
-            stamp = received + dt.timedelta(days=int(match.group(1)))
-            candidates.append({**base, "kind": "DERIVED", "value": stamp.isoformat(),
-                               "date_only": False, "timezone": "UTC" if stamp.utcoffset() == dt.timedelta() else str(stamp.tzinfo),
-                               "reason": f"email received timestamp plus {match.group(1)} calendar days"})
-        except (ValueError, TypeError, AttributeError):
-            return {**base, "needs_review": True, "reason": "relative deadline lacks a reliable received timestamp"}
-    values = {c["value"] for c in candidates}
-    if len(values) > 1:
-        return {**base, "needs_review": True, "reason": "multiple conflicting deadlines; owner review required"}
-    if candidates:
-        return candidates[0]
-    if re.search(r"deadline|complete by|within|as soon as|due\b|expires", text, re.I):
-        return {**base, "needs_review": True, "reason": "deadline wording contains no supported unambiguous date"}
-    return base
+    return reliable_deadline(text, received_at, message_id, thread_id)
+
+
+def mail_fields(raw):
+    mail = parse_gmail_api_message(raw) if "payload" in raw else dict(raw)
+    # Decode original HTML, not the legacy regex de-tagging that leaves CSS text.
+    if "payload" in raw:
+        import base64
+        plain, html = [], []
+        def walk(part):
+            data = (part.get("body") or {}).get("data")
+            if data and part.get("mimeType") in {"text/plain", "text/html"}:
+                try:
+                    value = base64.urlsafe_b64decode(data + "=" * (-len(data) % 4)).decode("utf-8", "replace")
+                    (plain if part["mimeType"] == "text/plain" else html).append(value)
+                except (ValueError, TypeError):
+                    pass
+            for child in part.get("parts", []): walk(child)
+        walk(raw["payload"])
+        if plain or html: mail["body"] = "\n".join(plain or html)
+    mail["body"] = strip_quoted(visible(mail.get("body") or ""))
+    mail["subject"] = visible(mail.get("subject") or "")
+    return mail
+
+
+def classify_recruitment(subject, body):
+    # Surveys/newsletters and discussion of future hiring stages are not events.
+    if re.search(r"(?i)application experience|roles are now open|candidate survey|job alerts?|newsletter", subject):
+        return None
+    text = subject + "\n" + body
+    text = re.sub(r"(?i)if you[^.!?\n]{0,250}(?:unsuccessful|not successful)[^.!?\n]*", "", text)
+    if re.search(r"(?i)thanks for taking|thank you for completing", subject):
+        return "assessment_completed"
+    if re.search(r"(?i)(?:invitation|invited|reminder).{0,80}(?:assessment|test)|assessment (?:invitation|reminder)", subject):
+        return "coding_assessment" if re.search(r"(?i)coding|hackerrank|codility",text) else "online_assessment"
+    if re.search(r"(?i)(?:invite|invitation|scheduled|book|confirm).{0,60}interview|interview (?:invitation|scheduled|confirmation)",subject):
+        return "hirevue_video_interview" if re.search(r"(?i)hirevue|video",text) else "interview"
+    if re.search(r"(?i)next steps",subject) and re.search(r"(?i)assessment link|complete.{0,60}assessment",body):
+        return "online_assessment"
+    if re.search(r"(?i)confirm.{0,40}application|thank.{0,30}(?:apply|application)|application.{0,30}(?:received|confirmation)|received.{0,30}application|got it",subject):
+        # Direct action wins over a receipt only when actually requested now.
+        if re.search(r"(?i)(?:please|you need to|you will need to) complete.{0,60}(?:assessment|test)",body) and not re.search(r"(?i)separate email|if.{0,40}(?:shortlist|successful)",body):
+            return "online_assessment"
+        return "application_received" if re.search(r"(?i)received|got it",subject) else "application_confirmation"
+    return next((name for name, pattern in PATTERNS if re.search(pattern, text, re.I)), None)
 
 
 def identity_key(value):
@@ -99,7 +100,7 @@ def identity_key(value):
 
 
 def identity_text(raw):
-    mail = parse_gmail_api_message(raw) if "payload" in raw else dict(raw)
+    mail = mail_fields(raw)
     return (mail.get("subject") or "") + "\n" + strip_quoted(mail.get("body") or "")
 
 
@@ -115,7 +116,7 @@ def extract_identity(text):
     # Bound captures to one sentence/line. 'at' in a later paragraph is not an employer.
     match = re.search(r"(?:applying|application)\s+(?:for|to)\s+(?:(?:the|our)\s+)?([^\n.!?]{2,180}?)\s+(?:role\s+)?(?:at|with)\s+([^\n.!?]{2,100})(?=[.!?\n]|$)", text, re.I)
     if match:
-        role = role or match.group(1).strip()
+        role = role or re.sub(r"(?i)^(?:role|position) of |(?:role|vacancy|opportunity)$", "", match.group(1)).strip()
         company = company or match.group(2).strip()
         evidence.append("bounded application role at employer phrase")
     if not role:
@@ -128,11 +129,25 @@ def extract_identity(text):
         if match:
             company = match.group(1).strip()
             evidence.append("explicit applying to employer phrase")
+    if company and (company.casefold() in {"us", "our team", "this", "the engineering programme"} or len(company.split()) > 10): company = None
+    if role and (role.casefold() in {"this", "a role", "this role"} or re.search(r"(?i)we[’']re|for the time|absolute;",role)): role = None
+    # Full role before portal transition language, bounded inside the sentence.
+    for pattern in (
+        r"(?:applying|application) (?:for|to) (?:(?:the|our) )?(?:(?:role|position) of )?([^\n.!?]{2,180}?) (?:role,|opportunity at|(?:vacancy|role) at)",
+        r"your application for (?:(?:the )?position of )?([^\n.!?]{2,180}?)(?:, and| has been received| and are currently| job was|\n)",
+        r"role of\s+([^\n.!?]{2,150})",
+        r"thank you for your interest in ([^\n.!?]{2,150}) and your application",
+    ):
+        found = re.search(pattern,text,re.I)
+        if found:
+            role = found.group(1).strip()
+            evidence.append("explicit portal role phrase")
+            break
     return company, role, evidence
 
 
 def parse_message(raw):
-    mail = parse_gmail_api_message(raw) if "payload" in raw else dict(raw)
+    mail = mail_fields(raw)
     mid = mail.get("_gmail_id") or mail.get("message_id")
     thread = mail.get("_gmail_thread") or mail.get("thread_id")
     received = mail.get("received_at") or ""
@@ -141,7 +156,7 @@ def parse_message(raw):
         # An unsubscribe footer alone is not enough to reject an explicit receipt.
         if not re.search(r"your application|thank you for applying|invitation to interview", text, re.I):
             return None
-    kind = next((name for name, pattern in PATTERNS if re.search(pattern, text, re.I)), None)
+    kind = classify_recruitment(mail.get("subject") or "", mail.get("body") or "")
     if not kind or not mid or not thread:
         return None
     company, role, identity_evidence = extract_identity(text)
@@ -166,6 +181,7 @@ def parse_message(raw):
             "assessment_received_date": received if assessment else None,
             "application_date": received[:10] if kind.startswith("application_") and kind != "application_under_review" else None,
             "application_identity": identity.group(1) if identity else None,
+            "reference_type": "candidate" if identity and identity.group(0).lower().startswith("candidate") else "application",
             "source_application_channel": provider or "Gmail recruitment notification",
             "assessment_interview_link": next((u for u in urls if u), None),
             "recruiter_contact": mail.get("from"), "gmail_message_id": mid,

@@ -1,0 +1,98 @@
+"""Evidence-ranked matching; no edit-distance, semantic model, or company-only merge."""
+import re
+from career_mail_parser import parse_message, mail_fields, identity_key
+from career_mail_rules import company_key, company_aliases, role_key
+
+PLATFORMS=('workday','workable','lever','teamtailor','canditech','hirevue','successfactors','greenhouse','smartrecruiters','jobtrain','oraclecloud','groupgti','hackerrank')
+
+def has_phrase(phrase,text):
+    return ' '+identity_key(phrase)+' ' in ' '+identity_key(text)+' '
+
+def clean_role(value):
+    value=re.sub(r'\s+',' ',value or '')
+    value=re.sub(r'(?i)^(?:(?:the|our) )?(?:(?:role|position) of |(?:role|position) )','',value or '').strip()
+    value=re.sub(r'(?i)(?:opportunity|vacancy|role)$','',value).strip()
+    value=re.sub(r'(?i)\s+(?:ID )?[A-Z]{0,4}-?\d{5,}\s*$','',value).strip()
+    return value
+
+def fields(raw,records):
+    signal=parse_message(raw)
+    if signal is None:return None
+    mail=mail_fields(raw);subject=mail['subject'];body=mail['body'];text=subject+'\n'+body
+    signal['role']=clean_role(signal.get('role')) or None
+    evidence=signal.setdefault('identity_evidence',[])
+    known=[]
+    for record in records:
+        # Canonical employer variants are audited by the matcher: collisions remain review-only.
+        if any(has_phrase(a,subject) for a in company_aliases(record['company'])):known.append(record['company'])
+    if not known:
+        for record in records:
+            if any(has_phrase(a,text) for a in company_aliases(record['company'])):known.append(record['company'])
+    families={company_key(c.split('(')[0].split('/')[0]) for c in known}
+    if len(families)==1 and known and (not signal.get('company') or any(company_key(signal['company']) in company_aliases(c) for c in known)):
+        signal['company']=known[0];evidence.append('employer named in subject/body and canonical employer index')
+    # Explicit employer phrases for employers absent from the tracker.
+    if not signal.get('company'):
+        for pattern in [r'thank you for (?:your application|applying) to ([^\n.!?]{2,90})',r'thank you for your interest in ([^\n.!?]{2,90}?)(?: and| where|,|\n|$)',r'(?:career at|invited by) ([^\n.!?]{2,80}?)(?: to |\n|$)']:
+            m=re.search(pattern,text,re.I)
+            if m:
+                value=m.group(1).strip()
+                if not re.search(r'(?i)programme|join us|role|position|internship|^us$|^our |^the engineering',value) and len(value.split())<=7:
+                    signal['company']=value;evidence.append('explicit employer phrase');break
+    if not signal.get('role'):
+        for pattern in [r'for the position of\s+([^\n.!?]{2,180}?)(?: has been| that requires|\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to the\s+([^\n.!?]{2,180})(?:\n|$)']:
+            m=re.search(pattern,text,re.I)
+            if m:
+                signal['role']=clean_role(m.group(1));evidence.append('explicit portal position phrase');break
+    # Subject "Employer - Role - Thank you ..." / "Role - Employer".
+    parts=re.split(r'\s+[–—-]\s+',subject)
+    if len(parts)>=2 and signal.get('company'):
+        for i,part in enumerate(parts):
+            if company_key(part) in company_aliases(signal['company']):
+                adjacent=parts[i+1] if i==0 else parts[i-1]
+                if not re.search(r'(?i)application|thank|update|received',adjacent):
+                    signal['role']=clean_role(adjacent);evidence.append('employer/role subject layout')
+    # Candidate full role is actually mentioned, not inferred from a unique company.
+    if signal.get('company') and not signal.get('role'):
+        possible={r['role'] for r in records if company_key(signal['company']) in company_aliases(r['company']) and has_phrase(r['role'],text)}
+        if len(possible)==1:signal['role']=possible.pop();evidence.append('full canonical role named in subject/body')
+    # Portal references are retained only from explicit application/requisition evidence.
+    refs=re.findall(r'(?i)\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|[A-Z]{3}\d{4}[A-Z]{2}|SYS-\d{4,})\b',subject+'\n'+body)
+    if not signal.get('application_identity') and len(set(refs))==1:
+        signal['application_identity']=refs[0];signal['reference_type']='requisition';evidence.append('explicit portal requisition reference')
+    sender=mail.get('from') or ''
+    signal['platform_sender']=any(p in sender.lower() for p in PLATFORMS)
+    return signal
+
+def compatible(signal,record):
+    if signal.get('region') and signal['region']!=record.get('region'):return False
+    cities=('london','chester','burgess hill','knutsford','ipswich','dubai','singapore','tokyo')
+    supplied={c for c in cities if has_phrase(c,signal.get('role') or '')}
+    canonical={c for c in cities if has_phrase(c,record.get('role') or '')}
+    if supplied and canonical and supplied!=canonical:return False
+    if signal.get('application_identity') and record.get('application_identity') and signal['application_identity']!=record['application_identity']:return False
+    if signal.get('company') and company_key(signal['company']) not in company_aliases(record['company']):return False
+    return True
+
+def resolve(raw,records):
+    signal=fields(raw,records)
+    if signal is None:return None,[],None
+    # Strong evidence first. Candidate/person IDs alone are not application IDs.
+    ref=signal.get('application_identity')
+    reference=[r for r in records if ref and signal.get('reference_type')!='candidate' and (r.get('application_identity')==ref or ref in r.get('job_reference_ids',[]))]
+    thread=[r for r in records if signal['gmail_thread_id'] in r.get('thread_ids',[])]
+    if reference:return signal,[r for r in reference if compatible(signal,r)],'application/reference ID'
+    if thread:return signal,thread,'Gmail thread'
+    candidates=[r for r in records if compatible(signal,r) and signal.get('company') and signal.get('role') and role_key(signal['role'])==role_key(r['role'])]
+    return signal,candidates,'company + normalized full role' if candidates else None
+
+def review_reason(signal,records):
+    reasons=[]
+    if signal.get('platform_sender'):reasons.append('recruitment platform sender; employer/role must be established from message evidence')
+    if not signal.get('company'):reasons.append('company extraction failure: no unique explicit employer')
+    if not signal.get('role'):reasons.append('role extraction failure: no complete role title')
+    if not signal.get('region'):reasons.append('canonical region missing')
+    employer=[r for r in records if signal.get('company') and company_key(signal['company']) in company_aliases(r['company'])]
+    if employer and signal.get('role'):reasons.append('title variation or a different role: no unique full-role equivalence')
+    if signal.get('company') and signal.get('role') and not employer:reasons.append('no canonical employer/role pair; likely new application')
+    return reasons

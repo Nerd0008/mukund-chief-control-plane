@@ -18,6 +18,8 @@ from career_google_auth import GoogleError, access_token, status
 from career_google_clients import GmailReader, DeadlineCalendar
 from career_mail_parser import parse_message, stable_id, calendar_event, identity_key, identity_text
 from career_mail_tracker import WorkbookTracker
+from career_mail_matching import resolve, review_reason, compatible
+from career_mail_rules import role_key, company_key, company_aliases
 
 REPO = Path(__file__).resolve().parent.parent
 CONFIG = Path(__file__).with_name("career_mail_config.json")
@@ -100,7 +102,7 @@ def reconcile(messages, existing, processed=()):
               "ambiguous_deadlines": 0}
     for raw in sorted(messages, key=lambda m: int(m.get("internalDate") or 0) if "payload" in m
                       else time_key(m.get("received_at")) * 1000):
-        signal = parse_message(raw)
+        signal, ranked_candidates, match_method = resolve(raw, records)
         if signal is None:
             counts["ignored"] += 1
             continue
@@ -117,9 +119,7 @@ def reconcile(messages, existing, processed=()):
             counts["ambiguous_deadlines"] += 1
         elif extracted_deadline.get("kind"):
             counts[extracted_deadline["kind"].lower() + "_deadlines"] += 1
-        candidates = [r for r in records if thread in r.get("thread_ids", [])]
-        if not candidates:
-            candidates = canonical_candidates(signal, raw, records)
+        candidates = ranked_candidates
         if len(candidates) > 1:
             signal["needs_review"] = True
             signal["review_reason"] = "multiple canonical applications match"
@@ -127,19 +127,18 @@ def reconcile(messages, existing, processed=()):
             continue
         if candidates:
             record = candidates[0]
-            if any(signal.get(key) and identity_key(signal[key]) != identity_key(record.get(key))
-                   for key in ("company", "role", "region")) or (
-                    signal.get("application_identity") and record.get("application_identity")
-                    and signal["application_identity"] != record["application_identity"]):
+            if not compatible(signal, record) or (signal.get("role") and
+                    role_key(signal["role"]) != role_key(record["role"]) and match_method != "application/reference ID"):
                 signal.update(needs_review=True, review_reason="thread conflicts with company/role/region/reference evidence")
                 review.append(signal)
                 continue
             counts["matched_existing"] += 1
-            signal.setdefault("identity_evidence", []).append("unique canonical company/full-role or Gmail thread match")
+            signal.setdefault("identity_evidence", []).append(match_method)
+            signal["match_method"] = match_method
             signal.update(company=record["company"], role=record["role"], region=record["region"])
             signal["needs_review"] = bool(signal["deadline"]["needs_review"])
         elif not all(signal.get(k) for k in ("company", "role", "region")) or signal["region"] not in {"uk", "dubai", "japan", "singapore"}:
-            signal.update(needs_review=True, review_reason="company, role or canonical region unresolved")
+            signal.update(needs_review=True, review_reason="company, role or canonical region unresolved", review_reasons=review_reason(signal, records))
             review.append(signal)
             continue
         else:
@@ -184,6 +183,37 @@ def reconcile(messages, existing, processed=()):
             "needs_review": review, "proposed_calendar_events": list(events.values()),
             "processed_ids": sorted(new_ids), "gmail_mutations": 0,
             "model_calls": 0, "tracker_writes": 0, "calendar_writes": 0}
+
+
+def analyze_signal(raw, records, *, item=None):
+    signal, candidates, method = resolve(raw, records)
+    if signal is None:
+        from career_mail_parser import mail_fields
+        mail = mail_fields(raw)
+        return {"item": item, "gmail_message_id": raw.get("id") or raw.get("message_id"),
+                "category": "false positive / generic recruitment content", "reasons": ["survey, marketing or no current recruitment event"],
+                "received_date": mail.get("received_at")}
+    signal["item"] = item
+    signal["received_date"] = signal.get("assessment_received_date") or signal.get("last_update_timestamp")
+    signal["candidate_count"] = len(candidates)
+    if len(candidates) == 1 and compatible(signal,candidates[0]) and (not signal.get("role") or
+            role_key(signal["role"]) == role_key(candidates[0]["role"]) or method == "application/reference ID"):
+        match = candidates[0]
+        signal.update(company=match["company"], role=match["role"], region=match["region"],
+                      category="confident existing application match", match_method=method, confidence="high", matched_application_id=match["application_id"])
+        signal["needs_review"] = bool(signal["deadline"].get("needs_review"))
+        signal["reasons"] = [method] + ([signal["deadline"]["reason"]] if signal["needs_review"] else [])
+    elif len(candidates)>1:
+        signal.update(category="genuine owner review required", confidence="needs_review",needs_review=True,
+                      reasons=["multiple candidate tracker rows: " + str(len(candidates)) + "; duplicate posting or distinct applications cannot be selected automatically"])
+    elif signal.get("company") and signal.get("role") and signal["latest_status"] in {"application_confirmation","application_received","application_under_review"}:
+        signal.update(category="likely new application",confidence="medium",needs_review=True,reasons=review_reason(signal,records))
+        signal["reasons"].append("explicit application receipt; proposed as new for review, not a safe automatic insertion")
+    elif signal.get("assessment_type") or signal["latest_status"] in {"recruiter_update","rejection","withdrawal","offer"}:
+        signal.update(category="recruitment event for an existing application but uncertain match",confidence="needs_review",needs_review=True,reasons=review_reason(signal,records))
+    else:
+        signal.update(category="genuine owner review required",confidence="needs_review",needs_review=True,reasons=review_reason(signal,records))
+    return signal
 
 
 def report_hash(report):
