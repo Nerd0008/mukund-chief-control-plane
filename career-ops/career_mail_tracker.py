@@ -77,6 +77,7 @@ class WorkbookTracker:
                             refs.extend(v for v in values if re.fullmatch(r"[A-Za-z0-9_-]{3,40}",v))
                     record["job_reference_ids"] = sorted(set(refs))
                     record["canonical_job_host"] = parsed.hostname or ""
+                    record["canonical_job_path"] = parsed.path
                     record["canonical_owner_status"] = cells[ci(cfg["status_columns"]["application_status"]) - 1]
                     records.append(record)
             finally:
@@ -112,15 +113,19 @@ class WorkbookTracker:
             matches = [r for r in records if r["region"] == old["region"]
                        and r["company"].casefold() == old["company"].casefold()
                        and r["role"].casefold() == old["role"].casefold()
-                       and r.get("canonical_job_host") == old.get("canonical_job_host")]
+                       and r.get("canonical_job_host") == old.get("canonical_job_host")
+                       and r.get("canonical_job_path") == old.get("canonical_job_path")
+                       and set(r.get("job_reference_ids", [])) == set(old.get("job_reference_ids", []))]
             if len(matches) != 1:
                 raise ValueError("accepted mailbox identity needs fresh owner reconciliation")
             current = matches[0]
             if current.get("seen_message_ids"):
+                if current["application_id"] != old["application_id"]:
+                    raise ValueError("accepted mailbox application identity conflicts with current metadata")
                 # Current persisted metadata is stronger than the historical snapshot.
                 current["seen_message_ids"] = sorted(set(current["seen_message_ids"]) | set(old["seen_message_ids"]))
                 continue
-            protected = {k: current.get(k) for k in ("company", "role", "region", "row", "canonical_owner_status", "job_reference_ids", "canonical_job_host")}
+            protected = {k: current.get(k) for k in ("company", "role", "region", "row", "canonical_owner_status", "job_reference_ids", "canonical_job_host", "canonical_job_path")}
             current.update(copy.deepcopy(old))
             current.update(protected)
             current["accepted_state_source"] = "verified previously applied snapshot"
