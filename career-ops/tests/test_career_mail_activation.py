@@ -42,3 +42,11 @@ def test_write_failure_does_not_advance_checkpoint(tmp_path):
   def upsert(self,r):raise OSError('fixture failure')
  with pytest.raises(OSError):m.run_scan({'backfill_days':30,'max_messages':10},tmp_path,apply=True,reader=Reader([mail('new',body='Your application is under review.')]),tracker=Failing(records))
  assert not (tmp_path/'checkpoint.json').exists()
+
+
+def test_previously_review_only_message_cannot_be_automatically_promoted(tmp_path):
+ setup(tmp_path);records=m.reconcile([mail()],[])['proposed_records'];records[0]['row']=3
+ m.atomic_json(tmp_path/'pending-review.json',{'new':{'gmail_message_id':'new','needs_review':True}})
+ t=Tracker(records);r=m.run_scan({'backfill_days':30,'max_messages':10},tmp_path,apply=True,reader=Reader([mail('new',body='Your application is under review.')]),tracker=t)
+ assert not t.writes and r['tracker_writes']==0
+ assert json.loads((tmp_path/'pending-review.json').read_text())['new']['needs_review']

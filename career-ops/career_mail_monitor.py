@@ -355,7 +355,8 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
         # An offline proposal is not automatic write authority. Only confident
         # existing identities or explicitly confirmed applications may be written.
         analysis = {s.get("gmail_message_id"): s for s in report["signal_analysis"]}
-        allowed = [r for r in report["proposed_records"] if not r.get("needs_review")
+        pending = read_json(runtime / "pending-review.json", {})
+        allowed = [r for r in report["proposed_records"] if r.get("gmail_message_id") not in pending and not r.get("needs_review")
                    and r.get("confidence") == "high"
                    and (r.get("owner_confirmed_application") or r.get("row")
                         and analysis.get(r.get("gmail_message_id"), {}).get("category")
@@ -374,7 +375,6 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
         receipt = apply_report(apply_plan, tracker, calendar, runtime / (report["report_id"] + "-audit.json"))
         # Retain uncertain notifications durably even after advancing Gmail history.
         review_path = runtime / "pending-review.json"
-        pending = read_json(review_path, {})
         for signal in report["needs_review"]:
             pending[signal["gmail_message_id"]] = signal
         atomic_json(review_path, pending)
