@@ -93,7 +93,7 @@ def cmd_inventory(args) -> int:
             "header_row": cfg["header_row"],
             "owner_columns": cfg["owner_columns"],
             "dedupe_url_column": cfg["dedupe"]["url_column"],
-            "id_style": cfg["id"]["style"],
+            "id_style": (cfg.get("id") or {}).get("style"),
         }
         if path.exists():
             tr = tracker_writer.Tracker(path, c)

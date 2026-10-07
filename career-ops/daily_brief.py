@@ -381,7 +381,8 @@ def collect_trackers(cfg: dict, now: dt.datetime, window_start: dt.datetime) -> 
             rows = tr.data_rows()
             last = tr.last_data_row()
             first = cfg_r["first_data_row"]
-            id_idx = tw.column_index_from_string(cfg_r["id"]["column"]) - 1
+            id_col = (cfg_r.get("id") or cfg_r.get("mail_identity") or {}).get("column")
+            id_idx = tw.column_index_from_string(id_col) - 1 if id_col else None
             status_col = cfg_r["status_columns"]["application_status"]
             status_idx = tw.column_index_from_string(status_col) - 1
             fm = cfg_r["field_map"]
@@ -404,7 +405,7 @@ def collect_trackers(cfg: dict, now: dt.datetime, window_start: dt.datetime) -> 
             actionable, with_deadline = [], 0
             for i, r in enumerate(rows):
                 row_no = first + i
-                rid = r[id_idx]
+                rid = r[id_idx] if id_idx is not None else None
                 status = r[status_idx]
                 status_text = str(status) if status not in (None, "") else None
                 found = parse_day(r[found_idx]) if found_idx is not None else None
@@ -419,7 +420,7 @@ def collect_trackers(cfg: dict, now: dt.datetime, window_start: dt.datetime) -> 
                         "deadline": deadline.isoformat(),
                         "days_remaining": days_between(deadline, now.date()),
                         "application_status": status_text,
-                        "source": f"{path.name}#{rc['id']['column']}{row_no}",
+                        "source": f"{path.name}#{id_col or fm['company']}{row_no}",
                     })
                 if status_text is not None and status_text.casefold() in terminal:
                     continue

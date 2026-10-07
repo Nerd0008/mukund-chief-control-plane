@@ -14,7 +14,7 @@ class VisibleMail(HTMLParser):
         if tag in {'br','p','div','li','tr','td','h1','h2'}: self.out.append('\n')
         if tag in {'span','a','b','strong'}: self.out.append(' ')
         if tag=='img':
-            alt=dict(attrs).get('alt','')
+            alt=dict(attrs).get('alt') or ''
             if len(alt)<=100 and alt:self.out.append(' '+alt+' ')
     def handle_endtag(self, tag):
         if tag in {'style','script','head'}: self.hidden = max(0, self.hidden-1)

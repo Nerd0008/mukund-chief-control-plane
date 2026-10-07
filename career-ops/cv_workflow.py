@@ -213,14 +213,14 @@ def tracker_job(profiles: dict, region: str, *, job_id: str | None = None,
     tr = tw.Tracker(path, cfg)
     try:
         field_map = cfg.get("field_map", {})
-        id_col = cfg["id"]["column"]
+        id_col = (cfg.get("id") or cfg.get("mail_identity") or {}).get("column")
         last = tr.last_data_row()
         hit = None
         for r in range(cfg["first_data_row"], last + 1):
             if row is not None and r == row:
                 hit = r
                 break
-            if job_id is not None and str(tr.ws[f"{id_col}{r}"].value or "").strip() == str(job_id):
+            if id_col and job_id is not None and str(tr.ws[f"{id_col}{r}"].value or "").strip() == str(job_id):
                 hit = r
                 break
             if url is not None and tw.normalize_url(tr.ws[f"{cfg['dedupe']['url_column']}{r}"].value) \

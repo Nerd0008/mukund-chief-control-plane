@@ -154,7 +154,7 @@ def _scan(tr, cfg: dict, month: str) -> dict:
     """Partition the canonical data rows into the target month and the rest."""
     dcol = column_index_from_string(cfg["field_map"]["date_found"])
     urlcol = column_index_from_string(cfg["dedupe"]["url_column"])
-    idcol = cfg["id"]["column"]
+    idcol = (cfg.get("id") or cfg.get("mail_identity") or {}).get("column")
     first, last = cfg["first_data_row"], tr.last_data_row()
     months: dict[str, int] = {}
     rolled, retained = [], []
@@ -169,7 +169,7 @@ def _scan(tr, cfg: dict, month: str) -> dict:
         "months_present": dict(sorted(months.items())),
         "rolled_rows": rolled,
         "retained_rows": retained,
-        "rolled_ids": [str(tr.ws[f"{idcol}{r}"].value) for r in rolled],
+        "rolled_ids": [str(tr.ws[f"{idcol}{r}"].value) if idcol else None for r in rolled],
         "rolled_url_keys": [tw.normalize_url(tr.ws.cell(row=r, column=urlcol).value) for r in rolled],
         "undated_rows": sum(1 for r in retained
                             if month_of(tr.ws.cell(row=r, column=dcol).value) is None),
