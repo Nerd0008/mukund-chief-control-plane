@@ -211,3 +211,13 @@ def test_non_title_prose_and_link_not_a_role():
 def test_umbrella_early_careers_scheme_not_specific_application():
     a=analyze_signal(mail('Company: Acme\nRole: Acme Early Careers Scheme\nPlease complete an assessment.',subject='Assessment invitation'),[record(role='Graduate Engineer')])
     assert not a['role'] and a['category']!='confident existing application match'
+
+
+def test_employer_name_is_not_job_title():
+    a=analyze_signal(mail('Company: Acme\nRole: Acme Group\nYour application has been received.'),[])
+    assert not a['role'] and a['category']!='likely new application'
+
+
+def test_marketing_tagline_not_job_title():
+    a=analyze_signal(mail('Company: Acme\nRole: start a career that moves you\nYour application has been received.'),[])
+    assert not a['role'] and a['category']!='likely new application'
