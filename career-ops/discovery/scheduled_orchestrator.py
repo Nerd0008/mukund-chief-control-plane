@@ -584,7 +584,7 @@ def run_region(region: str, args, *, deadline: float | None = None,
     run_id = f"unified-{region}-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     live = not args.no_live
     provider_kind = args.provider if args.provider != "auto" else "codex"
-    if not live and not args.reuse_web_export:
+    if not live:
         provider_kind = "none" if args.provider == "auto" else args.provider
 
     collection: list = []
@@ -627,9 +627,9 @@ def run_region(region: str, args, *, deadline: float | None = None,
     candidates = [c for b in collection for c in b["candidates"]]
     mode = args.mode
     funnel_doc = pipeline.run_funnel(
-        candidates, region=region, mode=mode, semantic=args.semantic,
+        candidates, region=region, mode=mode, semantic=args.semantic if live else "off",
         deepseek_model=args.model, batch_size=args.batch_size,
-        codex_budget=args.codex_budget, codex_enabled=(args.codex == "on"),
+        codex_budget=args.codex_budget, codex_enabled=live and (args.codex == "on"),
         timeout=args.per_query_timeout, run_id=run_id,
         max_tokens=args.max_tokens, collection=collection,
         codex_model=getattr(args, "codex_model", None))
