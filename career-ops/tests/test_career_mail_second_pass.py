@@ -191,3 +191,13 @@ def test_named_full_role_cybersecurity_word_boundary():
 def test_portal_application_to_title_without_article():
     a=analyze_signal(mail('Company: Acme\nThank you for your application to IT Support Engineer (SYS-6942)\nWe will consider it.',subject='Application received'),[record(role='IT Support Engineer (SYS-6942)')])
     assert a['role']=='IT Support Engineer (SYS-6942)'
+
+
+def test_role_of_sentence_period_is_title_boundary():
+    a=analyze_signal(mail('Company: Acme\nThank you for your application for the role of Graduate - Cybersecurity.',subject='Application received'),[record(role='Graduate Cyber Security')])
+    assert a['category']=='confident existing application match'
+
+
+def test_application_to_sentence_period_is_title_boundary():
+    a=analyze_signal(mail('Company: Acme\nThank you for your application to IT Support Engineer (SYS-6942).',subject='Application received'),[record(role='IT Support Engineer (SYS-6942)')])
+    assert a['role']=='IT Support Engineer (SYS-6942)'

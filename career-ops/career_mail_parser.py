@@ -135,7 +135,7 @@ def extract_identity(text):
     for pattern in (
         r"(?:applying|application) (?:for|to) (?:(?:the|our) )?(?:(?:role|position) of )?([^\n.!?]{2,180}?) (?:role,|opportunity at|(?:vacancy|role) at)",
         r"your application for (?:(?:the )?position of )?([^\n.!?]{2,180}?)(?:, and| has been received| and are currently| job was|\n)",
-        r"role of\s+([^\n.!?]{2,150}?)(?:\s+at |\n|$)",
+        r"role of\s+([^\n.!?]{2,150}?)(?:\s+at |[.!?\n]|$)",
         r"thank you for your interest in ([^\n.!?]{2,150}) and your application",
     ):
         found = re.search(pattern,text,re.I)

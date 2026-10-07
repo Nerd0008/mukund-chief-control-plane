@@ -53,6 +53,12 @@ def fields(raw,records):
     if subject_employer and not explicit_company:
         signal['company']=subject_employer;explicit_company=True;evidence.append('explicit employer subject')
     named_explicit=bool(signal.get('company'))
+    _,sender_address=parseaddr(mail.get('from') or '')
+    sender_host=sender_address.rsplit('@',1)[-1].lower()
+    sender_brand=sender_host.split('.')[-2] if '.' in sender_host else ''
+    sender_employers={r['company'] for r in records if company_key(r['company'])==sender_brand and len(sender_brand)>3}
+    if not signal.get('company') and len(sender_employers)==1 and not any(p in sender_host for p in PLATFORMS):
+        signal['company']=sender_employers.pop();evidence.append('exact canonical employer brand in non-platform sender domain')
     known=[]
     for record in records:
         # Canonical employer variants are audited by the matcher: collisions remain review-only.
@@ -82,7 +88,7 @@ def fields(raw,records):
                 elif not re.search(r'(?i)application|thank|update',subject):signal['company']=pieces[-1].strip()
     if not signal.get('role'):
 
-        for pattern in [r'for the position of\s+([^.!?]{2,180}?)(?: has been| that requires| and are currently|\n\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to (?:the\s+)?([^\n.!?]{2,180})(?:\n|$)']:
+        for pattern in [r'for the position of\s+([^.!?]{2,180}?)(?: has been| that requires| and are currently|\n\n|$)',r'interest in [^\n.!?]+ and the\s+([^\n.!?]{2,180}?) role',r'time to apply for\s+([^\n.!?]{2,180}?)(?:, one of|\n|$)',r'join us as a\s+([^\n.!?]{2,180})(?:\n|$)',r'application to (?:the\s+)?([^\n.!?]{2,180})(?:[.!?\n]|$)']:
             m=re.search(pattern,text,re.I)
             if m:
                 signal['role']=clean_role(m.group(1));evidence.append('explicit portal position phrase');break
