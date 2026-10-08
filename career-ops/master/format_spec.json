@@ -1,0 +1,2391 @@
+{
+  "source_file": "doc_8d4ecda0beaf_Mukund_Didwania_CV.pdf",
+  "saved_as": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\CV_FORMAT_MASTER.pdf",
+  "producer": "Canva",
+  "creator": "Canva",
+  "pages": 1,
+  "page": {
+    "rect": [
+      0.0,
+      0.0,
+      595.5,
+      842.25
+    ],
+    "cropbox": [
+      0.0,
+      0.0,
+      595.5,
+      842.25
+    ],
+    "mediabox": [
+      0.0,
+      7.82998,
+      595.5,
+      850.07996
+    ],
+    "rotation": 0
+  },
+  "fonts": [
+    {
+      "xref": 156,
+      "ext": "ttf",
+      "type": "Type0",
+      "name": "AAAAAA+TimesNewRomanPSMT",
+      "ref": "F4",
+      "encoding": "Identity-H",
+      "embedded": true
+    },
+    {
+      "xref": 157,
+      "ext": "ttf",
+      "type": "Type0",
+      "name": "BAAAAA+TimesNewRomanPS-BoldMT",
+      "ref": "F5",
+      "encoding": "Identity-H",
+      "embedded": true
+    },
+    {
+      "xref": 158,
+      "ext": "ttf",
+      "type": "Type0",
+      "name": "CAAAAA+TimesNewRomanPS-ItalicMT",
+      "ref": "F6",
+      "encoding": "Identity-H",
+      "embedded": true
+    }
+  ],
+  "sizes": [
+    10.00127,
+    10.99914,
+    13.0024
+  ],
+  "rules": [
+    {
+      "type": "f",
+      "x0": 226.28731,
+      "y": 34.08147,
+      "x1": 354.92563,
+      "width_pt": 0.7502823,
+      "len": 128.63832,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "f",
+      "x0": 211.48096,
+      "y": 46.086,
+      "x1": 250.63632,
+      "width_pt": 0.7502823,
+      "len": 39.15536,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "f",
+      "x0": 255.14975,
+      "y": 46.086,
+      "x1": 285.16107,
+      "width_pt": 0.7502823,
+      "len": 30.01132,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "f",
+      "x0": 287.6698,
+      "y": 46.086,
+      "x1": 289.67447,
+      "width_pt": 0.7502823,
+      "len": 2.00467,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "s",
+      "x0": 31.84271,
+      "y": 70.49828,
+      "x1": 551.78864,
+      "width_pt": 0.7502827,
+      "len": 519.94593,
+      "fill": null
+    },
+    {
+      "type": "s",
+      "x0": 31.84271,
+      "y": 124.11556,
+      "x1": 551.78864,
+      "width_pt": 0.7502827,
+      "len": 519.94593,
+      "fill": null
+    },
+    {
+      "type": "s",
+      "x0": 28.96969,
+      "y": 227.89917,
+      "x1": 548.91559,
+      "width_pt": 0.7502827,
+      "len": 519.9459,
+      "fill": null
+    },
+    {
+      "type": "s",
+      "x0": 29.44532,
+      "y": 519.19373,
+      "x1": 549.39124,
+      "width_pt": 0.7502827,
+      "len": 519.94592,
+      "fill": null
+    },
+    {
+      "type": "s",
+      "x0": 34.67842,
+      "y": 773.83325,
+      "x1": 554.62433,
+      "width_pt": 0.7502827,
+      "len": 519.94591,
+      "fill": null
+    },
+    {
+      "type": "s",
+      "x0": 28.76059,
+      "y": 334.36658,
+      "x1": 548.70648,
+      "width_pt": 0.7502827,
+      "len": 519.94589,
+      "fill": null
+    },
+    {
+      "type": "f",
+      "x0": 28.74975,
+      "y": 333.8656,
+      "x1": 548.49976,
+      "width_pt": 0.75,
+      "len": 519.75,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "f",
+      "x0": 29.43423,
+      "y": 518.62305,
+      "x1": 549.1842,
+      "width_pt": 0.75,
+      "len": 519.74998,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "type": "f",
+      "x0": 34.66536,
+      "y": 773.16663,
+      "x1": 554.41534,
+      "width_pt": 0.75,
+      "len": 519.74999,
+      "fill": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "spans": [
+    {
+      "b": 0,
+      "l": 0,
+      "s": 0,
+      "text": "Microsoft 365, IT Systems Administration, Network Troubleshooting, Windows 11, ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        164.88815,
+        134.49446
+      ],
+      "bbox": [
+        164.88815,
+        125.5822,
+        504.58191,
+        136.65782
+      ]
+    },
+    {
+      "b": 1,
+      "l": 0,
+      "s": 0,
+      "text": "Proactive IT Support Assistant combining MSc-level cybersecurity expertise with hands-on administration of Microsoft 365,",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        34.67842,
+        81.488
+      ],
+      "bbox": [
+        34.67842,
+        72.57574,
+        534.57452,
+        83.65136
+      ]
+    },
+    {
+      "b": 1,
+      "l": 1,
+      "s": 0,
+      "text": "Microsoft Azure, and Active Directory. A consultative partner adept at context-aware problem solving, delivering secure,",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        34.67842,
+        92.74223
+      ],
+      "bbox": [
+        34.67842,
+        83.82997,
+        521.16162,
+        94.90559
+      ]
+    },
+    {
+      "b": 1,
+      "l": 2,
+      "s": 0,
+      "text": "business-aligned IT solutions strictly compliant with ISO 27001 standards.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        34.67842,
+        103.99648
+      ],
+      "bbox": [
+        34.67842,
+        95.08421,
+        333.81055,
+        106.15984
+      ]
+    },
+    {
+      "b": 2,
+      "l": 0,
+      "s": 0,
+      "text": "Mukund Didwania",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 13.0024,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        247.63519,
+        20.57639
+      ],
+      "bbox": [
+        247.63519,
+        8.98978,
+        352.7739,
+        23.38892
+      ]
+    },
+    {
+      "b": 2,
+      "l": 0,
+      "s": 1,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 13.0024,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        352.78027,
+        20.57639
+      ],
+      "bbox": [
+        352.78027,
+        8.98978,
+        356.03088,
+        23.38892
+      ]
+    },
+    {
+      "b": 2,
+      "l": 1,
+      "s": 0,
+      "text": "+44 7990920031 | mukunddidwania3@gmail.com | London, UK, E6 3AG |",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        151.13008,
+        33.33119
+      ],
+      "bbox": [
+        151.13008,
+        24.41893,
+        452.54001,
+        35.49455
+      ]
+    },
+    {
+      "b": 3,
+      "l": 0,
+      "s": 0,
+      "text": "LinkedIn | GitHub | Right to work in the UK ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        211.48096,
+        45.33572
+      ],
+      "bbox": [
+        211.48096,
+        36.42345,
+        392.18512,
+        47.49908
+      ]
+    },
+    {
+      "b": 4,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        34.67842,
+        776.00909
+      ],
+      "bbox": [
+        34.67842,
+        767.0968,
+        37.17874,
+        778.17242
+      ]
+    },
+    {
+      "b": 5,
+      "l": 0,
+      "s": 0,
+      "text": "ISC2 Certified in Cybersecurity (CC) ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        37.43337,
+        787.83105
+      ],
+      "bbox": [
+        37.43337,
+        778.91876,
+        189.90816,
+        789.99438
+      ]
+    },
+    {
+      "b": 5,
+      "l": 1,
+      "s": 0,
+      "text": "Ethical Hacking with Kali Linux, IBM",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        37.43337,
+        799.08527
+      ],
+      "bbox": [
+        37.43337,
+        790.17297,
+        192.40169,
+        801.2486
+      ]
+    },
+    {
+      "b": 5,
+      "l": 2,
+      "s": 0,
+      "text": "Cyber Security Job Simulation, Deloitte & Mastercard via Forage",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        37.43337,
+        810.33954
+      ],
+      "bbox": [
+        37.43337,
+        801.42725,
+        300.43011,
+        812.50287
+      ]
+    },
+    {
+      "b": 5,
+      "l": 3,
+      "s": 0,
+      "text": "CompTia Security+ (In Progress)",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        37.43337,
+        821.59375
+      ],
+      "bbox": [
+        37.43337,
+        812.68146,
+        171.10387,
+        823.75708
+      ]
+    },
+    {
+      "b": 6,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        32.46084,
+        227.84865
+      ],
+      "bbox": [
+        32.46084,
+        218.93639,
+        34.96116,
+        230.01201
+      ]
+    },
+    {
+      "b": 7,
+      "l": 0,
+      "s": 0,
+      "text": "  ",
+      "font": "TimesNewRomanPS-ItalicMT",
+      "size": 10.00127,
+      "flags": 6,
+      "color": 0,
+      "origin": [
+        29.88365,
+        249.36526
+      ],
+      "bbox": [
+        29.88365,
+        240.453,
+        34.88393,
+        251.52863
+      ]
+    },
+    {
+      "b": 7,
+      "l": 1,
+      "s": 0,
+      "text": "Modules:",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.88365,
+        260.61951
+      ],
+      "bbox": [
+        29.88365,
+        251.70724,
+        69.88351,
+        262.78287
+      ]
+    },
+    {
+      "b": 7,
+      "l": 1,
+      "s": 1,
+      "text": " Cryptography, Security Management (ISO 27001 focus), Critical Infrastructure Security, Secure Business",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        69.89481,
+        260.61951
+      ],
+      "bbox": [
+        69.89481,
+        251.70724,
+        495.89389,
+        262.78287
+      ]
+    },
+    {
+      "b": 7,
+      "l": 2,
+      "s": 0,
+      "text": "Architectures, Digital Forensics and Network Security. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        29.88365,
+        271.87375
+      ],
+      "bbox": [
+        29.88365,
+        262.96149,
+        252.60367,
+        274.03711
+      ]
+    },
+    {
+      "b": 8,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        24.54025,
+        406.43057
+      ],
+      "bbox": [
+        24.54025,
+        397.51831,
+        27.04056,
+        408.59393
+      ]
+    },
+    {
+      "b": 9,
+      "l": 0,
+      "s": 0,
+      "text": "Reduced phishing triage time by 35% by automating email ingestion and analysis with Python and Gmail APIs, enabling",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        630.46417
+      ],
+      "bbox": [
+        44.79788,
+        621.55188,
+        528.60565,
+        632.6275
+      ]
+    },
+    {
+      "b": 9,
+      "l": 1,
+      "s": 0,
+      "text": "faster identification and prioritization of suspicious emails.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        640.21783
+      ],
+      "bbox": [
+        44.79788,
+        631.30554,
+        280.56662,
+        642.38116
+      ]
+    },
+    {
+      "b": 9,
+      "l": 2,
+      "s": 0,
+      "text": "Applied AI models to map email content against the MITRE ATT&CK framework, producing structured threat intelligence",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        649.9715
+      ],
+      "bbox": [
+        44.79788,
+        641.0592,
+        539.6568,
+        652.13483
+      ]
+    },
+    {
+      "b": 9,
+      "l": 3,
+      "s": 0,
+      "text": "that improved investigation quality and supported faster incident response.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        659.72522
+      ],
+      "bbox": [
+        44.79788,
+        650.81293,
+        343.33432,
+        661.88855
+      ]
+    },
+    {
+      "b": 10,
+      "l": 0,
+      "s": 0,
+      "text": "Reduced the attack surface across 15+ endpoints by analyzing network traffic and Windows event logs to identify",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        717.77032
+      ],
+      "bbox": [
+        44.79788,
+        708.85803,
+        500.29062,
+        719.93365
+      ]
+    },
+    {
+      "b": 10,
+      "l": 1,
+      "s": 0,
+      "text": "unnecessary services, strengthening endpoint security and reducing potential exploitation paths.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        729.02454
+      ],
+      "bbox": [
+        44.79788,
+        720.11224,
+        427.7424,
+        731.18787
+      ]
+    },
+    {
+      "b": 10,
+      "l": 2,
+      "s": 0,
+      "text": "Investigated anomalous system activity and historical event logs to identify potential security incidents, supporting root",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        740.27881
+      ],
+      "bbox": [
+        44.79788,
+        731.36652,
+        522.75262,
+        742.44214
+      ]
+    },
+    {
+      "b": 10,
+      "l": 3,
+      "s": 0,
+      "text": "cause analysis, forensic investigations and system recovery.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        751.53302
+      ],
+      "bbox": [
+        44.79788,
+        742.62073,
+        284.17007,
+        753.69635
+      ]
+    },
+    {
+      "b": 11,
+      "l": 0,
+      "s": 0,
+      "text": "MacOS, iOS, Android, Endpoint Management (Microsoft Intune), Hardware Provisioning, SharePoint, Power Automate. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.84271,
+        146.56902
+      ],
+      "bbox": [
+        31.84271,
+        137.65675,
+        518.70911,
+        148.73238
+      ]
+    },
+    {
+      "b": 11,
+      "l": 1,
+      "s": 0,
+      "text": "Cyber Security & Cloud Platforms: ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        31.84271,
+        157.82326
+      ],
+      "bbox": [
+        31.84271,
+        148.911,
+        186.54491,
+        159.98662
+      ]
+    },
+    {
+      "b": 11,
+      "l": 1,
+      "s": 1,
+      "text": "Microsoft Azure, Microsoft Entra ID, Identity & Access Management (IAM),  ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        187.40091,
+        158.50351
+      ],
+      "bbox": [
+        187.40091,
+        149.59125,
+        503.42853,
+        160.66687
+      ]
+    },
+    {
+      "b": 11,
+      "l": 2,
+      "s": 0,
+      "text": " Active Directory, Threat Detection, Log Analysis, Incident Management, BitLocker. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        29.00699,
+        169.32759
+      ],
+      "bbox": [
+        29.00699,
+        160.41533,
+        373.07349,
+        171.49095
+      ]
+    },
+    {
+      "b": 12,
+      "l": 0,
+      "s": 0,
+      "text": "Data Analysis, SQL, Python (Pandas), Microsoft Power BI, Microsoft Excel, ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        207.45445,
+        181.01198
+      ],
+      "bbox": [
+        207.45445,
+        172.09972,
+        518.25061,
+        183.17534
+      ]
+    },
+    {
+      "b": 12,
+      "l": 1,
+      "s": 0,
+      "text": "Software Development, System Testing, API Integration. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.84271,
+        194.01689
+      ],
+      "bbox": [
+        31.84271,
+        185.10463,
+        263.74194,
+        196.18025
+      ]
+    },
+    {
+      "b": 13,
+      "l": 0,
+      "s": 0,
+      "text": "ISO 27001/27002, UK Cyber Essentials, NIST CSF, DPA/GDPR. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        158.17155,
+        207.94965
+      ],
+      "bbox": [
+        158.17155,
+        199.03738,
+        425.41614,
+        210.11301
+      ]
+    },
+    {
+      "b": 14,
+      "l": 0,
+      "s": 0,
+      "text": "Data Analysis & Software Development:",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        31.84271,
+        181.26208
+      ],
+      "bbox": [
+        31.84271,
+        172.34982,
+        204.59473,
+        183.42545
+      ]
+    },
+    {
+      "b": 15,
+      "l": 0,
+      "s": 0,
+      "text": "Frameworks & Compliance:",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        31.84271,
+        207.19936
+      ],
+      "bbox": [
+        31.84271,
+        198.28709,
+        154.03876,
+        209.36272
+      ]
+    },
+    {
+      "b": 16,
+      "l": 0,
+      "s": 0,
+      "text": "MSc Information Security",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.91362,
+        237.63332
+      ],
+      "bbox": [
+        29.91362,
+        228.72105,
+        142.11989,
+        239.79668
+      ]
+    },
+    {
+      "b": 16,
+      "l": 0,
+      "s": 1,
+      "text": ", Royal Holloway University of London, United Kingdom ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        142.12778,
+        237.63332
+      ],
+      "bbox": [
+        142.12778,
+        228.72105,
+        377.11023,
+        239.79668
+      ]
+    },
+    {
+      "b": 17,
+      "l": 0,
+      "s": 0,
+      "text": "IT Support & Digital Systems:",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        31.84271,
+        133.99428
+      ],
+      "bbox": [
+        31.84271,
+        125.08202,
+        162.40779,
+        136.15764
+      ]
+    },
+    {
+      "b": 18,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        32.37488,
+        683.56915
+      ],
+      "bbox": [
+        32.37488,
+        674.65686,
+        34.87519,
+        685.73248
+      ]
+    },
+    {
+      "b": 18,
+      "l": 1,
+      "s": 0,
+      "text": "AttackSurfaceIQ – ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        32.37488,
+        694.82336
+      ],
+      "bbox": [
+        32.37488,
+        685.91107,
+        115.69445,
+        696.98669
+      ]
+    },
+    {
+      "b": 18,
+      "l": 1,
+      "s": 1,
+      "text": "Risk Assessment",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        115.70315,
+        694.82336
+      ],
+      "bbox": [
+        115.70315,
+        685.91107,
+        183.76585,
+        696.98669
+      ]
+    },
+    {
+      "b": 18,
+      "l": 1,
+      "s": 2,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        183.76785,
+        694.82336
+      ],
+      "bbox": [
+        183.76785,
+        685.91107,
+        186.26817,
+        696.98669
+      ]
+    },
+    {
+      "b": 19,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        189.95032,
+        593.09662
+      ],
+      "bbox": [
+        189.95032,
+        584.18433,
+        192.45064,
+        595.25995
+      ]
+    },
+    {
+      "b": 19,
+      "l": 1,
+      "s": 0,
+      "text": "InboxDefender – ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        30.76143,
+        606.60175
+      ],
+      "bbox": [
+        30.76143,
+        597.68945,
+        105.02348,
+        608.76508
+      ]
+    },
+    {
+      "b": 19,
+      "l": 1,
+      "s": 1,
+      "text": "AI-Powered Phishing Intelligence Platform (Current Project) ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        105.02769,
+        606.60175
+      ],
+      "bbox": [
+        105.02769,
+        597.68945,
+        351.63953,
+        608.76508
+      ]
+    },
+    {
+      "b": 20,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        189.95032,
+        620.10681
+      ],
+      "bbox": [
+        189.95032,
+        611.19452,
+        192.45064,
+        622.27014
+      ]
+    },
+    {
+      "b": 21,
+      "l": 0,
+      "s": 0,
+      "text": "Professional Summary",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        37.59749,
+        64.471
+      ],
+      "bbox": [
+        37.59749,
+        54.66952,
+        143.99695,
+        66.85021
+      ]
+    },
+    {
+      "b": 22,
+      "l": 0,
+      "s": 0,
+      "text": "Technical Skills",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        31.72418,
+        119.58884
+      ],
+      "bbox": [
+        31.72418,
+        109.78736,
+        104.95518,
+        121.96806
+      ]
+    },
+    {
+      "b": 23,
+      "l": 0,
+      "s": 0,
+      "text": "Education",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.88365,
+        223.85564
+      ],
+      "bbox": [
+        29.88365,
+        214.05415,
+        78.15893,
+        226.23485
+      ]
+    },
+    {
+      "b": 24,
+      "l": 0,
+      "s": 0,
+      "text": "Projects",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        30.04285,
+        514.66699
+      ],
+      "bbox": [
+        30.04285,
+        504.86551,
+        68.30379,
+        517.0462
+      ]
+    },
+    {
+      "b": 25,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        37.43337,
+        753.82172
+      ],
+      "bbox": [
+        37.43337,
+        744.0202,
+        40.18316,
+        756.20093
+      ]
+    },
+    {
+      "b": 25,
+      "l": 1,
+      "s": 0,
+      "text": "Certifications",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        37.43337,
+        765.82623
+      ],
+      "bbox": [
+        37.43337,
+        756.02472,
+        101.55827,
+        768.20544
+      ]
+    },
+    {
+      "b": 26,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.88365,
+        534.80969
+      ],
+      "bbox": [
+        29.88365,
+        525.8974,
+        32.38396,
+        536.97302
+      ]
+    },
+    {
+      "b": 27,
+      "l": 0,
+      "s": 0,
+      "text": "Developed a browser-wide Chrome Extension achieving a 93.7% detection rate across 150+ real-world test cases using 25+",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        39.0985,
+        552.9519
+      ],
+      "bbox": [
+        39.0985,
+        544.03961,
+        534.38605,
+        555.11523
+      ]
+    },
+    {
+      "b": 27,
+      "l": 1,
+      "s": 0,
+      "text": "deterministic detection patterns.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        39.0985,
+        562.70557
+      ],
+      "bbox": [
+        39.0985,
+        553.79327,
+        167.10991,
+        564.8689
+      ]
+    },
+    {
+      "b": 27,
+      "l": 2,
+      "s": 0,
+      "text": "Engineered a privacy-first client-side detection engine using JavaScript and regular expressions to identify emails,",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        39.0985,
+        572.45923
+      ],
+      "bbox": [
+        39.0985,
+        563.54694,
+        496.16806,
+        574.62256
+      ]
+    },
+    {
+      "b": 27,
+      "l": 3,
+      "s": 0,
+      "text": "Passwords, API keys, JWTs and other sensitive patterns locally, eliminating the need to transmit user data to external",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        39.0985,
+        582.21295
+      ],
+      "bbox": [
+        39.0985,
+        573.30066,
+        508.43039,
+        584.37628
+      ]
+    },
+    {
+      "b": 27,
+      "l": 4,
+      "s": 0,
+      "text": "services",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        39.0985,
+        591.96661
+      ],
+      "bbox": [
+        39.0985,
+        583.05432,
+        71.30407,
+        594.12994
+      ]
+    },
+    {
+      "b": 28,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        30.24165,
+        553.48682
+      ],
+      "bbox": [
+        30.24165,
+        544.57452,
+        36.89197,
+        555.65015
+      ]
+    },
+    {
+      "b": 29,
+      "l": 0,
+      "s": 0,
+      "text": "SafePaste - ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        30.91846,
+        532.07355
+      ],
+      "bbox": [
+        30.91846,
+        523.16125,
+        80.34686,
+        534.23688
+      ]
+    },
+    {
+      "b": 29,
+      "l": 0,
+      "s": 1,
+      "text": "Browser Privacy Extension",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        80.35506,
+        532.07355
+      ],
+      "bbox": [
+        80.35506,
+        523.16125,
+        189.77815,
+        534.23688
+      ]
+    },
+    {
+      "b": 29,
+      "l": 1,
+      "s": 0,
+      "text": "JavaScript, Manifest V3, HTML, CSS, Regular Expressions",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        30.82865,
+        542.57751
+      ],
+      "bbox": [
+        30.82865,
+        533.66522,
+        271.17599,
+        544.74084
+      ]
+    },
+    {
+      "b": 30,
+      "l": 0,
+      "s": 0,
+      "text": "Python ,Gmail API, LLM, MITRE ATT&CK, JSON",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.36123,
+        618.38458
+      ],
+      "bbox": [
+        31.36123,
+        609.47229,
+        240.81551,
+        620.54791
+      ]
+    },
+    {
+      "b": 31,
+      "l": 0,
+      "s": 0,
+      "text": "Bachelor of Computer Applications",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.88365,
+        286.51172
+      ],
+      "bbox": [
+        29.88365,
+        277.59946,
+        181.81908,
+        288.67508
+      ]
+    },
+    {
+      "b": 31,
+      "l": 0,
+      "s": 1,
+      "text": ", Maharashtra Institute of Technology World Peace University, India ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        181.82762,
+        286.51172
+      ],
+      "bbox": [
+        181.82762,
+        277.59946,
+        459.79889,
+        288.67508
+      ]
+    },
+    {
+      "b": 31,
+      "l": 1,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        29.88365,
+        297.76596
+      ],
+      "bbox": [
+        29.88365,
+        288.8537,
+        32.38396,
+        299.92932
+      ]
+    },
+    {
+      "b": 31,
+      "l": 2,
+      "s": 0,
+      "text": "Modules: ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        29.88365,
+        311.63876
+      ],
+      "bbox": [
+        29.88365,
+        302.7265,
+        72.38345,
+        313.80212
+      ]
+    },
+    {
+      "b": 31,
+      "l": 2,
+      "s": 1,
+      "text": "Python, Java, JavaScript, C++, C, MySQL, AI & ML, Angular, Mobile Application Development.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        72.39185,
+        311.63876
+      ],
+      "bbox": [
+        72.39185,
+        302.7265,
+        466.12234,
+        313.80212
+      ]
+    },
+    {
+      "b": 31,
+      "l": 3,
+      "s": 0,
+      "text": "September 2021 – September 2024 | CGPA: 9.17 ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        29.99576,
+        298.0986
+      ],
+      "bbox": [
+        29.99576,
+        289.18634,
+        228.56604,
+        300.26196
+      ]
+    },
+    {
+      "b": 32,
+      "l": 0,
+      "s": 0,
+      "text": "September 2024 - September 2025 | Merit",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        29.19456,
+        247.92049
+      ],
+      "bbox": [
+        29.19456,
+        239.00822,
+        197.27055,
+        250.08385
+      ]
+    },
+    {
+      "b": 33,
+      "l": 0,
+      "s": 0,
+      "text": "Python, Windows Event Logs, Network Analysis, PowerShell",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        32.23119,
+        705.65576
+      ],
+      "bbox": [
+        32.23119,
+        696.74347,
+        279.69077,
+        707.81909
+      ]
+    },
+    {
+      "b": 34,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        30.24165,
+        573.33429
+      ],
+      "bbox": [
+        30.24165,
+        564.422,
+        36.89197,
+        575.49762
+      ]
+    },
+    {
+      "b": 35,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.23703,
+        631.83771
+      ],
+      "bbox": [
+        31.23703,
+        622.92542,
+        37.88735,
+        634.00104
+      ]
+    },
+    {
+      "b": 36,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.23703,
+        650.18463
+      ],
+      "bbox": [
+        31.23703,
+        641.27234,
+        37.88735,
+        652.34796
+      ]
+    },
+    {
+      "b": 37,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.84271,
+        718.51227
+      ],
+      "bbox": [
+        31.84271,
+        709.59998,
+        38.49302,
+        720.6756
+      ]
+    },
+    {
+      "b": 38,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.84271,
+        738.35986
+      ],
+      "bbox": [
+        31.84271,
+        729.44757,
+        38.49302,
+        740.52319
+      ]
+    },
+    {
+      "b": 39,
+      "l": 0,
+      "s": 0,
+      "text": "Engineered an automated phishing analysis pipeline that processed 450+ real-world phishing emails, reducing analyst",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        670.45074
+      ],
+      "bbox": [
+        44.79788,
+        661.53845,
+        515.86304,
+        672.61407
+      ]
+    },
+    {
+      "b": 39,
+      "l": 1,
+      "s": 0,
+      "text": "triage time by 35% through automated threat enrichment.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        44.79788,
+        680.20441
+      ],
+      "bbox": [
+        44.79788,
+        671.29211,
+        274.16531,
+        682.36774
+      ]
+    },
+    {
+      "b": 39,
+      "l": 2,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        31.23703,
+        670.03217
+      ],
+      "bbox": [
+        31.23703,
+        661.11987,
+        37.88735,
+        672.1955
+      ]
+    },
+    {
+      "b": 40,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        477.89365
+      ],
+      "bbox": [
+        38.8894,
+        468.98138,
+        41.38972,
+        480.05701
+      ]
+    },
+    {
+      "b": 40,
+      "l": 1,
+      "s": 0,
+      "text": "Managed corporate data systems utilizing SQL for database administration, analyzing corporate data and system logs to",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        489.18738
+      ],
+      "bbox": [
+        38.8894,
+        480.27512,
+        518.19043,
+        491.35074
+      ]
+    },
+    {
+      "b": 40,
+      "l": 2,
+      "s": 0,
+      "text": "inform technical decision-making and ensure operational efficiency. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        500.44162
+      ],
+      "bbox": [
+        38.8894,
+        491.52936,
+        314.34021,
+        502.60498
+      ]
+    },
+    {
+      "b": 41,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.88005,
+        387.96179
+      ],
+      "bbox": [
+        38.88005,
+        379.04953,
+        41.38036,
+        390.12515
+      ]
+    },
+    {
+      "b": 41,
+      "l": 1,
+      "s": 0,
+      "text": "Delivered AV and Microsoft Teams support for 10–15 weekly cross-functional meetings while training staff on digital tools",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.88005,
+        401.34186
+      ],
+      "bbox": [
+        38.88005,
+        392.4296,
+        535.42523,
+        403.50522
+      ]
+    },
+    {
+      "b": 41,
+      "l": 2,
+      "s": 0,
+      "text": "and secure working practices, improving technology adoption across the organisation.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.88005,
+        411.84583
+      ],
+      "bbox": [
+        38.88005,
+        402.93356,
+        382.94809,
+        414.00919
+      ]
+    },
+    {
+      "b": 42,
+      "l": 0,
+      "s": 0,
+      "text": "Apollo Clinic, Basti, India | January 2024 - September 2024 ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        148.13889,
+        428.55209
+      ],
+      "bbox": [
+        148.13889,
+        419.63983,
+        390.6593,
+        430.71545
+      ]
+    },
+    {
+      "b": 42,
+      "l": 1,
+      "s": 0,
+      "text": "Coordinated deployment of secure IT infrastructure across 20+ external vendors, translating clinical requirements into",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        441.63998
+      ],
+      "bbox": [
+        38.8894,
+        432.72772,
+        511.58896,
+        443.80334
+      ]
+    },
+    {
+      "b": 42,
+      "l": 2,
+      "s": 0,
+      "text": "technical solutions that delivered compliant systems on time and within budget.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        452.89423
+      ],
+      "bbox": [
+        38.8894,
+        443.98196,
+        357.43539,
+        455.05759
+      ]
+    },
+    {
+      "b": 43,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        25.92487,
+        343.495
+      ],
+      "bbox": [
+        25.92487,
+        334.58273,
+        28.42519,
+        345.65836
+      ]
+    },
+    {
+      "b": 44,
+      "l": 0,
+      "s": 0,
+      "text": "Delivered IT support across Windows, macOS and mobile devices, troubleshooting Microsoft 365, Azure, network connectivity",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.88005,
+        356.87506
+      ],
+      "bbox": [
+        38.88005,
+        347.9628,
+        551.53021,
+        359.03842
+      ]
+    },
+    {
+      "b": 44,
+      "l": 1,
+      "s": 0,
+      "text": "and hardware/software issues to minimise user downtime and maintain business continuity.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.88005,
+        367.37903
+      ],
+      "bbox": [
+        38.88005,
+        358.46677,
+        404.6373,
+        369.54239
+      ]
+    },
+    {
+      "b": 45,
+      "l": 0,
+      "s": 0,
+      "text": "Produced and maintained 40+ internal operational documents supporting system changes, audit readiness and knowledge",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        40.22681,
+        378.19263
+      ],
+      "bbox": [
+        40.22681,
+        369.28036,
+        524.62683,
+        380.35599
+      ]
+    },
+    {
+      "b": 45,
+      "l": 1,
+      "s": 0,
+      "text": "sharing across the organisation.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        40.22681,
+        389.44687
+      ],
+      "bbox": [
+        40.22681,
+        380.53461,
+        166.30461,
+        391.61023
+      ]
+    },
+    {
+      "b": 46,
+      "l": 0,
+      "s": 0,
+      "text": "IT Support Assistant,",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        25.92487,
+        344.99557
+      ],
+      "bbox": [
+        25.92487,
+        336.08331,
+        117.89668,
+        347.15894
+      ]
+    },
+    {
+      "b": 47,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        25.92487,
+        416.1904
+      ],
+      "bbox": [
+        25.92487,
+        407.27814,
+        28.42519,
+        418.35376
+      ]
+    },
+    {
+      "b": 47,
+      "l": 1,
+      "s": 0,
+      "text": "Assistant Systems Engineer,",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.00127,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        25.92487,
+        427.44464
+      ],
+      "bbox": [
+        25.92487,
+        418.53238,
+        145.65022,
+        429.608
+      ]
+    },
+    {
+      "b": 48,
+      "l": 0,
+      "s": 0,
+      "text": "The Colourful Aura | London, UK | November 2024 - Present",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        120.75861,
+        345.33081
+      ],
+      "bbox": [
+        120.75861,
+        336.41855,
+        367.21246,
+        347.49417
+      ]
+    },
+    {
+      "b": 49,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        50.36498,
+        432.84863
+      ],
+      "bbox": [
+        50.36498,
+        423.93637,
+        52.8653,
+        435.01199
+      ]
+    },
+    {
+      "b": 50,
+      "l": 0,
+      "s": 0,
+      "text": " ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.99914,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        28.76059,
+        315.91998
+      ],
+      "bbox": [
+        28.76059,
+        306.1185,
+        31.51037,
+        318.29919
+      ]
+    },
+    {
+      "b": 50,
+      "l": 1,
+      "s": 0,
+      "text": "Work Experience ",
+      "font": "TimesNewRomanPS-BoldMT",
+      "size": 10.99914,
+      "flags": 20,
+      "color": 0,
+      "origin": [
+        28.76059,
+        327.9245
+      ],
+      "bbox": [
+        28.76059,
+        318.12302,
+        114.27594,
+        330.30371
+      ]
+    },
+    {
+      "b": 51,
+      "l": 0,
+      "s": 0,
+      "text": "Protected sensitive patient information across 100% of clinical endpoints by implementing network segmentation,",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        465.2334
+      ],
+      "bbox": [
+        38.8894,
+        456.32114,
+        495.16797,
+        467.39676
+      ]
+    },
+    {
+      "b": 51,
+      "l": 1,
+      "s": 0,
+      "text": "firewall policies and BitLocker encryption, strengthening regulatory compliance and reducing endpoint security risk.",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        38.8894,
+        475.73737
+      ],
+      "bbox": [
+        38.8894,
+        466.8251,
+        506.51544,
+        477.90073
+      ]
+    },
+    {
+      "b": 52,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        26.45704,
+        357.67038
+      ],
+      "bbox": [
+        26.45704,
+        348.75812,
+        33.10736,
+        359.83374
+      ]
+    },
+    {
+      "b": 53,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        26.45704,
+        376.78757
+      ],
+      "bbox": [
+        26.45704,
+        367.87531,
+        33.10736,
+        378.95093
+      ]
+    },
+    {
+      "b": 54,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        26.45704,
+        401.88708
+      ],
+      "bbox": [
+        26.45704,
+        392.97482,
+        33.10736,
+        404.05045
+      ]
+    },
+    {
+      "b": 55,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        25.79462,
+        446.69193
+      ],
+      "bbox": [
+        25.79462,
+        437.77966,
+        32.44494,
+        448.85529
+      ]
+    },
+    {
+      "b": 56,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        25.79462,
+        466.53943
+      ],
+      "bbox": [
+        25.79462,
+        457.62717,
+        32.44494,
+        468.70279
+      ]
+    },
+    {
+      "b": 57,
+      "l": 0,
+      "s": 0,
+      "text": "• ",
+      "font": "TimesNewRomanPSMT",
+      "size": 10.00127,
+      "flags": 4,
+      "color": 0,
+      "origin": [
+        25.79462,
+        489.38806
+      ],
+      "bbox": [
+        25.79462,
+        480.4758,
+        32.44494,
+        491.55142
+      ]
+    }
+  ]
+}
