@@ -13,7 +13,7 @@
   "measured": [
     {
       "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
-      "replace": "MSc Information Security graduate from Royal Holloway with software development and systems experience",
+      "replace": "MSc Information Security graduate from Royal Holloway with software development and IT support systems",
       "font": "TimesNewRomanPSMT",
       "size": 9.96,
       "origin": [
@@ -24,7 +24,7 @@
       "new_chars": 102,
       "char_delta_pct": -8.9,
       "old_width_pt": 523.49,
-      "new_width_pt": 438.67,
+      "new_width_pt": 437.32,
       "available_pt": 552.0
     },
     {
@@ -172,8 +172,8 @@
     },
     "non_breaking_spaces_remaining": 4,
     "font_subsetting": {
-      "bytes_before": 829045,
-      "bytes_after": 191866
+      "bytes_before": 829043,
+      "bytes_after": 191868
     }
   }
 }
