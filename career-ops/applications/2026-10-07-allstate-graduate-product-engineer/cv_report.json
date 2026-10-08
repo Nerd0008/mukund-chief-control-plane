@@ -167,13 +167,13 @@
     "cmap_repair": {
       "streams_patched": 1,
       "fonts": [
-        "ELJPUA+Times New Roman Regular"
+        "HMXNYD+Times New Roman Bold"
       ]
     },
-    "non_breaking_spaces_remaining": 4,
+    "non_breaking_spaces_remaining": 1,
     "font_subsetting": {
-      "bytes_before": 829043,
-      "bytes_after": 191868
+      "bytes_before": 1486961,
+      "bytes_after": 216162
     }
   }
 }
