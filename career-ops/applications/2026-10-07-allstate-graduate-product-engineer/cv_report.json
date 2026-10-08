@@ -1,0 +1,179 @@
+{
+  "ok": true,
+  "master": "C:\\Users\\mukun\\Downloads\\codex\\CV_FORMAT_MASTER.pdf",
+  "output": "C:\\Users\\mukun\\Downloads\\codex\\_CVs\\Mukund_Allstate_Product_Engineer_CV.pdf",
+  "page": {
+    "width": 595.5,
+    "height": 850.5,
+    "page_count": 1
+  },
+  "edits_applied": 9,
+  "spans_before": 81,
+  "spans_after": 81,
+  "measured": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "MSc Information Security graduate from Royal Holloway with software development and systems experience",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        81.2
+      ],
+      "old_chars": 112,
+      "new_chars": 102,
+      "char_delta_pct": -8.9,
+      "old_width_pt": 523.49,
+      "new_width_pt": 438.67,
+      "available_pt": 552.0
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "experience, complemented by practical projects in application development, security analysis and system design. ",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        94.7
+      ],
+      "old_chars": 118,
+      "new_chars": 111,
+      "char_delta_pct": -5.9,
+      "old_width_pt": 478.27,
+      "new_width_pt": 452.48,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "Seeking a graduate product engineering role to contribute programming and analytical skills while building scalable applications.",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        21.75,
+        108.2
+      ],
+      "old_chars": 127,
+      "new_chars": 129,
+      "char_delta_pct": 1.6,
+      "old_width_pt": 503.67,
+      "new_width_pt": 515.56,
+      "available_pt": 552.0
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Python, JavaScript, Java, cloud platforms, APIs, databases, MITRE ATT&CK",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        101.36,
+        138.74
+      ],
+      "old_chars": 69,
+      "new_chars": 72,
+      "char_delta_pct": 4.3,
+      "old_width_pt": 312.0,
+      "new_width_pt": 312.59,
+      "available_pt": 472.39
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, cloud platforms, APIs, databases, DevOps tools",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        109.92,
+        148.92
+      ],
+      "old_chars": 77,
+      "new_chars": 77,
+      "char_delta_pct": 0.0,
+      "old_width_pt": 320.8,
+      "new_width_pt": 324.48,
+      "available_pt": 463.83
+    },
+    {
+      "find": "Python, PowerShell, SQL, API integration",
+      "replace": "Python, JavaScript, Java, PowerShell, SQL",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        131.16,
+        160.27
+      ],
+      "old_chars": 40,
+      "new_chars": 41,
+      "char_delta_pct": 2.5,
+      "old_width_pt": 169.8,
+      "new_width_pt": 172.07,
+      "available_pt": 442.59
+    },
+    {
+      "find": "BitLocker, network segmentation, endpoint security ",
+      "replace": "Cloud platforms, DevOps tools, frameworks, APIs",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        102.63,
+        171.74
+      ],
+      "old_chars": 50,
+      "new_chars": 47,
+      "char_delta_pct": -6.0,
+      "old_width_pt": 210.22,
+      "new_width_pt": 201.95,
+      "available_pt": 471.12
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "Agile, design thinking, KPIs, AI fundamentals",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        128.4,
+        183.25
+      ],
+      "old_chars": 42,
+      "new_chars": 45,
+      "char_delta_pct": 7.1,
+      "old_width_pt": 193.58,
+      "new_width_pt": 185.34,
+      "available_pt": 445.35
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "User support, technical documentation, stakeholder communication",
+      "font": "TimesNewRomanPSMT",
+      "size": 9.96,
+      "origin": [
+        144.2,
+        194.76
+      ],
+      "old_chars": 63,
+      "new_chars": 64,
+      "char_delta_pct": 1.6,
+      "old_width_pt": 257.23,
+      "new_width_pt": 269.12,
+      "available_pt": 429.55
+    }
+  ],
+  "problems": [],
+  "verification": {
+    "untouched_spans_unchanged": true,
+    "moved": [],
+    "missing": [],
+    "all_replacements_present": true,
+    "page_geometry_unchanged": true,
+    "collateral_restored": [],
+    "cmap_repair": {
+      "streams_patched": 1,
+      "fonts": [
+        "ELJPUA+Times New Roman Regular"
+      ]
+    },
+    "non_breaking_spaces_remaining": 4,
+    "font_subsetting": {
+      "bytes_before": 829045,
+      "bytes_after": 191866
+    }
+  }
+}

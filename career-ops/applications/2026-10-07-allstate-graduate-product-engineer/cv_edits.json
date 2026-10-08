@@ -1,0 +1,40 @@
+{
+  "edits": [
+    {
+      "find": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems",
+      "replace": "MSc Information Security graduate from Royal Holloway with software development and systems experience"
+    },
+    {
+      "find": "experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. ",
+      "replace": "experience, complemented by practical projects in application development, security analysis and system design. "
+    },
+    {
+      "find": "Seeking a cybersecurity internship to contribute technical and analytical skills while developing hands-on industry experience.",
+      "replace": "Seeking a graduate product engineering role to contribute programming and analytical skills while building scalable applications."
+    },
+    {
+      "find": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "replace": "Python, JavaScript, Java, cloud platforms, APIs, databases, MITRE ATT&CK"
+    },
+    {
+      "find": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "replace": "Windows, Microsoft 365, Azure, cloud platforms, APIs, databases, DevOps tools"
+    },
+    {
+      "find": "Python, PowerShell, SQL, API integration",
+      "replace": "Python, JavaScript, Java, PowerShell, SQL"
+    },
+    {
+      "find": "BitLocker, network segmentation, endpoint security ",
+      "replace": "Cloud platforms, DevOps tools, frameworks, APIs"
+    },
+    {
+      "find": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+      "replace": "Agile, design thinking, KPIs, AI fundamentals"
+    },
+    {
+      "find": "User support, technical documentation, stakeholder coordination",
+      "replace": "User support, technical documentation, stakeholder communication"
+    }
+  ]
+}
