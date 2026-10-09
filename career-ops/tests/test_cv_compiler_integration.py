@@ -172,3 +172,25 @@ def test_unrelated_turn_keeps_normal_tools_after_cv_history():
     assert result=={'limit':150,'patch':None,'context':''}
     result=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
     assert result['limit']==4 and result['patch']['action']=='block'
+
+
+def test_jd_attachment_can_activate_compiler_without_history_lock(monkeypatch):
+    runtime=types.SimpleNamespace(_current_max_iterations=lambda:150)
+    monkeypatch.setattr(g,'compile_prototype',lambda *a,**kw:{'status':'FAIL','stage':'fixture','reason':'bounded fixture','delivery_allowed':False})
+    class Turn:
+        async def _run_agent(self,message,context,history,*a,**kw):
+            assert runtime._current_max_iterations()==150
+            assert g.pre_tool('patch',{'path':'unrelated.py'}) is None
+            assert g.pre_tool('tool_call',{'calls':[{'name':'career_cv_compile','arguments':{'jd':'Attached graduate role','job_id':'test'}}]}) is None
+            result=json.loads(g.compile_tool({'jd':'Attached graduate role','job_id':'test'}))
+            assert result.get('reason')!='native CV job context required'
+            assert runtime._current_max_iterations()==4
+            assert g.pre_tool('patch',{'path':'cv_template.py'})['action']=='block'
+            assert json.loads(g.compile_tool({'jd':'retry','job_id':'test'}))['reason']=='compiler already invoked; no retries'
+            return result
+    class Media:
+        async def send_document(self,*a,**kw):return True
+    g.install_runtime(runtime,Turn,Media)
+    result=asyncio.run(Turn()._run_agent('[Content of message.txt]: Graduate programme requirements','',[]))
+    assert result['stage']=='fixture'
+    assert g.JOB.get() is None
