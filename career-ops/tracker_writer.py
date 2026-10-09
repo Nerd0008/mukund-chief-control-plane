@@ -221,18 +221,22 @@ class Tracker:
         return snap
 
     def find_passed_rows(self) -> list[int]:
-        """Return row numbers where the status column contains 'passed' (case-insensitive).
+        """Return row numbers where the status or deadline column contains 'passed'.
 
-        Owner marks dead roles as 'passed' in the Status column. These rows are
-        deleted on the next write so the tracker stays clean.
+        Owner marks dead roles as 'passed' in the Status or Application Deadline
+        column. These rows are deleted on the next write so the tracker stays clean.
         """
         status_cols = self.cfg.get("status_columns", {})
-        if not status_cols:
+        deadline_col = self.cfg.get("field_map", {}).get("deadline")
+        check_cols = list(status_cols.values())
+        if deadline_col and deadline_col not in check_cols:
+            check_cols.append(deadline_col)
+        if not check_cols:
             return []
         last = self.last_data_row()
         passed_rows = []
         for r in range(self.first_data_row, last + 1):
-            for key, col in status_cols.items():
+            for col in check_cols:
                 val = self.ws[f"{col}{r}"].value
                 if val and str(val).strip().lower() == "passed":
                     passed_rows.append(r)
