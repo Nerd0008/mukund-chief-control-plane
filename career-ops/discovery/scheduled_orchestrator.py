@@ -439,6 +439,11 @@ def ingest_recruiter_watch(region: str, args) -> dict:
                                 "employer is contacted"))
 
 
+def ingest_gmail_alerts(region: str, args) -> dict:
+    from gmail_discovery import collect
+    return collect(region, args)
+
+
 def ingest_linkedin(region: str, args) -> dict:
     path = LINKEDIN_INBOX / f"linkedin-jobs-{region}.json"
     return _ingest_export(path, region, pipeline.collect_from_linkedin,
@@ -619,8 +624,11 @@ def run_region(region: str, args, *, deadline: float | None = None,
     for key, fn in (("company_watch", ingest_company_watch),
                     ("priority_watchlist", ingest_priority_watchlist),
                     ("recruiter_watch", ingest_recruiter_watch),
-                    ("linkedin_export", ingest_linkedin)):
-        lane = fn(region, args)
+                    ("linkedin_export", ingest_linkedin),
+                    ("gmail_job_alerts", ingest_gmail_alerts)):
+        lane_args = argparse.Namespace(**vars(args))
+        lane_args.gmail_deadline = deadline
+        lane = fn(region, lane_args)
         lanes[key] = lane
         collection.append(lane["block"])
 

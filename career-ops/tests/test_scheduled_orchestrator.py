@@ -416,7 +416,11 @@ def test_the_scheduled_launcher_invokes_the_unified_orchestrator():
     assert "--require-live-web" in joined
     assert "--mode high_recall" in joined
     assert "regional_job_search.py" not in joined
-    assert "--apply" not in joined and "submission" not in joined
+    discovery_lines=[line for line in active if 'scheduled_orchestrator.py' in line]
+    promote_lines=[line for line in active if 'promote_manifest.py' in line]
+    assert discovery_lines and all('--apply' not in line for line in discovery_lines)
+    assert len(promote_lines)==1 and '--apply' in promote_lines[0]
+    assert 'submission' not in joined
 
 
 def test_the_scheduled_launcher_keeps_crlf_and_the_rollback_command():
