@@ -6,6 +6,7 @@ REPO=Path(r'C:/Users/mukun/Documents/mukund-chief-control-plane')
 if str(REPO/'career-ops') not in sys.path:sys.path.insert(0,str(REPO/'career-ops'))
 import cv_golden as golden
 CV_ACTIVE=ContextVar('career_cv_active',default=False)
+CV_WORKSPACE=ContextVar('career_cv_workspace',default=None)
 CV_AGENT_TURNS=8
 PROTECTED=[golden.MASTER,golden.MANIFEST,REPO/'career-ops/cv_tailor.py',REPO/'career-ops/cv_golden.py',REPO/'career-ops/master/format_spec.json',REPO/'career-ops/hermes_cv_guard.py']
 def cv_request(message,history=()):
@@ -22,7 +23,7 @@ def pre_tool(tool_name,args,**kwargs):
   if not safe_renderer(args.get('command','')):return {'action':'block','message':'CV generation is bounded: only the canonical renderer command is permitted. Rewrite edits JSON, never code.'}
  elif tool_name in {'write_file','patch','apply_patch'}:
   path=args.get('path') or args.get('file_path') or args.get('file') or ''
-  if not path or not Path(path).resolve().is_relative_to(golden.OUTPUT_ROOT.resolve()):return {'action':'block','message':'Application writes restricted to the bounded CV output workspace.'}
+  if not path or Path(path).name!='cv_edits.json' or not Path(path).resolve().is_relative_to(golden.OUTPUT_ROOT.resolve()):return {'action':'block','message':'Application writes restricted to the bounded CV output workspace.'}
  elif tool_name in {'execute_code','python','delegate_task'}:return {'action':'block','message':'CV jobs cannot launch a parallel builder or an unbounded repair subagent.'}
  return None
 
@@ -30,7 +31,19 @@ def safe_renderer(command):
  command=command.strip()
  if command.startswith('& '):command=command[2:].strip()
  if any(c in command for c in ';|><`\n\r') or '&' in command or '--force' in command or ' -c ' in command:return False
- return bool(re.match(r'^(?:"[^"\n]*python(?:\.exe)?"|[^\s]*python(?:\.exe)?)\s+(?:"[^"\n]*cv_tailor\.py"|[^\s]*cv_tailor\.py)\s+--',command,re.I))
+ import shlex,os
+ try:tokens=shlex.split(command,posix=False)
+ except ValueError:return False
+ if len(tokens)<3:return False
+ expected_python=Path(os.environ.get('LOCALAPPDATA',''))/'hermes/hermes-agent/venv/Scripts/python.exe'
+ if Path(tokens[0].strip('"')).resolve()!=expected_python.resolve() or Path(tokens[1].strip('"')).resolve()!=(REPO/'career-ops/cv_tailor.py').resolve():return False
+ if '--out' not in tokens:return False
+ output=Path(tokens[tokens.index('--out')+1].strip('"')).resolve()
+ if not output.is_relative_to(golden.OUTPUT_ROOT.resolve()):return False
+ workspace=CV_WORKSPACE.get()
+ if workspace is not None and output.parent!=workspace:return False
+ CV_WORKSPACE.set(output.parent)
+ return True
 
 def needs_gate(path):
  p=Path(path)
@@ -44,9 +57,9 @@ def install_runtime(gateway_module,turn_class,media_class):
  old_run=turn_class._run_agent
  @functools.wraps(old_run)
  async def run(self,message,context_prompt,history,*args,**kwargs):
-  token=CV_ACTIVE.set(cv_request(message,history))
+  token=CV_ACTIVE.set(cv_request(message,history));workspace_token=CV_WORKSPACE.set(None)
   try:return await old_run(self,message,context_prompt,history,*args,**kwargs)
-  finally:CV_ACTIVE.reset(token)
+  finally:CV_ACTIVE.reset(token);CV_WORKSPACE.reset(workspace_token)
  turn_class._run_agent=run
  old_send=media_class.send_document
  @functools.wraps(old_send)

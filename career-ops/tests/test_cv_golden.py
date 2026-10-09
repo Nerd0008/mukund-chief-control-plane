@@ -71,7 +71,7 @@ def test_three_fit_attempts_fail_closed_without_pdf(setup):
  assert not (tmp/'bad_CV.pdf').exists() and not g.delivery_allowed(tmp/'bad_CV.pdf')
 
 def test_reproducible_identical_input(setup):
- root=setup[3];a=root/'a_CV.pdf';b=root/'b_CV.pdf'
+ root=setup[3];a=root/'a'/'a_CV.pdf';b=root/'b'/'b_CV.pdf'
  assert g.generate(g.MASTER,g.MANIFEST,setup[2],a)['status']=='PASS'
  assert g.generate(g.MASTER,g.MANIFEST,setup[2],b)['status']=='PASS'
  assert g.sha(a)==g.sha(b)
@@ -104,3 +104,11 @@ def test_cv_agent_budget_is_local_not_global(setup):
 def test_legacy_format_master_cannot_be_used(setup):
  import cv_tailor
  assert cv_tailor.main(['--master','C:/Users/mukun/Downloads/codex/CV_FORMAT_MASTER.pdf','--edits','x','--out','y'])==1
+
+
+def test_three_attempt_budget_persists_across_process_reentry(setup):
+ spec=setup[2];spec['edits'][0]['replace']='W'*1000;spec['edits'][0]['alternatives']=['W'*1000,'W'*1000]
+ root=setup[3];first=g.generate(g.MASTER,g.MANIFEST,spec,root/'failed_CV.pdf');assert first['status']=='FAIL'
+ spec['edits'][0]['replace']=setup[1]['text'];spec['edits'][0].pop('alternatives')
+ second=g.generate(g.MASTER,g.MANIFEST,spec,root/'renamed_CV.pdf');assert second['status']=='FAIL' and 'three' in second['problems'][0]
+ assert not (root/'renamed_CV.pdf').exists()

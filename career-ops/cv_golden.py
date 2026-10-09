@@ -106,7 +106,7 @@ def fit(span,text,fm,policy):
  if width>span['available_width']:return 'rendered width overflow'
  return None
 
-def prepare(doc,manifest,spec,rewrite=None):
+def prepare(doc,manifest,spec,rewrite=None,budget=None,save_budget=None):
  fm=fonts(doc);plan=[];seen=set()
  for e in spec.get('edits',[]):
   if set(e)-{'find','replace','span_id','alternatives'}:raise ValueError('geometry/font overrides and force exemptions forbidden')
@@ -115,7 +115,12 @@ def prepare(doc,manifest,spec,rewrite=None):
   s=matches[0]
   if s['id'] in seen:raise ValueError('duplicate span edit')
   seen.add(s['id']);candidate=e['replace'];reason=None
-  for attempt in range(1,MAX_FIT_ATTEMPTS+1):
+  used=(budget or {}).get(s["id"],0)
+  if used>=MAX_FIT_ATTEMPTS:raise ValueError(s["id"]+": three content-fit attempts exhausted")
+  for attempt in range(used+1,MAX_FIT_ATTEMPTS+1):
+   if budget is not None:
+    budget[s["id"]]=attempt
+    if save_budget:save_budget()
    reason=fit(s,candidate,fm[s['font_ref']],manifest['policy'])
    if reason is None:break
    if attempt==MAX_FIT_ATTEMPTS:break
@@ -210,12 +215,16 @@ def generate(master,manifest_path,spec,out,rewrite=None):
  if out==master.resolve() or not out.is_relative_to(OUTPUT_ROOT.resolve()):raise ValueError('output outside bounded CV application workspace')
  if out.exists():raise ValueError('output already exists; use a fresh application workspace')
  out.parent.mkdir(parents=True,exist_ok=True);manifest=json.loads(manifest_path.read_text());report_path=out.with_suffix('.verification.json');temp=out.with_suffix('.candidate.pdf');report={'status':'FAIL','problems':[]}
- protected=[master,manifest_path,HERE/'cv_tailor.py',Path(__file__),HERE/'master/format_spec.json']
+ protected=[master,manifest_path,HERE/'cv_tailor.py',Path(__file__),HERE/'hermes_cv_guard.py',HERE/'master/format_spec.json']
  try:
+  ledger_path=out.parent/'content_fit_verification.json'
+  ledger=json.loads(ledger_path.read_text()) if ledger_path.exists() else {'attempts':{},'render_attempts':0}
+  def save_ledger():ledger_path.write_text(json.dumps(ledger,indent=2))
+  if ledger['render_attempts']:raise ValueError('one-render job budget exhausted; no visual repair loop permitted')
   with immutable_files(protected) as before:
    if sha(master)!=manifest['master_sha256']:raise ValueError('master differs from versioned manifest')
    with pymupdf.open(master) as doc:
-    plan=prepare(doc,manifest,spec,rewrite);render_once(doc,plan,str(temp))
+    plan=prepare(doc,manifest,spec,rewrite,ledger['attempts'],save_ledger);ledger['render_attempts']=1;save_ledger();render_once(doc,plan,str(temp))
    report=verify(master,temp,manifest,plan);report.update(immutable_before=before,immutable_after={str(p):sha(p) for p in protected},master_sha256=sha(master),manifest_sha256=sha(manifest_path),content_fit_attempts={p['span']['id']:p['attempts'] for p in plan},render_attempts=1,approved_edits=[{'span_id':p['span']['id'],'replace':p['replace']} for p in plan])
    if report['status']!='PASS':raise ValueError('; '.join(report['problems']))
   os.replace(temp,out);report['output_sha256']=sha(out)
