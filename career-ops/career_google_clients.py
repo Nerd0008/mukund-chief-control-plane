@@ -43,7 +43,7 @@ class GmailReader:
                 self._sleep(60)
                 self._last_request = self._clock()
 
-    def read_window(self, checkpoint=None, *, days=30, max_messages=2000, now=None):
+    def read_window(self, checkpoint=None, *, days=30, max_messages=2000, now=None, query=RECRUITMENT_QUERY):
         """Complete pagination or fail without advancing the caller's checkpoint.
 
         Capture profile history BEFORE backfill to avoid losing arrivals during it.
@@ -86,7 +86,7 @@ class GmailReader:
             cutoff = int(((now or dt.datetime.now(dt.timezone.utc)) - dt.timedelta(days=days)).timestamp())
             page = None
             while True:
-                params = {"q": f"after:{cutoff} " + RECRUITMENT_QUERY, "maxResults": 500, "includeSpamTrash": "false"}
+                params = {"q": f"after:{cutoff} " + query, "maxResults": 500, "includeSpamTrash": "false"}
                 if page:
                     params["pageToken"] = page
                 result = self._get("/messages", **params)

@@ -380,6 +380,8 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
         atomic_json(review_path, pending)
         report["tracker_writes"] = len(receipt)
         report["calendar_writes"] = sum("calendar_event_id" in r for r in receipt)
+        from career_job_mail import compile_list
+        report["job_alert_discovery"] = compile_list(window["messages"], runtime.parent / "gmail-job-alerts")
         atomic_json(runtime / "checkpoint.json", {
             "history_id": window["checkpoint"],
             "processed_ids": sorted(set(state.get("processed_ids", [])) | set(report["processed_ids"])),
