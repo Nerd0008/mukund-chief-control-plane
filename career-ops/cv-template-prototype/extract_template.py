@@ -57,5 +57,7 @@ layout={'version':2,'status':'PROTOTYPE_NOT_DEPLOYED','master_sha256':hashlib.sh
         'section_order':headings,'slots':slots,'target_seconds':120,'hard_seconds':180,
         'max_generation_calls':2,'max_renders':2,
         'rules':[{'x1':21.75,'x2':515.25 if s['section']=='Projects' else 545.25,'y':s['baseline']+5,'width':1.0} for s in slots if s['heading']]}
+from layout_typography import standardize
+standardize(layout)
 (ROOT/'layout.json').write_text(json.dumps(layout,indent=2,ensure_ascii=False),encoding='utf-8')
 print('slots',len(slots),'variable',sum(s['variable'] for s in slots))

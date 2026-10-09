@@ -137,3 +137,16 @@ def test_all_section_headings_exactly_eleven_points(tmp_path):
     found=[s for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans'] if s['text'].strip() in layout['section_order']]
     assert len(found)==6
     assert all(abs(s['size']-11.0)<.001 and 'Bold' in s['font'] for s in found)
+
+def test_consistent_body_spacing_and_upright_bca(tmp_path):
+    layout=cv.load_layout()
+    assert all(s['leading']==11.5 for s in layout['slots'])
+    p=tmp_path/'spacing.pdf';cv.render(layout,{},p)
+    spans=[s for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans']]
+    bca=next(s for s in spans if 'Bachelor of Computer Applications' in s['text'])
+    assert 'Bold' in bca['font'] and 'Ital' not in bca['font']
+    for slot in layout['slots']:
+        if slot['max_lines']>1:
+            origins=sorted(set(round(s['origin'][1],3) for s in spans if slot['baseline']-.1<=s['origin'][1]<=slot['region'][3] and s['origin'][0]>=slot['x']-.1))
+            assert len(origins)==slot['max_lines']
+            assert all(abs(b-a-11.5)<.01 for a,b in zip(origins,origins[1:]))

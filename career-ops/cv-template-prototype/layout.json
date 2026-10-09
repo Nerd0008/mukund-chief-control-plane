@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "status": "PROTOTYPE_NOT_DEPLOYED",
   "master_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
   "master_source": "source-master.pdf",
@@ -160,13 +160,13 @@
       ],
       "variable": true,
       "max_lines": 3,
-      "leading": 13.5,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         71.24399475097655,
         545.25,
-        111.20399475097656
+        107.20399475097656
       ]
     },
     {
@@ -248,7 +248,7 @@
       "heading": false,
       "bullet": false,
       "font_size": 9.96,
-      "baseline": 148.9241180419922,
+      "baseline": 150.2421112060547,
       "x": 21.75,
       "source_baselines": [
         148.9241180419922
@@ -259,9 +259,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        138.96411804199218,
+        140.28211120605468,
         545.25,
-        151.9241180419922
+        153.2421112060547
       ]
     },
     {
@@ -281,7 +281,7 @@
       "heading": false,
       "bullet": false,
       "font_size": 9.96,
-      "baseline": 160.27252197265625,
+      "baseline": 161.7421112060547,
       "x": 21.75,
       "source_baselines": [
         160.27252197265625
@@ -292,9 +292,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        150.31252197265624,
+        151.78211120605468,
         545.25,
-        163.27252197265625
+        164.7421112060547
       ]
     },
     {
@@ -314,7 +314,7 @@
       "heading": false,
       "bullet": false,
       "font_size": 9.96,
-      "baseline": 171.74362182617188,
+      "baseline": 173.2421112060547,
       "x": 21.75,
       "source_baselines": [
         171.74362182617188
@@ -325,9 +325,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        161.78362182617187,
+        163.28211120605468,
         545.25,
-        174.74362182617188
+        176.2421112060547
       ]
     },
     {
@@ -347,7 +347,7 @@
       "heading": false,
       "bullet": false,
       "font_size": 9.96,
-      "baseline": 183.25161743164062,
+      "baseline": 184.7421112060547,
       "x": 21.75,
       "source_baselines": [
         183.25161743164062
@@ -358,9 +358,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        173.29161743164062,
+        174.78211120605468,
         545.25,
-        186.25161743164062
+        187.7421112060547
       ]
     },
     {
@@ -380,7 +380,7 @@
       "heading": false,
       "bullet": false,
       "font_size": 9.96,
-      "baseline": 194.75962829589844,
+      "baseline": 196.2421112060547,
       "x": 21.75,
       "source_baselines": [
         194.75962829589844
@@ -391,9 +391,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        184.79962829589843,
+        186.28211120605468,
         545.25,
-        197.75962829589844
+        199.2421112060547
       ]
     },
     {
@@ -512,13 +512,13 @@
       ],
       "variable": false,
       "max_lines": 2,
-      "leading": 12.75,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         239.3770751953125,
         545.25,
-        265.1270751953125
+        263.8770751953125
       ]
     },
     {
@@ -528,7 +528,7 @@
       "runs": [
         {
           "text": "Bachelor of Computer Applications",
-          "style": "bold_italic"
+          "style": "bold"
         },
         {
           "text": " , Maharashtra Institute of Technology World Peace University, India",
@@ -695,13 +695,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.844,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         333.4454870605469,
         545.25,
-        357.249755859375
+        357.9054870605469
       ]
     },
     {
@@ -717,7 +717,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 366.0224914550781,
+      "baseline": 366.4054870605469,
       "x": 21.75,
       "source_baselines": [
         366.0224914550781,
@@ -725,13 +725,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.467,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        356.06249145507815,
+        356.4454870605469,
         545.25,
-        379.4894714355469
+        380.9054870605469
       ]
     },
     {
@@ -747,7 +747,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 387.6622619628906,
+      "baseline": 389.4054870605469,
       "x": 21.75,
       "source_baselines": [
         387.6622619628906,
@@ -755,13 +755,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 11.321,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        377.70226196289065,
+        379.4454870605469,
         545.25,
-        401.9835205078125
+        403.9054870605469
       ]
     },
     {
@@ -818,13 +818,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.808,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         413.83571533203127,
         545.25,
-        437.6032409667969
+        438.29571533203125
       ]
     },
     {
@@ -840,7 +840,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 447.6112365722656,
+      "baseline": 446.79571533203125,
       "x": 21.75,
       "source_baselines": [
         447.6112365722656,
@@ -848,13 +848,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 12.258,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        437.65123657226565,
+        436.83571533203127,
         545.25,
-        462.8692321777344
+        461.29571533203125
       ]
     },
     {
@@ -870,7 +870,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 472.87725830078125,
+      "baseline": 469.79571533203125,
       "x": 21.75,
       "source_baselines": [
         472.87725830078125,
@@ -878,13 +878,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 9.839,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        462.91725830078127,
+        459.83571533203127,
         545.25,
-        485.71649169921875
+        484.29571533203125
       ]
     },
     {
@@ -999,13 +999,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 9.996,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         524.52974609375,
         545.25,
-        547.4856567382812
+        548.98974609375
       ]
     },
     {
@@ -1021,7 +1021,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 556.74365234375,
+      "baseline": 557.48974609375,
       "x": 21.75,
       "source_baselines": [
         556.74365234375,
@@ -1029,13 +1029,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 11.737,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        546.78365234375,
+        547.52974609375,
         545.25,
-        571.48046875
+        571.98974609375
       ]
     },
     {
@@ -1051,7 +1051,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 578.7516479492188,
+      "baseline": 580.48974609375,
       "x": 21.75,
       "source_baselines": [
         578.7516479492188,
@@ -1059,13 +1059,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.987,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        568.7916479492187,
+        570.52974609375,
         545.25,
-        592.7384643554688
+        594.98974609375
       ]
     },
     {
@@ -1151,13 +1151,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 9.637,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         614.8623876953125,
         545.25,
-        637.4591674804688
+        639.3223876953125
       ]
     },
     {
@@ -1173,7 +1173,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 648.2171630859375,
+      "baseline": 647.8223876953125,
       "x": 21.75,
       "source_baselines": [
         648.2171630859375,
@@ -1181,13 +1181,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.792,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        638.2571630859375,
+        637.8623876953125,
         545.25,
-        662.0088500976562
+        662.3223876953125
       ]
     },
     {
@@ -1203,7 +1203,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 671.2669067382812,
+      "baseline": 670.8223876953125,
       "x": 21.75,
       "source_baselines": [
         671.2669067382812,
@@ -1211,13 +1211,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.5,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        661.3069067382812,
+        660.8623876953125,
         545.25,
-        684.7669067382812
+        685.3223876953125
       ]
     },
     {
@@ -1303,13 +1303,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 9.697,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
         708.81490234375,
         545.25,
-        731.4723510742188
+        733.27490234375
       ]
     },
     {
@@ -1325,7 +1325,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 741.4765625,
+      "baseline": 741.77490234375,
       "x": 21.75,
       "source_baselines": [
         741.4765625,
@@ -1333,13 +1333,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 10.049,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        731.5165625,
+        731.81490234375,
         545.25,
-        754.525390625
+        756.27490234375
       ]
     },
     {
@@ -1355,7 +1355,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 763.7833862304688,
+      "baseline": 764.77490234375,
       "x": 21.75,
       "source_baselines": [
         763.7833862304688,
@@ -1363,13 +1363,13 @@
       ],
       "variable": true,
       "max_lines": 2,
-      "leading": 11.25,
+      "leading": 11.5,
       "width": 523.5,
       "region": [
         21.75,
-        753.8233862304687,
+        754.81490234375,
         545.25,
-        778.0333862304688
+        779.27490234375
       ]
     },
     {
@@ -1443,7 +1443,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 816.4571533203125,
+      "baseline": 817.4571533203125,
       "x": 21.75,
       "source_baselines": [
         816.4571533203125
@@ -1454,9 +1454,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        806.4971533203125,
+        807.4971533203125,
         545.25,
-        819.4571533203125
+        820.4571533203125
       ]
     },
     {
@@ -1472,7 +1472,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 826.9571533203125,
+      "baseline": 828.9571533203125,
       "x": 21.75,
       "source_baselines": [
         826.9571533203125
@@ -1483,9 +1483,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        816.9971533203125,
+        818.9971533203125,
         545.25,
-        829.9571533203125
+        831.9571533203125
       ]
     },
     {
@@ -1501,7 +1501,7 @@
       "heading": false,
       "bullet": true,
       "font_size": 9.96,
-      "baseline": 837.4571533203125,
+      "baseline": 840.4571533203125,
       "x": 21.75,
       "source_baselines": [
         837.4571533203125
@@ -1512,9 +1512,9 @@
       "width": 523.5,
       "region": [
         21.75,
-        827.4971533203125,
+        830.4971533203125,
         545.25,
-        840.4571533203125
+        843.4571533203125
       ]
     }
   ],
@@ -1560,5 +1560,7 @@
       "width": 1.0
     }
   ],
-  "heading_policy": "All six section headings: exactly 11 pt Times New Roman Bold, owner requested 2026-10-09"
+  "heading_policy": "All six section headings: exactly 11 pt Times New Roman Bold, owner requested 2026-10-09",
+  "body_leading": 11.5,
+  "spacing_policy": "11.5 pt body leading; 23 pt two-line bullet cadence; upright bold degree titles"
 }
