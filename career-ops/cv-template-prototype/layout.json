@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "status": "PROTOTYPE_NOT_DEPLOYED",
   "master_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
   "master_source": "source-master.pdf",
@@ -121,7 +121,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 11.04,
+      "font_size": 11.0,
       "baseline": 64.44386291503906,
       "x": 21.75,
       "source_baselines": [
@@ -133,7 +133,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        53.40386291503906,
+        53.44386291503906,
         545.25,
         67.44386291503906
       ]
@@ -181,7 +181,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 10.99,
+      "font_size": 11.0,
       "baseline": 121.8584976196289,
       "x": 21.75,
       "source_baselines": [
@@ -193,7 +193,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        110.86849761962891,
+        110.8584976196289,
         545.25,
         124.8584976196289
       ]
@@ -408,7 +408,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 10.99,
+      "font_size": 11.0,
       "baseline": 207.37948608398438,
       "x": 21.75,
       "source_baselines": [
@@ -420,7 +420,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        196.38948608398437,
+        196.37948608398438,
         545.25,
         210.37948608398438
       ]
@@ -624,7 +624,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 11.04,
+      "font_size": 11.0,
       "baseline": 315.8077697753906,
       "x": 21.75,
       "source_baselines": [
@@ -636,7 +636,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        304.7677697753906,
+        304.8077697753906,
         545.25,
         318.8077697753906
       ]
@@ -899,7 +899,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 11.04,
+      "font_size": 11.0,
       "baseline": 494.7960205078125,
       "x": 21.75,
       "source_baselines": [
@@ -911,7 +911,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        483.7560205078125,
+        483.7960205078125,
         545.25,
         497.7960205078125
       ]
@@ -1384,7 +1384,7 @@
       ],
       "heading": true,
       "bullet": false,
-      "font_size": 9.96,
+      "font_size": 11.0,
       "baseline": 791.2708129882812,
       "x": 21.75,
       "source_baselines": [
@@ -1396,7 +1396,7 @@
       "width": 523.5,
       "region": [
         21.75,
-        781.3108129882812,
+        780.2708129882812,
         545.25,
         794.2708129882812
       ]
@@ -1559,5 +1559,6 @@
       "y": 796.2708129882812,
       "width": 1.0
     }
-  ]
+  ],
+  "heading_policy": "All six section headings: exactly 11 pt Times New Roman Bold, owner requested 2026-10-09"
 }

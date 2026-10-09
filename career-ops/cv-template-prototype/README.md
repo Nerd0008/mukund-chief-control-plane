@@ -14,6 +14,11 @@ MSc Information Security, CompTIA Security+ and ISC2 Certified in Cybersecurity
 The Allstate summary was updated locally with these credentials foregrounded;
 no additional provider call was necessary. The approved layout remains intact.
 
+Owner typography revision: all six section headings are standardized to exactly
+11 pt Times New Roman Bold (layout v2). This deliberately supersedes the supplied
+PDF's varying heading sizes, including its smaller Certifications heading.
+The source PDFs remain unchanged; body/role/name font sizes remain unchanged.
+
 ## Corrected source
 
 The owner superseded the previous CV_FORMAT_MASTER.pdf with

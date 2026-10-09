@@ -130,3 +130,10 @@ def test_summary_credentials_cannot_be_omitted(credential):
     content=resolve_plan({'selections':{key:'engineering' for key in bank['slots']}})
     content['s04']['text']=content['s04']['text'].replace(credential,'')
     assert any(f['reason']=='mandatory summary credential missing' for f in cv.content_check(cv.load_layout(),content))
+
+def test_all_section_headings_exactly_eleven_points(tmp_path):
+    layout=cv.load_layout(); assert all(s['font_size']==11.0 for s in layout['slots'] if s['heading'])
+    p=tmp_path/'headings.pdf';cv.render(layout,{},p)
+    found=[s for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans'] if s['text'].strip() in layout['section_order']]
+    assert len(found)==6
+    assert all(abs(s['size']-11.0)<.001 and 'Bold' in s['font'] for s in found)

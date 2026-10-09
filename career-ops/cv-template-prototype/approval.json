@@ -6,5 +6,11 @@
   "approved_reproduction_sha256": "02c4cbd40f64c7f7b061a119d8878615d5238af94197492c87e85d16cbd60316",
   "approved_layout_sha256": "b1ae4b5a31a6e24b8fd4b6592b8da57991764a73ff82ead2232d2ed87aa33250",
   "live_hermes_deployment": false,
-  "native_provider_acceptance": "Owner explicitly approved sending JD and professional facts, excluding contact details, to existing Nous/LongCat for bounded test"
+  "native_provider_acceptance": "Owner explicitly approved sending JD and professional facts, excluding contact details, to existing Nous/LongCat for bounded test",
+  "owner_requested_revision": {
+    "date": "2026-10-09",
+    "rule": "All section headings exactly 11 pt bold",
+    "layout_sha256": "b9b9634fcc6388f556e8deb32b1fbe1e2913a1e2b1b22b07ea17c5d77d53e578",
+    "reproduction_sha256": "563e175837ef6e1f4942c22c04babdc3b5d5a2f6a5f8c4afa42630a48750d9c9"
+  }
 }

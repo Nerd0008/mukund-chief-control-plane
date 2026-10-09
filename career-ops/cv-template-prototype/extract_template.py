@@ -38,7 +38,7 @@ for ss in lines:
                      'style':'bold_italic' if 'BoldItal' in s['font'] else 'bold' if 'Bold' in s['font'] else 'normal'})
     slots.append({'id':f's{len(slots):02d}', 'section':section,'text':text,
                   'runs':runs,'heading':heading,'bullet':bullet,
-                  'font_size':round(ss[0]['size'],2), 'baseline':ss[0]['origin'][1],
+                  'font_size':11.0 if heading else round(ss[0]['size'],2), 'baseline':ss[0]['origin'][1],
                   'x':ss[0]['origin'][0], 'source_baselines':[ss[0]['origin'][1]],
                   'variable': section in ['Professional Summary','Technical Skills','Work Experience','Projects'] and not heading and (bullet or section in ['Professional Summary','Technical Skills'])})
 for i,s in enumerate(slots):
@@ -51,7 +51,8 @@ for i,s in enumerate(slots):
         if s['text'].startswith('Modules: '):
             s['runs']=[{'text':'Modules: ','style':'bold'},{'text':s['text'][9:],'style':'normal'}]
         else: s['runs']=[{'text':s['text'],'style':'normal'}]
-layout={'version':1,'status':'PROTOTYPE_NOT_DEPLOYED','master_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
+layout={'version':2,'status':'PROTOTYPE_NOT_DEPLOYED','master_sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
+        'heading_policy':'All six section headings: exactly 11 pt Times New Roman Bold, owner requested 2026-10-09',
         'master_source':'source-master.pdf','page':[595.5,850.5], 'fonts':{'normal':'times.ttf','bold':'timesbd.ttf','italic':'timesi.ttf','bold_italic':'timesbi.ttf'},
         'section_order':headings,'slots':slots,'target_seconds':120,'hard_seconds':180,
         'max_generation_calls':2,'max_renders':2,

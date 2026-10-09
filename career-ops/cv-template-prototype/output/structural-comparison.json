@@ -23,21 +23,30 @@
     "Line endings may differ where source used manually positioned lines.",
     "Skill values follow bold labels with normal spacing, not fixed value anchors.",
     "Education modules retain the source hard break; all editable body text flows.",
-    "No claim of source pixel identity; this is a separate font-backed reconstruction."
+    "No claim of source pixel identity; this is a separate font-backed reconstruction.",
+    "Owner requested all section headings standardized to 11 pt; source master is unchanged."
   ],
   "validation": {
     "status": "PASS",
     "failures": [],
     "page_count": 1,
-    "pdf_sha256": "02c4cbd40f64c7f7b061a119d8878615d5238af94197492c87e85d16cbd60316",
-    "total_seconds": 0.23499999986961484,
-    "render_seconds": 0.06299999984912574,
-    "validation_seconds": 0.125,
+    "pdf_sha256": "563e175837ef6e1f4942c22c04babdc3b5d5a2f6a5f8c4afa42630a48750d9c9",
+    "total_seconds": 0.21899999980814755,
+    "render_seconds": 0.06200000015087426,
+    "validation_seconds": 0.14099999982863665,
     "content_generation_seconds": 0,
     "model_calls": 0,
     "owner_visual_acceptance": false,
     "not_deployed": true
   },
   "owner_visual_acceptance": false,
-  "hermes_deployment": "UNCHANGED"
+  "hermes_deployment": "UNCHANGED",
+  "heading_sizes_pt": {
+    "Professional Summary": 11,
+    "Technical Skills": 11,
+    "Education": 11,
+    "Work Experience": 11,
+    "Projects": 11,
+    "Certifications": 11
+  }
 }
