@@ -282,7 +282,7 @@ def test_apply_is_reversible_and_verified(region, workspace, tmp_path):
     assert res["counts"]["appended"] == 2
     assert Path(res["backup"]).exists()
     assert res["verification"]["ok"], res["verification"]["problems"]
-    assert res["post_data_rows"] == pre_rows + 2
+    assert res["post_data_rows"] == pre_rows - res["counts"]["passed_deleted"] + 2
     assert res["verification"]["owner_columns_unchanged"] is True
     assert res["verification"]["duplicate_urls_in_workbook"] == []
 
