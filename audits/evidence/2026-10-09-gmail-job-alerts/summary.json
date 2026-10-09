@@ -1,0 +1,16 @@
+{
+  "messages_inspected": 82,
+  "raw_job_links": 316,
+  "duplicates_collapsed": 39,
+  "unique_links": 277,
+  "explicit_titles": 183,
+  "unknown_titles": 94,
+  "posting_validation": "discovered_unverified",
+  "gmail_mutations": 0,
+  "tracker_writes": 0,
+  "calendar_writes": 0,
+  "model_calls": 0,
+  "focused_tests_passed": 81,
+  "scope": "existing Gmail readonly",
+  "scheduled_integration": "existing hourly incremental apply; separate private list"
+}

@@ -47,3 +47,27 @@ def test_reader_scoped_query_get_only():
 def test_manifest_does_not_write_tracker_or_calendar(tmp_path):
     compile_list([message('<a href="https://company.test/jobs/1">Graduate Engineer</a>')],tmp_path)
     assert {p.name for p in tmp_path.iterdir()}=={'jobs.json','job-list.md','summary.json'}
+
+@pytest.mark.parametrize('fail_discovery',[False,True])
+def test_hourly_apply_newsletters_are_not_application_rows(tmp_path,monkeypatch,fail_discovery):
+    import career_mail_monitor as monitor
+    import career_job_mail as jobmail
+    runtime=tmp_path/'gmail-monitor';runtime.mkdir()
+    monitor.atomic_json(runtime/'write-approval.json',{'approved_report_id':'existing-owner-approval'})
+    monitor.atomic_json(runtime/'checkpoint.json',{'history_id':'10','processed_ids':[]})
+    class Tracker:
+        def read(self):return [],{'uk':'unchanged'}
+        def upsert(self,*a):raise AssertionError('newsletter must not create application')
+    class Calendar:
+        def ensure(self,*a):raise AssertionError('newsletter must not create deadline event')
+    class Reader:
+        def read_window(self,*a,**kw):return {'messages':[message('<a href="https://company.test/jobs/1">Graduate Engineer</a>')],'mode':'incremental','checkpoint':'20'}
+    if fail_discovery:
+        monkeypatch.setattr(jobmail,'compile_list',lambda *a,**kw:(_ for _ in ()).throw(OSError('failed private persistence')))
+        with pytest.raises(OSError):monitor.run_scan({'backfill_days':30,'max_messages':10},runtime,apply=True,reader=Reader(),tracker=Tracker(),calendar=Calendar())
+        assert json.loads((runtime/'checkpoint.json').read_text())['history_id']=='10'
+    else:
+        report=monitor.run_scan({'backfill_days':30,'max_messages':10},runtime,apply=True,reader=Reader(),tracker=Tracker(),calendar=Calendar())
+        assert report['tracker_writes']==0 and report['calendar_writes']==0 and report['gmail_mutations']==0
+        assert report['job_alert_discovery']['job_list_total']==1
+        assert json.loads((runtime/'checkpoint.json').read_text())['history_id']=='20'
