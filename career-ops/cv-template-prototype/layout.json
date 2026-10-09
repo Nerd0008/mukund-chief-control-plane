@@ -1,0 +1,1563 @@
+{
+  "version": 1,
+  "status": "PROTOTYPE_NOT_DEPLOYED",
+  "master_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
+  "master_source": "source-master.pdf",
+  "page": [
+    595.5,
+    850.5
+  ],
+  "fonts": {
+    "normal": "times.ttf",
+    "bold": "timesbd.ttf",
+    "italic": "timesi.ttf",
+    "bold_italic": "timesbi.ttf"
+  },
+  "section_order": [
+    "Professional Summary",
+    "Technical Skills",
+    "Education",
+    "Work Experience",
+    "Projects",
+    "Certifications"
+  ],
+  "slots": [
+    {
+      "id": "s00",
+      "section": "Header",
+      "text": "Mukund Didwania",
+      "runs": [
+        {
+          "text": "Mukund Didwania",
+          "style": "bold"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 12.0,
+      "baseline": 22.07324981689453,
+      "x": 253.33441162109375,
+      "source_baselines": [
+        22.07324981689453
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 291.91558837890625,
+      "region": [
+        253.33441162109375,
+        10.073249816894531,
+        545.25,
+        25.07324981689453
+      ]
+    },
+    {
+      "id": "s01",
+      "section": "Header",
+      "text": "+44 7990920031 | mukunddidwania3@gmail.com | London, UK, E6 3AG",
+      "runs": [
+        {
+          "text": "+44 7990920031 | mukunddidwania3@gmail.com | London, UK, E6 3AG",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 37.559852600097656,
+      "x": 168.94631958007812,
+      "source_baselines": [
+        37.559852600097656
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 376.3036804199219,
+      "region": [
+        168.94631958007812,
+        27.599852600097655,
+        545.25,
+        40.559852600097656
+      ]
+    },
+    {
+      "id": "s02",
+      "section": "Header",
+      "text": "LinkedIn | GitHub | Right to work in the UK",
+      "runs": [
+        {
+          "text": "LinkedIn | GitHub | Right to work in the UK",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 48.809852600097656,
+      "x": 226.76663208007812,
+      "source_baselines": [
+        48.809852600097656
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 318.4833679199219,
+      "region": [
+        226.76663208007812,
+        38.849852600097655,
+        545.25,
+        51.809852600097656
+      ]
+    },
+    {
+      "id": "s03",
+      "section": "Professional Summary",
+      "text": "Professional Summary",
+      "runs": [
+        {
+          "text": "Professional Summary",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 11.04,
+      "baseline": 64.44386291503906,
+      "x": 21.75,
+      "source_baselines": [
+        64.44386291503906
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        53.40386291503906,
+        545.25,
+        67.44386291503906
+      ]
+    },
+    {
+      "id": "s04",
+      "section": "Professional Summary",
+      "text": "MSc Information Security graduate with hands-on IT support experience across Windows, Microsoft 365 and endpoint troubleshooting. CompTIA Security+ and ISC2 CC certified, with practical exposure to Python, PowerShell, SQL and log analysis, and a strong interest in trading technology and production support.",
+      "runs": [
+        {
+          "text": "MSc Information Security graduate with hands-on IT support experience across Windows, Microsoft 365 and endpoint troubleshooting. CompTIA Security+ and ISC2 CC certified, with practical exposure to Python, PowerShell, SQL and log analysis, and a strong interest in trading technology and production support.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 81.20399475097656,
+      "x": 21.75,
+      "source_baselines": [
+        81.20399475097656,
+        94.70399475097656,
+        108.20399475097656
+      ],
+      "variable": true,
+      "max_lines": 3,
+      "leading": 13.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        71.24399475097655,
+        545.25,
+        111.20399475097656
+      ]
+    },
+    {
+      "id": "s05",
+      "section": "Technical Skills",
+      "text": "Technical Skills",
+      "runs": [
+        {
+          "text": "Technical Skills",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 10.99,
+      "baseline": 121.8584976196289,
+      "x": 21.75,
+      "source_baselines": [
+        121.8584976196289
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        110.86849761962891,
+        545.25,
+        124.8584976196289
+      ]
+    },
+    {
+      "id": "s06",
+      "section": "Technical Skills",
+      "text": "Security Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+      "runs": [
+        {
+          "text": "Security Analysis: ",
+          "style": "bold"
+        },
+        {
+          "text": "Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 138.7421112060547,
+      "x": 21.75,
+      "source_baselines": [
+        138.7421112060547
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        128.78211120605468,
+        545.25,
+        141.7421112060547
+      ]
+    },
+    {
+      "id": "s07",
+      "section": "Technical Skills",
+      "text": "Systems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+      "runs": [
+        {
+          "text": "Systems & Support: ",
+          "style": "bold"
+        },
+        {
+          "text": "Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 148.9241180419922,
+      "x": 21.75,
+      "source_baselines": [
+        148.9241180419922
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        138.96411804199218,
+        545.25,
+        151.9241180419922
+      ]
+    },
+    {
+      "id": "s08",
+      "section": "Technical Skills",
+      "text": "Scripting & Automation: Python, PowerShell, SQL, API integration",
+      "runs": [
+        {
+          "text": "Scripting & Automation: ",
+          "style": "bold"
+        },
+        {
+          "text": "Python, PowerShell, SQL, API integration",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 160.27252197265625,
+      "x": 21.75,
+      "source_baselines": [
+        160.27252197265625
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        150.31252197265624,
+        545.25,
+        163.27252197265625
+      ]
+    },
+    {
+      "id": "s09",
+      "section": "Technical Skills",
+      "text": "Security Controls: BitLocker, network segmentation, endpoint security",
+      "runs": [
+        {
+          "text": "Security Controls: ",
+          "style": "bold"
+        },
+        {
+          "text": "BitLocker, network segmentation, endpoint security ",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 171.74362182617188,
+      "x": 21.75,
+      "source_baselines": [
+        171.74362182617188
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        161.78362182617187,
+        545.25,
+        174.74362182617188
+      ]
+    },
+    {
+      "id": "s10",
+      "section": "Technical Skills",
+      "text": "Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF",
+      "runs": [
+        {
+          "text": "Framework Familiarity: ",
+          "style": "bold"
+        },
+        {
+          "text": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 183.25161743164062,
+      "x": 21.75,
+      "source_baselines": [
+        183.25161743164062
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        173.29161743164062,
+        545.25,
+        186.25161743164062
+      ]
+    },
+    {
+      "id": "s11",
+      "section": "Technical Skills",
+      "text": "Communication & Support: User support, technical documentation, stakeholder coordination",
+      "runs": [
+        {
+          "text": "Communication & Support: ",
+          "style": "bold"
+        },
+        {
+          "text": "User support, technical documentation, stakeholder coordination",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 194.75962829589844,
+      "x": 21.75,
+      "source_baselines": [
+        194.75962829589844
+      ],
+      "variable": true,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        184.79962829589843,
+        545.25,
+        197.75962829589844
+      ]
+    },
+    {
+      "id": "s12",
+      "section": "Education",
+      "text": "Education",
+      "runs": [
+        {
+          "text": "Education",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 10.99,
+      "baseline": 207.37948608398438,
+      "x": 21.75,
+      "source_baselines": [
+        207.37948608398438
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        196.38948608398437,
+        545.25,
+        210.37948608398438
+      ]
+    },
+    {
+      "id": "s13",
+      "section": "Education",
+      "text": "MSc Information Security, Royal Holloway University of London, United Kingdom",
+      "runs": [
+        {
+          "text": "MSc Information Security",
+          "style": "bold"
+        },
+        {
+          "text": ", Royal Holloway University of London, United Kingdom ",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 223.8770751953125,
+      "x": 21.75,
+      "source_baselines": [
+        223.8770751953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        213.8770751953125,
+        545.25,
+        226.8770751953125
+      ]
+    },
+    {
+      "id": "s14",
+      "section": "Education",
+      "text": "September 2024 - September 2025 | Merit",
+      "runs": [
+        {
+          "text": "September 2024 - September 2025 | Merit",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 236.6270751953125,
+      "x": 21.75,
+      "source_baselines": [
+        236.6270751953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        226.6270751953125,
+        545.25,
+        239.6270751953125
+      ]
+    },
+    {
+      "id": "s15",
+      "section": "Education",
+      "text": "Modules: Cryptography, Security Management, Critical Infrastructure Security, Secure Business Architectures, Digital Forensics and Network Security.",
+      "runs": [
+        {
+          "text": "Modules: ",
+          "style": "bold"
+        },
+        {
+          "text": "Cryptography, Security Management, Critical Infrastructure Security, Secure Business Architectures, Digital Forensics and Network Security.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 249.3770751953125,
+      "x": 21.75,
+      "source_baselines": [
+        249.3770751953125,
+        262.1270751953125
+      ],
+      "variable": false,
+      "max_lines": 2,
+      "leading": 12.75,
+      "width": 523.5,
+      "region": [
+        21.75,
+        239.3770751953125,
+        545.25,
+        265.1270751953125
+      ]
+    },
+    {
+      "id": "s16",
+      "section": "Education",
+      "text": "Bachelor of Computer Applications , Maharashtra Institute of Technology World Peace University, India",
+      "runs": [
+        {
+          "text": "Bachelor of Computer Applications",
+          "style": "bold_italic"
+        },
+        {
+          "text": " , Maharashtra Institute of Technology World Peace University, India",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 274.8770751953125,
+      "x": 21.75,
+      "source_baselines": [
+        274.8770751953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        264.8770751953125,
+        545.25,
+        277.8770751953125
+      ]
+    },
+    {
+      "id": "s17",
+      "section": "Education",
+      "text": "September 2021 – September 2024 | CGPA: 9.17",
+      "runs": [
+        {
+          "text": "September 2021 – September 2024 | CGPA: 9.17",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 287.6270751953125,
+      "x": 21.75,
+      "source_baselines": [
+        287.6270751953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        277.6270751953125,
+        545.25,
+        290.6270751953125
+      ]
+    },
+    {
+      "id": "s18",
+      "section": "Education",
+      "text": "Modules: Python, Java, JavaScript, C++, C, MySQL, AI & ML, Angular, Mobile Application Development.",
+      "runs": [
+        {
+          "text": "Modules: Python, Java, JavaScript, C++, C, MySQL, AI & ML, Angular, Mobile Application Development.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 300.3770751953125,
+      "x": 21.75,
+      "source_baselines": [
+        300.3770751953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        290.3770751953125,
+        545.25,
+        303.3770751953125
+      ]
+    },
+    {
+      "id": "s19",
+      "section": "Work Experience",
+      "text": "Work Experience",
+      "runs": [
+        {
+          "text": "Work Experience",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 11.04,
+      "baseline": 315.8077697753906,
+      "x": 21.75,
+      "source_baselines": [
+        315.8077697753906
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        304.7677697753906,
+        545.25,
+        318.8077697753906
+      ]
+    },
+    {
+      "id": "s20",
+      "section": "Work Experience",
+      "text": "IT Support Assistant, The Colourful Aura | London,UK | November 2024 - Present",
+      "runs": [
+        {
+          "text": "IT Support Assistant, ",
+          "style": "bold"
+        },
+        {
+          "text": "The Colourful Aura | London,UK | November 2024 - Present",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 331.90802001953125,
+      "x": 21.75,
+      "source_baselines": [
+        331.90802001953125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        321.94802001953127,
+        545.25,
+        334.90802001953125
+      ]
+    },
+    {
+      "id": "s21",
+      "section": "Work Experience",
+      "text": "• Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
+      "runs": [
+        {
+          "text": "Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 343.4054870605469,
+      "x": 21.75,
+      "source_baselines": [
+        343.4054870605469,
+        354.249755859375
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.844,
+      "width": 523.5,
+      "region": [
+        21.75,
+        333.4454870605469,
+        545.25,
+        357.249755859375
+      ]
+    },
+    {
+      "id": "s22",
+      "section": "Work Experience",
+      "text": "• Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
+      "runs": [
+        {
+          "text": "Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 366.0224914550781,
+      "x": 21.75,
+      "source_baselines": [
+        366.0224914550781,
+        376.4894714355469
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.467,
+      "width": 523.5,
+      "region": [
+        21.75,
+        356.06249145507815,
+        545.25,
+        379.4894714355469
+      ]
+    },
+    {
+      "id": "s23",
+      "section": "Work Experience",
+      "text": "• Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
+      "runs": [
+        {
+          "text": "Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 387.6622619628906,
+      "x": 21.75,
+      "source_baselines": [
+        387.6622619628906,
+        398.9835205078125
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 11.321,
+      "width": 523.5,
+      "region": [
+        21.75,
+        377.70226196289065,
+        545.25,
+        401.9835205078125
+      ]
+    },
+    {
+      "id": "s24",
+      "section": "Work Experience",
+      "text": "Person in Charge (PIC), Co-op | Fenchurch Street London, UK | November 2025 - Present",
+      "runs": [
+        {
+          "text": "Person in Charge (PIC), ",
+          "style": "bold"
+        },
+        {
+          "text": "Co-op | Fenchurch Street London, UK | November 2025 - Present ",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 412.9626159667969,
+      "x": 21.75,
+      "source_baselines": [
+        412.9626159667969
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        403.0026159667969,
+        545.25,
+        415.9626159667969
+      ]
+    },
+    {
+      "id": "s25",
+      "section": "Work Experience",
+      "text": "• Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining assessment records and identifying issues requiring corrective action.",
+      "runs": [
+        {
+          "text": "Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining assessment records and identifying issues requiring corrective action.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 423.79571533203125,
+      "x": 21.75,
+      "source_baselines": [
+        423.79571533203125,
+        434.6032409667969
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.808,
+      "width": 523.5,
+      "region": [
+        21.75,
+        413.83571533203127,
+        545.25,
+        437.6032409667969
+      ]
+    },
+    {
+      "id": "s26",
+      "section": "Work Experience",
+      "text": "• Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through internal reporting systems, apply temporary controls and escalate unresolved risks.",
+      "runs": [
+        {
+          "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through internal reporting systems, apply temporary controls and escalate unresolved risks.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 447.6112365722656,
+      "x": 21.75,
+      "source_baselines": [
+        447.6112365722656,
+        459.8692321777344
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 12.258,
+      "width": 523.5,
+      "region": [
+        21.75,
+        437.65123657226565,
+        545.25,
+        462.8692321777344
+      ]
+    },
+    {
+      "id": "s27",
+      "section": "Work Experience",
+      "text": "• Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
+      "runs": [
+        {
+          "text": "Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 472.87725830078125,
+      "x": 21.75,
+      "source_baselines": [
+        472.87725830078125,
+        482.71649169921875
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 9.839,
+      "width": 523.5,
+      "region": [
+        21.75,
+        462.91725830078127,
+        545.25,
+        485.71649169921875
+      ]
+    },
+    {
+      "id": "s28",
+      "section": "Projects",
+      "text": "Projects",
+      "runs": [
+        {
+          "text": "Projects",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 11.04,
+      "baseline": 494.7960205078125,
+      "x": 21.75,
+      "source_baselines": [
+        494.7960205078125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        483.7560205078125,
+        545.25,
+        497.7960205078125
+      ]
+    },
+    {
+      "id": "s29",
+      "section": "Projects",
+      "text": "SafePaste - Sensitive Data Detection Browser Extension",
+      "runs": [
+        {
+          "text": "SafePaste - ",
+          "style": "bold"
+        },
+        {
+          "text": "Sensitive Data Detection Browser Extension",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 10.0,
+      "baseline": 512.2207641601562,
+      "x": 21.75,
+      "source_baselines": [
+        512.2207641601562
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        502.22076416015625,
+        545.25,
+        515.2207641601562
+      ]
+    },
+    {
+      "id": "s30",
+      "section": "Projects",
+      "text": "JavaScript, Manifest V3, HTML, CSS, Regular Expressions",
+      "runs": [
+        {
+          "text": "JavaScript, Manifest V3, HTML, CSS, Regular Expressions",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 522.631103515625,
+      "x": 21.75,
+      "source_baselines": [
+        522.631103515625
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        512.671103515625,
+        545.25,
+        525.631103515625
+      ]
+    },
+    {
+      "id": "s31",
+      "section": "Projects",
+      "text": "• Built a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials and API keys  before submitting pasted content.",
+      "runs": [
+        {
+          "text": "Built a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials and API keys  before submitting pasted content.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 534.48974609375,
+      "x": 21.75,
+      "source_baselines": [
+        534.48974609375,
+        544.4856567382812
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 9.996,
+      "width": 523.5,
+      "region": [
+        21.75,
+        524.52974609375,
+        545.25,
+        547.4856567382812
+      ]
+    },
+    {
+      "id": "s32",
+      "section": "Projects",
+      "text": "• Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content.",
+      "runs": [
+        {
+          "text": "Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 556.74365234375,
+      "x": 21.75,
+      "source_baselines": [
+        556.74365234375,
+        568.48046875
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 11.737,
+      "width": 523.5,
+      "region": [
+        21.75,
+        546.78365234375,
+        545.25,
+        571.48046875
+      ]
+    },
+    {
+      "id": "s33",
+      "section": "Projects",
+      "text": "• Refined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and choose whether to proceed.",
+      "runs": [
+        {
+          "text": "Refined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and choose whether to proceed.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 578.7516479492188,
+      "x": 21.75,
+      "source_baselines": [
+        578.7516479492188,
+        589.7384643554688
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.987,
+      "width": 523.5,
+      "region": [
+        21.75,
+        568.7916479492187,
+        545.25,
+        592.7384643554688
+      ]
+    },
+    {
+      "id": "s34",
+      "section": "Projects",
+      "text": "InboxDefender –  Phishing Analysis",
+      "runs": [
+        {
+          "text": "InboxDefender –  ",
+          "style": "bold"
+        },
+        {
+          "text": "Phishing Analysis",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 601.9762573242188,
+      "x": 21.75,
+      "source_baselines": [
+        601.9762573242188
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        592.0162573242187,
+        545.25,
+        604.9762573242188
+      ]
+    },
+    {
+      "id": "s35",
+      "section": "Projects",
+      "text": "Python ,Gmail API, LLM, MITRE ATT&CK, JSON",
+      "runs": [
+        {
+          "text": "Python ,Gmail API, LLM, MITRE ATT&CK, JSON",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 611.7262573242188,
+      "x": 21.75,
+      "source_baselines": [
+        611.7262573242188
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        601.7662573242187,
+        545.25,
+        614.7262573242188
+      ]
+    },
+    {
+      "id": "s36",
+      "section": "Projects",
+      "text": "• Designed and developed a phishing-analysis prototype to highlight suspicious email indicators and support manual triage, with design reviews from an experienced SOC analyst.",
+      "runs": [
+        {
+          "text": "Designed and developed a phishing-analysis prototype to highlight suspicious email indicators and support manual triage, with design reviews from an experienced SOC analyst.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 624.8223876953125,
+      "x": 21.75,
+      "source_baselines": [
+        624.8223876953125,
+        634.4591674804688
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 9.637,
+      "width": 523.5,
+      "region": [
+        21.75,
+        614.8623876953125,
+        545.25,
+        637.4591674804688
+      ]
+    },
+    {
+      "id": "s37",
+      "section": "Projects",
+      "text": "• Evaluated the prototype using a mixture of suspicious and legitimate business emails, keeping sensitive email data local and using hardcoded MITRE ATT&CK mappings to contextualise findings.",
+      "runs": [
+        {
+          "text": "Evaluated the prototype using a mixture of suspicious and legitimate business emails, keeping sensitive email data local and using hardcoded MITRE ATT&CK mappings to contextualise findings.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 648.2171630859375,
+      "x": 21.75,
+      "source_baselines": [
+        648.2171630859375,
+        659.0088500976562
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.792,
+      "width": 523.5,
+      "region": [
+        21.75,
+        638.2571630859375,
+        545.25,
+        662.0088500976562
+      ]
+    },
+    {
+      "id": "s38",
+      "section": "Projects",
+      "text": "• Developing sandbox-based URL analysis to inspect linked content and enrich investigation reports, while keeping sensitive email data local.",
+      "runs": [
+        {
+          "text": "Developing sandbox-based URL analysis to inspect linked content and enrich investigation reports, while keeping sensitive email data local.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 671.2669067382812,
+      "x": 21.75,
+      "source_baselines": [
+        671.2669067382812,
+        681.7669067382812
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        661.3069067382812,
+        545.25,
+        684.7669067382812
+      ]
+    },
+    {
+      "id": "s39",
+      "section": "Projects",
+      "text": "AttackSurfaceIQ – Windows Event Log Analysis",
+      "runs": [
+        {
+          "text": "AttackSurfaceIQ – ",
+          "style": "bold"
+        },
+        {
+          "text": "Windows Event Log Analysis ",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 696.1215209960938,
+      "x": 21.75,
+      "source_baselines": [
+        696.1215209960938
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        686.1615209960937,
+        545.25,
+        699.1215209960938
+      ]
+    },
+    {
+      "id": "s40",
+      "section": "Projects",
+      "text": "Python, Windows Event Logs, Network Analysis, PowerShell",
+      "runs": [
+        {
+          "text": "Python, Windows Event Logs, Network Analysis, PowerShell",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 705.8715209960938,
+      "x": 21.75,
+      "source_baselines": [
+        705.8715209960938
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        695.9115209960937,
+        545.25,
+        708.8715209960938
+      ]
+    },
+    {
+      "id": "s41",
+      "section": "Projects",
+      "text": "• Developed a local tool that maps Windows error codes to common causes, supporting investigation of system faults across business devices.",
+      "runs": [
+        {
+          "text": "Developed a local tool that maps Windows error codes to common causes, supporting investigation of system faults across business devices.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 718.77490234375,
+      "x": 21.75,
+      "source_baselines": [
+        718.77490234375,
+        728.4723510742188
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 9.697,
+      "width": 523.5,
+      "region": [
+        21.75,
+        708.81490234375,
+        545.25,
+        731.4723510742188
+      ]
+    },
+    {
+      "id": "s42",
+      "section": "Projects",
+      "text": "• Used the tool to investigate intermittent server freezes and crashes, identifying errors associated with missing or corrupted DLLs and informing corrective action.",
+      "runs": [
+        {
+          "text": "Used the tool to investigate intermittent server freezes and crashes, identifying errors associated with missing or corrupted DLLs and informing corrective action.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 741.4765625,
+      "x": 21.75,
+      "source_baselines": [
+        741.4765625,
+        751.525390625
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 10.049,
+      "width": 523.5,
+      "region": [
+        21.75,
+        731.5165625,
+        545.25,
+        754.525390625
+      ]
+    },
+    {
+      "id": "s43",
+      "section": "Projects",
+      "text": "• Designed the tool for internal troubleshooting, keeping log analysis local; currently developing background monitoring and automated alerts for unexpected errors.",
+      "runs": [
+        {
+          "text": "Designed the tool for internal troubleshooting, keeping log analysis local; currently developing background monitoring and automated alerts for unexpected errors.",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 763.7833862304688,
+      "x": 21.75,
+      "source_baselines": [
+        763.7833862304688,
+        775.0333862304688
+      ],
+      "variable": true,
+      "max_lines": 2,
+      "leading": 11.25,
+      "width": 523.5,
+      "region": [
+        21.75,
+        753.8233862304687,
+        545.25,
+        778.0333862304688
+      ]
+    },
+    {
+      "id": "s44",
+      "section": "Certifications",
+      "text": "Certifications",
+      "runs": [
+        {
+          "text": "Certifications",
+          "style": "bold"
+        }
+      ],
+      "heading": true,
+      "bullet": false,
+      "font_size": 9.96,
+      "baseline": 791.2708129882812,
+      "x": 21.75,
+      "source_baselines": [
+        791.2708129882812
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        781.3108129882812,
+        545.25,
+        794.2708129882812
+      ]
+    },
+    {
+      "id": "s45",
+      "section": "Certifications",
+      "text": "• CompTIA Security+",
+      "runs": [
+        {
+          "text": "CompTIA Security+",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 805.9571533203125,
+      "x": 21.75,
+      "source_baselines": [
+        805.9571533203125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        795.9971533203125,
+        545.25,
+        808.9571533203125
+      ]
+    },
+    {
+      "id": "s46",
+      "section": "Certifications",
+      "text": "• ISC2 Certified in Cybersecurity (CC)",
+      "runs": [
+        {
+          "text": "ISC2 Certified in Cybersecurity (CC)",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 816.4571533203125,
+      "x": 21.75,
+      "source_baselines": [
+        816.4571533203125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        806.4971533203125,
+        545.25,
+        819.4571533203125
+      ]
+    },
+    {
+      "id": "s47",
+      "section": "Certifications",
+      "text": "• Ethical Hacking with Kali Linux, IBM",
+      "runs": [
+        {
+          "text": "Ethical Hacking with Kali Linux, IBM",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 826.9571533203125,
+      "x": 21.75,
+      "source_baselines": [
+        826.9571533203125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        816.9971533203125,
+        545.25,
+        829.9571533203125
+      ]
+    },
+    {
+      "id": "s48",
+      "section": "Certifications",
+      "text": "• Cyber Security Job Simulation, Deloitte & Mastercard via Forage",
+      "runs": [
+        {
+          "text": "Cyber Security Job Simulation, Deloitte & Mastercard via Forage",
+          "style": "normal"
+        }
+      ],
+      "heading": false,
+      "bullet": true,
+      "font_size": 9.96,
+      "baseline": 837.4571533203125,
+      "x": 21.75,
+      "source_baselines": [
+        837.4571533203125
+      ],
+      "variable": false,
+      "max_lines": 1,
+      "leading": 11.5,
+      "width": 523.5,
+      "region": [
+        21.75,
+        827.4971533203125,
+        545.25,
+        840.4571533203125
+      ]
+    }
+  ],
+  "target_seconds": 120,
+  "hard_seconds": 180,
+  "max_generation_calls": 2,
+  "max_renders": 2,
+  "rules": [
+    {
+      "x1": 21.75,
+      "x2": 545.25,
+      "y": 69.44386291503906,
+      "width": 1.0
+    },
+    {
+      "x1": 21.75,
+      "x2": 545.25,
+      "y": 126.8584976196289,
+      "width": 1.0
+    },
+    {
+      "x1": 21.75,
+      "x2": 545.25,
+      "y": 212.37948608398438,
+      "width": 1.0
+    },
+    {
+      "x1": 21.75,
+      "x2": 545.25,
+      "y": 320.8077697753906,
+      "width": 1.0
+    },
+    {
+      "x1": 21.75,
+      "x2": 515.25,
+      "y": 499.7960205078125,
+      "width": 1.0
+    },
+    {
+      "x1": 21.75,
+      "x2": 545.25,
+      "y": 796.2708129882812,
+      "width": 1.0
+    }
+  ]
+}

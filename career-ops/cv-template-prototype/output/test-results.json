@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-09",
+  "suite": "test_cv_template.py",
+  "passed": 24,
+  "failed": 0,
+  "elapsed_seconds": 7.82,
+  "provider_calls": 0,
+  "execution": "Hermes Python 3.11 with bundled ReportLab dependency path, cache disabled, bounded workspace temp",
+  "includes": ["original content", "reproducibility", "rendered line capacity", "truth provenance", "markup/blank-line/corruption", "section ordering", "actual pixel corruption", "actual neighbour corruption", "extra page", "worker compilation", "one shortening pass", "elapsed cancellation", "reentry prevention", "deny-write dependency lock", "hard budget cap", "wrong font", "baseline movement", "overflow", "unexpected bold", "missing text", "shortening exhausted"],
+  "owner_visual_acceptance": false,
+  "deployed": false
+}

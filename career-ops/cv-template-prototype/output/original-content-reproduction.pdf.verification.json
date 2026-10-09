@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "failures": [],
+  "page_count": 1,
+  "pdf_sha256": "02c4cbd40f64c7f7b061a119d8878615d5238af94197492c87e85d16cbd60316",
+  "total_seconds": 0.23499999986961484,
+  "render_seconds": 0.06299999984912574,
+  "validation_seconds": 0.125,
+  "content_generation_seconds": 0,
+  "model_calls": 0,
+  "owner_visual_acceptance": false,
+  "not_deployed": true
+}

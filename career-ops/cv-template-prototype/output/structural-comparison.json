@@ -1,0 +1,43 @@
+{
+  "source_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
+  "original_content_equal": true,
+  "source_page_count": 1,
+  "reproduction_page_count": 1,
+  "page_dimensions": [
+    595.5,
+    850.5
+  ],
+  "section_order": [
+    "Professional Summary",
+    "Technical Skills",
+    "Education",
+    "Work Experience",
+    "Projects",
+    "Certifications"
+  ],
+  "font_family": "Times New Roman (Windows TTF, embedded)",
+  "slots": 49,
+  "variable_slots": 22,
+  "design_notes": [
+    "Source content is preserved; paragraphs flow within fixed slots.",
+    "Line endings may differ where source used manually positioned lines.",
+    "Skill values follow bold labels with normal spacing, not fixed value anchors.",
+    "Education modules retain the source hard break; all editable body text flows.",
+    "No claim of source pixel identity; this is a separate font-backed reconstruction."
+  ],
+  "validation": {
+    "status": "PASS",
+    "failures": [],
+    "page_count": 1,
+    "pdf_sha256": "02c4cbd40f64c7f7b061a119d8878615d5238af94197492c87e85d16cbd60316",
+    "total_seconds": 0.23499999986961484,
+    "render_seconds": 0.06299999984912574,
+    "validation_seconds": 0.125,
+    "content_generation_seconds": 0,
+    "model_calls": 0,
+    "owner_visual_acceptance": false,
+    "not_deployed": true
+  },
+  "owner_visual_acceptance": false,
+  "hermes_deployment": "UNCHANGED"
+}
