@@ -44,6 +44,10 @@ def test_native_budget_only_cv():
     g.install_runtime(runtime,Turn,Media)
     r=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
     assert r['limit']==4 and 'career_cv_compile' in r['context']
+    assert 'vision_analyze is allowed' in r['context']
+    assert 'CURRENT inbound message' in r['context']
+    assert 'Do not label a provider failure' in r['context']
+    assert 'already installed' in r['context']
     assert asyncio.run(Turn()._run_agent('Unrelated request','',[]))['limit']==150
 
 def test_failed_pdf_blocked_on_actual_lazy_adapter(tmp_path,monkeypatch):
