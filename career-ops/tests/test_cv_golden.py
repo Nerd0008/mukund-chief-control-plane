@@ -191,3 +191,10 @@ def test_skill_labels_can_be_tailored_without_font_or_origin_changes(setup):
  spec={'edits':[{'span_id':'p0-s28','replace':'Cloud & Security Platforms:'},{'span_id':'p0-s34','replace':'Software Development & Data:'}]}
  p=setup[3]/'labels_CV.pdf';r=g.generate(g.MASTER,g.MANIFEST,spec,p)
  assert r['status']=='PASS' and r['outside_region_changed_pixels']==0 and g.delivery_allowed(p)
+
+
+@pytest.mark.parametrize('replacement',['Information Security MSc graduate.','i'*175])
+def test_content_length_can_change_freely_when_geometry_fits(setup,replacement):
+ spec=setup[2];spec['edits'][0]['replace']=replacement
+ r=g.generate(g.MASTER,g.MANIFEST,spec,setup[3]/'flexible_CV.pdf')
+ assert r['status']=='PASS' and r['outside_region_changed_pixels']==0

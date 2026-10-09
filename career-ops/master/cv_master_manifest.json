@@ -5547,7 +5547,7 @@
   ],
   "policy": {
     "max_fit_attempts": 3,
-    "char_delta": 0.15,
+    "content_constraint": "existing font-measured width; no original wording or character-count similarity requirement",
     "raster_dpi": 144,
     "pixel_channel_tolerance": 0,
     "region_edge_tolerance_pixels": 1,

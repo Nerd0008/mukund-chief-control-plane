@@ -153,9 +153,11 @@ canonical regional tracker. Do not ask whether to log it; log it, then report.
 
 The sole authoritative PDF is `career-ops/master/CV_FORMAT_MASTER.pdf`; its versioned span/layout manifest is `career-ops/master/cv_master_manifest.json`. Never regenerate, edit, redact/reinsert, or repair this master. Do not use the historical Downloads master.
 
+The master is a visual template and a source of verified professional facts, not a wording template. Tailor content freely to each JD, including skill labels and experience/project descriptions; no character-count similarity to original wording is required. Preserve the layout and truthful facts.
+
 Normal application jobs MUST NOT edit cv_tailor.py, cv_golden.py, hermes_cv_guard.py, the manifest or font/layout configuration. Do not extend the renderer during a job, use --force, geometry overrides, font substitution, manual reinsertion, a parallel PDF builder, or an open-ended visual repair loop.
 
-Use the bounded workspace `%LOCALAPPDATA%/hermes/runtime/career-ops/cv-output/<application-job>/` only. Read the JD and immutable manifest; produce `cv_edits.json` with `edits: [{span_id, replace, alternatives}]`. Each original editable span has its own fixed font, origin, width and character limits. Supply at most two content-only alternatives. There are at most THREE fit attempts per span, persisted across command re-entry, and ONE PDF render per job. The native CV agent budget is eight turns. Failure ends the job; do not rename the output or launch a new job to evade the budget.
+Use the bounded workspace `%LOCALAPPDATA%/hermes/runtime/career-ops/cv-output/<application-job>/` only. Read the JD and immutable manifest; produce `cv_edits.json` with `edits: [{span_id, replace, alternatives}]`. Each original editable span has its own fixed font, origin, rendered-width limits. Supply at most two content-only alternatives. There are at most THREE fit attempts per span, persisted across command re-entry, and ONE PDF render per job. The native CV agent budget is eight turns. Failure ends the job; do not rename the output or launch a new job to evade the budget.
 
 PREFERRED HERMES PATH: call `career_cv_master`, select editable span IDs using the JD, then call `career_cv_build` with content-only edits and up to two alternatives. This tool creates the workspace/edits JSON and invokes the verified renderer directly. No shell commands, git checks, code inspection, execute_code or renderer unlock are required. Do not look for removed include_blanks/bold_prefix/char_budget_exempt/--force repair markers.
 

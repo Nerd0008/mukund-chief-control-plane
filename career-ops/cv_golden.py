@@ -99,11 +99,10 @@ def build_manifest(master):
    item={**s,'id':f'p{s["page"]}-s{i}','section':section,'editable':editable,'glyph_origin':list(glyph_origin),'label':label,'available_width':max(0,boundary-glyph_origin[0]),'neighbours':[t['bbox'] for t in ss if t is not s and t['page']==s['page'] and abs(t['origin'][1]-s['origin'][1])<15]}
    if editable:item.update(stream_xref=candidates[0]['xref'],stream_start=candidates[0]['start'],stream_end=candidates[0]['end'],font_ref=candidates[0]['font_ref'])
    items.append(item)
-  return {'schema':1,'master_sha256':sha(master),'pages':[{'rect':list(p.rect),'mediabox':list(p.mediabox),'cropbox':list(p.cropbox),'rotation':p.rotation} for p in d],'page_count':len(d),'spans':items,'policy':{'max_fit_attempts':3,'char_delta':.15,'raster_dpi':144,'pixel_channel_tolerance':0,'region_edge_tolerance_pixels':1,'render_attempts':1}}
+  return {'schema':1,'master_sha256':sha(master),'pages':[{'rect':list(p.rect),'mediabox':list(p.mediabox),'cropbox':list(p.cropbox),'rotation':p.rotation} for p in d],'page_count':len(d),'spans':items,'policy':{'max_fit_attempts':3,'content_constraint':'existing font-measured width; no original wording or character-count similarity requirement','raster_dpi':144,'pixel_channel_tolerance':0,'region_edge_tolerance_pixels':1,'render_attempts':1}}
 
 def fit(span,text,fm,policy):
  if '\n' in text or '\r' in text or not text.strip():return 'replacement must be one nonempty line'
- if ((len(text.strip())>len(span['text'].strip())*(1+policy['char_delta'])) if span.get('label') else (abs(len(text.strip())-len(span['text'].strip()))/max(1,len(span['text'].strip()))>policy['char_delta'])):return 'character budget exceeded'
  if any(c not in fm['encode'] for c in text):return 'glyph absent from immutable master font'
  width=sum(fm['widths'].get(fm['encode'][c],fm['default_width']) for c in text)/1000*span['size']
  if width>span['available_width']:return 'rendered width overflow'
