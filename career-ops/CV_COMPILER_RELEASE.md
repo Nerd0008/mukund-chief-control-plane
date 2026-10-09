@@ -60,3 +60,6 @@ Offline validation: 64 passed, 0 failed; zero provider calls.
 
 2026-10-09 wording correction: revised curated sentence boundaries and summary; reject generic self-praise, vague impact, inflated filler, chatbot text, placeholders, contrived contrasts and owner-disallowed semicolons/em dashes. Numeric ranges remain permitted. Both full wording-bank variants fit the unchanged layout. 67 focused tests passed; zero provider calls. Capacity-only fixtures now use two provenance-backed punctuation-compliant bullets so they continue isolating shortening behavior. Existing PDFs are not rewritten.
 
+
+Encoding incident: owner screenshot showed UTF-8 en-dash bytes decoded as Windows-1252 in numeric ranges. Curated source text repaired. Independent content and extracted-PDF checks reject mojibake, replacement characters and invalid controls even when source and PDF match. 71 tests passed, zero provider calls. Gateway logs prove vision analysis completed at 12:47 despite the subsequent assistant claim that it was locked.
+

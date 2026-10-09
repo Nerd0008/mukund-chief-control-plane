@@ -24,6 +24,14 @@ def policy():
     return {'version': VERSION, 'source': SOURCE, 'guidance': GUIDANCE,
             'mode': 'reviewed_local_reference', 'not_an_ai_detector': True}
 
+def encoding_errors(text):
+    errors=[]
+    if any(ord(c)<32 and c not in "\n\t" for c in text) or any(0x7f<=ord(c)<=0x9f or 0xd800<=ord(c)<=0xdfff for c in text):
+        errors.append("invalid control or Unicode character")
+    if "\ufffd" in text or re.search(r"(?:\u00e2\u20ac|\u00c3[\u0080-\u00bf]|\u00c2[\u0080-\u00bf])",text):
+        errors.append("suspected UTF-8 decoding corruption")
+    return errors
+
 def check(text):
     # Narrow, explainable checks; no probabilistic detector or broad word blacklist.
     patterns = {
@@ -35,5 +43,5 @@ def check(text):
         'promotional filler': r'\b(?:ever[- ]evolving landscape|game[- ]changing|unparalleled expertise|testament to my|pivotal role in shaping|delve into)\b',
         'contrived contrast': r'\bnot (?:just|only)\b[^.!?]{0,100}\bbut (?:also|rather)\b',
     }
-    return [reason for reason, pattern in patterns.items() if re.search(pattern, text, re.I)]
+    return encoding_errors(text)+[reason for reason, pattern in patterns.items() if re.search(pattern, text, re.I)]
 

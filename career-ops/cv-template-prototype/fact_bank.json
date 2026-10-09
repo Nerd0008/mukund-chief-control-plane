@@ -126,13 +126,13 @@
     },
     "s21": {
       "original": {
-        "text": "Manage typically 4â€“5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
+        "text": "Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
         "sources": [
           "s21"
         ]
       },
       "engineering": {
-        "text": "Administer 4â€“5 daily access requests in on-premises Active Directory, verifying approval, recording access periods and managing time-limited permissions.",
+        "text": "Administer 4–5 daily access requests in on-premises Active Directory, verifying approval, recording access periods and managing time-limited permissions.",
         "sources": [
           "s21"
         ]
@@ -140,13 +140,13 @@
     },
     "s22": {
       "original": {
-        "text": "Investigate 4â€“5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
+        "text": "Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
         "sources": [
           "s22"
         ]
       },
       "engineering": {
-        "text": "Analyse 4â€“5 suspicious emails daily, checking sender and link domains, recording findings and communicating recurring phishing patterns to colleagues.",
+        "text": "Analyse 4–5 suspicious emails daily, checking sender and link domains, recording findings and communicating recurring phishing patterns to colleagues.",
         "sources": [
           "s22"
         ]
@@ -154,13 +154,13 @@
     },
     "s23": {
       "original": {
-        "text": "Serve as the first point of contact for IT issues for 15 employees across 15â€“20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
+        "text": "Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
         "sources": [
           "s23"
         ]
       },
       "engineering": {
-        "text": "Support 15 employees using 15â€“20 devices, troubleshooting access and system issues, monitoring server health and maintaining password and website-access controls.",
+        "text": "Support 15 employees using 15–20 devices, troubleshooting access and system issues, monitoring server health and maintaining password and website-access controls.",
         "sources": [
           "s23"
         ]
@@ -196,13 +196,13 @@
     },
     "s27": {
       "original": {
-        "text": "Coordinate 7â€“8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
+        "text": "Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
         "sources": [
           "s27"
         ]
       },
       "engineering": {
-        "text": "Coordinate 7â€“8 colleagues per shift, communicating requirements, assigning corrective actions and following up to confirm issues are addressed.",
+        "text": "Coordinate 7–8 colleagues per shift, communicating requirements, assigning corrective actions and following up to confirm issues are addressed.",
         "sources": [
           "s27"
         ]

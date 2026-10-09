@@ -12,7 +12,7 @@ from reportlab.platypus import Paragraph
 import pymupdf as fitz
 from PIL import Image, ImageChops, ImageDraw
 
-from cv_writing_policy import check as writing_check
+from cv_writing_policy import check as writing_check, encoding_errors
 HERE=pathlib.Path(__file__).parent
 FONT_NAMES={}
 def load_layout():
@@ -115,6 +115,7 @@ def validate(layout, content, pdf):
     if len(d)!=1 or any(abs(a-b)>.01 for a,b in zip(d[0].rect[2:],layout['page'])):
         failures.append({'slot':'page','reason':'page dimensions/count'})
     spans=[s for b in d[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans']]
+    for reason in encoding_errors(d[0].get_text()): failures.append({'slot':'page','reason':reason})
     for s in layout['slots']:
         region=fitz.Rect(s['region']); found=[]
         for t in spans:
