@@ -1,0 +1,20 @@
+{
+  "task": "ChiefCareerGmailMonitor",
+  "enabled": true,
+  "interval": "PT1H",
+  "principal": "MISTY\\mukun",
+  "acceptance_exit_code": 0,
+  "messages_inspected": 24,
+  "recruitment_signals": 3,
+  "tracker_writes": 0,
+  "calendar_writes": 0,
+  "gmail_mutations": 0,
+  "review_only_total": 59,
+  "model_calls": 0,
+  "checkpoint_after": "1027137",
+  "focused_tests_passed": 68,
+  "broader_layout_tests_failed": 5,
+  "local_gmail_skill_deployed": true,
+  "credential_values_recorded": false,
+  "checkpoint_before": "1025220"
+}
