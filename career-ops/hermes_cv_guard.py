@@ -46,7 +46,7 @@ def safe_readonly(command):
 
 def master_tool(args,**kwargs):
  m=json.loads(golden.MANIFEST.read_text())
- return json.dumps({'master_sha256':m['master_sha256'],'policy':m['policy'],'editable_spans':[{k:s[k] for k in ('id','text','section','font','size','available_width','label')} for s in sorted(m['spans'],key=lambda x:(x['page'],x['origin'][1],x['origin'][0])) if s['editable']],'instruction':'Use career_cv_build. No renderer unlock or shell execution required; only rewrite content to fit these existing spans.'})
+ return json.dumps({'master_sha256':m['master_sha256'],'policy':m['policy'],'editable_spans':[{**{k:s[k] for k in ('id','text','section','font','size','available_width','label')},'required_characters':len(s['text'].strip())} for s in sorted(m['spans'],key=lambda x:(x['page'],x['origin'][1],x['origin'][0])) if s['editable']],'instruction':'Use career_cv_build. No renderer unlock or shell execution required; only rewrite content to fit these existing spans.'})
 
 def build_tool(args,**kwargs):
  import uuid
@@ -133,7 +133,7 @@ def register(ctx):
  install_runtime(runtime,GatewayTurnMixin,DiscordMediaMixin)
  ctx.register_hook('pre_tool_call',pre_tool)
  ctx.register_tool(name='career_cv_master',toolset='career_cv',schema={'name':'career_cv_master','description':'Read the immutable CV master spans and fit policy. Use before tailoring; no shell or renderer changes.','parameters':{'type':'object','properties':{}}},handler=master_tool)
- ctx.register_tool(name='career_cv_build',toolset='career_cv',schema={'name':'career_cv_build','description':'Build a verified CV from the immutable master using span_id/replace and at most two alternatives per span. One render per job; failed PDFs cannot be delivered.','parameters':{'type':'object','properties':{'edits':{'type':'array','minItems':1,'items':{'type':'object','properties':{'span_id':{'type':'string'},'replace':{'type':'string'},'alternatives':{'type':'array','maxItems':2,'items':{'type':'string'}}},'required':['span_id','replace'],'additionalProperties':False}}},'required':['edits'],'additionalProperties':False}},handler=build_tool)
+ ctx.register_tool(name='career_cv_build',toolset='career_cv',schema={'name':'career_cv_build','description':'Build a verified CV matching the owner master visually. Every replacement must have exactly required_characters and preserve measured geometry/skill-label gap; use span_id/replace and at most two alternatives per span. One render per job; failed PDFs cannot be delivered.','parameters':{'type':'object','properties':{'edits':{'type':'array','minItems':1,'items':{'type':'object','properties':{'span_id':{'type':'string'},'replace':{'type':'string'},'alternatives':{'type':'array','maxItems':2,'items':{'type':'string'}}},'required':['span_id','replace'],'additionalProperties':False}}},'required':['edits'],'additionalProperties':False}},handler=build_tool)
  # Hermes lazily loads Discord under hermes_plugins.*, a different module identity.
  # Connect/reload callback must guard the actual live adapter, not only a static import.
  def connected(native,adapter):

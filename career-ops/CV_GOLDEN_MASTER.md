@@ -15,3 +15,9 @@ Discord delivery independently checks the output hash, protected dependency hash
 Deployment sources: `hermes-plugins/career-cv-golden-guard/` and `hermes-skills/job-application-intake/SKILL.md`. Install the plugin under Hermes home, enable with `hermes plugins enable career-cv-golden-guard`, copy the versioned skill and restart the native gateway when source changes. Maintenance/code repair is separate from normal application generation; never patch implementation to make a single application pass.
 
 Regression: `python -m pytest career-ops/tests/test_cv_golden.py -q`. Cover-letter compatibility retains CMAP_FIXES but does not permit a second CV renderer. cv_workflow's markdown content drafting is not a PDF renderer or delivery bypass.
+
+## Owner confirmation — supplied PDF on 2026-10-09
+
+`C:/Users/mukun/Downloads/Mukund Didwania CV.pdf` SHA-256 is 01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b, identical to the canonical master. It is the fixed visual template and professional-information source for future JD tailoring. The owner explicitly requires exact character counts and master-identical spacing/layout; differing wording is permitted, not arbitrary shorter labels or shifted value anchors.
+
+Replacement character counts equal the original editable non-whitespace text. Native whitespace objects remain untouched and are independently verified byte-for-byte along with all non-edit streams. Skill label advance-width must remain within 0.5 point of the original so the fixed following value anchor retains its gap. No font shrink, layout reflow or blank padding workaround. The previous permissive content-length policy is superseded.
