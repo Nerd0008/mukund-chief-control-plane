@@ -85,6 +85,7 @@ DISCIPLINE_FAMILIES = {
         "security operation center", "blue team", "incident response",
         "threat intelligence", "threat hunting", "siem", "triage analyst",
         "detection and response", "cyber defence", "cyber defense",
+        "phishing",
     ],
     "infosec_cybersecurity": [
         "cyber security", "cybersecurity", "cyber", "information security",
@@ -92,11 +93,13 @@ DISCIPLINE_FAMILIES = {
         "cloud security", "data security", "security analyst",
         "security engineer", "security specialist", "security consultant",
         "security administrator", "security operations", "security assurance",
+        "security analysis", "dlp", "data loss prevention", "cryptography",
     ],
     "grc_governance_risk_compliance": [
         "grc", "governance risk", "governance, risk", "risk and compliance",
         "security compliance", "security governance", "iso 27001",
         "compliance analyst", "audit analyst",
+        "digital forensics", "forensics", "security management",
     ],
     "iam_identity": [
         "iam", "identity and access", "identity & access", "access management",
