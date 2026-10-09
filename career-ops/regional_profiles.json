@@ -43,12 +43,7 @@
         "E",
         "F"
       ],
-      "refreshable_columns": [
-        "AB",
-        "AC",
-        "AD",
-        "AE"
-      ],
+      "refreshable_columns": [],
       "defaults": {
         "application_status": "Not Applied"
       },
@@ -88,22 +83,11 @@
         "E": "Application Deadline",
         "F": "Status"
       },
-      "mail_identity": {
-        "column": "G",
-        "header": "Career Ops Job ID",
-        "prefix": "UK",
-        "style": "mail"
-      },
       "status_aliases": {
         "To Review": "Not Applied",
         "Not Applying": "Not Applied"
       },
-      "optional_headers": {
-        "AB": "Career Ops Discovery Source",
-        "AC": "Career Ops Discovery Notes",
-        "AD": "Career Ops Posted Date",
-        "AE": "Career Ops Last Checked"
-      }
+      "column_ceiling": 6
     },
     "dubai": {
       "display_name": "Dubai / UAE",

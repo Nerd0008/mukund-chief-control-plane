@@ -139,6 +139,14 @@ class WorkbookTracker:
             raise ValueError("application region is unresolved; no workbook write")
         cfg = self.profiles[region]
         path = Path(cfg["tracker"])
+        # Owner mandate: the UK tracker is a fixed six-column sheet. Refuse to
+        # append email metadata columns to it; that is what turned a readable
+        # tracker into a 31-column log. Non-UK regions keep their own layouts.
+        if cfg.get("column_ceiling") and "mail_identity" not in cfg:
+            raise ValueError(
+                f"{region} tracker is capped at {cfg['column_ceiling']} columns; "
+                "email metadata columns are not permitted"
+            )
         # A fail-fast file lock excludes our own overlapping scheduled scans.
         lock = path.with_suffix(path.suffix + ".career-mail.lock")
         fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)

@@ -624,6 +624,19 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
             result["reason"] = "no changes required: nothing to append or refresh"
         return result
 
+    # Owner mandate: the UK tracker carries exactly six columns
+    # (Date Found, Company, Role Title, Apply Link, Application Deadline,
+    # Status). A profile may declare a hard ceiling; refuse to write rather
+    # than silently growing the sheet with automation metadata columns.
+    ceiling = cfg.get("column_ceiling")
+    if ceiling:
+        occupied = tr.ws.max_column
+        if occupied > ceiling:
+            raise ValueError(
+                f"tracker has {occupied} columns but the profile ceiling is "
+                f"{ceiling}; refusing to write until the extra columns are removed"
+            )
+
     # Optional automation columns are declared by the same regional profile.
     for column, header in cfg.get("optional_headers", {}).items():
         cell = tr.ws[f"{column}{cfg['header_row']}"]
