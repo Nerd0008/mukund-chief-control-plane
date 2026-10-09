@@ -140,9 +140,9 @@ def register(ctx):
     tool('career_cv_compile','Tailor a CV from JD in one bounded compiler invocation; returns verified PDF or failure. Never repair formatting.',
          {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'}},['jd','job_id'],compile_tool)
     tool('career_cv_build','Retired span builder; use career_cv_compile.',{},[],retired_build)
-    def connected(native,adapter):
+    def connected_v2(native,adapter):
         install_delivery(type(adapter))
         import logging
         logging.getLogger('gateway.platforms.base').info('Approved flow CV compiler active on %s; attachment guard=%s; source=%s',
             type(adapter).__module__,getattr(type(adapter),'_fast_cv_delivery_installed',False),cv.digest(pathlib.Path(__file__))[:12])
-    ctx.register_platform_handler('discord',connected)
+    ctx.register_platform_handler('discord',connected_v2)
