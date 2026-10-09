@@ -165,3 +165,17 @@ def test_lazy_platform_module_alias_also_gets_delivery_guard(setup,monkeypatch):
  guard.install_runtime(runtime,Turn,StaticMedia)
  guard.install_runtime(runtime,Turn,ActualLazyMedia)
  assert asyncio.run(ActualLazyMedia().send_document('chief',setup[3]/'bad_CV.pdf')).success is False
+
+
+def test_read_only_diagnostic_allowed_without_unlock():
+ command='git -C "'+str(guard.REPO)+'" log --oneline -3 -- career-ops/cv_tailor.py'
+ assert guard.pre_tool('terminal',{'command':command}) is None
+ assert not guard.safe_readonly(command+' && git reset --hard')
+
+
+def test_native_cv_build_tool_no_shell_or_renderer_patch(setup):
+ token=guard.CV_WORKSPACE.set({'path':None});active=guard.CV_ACTIVE.set(True)
+ try:
+  result=json.loads(guard.build_tool(setup[2]));assert result['status']=='PASS' and g.delivery_allowed(result['verified_pdf'])
+  assert json.loads(guard.build_tool(setup[2]))['status']=='FAIL'
+ finally:guard.CV_WORKSPACE.reset(token);guard.CV_ACTIVE.reset(active)

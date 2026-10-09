@@ -15,9 +15,10 @@ def cv_request(message,history=()):
 def pre_tool(tool_name,args,**kwargs):
  text=json.dumps(args).replace('\\\\','/').lower()
  mutates=tool_name in {'write_file','patch','apply_patch','terminal','execute_code','python','delegate_task'}
+ if tool_name=='terminal' and safe_readonly(args.get('command','')):return None
  if mutates and any(str(p).replace('\\','/').lower() in text or p.name.lower() in text for p in PROTECTED):
   if tool_name!='terminal' or not safe_renderer(args.get('command','')):
-   return {'action':'block','message':'CV generation failed: immutable master/renderer/layout cannot be changed by an application job.'}
+   return {'action':'block','message':'Protected CV code cannot be changed. No unlock is needed: use career_cv_master then career_cv_build with content-only edits. Read source with read_file; do not inspect old renderer repair markers.'}
  if not CV_ACTIVE.get():return None
  if tool_name=='terminal':
   if not safe_renderer(args.get('command','')):return {'action':'block','message':'CV generation is bounded: only the canonical renderer command is permitted. Rewrite edits JSON, never code.'}
@@ -30,8 +31,38 @@ def pre_tool(tool_name,args,**kwargs):
    if state['path'] is not None and state['path']!=parent:return {'action':'block','message':'One bounded CV application workspace per job.'}
    state['path']=parent
  elif tool_name in {'execute_code','python','delegate_task'}:return {'action':'block','message':'CV jobs cannot launch a parallel builder or an unbounded repair subagent.'}
- elif tool_name not in {'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think'}:return {'action':'block','message':'CV jobs allow only read-only research and bounded edits/renderer execution; unknown tools fail closed.'}
+ elif tool_name not in {'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think','career_cv_master','career_cv_build'}:return {'action':'block','message':'CV jobs allow only read-only research and bounded edits/renderer execution; unknown tools fail closed.'}
  return None
+
+
+def safe_readonly(command):
+ import shlex
+ if any(c in command for c in ';|><`\n\r&$'):return False
+ try:t=[x.strip('"') for x in shlex.split(command,posix=False)]
+ except ValueError:return False
+ # Only a narrow diagnostic form; no arbitrary interpreter or shell chains.
+ if len(t)<4 or t[:2]!=['git','-C'] or Path(t[2]).resolve()!=REPO.resolve():return False
+ return t[3] in {'status','log'} and all(x in {'--short','--oneline','-3','--','career-ops/cv_tailor.py'} for x in t[4:])
+
+def master_tool(args,**kwargs):
+ m=json.loads(golden.MANIFEST.read_text())
+ return json.dumps({'master_sha256':m['master_sha256'],'policy':m['policy'],'editable_spans':[s for s in m['spans'] if s['editable']],'instruction':'Use career_cv_build. No renderer unlock or shell execution required; only rewrite content to fit these existing spans.'})
+
+def build_tool(args,**kwargs):
+ import uuid
+ state=CV_WORKSPACE.get()
+ if not isinstance(state,dict):return json.dumps({'status':'FAIL','reason':'CV application job context required'})
+ if state['path'] is None:state['path']=golden.OUTPUT_ROOT/('application-'+uuid.uuid4().hex)
+ folder=state['path'];folder.mkdir(parents=True,exist_ok=True)
+ spec={'edits':args.get('edits',[])}
+ (folder/'cv_edits.json').write_text(json.dumps(spec,indent=2))
+ output=folder/'Tailored_CV.pdf'
+ try:
+  report=golden.generate(golden.MASTER,golden.MANIFEST,spec,output)
+  result={'status':report['status'],'problems':report['problems'],'verification_report':str(output.with_suffix('.verification.json'))}
+  if report['status']=='PASS':result['verified_pdf']=str(output)
+  return json.dumps(result)
+ except Exception as e:return json.dumps({'status':'FAIL','message':'CV generation failed','reason':str(e)})
 
 def safe_renderer(command):
  command=command.strip()
@@ -100,6 +131,8 @@ def register(ctx):
  from plugins.platforms.discord.adapter_media import DiscordMediaMixin
  install_runtime(runtime,GatewayTurnMixin,DiscordMediaMixin)
  ctx.register_hook('pre_tool_call',pre_tool)
+ ctx.register_tool(name='career_cv_master',toolset='career_cv',schema={'name':'career_cv_master','description':'Read the immutable CV master spans and fit policy. Use before tailoring; no shell or renderer changes.','parameters':{'type':'object','properties':{}}},handler=master_tool)
+ ctx.register_tool(name='career_cv_build',toolset='career_cv',schema={'name':'career_cv_build','description':'Build a verified CV from the immutable master using span_id/replace and at most two alternatives per span. One render per job; failed PDFs cannot be delivered.','parameters':{'type':'object','properties':{'edits':{'type':'array','minItems':1,'items':{'type':'object','properties':{'span_id':{'type':'string'},'replace':{'type':'string'},'alternatives':{'type':'array','maxItems':2,'items':{'type':'string'}}},'required':['span_id','replace'],'additionalProperties':False}}},'required':['edits'],'additionalProperties':False}},handler=build_tool)
  # Hermes lazily loads Discord under hermes_plugins.*, a different module identity.
  # Connect/reload callback must guard the actual live adapter, not only a static import.
  def connected(native,adapter):
