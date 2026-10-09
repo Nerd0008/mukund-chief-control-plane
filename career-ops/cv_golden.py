@@ -58,7 +58,7 @@ def fonts(doc):
     else:
      end=int(w[i]);width=w[i+1];i+=2
      for n in range(start,end+1):widths[n]=width
-   result[ref]={'font':name.split('+')[-1],'decode':decode,'encode':{v:k for k,v in decode.items()},'widths':widths}
+   result[ref]={'font':name.split('+')[-1],'decode':decode,'encode':{v:k for k,v in decode.items()},'widths':widths,'default_width':float(doc.xref_get_key(descendant,'DW')[1]) if doc.xref_get_key(descendant,'DW')[0]!='null' else 1000}
  return result
 
 def blocks(doc,fontmap):
@@ -102,7 +102,7 @@ def fit(span,text,fm,policy):
  if '\n' in text or '\r' in text or not text.strip():return 'replacement must be one nonempty line'
  if abs(len(text.strip())-len(span['text'].strip()))/max(1,len(span['text'].strip()))>policy['char_delta']:return 'character budget exceeded'
  if any(c not in fm['encode'] for c in text):return 'glyph absent from immutable master font'
- width=sum(fm['widths'].get(fm['encode'][c],1000) for c in text)/1000*span['size']
+ width=sum(fm['widths'].get(fm['encode'][c],fm['default_width']) for c in text)/1000*span['size']
  if width>span['available_width']:return 'rendered width overflow'
  return None
 
@@ -168,7 +168,7 @@ def verify(master,out,manifest,plan):
    for p in plan:
     s=p['span']
     if s['page']!=i:continue
-    fm=fonts(a)[s['font_ref']];width=sum(fm['widths'].get(fm['encode'][c],1000) for c in p['replace'])/1000*s['size'];x0,y0,x1,y1=s['bbox']
+    fm=fonts(a)[s['font_ref']];width=sum(fm['widths'].get(fm['encode'][c],fm['default_width']) for c in p['replace'])/1000*s['size'];x0,y0,x1,y1=s['bbox']
     # One pixel edge tolerance is documented. Never mask a section or whole page.
     import math
     draw.rectangle((math.floor(x0*2)-1,math.floor(y0*2)-1,math.ceil(max(x1,s['origin'][0]+width)*2)+1,math.ceil(y1*2)+1),fill=0)
