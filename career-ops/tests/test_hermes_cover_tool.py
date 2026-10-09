@@ -34,3 +34,33 @@ def test_overflow_content_refused(tmp_path):
     s=spec(tmp_path);s['paragraphs'][0]='x'*3000
     p=tmp_path/'spec.json';p.write_text(json.dumps(s))
     with pytest.raises(ValueError,match='capacity'):cover.build(p)
+
+
+def test_corrected_cover_can_retry_once_without_bypassing_gate(tmp_path,monkeypatch):
+    from types import SimpleNamespace
+    monkeypatch.setattr(cover,'ROOT',tmp_path)
+    calls=[]
+    def rejected(*args,**kwargs):
+        calls.append(args)
+        return SimpleNamespace(returncode=1)
+    monkeypatch.setattr(cover.subprocess,'run',rejected)
+    token=guard.JOB.set({'deadline':time.monotonic()+180,'cv_active':True})
+    args={'company':'Example','role':'Graduate','paragraphs':['Original']*5}
+    try:
+        assert json.loads(cover.cover_tool(args))['status']=='FAIL'
+        assert 'unchanged' in json.loads(cover.cover_tool(args))['reason']
+        corrected=dict(args,paragraphs=['Corrected']*5)
+        assert 'verification failed' in json.loads(cover.cover_tool(corrected))['reason']
+        assert 'budget exhausted' in json.loads(cover.cover_tool(dict(args,paragraphs=['Third']*5)))['reason']
+        assert len(calls)==2
+    finally:guard.JOB.reset(token)
+
+
+def test_expired_cover_never_launches_renderer(tmp_path,monkeypatch):
+    monkeypatch.setattr(cover,'ROOT',tmp_path)
+    monkeypatch.setattr(cover.subprocess,'run',lambda *a,**k:pytest.fail('expired renderer launched'))
+    token=guard.JOB.set({'deadline':time.monotonic()-1,'cv_active':True})
+    try:
+        assert 'deadline' in json.loads(cover.cover_tool({'company':'Example','role':'Graduate','paragraphs':['Text']*5}))['reason']
+        assert not list(tmp_path.iterdir())
+    finally:guard.JOB.reset(token)

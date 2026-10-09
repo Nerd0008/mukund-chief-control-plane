@@ -37,8 +37,13 @@ def cover_tool(args,**kwargs):
     state=JOB.get()
     if state is None:return json.dumps({'status':'FAIL','reason':'native application turn required'})
     activate_job(state)
-    if state.get('cover_attempted'):return json.dumps({'status':'FAIL','reason':'cover already attempted; no repair loop'})
-    state['cover_attempted']=True
+    if state['deadline'] <= time.monotonic():return json.dumps({'status':'FAIL','reason':'application deadline reached'})
+    if state.get('cover_succeeded'):return json.dumps({'status':'FAIL','reason':'verified cover already produced'})
+    fingerprint=hashlib.sha256(json.dumps(args,sort_keys=True,ensure_ascii=False).encode('utf-8')).hexdigest()
+    attempts=state.setdefault('cover_content_attempts',[])
+    if fingerprint in attempts:return json.dumps({'status':'FAIL','reason':'unchanged rejected cover; correct the content before retrying'})
+    if len(attempts)>=2:return json.dumps({'status':'FAIL','reason':'cover correction budget exhausted (2 attempts)'})
+    attempts.append(fingerprint)
     workspace=ROOT/uuid.uuid4().hex;workspace.mkdir(parents=True)
     out=workspace/'Mukund_Cover_Letter.pdf'
     spec={'heading':'Application for '+str(args['role']),'salutation':'Dear '+str(args['company'])+' Recruitment Team,','paragraphs':args['paragraphs'],'out':str(out),'qa':str(workspace/'preview.png')}
@@ -48,6 +53,7 @@ def cover_tool(args,**kwargs):
         if remaining<=0:raise ValueError('application deadline reached')
         run=subprocess.run([sys.executable,str(HERE/'hermes_cover_tool.py'),str(path)],capture_output=True,text=True,timeout=remaining)
         if run.returncode or not verified(out):return json.dumps({'status':'FAIL','reason':'cover content/fact/format verification failed','instruction':'No unverified PDF may be attached. No shell repair.'})
+        state['cover_succeeded']=True
         return json.dumps({'status':'PASS','verified_pdf':str(out),'verification_report':str(out.with_suffix('.verification.json'))})
     except subprocess.TimeoutExpired:return json.dumps({'status':'FAIL','reason':'cover generation elapsed-time limit'})
 if __name__=='__main__':
