@@ -11,7 +11,7 @@ def dependency_paths():
     layout=cv.load_layout()
     paths=[cv.HERE/'layout.json',cv.HERE/'cv_template.py',pathlib.Path(__file__),pathlib.Path(layout['master_source'])]
     paths += [pathlib.Path('C:/Windows/Fonts')/f for f in layout['fonts'].values()]
-    paths += [cv.HERE/name for name in ['cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
+    paths += [cv.HERE/name for name in ['cv_pdf_compatibility.py','cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
     return paths
 
 @contextmanager

@@ -63,3 +63,6 @@ Offline validation: 64 passed, 0 failed; zero provider calls.
 
 Encoding incident: owner screenshot showed UTF-8 en-dash bytes decoded as Windows-1252 in numeric ranges. Curated source text repaired. Independent content and extracted-PDF checks reject mojibake, replacement characters and invalid controls even when source and PDF match. 71 tests passed, zero provider calls. Gateway logs prove vision analysis completed at 12:47 despite the subsequent assistant claim that it was locked.
 
+
+Workday upload recovery: original Allstate and container-only rewrite rejected with blank alert; Turnkey control accepted; Unicode CID font serialization accepted in the same session. Production serialization preserves every character origin from the completed ReportLab flow layout, font family/size and rules, with explicit Unicode maps and deterministic IDs. Existing verification remains mandatory. 72 offline tests passed; no provider call. No application submitted. Workday's internal rejection reason is unavailable; font serialization is the tested compatibility remedy.
+

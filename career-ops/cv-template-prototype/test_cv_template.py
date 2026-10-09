@@ -157,13 +157,13 @@ def test_bullet_paragraphs_have_no_extra_gap_and_align(tmp_path):
         if previous['bullet'] and current['bullet']:
             assert abs(current['baseline']-previous['baseline']-previous['max_lines']*11.0)<.001
     p=tmp_path/'alignment.pdf';cv.render(layout,{},p)
-    lines=[l for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[])]
+    lines=[l for b in fitz.open(p)[0].get_text('rawdict')['blocks'] for l in b.get('lines',[])]
     for slot in slots:
         if slot['bullet'] and slot['max_lines']>1:
             starts=[]
             for line in lines:
                 if slot['baseline']-.1<=line['spans'][0]['origin'][1]<=slot['region'][3]:
-                    spans=[s for s in line['spans'] if s['text'].strip() and s['text'].strip() not in ('\u2022','\ufffd')]
-                    if spans: starts.append(spans[0]['origin'][0])
+                    chars=[c for s in line['spans'] for c in s['chars'] if c['c'].strip() and c['c'] not in ('\u2022','\ufffd')]
+                    if chars: starts.append(chars[0]['origin'][0])
             assert len(starts)==slot['max_lines']
             assert max(starts)-min(starts)<.01

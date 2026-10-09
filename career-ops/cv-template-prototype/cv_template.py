@@ -110,11 +110,23 @@ def render(layout, content, output):
         # Paragraph first baseline is height minus its font size.
         p.drawOn(c,s['x'],layout['page'][1]-s['baseline']-h+s['font_size'])
     c.showPage(); c.save()
+    from cv_pdf_compatibility import normalize
+    normalize(output,layout['fonts'])
 def validate(layout, content, pdf):
     failures=fit(layout,content); d=fitz.open(pdf)
     if len(d)!=1 or any(abs(a-b)>.01 for a,b in zip(d[0].rect[2:],layout['page'])):
         failures.append({'slot':'page','reason':'page dimensions/count'})
-    spans=[s for b in d[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans']]
+    spans=[]
+    for block in d[0].get_text('rawdict')['blocks']:
+        for line in block.get('lines',[]):
+            for raw in line['spans']:
+                chars=raw['chars'];text=''.join(c['c'] for c in chars)
+                if text.startswith('\u2022') and text.strip()!='\u2022':
+                    spans.append(dict(raw,text='\u2022',origin=chars[0]['origin'],bbox=chars[0]['bbox']))
+                    chars=chars[1:]
+                    while chars and chars[0]['c'].isspace():chars=chars[1:]
+                    if chars:spans.append(dict(raw,text=''.join(c['c'] for c in chars),origin=chars[0]['origin'],bbox=(chars[0]['bbox'][0],raw['bbox'][1],raw['bbox'][2],raw['bbox'][3])))
+                else:spans.append(dict(raw,text=text))
     for reason in encoding_errors(d[0].get_text()): failures.append({'slot':'page','reason':reason})
     for s in layout['slots']:
         region=fitz.Rect(s['region']); found=[]
