@@ -22,7 +22,7 @@ def pre_tool(tool_name,args,**kwargs):
     if not state:return None
     if time.monotonic()>=state['deadline']:
         return {'action':'block','message':'CV generation failed: three-minute deadline reached. Stop; do not restart or substitute the master.'}
-    allowed={'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think',
+    allowed={'read_file','file_search','file_read','search_files','web_search','web_extract','vision_analyze','skill_view','skills_list','think',
              'career_cv_master','career_cv_compile','career_cv_build','tool_search','tool_describe','tool_call'}
     if tool_name not in allowed:
         return {'action':'block','message':'CV jobs use career_cv_compile with JD text. Code edits, terminal execution, parallel builders and repair loops are forbidden.'}
@@ -146,4 +146,5 @@ def register(ctx):
         logging.getLogger('gateway.platforms.base').info('Approved flow CV compiler active on %s; attachment guard=%s; source=%s',
             type(adapter).__module__,getattr(type(adapter),'_fast_cv_delivery_installed',False),cv.digest(pathlib.Path(__file__))[:12])
     ctx.register_platform_handler('discord',connected_v2)
+
 

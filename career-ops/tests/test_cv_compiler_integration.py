@@ -111,3 +111,11 @@ def test_wall_clock_watchdog_uses_native_interrupt_seam(monkeypatch):
         assert interrupted.wait(1)
         assert state['timed_out'] and worker.agent_timeout==180
     finally:g.JOB.reset(token);done.set()
+
+@pytest.mark.parametrize('attempted',[False,True])
+def test_cv_feedback_vision_is_allowed(attempted):
+    token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':attempted})
+    try:
+        assert g.pre_tool('vision_analyze',{'image_path':'feedback.png','question':'Inspect spacing'}) is None
+        assert g.pre_tool('write_file',{'path':'cv_template.py'})['action']=='block'
+    finally:g.JOB.reset(token)
