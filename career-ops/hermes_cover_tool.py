@@ -1,0 +1,55 @@
+"""Bounded native cover-letter render through the established format/fact gate."""
+import json,pathlib,subprocess,sys,uuid,hashlib,os
+HERE=pathlib.Path(__file__).resolve().parent
+ROOT=pathlib.Path(os.environ['LOCALAPPDATA'])/'hermes/runtime/career-ops/cover-compiled'
+def digest(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
+def dependencies():return [HERE/'build_cover.py',HERE/'hermes_cover_tool.py',HERE/'cv_tailor.py',HERE/'cv_golden.py',pathlib.Path('C:/Windows/Fonts/times.ttf'),pathlib.Path('C:/Windows/Fonts/timesbd.ttf')]
+def verified(path):
+    p=pathlib.Path(path)
+    if not p.resolve().is_relative_to(ROOT.resolve()):return False
+    try:
+        report=json.loads(p.with_suffix('.verification.json').read_text())
+        return report['status']=='PASS' and report['sha256']==digest(p) and report['dependencies']=={str(f):digest(f) for f in dependencies()}
+    except Exception:return False
+
+def build(spec_path):
+    import build_cover,cv_workflow,pymupdf
+    sys.path.insert(0,str(HERE/'cv-template-prototype'))
+    from cv_writing_policy import check
+    p=pathlib.Path(spec_path);s=json.loads(p.read_text());text='\n'.join(s['paragraphs'])
+    if len(s['paragraphs'])!=5 or any(not t.strip() for t in s['paragraphs']):raise ValueError('five complete paragraphs required')
+    if len(text)>2855:raise ValueError('cover letter exceeds 2855-character capacity')
+    if check(text):raise ValueError('cover wording/encoding verification failed')
+    gate=cv_workflow.fact_gate(cv_workflow.load_config(),text,label='cover',scratch=p.parent)
+    if not gate.get('available') or gate.get('exit_code')!=0 or gate.get('verdict')=='block':raise ValueError('cover letter fact gate did not pass')
+    before={str(f):digest(f) for f in dependencies()}
+    if build_cover.build(s)!=0:raise ValueError('cover letter formatting verification failed')
+    out=pathlib.Path(s['out'])
+    with pymupdf.open(out) as pdf:
+        extracted=' '.join(pdf[0].get_text().split())
+        if pdf.page_count!=1 or any(' '.join(t.split()) not in extracted for t in [s['heading'],s['salutation']]+s['paragraphs']):raise ValueError('cover letter text extraction mismatch')
+    if before!={str(f):digest(f) for f in dependencies()}:raise ValueError('immutable cover dependency changed')
+    out.with_suffix('.verification.json').write_text(json.dumps({'status':'PASS','sha256':digest(out),'dependencies':before}))
+
+def cover_tool(args,**kwargs):
+    from hermes_cv_compiler_guard import JOB,activate_job
+    import time
+    state=JOB.get()
+    if state is None:return json.dumps({'status':'FAIL','reason':'native application turn required'})
+    activate_job(state)
+    if state.get('cover_attempted'):return json.dumps({'status':'FAIL','reason':'cover already attempted; no repair loop'})
+    state['cover_attempted']=True
+    workspace=ROOT/uuid.uuid4().hex;workspace.mkdir(parents=True)
+    out=workspace/'Mukund_Cover_Letter.pdf'
+    spec={'heading':'Application for '+str(args['role']),'salutation':'Dear '+str(args['company'])+' Recruitment Team,','paragraphs':args['paragraphs'],'out':str(out),'qa':str(workspace/'preview.png')}
+    path=workspace/'content.json';path.write_text(json.dumps(spec,ensure_ascii=False),encoding='utf-8')
+    try:
+        remaining=min(45,state['deadline']-time.monotonic())
+        if remaining<=0:raise ValueError('application deadline reached')
+        run=subprocess.run([sys.executable,str(HERE/'hermes_cover_tool.py'),str(path)],capture_output=True,text=True,timeout=remaining)
+        if run.returncode or not verified(out):return json.dumps({'status':'FAIL','reason':'cover content/fact/format verification failed','instruction':'No unverified PDF may be attached. No shell repair.'})
+        return json.dumps({'status':'PASS','verified_pdf':str(out),'verification_report':str(out.with_suffix('.verification.json'))})
+    except subprocess.TimeoutExpired:return json.dumps({'status':'FAIL','reason':'cover generation elapsed-time limit'})
+if __name__=='__main__':
+    try:build(sys.argv[1])
+    except Exception:print('Cover verification failed');raise SystemExit(1)

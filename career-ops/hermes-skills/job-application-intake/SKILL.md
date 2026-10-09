@@ -236,3 +236,7 @@ The compiler enforces narrow wording checks before delivery and protects the pol
 as an immutable dependency. Do not change layout, invent facts, or enter a repair
 loop to satisfy these checks. The local reference avoids a web dependency in each
 three-minute CV job; future source updates require a reviewed policy revision.
+
+
+## Native cover letter (2026-10-09)
+Unless Mukund explicitly requests CV only, return BOTH documents for an application package. After `career_cv_master`, reason from verified owner facts and the JD, then call `career_cv_compile` for the CV and `career_cover_compile(company, role, paragraphs)` for the letter. Provide exactly five complete, evidence-grounded paragraphs totalling at most 2855 characters. Avoid invented facts and promotional/AI boilerplate. The native cover tool runs the existing fact gate and fixed one-page renderer, verifies text extraction and dependency hashes, and returns a verified PDF. No shell command, renderer unlock or code edit is needed. On FAIL, do not attach intermediate documents or enter a repair loop. One cover invocation per request, at most 45 seconds within the three-minute application budget.

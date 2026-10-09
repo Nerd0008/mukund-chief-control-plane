@@ -169,7 +169,8 @@ def test_unrelated_turn_keeps_normal_tools_after_cv_history():
     g.install_runtime(runtime,Turn,Media)
     result=asyncio.run(Turn()._run_agent('Fix the CV compiler guard','',
                          [{'role':'user','content':'Build my CV'}]))
-    assert result=={'limit':150,'patch':None,'context':''}
+    assert result['limit']==150 and result['patch'] is None
+    assert 'career_cover_compile' in result['context']
     result=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
     assert result['limit']==4 and result['patch']['action']=='block'
 
