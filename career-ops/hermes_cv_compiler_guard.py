@@ -14,9 +14,32 @@ JOB=ContextVar('career_cv_compiler_job',default=None)
 AGENT_TURNS=4
 
 def cv_request(message,history=()):
+    """Scope application restrictions to this request, never historical keywords.
+
+    Maintenance is an engineering task even when it mentions CVs. History
+    supplies context only for an otherwise bare JD/link, not arbitrary work.
+    """
     import re
-    return any(re.search(r'\bCV\b|\bJD\b|job description|curriculum vitae|tailor.{0,30}resume|https?://\S*(?:careers|jobs\.|/job/)',str(t),re.I) for t in
-        [message]+[m.get('content','') for m in history[-4:] if isinstance(m,dict)])
+    text=str(message)
+    cv_words=r'\bCV\b|\bresume\b|curriculum vitae'
+    maintenance=r'\b(?:guard|compiler|renderer|template|plugin|runtime|regex|code|test|tests|bug|blocking|lock|reconciliation)\b'
+    engineering=r'\b(?:fix|debug|audit|investigate|repair|edit|modify|update|implement|reconcile|stop|disable|unblock)\b'
+    if re.search(maintenance,text,re.I) and re.search(engineering,text,re.I):
+        return False
+    production=r'\b(?:tailor|generate|build|rebuild|compile|write|create|customize|customise|produce)\b'
+    if re.search(cv_words,text,re.I) and re.search(production,text,re.I):
+        return True
+    if re.search(r'\b(?:here is|here.s|use|tailor to)\b.{0,40}(?:\bJD\b|job description)',text,re.I):
+        return True
+    # A job link alone is not a CV request: it may be discovery or eligibility.
+    if re.fullmatch(r'\s*https?://\S+\s*',text):
+        last_user=next((m.get('content','') for m in reversed(history)
+                        if isinstance(m,dict) and m.get('role')=='user'), '')
+        return bool(re.search(cv_words,str(last_user),re.I)
+                    and re.search(production,str(last_user),re.I)
+                    and not re.search(maintenance,str(last_user),re.I))
+    return False
+
 
 def pre_tool(tool_name,args,**kwargs):
     state=JOB.get()

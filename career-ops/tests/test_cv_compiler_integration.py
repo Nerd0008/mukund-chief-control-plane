@@ -67,7 +67,7 @@ def test_expired_job_no_tools():
     try:assert g.pre_tool('career_cv_compile',{})['action']=='block'
     finally:g.JOB.reset(token)
 
-@pytest.mark.parametrize('message',['Here is the JD','Tailor to this job description','https://www.allstate.jobs/job/23947981/graduate'])
+@pytest.mark.parametrize('message',['Here is the JD','Tailor to this job description'])
 def test_jd_only_intake_gets_cv_guards(message):
     assert g.cv_request(message)
 
@@ -136,3 +136,39 @@ def test_export_short_name_and_corruption(tmp_path,monkeypatch):
     assert g.verified_attachment(path)
     pathlib.Path(path).write_bytes(b'corrupt')
     assert not g.verified_attachment(path)
+
+
+@pytest.mark.parametrize('message',[
+    'Fix the Greenhouse regex', 'Update the tracker', 'Restart Hermes',
+    'Fix the CV compiler guard blocking unrelated tasks',
+    'Debug cv_template.py', 'Why did my CV fail?', 'Check this job eligibility',
+])
+def test_history_cannot_lock_unrelated_or_maintenance_request(message):
+    history=[{'role':'user','content':'Tailor my CV to this JD'},
+             {'role':'assistant','content':'Use career_cv_compile'}]
+    assert not g.cv_request(message,history)
+
+
+def test_bare_link_requires_latest_user_cv_intent():
+    link='https://www.allstate.jobs/job/23947981/graduate'
+    assert not g.cv_request(link)
+    assert g.cv_request(link,[{'role':'user','content':'Tailor my CV'}])
+    assert not g.cv_request(link,[{'role':'user','content':'Tailor my CV'},
+                                 {'role':'user','content':'Check eligibility'}])
+
+
+def test_unrelated_turn_keeps_normal_tools_after_cv_history():
+    runtime=types.SimpleNamespace(_current_max_iterations=lambda:150)
+    class Turn:
+        async def _run_agent(self,message,context,history,*a,**kw):
+            return {'limit':runtime._current_max_iterations(),
+                    'patch':g.pre_tool('patch',{'path':'unrelated.py'}),
+                    'context':context}
+    class Media:
+        async def send_document(self,*a,**kw):return True
+    g.install_runtime(runtime,Turn,Media)
+    result=asyncio.run(Turn()._run_agent('Fix the CV compiler guard','',
+                         [{'role':'user','content':'Build my CV'}]))
+    assert result=={'limit':150,'patch':None,'context':''}
+    result=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
+    assert result['limit']==4 and result['patch']['action']=='block'
