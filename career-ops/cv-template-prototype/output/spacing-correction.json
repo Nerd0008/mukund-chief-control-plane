@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-09",
+  "body_leading_pt": 11,
+  "bullet_paragraph_extra_gap_pt": 0,
+  "block_extra_gap_pt": 2.5,
+  "section_heading_font_pt": 11,
+  "BCA_style": "upright bold",
+  "tests_passed": 38,
+  "tests_failed": 0,
+  "model_calls": 0,
+  "master_modified": false,
+  "live_hermes_deployed": false,
+  "visual_review": "Full-page preview inspected",
+  "generation_seconds": 0.859
+}

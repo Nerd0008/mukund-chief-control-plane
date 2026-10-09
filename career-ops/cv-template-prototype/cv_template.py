@@ -39,8 +39,10 @@ def paragraph(slot, replacement=None):
     style=ParagraphStyle(slot['id'],fontName=FONT_NAMES['normal'],fontSize=slot['font_size'],leading=slot['leading'],
                          leftIndent=6.75 if slot['bullet'] else 0,firstLineIndent=0,
                          bulletIndent=0,bulletFontName=FONT_NAMES['normal'],bulletFontSize=slot['font_size'],
-                         splitLongWords=False,alignment=4 if slot['section']=='Professional Summary' else 0)
-    return Paragraph(markup,style,bulletText='\u2022' if slot['bullet'] else None)
+                         splitLongWords=False,spaceShrinkage=0,alignment=4 if slot['section']=='Professional Summary' else 0)
+    # Draw bullets separately: ReportLab otherwise adds a first-line-only
+    # bullet padding that makes continuation text start at a different x.
+    return Paragraph(markup,style)
 def expected_text(slot, replacement=None):
     if replacement is not None: return ('\u2022 ' if slot['bullet'] else '')+replacement
     return slot['text']
@@ -100,6 +102,9 @@ def render(layout, content, output):
         c.setLineWidth(rule['width']); c.line(rule['x1'],layout['page'][1]-rule['y'],rule['x2'],layout['page'][1]-rule['y'])
     for s in layout['slots']:
         p=paragraph(s,content.get(s['id'],{}).get('text')); _,h=p.wrap(s['width'],1000)
+        if s['bullet']:
+            c.setFont(FONT_NAMES['normal'],s['font_size'])
+            c.drawString(s['x'],layout['page'][1]-s['baseline'],'\u2022')
         # Paragraph first baseline is height minus its font size.
         p.drawOn(c,s['x'],layout['page'][1]-s['baseline']-h+s['font_size'])
     c.showPage(); c.save()

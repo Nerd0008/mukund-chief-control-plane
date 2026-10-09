@@ -140,7 +140,7 @@ def test_all_section_headings_exactly_eleven_points(tmp_path):
 
 def test_consistent_body_spacing_and_upright_bca(tmp_path):
     layout=cv.load_layout()
-    assert all(s['leading']==11.5 for s in layout['slots'])
+    assert all(s['leading']==11.0 for s in layout['slots'])
     p=tmp_path/'spacing.pdf';cv.render(layout,{},p)
     spans=[s for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans']]
     bca=next(s for s in spans if 'Bachelor of Computer Applications' in s['text'])
@@ -149,4 +149,21 @@ def test_consistent_body_spacing_and_upright_bca(tmp_path):
         if slot['max_lines']>1:
             origins=sorted(set(round(s['origin'][1],3) for s in spans if slot['baseline']-.1<=s['origin'][1]<=slot['region'][3] and s['origin'][0]>=slot['x']-.1))
             assert len(origins)==slot['max_lines']
-            assert all(abs(b-a-11.5)<.01 for a,b in zip(origins,origins[1:]))
+            assert all(abs(b-a-11.0)<.01 for a,b in zip(origins,origins[1:]))
+
+def test_bullet_paragraphs_have_no_extra_gap_and_align(tmp_path):
+    layout=cv.load_layout();slots=layout['slots']
+    for previous,current in zip(slots,slots[1:]):
+        if previous['bullet'] and current['bullet']:
+            assert abs(current['baseline']-previous['baseline']-previous['max_lines']*11.0)<.001
+    p=tmp_path/'alignment.pdf';cv.render(layout,{},p)
+    lines=[l for b in fitz.open(p)[0].get_text('dict')['blocks'] for l in b.get('lines',[])]
+    for slot in slots:
+        if slot['bullet'] and slot['max_lines']>1:
+            starts=[]
+            for line in lines:
+                if slot['baseline']-.1<=line['spans'][0]['origin'][1]<=slot['region'][3]:
+                    spans=[s for s in line['spans'] if s['text'].strip() and s['text'].strip() not in ('\u2022','\ufffd')]
+                    if spans: starts.append(spans[0]['origin'][0])
+            assert len(starts)==slot['max_lines']
+            assert max(starts)-min(starts)<.01
