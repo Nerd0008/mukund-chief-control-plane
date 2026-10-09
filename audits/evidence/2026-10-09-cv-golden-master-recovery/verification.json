@@ -1,0 +1,80 @@
+{
+  "master_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\CV_FORMAT_MASTER.pdf",
+  "master_sha256": "01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b",
+  "owner_upload_sha256": "01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b",
+  "master_matches_owner_upload": true,
+  "manifest_sha256": "3b8d9895b6122c9445b31066530cbbfa71e1b26c6461e101fc01bc8a4a5656ec",
+  "original_local_dirty_renderer_sha256": "4f271148f019b7c2853c7cca207b75810e696deb2c47d790decfe35b1b8a3bf9",
+  "failed_session": "20261003_010551_5b27acbc",
+  "renderer_patch_message_ids": [
+    24803,
+    24805,
+    24807,
+    24809,
+    24811,
+    24813,
+    24883,
+    24885
+  ],
+  "manual_corruption_message_id": 24877,
+  "manual_corruption_timestamp_utc": "2026-10-08T23:52:09Z",
+  "max_content_fit_attempts_per_span": 3,
+  "max_renders_per_job": 1,
+  "max_native_cv_turns": 8,
+  "provider_calls_by_recovery": 0,
+  "gateway_pid": 70840,
+  "live_delivery_binding": "2026-10-09 01:18:39,718 INFO hermes_cv_guard: CV golden delivery guard active on actual Discord adapter hermes_plugins.platforms__discord.adapter",
+  "verification": {
+    "status": "PASS",
+    "problems": [],
+    "outside_region_changed_pixels": 0,
+    "verified_spans": 109,
+    "raster_dpi": 144,
+    "pixel_channel_tolerance": 0,
+    "edge_tolerance_pixels": 1,
+    "immutable_before": {
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\CV_FORMAT_MASTER.pdf": "01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\cv_master_manifest.json": "3b8d9895b6122c9445b31066530cbbfa71e1b26c6461e101fc01bc8a4a5656ec",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\cv_tailor.py": "173419d6e70b6d3b8af1c96cd3d794bc4d8eb7351e170910db4354a9835df6a8",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\cv_golden.py": "d4326bff7505a18d5d8f918520825653944bef287db7a4003e6e4bdb94770c7c",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\hermes_cv_guard.py": "57cd6a77fc1cd348c059e84964be7e9ebb0b19322af13227b5ae24ebff25b95e",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\format_spec.json": "28afee7bd7a2d11e2e144593b60344d1a6e6ac4625151244761aa0a84afd8326"
+    },
+    "immutable_after": {
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\CV_FORMAT_MASTER.pdf": "01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\cv_master_manifest.json": "3b8d9895b6122c9445b31066530cbbfa71e1b26c6461e101fc01bc8a4a5656ec",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\cv_tailor.py": "173419d6e70b6d3b8af1c96cd3d794bc4d8eb7351e170910db4354a9835df6a8",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\cv_golden.py": "d4326bff7505a18d5d8f918520825653944bef287db7a4003e6e4bdb94770c7c",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\hermes_cv_guard.py": "57cd6a77fc1cd348c059e84964be7e9ebb0b19322af13227b5ae24ebff25b95e",
+      "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\master\\format_spec.json": "28afee7bd7a2d11e2e144593b60344d1a6e6ac4625151244761aa0a84afd8326"
+    },
+    "master_sha256": "01643b073e63cce3d8d71b3cd0ebbc2d521bd3b74cb438de2da06e6e8a23039b",
+    "manifest_sha256": "3b8d9895b6122c9445b31066530cbbfa71e1b26c6461e101fc01bc8a4a5656ec",
+    "content_fit_attempts": {
+      "p0-s1": 1,
+      "p0-s2": 1,
+      "p0-s3": 1
+    },
+    "render_attempts": 1,
+    "approved_edits": [
+      {
+        "span_id": "p0-s1",
+        "replace": "MSc Information Security graduate combining software development and cybersecurity knowledge with practical IT systems support,"
+      },
+      {
+        "span_id": "p0-s2",
+        "replace": "Microsoft Azure, SQL and Python. Experienced in system testing and API integration, with analytical problem solving for secure,"
+      },
+      {
+        "span_id": "p0-s3",
+        "replace": "business-aligned applications and reliable IT systems informed by ISO 27001."
+      }
+    ],
+    "output_sha256": "e397cc2be5fd374b36da2002f899349f9a32da9faca0862abc68416e1f306feb"
+  },
+  "regression": {
+    "focused_cv": 22,
+    "whole_career_ops": 801,
+    "failed": 0
+  }
+}
