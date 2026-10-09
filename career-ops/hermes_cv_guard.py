@@ -65,7 +65,8 @@ def needs_gate(path):
  except Exception:return True
 
 def install_runtime(gateway_module,turn_class,media_class):
- if getattr(turn_class,'_golden_cv_guard_installed',False):return
+ if getattr(turn_class,'_golden_cv_guard_installed',False):
+  install_delivery(media_class);return
  old_limit=gateway_module._current_max_iterations
  def bounded():return min(old_limit(),CV_AGENT_TURNS) if CV_ACTIVE.get() else old_limit()
  gateway_module._current_max_iterations=bounded
@@ -76,6 +77,11 @@ def install_runtime(gateway_module,turn_class,media_class):
   try:return await old_run(self,message,context_prompt,history,*args,**kwargs)
   finally:CV_ACTIVE.reset(token);CV_WORKSPACE.reset(workspace_token)
  turn_class._run_agent=run
+ turn_class._golden_cv_guard_installed=True
+ install_delivery(media_class)
+
+def install_delivery(media_class):
+ if getattr(media_class,'_golden_cv_delivery_installed',False):return
  old_send=media_class.send_document
  @functools.wraps(old_send)
  async def send(self,chat_id,file_path,*args,**kwargs):
@@ -86,7 +92,7 @@ def install_runtime(gateway_module,turn_class,media_class):
    return SendResult(success=False,error=message)
   return await old_send(self,chat_id,file_path,*args,**kwargs)
  media_class.send_document=send
- turn_class._golden_cv_guard_installed=True
+ media_class._golden_cv_delivery_installed=True
 
 def register(ctx):
  import gateway.run as runtime
@@ -94,3 +100,10 @@ def register(ctx):
  from plugins.platforms.discord.adapter_media import DiscordMediaMixin
  install_runtime(runtime,GatewayTurnMixin,DiscordMediaMixin)
  ctx.register_hook('pre_tool_call',pre_tool)
+ # Hermes lazily loads Discord under hermes_plugins.*, a different module identity.
+ # Connect/reload callback must guard the actual live adapter, not only a static import.
+ def connected(native,adapter):
+  install_delivery(type(adapter))
+  import logging
+  logging.getLogger(__name__).info('CV golden delivery guard active on actual Discord adapter %s',type(adapter).__module__)
+ ctx.register_platform_handler('discord',connected)

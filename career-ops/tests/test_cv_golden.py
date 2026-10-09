@@ -150,3 +150,18 @@ def test_renaming_a_cv_does_not_bypass_attachment_guard(setup):
  import shutil
  pdf=setup[3]/'innocent.pdf';shutil.copyfile(g.MASTER,pdf)
  assert guard.needs_gate(pdf)
+
+
+def test_lazy_platform_module_alias_also_gets_delivery_guard(setup,monkeypatch):
+ fake=types.ModuleType('gateway.platforms.base');fake.SendResult=lambda **kw:types.SimpleNamespace(**kw);monkeypatch.setitem(sys.modules,'gateway.platforms.base',fake)
+ runtime=types.SimpleNamespace(_current_max_iterations=lambda:150)
+ class Turn:
+  async def _run_agent(self,*a,**kw):pass
+ class StaticMedia:
+  async def send_document(self,*a,**kw):return 'static'
+ class ActualLazyMedia:
+  async def send(self,**kw):pass
+  async def send_document(self,*a,**kw):raise AssertionError('unverified file attached')
+ guard.install_runtime(runtime,Turn,StaticMedia)
+ guard.install_runtime(runtime,Turn,ActualLazyMedia)
+ assert asyncio.run(ActualLazyMedia().send_document('chief',setup[3]/'bad_CV.pdf')).success is False
