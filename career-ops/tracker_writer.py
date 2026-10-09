@@ -220,6 +220,30 @@ class Tracker:
             snap[r] = {c: self.ws[f"{c}{r}"].value for c in cols}
         return snap
 
+    def find_passed_rows(self) -> list[int]:
+        """Return row numbers where the status column contains 'passed' (case-insensitive).
+
+        Owner marks dead roles as 'passed' in the Status column. These rows are
+        deleted on the next write so the tracker stays clean.
+        """
+        status_cols = self.cfg.get("status_columns", {})
+        if not status_cols:
+            return []
+        last = self.last_data_row()
+        passed_rows = []
+        for r in range(self.first_data_row, last + 1):
+            for key, col in status_cols.items():
+                val = self.ws[f"{col}{r}"].value
+                if val and str(val).strip().lower() == "passed":
+                    passed_rows.append(r)
+                    break
+        return passed_rows
+
+    def delete_rows(self, rows: list[int]) -> None:
+        """Delete rows from the worksheet (bottom-up to preserve row numbers)."""
+        for r in sorted(rows, reverse=True):
+            self.ws.delete_rows(r)
+
     def ids(self) -> list:
         id_cfg = self.cfg.get("id")
         if not id_cfg:
@@ -520,6 +544,17 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
     by_url, by_pair = tr.existing_keys()
     cross = build_cross_month_index(profile, cfg, extra_archive_dirs)
 
+    # Owner marks dead roles as "passed" in the Status column. Delete them
+    # before processing new records so the tracker stays clean.
+    passed_rows = tr.find_passed_rows()
+    if passed_rows:
+        tr.delete_rows(passed_rows)
+        # Re-read keys after deletion so dedupe sees the cleaned state
+        existing_ids = tr.ids()
+        by_url, by_pair = tr.existing_keys()
+        pre_owned = tr.owned_snapshot()
+        pre_rows = tr.last_data_row() - cfg["first_data_row"] + 1
+
     outcomes = []
     plan_rows = []
     next_seq = (_next_sequential_id(existing_ids, cfg["id"]["prefix"], cfg["id"].get("start", 1))
@@ -610,6 +645,7 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
             "duplicates": sum(1 for o in outcomes if o["decision"].startswith("duplicate")),
             "rejected": sum(1 for o in outcomes if o["decision"] == "rejected"),
             "refreshed": sum(1 for o in outcomes if o["decision"] == "refreshed"),
+            "passed_deleted": len(passed_rows),
         },
         "outcomes": outcomes,
         "pre_data_rows": pre_rows,
