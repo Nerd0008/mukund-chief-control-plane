@@ -104,3 +104,13 @@ deployment occurred. Tests run without real provider calls.
 The reproduction was accepted. Qualify the content contract against varied
 JDs and the independent delivery gate before deliberately replacing Hermes
 CV routing. Do not call this production-ready or deploy it on tests alone.
+## Current runtime status — 2026-10-09
+
+The owner approved the final spacing/typography and authorized integration. The existing Hermes
+CV plugin now registers `career_cv_compile(jd, job_id)` through `hermes_cv_compiler_guard`.
+The production release/limitations are documented in `../CV_COMPILER_RELEASE.md` and
+`output/hermes-deployment-acceptance.json`. Historical prototype flags/evidence below describe
+earlier checkpoints, not the current gateway state. Final focused regression: 86 passed.
+Eight offline role families pass; live qualification is partial (five passed, three provider
+timeouts, eight requests, no retries). Timeout/error never authorizes delivering an intermediate
+PDF or substituting the master. Do not interpret deployment as a guarantee of provider availability.

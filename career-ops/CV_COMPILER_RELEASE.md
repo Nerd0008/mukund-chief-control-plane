@@ -1,4 +1,4 @@
-# Approved CV flow compiler — 2026-10-09
+# Approved CV flow compiler â€” 2026-10-09
 
 Owner visual acceptance: "Perfect", followed by authorization to finish Hermes integration.
 Source PDF remains unchanged: b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58.
@@ -24,13 +24,24 @@ hashes and a fresh independent structural/text/font/spacing/pixel verification. 
 Discord adapter is guarded via the native platform handler. Renaming an unverified CV does not bypass
 the content/name attachment check. Failed intermediate PDFs and master substitution are forbidden.
 
-Validation before deployment: 54 focused compiler/integration tests passed. Eight role-family offline
-keyword-selection tests passed, each under one second, without modifying the format engine between JDs.
+Final validation: 86 focused compiler/integration/legacy-safety tests passed (16 historical Pillow
+deprecation warnings, zero failures). Eight role-family offline
+keyword-selection tests passed, each under 1.4 seconds, without modifying the format engine between JDs.
 These are layout/safety tests, not live LLM quality qualification. The previous Allstate native reasoning
-test passed in 22.391 seconds. In the newly owner-approved live role-family run, the first SOC test timed
-out at 93.219 seconds, with one Nous/LongCat request, zero renders and no PDF delivered. The harness stopped;
-the remaining seven live role-family calls were not sent. No blind retry. See private/local live run paths
-in the acceptance JSON. This provider availability failure is not represented as a format-engine PASS.
+test passed in 22.391 seconds. The newly owner-approved live role-family tests made eight requests total,
+one per distinct JD, no shortening and no retries. GRC, risk/audit, IT support, graduate digital technology,
+and security engineering passed in 60.656â€“83.703 seconds. SOC, consulting and general cyber graduate timed
+out in 92.032â€“93.219 seconds, with zero renders and no PDF delivered. Failed cases were not retried.
+These provider availability failures are not represented as format-engine PASS results.
 
-Dependency installed in Hermes Python: reportlab==4.4.9. Runtime deployment/restart and registration
-evidence are recorded separately after verification. No main merge and no Discord test message initiated.
+Dependency installed in Hermes Python: reportlab==4.4.9. Plugin/skill backups are private under
+`%LOCALAPPDATA%/hermes/runtime/career-ops/cv-compiler-backups/`. Initial gateway restart loaded the
+compiler. A supported plugin reload did not confirm live adapter rewiring, so a final clean restart
+proved the actual lazy Discord adapter guard active, source prefix `0dad524f6b18`. Gateway PID 26288,
+Discord connected. The registered native tool passed an offline invocation in 1.141 seconds; no
+provider call or message in that check. A real Discord CV generation/delivery has not been tested.
+No main merge. No Discord test message initiated, no application submission, tracker write or outreach.
+
+Current status: deployed and locally verified; live provider acceptance PARTIAL (5/8). Provider outages
+still cause a bounded failure; this release does not promise every CV request succeeds. The format engine
+is not patched per JD. JD text, CV requests and employer job URLs all enter the bounded CV guard.

@@ -24,8 +24,13 @@ def offline_selection(request):
 
 def main():
     offline='--offline' in sys.argv
-    results=[]; before=cv.digest(HERE/'cv_template.py')
+    start=int(sys.argv[sys.argv.index('--start')+1]) if '--start' in sys.argv else 0
+    evidence=HERE/'output'/('role-family-offline-acceptance.json' if offline else 'role-family-live-acceptance.json')
+    results=json.loads(evidence.read_text()) if start and evidence.exists() else []
+    before=cv.digest(HERE/'cv_template.py')
     for n,(family,source,fixture) in enumerate(CASES):
+        if n<start:continue
+        if any(r['role_family']==family for r in results):raise ValueError('This role was already attempted; no blind retry')
         jd=(REPO/source).read_bytes().decode('utf-8-sig',errors='replace') if source else fixture
         folder=HERE/'case-output'/('live-'+str(n)+'-'+str(time.time_ns()))
         r=compile_prototype(jd,f'role-family-{n}',folder,offline_selection if offline else generate)
@@ -34,7 +39,8 @@ def main():
             jd_sha256=hashlib.sha256(jd.encode()).hexdigest(),workspace=str(folder),
             mode='OFFLINE_KEYWORD_SELECTION_NO_PROVIDER' if offline else 'NATIVE_PROVIDER',
             format_engine_unchanged=cv.digest(HERE/'cv_template.py')==before)
-        (HERE/'output'/('role-family-offline-acceptance.json' if offline else 'role-family-live-acceptance.json')).write_text(json.dumps(results,indent=2),encoding='utf-8')
+        evidence.write_text(json.dumps(results,indent=2),encoding='utf-8')
         print(json.dumps(results[-1]),flush=True)
-        if r['status']!='PASS': break  # Diagnose, never blindly retry.
+        if r['status']!='PASS' and '--complete-distinct-cases' not in sys.argv: break
+        # Complete mode moves to a DIFFERENT JD; it never retries an attempted case.
 if __name__=='__main__': main()
