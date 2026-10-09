@@ -4,7 +4,7 @@ HERE=pathlib.Path(__file__).parent
 l=json.loads((HERE/'layout.json').read_text(encoding='utf-8'))
 slots={s['id']:s for s in l['slots']}
 texts=[
-('s04','MSc Information Security graduate and BCA graduate with practical experience building Python tools and a JavaScript browser extension. Bring hands-on testing, API integration and Windows troubleshooting experience, alongside user support and technical documentation.',['s13','s16','s31','s35','s36','s40','s41','s21','s11']),
+('s04','MSc Information Security graduate holding CompTIA Security+ and ISC2 Certified in Cybersecurity (CC). Practical experience building Python tools and a JavaScript browser extension, with testing, API integration and Windows troubleshooting, alongside user support and technical documentation.',['s13','s45','s46','s31','s35','s36','s40','s41','s21','s11']),
 ('s06','Programming & Scripting: Python, Java, JavaScript, PowerShell, SQL',['s08','s18','s30']),
 ('s07','Web & APIs: JavaScript, HTML, CSS, API integration, Manifest V3',['s08','s30']),
 ('s08','Systems & Cloud: Windows, Microsoft 365, Azure, endpoint configuration',['s07']),

@@ -8,6 +8,12 @@ and ALLSTATE_ACCEPTANCE.md for the reasoning-enabled native Allstate sample:
 The model chooses source-grounded wording variants; arbitrary fact invention
 is still rejected. This is a prototype, not a live route replacement.
 
+Permanent owner content rule: every tailored professional summary must promote
+MSc Information Security, CompTIA Security+ and ISC2 Certified in Cybersecurity
+(CC). This is enforced locally, not merely requested in the model prompt.
+The Allstate summary was updated locally with these credentials foregrounded;
+no additional provider call was necessary. The approved layout remains intact.
+
 ## Corrected source
 
 The owner superseded the previous CV_FORMAT_MASTER.pdf with

@@ -122,3 +122,11 @@ def test_skill_label_cannot_disappear():
 def test_profile_fragment_rejected():
     l=cv.load_layout()
     assert any(f['reason']=='incomplete sentence' for f in cv.content_check(l,{'s04':{'text':'MSc Information Security graduate','sources':['s04']}}))
+
+@pytest.mark.parametrize('credential',['MSc Information Security','CompTIA Security+','ISC2 Certified in Cybersecurity (CC)'])
+def test_summary_credentials_cannot_be_omitted(credential):
+    from cv_content_adapter import resolve_plan
+    bank=json.loads((cv.HERE/'fact_bank.json').read_text(encoding='utf-8'))
+    content=resolve_plan({'selections':{key:'engineering' for key in bank['slots']}})
+    content['s04']['text']=content['s04']['text'].replace(credential,'')
+    assert any(f['reason']=='mandatory summary credential missing' for f in cv.content_check(cv.load_layout(),content))

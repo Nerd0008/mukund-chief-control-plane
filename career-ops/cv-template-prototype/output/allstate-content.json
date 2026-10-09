@@ -1,9 +1,10 @@
 {
   "s04": {
-    "text": "MSc Information Security graduate and BCA graduate with practical experience building Python tools and a JavaScript browser extension. Bring hands-on testing, API integration and Windows troubleshooting experience, alongside user support and technical documentation.",
+    "text": "MSc Information Security graduate holding CompTIA Security+ and ISC2 Certified in Cybersecurity (CC). Practical experience building Python tools and a JavaScript browser extension, with testing, API integration and Windows troubleshooting, alongside user support and technical documentation.",
     "sources": [
       "s13",
-      "s16",
+      "s45",
+      "s46",
       "s31",
       "s35",
       "s36",

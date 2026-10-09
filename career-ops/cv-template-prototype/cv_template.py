@@ -46,6 +46,14 @@ def expected_text(slot, replacement=None):
     return slot['text']
 def content_check(layout, content):
     failures=[]; slots={s['id']:s for s in layout['slots']}
+    if content:
+        summary=next(s for s in layout['slots'] if s['section']=='Professional Summary' and s['variable'])
+        text=norm(content.get(summary['id'],{}).get('text',summary['text'])).lower()
+        checks={'MSc Information Security':'msc information security' in text,
+                'CompTIA Security+':'comptia security+' in text,
+                'ISC2 CC':('isc2 cc' in text or 'isc2 certified in cybersecurity (cc)' in text)}
+        for credential,present in checks.items():
+            if not present:failures.append({'slot':summary['id'],'reason':'mandatory summary credential missing','credential':credential})
     for key,item in content.items():
         s=slots.get(key)
         if not s or not s['variable']: failures.append({'slot':key,'reason':'immutable/unknown slot'}); continue
