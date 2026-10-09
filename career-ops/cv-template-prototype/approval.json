@@ -15,8 +15,9 @@
   },
   "final_visual_approval": {
     "evidence": "Mukund: Perfect; then Yeah go ahead",
-    "layout_sha256": "161046ceca3cad7c0c0e587ad54e5d75a541a2071620969c750cc8f21b12b38c",
-    "reproduction_sha256": "b581521281df5293e974852fc0248f66122dc3db965c3e17c12bc63e1c807a4c",
-    "date": "2026-10-09"
+    "layout_sha256": "0d9ac8694d6da3956cb2ecc4632549563db84c216130421e79ab3fd77aab797d",
+    "reproduction_sha256": "6f6723daa7d34f5774912f3140d17421729f04bd3f6ce292374cbd422c66f83f",
+    "date": "2026-10-09",
+    "owner_text_revision": "Mukund requested Co-op -> The Co-operative Group; all other pixels unchanged"
   }
 }

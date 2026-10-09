@@ -2,6 +2,9 @@
 def standardize(layout):
     slots = layout['slots']
     by_id = {s['id']: s for s in slots}
+    employer=by_id['s24']
+    employer['text']=employer['text'].replace('Co-op |','The Co-operative Group |')
+    for run in employer['runs']:run['text']=run['text'].replace('Co-op |','The Co-operative Group |')
     layout['version'] = 4
     layout['body_leading'] = 11.0
     layout['spacing_policy'] = '11 pt body leading; no extra bullet paragraph gap; 2.5 pt block gap; upright bold degree titles'
@@ -29,3 +32,4 @@ def standardize(layout):
     for rule, heading in zip(layout['rules'],(s for s in slots if s['heading'])):
         rule['y']=heading['baseline']+5
     return layout
+
