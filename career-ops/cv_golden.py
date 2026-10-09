@@ -198,7 +198,11 @@ def delivery_allowed(pdf):
  pdf=Path(pdf).resolve();report=pdf.with_suffix('.verification.json')
  try:
   if not pdf.is_relative_to(OUTPUT_ROOT.resolve()):return False
-  r=json.loads(report.read_text());return r['status']=='PASS' and r['output_sha256']==sha(pdf) and r['master_sha256']==sha(MASTER) and r['manifest_sha256']==sha(MANIFEST) and all(sha(Path(p))==v for p,v in r['immutable_after'].items())
+  r=json.loads(report.read_text())
+  if not (r['status']=='PASS' and r['output_sha256']==sha(pdf) and r['master_sha256']==sha(MASTER) and r['manifest_sha256']==sha(MANIFEST) and all(sha(Path(p))==v for p,v in r['immutable_after'].items())):return False
+  manifest=json.loads(MANIFEST.read_text())
+  with pymupdf.open(MASTER) as doc:plan=prepare(doc,manifest,{'edits':r['approved_edits']})
+  return verify(MASTER,pdf,manifest,plan)['status']=='PASS'
  except (OSError,KeyError,ValueError):return False
 
 def generate(master,manifest_path,spec,out,rewrite=None):
@@ -212,7 +216,7 @@ def generate(master,manifest_path,spec,out,rewrite=None):
    if sha(master)!=manifest['master_sha256']:raise ValueError('master differs from versioned manifest')
    with pymupdf.open(master) as doc:
     plan=prepare(doc,manifest,spec,rewrite);render_once(doc,plan,str(temp))
-   report=verify(master,temp,manifest,plan);report.update(immutable_before=before,immutable_after={str(p):sha(p) for p in protected},master_sha256=sha(master),manifest_sha256=sha(manifest_path),content_fit_attempts={p['span']['id']:p['attempts'] for p in plan},render_attempts=1)
+   report=verify(master,temp,manifest,plan);report.update(immutable_before=before,immutable_after={str(p):sha(p) for p in protected},master_sha256=sha(master),manifest_sha256=sha(manifest_path),content_fit_attempts={p['span']['id']:p['attempts'] for p in plan},render_attempts=1,approved_edits=[{'span_id':p['span']['id'],'replace':p['replace']} for p in plan])
    if report['status']!='PASS':raise ValueError('; '.join(report['problems']))
   os.replace(temp,out);report['output_sha256']=sha(out)
  except Exception as e:
