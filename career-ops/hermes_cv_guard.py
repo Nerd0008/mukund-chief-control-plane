@@ -31,7 +31,7 @@ def pre_tool(tool_name,args,**kwargs):
    if state['path'] is not None and state['path']!=parent:return {'action':'block','message':'One bounded CV application workspace per job.'}
    state['path']=parent
  elif tool_name in {'execute_code','python','delegate_task'}:return {'action':'block','message':'CV jobs cannot launch a parallel builder or an unbounded repair subagent.'}
- elif tool_name not in {'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think','career_cv_master','career_cv_build'}:return {'action':'block','message':'CV jobs allow only read-only research and bounded edits/renderer execution; unknown tools fail closed.'}
+ elif tool_name not in {'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think','career_cv_master','career_cv_build','tool_search','tool_describe','tool_call'}:return {'action':'block','message':'CV jobs allow only read-only research and bounded edits/renderer execution; unknown tools fail closed.'}
  return None
 
 
