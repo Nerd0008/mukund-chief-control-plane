@@ -33,11 +33,7 @@
         "company": "B",
         "title": "C",
         "url": "D",
-        "deadline": "E",
-        "source": "AB",
-        "notes": "AC",
-        "posted_date": "AD",
-        "last_checked": "AE"
+        "deadline": "E"
       },
       "owner_columns": [
         "E",
