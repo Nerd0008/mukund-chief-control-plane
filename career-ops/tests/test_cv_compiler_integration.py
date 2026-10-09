@@ -10,12 +10,14 @@ from role_family_acceptance import offline_selection
 
 def test_native_compiler_and_attachment_verification(tmp_path,monkeypatch):
     monkeypatch.setattr(g,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(g,'EXPORT_ROOT',tmp_path/'exports')
     monkeypatch.setattr(g,'generate',offline_selection)
     token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':False})
     try:
         r=json.loads(g.compile_tool({'jd':'Python and Windows graduate software support','job_id':'test'}))
         assert r['status']=='PASS',r
-        assert delivery_allowed(r['verified_pdf'],tmp_path)
+        assert g.verified_attachment(r['verified_pdf'])
+        assert pathlib.Path(r['verified_pdf']).name=='Mukund_test_Tailored_CV.pdf'
         assert json.loads(g.compile_tool({'jd':'same','job_id':'test'}))['status']=='FAIL'
         pathlib.Path(r['verified_pdf']).write_bytes(b'broken')
         assert not delivery_allowed(r['verified_pdf'],tmp_path)
@@ -123,3 +125,14 @@ def test_cv_feedback_vision_is_allowed(attempted):
         assert g.pre_tool('vision_analyze',{'image_path':'feedback.png','question':'Inspect spacing'}) is None
         assert g.pre_tool('write_file',{'path':'cv_template.py'})['action']=='block'
     finally:g.JOB.reset(token)
+
+
+def test_export_short_name_and_corruption(tmp_path,monkeypatch):
+    monkeypatch.setattr(g,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(g,'EXPORT_ROOT',tmp_path/'exports')
+    result=compile_prototype('Engineering fixture','allstate',tmp_path/'job',offline_selection)
+    path=g.export_verified(result['pdf_path'],'Allstate Inc.','Product Engineer')
+    assert pathlib.Path(path).name=='Mukund_Allstate_Product_Engineer_CV.pdf'
+    assert g.verified_attachment(path)
+    pathlib.Path(path).write_bytes(b'corrupt')
+    assert not g.verified_attachment(path)

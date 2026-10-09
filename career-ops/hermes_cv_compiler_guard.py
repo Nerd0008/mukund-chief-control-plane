@@ -9,6 +9,7 @@ import cv_template as cv
 from cv_compile_prototype import compile_prototype,delivery_allowed
 from cv_content_adapter import generate
 OUTPUT_ROOT=pathlib.Path(os.environ.get('LOCALAPPDATA',str(pathlib.Path.home())))/'hermes/runtime/career-ops/cv-compiled'
+EXPORT_ROOT=pathlib.Path.home()/'Downloads/codex/_CVs'
 JOB=ContextVar('career_cv_compiler_job',default=None)
 AGENT_TURNS=4
 
@@ -37,6 +38,36 @@ def master_tool(args,**kwargs):
         'writing_policy':__import__('cv_writing_policy').policy(),'target_seconds':120,'hard_seconds':180,'mandatory_summary':['MSc Information Security','CompTIA Security+','ISC2 CC'],
         'verified_facts':[{k:s[k] for k in ['id','section','text']} for s in layout['slots'] if s['section']!='Header']})
 
+def export_verified(pdf,company,role):
+    import re,shutil
+    source=pathlib.Path(pdf)
+    if not delivery_allowed(source,OUTPUT_ROOT):raise ValueError('unverified source cannot be exported')
+    company=re.sub(r'\b(?:limited|ltd|plc|incorporated|inc|llc|corp|corporation)\b\.?','',company,flags=re.I)
+    def safe(value,limit):
+        words=re.findall(r'[A-Za-z0-9]+',value)
+        if not words:raise ValueError('company and short role required for export')
+        return '_'.join(words[:limit])
+    target=EXPORT_ROOT/('Mukund_'+safe(company,4)+'_'+safe(role,2)+'_CV.pdf')
+    EXPORT_ROOT.mkdir(parents=True,exist_ok=True)
+    temporary=target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp')
+    try:
+        shutil.copyfile(source,temporary)
+        if cv.digest(temporary)!=cv.digest(source):raise ValueError('CV export hash mismatch')
+        os.replace(temporary,target)
+    finally:
+        if temporary.exists():temporary.unlink()
+    target.with_suffix('.verification.json').write_text(json.dumps({'source':str(source.resolve()),'sha256':cv.digest(target)}),encoding='utf-8')
+    return str(target)
+
+def verified_attachment(path):
+    p=pathlib.Path(path)
+    if delivery_allowed(p,OUTPUT_ROOT):return True
+    try:
+        if p.resolve().parent!=EXPORT_ROOT.resolve():return False
+        receipt=json.loads(p.with_suffix('.verification.json').read_text(encoding='utf-8'))
+        return cv.digest(p)==receipt['sha256'] and cv.digest(pathlib.Path(receipt['source']))==receipt['sha256'] and delivery_allowed(receipt['source'],OUTPUT_ROOT)
+    except Exception:return False
+
 def compile_tool(args,**kwargs):
     state=JOB.get()
     if not state:return json.dumps({'status':'FAIL','reason':'native CV job context required'})
@@ -53,7 +84,8 @@ def compile_tool(args,**kwargs):
         state['workspace']=workspace
         response={k:result.get(k) for k in ['status','stage','reason','elapsed_seconds','content_calls','renders','provider']}
         if time.monotonic()<state['deadline'] and result['delivery_allowed'] and delivery_allowed(result['pdf_path'],OUTPUT_ROOT):
-            response.update(verified_pdf=result['pdf_path'],verification_report=str(workspace/'verification.json'))
+            exported=export_verified(result['pdf_path'],str(args.get('company') or str(args.get('job_id','application')).split('-')[0]),str(args.get('short_role') or 'Tailored'))
+            response.update(verified_pdf=exported,compiler_pdf=result['pdf_path'],verification_report=str(workspace/'verification.json'))
         else:
             response.update(status='FAIL',instruction='CV generation failed. Report stage and reason. Do not attach any intermediate PDF, retry, or substitute the master.')
         return json.dumps(response)
@@ -77,7 +109,7 @@ def install_delivery(media_class):
     old_send=media_class.send_document
     @functools.wraps(old_send)
     async def send(self,chat_id,file_path,*args,**kwargs):
-        if needs_gate(file_path) and not delivery_allowed(file_path,OUTPUT_ROOT):
+        if needs_gate(file_path) and not verified_attachment(file_path):
             from gateway.platforms.base import SendResult
             message='CV generation failed — PDF verification absent, failed or stale. No unverified PDF was attached.'
             await self.send(chat_id=chat_id,content=message)
@@ -112,7 +144,7 @@ def install_runtime(runtime,turn_class,media_class):
         if not cv_request(message,history):return await old_run(self,message,context_prompt,history,*args,**kwargs)
         state={'deadline':time.monotonic()+180,'attempted':False}
         token=JOB.set(state)
-        instruction=('\nCV production: call career_cv_compile once with the full JD and job_id. '
+        instruction=('\nCV production: call career_cv_compile once with the full JD, job_id, company and one or two short_role words. PASS automatically exports to Downloads/codex/_CVs with the short filename. No shell copy is needed. '
                      'No span edits, terminal, renderer repair, code changes or master substitution. '
                      'Attach only verified_pdf on PASS. Return bounded failure immediately otherwise. '
                      'Screenshot feedback: vision_analyze is allowed in this CV workflow. '
@@ -149,7 +181,7 @@ def register(ctx):
             'parameters':{'type':'object','properties':properties,'required':required,'additionalProperties':False}},handler=handler)
     tool('career_cv_master','Read approved CV design/facts. No span editing or character-count constraint.',{},[],master_tool)
     tool('career_cv_compile','Tailor a CV from JD in one bounded compiler invocation; returns verified PDF or failure. Never repair formatting.',
-         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'}},['jd','job_id'],compile_tool)
+         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'},'company':{'type':'string'},'short_role':{'type':'string','description':'One or two role words, e.g. Product Engineer'}},['jd','job_id'],compile_tool)
     tool('career_cv_build','Retired span builder; use career_cv_compile.',{},[],retired_build)
     def connected_v2(native,adapter):
         install_delivery(type(adapter))
