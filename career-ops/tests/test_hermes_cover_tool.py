@@ -64,3 +64,25 @@ def test_expired_cover_never_launches_renderer(tmp_path,monkeypatch):
         assert 'deadline' in json.loads(cover.cover_tool({'company':'Example','role':'Graduate','paragraphs':['Text']*5}))['reason']
         assert not list(tmp_path.iterdir())
     finally:guard.JOB.reset(token)
+
+
+def test_verified_export_is_deliverable_and_tamper_checked(tmp_path,monkeypatch):
+    import cv_workflow
+    monkeypatch.setattr(cv_workflow,'fact_gate',lambda *a,**k:{'available':True,'exit_code':0})
+    runtime=tmp_path/'runtime';runtime.mkdir()
+    monkeypatch.setattr(cover,'ROOT',runtime)
+    monkeypatch.setattr(cover,'EXPORT_ROOT',tmp_path/'exports')
+    content=spec(runtime);path=runtime/'content.json';path.write_text(json.dumps(content))
+    cover.build(path)
+    exported=cover.export_verified(content['out'],'Example Ltd','Security Consultant')
+    assert exported.name=='Mukund_Example_Security_Consultant_Cover_Letter.pdf'
+    assert cover.verified(exported)
+    exported.write_bytes(b'corrupt')
+    assert not cover.verified(exported)
+
+
+def test_unverified_cover_never_exported(tmp_path,monkeypatch):
+    monkeypatch.setattr(cover,'ROOT',tmp_path/'runtime')
+    monkeypatch.setattr(cover,'EXPORT_ROOT',tmp_path/'exports')
+    with pytest.raises(ValueError,match='unverified'):cover.export_verified(tmp_path/'missing.pdf','Example','Role')
+    assert not cover.EXPORT_ROOT.exists()
