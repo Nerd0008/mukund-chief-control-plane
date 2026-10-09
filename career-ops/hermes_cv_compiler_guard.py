@@ -14,7 +14,7 @@ AGENT_TURNS=4
 
 def cv_request(message,history=()):
     import re
-    return any(re.search(r'\bCV\b|curriculum vitae|tailor.{0,30}resume',str(t),re.I) for t in
+    return any(re.search(r'\bCV\b|\bJD\b|job description|curriculum vitae|tailor.{0,30}resume|https?://\S*(?:careers|jobs\.|/job/)',str(t),re.I) for t in
         [message]+[m.get('content','') for m in history[-4:] if isinstance(m,dict)])
 
 def pre_tool(tool_name,args,**kwargs):
@@ -143,5 +143,6 @@ def register(ctx):
     def connected(native,adapter):
         install_delivery(type(adapter))
         import logging
-        logging.getLogger(__name__).info('Approved flow CV compiler/delivery guard active on %s',type(adapter).__module__)
+        logging.getLogger('gateway.platforms.base').info('Approved flow CV compiler active on %s; attachment guard=%s; source=%s',
+            type(adapter).__module__,getattr(type(adapter),'_fast_cv_delivery_installed',False),cv.digest(pathlib.Path(__file__))[:12])
     ctx.register_platform_handler('discord',connected)

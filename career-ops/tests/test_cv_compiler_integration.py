@@ -61,6 +61,10 @@ def test_expired_job_no_tools():
     try:assert g.pre_tool('career_cv_compile',{})['action']=='block'
     finally:g.JOB.reset(token)
 
+@pytest.mark.parametrize('message',['Here is the JD','Tailor to this job description','https://www.allstate.jobs/job/23947981/graduate'])
+def test_jd_only_intake_gets_cv_guards(message):
+    assert g.cv_request(message)
+
 def test_forged_verification_cannot_skip_dependencies(tmp_path):
     folder=tmp_path/'a';folder.mkdir();pdf=folder/'candidate.pdf';pdf.write_bytes(b'fake')
     (folder/'verification.json').write_text(json.dumps({'status':'PASS','delivery_allowed':True,'hashes_before':{},'hashes_after':{}}))
