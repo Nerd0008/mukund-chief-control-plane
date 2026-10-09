@@ -136,3 +136,17 @@ def test_cv_hook_shares_one_workspace_across_copied_context(setup):
   contextvars.copy_context().run(guard.pre_tool,'write_file',{'path':str(setup[3]/'a/cv_edits.json')})
   assert guard.pre_tool('write_file',{'path':str(setup[3]/'b/cv_edits.json')})['action']=='block'
  finally:guard.CV_WORKSPACE.reset(workspace);guard.CV_ACTIVE.reset(token)
+
+
+def test_unknown_mutating_tools_fail_closed(setup):
+ token=guard.CV_ACTIVE.set(True)
+ try:
+  for name in ['memory','skill_manage','custom_pdf_builder','send_message']:
+   assert guard.pre_tool(name,{'action':'write'})['action']=='block'
+ finally:guard.CV_ACTIVE.reset(token)
+
+
+def test_renaming_a_cv_does_not_bypass_attachment_guard(setup):
+ import shutil
+ pdf=setup[3]/'innocent.pdf';shutil.copyfile(g.MASTER,pdf)
+ assert guard.needs_gate(pdf)

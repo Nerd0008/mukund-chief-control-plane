@@ -30,6 +30,7 @@ def pre_tool(tool_name,args,**kwargs):
    if state['path'] is not None and state['path']!=parent:return {'action':'block','message':'One bounded CV application workspace per job.'}
    state['path']=parent
  elif tool_name in {'execute_code','python','delegate_task'}:return {'action':'block','message':'CV jobs cannot launch a parallel builder or an unbounded repair subagent.'}
+ elif tool_name not in {'read_file','file_search','file_read','search_files','web_search','web_extract','skill_view','skills_list','think'}:return {'action':'block','message':'CV jobs allow only read-only research and bounded edits/renderer execution; unknown tools fail closed.'}
  return None
 
 def safe_renderer(command):
@@ -55,7 +56,13 @@ def safe_renderer(command):
 
 def needs_gate(path):
  p=Path(path)
- return p.suffix.lower()=='.pdf' and (bool(re.search(r'\bCV\b|_CV\b|curriculum|resume',p.stem,re.I)) or p.resolve().is_relative_to(golden.OUTPUT_ROOT.resolve()))
+ if p.suffix.lower()!='.pdf':return False
+ if bool(re.search(r'\bCV\b|_CV\b|curriculum|resume',p.stem,re.I)) or p.resolve().is_relative_to(golden.OUTPUT_ROOT.resolve()):return True
+ # Renaming an old/broken CV must not evade the attachment guard.
+ try:
+  with golden.pymupdf.open(p) as doc:text=' '.join(page.get_text() for page in doc).lower()
+  return 'professional summary' in text and 'education' in text and ('technical skills' in text or 'work experience' in text)
+ except Exception:return True
 
 def install_runtime(gateway_module,turn_class,media_class):
  if getattr(turn_class,'_golden_cv_guard_installed',False):return
