@@ -1,6 +1,12 @@
-# CV flow-template prototype - awaiting owner visual acceptance
+# CV flow-template prototype - design accepted, deployment pending
 
 Date: 2026-10-09. Branch: fix/e3-whole-repo-architecture. No deployment.
+
+UPDATE: Mukund accepted the reproduction ("its perfect"). See approval.json
+and ALLSTATE_ACCEPTANCE.md for the reasoning-enabled native Allstate sample:
+22.391 seconds, one call/render, PASS. General Hermes reasoning is unchanged.
+The model chooses source-grounded wording variants; arbitrary fact invention
+is still rejected. This is a prototype, not a live route replacement.
 
 ## Corrected source
 
@@ -34,7 +40,8 @@ output/structural-comparison.json compares page size/count, section order,
 source content and typography. Text equality normalizes extraction whitespace
 and punctuation spacing, not words or qualifications. Visual resemblance is
 not pixel identity: some word wrap, rule placement and bullet spacing differ.
-Owner visual acceptance is REQUIRED. Automated PASS is not production approval.
+Owner visual acceptance of this reproduction was recorded in approval.json.
+Automated PASS is not production deployment approval or varied-JD qualification.
 
 output/varied-jd-offline-timings.json records eight zero-provider role-family
 exercises: six existing application JDs, one existing SOC fixture and one
@@ -56,11 +63,11 @@ PDF path or substitutes the master. Only approved slot content can shorten.
 Windows deny-write handles and before/after hashes protect source, template,
 compiler and fonts for the job. No renderer/tool repair loop is exposed.
 
-The current provenance validator deliberately permits only explicit selection
-of source text. Paraphrases and unsupported new claims fail closed. A future
-single-call content adapter and a tested fact-grounded paraphrase contract are
-still required for meaningful full-document generative tailoring. No live
-model adapter has been configured and provider latency has NOT been measured.
+The provenance validator permits source text plus engineering-curated,
+source-traceable alternatives in fact_bank.json. Arbitrary unverified
+paraphrases and new claims fail closed. A native model planner selects wording
+for all editable slots in one call. The Allstate acceptance measures actual
+provider latency; broad free-form generation is not yet implemented/qualified.
 The generic adapter injection is an offline engineering seam, not an exposed
 Hermes tool or sandbox for arbitrary untrusted Python.
 
@@ -83,8 +90,6 @@ deployment occurred. Tests run without real provider calls.
 
 ## Next gate
 
-Mukund reviews the original-content reproduction and side-by-side first.
-Only after acceptance: implement/qualify full-content adapter against varied
-JDs, validate provider timing/timeout and independent delivery gate, then obtain
-the already-required visual acceptance before deliberately replacing Hermes
+The reproduction was accepted. Qualify the content contract against varied
+JDs and the independent delivery gate before deliberately replacing Hermes
 CV routing. Do not call this production-ready or deploy it on tests alone.

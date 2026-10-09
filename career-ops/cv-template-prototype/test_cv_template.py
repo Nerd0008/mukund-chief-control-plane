@@ -82,3 +82,43 @@ def test_shortening_failure_stops(tmp_path):
     assert not r['delivery_allowed'] and r['content_calls']==2 and r['renders']==0 and 'pdf_path' not in r
 
 def always_long(request): return shorten({'mode':'generate'})
+
+def test_engineering_content_all_slots_fit(tmp_path):
+    from cv_content_adapter import resolve_plan
+    bank=json.loads((cv.HERE/'fact_bank.json').read_text(encoding='utf-8'))
+    content=resolve_plan({'selections':{key:'engineering' for key in bank['slots']}})
+    assert not cv.fit(cv.load_layout(),content)
+    p=tmp_path/'engineering.pdf';cv.render(cv.load_layout(),content,p)
+    assert cv.validate(cv.load_layout(),content,p)['status']=='PASS'
+
+def test_variant_cannot_introduce_fake_fact():
+    from cv_content_adapter import resolve_plan
+    bank=json.loads((cv.HERE/'fact_bank.json').read_text(encoding='utf-8'))
+    content=resolve_plan({'selections':{key:'engineering' for key in bank['slots']}})
+    content['s04']['text']='Senior engineer with 20 years experience.'
+    assert cv.content_check(cv.load_layout(),content)
+
+@pytest.mark.parametrize('plan',[{'selections':{}},{'selections':{'s04':'invented'}}])
+def test_incomplete_model_plan_rejected(plan):
+    from cv_content_adapter import resolve_plan
+    with pytest.raises(ValueError):resolve_plan(plan)
+
+def test_native_reasoning_retained_for_bounded_planning():
+    from cv_content_adapter import request_options
+    assert request_options('nous','meituan/longcat-2.5-preview:free')=={'reasoning':{'enabled':True,'effort':'low'},'thinking':{'type':'enabled'}}
+    assert request_options('other','other-model')=={}
+
+def test_underfilled_bullet_blocks_delivery():
+    layout=cv.load_layout();s=next(s for s in layout['slots'] if s['bullet'] and s['variable'])
+    text=s['text'][2:].split(',')[0]+'.'
+    # Existing substring evidence deliberately excludes an invented abbreviation.
+    c={s['id']:{'text':s['text'][2:].split(',')[0],'sources':[s['id']]}}
+    assert any('underfills' in f['reason'] for f in cv.fit(layout,c))
+
+def test_skill_label_cannot_disappear():
+    l=cv.load_layout()
+    assert any(f['reason']=='missing skill label/value' for f in cv.content_check(l,{'s06':{'text':'Phishing analysis','sources':['s06']}}))
+
+def test_profile_fragment_rejected():
+    l=cv.load_layout()
+    assert any(f['reason']=='incomplete sentence' for f in cv.content_check(l,{'s04':{'text':'MSc Information Security graduate','sources':['s04']}}))

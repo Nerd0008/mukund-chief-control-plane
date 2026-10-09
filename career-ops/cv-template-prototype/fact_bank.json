@@ -1,0 +1,334 @@
+{
+  "version": 1,
+  "master_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
+  "review": "Engineering-curated paraphrases checked against cited master facts; no model-authored facts.",
+  "slots": {
+    "s04": {
+      "original": {
+        "text": "MSc Information Security graduate with hands-on IT support experience across Windows, Microsoft 365 and endpoint troubleshooting. CompTIA Security+ and ISC2 CC certified, with practical exposure to Python, PowerShell, SQL and log analysis, and a strong interest in trading technology and production support.",
+        "sources": [
+          "s04"
+        ]
+      },
+      "engineering": {
+        "text": "MSc Information Security graduate and BCA graduate with practical experience building Python tools and a JavaScript browser extension. Bring hands-on testing, API integration and Windows troubleshooting experience, alongside user support and technical documentation.",
+        "sources": [
+          "s13",
+          "s16",
+          "s31",
+          "s35",
+          "s36",
+          "s40",
+          "s41",
+          "s21",
+          "s11"
+        ]
+      }
+    },
+    "s06": {
+      "original": {
+        "text": "Security Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK",
+        "sources": [
+          "s06"
+        ]
+      },
+      "engineering": {
+        "text": "Programming & Scripting: Python, Java, JavaScript, PowerShell, SQL",
+        "sources": [
+          "s08",
+          "s18",
+          "s30"
+        ]
+      }
+    },
+    "s07": {
+      "original": {
+        "text": "Systems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration",
+        "sources": [
+          "s07"
+        ]
+      },
+      "engineering": {
+        "text": "Web & APIs: JavaScript, HTML, CSS, API integration, Manifest V3",
+        "sources": [
+          "s08",
+          "s30"
+        ]
+      }
+    },
+    "s08": {
+      "original": {
+        "text": "Scripting & Automation: Python, PowerShell, SQL, API integration",
+        "sources": [
+          "s08"
+        ]
+      },
+      "engineering": {
+        "text": "Systems & Cloud: Windows, Microsoft 365, Azure, endpoint configuration",
+        "sources": [
+          "s07"
+        ]
+      }
+    },
+    "s09": {
+      "original": {
+        "text": "Security Controls: BitLocker, network segmentation, endpoint security",
+        "sources": [
+          "s09"
+        ]
+      },
+      "engineering": {
+        "text": "Testing & Analysis: Manual testing, false-positive checks, log analysis",
+        "sources": [
+          "s32",
+          "s33",
+          "s40",
+          "s04"
+        ]
+      }
+    },
+    "s10": {
+      "original": {
+        "text": "Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF",
+        "sources": [
+          "s10"
+        ]
+      },
+      "engineering": {
+        "text": "Data & Tools: Python, SQL, MySQL, JSON, Windows Event Logs",
+        "sources": [
+          "s08",
+          "s18",
+          "s35",
+          "s40"
+        ]
+      }
+    },
+    "s11": {
+      "original": {
+        "text": "Communication & Support: User support, technical documentation, stakeholder coordination",
+        "sources": [
+          "s11"
+        ]
+      },
+      "engineering": {
+        "text": "Communication & Support: User support, technical documentation, stakeholder coordination",
+        "sources": [
+          "s11"
+        ]
+      }
+    },
+    "s21": {
+      "original": {
+        "text": "Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
+        "sources": [
+          "s21"
+        ]
+      },
+      "engineering": {
+        "text": "Administer 4–5 daily access requests in on-premises Active Directory, verifying approval, recording access periods and managing time-limited permissions.",
+        "sources": [
+          "s21"
+        ]
+      }
+    },
+    "s22": {
+      "original": {
+        "text": "Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
+        "sources": [
+          "s22"
+        ]
+      },
+      "engineering": {
+        "text": "Analyse 4–5 suspicious emails daily, checking sender and link domains, recording findings and communicating recurring phishing patterns to colleagues.",
+        "sources": [
+          "s22"
+        ]
+      }
+    },
+    "s23": {
+      "original": {
+        "text": "Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
+        "sources": [
+          "s23"
+        ]
+      },
+      "engineering": {
+        "text": "Support 15 employees using 15–20 devices, troubleshooting access and system issues, monitoring server health and maintaining password and website-access controls.",
+        "sources": [
+          "s23"
+        ]
+      }
+    },
+    "s25": {
+      "original": {
+        "text": "Conduct weekly store-wide risk assessments and daily compliance checks, reviewing operational controls, maintaining assessment records and identifying issues requiring corrective action.",
+        "sources": [
+          "s25"
+        ]
+      },
+      "engineering": {
+        "text": "Review operational controls through weekly risk assessments and daily compliance checks, recording findings and identifying corrective actions.",
+        "sources": [
+          "s25"
+        ]
+      }
+    },
+    "s26": {
+      "original": {
+        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through internal reporting systems, apply temporary controls and escalate unresolved risks.",
+        "sources": [
+          "s26"
+        ]
+      },
+      "engineering": {
+        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents, apply temporary controls and escalate unresolved risks.",
+        "sources": [
+          "s26"
+        ]
+      }
+    },
+    "s27": {
+      "original": {
+        "text": "Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
+        "sources": [
+          "s27"
+        ]
+      },
+      "engineering": {
+        "text": "Coordinate 7–8 colleagues per shift, communicating requirements, assigning corrective actions and following up to confirm issues are addressed.",
+        "sources": [
+          "s27"
+        ]
+      }
+    },
+    "s31": {
+      "original": {
+        "text": "Built a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials and API keys  before submitting pasted content.",
+        "sources": [
+          "s31"
+        ]
+      },
+      "engineering": {
+        "text": "Built a Chrome extension with 25+ detection patterns to warn users about email addresses, credentials and API keys in pasted content before submission.",
+        "sources": [
+          "s31"
+        ]
+      }
+    },
+    "s32": {
+      "original": {
+        "text": "Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content.",
+        "sources": [
+          "s32"
+        ]
+      },
+      "engineering": {
+        "text": "Achieved 93.7% accuracy over 150+ manual tests, including false-positive checks; kept detection local to protect sensitive content.",
+        "sources": [
+          "s32"
+        ]
+      }
+    },
+    "s33": {
+      "original": {
+        "text": "Refined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and choose whether to proceed.",
+        "sources": [
+          "s33"
+        ]
+      },
+      "engineering": {
+        "text": "Iterated detection rules through manual testing to reduce false positives, while allowing users to review flagged content and decide whether to proceed.",
+        "sources": [
+          "s33"
+        ]
+      }
+    },
+    "s36": {
+      "original": {
+        "text": "Designed and developed a phishing-analysis prototype to highlight suspicious email indicators and support manual triage, with design reviews from an experienced SOC analyst.",
+        "sources": [
+          "s36"
+        ]
+      },
+      "engineering": {
+        "text": "Built a Python/Gmail API phishing-analysis prototype to highlight suspicious email indicators and support manual triage, with design reviews from an experienced SOC analyst.",
+        "sources": [
+          "s35",
+          "s36"
+        ]
+      }
+    },
+    "s37": {
+      "original": {
+        "text": "Evaluated the prototype using a mixture of suspicious and legitimate business emails, keeping sensitive email data local and using hardcoded MITRE ATT&CK mappings to contextualise findings.",
+        "sources": [
+          "s37"
+        ]
+      },
+      "engineering": {
+        "text": "Tested the prototype against suspicious and legitimate business emails, using hardcoded MITRE ATT&CK mappings while keeping sensitive email data local.",
+        "sources": [
+          "s37"
+        ]
+      }
+    },
+    "s38": {
+      "original": {
+        "text": "Developing sandbox-based URL analysis to inspect linked content and enrich investigation reports, while keeping sensitive email data local.",
+        "sources": [
+          "s38"
+        ]
+      },
+      "engineering": {
+        "text": "Developing sandbox-based URL analysis to inspect linked content and enrich investigation reports while keeping sensitive email data local.",
+        "sources": [
+          "s38"
+        ]
+      }
+    },
+    "s41": {
+      "original": {
+        "text": "Developed a local tool that maps Windows error codes to common causes, supporting investigation of system faults across business devices.",
+        "sources": [
+          "s41"
+        ]
+      },
+      "engineering": {
+        "text": "Built a Python tool mapping Windows error codes to common causes to support investigation of system faults across business devices.",
+        "sources": [
+          "s40",
+          "s41"
+        ]
+      }
+    },
+    "s42": {
+      "original": {
+        "text": "Used the tool to investigate intermittent server freezes and crashes, identifying errors associated with missing or corrupted DLLs and informing corrective action.",
+        "sources": [
+          "s42"
+        ]
+      },
+      "engineering": {
+        "text": "Used the tool to investigate server freezes and crashes, finding errors linked to missing or corrupted DLLs and informing corrective action.",
+        "sources": [
+          "s42"
+        ]
+      }
+    },
+    "s43": {
+      "original": {
+        "text": "Designed the tool for internal troubleshooting, keeping log analysis local; currently developing background monitoring and automated alerts for unexpected errors.",
+        "sources": [
+          "s43"
+        ]
+      },
+      "engineering": {
+        "text": "Keep log analysis local for internal troubleshooting; developing background monitoring and automated alerts for unexpected errors.",
+        "sources": [
+          "s43"
+        ]
+      }
+    }
+  }
+}

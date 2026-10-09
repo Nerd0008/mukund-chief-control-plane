@@ -30,7 +30,7 @@ def paragraph(slot, replacement=None):
     tags={'normal':('',''),'bold':('<b>','</b>'),'italic':('<i>','</i>'),'bold_italic':('<b><i>','</i></b>')}
     runs=slot['runs'] if replacement is None else [{'text':replacement,'style':'normal'}]
     if replacement is not None and slot['section']=='Technical Skills':
-        label=slot['runs'][0]['text']
+        label=replacement.split(':',1)[0]+': ' if ':' in replacement else slot['runs'][0]['text']
         if replacement.startswith(label):
             runs=[{'text':label,'style':'bold'},{'text':replacement[len(label):],'style':'normal'}]
     markup=''.join(tags[r['style']][0]+html.escape(r['text'])+tags[r['style']][1] for r in runs)
@@ -54,14 +54,24 @@ def content_check(layout, content):
         text=item['text']
         if not text.strip() or '\n\n' in text or any(c in text for c in '<>\ufffd'):
             failures.append({'slot':key,'reason':'blank line, markup, or invalid text'}); continue
+        if s['section']=='Technical Skills' and (':' not in text or not text.split(':',1)[1].strip()):
+            failures.append({'slot':key,'reason':'missing skill label/value'}); continue
         # A selected source must be explicit and the content must be verbatim from it.
         # Paraphrase claims require a future independently reviewed fact validator.
         sources=item.get('sources',[])
         if not sources or any(k not in slots for k in sources):
             failures.append({'slot':key,'reason':'missing fact provenance'}); continue
         hay=' '.join(expected_text(slots[k]).removeprefix('\u2022 ') for k in sources)
-        if norm(text) not in norm(hay): failures.append({'slot':key,'reason':'unverified/invented content'})
-        if s['bullet'] and not text.rstrip().endswith(('.', '!', '?')):
+        verified=False
+        if 'variant' in item:
+            bank_path=HERE/'fact_bank.json'
+            bank=json.loads(bank_path.read_text(encoding='utf-8')) if bank_path.exists() else {}
+            variant=bank.get('slots',{}).get(key,{}).get(item['variant'])
+            verified=(bank.get('master_sha256')==layout['master_sha256'] and variant is not None and
+                      text==variant['text'] and sources==variant['sources'])
+        else: verified=norm(text) in norm(hay)
+        if not verified: failures.append({'slot':key,'reason':'unverified/invented content'})
+        if (s['bullet'] or s['section']=='Professional Summary') and not text.rstrip().endswith(('.', '!', '?')):
             failures.append({'slot':key,'reason':'incomplete sentence'})
     return failures
 def fit(layout, content):
@@ -71,6 +81,8 @@ def fit(layout, content):
         width,height=p.wrap(s['width'],1000)
         if len(p.blPara.lines)>s['max_lines'] or any(getattr(l,'extraSpace',l[0] if isinstance(l,tuple) else 0)<-.3 for l in p.blPara.lines):
             failures.append({'slot':s['id'],'reason':'content capacity exceeded','max_lines':s['max_lines']})
+        if s['id'] in content and len(p.blPara.lines)<s['max_lines']:
+            failures.append({'slot':s['id'],'reason':'content underfills slot, leaving unexpected blank line','required_lines':s['max_lines']})
     return failures
 def render(layout, content, output):
     register(layout); output=pathlib.Path(output); output.parent.mkdir(parents=True,exist_ok=True)
@@ -98,6 +110,10 @@ def validate(layout, content, pdf):
         if actual!=norm(expected_text(s,content.get(s['id'],{}).get('text'))):
             failures.append({'slot':s['id'],'reason':'missing/corrupted/overflow ATS text','expected':expected_text(s,content.get(s['id'],{}).get('text')),'actual':actual})
         allowed={'TimesNewRomanPSMT','TimesNewRomanPS-BoldMT','TimesNewRomanPS-BoldItalicMT','TimesNewRomanPS-BoldItal'}
+        if s['section']=='Technical Skills' and not s['heading']:
+            label=content.get(s['id'],{}).get('text',s['text']).split(':',1)[0]+':'
+            if not any('Bold' in t['font'] and norm(t['text'])==norm(label) for t in found):
+                failures.append({'slot':s['id'],'reason':'missing bold skill label'})
         for t in found:
             if t['font'] not in allowed or abs(t['size']-s['font_size'])>.02:
                 failures.append({'slot':s['id'],'reason':'wrong font/size'})
@@ -111,7 +127,8 @@ def validate(layout, content, pdf):
             # Ordinary content cannot acquire emphasis; fixed heading/title/label runs
             # are the only source of emphasis. Also reject missing required emphasis.
             if s['heading'] and style!='bold': failures.append({'slot':s['id'],'reason':'heading emphasis changed'})
-            if s['section']=='Technical Skills' and style=='bold' and norm(t['text'])!=norm(s['runs'][0]['text']):
+            label=content.get(s['id'],{}).get('text',s['text']).split(':',1)[0]+':'
+            if s['section']=='Technical Skills' and not s['heading'] and style=='bold' and norm(t['text'])!=norm(label):
                 failures.append({'slot':s['id'],'reason':'unexpected bold skills'})
             if s['id'] not in content:
                 allowed_text=' '.join(r['text'] for r in s['runs'] if r['style']==style)

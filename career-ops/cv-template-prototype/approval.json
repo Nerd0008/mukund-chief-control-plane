@@ -1,0 +1,10 @@
+{
+  "design_owner": "Mukund",
+  "date": "2026-10-09",
+  "approval_evidence": "Owner response: its perfect",
+  "scope": "Original-content template reproduction visual design only",
+  "approved_reproduction_sha256": "02c4cbd40f64c7f7b061a119d8878615d5238af94197492c87e85d16cbd60316",
+  "approved_layout_sha256": "b1ae4b5a31a6e24b8fd4b6592b8da57991764a73ff82ead2232d2ed87aa33250",
+  "live_hermes_deployment": false,
+  "native_provider_acceptance": "Owner explicitly approved sending JD and professional facts, excluding contact details, to existing Nous/LongCat for bounded test"
+}

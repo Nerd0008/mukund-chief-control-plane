@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "failures": [],
+  "page_count": 1,
+  "pdf_sha256": "61be7a4b42fd1a82ad92be7218016c020746ddead8ac8a3f16edf56556cae406",
+  "successful_run_seconds": 22.390999999828637,
+  "content_generation_seconds": 21.25,
+  "render_seconds": 0.0940000000409782,
+  "validation_seconds": 0.125,
+  "provider": {
+    "provider": "nous",
+    "model": "meituan/longcat-2.5-preview:free",
+    "model_calls": 1,
+    "finish_reason": "stop",
+    "usage_tokens": 5972,
+    "visible_characters": 456,
+    "reasoning_tokens": 692
+  },
+  "successful_run_model_calls": 1,
+  "total_live_model_calls": 3,
+  "failed_attempts": [
+    {
+      "status": "FAIL",
+      "reason": "provider truncated content plan",
+      "elapsed_seconds": 61.54700000002049,
+      "model_calls": 1
+    }
+  ],
+  "earlier_successful_attempts": [
+    {
+      "seconds": 7.187999999849126,
+      "provider": {
+        "provider": "nous",
+        "model": "meituan/longcat-2.5-preview:free",
+        "model_calls": 1,
+        "finish_reason": "stop",
+        "usage_tokens": 5281,
+        "visible_characters": 456,
+        "reasoning_tokens": null
+      }
+    }
+  ],
+  "renders": 1,
+  "shortening_pass": false,
+  "template_visual_approved": true,
+  "layout_sha256": "b1ae4b5a31a6e24b8fd4b6592b8da57991764a73ff82ead2232d2ed87aa33250",
+  "verifier_sha256": "1a7ff73dc82e9c73debe7aaec10a74cf351cc151e415235eee2d3adc840a3115",
+  "fact_bank_sha256": "d1431f83a6311ff3a042e80577e47e8a70acbae5ca01ad34b8dd596664dccb2e",
+  "changes": 21,
+  "master_unchanged": true,
+  "hermes_deployed": false,
+  "jd_url": "https://www.allstate.jobs/job/23947981/graduate-product-engineer-opportunities-2027/"
+}

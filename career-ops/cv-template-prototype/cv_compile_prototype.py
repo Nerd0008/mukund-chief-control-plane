@@ -38,6 +38,7 @@ def worker(generator,request,workspace):
         save(w/'analysis.json',request)
         t=time.monotonic(); calls+=1; content=generator(request)
         timings['content_generation_seconds']=time.monotonic()-t
+        provider_metadata=getattr(generator,'last_metadata',None)
         save(w/'content-draft.json',content)
         stage='fit_validation'; save(w/'stage.json',{'stage':stage})
         failures=cv.fit(layout,content)
@@ -57,9 +58,11 @@ def worker(generator,request,workspace):
         t=time.monotonic(); result=cv.validate(layout,content,w/'candidate.pdf')
         timings['validation_seconds']=time.monotonic()-t
         result.update(timings,content_calls=calls,renders=renders,total_worker_seconds=time.monotonic()-started)
+        if provider_metadata: result['provider']=provider_metadata
         save(w/'result.json',result)
     except Exception as e:
-        save(w/'result.json',dict(status='FAIL',stage=stage,reason=str(e),content_calls=calls,renders=renders))
+        save(w/'result.json',dict(status='FAIL',stage=stage,reason=str(e),content_calls=calls,renders=renders,
+                                 provider=getattr(generator,'last_metadata',None)))
 
 def compile_prototype(jd,job_id,workspace,generator,hard_seconds=180):
     started=time.monotonic(); layout=cv.load_layout()
@@ -70,6 +73,7 @@ def compile_prototype(jd,job_id,workspace,generator,hard_seconds=180):
     workspace.mkdir(parents=True,exist_ok=True)
     paths=[cv.HERE/'layout.json',cv.HERE/'cv_template.py',pathlib.Path(__file__),pathlib.Path(layout['master_source'])]
     paths += [pathlib.Path('C:/Windows/Fonts')/f for f in layout['fonts'].values()]
+    paths += [cv.HERE/name for name in ['fact_bank.json','cv_content_adapter.py'] if (cv.HERE/name).exists()]
     request={'jd':jd,'job_id':job_id,'mode':'generate','capacities':[
         {k:s[k] for k in ['id','section','width','font_size','leading','max_lines','variable']} for s in layout['slots']],
         'verified_sources':[{k:s[k] for k in ['id','text']} for s in layout['slots']],
