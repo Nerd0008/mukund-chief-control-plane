@@ -153,7 +153,7 @@ canonical regional tracker. Do not ask whether to log it; log it, then report.
 
 The sole authoritative PDF is `career-ops/master/CV_FORMAT_MASTER.pdf`; its versioned span/layout manifest is `career-ops/master/cv_master_manifest.json`. Never regenerate, edit, redact/reinsert, or repair this master. Do not use the historical Downloads master.
 
-The master is a visual template and a source of verified professional facts, not a wording template. Tailor content freely to each JD, including skill labels and experience/project descriptions; no character-count similarity to original wording is required. Preserve the layout and truthful facts.
+The master is a visual template and a source of verified professional facts, not a wording template. Tailor content freely to each JD, including skill labels and experience/project descriptions; every editable replacement MUST have exactly the original character count (excluding immutable leading/trailing PDF whitespace). Preserve the layout and truthful facts. Skill labels must also preserve their rendered width within 0.5 point so label-to-value gaps remain identical; leave a label unchanged if a truthful rewrite cannot fit.
 
 Normal application jobs MUST NOT edit cv_tailor.py, cv_golden.py, hermes_cv_guard.py, the manifest or font/layout configuration. Do not extend the renderer during a job, use --force, geometry overrides, font substitution, manual reinsertion, a parallel PDF builder, or an open-ended visual repair loop.
 

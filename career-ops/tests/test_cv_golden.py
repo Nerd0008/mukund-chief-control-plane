@@ -9,7 +9,7 @@ import hermes_cv_guard as guard
 def setup(tmp_path,monkeypatch):
  monkeypatch.setattr(g,'OUTPUT_ROOT',tmp_path)
  manifest=json.loads(g.MANIFEST.read_text());s=next(s for s in manifest['spans'] if s['editable'] and s['section']=='Professional Summary')
- replacement='MSc Information Security graduate combining software development and cybersecurity knowledge with practical IT systems support,'
+ replacement='MSc Information Security graduate with software development skills and cybersecurity knowledge plus practical IT support.'
  spec={'edits':[{'span_id':s['id'],'replace':replacement}]}
  return manifest,s,spec,tmp_path
 
@@ -182,19 +182,25 @@ def test_native_cv_build_tool_no_shell_or_renderer_patch(setup):
 
 
 def test_separate_native_skill_whitespace_is_preserved(setup):
- manifest=setup[0];spec={'edits':[{'span_id':'p0-s27','replace':'Windows, Microsoft 365, Azure, Active Directory, System Testing, Documentation, IT Systems Support.'},{'span_id':'p0-s29','replace':'Microsoft Azure, Microsoft Entra ID, Identity & Access Management, Cloud.'},{'span_id':'p0-s30','replace':'Windows, Microsoft 365, Azure, Active Directory, System Testing, Documentation.'}]}
+ manifest=setup[0];original={x['id']:x['text'].strip() for x in manifest['spans']};spec={'edits':[{'span_id':'p0-s27','replace':original['p0-s27'].replace('Hardware','Endpoint')},{'span_id':'p0-s29','replace':original['p0-s29'].replace('Azure','Cloud')},{'span_id':'p0-s30','replace':original['p0-s30'].replace('Detection','Analytics') }]}
  p=setup[3]/'skills_CV.pdf';r=g.generate(g.MASTER,g.MANIFEST,spec,p)
  assert r['status']=='PASS' and r['outside_region_changed_pixels']==0 and g.delivery_allowed(p)
 
 
 def test_skill_labels_can_be_tailored_without_font_or_origin_changes(setup):
- spec={'edits':[{'span_id':'p0-s28','replace':'Cloud & Security Platforms:'},{'span_id':'p0-s34','replace':'Software Development & Data:'}]}
+ spec={'edits':[{'span_id':'p0-s28','replace':'Cloud Security & Cyber Platforms:'},{'span_id':'p0-s34','replace':'Software Development & Data Analysis:'}]}
  p=setup[3]/'labels_CV.pdf';r=g.generate(g.MASTER,g.MANIFEST,spec,p)
  assert r['status']=='PASS' and r['outside_region_changed_pixels']==0 and g.delivery_allowed(p)
 
 
 @pytest.mark.parametrize('replacement',['Information Security MSc graduate.','i'*175])
-def test_content_length_can_change_freely_when_geometry_fits(setup,replacement):
+def test_exact_character_count_rejects_shorter_and_longer_content(setup,replacement):
  spec=setup[2];spec['edits'][0]['replace']=replacement
  r=g.generate(g.MASTER,g.MANIFEST,spec,setup[3]/'flexible_CV.pdf')
- assert r['status']=='PASS' and r['outside_region_changed_pixels']==0
+ assert r['status']=='FAIL' and 'exact character count' in r['problems'][0]
+
+
+def test_skill_label_shortening_cannot_create_large_value_gap(setup):
+ spec={'edits':[{'span_id':'p0-s28','replace':'Cloud & Security Platforms:'}]}
+ r=g.generate(g.MASTER,g.MANIFEST,spec,setup[3]/'gaps_CV.pdf')
+ assert r['status']=='FAIL' and not (setup[3]/'gaps_CV.pdf').exists()
