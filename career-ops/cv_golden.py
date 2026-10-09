@@ -92,15 +92,18 @@ def build_manifest(master):
    right=[t for t in ss if t['page']==s['page'] and abs(t['origin'][1]-s['origin'][1])<1 and t['origin'][0]>s['bbox'][2]+.1]
    boundary=min([t['bbox'][0] for t in right]+[d[s['page']].rect.width-21.75])
    section=max([t for t in sections if t['page']==s['page'] and t['origin'][1]<=s['origin'][1]],key=lambda t:t['origin'][1],default={'text':'Identity'})['text'].strip()
-   editable=len(candidates)==1 and s['font'].endswith('PSMT') and len(s['text'].strip())>35 and section not in ('Identity','Education','Certifications')
-   item={**s,'id':f'p{s["page"]}-s{i}','section':section,'editable':editable,'available_width':max(0,boundary-s['origin'][0]),'neighbours':[t['bbox'] for t in ss if t is not s and t['page']==s['page'] and abs(t['origin'][1]-s['origin'][1])<15]}
+   label=section=='Technical Skills' and s['size']<10.5 and s['text'].strip().endswith(':')
+   editable=len(candidates)==1 and ((s['font'].endswith('PSMT') and len(s['text'].strip())>35) or label) and section not in ('Identity','Education','Certifications')
+   chars=[c for block in d[s['page']].get_text('rawdict')['blocks'] if block.get('type')==0 for line in block['lines'] for raw in line['spans'] if abs(raw['origin'][0]-s['origin'][0])<.001 and abs(raw['origin'][1]-s['origin'][1])<.001 for c in raw['chars'] if c['c'].strip()]
+   glyph_origin=chars[0]['origin'] if chars else s['origin']
+   item={**s,'id':f'p{s["page"]}-s{i}','section':section,'editable':editable,'glyph_origin':list(glyph_origin),'label':label,'available_width':max(0,boundary-glyph_origin[0]),'neighbours':[t['bbox'] for t in ss if t is not s and t['page']==s['page'] and abs(t['origin'][1]-s['origin'][1])<15]}
    if editable:item.update(stream_xref=candidates[0]['xref'],stream_start=candidates[0]['start'],stream_end=candidates[0]['end'],font_ref=candidates[0]['font_ref'])
    items.append(item)
   return {'schema':1,'master_sha256':sha(master),'pages':[{'rect':list(p.rect),'mediabox':list(p.mediabox),'cropbox':list(p.cropbox),'rotation':p.rotation} for p in d],'page_count':len(d),'spans':items,'policy':{'max_fit_attempts':3,'char_delta':.15,'raster_dpi':144,'pixel_channel_tolerance':0,'region_edge_tolerance_pixels':1,'render_attempts':1}}
 
 def fit(span,text,fm,policy):
  if '\n' in text or '\r' in text or not text.strip():return 'replacement must be one nonempty line'
- if abs(len(text.strip())-len(span['text'].strip()))/max(1,len(span['text'].strip()))>policy['char_delta']:return 'character budget exceeded'
+ if ((len(text.strip())>len(span['text'].strip())*(1+policy['char_delta'])) if span.get('label') else (abs(len(text.strip())-len(span['text'].strip()))/max(1,len(span['text'].strip()))>policy['char_delta'])):return 'character budget exceeded'
  if any(c not in fm['encode'] for c in text):return 'glyph absent from immutable master font'
  width=sum(fm['widths'].get(fm['encode'][c],fm['default_width']) for c in text)/1000*span['size']
  if width>span['available_width']:return 'rendered width overflow'
@@ -114,7 +117,7 @@ def prepare(doc,manifest,spec,rewrite=None,budget=None,save_budget=None):
   if len(matches)!=1 or not matches[0]['editable']:raise ValueError('affected span absent, ambiguous or immutable: '+e.get('find',e.get('span_id','')))
   s=matches[0]
   if s['id'] in seen:raise ValueError('duplicate span edit')
-  seen.add(s['id']);candidate=e['replace'];reason=None
+  seen.add(s['id']);candidate=e['replace'].strip();reason=None
   used=(budget or {}).get(s["id"],0)
   if used>=MAX_FIT_ATTEMPTS:raise ValueError(s["id"]+": three content-fit attempts exhausted")
   for attempt in range(used+1,MAX_FIT_ATTEMPTS+1):
@@ -124,8 +127,8 @@ def prepare(doc,manifest,spec,rewrite=None,budget=None,save_budget=None):
    reason=fit(s,candidate,fm[s['font_ref']],manifest['policy'])
    if reason is None:break
    if attempt==MAX_FIT_ATTEMPTS:break
-   if rewrite is not None:candidate=rewrite(s,candidate,reason,attempt)
-   elif len(e.get('alternatives',[]))>=attempt:candidate=e['alternatives'][attempt-1]
+   if rewrite is not None:candidate=rewrite(s,candidate,reason,attempt).strip()
+   elif len(e.get('alternatives',[]))>=attempt:candidate=e['alternatives'][attempt-1].strip()
    else:raise ValueError(s['id']+': content rewrite required: '+reason)
   if reason:raise ValueError(s['id']+': three content-fit attempts exhausted: '+reason)
   plan.append({'span':s,'replace':candidate,'attempts':attempt,'encoded':b''.join(fm[s['font_ref']]['encode'][c].to_bytes(2,'big') for c in candidate)})
@@ -154,11 +157,25 @@ def verify(master,out,manifest,plan):
   for s in manifest['spans']:
    p=edited.get(s['id']);expected.append({k:(p['replace'] if k=='text' and p else s[k]) for k in ('page','text','origin','font','size')})
   remaining=actual.copy()
-  for s in expected:
-   match=next((v for v in remaining if v['page']==s['page'] and v['text']==s['text'] and v['font']==s['font'] and abs(v['size']-s['size'])<.001 and all(abs(x-y)<.001 for x,y in zip(v['origin'],s['origin']))),None)
+  for idx,s in enumerate(expected):
+   is_edit=manifest['spans'][idx]['id'] in edited
+   match=next((v for v in remaining if v['page']==s['page'] and (v['text'].strip()==s['text'].strip() if is_edit else v['text']==s['text']) and v['font']==s['font'] and abs(v['size']-s['size'])<.001 and all(abs(x-y)<.001 for x,y in zip(v['origin'],s['origin']))),None)
    if match is None:problems.append('text/font/baseline mismatch: '+s['text'][:55])
    else:remaining.remove(match)
-  if remaining:problems.append('unexpected text spans')
+  if any(v['text'].strip() for v in remaining):problems.append('unexpected text spans')
+  # Whitespace extraction may regroup after an edit, but its native PDF objects
+  # must remain byte-identical. Every non-edited stream/object is immutable.
+  grouped={}
+  for p in plan:grouped.setdefault(p['span']['stream_xref'],[]).append(p)
+  for x in range(1,a.xref_length()):
+   if not a.xref_is_stream(x):continue
+   expected_stream=a.xref_stream(x)
+   for p in sorted(grouped.get(x,[]),key=lambda e:e['span']['stream_start'],reverse=True):
+    z=p['span'];body=expected_stream[z['stream_start']:z['stream_end']]
+    tm=list(re.finditer(rb'[-\d.]+\s+[-\d.]+\s+[-\d.]+\s+[-\d.]+\s+[-\d.]+\s+[-\d.]+\s+Tm',body))[0]
+    new=body[:tm.end()]+b'\n<'+p['encoded'].hex().encode()+b'> Tj\nET'
+    expected_stream=expected_stream[:z['stream_start']]+new+expected_stream[z['stream_end']:]
+   if b.xref_stream(x)!=expected_stream:problems.append('unauthorised native PDF stream change: '+str(x))
   for p in plan:
    s=p['span'];err=fit(s,p['replace'],fonts(a)[s['font_ref']],manifest['policy'])
    if err:problems.append(s['id']+': '+err)
@@ -176,7 +193,7 @@ def verify(master,out,manifest,plan):
     fm=fonts(a)[s['font_ref']];width=sum(fm['widths'].get(fm['encode'][c],fm['default_width']) for c in p['replace'])/1000*s['size'];x0,y0,x1,y1=s['bbox']
     # One pixel edge tolerance is documented. Never mask a section or whole page.
     import math
-    draw.rectangle((math.floor(x0*2)-1,math.floor(y0*2)-1,math.ceil(max(x1,s['origin'][0]+width)*2)+1,math.ceil(y1*2)+1),fill=0)
+    draw.rectangle((math.floor(x0*2)-1,math.floor(y0*2)-1,math.ceil(max(x1,s.get('glyph_origin',s['origin'])[0]+width)*2)+1,math.ceil(y1*2)+1),fill=0)
    pixel_count+=sum(any(rgb) for rgb in diff.getdata())
   if pixel_count:problems.append(f'unexpected pixels outside approved regions: {pixel_count}')
   if '\ufffd' in ''.join(p.get_text() for p in b):problems.append('invalid ATS text')

@@ -44,6 +44,11 @@
       "id": "p0-s0",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        164.88815307617188,
+        134.4944610595703
+      ],
+      "label": false,
       "available_width": 408.8618469238281,
       "neighbours": [
         [
@@ -88,6 +93,11 @@
       "id": "p0-s1",
       "section": "Professional Summary",
       "editable": true,
+      "glyph_origin": [
+        34.67842102050781,
+        81.48799896240234
+      ],
+      "label": false,
       "available_width": 539.0715789794922,
       "neighbours": [
         [
@@ -120,6 +130,11 @@
       "id": "p0-s2",
       "section": "Professional Summary",
       "editable": true,
+      "glyph_origin": [
+        34.67842102050781,
+        92.74223327636719
+      ],
+      "label": false,
       "available_width": 539.0715789794922,
       "neighbours": [
         [
@@ -158,6 +173,11 @@
       "id": "p0-s3",
       "section": "Professional Summary",
       "editable": true,
+      "glyph_origin": [
+        34.67842102050781,
+        103.99647521972656
+      ],
+      "label": false,
       "available_width": 539.0715789794922,
       "neighbours": [
         [
@@ -190,6 +210,11 @@
       "id": "p0-s4",
       "section": "Mukund Didwania",
       "editable": false,
+      "glyph_origin": [
+        247.63519287109375,
+        20.576387405395508
+      ],
+      "label": false,
       "available_width": 326.11480712890625,
       "neighbours": [
         [
@@ -224,6 +249,11 @@
       "id": "p0-s5",
       "section": "Mukund Didwania",
       "editable": false,
+      "glyph_origin": [
+        352.7802734375,
+        20.576387405395508
+      ],
+      "label": false,
       "available_width": 220.9697265625,
       "neighbours": [
         [
@@ -258,6 +288,11 @@
       "id": "p0-s6",
       "section": "Mukund Didwania",
       "editable": false,
+      "glyph_origin": [
+        151.1300811767578,
+        33.33119201660156
+      ],
+      "label": false,
       "available_width": 422.6199188232422,
       "neighbours": [
         [
@@ -298,6 +333,11 @@
       "id": "p0-s7",
       "section": "Mukund Didwania",
       "editable": false,
+      "glyph_origin": [
+        211.48095703125,
+        45.335716247558594
+      ],
+      "label": false,
       "available_width": 362.26904296875,
       "neighbours": [
         [
@@ -326,6 +366,11 @@
       "id": "p0-s8",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        34.67842102050781,
+        776.0090942382812
+      ],
+      "label": false,
       "available_width": 539.0715789794922,
       "neighbours": [
         [
@@ -360,6 +405,11 @@
       "id": "p0-s9",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        787.8310546875
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -394,6 +444,11 @@
       "id": "p0-s10",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        799.0852661132812
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -428,6 +483,11 @@
       "id": "p0-s11",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        810.3395385742188
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -462,6 +522,11 @@
       "id": "p0-s12",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        821.59375
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -490,6 +555,11 @@
       "id": "p0-s13",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        32.46084213256836,
+        227.84864807128906
+      ],
+      "label": false,
       "available_width": 541.2891578674316,
       "neighbours": [
         [
@@ -530,6 +600,11 @@
       "id": "p0-s14",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        249.36526489257812
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -582,6 +657,11 @@
       "id": "p0-s15",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        260.6195068359375
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -628,7 +708,12 @@
       "id": "p0-s16",
       "section": "Education",
       "editable": false,
-      "available_width": 503.85518646240234,
+      "glyph_origin": [
+        72.39478302001953,
+        260.6195068359375
+      ],
+      "label": false,
+      "available_width": 501.35521697998047,
       "neighbours": [
         [
           29.88364601135254,
@@ -674,6 +759,11 @@
       "id": "p0-s17",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        271.8737487792969
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -720,6 +810,11 @@
       "id": "p0-s18",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        24.540246963500977,
+        406.4305725097656
+      ],
+      "label": false,
       "available_width": 549.209753036499,
       "neighbours": [
         [
@@ -766,6 +861,11 @@
       "id": "p0-s19",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        630.4641723632812
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -816,6 +916,11 @@
       "id": "p0-s20",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        640.2178344726562
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -866,6 +971,11 @@
       "id": "p0-s21",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        649.9714965820312
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -910,6 +1020,11 @@
       "id": "p0-s22",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        659.7252197265625
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -960,6 +1075,11 @@
       "id": "p0-s23",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        717.7703247070312
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -1004,6 +1124,11 @@
       "id": "p0-s24",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        729.0245361328125
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -1054,6 +1179,11 @@
       "id": "p0-s25",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        740.27880859375
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -1104,6 +1234,11 @@
       "id": "p0-s26",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        751.5330200195312
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -1154,6 +1289,11 @@
       "id": "p0-s27",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        146.5690155029297
+      ],
+      "label": false,
       "available_width": 541.9072933197021,
       "neighbours": [
         [
@@ -1203,7 +1343,12 @@
       "size": 10.00126838684082,
       "id": "p0-s28",
       "section": "Technical Skills",
-      "editable": false,
+      "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        157.82325744628906
+      ],
+      "label": true,
       "available_width": 155.55820274353027,
       "neighbours": [
         [
@@ -1224,7 +1369,11 @@
           373.073486328125,
           171.49095153808594
         ]
-      ]
+      ],
+      "stream_xref": 16,
+      "stream_start": 44595,
+      "stream_end": 45383,
+      "font_ref": "F5"
     },
     {
       "page": 0,
@@ -1244,6 +1393,11 @@
       "id": "p0-s29",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        187.40090942382812,
+        158.50350952148438
+      ],
+      "label": false,
       "available_width": 386.3490905761719,
       "neighbours": [
         [
@@ -1288,7 +1442,12 @@
       "id": "p0-s30",
       "section": "Technical Skills",
       "editable": true,
-      "available_width": 544.7430057525635,
+      "glyph_origin": [
+        31.5157527923584,
+        169.3275909423828
+      ],
+      "label": false,
+      "available_width": 542.2342472076416,
       "neighbours": [
         [
           31.84270668029785,
@@ -1338,6 +1497,11 @@
       "id": "p0-s31",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        207.45445251464844,
+        181.01197814941406
+      ],
+      "label": false,
       "available_width": 366.29554748535156,
       "neighbours": [
         [
@@ -1382,6 +1546,11 @@
       "id": "p0-s32",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        194.0168914794922
+      ],
+      "label": false,
       "available_width": 541.9072933197021,
       "neighbours": [
         [
@@ -1432,6 +1601,11 @@
       "id": "p0-s33",
       "section": "Technical Skills",
       "editable": true,
+      "glyph_origin": [
+        158.1715545654297,
+        207.94964599609375
+      ],
+      "label": false,
       "available_width": 415.5784454345703,
       "neighbours": [
         [
@@ -1469,7 +1643,12 @@
       "size": 10.00126838684082,
       "id": "p0-s34",
       "section": "Technical Skills",
-      "editable": false,
+      "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        181.2620849609375
+      ],
+      "label": true,
       "available_width": 175.6117458343506,
       "neighbours": [
         [
@@ -1490,7 +1669,11 @@
           263.741943359375,
           196.1802520751953
         ]
-      ]
+      ],
+      "stream_xref": 16,
+      "stream_start": 54609,
+      "stream_end": 55488,
+      "font_ref": "F5"
     },
     {
       "page": 0,
@@ -1509,7 +1692,12 @@
       "size": 10.00126838684082,
       "id": "p0-s35",
       "section": "Technical Skills",
-      "editable": false,
+      "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        207.19935607910156
+      ],
+      "label": true,
       "available_width": 126.32884788513184,
       "neighbours": [
         [
@@ -1524,7 +1712,11 @@
           425.4161376953125,
           210.11300659179688
         ]
-      ]
+      ],
+      "stream_xref": 16,
+      "stream_start": 55613,
+      "stream_end": 56194,
+      "font_ref": "F5"
     },
     {
       "page": 0,
@@ -1544,6 +1736,11 @@
       "id": "p0-s36",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.913619995117188,
+        237.63331604003906
+      ],
+      "label": false,
       "available_width": 543.8363800048828,
       "neighbours": [
         [
@@ -1596,6 +1793,11 @@
       "id": "p0-s37",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        142.12777709960938,
+        237.63331604003906
+      ],
+      "label": false,
       "available_width": 431.6222229003906,
       "neighbours": [
         [
@@ -1647,7 +1849,12 @@
       "size": 10.00126838684082,
       "id": "p0-s38",
       "section": "Technical Skills",
-      "editable": false,
+      "editable": true,
+      "glyph_origin": [
+        31.84270668029785,
+        133.99427795410156
+      ],
+      "label": true,
       "available_width": 133.04544639587402,
       "neighbours": [
         [
@@ -1668,7 +1875,11 @@
           104.95518493652344,
           121.96805572509766
         ]
-      ]
+      ],
+      "stream_xref": 16,
+      "stream_start": 58381,
+      "stream_end": 59076,
+      "font_ref": "F5"
     },
     {
       "page": 0,
@@ -1688,6 +1899,11 @@
       "id": "p0-s39",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        32.3748779296875,
+        683.5691528320312
+      ],
+      "label": false,
       "available_width": 541.3751220703125,
       "neighbours": [
         [
@@ -1746,6 +1962,11 @@
       "id": "p0-s40",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        32.3748779296875,
+        694.8233642578125
+      ],
+      "label": false,
       "available_width": 151.39297485351562,
       "neighbours": [
         [
@@ -1798,6 +2019,11 @@
       "id": "p0-s41",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        115.7031478881836,
+        694.8233642578125
+      ],
+      "label": false,
       "available_width": 458.0468521118164,
       "neighbours": [
         [
@@ -1850,6 +2076,11 @@
       "id": "p0-s42",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        183.76785278320312,
+        694.8233642578125
+      ],
+      "label": false,
       "available_width": 389.9821472167969,
       "neighbours": [
         [
@@ -1902,6 +2133,11 @@
       "id": "p0-s43",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        189.9503173828125,
+        593.0966186523438
+      ],
+      "label": false,
       "available_width": 383.7996826171875,
       "neighbours": [
         [
@@ -1948,6 +2184,11 @@
       "id": "p0-s44",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        30.761430740356445,
+        606.6017456054688
+      ],
+      "label": false,
       "available_width": 542.9885692596436,
       "neighbours": [
         [
@@ -2000,6 +2241,11 @@
       "id": "p0-s45",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        105.02769470214844,
+        606.6017456054688
+      ],
+      "label": false,
       "available_width": 468.72230529785156,
       "neighbours": [
         [
@@ -2056,6 +2302,11 @@
       "id": "p0-s46",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        189.9503173828125,
+        620.1068115234375
+      ],
+      "label": false,
       "available_width": 383.7996826171875,
       "neighbours": [
         [
@@ -2108,6 +2359,11 @@
       "id": "p0-s47",
       "section": "Professional Summary",
       "editable": false,
+      "glyph_origin": [
+        37.59748840332031,
+        64.47100067138672
+      ],
+      "label": false,
       "available_width": 536.1525115966797,
       "neighbours": []
     },
@@ -2129,6 +2385,11 @@
       "id": "p0-s48",
       "section": "Technical Skills",
       "editable": false,
+      "glyph_origin": [
+        31.72418212890625,
+        119.5888442993164
+      ],
+      "label": false,
       "available_width": 542.0258178710938,
       "neighbours": [
         [
@@ -2163,6 +2424,11 @@
       "id": "p0-s49",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        223.8556365966797
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -2203,6 +2469,11 @@
       "id": "p0-s50",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        30.04285430908203,
+        514.6669921875
+      ],
+      "label": false,
       "available_width": 543.707145690918,
       "neighbours": [
         [
@@ -2231,6 +2502,11 @@
       "id": "p0-s51",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        753.8217163085938
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -2271,6 +2547,11 @@
       "id": "p0-s52",
       "section": "Certifications",
       "editable": false,
+      "glyph_origin": [
+        37.43336868286133,
+        765.8262329101562
+      ],
+      "label": false,
       "available_width": 536.3166313171387,
       "neighbours": [
         [
@@ -2311,6 +2592,11 @@
       "id": "p0-s53",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        534.8096923828125
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -2351,6 +2637,11 @@
       "id": "p0-s54",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        39.09850311279297,
+        552.951904296875
+      ],
+      "label": false,
       "available_width": 534.651496887207,
       "neighbours": [
         [
@@ -2395,6 +2686,11 @@
       "id": "p0-s55",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        39.09850311279297,
+        562.70556640625
+      ],
+      "label": false,
       "available_width": 534.651496887207,
       "neighbours": [
         [
@@ -2441,6 +2737,11 @@
       "id": "p0-s56",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        39.09850311279297,
+        572.459228515625
+      ],
+      "label": false,
       "available_width": 534.651496887207,
       "neighbours": [
         [
@@ -2485,6 +2786,11 @@
       "id": "p0-s57",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        39.09850311279297,
+        582.2129516601562
+      ],
+      "label": false,
       "available_width": 534.651496887207,
       "neighbours": [
         [
@@ -2535,6 +2841,11 @@
       "id": "p0-s58",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        39.09850311279297,
+        591.9666137695312
+      ],
+      "label": false,
       "available_width": 534.651496887207,
       "neighbours": [
         [
@@ -2581,6 +2892,11 @@
       "id": "p0-s59",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        30.24165153503418,
+        553.48681640625
+      ],
+      "label": false,
       "available_width": 8.856851577758789,
       "neighbours": [
         [
@@ -2621,6 +2937,11 @@
       "id": "p0-s60",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        30.91845703125,
+        532.0735473632812
+      ],
+      "label": false,
       "available_width": 542.83154296875,
       "neighbours": [
         [
@@ -2661,6 +2982,11 @@
       "id": "p0-s61",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        80.35505676269531,
+        532.0735473632812
+      ],
+      "label": false,
       "available_width": 493.3949432373047,
       "neighbours": [
         [
@@ -2701,6 +3027,11 @@
       "id": "p0-s62",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        30.82865333557129,
+        542.5775146484375
+      ],
+      "label": false,
       "available_width": 542.9213466644287,
       "neighbours": [
         [
@@ -2757,6 +3088,11 @@
       "id": "p0-s63",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        31.361228942871094,
+        618.3845825195312
+      ],
+      "label": false,
       "available_width": 542.3887710571289,
       "neighbours": [
         [
@@ -2813,6 +3149,11 @@
       "id": "p0-s64",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        286.51171875
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -2859,6 +3200,11 @@
       "id": "p0-s65",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        181.82762145996094,
+        286.51171875
+      ],
+      "label": false,
       "available_width": 391.92237854003906,
       "neighbours": [
         [
@@ -2905,6 +3251,11 @@
       "id": "p0-s66",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        297.7659606933594
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -2957,6 +3308,11 @@
       "id": "p0-s67",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.88364601135254,
+        311.6387634277344
+      ],
+      "label": false,
       "available_width": 543.8663539886475,
       "neighbours": [
         [
@@ -3003,6 +3359,11 @@
       "id": "p0-s68",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        72.39185333251953,
+        311.6387634277344
+      ],
+      "label": false,
       "available_width": 501.35814666748047,
       "neighbours": [
         [
@@ -3049,6 +3410,11 @@
       "id": "p0-s69",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.995756149291992,
+        298.0986022949219
+      ],
+      "label": false,
       "available_width": 543.754243850708,
       "neighbours": [
         [
@@ -3101,6 +3467,11 @@
       "id": "p0-s70",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        29.194564819335938,
+        247.9204864501953
+      ],
+      "label": false,
       "available_width": 544.5554351806641,
       "neighbours": [
         [
@@ -3153,6 +3524,11 @@
       "id": "p0-s71",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        32.2311897277832,
+        705.65576171875
+      ],
+      "label": false,
       "available_width": 541.5188102722168,
       "neighbours": [
         [
@@ -3209,6 +3585,11 @@
       "id": "p0-s72",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        30.24165153503418,
+        573.3342895507812
+      ],
+      "label": false,
       "available_width": 8.856851577758789,
       "neighbours": [
         [
@@ -3249,6 +3630,11 @@
       "id": "p0-s73",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        31.23703384399414,
+        631.8377075195312
+      ],
+      "label": false,
       "available_width": 542.5129661560059,
       "neighbours": [
         [
@@ -3295,6 +3681,11 @@
       "id": "p0-s74",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        31.23703384399414,
+        650.1846313476562
+      ],
+      "label": false,
       "available_width": 13.560844421386719,
       "neighbours": [
         [
@@ -3335,6 +3726,11 @@
       "id": "p0-s75",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        31.84270668029785,
+        718.5122680664062
+      ],
+      "label": false,
       "available_width": 12.955171585083008,
       "neighbours": [
         [
@@ -3375,6 +3771,11 @@
       "id": "p0-s76",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        31.84270668029785,
+        738.35986328125
+      ],
+      "label": false,
       "available_width": 541.9072933197021,
       "neighbours": [
         [
@@ -3415,6 +3816,11 @@
       "id": "p0-s77",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        670.4507446289062
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -3465,6 +3871,11 @@
       "id": "p0-s78",
       "section": "Projects",
       "editable": true,
+      "glyph_origin": [
+        44.79787826538086,
+        680.2044067382812
+      ],
+      "label": false,
       "available_width": 528.9521217346191,
       "neighbours": [
         [
@@ -3527,6 +3938,11 @@
       "id": "p0-s79",
       "section": "Projects",
       "editable": false,
+      "glyph_origin": [
+        31.23703384399414,
+        670.0321655273438
+      ],
+      "label": false,
       "available_width": 13.560844421386719,
       "neighbours": [
         [
@@ -3573,6 +3989,11 @@
       "id": "p0-s80",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        38.889404296875,
+        477.8936462402344
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -3625,6 +4046,11 @@
       "id": "p0-s81",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        489.1873779296875
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -3675,6 +4101,11 @@
       "id": "p0-s82",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        500.4416198730469
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -3719,6 +4150,11 @@
       "id": "p0-s83",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        38.88004684448242,
+        387.9617919921875
+      ],
+      "label": false,
       "available_width": 534.8699531555176,
       "neighbours": [
         [
@@ -3771,6 +4207,11 @@
       "id": "p0-s84",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.88004684448242,
+        401.34185791015625
+      ],
+      "label": false,
       "available_width": 534.8699531555176,
       "neighbours": [
         [
@@ -3833,6 +4274,11 @@
       "id": "p0-s85",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.88004684448242,
+        411.8458251953125
+      ],
+      "label": false,
       "available_width": 534.8699531555176,
       "neighbours": [
         [
@@ -3883,6 +4329,11 @@
       "id": "p0-s86",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        148.13888549804688,
+        428.5520935058594
+      ],
+      "label": false,
       "available_width": 425.6111145019531,
       "neighbours": [
         [
@@ -3933,6 +4384,11 @@
       "id": "p0-s87",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        441.6399841308594
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -3989,6 +4445,11 @@
       "id": "p0-s88",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        452.89422607421875
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -4039,6 +4500,11 @@
       "id": "p0-s89",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.92487335205078,
+        343.4949951171875
+      ],
+      "label": false,
       "available_width": 547.8251266479492,
       "neighbours": [
         [
@@ -4085,6 +4551,11 @@
       "id": "p0-s90",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.88004684448242,
+        356.87506103515625
+      ],
+      "label": false,
       "available_width": 534.8699531555176,
       "neighbours": [
         [
@@ -4141,6 +4612,11 @@
       "id": "p0-s91",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.88004684448242,
+        367.3790283203125
+      ],
+      "label": false,
       "available_width": 534.8699531555176,
       "neighbours": [
         [
@@ -4191,6 +4667,11 @@
       "id": "p0-s92",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        40.226806640625,
+        378.192626953125
+      ],
+      "label": false,
       "available_width": 533.523193359375,
       "neighbours": [
         [
@@ -4241,6 +4722,11 @@
       "id": "p0-s93",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        40.226806640625,
+        389.4468688964844
+      ],
+      "label": false,
       "available_width": 533.523193359375,
       "neighbours": [
         [
@@ -4293,6 +4779,11 @@
       "id": "p0-s94",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.92487335205078,
+        344.9955749511719
+      ],
+      "label": false,
       "available_width": 94.83373260498047,
       "neighbours": [
         [
@@ -4339,6 +4830,11 @@
       "id": "p0-s95",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.92487335205078,
+        416.1903991699219
+      ],
+      "label": false,
       "available_width": 547.8251266479492,
       "neighbours": [
         [
@@ -4397,6 +4893,11 @@
       "id": "p0-s96",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.92487335205078,
+        427.44464111328125
+      ],
+      "label": false,
       "available_width": 547.8251266479492,
       "neighbours": [
         [
@@ -4443,6 +4944,11 @@
       "id": "p0-s97",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        120.75860595703125,
+        345.330810546875
+      ],
+      "label": false,
       "available_width": 452.99139404296875,
       "neighbours": [
         [
@@ -4493,6 +4999,11 @@
       "id": "p0-s98",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        50.3649787902832,
+        432.8486328125
+      ],
+      "label": false,
       "available_width": 523.3850212097168,
       "neighbours": [
         [
@@ -4539,6 +5050,11 @@
       "id": "p0-s99",
       "section": "Education",
       "editable": false,
+      "glyph_origin": [
+        28.760587692260742,
+        315.91998291015625
+      ],
+      "label": false,
       "available_width": 544.9894123077393,
       "neighbours": [
         [
@@ -4579,6 +5095,11 @@
       "id": "p0-s100",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        28.760587692260742,
+        327.92449951171875
+      ],
+      "label": false,
       "available_width": 544.9894123077393,
       "neighbours": [
         [
@@ -4607,6 +5128,11 @@
       "id": "p0-s101",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        465.2333984375
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -4657,6 +5183,11 @@
       "id": "p0-s102",
       "section": "Work Experience",
       "editable": true,
+      "glyph_origin": [
+        38.889404296875,
+        475.73736572265625
+      ],
+      "label": false,
       "available_width": 534.860595703125,
       "neighbours": [
         [
@@ -4713,6 +5244,11 @@
       "id": "p0-s103",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        26.45704460144043,
+        357.6703796386719
+      ],
+      "label": false,
       "available_width": 12.423002243041992,
       "neighbours": [
         [
@@ -4765,6 +5301,11 @@
       "id": "p0-s104",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        26.45704460144043,
+        376.7875671386719
+      ],
+      "label": false,
       "available_width": 547.2929553985596,
       "neighbours": [
         [
@@ -4811,6 +5352,11 @@
       "id": "p0-s105",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        26.45704460144043,
+        401.8870849609375
+      ],
+      "label": false,
       "available_width": 12.423002243041992,
       "neighbours": [
         [
@@ -4869,6 +5415,11 @@
       "id": "p0-s106",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.79462432861328,
+        446.6919250488281
+      ],
+      "label": false,
       "available_width": 547.9553756713867,
       "neighbours": [
         [
@@ -4909,6 +5460,11 @@
       "id": "p0-s107",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.79462432861328,
+        466.5394287109375
+      ],
+      "label": false,
       "available_width": 547.9553756713867,
       "neighbours": [
         [
@@ -4955,6 +5511,11 @@
       "id": "p0-s108",
       "section": "Work Experience",
       "editable": false,
+      "glyph_origin": [
+        25.79462432861328,
+        489.3880615234375
+      ],
+      "label": false,
       "available_width": 13.094779968261719,
       "neighbours": [
         [
