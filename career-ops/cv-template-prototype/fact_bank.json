@@ -1,13 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "master_sha256": "b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58",
   "review": "Engineering-curated paraphrases checked against cited master facts; no model-authored facts.",
   "slots": {
     "s04": {
       "original": {
-        "text": "MSc Information Security graduate with hands-on IT support experience across Windows, Microsoft 365 and endpoint troubleshooting. CompTIA Security+ and ISC2 CC certified, with practical exposure to Python, PowerShell, SQL and log analysis, and a strong interest in trading technology and production support.",
+        "text": "MSc Information Security graduate with CompTIA Security+ and ISC2 CC certifications. IT support experience across Windows, Microsoft 365 and endpoint troubleshooting. Used Python, PowerShell, SQL and Windows Event Logs in security projects, account administration and day-to-day technical support.",
         "sources": [
-          "s04"
+          "s04",
+          "s13",
+          "s45",
+          "s46",
+          "s21",
+          "s40"
         ]
       },
       "engineering": {
@@ -121,13 +126,13 @@
     },
     "s21": {
       "original": {
-        "text": "Manage typically 4–5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
+        "text": "Manage typically 4â€“5 access requests daily through on-premises Active Directory, verifying business approval, granting time-limited permissions and documenting access periods and extensions.",
         "sources": [
           "s21"
         ]
       },
       "engineering": {
-        "text": "Administer 4–5 daily access requests in on-premises Active Directory, verifying approval, recording access periods and managing time-limited permissions.",
+        "text": "Administer 4â€“5 daily access requests in on-premises Active Directory, verifying approval, recording access periods and managing time-limited permissions.",
         "sources": [
           "s21"
         ]
@@ -135,13 +140,13 @@
     },
     "s22": {
       "original": {
-        "text": "Investigate 4–5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
+        "text": "Investigate 4â€“5 suspicious emails daily, checking sender and link domains for impersonation, documenting findings and alerting colleagues to recurring phishing tactics.",
         "sources": [
           "s22"
         ]
       },
       "engineering": {
-        "text": "Analyse 4–5 suspicious emails daily, checking sender and link domains, recording findings and communicating recurring phishing patterns to colleagues.",
+        "text": "Analyse 4â€“5 suspicious emails daily, checking sender and link domains, recording findings and communicating recurring phishing patterns to colleagues.",
         "sources": [
           "s22"
         ]
@@ -149,13 +154,13 @@
     },
     "s23": {
       "original": {
-        "text": "Serve as the first point of contact for IT issues for 15 employees across 15–20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
+        "text": "Serve as the first point of contact for IT issues for 15 employees across 15â€“20 devices, troubleshooting access and system problems, monitoring server health and maintaining password and website-access controls.",
         "sources": [
           "s23"
         ]
       },
       "engineering": {
-        "text": "Support 15 employees using 15–20 devices, troubleshooting access and system issues, monitoring server health and maintaining password and website-access controls.",
+        "text": "Support 15 employees using 15â€“20 devices, troubleshooting access and system issues, monitoring server health and maintaining password and website-access controls.",
         "sources": [
           "s23"
         ]
@@ -177,13 +182,13 @@
     },
     "s26": {
       "original": {
-        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents through internal reporting systems, apply temporary controls and escalate unresolved risks.",
+        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns. Document incidents through internal reporting systems, apply temporary controls and escalate unresolved risks.",
         "sources": [
           "s26"
         ]
       },
       "engineering": {
-        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns; document incidents, apply temporary controls and escalate unresolved risks.",
+        "text": "Handle 15+ operational issues weekly, including product-date exceptions and safety concerns. Document incidents, apply temporary controls and escalate unresolved risks.",
         "sources": [
           "s26"
         ]
@@ -191,13 +196,13 @@
     },
     "s27": {
       "original": {
-        "text": "Coordinate 7–8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
+        "text": "Coordinate 7â€“8 colleagues per shift, communicating control requirements, assigning corrective actions and following up to ensure identified risks are addressed.",
         "sources": [
           "s27"
         ]
       },
       "engineering": {
-        "text": "Coordinate 7–8 colleagues per shift, communicating requirements, assigning corrective actions and following up to confirm issues are addressed.",
+        "text": "Coordinate 7â€“8 colleagues per shift, communicating requirements, assigning corrective actions and following up to confirm issues are addressed.",
         "sources": [
           "s27"
         ]
@@ -219,13 +224,13 @@
     },
     "s32": {
       "original": {
-        "text": "Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content.",
+        "text": "Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives. Kept all detection local to the browser to protect sensitive content.",
         "sources": [
           "s32"
         ]
       },
       "engineering": {
-        "text": "Achieved 93.7% accuracy over 150+ manual tests, including false-positive checks; kept detection local to protect sensitive content.",
+        "text": "Achieved 93.7% accuracy over 150+ manual tests, including false-positive checks. Kept detection local to protect sensitive content.",
         "sources": [
           "s32"
         ]
@@ -319,13 +324,13 @@
     },
     "s43": {
       "original": {
-        "text": "Designed the tool for internal troubleshooting, keeping log analysis local; currently developing background monitoring and automated alerts for unexpected errors.",
+        "text": "Designed the tool for internal troubleshooting, keeping log analysis local. Currently developing background monitoring and automated alerts for unexpected errors.",
         "sources": [
           "s43"
         ]
       },
       "engineering": {
-        "text": "Keep log analysis local for internal troubleshooting; developing background monitoring and automated alerts for unexpected errors.",
+        "text": "Keep log analysis local for internal troubleshooting. Developing background monitoring and automated alerts for unexpected errors.",
         "sources": [
           "s43"
         ]

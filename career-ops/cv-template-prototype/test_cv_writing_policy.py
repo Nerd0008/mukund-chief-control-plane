@@ -33,3 +33,20 @@ def test_prompt_always_includes_policy():
     source=(cv.HERE/'cv_content_adapter.py').read_text(encoding='utf-8')
     assert "'writing_policy':policy()" in source
     assert "policy()['guidance']" in source
+
+
+def test_owner_punctuation_preferences():
+    assert check('Investigated incidents; documented findings.')
+    assert check('Security experience — supported users.')
+    assert not check('Supported 15–20 devices. Documented findings.')
+
+def test_all_curated_variants_still_fit():
+    bank=json.loads((cv.HERE/'fact_bank.json').read_text(encoding='utf-8'))
+    for variant in ['original','engineering']:
+        content={key:dict(options[variant],variant=variant) for key,options in bank['slots'].items()}
+        assert not cv.fit(cv.load_layout(),content)
+
+
+def test_broader_generic_and_inflated_language():
+    for text in ['Results-driven professional with a proven track record.', 'Uniquely positioned to foster innovation.', 'Deliver transformative results and unlock potential.']:
+        assert check(text)

@@ -10,7 +10,7 @@ def bounded(request):
     s=next(s for s in cv.load_layout()['slots'] if s['bullet'] and s['variable'])
     return {s['id']:{'text':s['text'][2:],'sources':[s['id']]}}
 def shorten(request):
-    l=cv.load_layout(); ss=[s for s in l['slots'] if s['bullet'] and s['variable']]
+    l=cv.load_layout(); ss=[s for s in l['slots'] if s['bullet'] and s['variable']][:2]
     s=ss[0]
     if request['mode']=='shorten': return {s['id']:{'text':s['text'][2:],'sources':[s['id']]}}
     return {s['id']:{'text':' '.join(x['text'][2:] for x in ss),'sources':[x['id'] for x in ss]}}

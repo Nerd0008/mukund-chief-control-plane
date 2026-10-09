@@ -57,3 +57,6 @@ as an immutable dependency. Do not change layout, invent facts, or enter a repai
 loop to satisfy these checks. The local reference avoids a web dependency in each
 three-minute CV job; future source updates require a reviewed policy revision.
 Offline validation: 64 passed, 0 failed; zero provider calls.
+
+2026-10-09 wording correction: revised curated sentence boundaries and summary; reject generic self-praise, vague impact, inflated filler, chatbot text, placeholders, contrived contrasts and owner-disallowed semicolons/em dashes. Numeric ranges remain permitted. Both full wording-bank variants fit the unchanged layout. 67 focused tests passed; zero provider calls. Capacity-only fixtures now use two provenance-backed punctuation-compliant bullets so they continue isolating shortening behavior. Existing PDFs are not rewritten.
+
