@@ -120,6 +120,13 @@ def validate(layout, content, pdf):
             if s['baseline']-.2<=t['origin'][1]<=region.y1 and region.x0-.1<=t['origin'][0]<=region.x1:
                 found.append(t)
         actual=norm(' '.join(t['text'] for t in found))
+        body=[t for t in found if t['text'].strip() and t['text'].strip()!='\u2022']
+        origins={round(t['origin'][1],3) for t in body}
+        for y in origins:
+            first=min(t['origin'][0] for t in body if abs(t['origin'][1]-y)<.001)
+            expected_x=s['x']+(6.75 if s['bullet'] else 0)
+            if abs(first-expected_x)>.1:
+                failures.append({'slot':s['id'],'reason':'inconsistent paragraph/bullet indentation'})
         if actual!=norm(expected_text(s,content.get(s['id'],{}).get('text'))):
             failures.append({'slot':s['id'],'reason':'missing/corrupted/overflow ATS text','expected':expected_text(s,content.get(s['id'],{}).get('text')),'actual':actual})
         allowed={'TimesNewRomanPSMT','TimesNewRomanPS-BoldMT','TimesNewRomanPS-BoldItalicMT','TimesNewRomanPS-BoldItal'}
@@ -133,6 +140,7 @@ def validate(layout, content, pdf):
             if not s['heading'] and (s['bullet'] or s['section']=='Professional Summary') and ('Bold' in t['font'] or 'Ital' in t['font']):
                 failures.append({'slot':s['id'],'reason':'unexpected emphasis'})
             if t['bbox'][2]>region.x1+.2: failures.append({'slot':s['id'],'reason':'clipped/overflow text'})
+            if t['bbox'][3]>region.y1+.2: failures.append({'slot':s['id'],'reason':'vertical text overflow'})
             offset=(t['origin'][1]-s['baseline'])/s['leading']
             if abs(offset-round(offset))*s['leading']>.2:
                 failures.append({'slot':s['id'],'reason':'baseline/line spacing moved'})

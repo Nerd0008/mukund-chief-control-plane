@@ -149,21 +149,40 @@ canonical regional tracker. Do not ask whether to log it; log it, then report.
 - The write guard refuses a workbook that changed between read and write — do not fight it,
   re-read and re-apply.
 
-## CV tailoring — immutable golden master
+## CV tailoring — approved fast flow compiler
 
-The sole authoritative PDF is `career-ops/master/CV_FORMAT_MASTER.pdf`; its versioned span/layout manifest is `career-ops/master/cv_master_manifest.json`. Never regenerate, edit, redact/reinsert, or repair this master. Do not use the historical Downloads master.
+The owner approved the separate flow template on 2026-10-09 ("Perfect"). Its immutable reference is
+`career-ops/cv-template-prototype/source-master.pdf`, SHA-256
+`b5a4e2ae8a845e020661819c7ecaecdd80a9fc793981dec93ea6be4d2cf7db58`.
+The old PDF-span/exact-character-count workflow is RETIRED. Do not use cv_tailor.py,
+cv_golden.py, span edits, the historical CV_FORMAT_MASTER.pdf, or manual PDF surgery for new CVs.
 
-The master is a visual template and a source of verified professional facts, not a wording template. Tailor content freely to each JD, including skill labels and experience/project descriptions; every editable replacement MUST have exactly the original character count (excluding immutable leading/trailing PDF whitespace). Preserve the layout and truthful facts. Skill labels must also preserve their rendered width within 0.5 point so label-to-value gaps remain identical; leave a label unchanged if a truthful rewrite cannot fit.
+1. Read the JD using read-only tools. Preserve the existing eligibility rules above.
+2. Call `career_cv_compile` EXACTLY ONCE with the full JD text and a descriptive `job_id`.
+   `career_cv_master` is optional for reading verified facts. It no longer returns editable glyph spans.
+3. On PASS, attach ONLY the returned `verified_pdf`. The attachment guard independently rechecks
+   the PDF, content, approved template and dependency hashes immediately before sending.
+4. On failure, report "CV generation failed", the stage/affected element and reason. Stop.
+   Never substitute the master, attach a draft, retry the tool, edit code, or start a new workspace
+   to evade the budget. A provider outage is a bounded failure, not a formatting engineering task.
 
-Normal application jobs MUST NOT edit cv_tailor.py, cv_golden.py, hermes_cv_guard.py, the manifest or font/layout configuration. Do not extend the renderer during a job, use --force, geometry overrides, font substitution, manual reinsertion, a parallel PDF builder, or an open-ended visual repair loop.
+The compiler uses Hermes' existing native Nous/LongCat binding with reasoning enabled for one
+content-planning call, with at most one targeted content shortening pass and two renders. The
+model selects source-grounded wording; it never moves sections, changes styles, or invents facts.
+The summary MUST foreground MSc Information Security, CompTIA Security+ and ISC2 CC every time.
+All six section headings are 11 pt bold; BCA is upright bold. Body lines and consecutive bullet
+paragraphs use a consistent 11 pt baseline interval; bullets have aligned continuation text.
 
-Use the bounded workspace `%LOCALAPPDATA%/hermes/runtime/career-ops/cv-output/<application-job>/` only. Read the JD and immutable manifest; produce `cv_edits.json` with `edits: [{span_id, replace, alternatives}]`. Each original editable span has its own fixed font, origin, rendered-width limits. Supply at most two content-only alternatives. There are at most THREE fit attempts per span, persisted across command re-entry, and ONE PDF render per job. The native CV agent budget is eight turns. Failure ends the job; do not rename the output or launch a new job to evade the budget.
+Target elapsed time <=120 seconds; HARD STOP 180 seconds from JD processing, including the
+compiler. Native CV orchestration is capped at four turns; non-CV work retains its normal budget.
+The native gateway hard-interrupt seam enforces the CV deadline, and the compiler terminates its
+worker independently at its remaining deadline. Failed or timed-out jobs preserve analysis/drafts
+but cannot deliver PDFs. No blind retry when the provider is unavailable.
 
-PREFERRED HERMES PATH: call `career_cv_master`, select editable span IDs using the JD, then call `career_cv_build` with content-only edits and up to two alternatives. This tool creates the workspace/edits JSON and invokes the verified renderer directly. No shell commands, git checks, code inspection, execute_code or renderer unlock are required. Do not look for removed include_blanks/bold_prefix/char_budget_exempt/--force repair markers.
-
-CLI maintenance alternative: Run the exact Hermes Python interpreter and canonical absolute `career-ops/cv_tailor.py` entrypoint with --edits and --out. No shell chains. The pipeline takes a fresh master copy, changes only approved glyph streams, then independently verifies all text/geometry/fonts and pixels outside approved span regions. Protected files are held read-only on Windows and hashed before/after.
-
-Deliver ONLY the PDF with a valid adjacent `.verification.json` containing status PASS. The Discord attachment guard independently rechecks the actual artifact. On failure report `CV generation failed`, affected span/element and reason; never attach the intermediate candidate or patch renderer code. Structural/visual verification cannot be waived by owner approval or `ok: true`.
+Normal CV jobs cannot run terminal/execute_code, patch files, delegate a builder, or alter the master,
+template, renderer, font configuration or fact bank. The compiler alone creates the bounded output
+workspace under `%LOCALAPPDATA%/hermes/runtime/career-ops/cv-compiled/` and verifies dependencies
+under read locks and before/after hashes. Do not interpret protection as an instruction to unlock code.
 
 ## Application forms — what the owner types in each box
 
