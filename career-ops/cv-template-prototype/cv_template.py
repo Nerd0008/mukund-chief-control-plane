@@ -12,6 +12,7 @@ from reportlab.platypus import Paragraph
 import pymupdf as fitz
 from PIL import Image, ImageChops, ImageDraw
 
+from cv_writing_policy import check as writing_check
 HERE=pathlib.Path(__file__).parent
 FONT_NAMES={}
 def load_layout():
@@ -62,6 +63,7 @@ def content_check(layout, content):
         if not isinstance(item,dict) or not isinstance(item.get('text'),str):
             failures.append({'slot':key,'reason':'invalid structured content'}); continue
         text=item['text']
+        for reason in writing_check(text): failures.append({'slot':key,'reason':'writing policy: '+reason})
         if not text.strip() or '\n\n' in text or any(c in text for c in '<>\ufffd'):
             failures.append({'slot':key,'reason':'blank line, markup, or invalid text'}); continue
         if s['section']=='Technical Skills' and (':' not in text or not text.split(':',1)[1].strip()):
@@ -183,3 +185,4 @@ def reproduce(output):
     return result
 if __name__=='__main__':
     print(json.dumps(reproduce(HERE/'output'/'original-content-reproduction.pdf'),indent=2,ensure_ascii=True))
+

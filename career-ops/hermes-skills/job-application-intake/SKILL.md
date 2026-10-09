@@ -225,3 +225,14 @@ Useful checks when a JD arrives with a CV:
 - whether the posting publishes AI-usage guidance for candidates (BUUK does) — read it
   before any AI-assisted application text is finalised
 - which named desirable criteria the CV already evidences, and which are genuinely absent
+
+## CV wording reference (2026-10-09)
+Every CV planning/shortening pass must consult the reviewed local policy in
+`career-ops/cv-template-prototype/cv_writing_policy.py`, derived from
+https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing.
+Use specific, factual professional wording; avoid inflated claims, canned filler,
+chatbot boilerplate and placeholders. This is writing guidance, not an AI detector.
+The compiler enforces narrow wording checks before delivery and protects the policy
+as an immutable dependency. Do not change layout, invent facts, or enter a repair
+loop to satisfy these checks. The local reference avoids a web dependency in each
+three-minute CV job; future source updates require a reviewed policy revision.

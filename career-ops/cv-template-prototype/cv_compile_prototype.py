@@ -11,7 +11,7 @@ def dependency_paths():
     layout=cv.load_layout()
     paths=[cv.HERE/'layout.json',cv.HERE/'cv_template.py',pathlib.Path(__file__),pathlib.Path(layout['master_source'])]
     paths += [pathlib.Path('C:/Windows/Fonts')/f for f in layout['fonts'].values()]
-    paths += [cv.HERE/name for name in ['fact_bank.json','cv_content_adapter.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
+    paths += [cv.HERE/name for name in ['cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
     return paths
 
 @contextmanager
@@ -125,3 +125,4 @@ def delivery_allowed(pdf,output_root):
         content=json.loads((pdf.parent/'content-draft.json').read_text(encoding='utf-8'))
         return cv.validate(cv.load_layout(),content,pdf)['status']=='PASS'
     except Exception:return False
+

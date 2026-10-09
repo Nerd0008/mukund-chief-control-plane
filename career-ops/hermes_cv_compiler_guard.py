@@ -34,7 +34,7 @@ def master_tool(args,**kwargs):
     layout=cv.load_layout()
     return json.dumps({'master_sha256':layout['master_sha256'],'layout_version':layout['version'],
         'instructions':'Read the JD and call career_cv_compile exactly once with JD text and a job ID. No character-count matching or code changes.',
-        'target_seconds':120,'hard_seconds':180,'mandatory_summary':['MSc Information Security','CompTIA Security+','ISC2 CC'],
+        'writing_policy':__import__('cv_writing_policy').policy(),'target_seconds':120,'hard_seconds':180,'mandatory_summary':['MSc Information Security','CompTIA Security+','ISC2 CC'],
         'verified_facts':[{k:s[k] for k in ['id','section','text']} for s in layout['slots'] if s['section']!='Header']})
 
 def compile_tool(args,**kwargs):
@@ -146,3 +146,4 @@ def register(ctx):
         logging.getLogger('gateway.platforms.base').info('Approved flow CV compiler active on %s; attachment guard=%s; source=%s',
             type(adapter).__module__,getattr(type(adapter),'_fast_cv_delivery_installed',False),cv.digest(pathlib.Path(__file__))[:12])
     ctx.register_platform_handler('discord',connected_v2)
+

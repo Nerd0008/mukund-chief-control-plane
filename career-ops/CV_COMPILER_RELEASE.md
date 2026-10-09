@@ -45,3 +45,15 @@ No main merge. No Discord test message initiated, no application submission, tra
 Current status: deployed and locally verified; live provider acceptance PARTIAL (5/8). Provider outages
 still cause a bounded failure; this release does not promise every CV request succeeds. The format engine
 is not patched per JD. JD text, CV requests and employer job URLs all enter the bounded CV guard.
+
+## CV wording reference (2026-10-09)
+Every CV planning/shortening pass must consult the reviewed local policy in
+`career-ops/cv-template-prototype/cv_writing_policy.py`, derived from
+https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing.
+Use specific, factual professional wording; avoid inflated claims, canned filler,
+chatbot boilerplate and placeholders. This is writing guidance, not an AI detector.
+The compiler enforces narrow wording checks before delivery and protects the policy
+as an immutable dependency. Do not change layout, invent facts, or enter a repair
+loop to satisfy these checks. The local reference avoids a web dependency in each
+three-minute CV job; future source updates require a reviewed policy revision.
+Offline validation: 64 passed, 0 failed; zero provider calls.
