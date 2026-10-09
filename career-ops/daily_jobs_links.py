@@ -54,6 +54,12 @@ DISCOVERY = CONTROL_PLANE / "runtime" / "career-ops" / "discovery"
 
 REGIONS = ("uk", "dubai", "japan", "singapore")
 
+# Only active regions are shown in the digest. Paused regions are skipped
+# entirely — they don't appear and their stale tracker rows aren't read.
+# Owner request: "pause the rest of the job search agents for now only keep
+# running uk job search agent" — only UK is active until further notice.
+ACTIVE_REGIONS = ("uk",)
+
 TRACKERS = {
     "uk": Path(r"C:\Users\mukun\Downloads\codex\uk-cyber-job-tracker.xlsx"),
     "dubai": Path(r"C:\Users\mukun\Downloads\codex\Dubai_Cybersecurity_Job_Tracker.xlsx"),
@@ -314,7 +320,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     fresh_regions = 0
     total_jobs = 0
 
-    for region in REGIONS:
+    for region in ACTIVE_REGIONS:
         doc, _path = latest_run_doc(region)
         label = REGION_LABEL[region]
 
@@ -398,7 +404,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         header.append("⚠️ No region produced a fresh discovery run — this digest is "
                       "UNKNOWN, not 'no jobs'.")
     else:
-        header.append(f"{total_jobs} job(s) found across {len(REGIONS)} region(s).")
+        header.append(f"{total_jobs} job(s) found across {len(ACTIVE_REGIONS)} region(s).")
 
     tail = [
         "",

@@ -185,7 +185,7 @@ def test_all_regions_stale_yields_exit_3(isolated):
 
 
 def test_zero_stage_is_reported_not_hidden(isolated):
-    write_run(isolated, "dubai", generated=NOW, accepted=[], first_zero="discovered_raw")
+    write_run(isolated, djl.ACTIVE_REGIONS[0], generated=NOW, accepted=[], first_zero="discovered_raw")
     text, _ = djl.build_digest(26.0, 100_000, 25)
     assert "First zero stage: discovered_raw" in text
 
@@ -212,15 +212,15 @@ def test_tracker_write_never_happens_real_workbooks_unchanged():
 
 
 def test_budget_truncation_never_drops_a_region(isolated):
-    """Every region must survive truncation: the owner asked for all of them."""
-    for region in djl.REGIONS:
+    """Every active region must survive truncation: the owner asked for all of them."""
+    for region in djl.ACTIVE_REGIONS:
         write_tracker_rows(isolated, region, [
             {"id": f"J{i}", "company": f"Co {i}", "title": f"Role {i}",
              "url": f"https://c{i}.example.org/j"}
             for i in range(10)])
     text, _ = djl.build_digest(26.0, 700, 25)
-    # Every region still appears, even under a tight budget.
-    for region in djl.REGIONS:
+    # Every active region still appears, even under a tight budget.
+    for region in djl.ACTIVE_REGIONS:
         assert djl.REGION_LABEL[region] in text, f"{region} block was dropped"
     assert "region(s) omitted" not in text
     assert "more job(s) in this region not listed here" in text
