@@ -471,3 +471,24 @@ def test_thread_does_not_merge_different_application_references():
     report = reconcile([raw], existing)
     assert not report["proposed_records"]
     assert report["needs_review"][0]["review_reason"] == "thread conflicts with company/role/region/reference evidence"
+
+
+@pytest.mark.parametrize('status',[404,403,429,500])
+def test_missing_history_message_skipped_only_for_404(status):
+    calls=[]
+    def transport(method,url,**kwargs):
+        calls.append(method)
+        if '/profile' in url:return {'historyId':'22'}
+        if '/history' in url:return {'history':[{'messagesAdded':[{'message':{'id':'missing'}},{'message':{'id':'present'}}]}]}
+        if '/messages/missing' in url:raise auth.GoogleError('request',status)
+        if '/messages/present' in url:return {'id':'present'}
+        raise AssertionError('unexpected endpoint')
+    reader=GmailReader('FAKE',transport,request_interval=0)
+    if status==404:
+        result=reader.read_window('10')
+        assert result['messages']==[{'id':'present'}]
+        assert result['unavailable_messages']==1 and result['checkpoint']=='22'
+        assert result['gmail_mutations']==0
+    else:
+        with pytest.raises(auth.GoogleError):reader.read_window('10')
+    assert all(method=='GET' for method in calls)

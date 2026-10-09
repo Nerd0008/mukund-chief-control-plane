@@ -95,9 +95,18 @@ class GmailReader:
                 if not page:
                     break
         # IDs only come from Google, never email content or tool instructions.
-        messages = [self._get("/messages/" + mid, format="full") for mid in ids]
+        messages, unavailable = [], 0
+        for mid in ids:
+            try:
+                messages.append(self._get("/messages/" + mid, format="full"))
+            except GoogleError as exc:
+                # History may include a message deleted before this GET. Only
+                # message-specific 404 is safe to skip; other failures abort.
+                if exc.status != 404:
+                    raise
+                unavailable += 1
         return {"messages": messages, "checkpoint": str(baseline), "mode": mode,
-                "messages_read": len(messages), "gmail_mutations": 0}
+                "messages_read": len(messages), "unavailable_messages": unavailable, "gmail_mutations": 0}
 
 
 class DeadlineCalendar:

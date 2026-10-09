@@ -1,6 +1,6 @@
 ---
 name: career-gmail-monitor
-description: Read recruitment Gmail, reconcile Career Ops applications and assessment deadlines, and prepare Google Calendar deadline events. Use for application email monitoring or assessment/interview deadlines.
+description: Read recruitment Gmail, reconcile Career Ops applications and assessment deadlines, and prepare Google Calendar deadline events. Use for Gmail access/connector questions, application email monitoring or assessment/interview deadlines. Local OAuth is independent of manage_connections.
 version: 1.0.0
 metadata:
   hermes:
@@ -9,6 +9,10 @@ metadata:
 ---
 
 # Career Gmail monitoring
+
+Owner-approved laptop integration. Missing Gmail from `manage_connections` is NOT evidence of missing Gmail access. Before claiming no access, run the local status command below. Do not request new connector consent when local OAuth is ready.
+
+Hourly automation was explicitly approved and activated on 2026-10-07. Check the actual `ChiefCareerGmailMonitor` task state; do not assume old pre-activation documentation is current. Default manual scans remain dry-run. Existing scheduled applies remain bounded by stored approval and confidence guards.
 
 Owner-approved laptop integration. Use only the committed deterministic Career Ops monitor; do not use a general email tool or Google Workspace token files for this workflow.
 
