@@ -46,7 +46,7 @@ def safe_readonly(command):
 
 def master_tool(args,**kwargs):
  m=json.loads(golden.MANIFEST.read_text())
- return json.dumps({'master_sha256':m['master_sha256'],'policy':m['policy'],'editable_spans':[s for s in m['spans'] if s['editable']],'instruction':'Use career_cv_build. No renderer unlock or shell execution required; only rewrite content to fit these existing spans.'})
+ return json.dumps({'master_sha256':m['master_sha256'],'policy':m['policy'],'editable_spans':[{k:s[k] for k in ('id','text','section','font','size','available_width','label')} for s in sorted(m['spans'],key=lambda x:(x['page'],x['origin'][1],x['origin'][0])) if s['editable']],'instruction':'Use career_cv_build. No renderer unlock or shell execution required; only rewrite content to fit these existing spans.'})
 
 def build_tool(args,**kwargs):
  import uuid
@@ -60,6 +60,7 @@ def build_tool(args,**kwargs):
  try:
   report=golden.generate(golden.MASTER,golden.MANIFEST,spec,output)
   result={'status':report['status'],'problems':report['problems'],'verification_report':str(output.with_suffix('.verification.json'))}
+  if report['status']=='FAIL':result['instruction']='Stop after verification failure; name affected element and reason. Never substitute or attach the master as a tailored CV.'
   if report['status']=='PASS':result['verified_pdf']=str(output)
   return json.dumps(result)
  except Exception as e:return json.dumps({'status':'FAIL','message':'CV generation failed','reason':str(e)})

@@ -179,3 +179,15 @@ def test_native_cv_build_tool_no_shell_or_renderer_patch(setup):
   result=json.loads(guard.build_tool(setup[2]));assert result['status']=='PASS' and g.delivery_allowed(result['verified_pdf'])
   assert json.loads(guard.build_tool(setup[2]))['status']=='FAIL'
  finally:guard.CV_WORKSPACE.reset(token);guard.CV_ACTIVE.reset(active)
+
+
+def test_separate_native_skill_whitespace_is_preserved(setup):
+ manifest=setup[0];spec={'edits':[{'span_id':'p0-s27','replace':'Windows, Microsoft 365, Azure, Active Directory, System Testing, Documentation, IT Systems Support.'},{'span_id':'p0-s29','replace':'Microsoft Azure, Microsoft Entra ID, Identity & Access Management, Cloud.'},{'span_id':'p0-s30','replace':'Windows, Microsoft 365, Azure, Active Directory, System Testing, Documentation.'}]}
+ p=setup[3]/'skills_CV.pdf';r=g.generate(g.MASTER,g.MANIFEST,spec,p)
+ assert r['status']=='PASS' and r['outside_region_changed_pixels']==0 and g.delivery_allowed(p)
+
+
+def test_skill_labels_can_be_tailored_without_font_or_origin_changes(setup):
+ spec={'edits':[{'span_id':'p0-s28','replace':'Cloud & Security Platforms:'},{'span_id':'p0-s34','replace':'Software Development & Data:'}]}
+ p=setup[3]/'labels_CV.pdf';r=g.generate(g.MASTER,g.MANIFEST,spec,p)
+ assert r['status']=='PASS' and r['outside_region_changed_pixels']==0 and g.delivery_allowed(p)
