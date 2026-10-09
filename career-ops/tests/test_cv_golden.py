@@ -112,3 +112,27 @@ def test_three_attempt_budget_persists_across_process_reentry(setup):
  spec['edits'][0]['replace']=setup[1]['text'];spec['edits'][0].pop('alternatives')
  second=g.generate(g.MASTER,g.MANIFEST,spec,root/'renamed_CV.pdf');assert second['status']=='FAIL' and 'three' in second['problems'][0]
  assert not (root/'renamed_CV.pdf').exists()
+
+
+def test_actual_discord_wrapper_never_attaches_failed_pdf(setup,monkeypatch):
+ fake=types.ModuleType('gateway.platforms.base');fake.SendResult=lambda **kw:types.SimpleNamespace(**kw)
+ monkeypatch.setitem(sys.modules,'gateway.platforms.base',fake)
+ runtime=types.SimpleNamespace(_current_max_iterations=lambda:150)
+ class Turn:
+  async def _run_agent(self,*a,**kw):return None
+ class Media:
+  def __init__(self):self.attachments=0;self.responses=[]
+  async def send(self,**kw):self.responses.append(kw['content'])
+  async def send_document(self,*a,**kw):self.attachments+=1;return 'sent'
+ guard.install_runtime(runtime,Turn,Media);media=Media()
+ result=asyncio.run(media.send_document('chief',setup[3]/'broken_CV.pdf'))
+ assert result.success is False and media.attachments==0 and 'CV generation failed' in media.responses[0]
+
+
+def test_cv_hook_shares_one_workspace_across_copied_context(setup):
+ import contextvars
+ token=guard.CV_ACTIVE.set(True);workspace=guard.CV_WORKSPACE.set({'path':None})
+ try:
+  contextvars.copy_context().run(guard.pre_tool,'write_file',{'path':str(setup[3]/'a/cv_edits.json')})
+  assert guard.pre_tool('write_file',{'path':str(setup[3]/'b/cv_edits.json')})['action']=='block'
+ finally:guard.CV_WORKSPACE.reset(workspace);guard.CV_ACTIVE.reset(token)

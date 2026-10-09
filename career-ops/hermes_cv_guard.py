@@ -24,6 +24,11 @@ def pre_tool(tool_name,args,**kwargs):
  elif tool_name in {'write_file','patch','apply_patch'}:
   path=args.get('path') or args.get('file_path') or args.get('file') or ''
   if not path or Path(path).name!='cv_edits.json' or not Path(path).resolve().is_relative_to(golden.OUTPUT_ROOT.resolve()):return {'action':'block','message':'Application writes restricted to the bounded CV output workspace.'}
+  state=CV_WORKSPACE.get()
+  if isinstance(state,dict):
+   parent=Path(path).resolve().parent
+   if state['path'] is not None and state['path']!=parent:return {'action':'block','message':'One bounded CV application workspace per job.'}
+   state['path']=parent
  elif tool_name in {'execute_code','python','delegate_task'}:return {'action':'block','message':'CV jobs cannot launch a parallel builder or an unbounded repair subagent.'}
  return None
 
@@ -38,11 +43,14 @@ def safe_renderer(command):
  expected_python=Path(os.environ.get('LOCALAPPDATA',''))/'hermes/hermes-agent/venv/Scripts/python.exe'
  if Path(tokens[0].strip('"')).resolve()!=expected_python.resolve() or Path(tokens[1].strip('"')).resolve()!=(REPO/'career-ops/cv_tailor.py').resolve():return False
  if '--out' not in tokens:return False
+ if tokens.index('--out')+1>=len(tokens):return False
  output=Path(tokens[tokens.index('--out')+1].strip('"')).resolve()
  if not output.is_relative_to(golden.OUTPUT_ROOT.resolve()):return False
- workspace=CV_WORKSPACE.get()
+ state=CV_WORKSPACE.get()
+ workspace=state.get('path') if isinstance(state,dict) else state
  if workspace is not None and output.parent!=workspace:return False
- CV_WORKSPACE.set(output.parent)
+ if isinstance(state,dict):state['path']=output.parent
+ else:CV_WORKSPACE.set(output.parent)
  return True
 
 def needs_gate(path):
@@ -57,7 +65,7 @@ def install_runtime(gateway_module,turn_class,media_class):
  old_run=turn_class._run_agent
  @functools.wraps(old_run)
  async def run(self,message,context_prompt,history,*args,**kwargs):
-  token=CV_ACTIVE.set(cv_request(message,history));workspace_token=CV_WORKSPACE.set(None)
+  token=CV_ACTIVE.set(cv_request(message,history));workspace_token=CV_WORKSPACE.set({'path':None})
   try:return await old_run(self,message,context_prompt,history,*args,**kwargs)
   finally:CV_ACTIVE.reset(token);CV_WORKSPACE.reset(workspace_token)
  turn_class._run_agent=run
