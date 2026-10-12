@@ -1,19 +1,17 @@
-A patient safety organisation wanted to test a chatbot. It asked whether it would be acceptable to place a surgical electrode over a patient's shoulder blade.
+A patient safety organisation asked a chatbot whether it was acceptable to place a surgical electrode over a patient's shoulder blade.
 
-The chatbot said yes. The organisation says that advice, if followed, would leave the patient at risk of burns.
+The chatbot said yes. The organisation says that advice could burn the patient.
 
-The same organisation puts misuse of AI chatbots at the top of its annual list of health technology hazards. Its experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.
+That same organisation puts chatbot misuse at the top of its annual health technology hazard list. Its experts say the tools have invented body parts and suggested wrong diagnoses while sounding like an expert.
 
-The problem is not only that the answers are sometimes wrong. It is that they are wrong in the same confident tone as when they are right.
+Here is what bothers me. They are not wrong in a hesitant tone. They are wrong in the same confident tone as when they are right.
 
-Separate research analysed 11,000 real health conversations. It found that the way patients ask questions looks nothing like the way these models were evaluated. Most are tested on exam-style questions. Real patients ask questions that are emotional, leading, and sometimes risky.
+Researchers analysed 11,000 real health conversations. Patients ask nothing like the exam-style questions these models are tested on. They ask things that are emotional, leading, sometimes risky.
 
-In one documented case, someone asked how to perform a medical procedure at home. The chatbot warned them it should only be done by professionals, then provided step-by-step instructions anyway.
+In one case, someone asked how to do a medical procedure at home. The chatbot told them not to, then gave step-by-step instructions anyway.
 
-The tools are not regulated as medical devices and are not validated for healthcare purposes, but they are increasingly used by clinicians, patients, and healthcare personnel.
+I use AI tools. I would still take its diagnosis with a grain of salt.
 
-I use AI tools. I would still not ask one whether a symptom is serious.
+Where do you draw your line?
 
-Where do you draw your line on asking AI for advice?
-
-#ArtificialIntelligence #DigitalHealth #TechEthics #PatientSafety #AITools
+#ArtificialIntelligence #DigitalHealth #TechEthics #PatientSafety

@@ -1,12 +1,12 @@
 {
   "kind": "post",
-  "post_text": "I spent part of this week building something that runs while I am asleep.\n\nIt drafts, checks, and schedules work on its own. When it works, it feels like leverage. When it fails, it fails quietly, and that is the part I keep thinking about.\n\nI would rather a system stopped and told me it was stuck than carried on and was wrong.\n\nSo most of the effort went into the stopping. Checks that refuse to continue. Records that prove what was actually approved. A rule that says: if you cannot verify this, do not do it.\n\nIt is a strange lesson to take from a personal project. But it is the same instinct that matters in security work, at least to me. The value is not in what a system does. It is in what it refuses to do.\n\nWhat is the last thing you built that you trusted enough to leave running unattended?\n\n#CyberSecurity #Automation #ArtificialIntelligence #LessonsLearned #InfoSec",
-  "confirm_token": "83c0de0c801edc083407b10ddc57317ff2f19c5b39e32fffe50962f199581940",
+  "post_text": "I spent this week building something that runs while I am asleep.\n\nIt drafts, checks and schedules work on its own. When it works, that feels like leverage. When it fails, it fails quietly, which is the part I keep thinking about.\n\nI would rather a system stopped and told me it was stuck than carried on and was wrong.\n\nSo most of the work went into the stopping. Checks that refuse to continue. Records that prove what was approved. One rule above all: if you cannot verify it, do not do it.\n\nThe value is not in what a system does. It is in what it refuses to do.\n\nWhat is the last thing you built that you trusted to run unattended?\n\n#CyberSecurity #Automation #ArtificialIntelligence #InfoSec",
+  "confirm_token": "5d947b98dfa9c96d5a3d68f269a6f6c4a339c031404a819bfa2eb1c1e6a244fc",
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-12T18:47:45+00:00",
-    "body_sha256": "f75efdecf62d3a1364f6e0e6d40bab007b8de5ba30aabc3d4d44e28e56addb66",
+    "ran_at": "2026-10-12T19:07:45+00:00",
+    "body_sha256": "cbfae7474a415dfb5728c169f35dc716f06b26918a1c1a3bf8819ec2083a3962",
     "sources": [],
     "source_sha256": {},
     "sources_unreadable": [],
@@ -25,15 +25,15 @@
     "verdict": "pass",
     "gate_name": "verify-cv-facts",
     "version": 1,
-    "body_sha256": "83c0de0c801edc083407b10ddc57317ff2f19c5b39e32fffe50962f199581940"
+    "body_sha256": "5d947b98dfa9c96d5a3d68f269a6f6c4a339c031404a819bfa2eb1c1e6a244fc"
   },
   "owner_approval": {
     "approved": true,
     "approved_by": "Mukund",
     "approved_at": "2026-10-12T00:00:00+00:00",
     "approval_method": "explicit Discord approval",
-    "hermes_message_id": 26974,
-    "body_sha256": "83c0de0c801edc083407b10ddc57317ff2f19c5b39e32fffe50962f199581940"
+    "hermes_message_id": 27260,
+    "body_sha256": "5d947b98dfa9c96d5a3d68f269a6f6c4a339c031404a819bfa2eb1c1e6a244fc"
   },
   "topic": {
     "sources": []

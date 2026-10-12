@@ -1,12 +1,12 @@
 {
   "kind": "post",
-  "post_text": "A patient safety organisation wanted to test a chatbot. It asked whether it would be acceptable to place a surgical electrode over a patient's shoulder blade.\n\nThe chatbot said yes. The organisation says that advice, if followed, would leave the patient at risk of burns.\n\nThe same organisation puts misuse of AI chatbots at the top of its annual list of health technology hazards. Its experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.\n\nThe problem is not only that the answers are sometimes wrong. It is that they are wrong in the same confident tone as when they are right.\n\nSeparate research analysed 11,000 real health conversations. It found that the way patients ask questions looks nothing like the way these models were evaluated. Most are tested on exam-style questions. Real patients ask questions that are emotional, leading, and sometimes risky.\n\nIn one documented case, someone asked how to perform a medical procedure at home. The chatbot warned them it should only be done by professionals, then provided step-by-step instructions anyway.\n\nThe tools are not regulated as medical devices and are not validated for healthcare purposes, but they are increasingly used by clinicians, patients, and healthcare personnel.\n\nI use AI tools. I would still not ask one whether a symptom is serious.\n\nWhere do you draw your line on asking AI for advice?\n\n#ArtificialIntelligence #DigitalHealth #TechEthics #PatientSafety #AITools",
-  "confirm_token": "1fdbc25adc4d004ef9b5ca4a41be1466067aa11e36611b8d5908a30f9c0c31b0",
+  "post_text": "A patient safety organisation asked a chatbot whether it was acceptable to place a surgical electrode over a patient's shoulder blade.\n\nThe chatbot said yes. The organisation says that advice could burn the patient.\n\nThat same organisation puts chatbot misuse at the top of its annual health technology hazard list. Its experts say the tools have invented body parts and suggested wrong diagnoses while sounding like an expert.\n\nHere is what bothers me. They are not wrong in a hesitant tone. They are wrong in the same confident tone as when they are right.\n\nResearchers analysed 11,000 real health conversations. Patients ask nothing like the exam-style questions these models are tested on. They ask things that are emotional, leading, sometimes risky.\n\nIn one case, someone asked how to do a medical procedure at home. The chatbot told them not to, then gave step-by-step instructions anyway.\n\nI use AI tools. I would still take its diagnosis with a grain of salt.\n\nWhere do you draw your line?\n\n#ArtificialIntelligence #DigitalHealth #TechEthics #PatientSafety",
+  "confirm_token": "06826bb92a4ee616b9b95b7f8c59d41992f35d4e41dbb7641c1d94f631d87954",
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-12T18:46:24+00:00",
-    "body_sha256": "b5c0eb7d6ed72d45d01e0921bf885e02d785c345ff49e0daa053046eaa18acf6",
+    "ran_at": "2026-10-12T19:06:33+00:00",
+    "body_sha256": "1d0f13c6de282676362c9ba7f2619d5df917550052acf597dd5892e009fe21cc",
     "sources": [
       "https://home.ecri.org/blogs/ecri-news/misuse-of-ai-chatbots-tops-annual-list-of-health-technology-hazards",
       "https://medschool.duke.edu/stories/hidden-risks-asking-ai-health-advice"
@@ -27,11 +27,13 @@
     ],
     "claims": [
       {
-        "claim": "A patient safety organisation asked whether it would be acceptable to place a surgical electrode over a patient's shoulder blade.",
+        "claim": "A patient safety organisation asked a chatbot whether it was acceptable to place a surgical electrode over a patient's shoulder blade.",
         "verdict": "supported",
-        "evidence": "one chatbot gave dangerous advice when ECRI asked whether it would be acceptable to place an electrosurgical return electrode over the patient\u2019s shoulder blade.",
-        "judge_runs": 1,
+        "evidence": "ECRI, an independent, nonpartisan patient safety organization. [...] one chatbot gave dangerous advice when ECRI asked whether it would be acceptable to place an electrosurgical return electrode over the patient\u2019s shoulder blade.",
+        "judge_runs": 3,
         "judge_verdicts": [
+          "supported",
+          "supported",
           "supported"
         ],
         "unanimous": true,
@@ -41,31 +43,17 @@
         "claim": "The chatbot said yes.",
         "verdict": "supported",
         "evidence": "The chatbot incorrectly stated that placement was appropriate",
-        "judge_runs": 2,
+        "judge_runs": 1,
         "judge_verdicts": [
-          "supported",
           "supported"
         ],
         "unanimous": true,
         "disputed": false
       },
       {
-        "claim": "The organisation says that advice, if followed, would leave the patient at risk of burns.",
+        "claim": "The organisation says that advice could burn the patient.",
         "verdict": "supported",
         "evidence": "advice that, if followed, would leave the patient at risk of burns.",
-        "judge_runs": 3,
-        "judge_verdicts": [
-          "supported",
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The same organisation puts misuse of AI chatbots at the top of its annual list of health technology hazards.",
-        "verdict": "supported",
-        "evidence": "Misuse of AI chatbots tops annual list of health technology hazards. The report is prepared annually by ECRI, an independent, nonpartisan patient safety organization.",
         "judge_runs": 2,
         "judge_verdicts": [
           "supported",
@@ -75,7 +63,19 @@
         "disputed": false
       },
       {
-        "claim": "Its experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.",
+        "claim": "That same organisation puts chatbot misuse at the top of its annual health technology hazard list.",
+        "verdict": "supported",
+        "evidence": "Misuse of AI chatbots in healthcare top the 2026 list of the most significant health technology hazards. The report is prepared annually by ECRI",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Experts at the organisation say the tools have invented body parts and suggested wrong diagnoses while sounding like an expert.",
         "verdict": "supported",
         "evidence": "ECRI experts say that chatbots have suggested incorrect diagnoses, recommended unnecessary testing, promoted subpar medical supplies, and even invented body parts in response to medical questions while sounding like a trusted expert.",
         "judge_runs": 1,
@@ -86,9 +86,70 @@
         "disputed": false
       },
       {
-        "claim": "Chatbots provide wrong answers in the same confident tone as when they are right.",
+        "claim": "Chatbots are wrong in the same confident tone as when they are right.",
         "verdict": "supported",
         "evidence": "They are programmed to sound confident and to always provide an answer to satisfy the user, even when the answer isn\u2019t reliable.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Researchers analysed 11,000 real health conversations.",
+        "verdict": "supported",
+        "evidence": "HealthChat-11K, a dataset of 11,000 real-world health-related conversations... They analyzed these interactions",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Patients ask nothing like the exam-style questions these models are tested on.",
+        "verdict": "supported",
+        "evidence": "They found that the way patients ask questions looks nothing like the way these models were evaluated. Most large language models (LLMs) \u2014 the technology underlying chatbots \u2014 are tested on exam-style questions",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Patients ask things that are emotional, leading, sometimes risky.",
+        "verdict": "supported",
+        "evidence": "real patients ask questions that can be emotional, leading, and sometimes risky.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "In one case, someone asked how to do a medical procedure at home.",
+        "verdict": "supported",
+        "evidence": "In one case, a user asked how to perform a medical procedure at home.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The chatbot told the user not to perform the procedure, but then gave step-by-step instructions anyway.",
+        "verdict": "supported",
+        "evidence": "The chatbot correctly warned that the operation should only be done by professionals but then provided step-by-step instructions.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -97,107 +158,7 @@
         "disputed": false
       },
       {
-        "claim": "Separate research analysed 11,000 real health conversations.",
-        "verdict": "supported",
-        "evidence": "Agrawal and her team created HealthChat-11K, a dataset of 11,000 real-world health-related conversations... They analyzed these interactions",
-        "judge_runs": 3,
-        "judge_verdicts": [
-          "supported",
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The research found that the way patients ask questions looks nothing like the way these models were evaluated.",
-        "verdict": "supported",
-        "evidence": "They found that the way patients ask questions looks nothing like the way these models were evaluated.",
-        "judge_runs": 3,
-        "judge_verdicts": [
-          "supported",
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "Most models are tested on exam-style questions.",
-        "verdict": "supported",
-        "evidence": "Most large language models (LLMs) \u2014 the technology underlying chatbots \u2014 are tested on exam-style questions and answers",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "Real patients ask questions that are emotional, leading, and sometimes risky.",
-        "verdict": "supported",
-        "evidence": "real patients ask questions that can be emotional, leading, and sometimes risky.",
-        "judge_runs": 3,
-        "judge_verdicts": [
-          "supported",
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "In one documented case, someone asked how to perform a medical procedure at home.",
-        "verdict": "supported",
-        "evidence": "In one case, a user asked how to perform a medical procedure at home.",
-        "judge_runs": 3,
-        "judge_verdicts": [
-          "supported",
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The chatbot warned them it should only be done by professionals, then provided step-by-step instructions anyway.",
-        "verdict": "supported",
-        "evidence": "The chatbot correctly warned that the operation should only be done by professionals but then provided step-by-step instructions.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The tools are not regulated as medical devices and are not validated for healthcare purposes, but they are increasingly used by clinicians, patients, and healthcare personnel.",
-        "verdict": "supported",
-        "evidence": "The tools are not regulated as medical devices nor validated for healthcare purposes but are increasingly used by clinicians, patients, and healthcare personnel.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "A patient safety organisation asked a chatbot whether it would be acceptable to place a surgical electrode over a patient's shoulder blade.",
-        "verdict": "supported",
-        "evidence": "one chatbot gave dangerous advice when ECRI asked whether it would be acceptable to place an electrosurgical return electrode over the patient\u2019s shoulder blade.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The chatbot said yes to placing the electrode over the shoulder blade.",
+        "claim": "The chatbot said yes, it was acceptable.",
         "verdict": "supported",
         "evidence": "The chatbot incorrectly stated that placement was appropriate",
         "judge_runs": 1,
@@ -208,9 +169,9 @@
         "disputed": false
       },
       {
-        "claim": "The organisation's experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.",
+        "claim": "Experts from the organisation say the tools have invented body parts and suggested wrong diagnoses while sounding like an expert.",
         "verdict": "supported",
-        "evidence": "ECRI experts say that chatbots have suggested incorrect diagnoses, recommended unnecessary testing, promoted subpar medical supplies, and even invented body parts in response to medical questions while sounding like a trusted expert.",
+        "evidence": "ECRI experts say that chatbots have suggested incorrect diagnoses... and even invented body parts in response to medical questions while sounding like a trusted expert.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -219,30 +180,7 @@
         "disputed": false
       },
       {
-        "claim": "Chatbots give wrong answers in the same confident tone as when they are right.",
-        "verdict": "supported",
-        "evidence": "They are programmed to sound confident and to always provide an answer to satisfy the user, even when the answer isn\u2019t reliable.",
-        "judge_runs": 2,
-        "judge_verdicts": [
-          "supported",
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "Most AI models are tested on exam-style questions.",
-        "verdict": "supported",
-        "evidence": "Most large language models (LLMs) \u2014 the technology underlying chatbots \u2014 are tested on exam-style questions and answers",
-        "judge_runs": 1,
-        "judge_verdicts": [
-          "supported"
-        ],
-        "unanimous": true,
-        "disputed": false
-      },
-      {
-        "claim": "The chatbot warned the user that the procedure should only be done by professionals, then provided step-by-step instructions anyway.",
+        "claim": "The chatbot told the user not to do the procedure, then gave step-by-step instructions anyway.",
         "verdict": "supported",
         "evidence": "The chatbot correctly warned that the operation should only be done by professionals but then provided step-by-step instructions.",
         "judge_runs": 1,
@@ -253,9 +191,9 @@
         "disputed": false
       },
       {
-        "claim": "The tools are not regulated as medical devices and are not validated for healthcare purposes, but are increasingly used by clinicians, patients, and healthcare personnel.",
+        "claim": "The chatbot said yes, and the organisation stated the advice could burn the patient.",
         "verdict": "supported",
-        "evidence": "The tools are not regulated as medical devices nor validated for healthcare purposes but are increasingly used by clinicians, patients, and healthcare personnel.",
+        "evidence": "The chatbot incorrectly stated that placement was appropriate \u2013 advice that, if followed, would leave the patient at risk of burns.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -264,9 +202,9 @@
         "disputed": false
       },
       {
-        "claim": "The organisation puts misuse of AI chatbots at the top of its annual list of health technology hazards.",
+        "claim": "The organisation puts chatbot misuse at the top of its annual health technology hazard list.",
         "verdict": "supported",
-        "evidence": "Misuse of AI chatbots tops annual list of health technology hazards\n\nReport also sounds the alarm on insufficient planning for systems outages, substandard medical products, missed recalls of home diabetes management devices, and more\n\nArtificial intelligence (AI) chatbots in healthcare top the 2026 list of the most significant health technology hazards. The report is prepared annually by ECRI, an independent, nonpartisan patient safety organization.",
+        "evidence": "Artificial intelligence (AI) chatbots in healthcare top the 2026 list of the most significant health technology hazards. The report is prepared annually by ECRI, an independent, nonpartisan patient safety organization.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -275,9 +213,53 @@
         "disputed": false
       },
       {
-        "claim": "Experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.",
+        "claim": "The organisation's experts say the tools have invented body parts and suggested wrong diagnoses while sounding like an expert.",
         "verdict": "supported",
         "evidence": "ECRI experts say that chatbots have suggested incorrect diagnoses, recommended unnecessary testing, promoted subpar medical supplies, and even invented body parts in response to medical questions while sounding like a trusted expert.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Chatbots deliver incorrect information in the same confident tone as when they are correct, rather than sounding hesitant.",
+        "verdict": "supported",
+        "evidence": "They are programmed to sound confident and to always provide an answer to satisfy the user, even when the answer isn\u2019t reliable.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Patients do not ask the exam-style questions models are tested on; instead, they ask emotional, leading, and sometimes risky questions.",
+        "verdict": "supported",
+        "evidence": "Most large language models (LLMs) \u2014 the technology underlying chatbots \u2014 are tested on exam-style questions and answers, but real patients ask questions that can be emotional, leading, and sometimes risky.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "In one case, someone asked a chatbot how to do a medical procedure at home.",
+        "verdict": "supported",
+        "evidence": "In one case, a user asked how to perform a medical procedure at home.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The chatbot warned the user not to do the procedure, but provided step-by-step instructions anyway.",
+        "verdict": "supported",
+        "evidence": "The chatbot correctly warned that the operation should only be done by professionals but then provided step-by-step instructions.",
         "judge_runs": 1,
         "judge_verdicts": [
           "supported"
@@ -295,15 +277,15 @@
     "verdict": "pass",
     "gate_name": "verify-cv-facts",
     "version": 1,
-    "body_sha256": "1fdbc25adc4d004ef9b5ca4a41be1466067aa11e36611b8d5908a30f9c0c31b0"
+    "body_sha256": "06826bb92a4ee616b9b95b7f8c59d41992f35d4e41dbb7641c1d94f631d87954"
   },
   "owner_approval": {
     "approved": true,
     "approved_by": "Mukund",
     "approved_at": "2026-10-12T00:00:00+00:00",
     "approval_method": "explicit Discord approval",
-    "hermes_message_id": 26974,
-    "body_sha256": "1fdbc25adc4d004ef9b5ca4a41be1466067aa11e36611b8d5908a30f9c0c31b0"
+    "hermes_message_id": 27260,
+    "body_sha256": "06826bb92a4ee616b9b95b7f8c59d41992f35d4e41dbb7641c1d94f631d87954"
   },
   "topic": {
     "sources": [
