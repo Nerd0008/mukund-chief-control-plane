@@ -1,0 +1,3 @@
+name: career-tracker-integrity
+version: 1.0.0
+description: Protect canonical Career Ops tracker writes and schema from ad hoc native agent mutation.

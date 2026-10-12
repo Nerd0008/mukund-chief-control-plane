@@ -82,9 +82,50 @@ class WorkbookTracker:
                     records.append(record)
             finally:
                 wb.close()
+        records=self._with_sidecars(records)
         if self.accepted_state:
             records = self._with_accepted_state(records)
         return records, fingerprints
+
+    def _with_sidecars(self,records):
+        for region,cfg in self.profiles.items():
+            if not cfg.get('mail_metadata_sidecar'):continue
+            path=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/cfg['mail_metadata_sidecar']
+            if not path.exists():continue
+            saved=json.loads(path.read_text(encoding='utf-8'))
+            for old in saved.get('records',{}).values():
+                matches=[r for r in records if r['region']==region and r['company'].casefold()==old['company'].casefold() and r['role'].casefold()==old['role'].casefold()
+                    and r.get('canonical_job_host')==old.get('canonical_job_host') and r.get('canonical_job_path')==old.get('canonical_job_path')
+                    and set(r.get('job_reference_ids',[]))==set(old.get('job_reference_ids',[]))]
+                if len(matches)>1:raise ValueError('ambiguous mailbox sidecar identity')
+                if not matches:continue  # Owner-deleted applications must never be resurrected.
+                current=matches[0];protected={k:current.get(k) for k in ('company','role','region','row','canonical_owner_status','canonical_job_host','canonical_job_path','job_reference_ids')}
+                current.update(copy.deepcopy(old));current.update(protected)
+        return records
+
+    def _upsert_sidecar(self,record,cfg,path):
+        lock=path.with_suffix(path.suffix+'.career-mail.lock');fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY);temp=None
+        try:
+            before=digest(path);records,_=self.read()
+            matches=[r for r in records if r['region']==record['region'] and r['company'].casefold()==record['company'].casefold() and r['role'].casefold()==record['role'].casefold()
+                     and (record.get('row') is None or r['row']==record['row'])]
+            if len(matches)!=1:raise ValueError('new or ambiguous mailbox application requires canonical writer reconciliation; no row restored')
+            current=matches[0]
+            store=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/cfg['mail_metadata_sidecar'];store.parent.mkdir(parents=True,exist_ok=True)
+            state=json.loads(store.read_text(encoding='utf-8')) if store.exists() else {'records':{}}
+            saved=copy.deepcopy(record);saved.pop('row',None)
+            for key in ('canonical_job_host','canonical_job_path','job_reference_ids'):saved[key]=current.get(key)
+            state['records'][record['application_id']]=saved
+            if store.exists():
+                self.backup_dir.mkdir(parents=True,exist_ok=True);shutil.copy2(store,self.backup_dir/(store.name+'.'+digest(store)+'.json'))
+            handle,name=tempfile.mkstemp(dir=store.parent,suffix='.tmp');os.close(handle);temp=Path(name)
+            temp.write_text(json.dumps(state,sort_keys=True),encoding='utf-8');json.loads(temp.read_text(encoding='utf-8'))
+            if digest(path)!=before:raise ValueError('canonical workbook changed concurrently; sidecar write refused')
+            os.replace(temp,store);record['row']=current['row']
+            return {'region':record['region'],'row':current['row'],'before_sha256':before,'after_sha256':digest(path),'metadata_store':'private_sidecar'}
+        finally:
+            os.close(fd);lock.unlink()
+            if temp and temp.exists():temp.unlink()
 
     def _with_accepted_state(self, records):
         """Recover dedupe evidence from the hash-verified, already-applied snapshot.
@@ -139,10 +180,12 @@ class WorkbookTracker:
             raise ValueError("application region is unresolved; no workbook write")
         cfg = self.profiles[region]
         path = Path(cfg["tracker"])
+        if cfg.get('mail_metadata_sidecar'):
+            return self._upsert_sidecar(record,cfg,path)
         # Owner mandate: the UK tracker is a fixed six-column sheet. Refuse to
         # append email metadata columns to it; that is what turned a readable
         # tracker into a 31-column log. Non-UK regions keep their own layouts.
-        if cfg.get("column_ceiling") and "mail_identity" not in cfg:
+        if cfg.get("column_ceiling"):
             raise ValueError(
                 f"{region} tracker is capped at {cfg['column_ceiling']} columns; "
                 "email metadata columns are not permitted"

@@ -83,7 +83,9 @@
         "To Review": "Not Applied",
         "Not Applying": "Not Applied"
       },
-      "column_ceiling": 6
+      "column_ceiling": 6,
+      "hyperlinks_required": true,
+      "mail_metadata_sidecar": "hermes/runtime/career-ops/gmail-monitor/uk-application-state.json"
     },
     "dubai": {
       "display_name": "Dubai / UAE",

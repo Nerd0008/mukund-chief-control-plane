@@ -379,6 +379,8 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
             problems.append(f"expected sheet {name!r} missing")
 
     ws = wb[cfg["sheet"]]
+    from tracker_integrity import problems as link_problems
+    problems.extend(link_problems(ws,cfg))
     tname = cfg.get("table")
     if not tname:
         table_ref = None
@@ -487,7 +489,7 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
         "last_data_row": last,
         "data_rows": last - cfg["first_data_row"] + 1,
         "expected_appended": expect_appended,
-        "headers_unchanged": hdr[:len(hdr)] == hdr,
+        "headers_unchanged": all(ws.cell(cfg["header_row"],column_index_from_string(c)).value==v for c,v in cfg.get("required_headers",{}).items()),
         "fit_tier_formula_cells": len(formula_rows),
         "validations": {col: len(v) for col, v in dvs.items()},
         "owner_columns_unchanged": owned_ok,
@@ -525,7 +527,7 @@ def _next_regional_id(existing: list[str], prefix: str, date_fmt: str, sep: str,
     return f"{head}{n + 1:02d}"
 
 
-def write_records(profile: dict, region: str, records: list[dict], *, apply: bool = False,
+def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, apply: bool = False,
                   backup_dir: str | None = None, update_existing: bool = False,
                   extra_archive_dirs: list[str] | None = None,
                   tracker_override: str | None = None,
@@ -542,6 +544,8 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
 
     before_hash = sha256_file(tracker_path)
     tr = Tracker(tracker_path, cfg)
+    from tracker_integrity import assert_valid,bind_links
+    assert_valid(tr.ws,cfg)
     pre_owned = tr.owned_snapshot()
     pre_rows = tr.last_data_row() - cfg["first_data_row"] + 1
     existing_ids = tr.ids()
@@ -804,6 +808,8 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
         assert sha256_file(backup_path) == before_hash, "backup hash mismatch"
 
     tmp_path = tracker_path.with_suffix(".write-tmp.xlsx")
+    bind_links(tr.ws,cfg)
+    assert_valid(tr.ws,cfg)
     tr.wb.save(tmp_path)
     # Release every handle on the canonical workbook before any replace attempt:
     # Windows refuses os.replace while the source workbook is still open.
@@ -825,6 +831,7 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
         result["error"] = "canonical workbook changed during write; retry from latest file"
         return result
 
+    staged_hash=sha256_file(tmp_path)
     tmp_path.replace(tracker_path)
     after = verify_workbook(tracker_path, cfg, expect_data_rows=expected_rows,
                            expect_appended=len(appends), pre_owned=pre_owned)
@@ -840,4 +847,23 @@ def write_records(profile: dict, region: str, records: list[dict], *, apply: boo
     if not after["ok"]:
         result["applied"] = False
         result["error"] = "post-write verification of the canonical file failed"
+        if backup_path and sha256_file(tracker_path)==staged_hash and sha256_file(backup_path)==before_hash:
+            rollback=tracker_path.with_suffix('.rollback-tmp.xlsx')
+            shutil.copy2(backup_path,rollback)
+            if sha256_file(tracker_path)==staged_hash:
+                rollback.replace(tracker_path);result['rolled_back']=True
+                result['tracker_sha256_after']=sha256_file(tracker_path)
+            else:rollback.unlink(missing_ok=True)
+
     return result
+
+
+def write_records(profile,region,records,**kwargs):
+    """One shared fail-fast lock for mailbox and discovery writes."""
+    if not kwargs.get('apply',False):return _write_records_unlocked(profile,region,records,**kwargs)
+    import os
+    cfg=region_config(profile,region);path=Path(kwargs.get('tracker_override') or cfg['tracker'])
+    lock=path.with_suffix(path.suffix+'.career-mail.lock')
+    fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    try:return _write_records_unlocked(profile,region,records,**kwargs)
+    finally:os.close(fd);lock.unlink()

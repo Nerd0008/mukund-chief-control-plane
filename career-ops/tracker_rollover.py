@@ -336,7 +336,7 @@ def plan(profile: dict, region: str, month: str, *, tracker_override: str | None
 # rollover
 # --------------------------------------------------------------------------- #
 
-def rollover(profile: dict, region: str, month: str, *, apply: bool = False,
+def _rollover_unlocked(profile: dict, region: str, month: str, *, apply: bool = False,
              archive_only: bool = False, archive_dir: str | None = None,
              tracker_override: str | None = None, backup_dir: str | None = None,
              force: bool = False, allow_owner_state_removal: bool = False,
@@ -371,6 +371,8 @@ def rollover(profile: dict, region: str, month: str, *, apply: bool = False,
     arch = adir / archive_filename(region, month)
 
     tr = tw.Tracker(tracker_path, cfg)
+    from tracker_integrity import assert_valid
+    assert_valid(tr.ws,cfg)
     try:
         scan = _scan(tr, cfg, month)
         ncols = tr.ws.max_column
@@ -462,6 +464,8 @@ def rollover(profile: dict, region: str, month: str, *, apply: bool = False,
     _clear_block(ws, cfg["first_data_row"], ws.max_row, ncols)
     _write_rows(ws, cfg, rolled_values, cfg["first_data_row"])
     table_ref = _set_table_ref(ws, cfg, len(rolled_values))
+    from tracker_integrity import bind_links,assert_valid
+    bind_links(ws,cfg);assert_valid(ws,cfg)
     wb.save(tmp)
     wb.close()
 
@@ -524,6 +528,8 @@ def rollover(profile: dict, region: str, month: str, *, apply: bool = False,
         _clear_block(ws, cfg["first_data_row"], biggest, ncols)
         _write_rows(ws, cfg, kept_values, cfg["first_data_row"], styles=styles)
         _set_table_ref(ws, cfg, len(kept_values))
+        from tracker_integrity import bind_links,assert_valid
+        bind_links(ws,cfg);assert_valid(ws,cfg)
         wb.save(tmpc)
         wb.close()
 
@@ -630,6 +636,15 @@ def emit(obj) -> None:
         text = json.dumps(obj, indent=2, ensure_ascii=True, default=str)
     sys.stdout.write(text + "\n")
     sys.stdout.flush()
+
+
+def rollover(profile,region,month,**kwargs):
+    if not kwargs.get('apply',False):return _rollover_unlocked(profile,region,month,**kwargs)
+    import os
+    cfg=_cfg(profile,region);path=Path(kwargs.get('tracker_override') or cfg['tracker'])
+    lock=path.with_suffix(path.suffix+'.career-mail.lock');fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    try:return _rollover_unlocked(profile,region,month,**kwargs)
+    finally:os.close(fd);lock.unlink()
 
 
 def main(argv=None) -> int:
