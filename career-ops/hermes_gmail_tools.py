@@ -12,6 +12,22 @@ GUIDANCE=('Local Career Ops Gmail access exists independently of manage_connecti
           'Return only OPEN, EXPIRED, COMPLETED or UNKNOWN with evidence. No deadline is UNKNOWN, never valid. '
           'Exclude newsletters. Do not add unrelated CV or tracker blockers. Do not delete scan locks.')
 
+LANGUAGE_POLICY=('Owner communication language: English by default on every chat and scheduled job. '
+    'Write explanations, summaries, tool-progress text and final answers in English unless the owner explicitly requests another language. '
+    'Quoted foreign-language source text and proper names may remain unchanged, but explain them in English. '
+    'Do not copy the language of old assistant messages or tool output into your response. '
+    'Do not blame Windows locale/encoding for coherent foreign-language prose generated in your own answer without evidence.')
+
+def install_language_policy(agent_class):
+    if getattr(agent_class,'_owner_english_policy_installed',False):return
+    old=agent_class.run_conversation
+    @functools.wraps(old)
+    def run(self,user_message,system_message=None,*args,**kwargs):
+        context=(system_message or '')+'\n'+LANGUAGE_POLICY
+        return old(self,user_message,context,*args,**kwargs)
+    agent_class.run_conversation=run
+    agent_class._owner_english_policy_installed=True
+
 def command(script,verb):
     result=subprocess.run([sys.executable,str(HERE/script),verb],cwd=str(HERE.parent),capture_output=True,text=True,encoding='utf-8',timeout=240)
     try:data=json.loads(result.stdout)
@@ -43,6 +59,8 @@ def install_turn_guidance(turn):
 
 def register(ctx):
     from gateway.run_turn import GatewayTurnMixin
+    from run_agent import AIAgent
+    install_language_policy(AIAgent)
     install_turn_guidance(GatewayTurnMixin)
     ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=2000)
     for name,description,handler,props in [

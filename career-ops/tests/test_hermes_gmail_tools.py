@@ -27,6 +27,7 @@ def test_native_gmail_registration(monkeypatch):
     mod=types.ModuleType('gateway.run_turn');mod.GatewayTurnMixin=object
     monkeypatch.setitem(sys.modules,'gateway.run_turn',mod)
     monkeypatch.setattr(g,'install_turn_guidance',lambda *a:None)
+    monkeypatch.setattr(g,'install_language_policy',lambda *a:None)
     class Context:
         def __init__(self):self.tools={};self.prompt=None
         def register_system_prompt_section(self,*a,**kw):self.prompt=a[1]
@@ -35,3 +36,15 @@ def test_native_gmail_registration(monkeypatch):
     assert set(ctx.tools)=={'career_gmail_status','career_gmail_scan','career_gmail_jobs','career_gmail_assessments'}
     assert ctx.tools['career_gmail_status']['handler'] is g.status_tool
     assert 'read-only' in ctx.prompt
+
+
+def test_english_policy_every_turn_including_cron_and_old_context():
+    class Agent:
+        def run_conversation(self,user_message,system_message=None,*args,**kwargs):return system_message,kwargs
+    g.install_language_policy(Agent);g.install_language_policy(Agent)
+    for text in ['Hi','Run daily cron report','Please answer in French']:
+        context,kwargs=Agent().run_conversation(text,'existing context',task_id='test')
+        assert context.startswith('existing context')
+        assert context.count(g.LANGUAGE_POLICY)==1
+        assert 'explicitly requests another language' in context
+        assert kwargs=={'task_id':'test'}
