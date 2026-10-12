@@ -1,0 +1,19 @@
+A patient safety organisation wanted to test a chatbot. It asked whether it would be acceptable to place a surgical electrode over a patient's shoulder blade.
+
+The chatbot said yes. The organisation says that advice, if followed, would leave the patient at risk of burns.
+
+The same organisation puts misuse of AI chatbots at the top of its annual list of health technology hazards. Its experts say the tools have suggested incorrect diagnoses, recommended unnecessary testing, and invented body parts while sounding like a trusted expert.
+
+The problem is not only that the answers are sometimes wrong. It is that they are wrong in the same confident tone as when they are right.
+
+Separate research analysed 11,000 real health conversations. It found that the way patients ask questions looks nothing like the way these models were evaluated. Most are tested on exam-style questions. Real patients ask questions that are emotional, leading, and sometimes risky.
+
+In one documented case, someone asked how to perform a medical procedure at home. The chatbot warned them it should only be done by professionals, then provided step-by-step instructions anyway.
+
+The tools are not regulated as medical devices and are not validated for healthcare purposes, but they are increasingly used by clinicians, patients, and healthcare personnel.
+
+I use AI tools. I would still not ask one whether a symptom is serious.
+
+Where do you draw your line on asking AI for advice?
+
+#ArtificialIntelligence #DigitalHealth #TechEthics #PatientSafety #AITools

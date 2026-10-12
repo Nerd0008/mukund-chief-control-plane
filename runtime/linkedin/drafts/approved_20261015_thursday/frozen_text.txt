@@ -1,0 +1,13 @@
+I spent part of this week building something that runs while I am asleep.
+
+It drafts, checks, and schedules work on its own. When it works, it feels like leverage. When it fails, it fails quietly, and that is the part I keep thinking about.
+
+I would rather a system stopped and told me it was stuck than carried on and was wrong.
+
+So most of the effort went into the stopping. Checks that refuse to continue. Records that prove what was actually approved. A rule that says: if you cannot verify this, do not do it.
+
+It is a strange lesson to take from a personal project. But it is the same instinct that matters in security work, at least to me. The value is not in what a system does. It is in what it refuses to do.
+
+What is the last thing you built that you trusted enough to leave running unattended?
+
+#CyberSecurity #Automation #ArtificialIntelligence #LessonsLearned #InfoSec

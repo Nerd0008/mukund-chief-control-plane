@@ -3,6 +3,11 @@
 
 Usage: python publish_scheduled.py <day>
 Where day is: tuesday, wednesday, or thursday
+
+Finds the newest approved_<YYYYMMDD>_<day>/ directory for the given weekday, so
+the schedule does not have to be re-pointed by hand every week (a hardcoded
+date previously made the cron jobs publish a stale draft, or fail as a
+duplicate, with nobody watching).
 """
 import sys
 import json
@@ -14,31 +19,44 @@ DRAFTS_DIR = CONTROL_PLANE / "runtime" / "linkedin" / "drafts"
 PYTHON = Path(r"C:\Users\mukun\Desktop\Pythob Bot\chief_of_staff_bot\.venv\Scripts\python.exe")
 PUBLISH_SCRIPT = CONTROL_PLANE / "career-ops" / "linkedin_publish.py"
 
+VALID_DAYS = ("tuesday", "wednesday", "thursday")
+
+
+def find_draft_dir(day: str) -> Path | None:
+    """Newest approved_<date>_<day> dir that has a draft JSON."""
+    candidates = []
+    for d in DRAFTS_DIR.glob(f"approved_*_{day}"):
+        if (d / "linkedin_drafts.json").exists():
+            candidates.append(d)
+    if not candidates:
+        return None
+    # Directory names are approved_<YYYYMMDD>_<day>, so lexical sort == date sort.
+    return sorted(candidates, key=lambda p: p.name)[-1]
+
+
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python publish_scheduled.py <day>")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if len(args) != 1:
+        print("Usage: python publish_scheduled.py <day> [--dry-run]")
         sys.exit(1)
-    
-    day = sys.argv[1].lower()
-    if day not in ('tuesday', 'wednesday', 'thursday'):
-        print(f"Invalid day: {day}")
+
+    day = args[0].lower()
+    if day not in VALID_DAYS:
+        print(f"Invalid day: {day} (expected one of {VALID_DAYS})")
         sys.exit(1)
-    
-    # Map day to date suffix
-    date_suffix = {'tuesday': '06', 'wednesday': '07', 'thursday': '08'}[day]
-    draft_dir = DRAFTS_DIR / f"approved_202610{date_suffix}_{day}"
+
+    draft_dir = find_draft_dir(day)
+    if draft_dir is None:
+        print(f"No approved draft found for {day} in {DRAFTS_DIR}")
+        sys.exit(1)
     draft_path = draft_dir / "linkedin_drafts.json"
-    
-    if not draft_path.exists():
-        print(f"Draft not found: {draft_path}")
-        sys.exit(1)
-    
-    with open(draft_path) as f:
+    print(f"Draft for {day}: {draft_dir.name}")
+
+    with open(draft_path, encoding="utf-8") as f:
         draft = json.load(f)
-    
-    confirm_token = draft['confirm_token']
-    image_path = draft.get('image_path')
-    
+
+    confirm_token = draft["confirm_token"]
+
     # Verify the draft matches the frozen approved text BEFORE publishing
     verify_script = CONTROL_PLANE / "runtime" / "linkedin" / "verify_draft.py"
     verify_result = subprocess.run(
@@ -51,7 +69,6 @@ def main():
         sys.exit(1)
     print(f"Verification passed: {verify_result.stdout.strip()}")
 
-    # Build command
     cmd = [
         str(PYTHON), str(PUBLISH_SCRIPT), "publish",
         "--drafts", str(draft_path),
@@ -59,24 +76,31 @@ def main():
         "--approve-publish",
         "--confirm-token", confirm_token,
     ]
-    
-    if image_path and Path(image_path).exists():
-        cmd.extend(["--image", image_path])
-    
+
+    image_path = draft_dir / "image.jpg"
+    if image_path.exists():
+        cmd.extend(["--image", str(image_path)])
+        print(f"Image: {image_path} ({image_path.stat().st_size} bytes)")
+    else:
+        print("Image: none found, publishing text only")
+
+    if "--dry-run" in sys.argv:
+        cmd.append("--dry-run")
+
     print(f"Publishing {day} post...")
-    print(f"Command: {' '.join(cmd)}")
-    
-    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
+    result = subprocess.run(cmd, capture_output=True, text=True,
+                            encoding="utf-8", errors="replace")
     print(result.stdout)
     if result.stderr:
         print("STDERR:", result.stderr)
-    
+
     if result.returncode == 0:
         print(f"SUCCESS: {day} post published")
     else:
         print(f"FAILED: {day} post failed with exit code {result.returncode}")
-    
+
     sys.exit(result.returncode)
+
 
 if __name__ == "__main__":
     main()
