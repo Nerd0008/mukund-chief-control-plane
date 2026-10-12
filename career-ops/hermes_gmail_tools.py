@@ -59,8 +59,18 @@ def install_turn_guidance(turn):
 
 def register(ctx):
     from gateway.run_turn import GatewayTurnMixin
-    from run_agent import AIAgent
-    install_language_policy(AIAgent)
+    # Avoid importing run_agent recursively during plugin discovery.
+    import threading,time
+    def install_when_loaded():
+        for _ in range(600):
+            agent=getattr(sys.modules.get('run_agent'),'AIAgent',None)
+            if agent is not None:
+                install_language_policy(agent);return
+            time.sleep(0.05)
+    install_when_ready=getattr(sys.modules.get('run_agent'),'AIAgent',None)
+    if install_when_ready is not None:install_language_policy(install_when_ready)
+    else:threading.Thread(target=install_when_loaded,daemon=True).start()
+    ctx.register_system_prompt_section('owner-response-language',LANGUAGE_POLICY,max_chars=1200)
     install_turn_guidance(GatewayTurnMixin)
     ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=2000)
     for name,description,handler,props in [
