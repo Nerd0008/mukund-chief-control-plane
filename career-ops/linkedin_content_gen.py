@@ -561,7 +561,7 @@ def _classify_post_topic(post_text: str) -> dict:
         return {
             "category": "ai_health",
             "style": "clean clinical editorial, soft natural light, calm neutral palette with a single cool accent, premium healthcare aesthetic",
-            "concept": "a glowing screen showing a calm conversational interface in a dim consulting room, a stethoscope resting unused beside it, representing unverified AI advice standing in for clinical judgement",
+            "concept": "a stethoscope and a folded paper prescription slip resting on an empty examination couch, an unused chair pulled up beside it, no screens and no text anywhere in the frame, representing unverified advice standing in for clinical judgement",
         }
 
     # Data breach / zero-day / vulnerability
@@ -629,6 +629,10 @@ def build_image_prompt(post_text: str, extra_instructions: str = "") -> str:
         "- Balanced with generous negative space (important for mobile feed)\n"
         "- If text appears in the scene, keep it to at most 3-4 words, incidental and neatly aligned\n"
         "- No logos, watermarks, or brand marks\n"
+        "- No text in the image at all. Do not render any letters, words, numbers,\n"
+        "  signage, labels or interface copy, and avoid screens as a subject: text\n"
+        "  rendered by image models is the single most obvious tell that an image\n"
+        "  is synthetic.\n"
         "- No literal violence, malware code, or attacker imagery\n\n"
         "Avoid (these read as generic AI-generated stock imagery):\n"
         "- Glowing 3D renders, isometric technology scenes, glossy plastic surfaces\n"
