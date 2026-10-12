@@ -436,6 +436,88 @@ def generate_image_bytes(prompt: str) -> bytes | None:
         return None
 
 
+# Distinct visual treatments, rotated per post so consecutive images never share
+# a look. Deliberately photographic, print and analogue rather than 3D-render or
+# vector-illustration: soft-gradient renders and flat vector art are the two
+# styles that read as "obviously AI" in a feed, which is what the owner rejects.
+IMAGE_MEDIA = [
+    {
+        "name": "documentary photograph",
+        "style": "candid documentary photograph, natural available light, shallow depth of field, 35mm lens, muted film colour, slight grain, unretouched",
+    },
+    {
+        "name": "macro still life",
+        "style": "extreme macro photograph of a physical object, raking side light, deep shadow, tactile surface detail, dark neutral background",
+    },
+    {
+        "name": "paper collage",
+        "style": "hand-cut paper collage, torn edges, halftone newsprint texture, limited three-colour palette, printed-matter aesthetic",
+    },
+    {
+        "name": "risograph print",
+        "style": "two-colour risograph print, visible ink misregistration, coarse paper grain, flat spot-colour shapes, screenprint poster aesthetic",
+    },
+    {
+        "name": "architectural photograph",
+        "style": "architectural photograph, wide angle, hard geometric daylight, long shadows, concrete and glass, small human figure for scale",
+    },
+    {
+        "name": "overhead flat lay",
+        "style": "overhead flat lay photograph on a plain surface, even diffuse light, objects placed with deliberate negative space, muted tones",
+    },
+    {
+        "name": "night street photograph",
+        "style": "night street photograph, available artificial light, damp reflective ground, deep shadows, cinematic but unpolished, 50mm lens",
+    },
+    {
+        "name": "analogue film portrait",
+        "style": "analogue 35mm film photograph, warm tungsten light, soft focus falloff, visible grain and slight colour shift, quiet intimate mood",
+    },
+]
+
+_IMAGE_STATE = Path(__file__).resolve().parents[1] / "runtime" / "linkedin" / "image_style_state.json"
+
+
+def _pick_media(post_text: str, state_path: Path | None = None) -> dict:
+    """Rotate through IMAGE_MEDIA so consecutive posts never share a treatment.
+
+    The next medium is chosen by walking the rotation order forward from the last
+    one used, so a week's three posts get three different mediums and the
+    following week does not restart on the same look. Deterministic given the
+    state file, which makes a re-run reproducible.
+    """
+    path = state_path or _IMAGE_STATE
+    recent: list[str] = []
+    try:
+        recent = json.loads(path.read_text(encoding="utf-8")).get("recent", [])
+    except Exception:
+        recent = []
+
+    names = [m["name"] for m in IMAGE_MEDIA]
+    # Start after the most recently used medium, then take the first candidate
+    # that has not appeared in the last three posts.
+    start = names.index(recent[0]) + 1 if recent and recent[0] in names else 0
+    banned = set(recent[:3])
+    chosen = None
+    for i in range(len(names)):
+        candidate = IMAGE_MEDIA[(start + i) % len(names)]
+        if candidate["name"] not in banned:
+            chosen = candidate
+            break
+    if chosen is None:
+        chosen = IMAGE_MEDIA[start % len(names)]
+
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"recent": [chosen["name"]] + recent[:7]}, indent=2),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+    return chosen
+
+
 def _classify_post_topic(post_text: str) -> dict:
     """Classify the post topic to determine the best image style.
 
@@ -522,6 +604,7 @@ def build_image_prompt(post_text: str, extra_instructions: str = "") -> str:
     """
     topic_summary = " ".join(post_text.split())[:300]
     topic_info = _classify_post_topic(post_text)
+    media = _pick_media(post_text)
 
     feedback_block = ""
     if extra_instructions.strip():
@@ -533,21 +616,27 @@ def build_image_prompt(post_text: str, extra_instructions: str = "") -> str:
         )
 
     return (
-        f"Create a professional LinkedIn post image for a cybersecurity topic.\n\n"
+        f"Create a professional LinkedIn post image.\n\n"
         f"Post topic: \"{topic_summary}\"\n\n"
-        f"Visual style: {topic_info['style']}\n\n"
-        f"Concept: {topic_info['concept']}\n\n"
+        f"Visual medium: {media['style']}\n\n"
+        f"Subject: {topic_info['concept']}\n\n"
+        f"Render the subject in the visual medium above. The medium is a photograph or a\n"
+        f"printed/handmade artefact, not a digital render: it should look like something a\n"
+        f"camera or a print shop produced, with real texture, real light and imperfect detail.\n\n"
         f"{feedback_block}\n"
         "Composition rules:\n"
-        "- Single unified scene, no split layouts\n"
+        "- Single unified scene, no split layouts, no collage of separate panels\n"
         "- Balanced with generous negative space (important for mobile feed)\n"
-        "- If text is used, keep it very short (max 3-4 words) and neatly aligned\n"
+        "- If text appears in the scene, keep it to at most 3-4 words, incidental and neatly aligned\n"
         "- No logos, watermarks, or brand marks\n"
-        "- No literal violence, malware code, or attacker imagery\n"
-        "- Clean, premium, professional aesthetic\n\n"
-        "Avoid:\n"
-        "- Neon colours, clutter, hacker cliches, shields, flashy effects\n"
-        "- Busy UI, large headlines, stock photo look\n\n"
+        "- No literal violence, malware code, or attacker imagery\n\n"
+        "Avoid (these read as generic AI-generated stock imagery):\n"
+        "- Glowing 3D renders, isometric technology scenes, glossy plastic surfaces\n"
+        "- Neon or cyan-purple gradient lighting, dark blue abstract networks\n"
+        "- Flat vector illustration, corporate Memphis figures, faceless silhouettes\n"
+        "- Floating holographic interfaces, circuit-board patterns, padlock or shield icons\n"
+        "- Perfectly symmetrical compositions and airbrushed, poreless surfaces\n"
+        "- Lens flare, bokeh circles, busy UI, large headlines\n\n"
         "Output:\n"
         "1 high-resolution image, 1080x1350 pixels (4:5 portrait aspect ratio). "
         "This is a strict requirement — portrait orientation for maximum mobile feed visibility."
