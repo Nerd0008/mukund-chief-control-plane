@@ -470,6 +470,18 @@ def _classify_post_topic(post_text: str) -> dict:
             "concept": "a transparent glass container with subtle cracks, light escaping through the gaps, representing AI systems breaking out of controlled environments",
         }
 
+    # AI in health / medical advice (before the cyber buckets: a health post
+    # rarely contains cyber keywords and would otherwise fall through to
+    # "personal", which produces a person-at-a-desk image that does not match)
+    if any(kw in text for kw in ["chatbot", "health", "medical", "patient", "clinician",
+                                 "symptom", "diagnosis", "prescribed", "medication",
+                                 "surgical", "hospital"]):
+        return {
+            "category": "ai_health",
+            "style": "clean clinical editorial, soft natural light, calm neutral palette with a single cool accent, premium healthcare aesthetic",
+            "concept": "a glowing screen showing a calm conversational interface in a dim consulting room, a stethoscope resting unused beside it, representing unverified AI advice standing in for clinical judgement",
+        }
+
     # Data breach / zero-day / vulnerability
     if any(kw in text for kw in ["breach", "zero-day", "vulnerability", "exploit", "data theft", "stolen", "leak"]):
         return {
