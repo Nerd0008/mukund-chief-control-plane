@@ -86,3 +86,19 @@ def test_unverified_cover_never_exported(tmp_path,monkeypatch):
     monkeypatch.setattr(cover,'EXPORT_ROOT',tmp_path/'exports')
     with pytest.raises(ValueError,match='unverified'):cover.export_verified(tmp_path/'missing.pdf','Example','Role')
     assert not cover.EXPORT_ROOT.exists()
+
+
+@pytest.mark.parametrize('repetitions',[1,4])
+def test_closing_follows_body_without_fixed_gap_and_links_survive(tmp_path,repetitions):
+    import build_cover,pymupdf
+    content=spec(tmp_path)
+    content['paragraphs']=['This is a clear paragraph about the application. '*repetitions]*4+['Thank you for considering my application.']
+    assert build_cover.build(content)==0
+    with pymupdf.open(content['out']) as pdf:
+        spans=[s for b in pdf[0].get_text('dict')['blocks'] for line in b.get('lines',[]) for s in line['spans']]
+        last=next(s for s in spans if s['text']=='Thank you for considering my application.')
+        closing=next(s for s in spans if s['text']=='Kind regards,')
+        assert abs(closing['origin'][1]-last['origin'][1]-16.8)<0.1
+        assert pdf.page_count==1
+        assert len(pdf[0].get_links())==2
+        assert {link['uri'] for link in pdf[0].get_links()}=={'mailto:'+build_cover.EMAIL,build_cover.LINKEDIN}
