@@ -46,3 +46,11 @@ def test_native_route_does_not_use_incremental_checkpoint(monkeypatch):
     g.assessments_tool({})
     assert calls==[('career_assessment_status.py','scan')]
     assert 'No deadline is UNKNOWN' in g.GUIDANCE
+
+
+def test_timeout_is_bounded_and_does_not_expose_private_output(monkeypatch):
+    import hermes_gmail_tools as g
+    def timeout(*a,**k):raise g.subprocess.TimeoutExpired('private-command',240,output='SECRET')
+    monkeypatch.setattr(g,'command',timeout)
+    result=g.assessments_tool({})
+    assert 'timed out' in result and 'SECRET' not in result

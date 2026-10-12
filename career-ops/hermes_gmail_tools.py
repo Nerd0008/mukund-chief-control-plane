@@ -20,7 +20,9 @@ def command(script,verb):
 
 def status_tool(args,**kwargs):return command('career_mail_monitor.py','status')
 def scan_tool(args,**kwargs):return command('career_mail_monitor.py','scan')
-def assessments_tool(args,**kwargs):return command('career_assessment_status.py','scan')
+def assessments_tool(args,**kwargs):
+    try:return command('career_assessment_status.py','scan')
+    except subprocess.TimeoutExpired:return json.dumps({'ok':False,'error':'assessment audit timed out; no status conclusions or writes made'})
 
 def jobs_tool(args,**kwargs):
     from career_job_mail import ROOT
