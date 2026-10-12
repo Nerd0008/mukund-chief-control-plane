@@ -23,8 +23,15 @@ def install_language_policy(agent_class):
     old=agent_class.run_conversation
     @functools.wraps(old)
     def run(self,user_message,system_message=None,*args,**kwargs):
-        context=(system_message or '')+'\n'+LANGUAGE_POLICY
-        return old(self,user_message,context,*args,**kwargs)
+        from hermes_owner_context import retrieve
+        owner_context,evidence=retrieve(user_message)
+        self._owner_context_retrieval=evidence
+        previous=getattr(self,'ephemeral_system_prompt',None)
+        # Native API-time seam: continuing sessions restore frozen system prompts.
+        # Do not persist private reference payloads into that frozen cache/history.
+        self.ephemeral_system_prompt=(previous or '')+'\n'+LANGUAGE_POLICY+owner_context
+        try:return old(self,user_message,system_message,*args,**kwargs)
+        finally:self.ephemeral_system_prompt=previous
     agent_class.run_conversation=run
     agent_class._owner_english_policy_installed=True
 

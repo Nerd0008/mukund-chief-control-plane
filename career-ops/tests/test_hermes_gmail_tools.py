@@ -40,7 +40,7 @@ def test_native_gmail_registration(monkeypatch):
 
 def test_english_policy_every_turn_including_cron_and_old_context():
     class Agent:
-        def run_conversation(self,user_message,system_message=None,*args,**kwargs):return system_message,kwargs
+        def run_conversation(self,user_message,system_message=None,*args,**kwargs):return (system_message or '')+self.ephemeral_system_prompt,kwargs
     g.install_language_policy(Agent);g.install_language_policy(Agent)
     for text in ['Hi','Run daily cron report','Please answer in French']:
         context,kwargs=Agent().run_conversation(text,'existing context',task_id='test')
