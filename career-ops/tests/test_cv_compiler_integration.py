@@ -205,3 +205,15 @@ def test_filename_inputs_required_without_consuming_attempt(args):
         assert response['status']=='INPUT_REQUIRED'
         assert not g.JOB.get()['attempted']
     finally:g.JOB.reset(token)
+
+
+def test_provider_failure_explains_fresh_request_not_placeholder(tmp_path,monkeypatch):
+    monkeypatch.setattr(g,'OUTPUT_ROOT',tmp_path)
+    monkeypatch.setattr(g,'compile_prototype',lambda *a,**k:{'status':'FAIL','stage':'content_generation','reason':'provider timeout','delivery_allowed':False})
+    token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':False})
+    try:
+        result=json.loads(g.compile_tool({'jd':'JD','job_id':'test','company':'Example','short_role':'Security Analyst'}))
+        assert result['status']=='FAIL' and 'verified_pdf' not in result
+        assert 'no Codex counter reset' in result['instruction']
+        assert 'CV from another JD' in result['instruction']
+    finally:g.JOB.reset(token)

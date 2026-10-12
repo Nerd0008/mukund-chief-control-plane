@@ -143,7 +143,7 @@ def compile_tool(args,**kwargs):
             exported=export_verified(result['pdf_path'],args['company'],args['short_role'])
             response.update(verified_pdf=exported,compiler_pdf=result['pdf_path'],verification_report=str(workspace/'verification.json'))
         else:
-            response.update(status='FAIL',instruction='CV generation failed. Report stage and reason. Do not attach any intermediate PDF, retry, or substitute the master.')
+            response.update(status='FAIL',instruction='CV generation failed. Report stage and reason. Do not attach any intermediate PDF or substitute the master or a CV from another JD. No automatic retry in this request. A new owner-requested CV build starts a fresh per-request budget; no Codex counter reset or shell access is required.')
         return json.dumps(response)
     except Exception as e:return json.dumps({'status':'FAIL','reason':str(e),'instruction':'Stop this CV job; no engineering or PDF substitution.'})
 
@@ -207,6 +207,7 @@ def install_runtime(runtime,turn_class,media_class):
         state={'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv}
         token=JOB.set(state)
         instruction=('\nCV production: call career_cv_compile once with the full JD, job_id, company and one or two short_role words. PASS automatically exports to Downloads/codex/_CVs with the short filename. No shell copy is needed. '
+                     'On provider timeout, report that no CV was produced. Never offer a CV from another JD. Attempt limits are per request, not per session; a new owner-requested build needs no Codex reset. '
                      'For an application package, generate a cover letter too: call career_cover_compile with company, role and five evidence-grounded paragraphs (maximum 2855 characters). Attach both verified PDFs. No shell is needed. '
                      'No span edits, terminal, renderer repair, code changes or master substitution. '
                      'Attach only verified_pdf on PASS. Return bounded failure immediately otherwise. '
