@@ -45,6 +45,9 @@ def analyze(messages,records,now=None):
         company,role=signal.get('company'),signal.get('role')
         if len(matches)==1:
             company,role=matches[0]['company'],matches[0]['role']
+        # Reject prose accidentally captured as a job title. Do not fabricate a replacement.
+        if role and (len(role.split())>16 or re.search(r'(?i)^join |and/or|from time to time|you may|your prior application',role)):
+            role=None
         status,reason=lifecycle(signal,mail,now)
         key=(signal.get('gmail_thread_id'),signal.get('application_identity'),signal.get('assessment_type'))
         # Completion and expiry updates supersede invitations in the same thread.
@@ -52,7 +55,7 @@ def analyze(messages,records,now=None):
         key=(key[0],key[1],'interview' if 'interview' in kind else 'assessment')
         rows[key]={'company':company,'role':role,'status':status,'reason':reason,
                    'received_at':signal.get('assessment_received_date'),'deadline':(signal.get('deadline') or {}).get('value'),
-                   'deadline_type':(signal.get('deadline') or {}).get('kind'),'identity_needs_review':len(matches)!=1 and (not company or not role or len(matches)>1),
+                   'deadline_type':(signal.get('deadline') or {}).get('kind'),'identity_needs_review':not company or not role or len(matches)>1,
                    'source_message_id':signal['gmail_message_id'],'source_thread_id':signal['gmail_thread_id'],
                    'portal_checked':False}
     output=list(rows.values())

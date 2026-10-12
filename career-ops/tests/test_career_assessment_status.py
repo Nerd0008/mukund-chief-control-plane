@@ -54,3 +54,11 @@ def test_timeout_is_bounded_and_does_not_expose_private_output(monkeypatch):
     monkeypatch.setattr(g,'command',timeout)
     result=g.assessments_tool({})
     assert 'timed out' in result and 'SECRET' not in result
+
+
+def test_prose_is_not_returned_as_job_title(monkeypatch):
+    monkeypatch.setattr(a,'prepare_messages',lambda m,r:m)
+    monkeypatch.setattr(a,'resolve',lambda raw,records:({'gmail_message_id':'m','gmail_thread_id':'t','assessment_type':'online_assessment',
+        'company':'Example','role':'join Example:','deadline':{}},[],None))
+    row=a.analyze([{'subject':'Assessment invitation','body':'Please complete your assessment.'}],[],NOW)['assessments'][0]
+    assert row['role'] is None and row['identity_needs_review']
