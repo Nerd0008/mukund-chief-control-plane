@@ -448,7 +448,9 @@ def llm_check_no_world_claims(post_text: str, *, api_key: str | None,
 List every factual claim it makes about the outside world: events, numbers,
 organisations, people, what happened, what someone said, what something is or
 does. Ignore the author's own opinions, feelings, memories of their own life,
-questions and rhetorical framing.
+statements about the author's own project or work, questions and rhetorical
+framing. A sentence describing what the author built or did themselves is not a
+claim about the outside world.
 
 Return ONLY JSON, no prose, in exactly this shape:
 {{"claims": [{{"claim": "<the claim, quoted or closely paraphrased>"}}]}}
@@ -466,6 +468,7 @@ POST:
         return {"used": False, "claims": [], "reason": f"model client failed: {exc}"}
 
     seen: dict[str, str] = {}
+    parsed_any = False
     for _ in range(max(1, runs)):
         try:
             resp = client.models.generate_content(model=model, contents=prompt)
@@ -482,11 +485,13 @@ POST:
         claims = parsed.get("claims")
         if not isinstance(claims, list):
             continue
+        parsed_any = True
         for c in claims:
             if isinstance(c, dict) and c.get("claim"):
                 seen[_normalise_claim(str(c["claim"]))] = str(c["claim"])
-    if not seen and not any(True for _ in ()):
+    if not parsed_any:
         # No run produced a usable list; report not-used rather than "no claims".
+        # A usable *empty* list is a real answer ("no claims"), not a failure.
         return {"used": False, "claims": [],
                 "reason": "model returned no usable JSON in any run"}
     return {"used": True, "claims": [{"claim": t} for t in seen.values()],
