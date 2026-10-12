@@ -7,7 +7,10 @@ GUIDANCE=('Local Career Ops Gmail access exists independently of manage_connecti
           'A missing Gmail connector is NOT evidence that local Gmail is unavailable. '
           'Do not request connector consent when local OAuth is ready. Gmail is strictly read-only; '
           'never send/reply/archive/delete/label or change read state. Manual scan is dry-run. '
-          'Existing owner-approved hourly writes remain governed by Career Ops guards.')
+          'Existing owner-approved hourly writes remain governed by Career Ops guards. '
+          'For open/valid/expired/completed assessment requests call career_gmail_assessments, not incremental scan. '
+          'Return only OPEN, EXPIRED, COMPLETED or UNKNOWN with evidence. No deadline is UNKNOWN, never valid. '
+          'Exclude newsletters. Do not add unrelated CV or tracker blockers. Do not delete scan locks.')
 
 def command(script,verb):
     result=subprocess.run([sys.executable,str(HERE/script),verb],cwd=str(HERE.parent),capture_output=True,text=True,encoding='utf-8',timeout=240)
@@ -17,6 +20,8 @@ def command(script,verb):
 
 def status_tool(args,**kwargs):return command('career_mail_monitor.py','status')
 def scan_tool(args,**kwargs):return command('career_mail_monitor.py','scan')
+def assessments_tool(args,**kwargs):return command('career_assessment_status.py','scan')
+
 def jobs_tool(args,**kwargs):
     from career_job_mail import ROOT
     p=ROOT/'jobs.json'
@@ -37,9 +42,10 @@ def install_turn_guidance(turn):
 def register(ctx):
     from gateway.run_turn import GatewayTurnMixin
     install_turn_guidance(GatewayTurnMixin)
-    ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=1200)
+    ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=2000)
     for name,description,handler,props in [
         ('career_gmail_status','Check existing local Gmail OAuth and approved monitoring status. No connector needed; no secrets printed.',status_tool,{}),
         ('career_gmail_scan','Read new recruitment Gmail using existing local OAuth. DRY RUN only: no tracker/Calendar/checkpoint/Gmail writes.',scan_tool,{}),
+        ('career_gmail_assessments','Audit last 30 days for personal assessment/interview status: OPEN, EXPIRED, COMPLETED, UNKNOWN. Gmail read-only, no writes/checkpoint. Does not submit tests or infer validity from an invitation.',assessments_tool,{}),
         ('career_gmail_jobs','Read the private deduplicated newsletter job list. Unverified leads, not applications. No Gmail or tracker writes.',jobs_tool,{'limit':{'type':'integer','minimum':1,'maximum':50},'offset':{'type':'integer','minimum':0}})]:
         ctx.register_tool(name=name,toolset='career_gmail',schema={'name':name,'description':description,'parameters':{'type':'object','properties':props,'additionalProperties':False}},handler=handler)
