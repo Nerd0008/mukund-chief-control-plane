@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "changed_slots": [
+    "s10",
+    "s16",
+    "s20",
+    "s35"
+  ],
+  "geometry_unchanged": true,
+  "outside_pixels_changed": false,
+  "master_unchanged": true,
+  "model_calls": 0
+}

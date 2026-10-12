@@ -333,14 +333,14 @@
     {
       "id": "s10",
       "section": "Technical Skills",
-      "text": "Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF",
+      "text": "Framework Familiarity: ISO 27001, Cyber Essentials, GDPR, NIST CSF",
       "runs": [
         {
           "text": "Framework Familiarity: ",
           "style": "bold"
         },
         {
-          "text": "ISO27001, Cyber Essentials, GDPR, NIST CSF ",
+          "text": "ISO 27001, Cyber Essentials, GDPR, NIST CSF ",
           "style": "normal"
         }
       ],
@@ -524,14 +524,14 @@
     {
       "id": "s16",
       "section": "Education",
-      "text": "Bachelor of Computer Applications , Maharashtra Institute of Technology World Peace University, India",
+      "text": "Bachelor of Computer Applications, Maharashtra Institute of Technology World Peace University, India",
       "runs": [
         {
           "text": "Bachelor of Computer Applications",
           "style": "bold"
         },
         {
-          "text": " , Maharashtra Institute of Technology World Peace University, India",
+          "text": ", Maharashtra Institute of Technology World Peace University, India",
           "style": "normal"
         }
       ],
@@ -644,14 +644,14 @@
     {
       "id": "s20",
       "section": "Work Experience",
-      "text": "IT Support Assistant, The Colourful Aura | London,UK | November 2024 - Present",
+      "text": "IT Support Assistant, The Colourful Aura | London, UK | November 2024 - Present",
       "runs": [
         {
           "text": "IT Support Assistant, ",
           "style": "bold"
         },
         {
-          "text": "The Colourful Aura | London,UK | November 2024 - Present",
+          "text": "The Colourful Aura | London, UK | November 2024 - Present",
           "style": "normal"
         }
       ],
@@ -1104,10 +1104,10 @@
     {
       "id": "s35",
       "section": "Projects",
-      "text": "Python ,Gmail API, LLM, MITRE ATT&CK, JSON",
+      "text": "Python, Gmail API, LLM, MITRE ATT&CK, JSON",
       "runs": [
         {
-          "text": "Python ,Gmail API, LLM, MITRE ATT&CK, JSON",
+          "text": "Python, Gmail API, LLM, MITRE ATT&CK, JSON",
           "style": "normal"
         }
       ],

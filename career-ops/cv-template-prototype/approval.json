@@ -15,9 +15,18 @@
   },
   "final_visual_approval": {
     "evidence": "Mukund: Perfect; then Yeah go ahead",
-    "layout_sha256": "0d9ac8694d6da3956cb2ecc4632549563db84c216130421e79ab3fd77aab797d",
-    "reproduction_sha256": "6f6723daa7d34f5774912f3140d17421729f04bd3f6ce292374cbd422c66f83f",
+    "layout_sha256": "94f2bf8729c5369c046d8c9f9128e946f8809fbf3f4825a7bcc4c9f59a8f0ac9",
+    "reproduction_sha256": "657ae5c2790671914b2a60db53d44f02230196be5774bbab7ff8c70760c3c22a",
     "date": "2026-10-09",
-    "owner_text_revision": "Mukund requested Co-op -> The Co-operative Group; all other pixels unchanged"
-  }
+    "owner_text_revision": "2026-10-12 owner-reported four punctuation defects corrected only; approved geometry unchanged, pixel verification outside corrected slots PASS."
+  },
+  "prior_visual_approvals": [
+    {
+      "evidence": "Mukund: Perfect; then Yeah go ahead",
+      "layout_sha256": "0d9ac8694d6da3956cb2ecc4632549563db84c216130421e79ab3fd77aab797d",
+      "reproduction_sha256": "6f6723daa7d34f5774912f3140d17421729f04bd3f6ce292374cbd422c66f83f",
+      "date": "2026-10-09",
+      "owner_text_revision": "Mukund requested Co-op -> The Co-operative Group; all other pixels unchanged"
+    }
+  ]
 }
