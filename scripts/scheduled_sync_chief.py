@@ -9,6 +9,7 @@ touched by failure: sync_discord_chief.py only advances its checkpoint after a
 successful push.
 """
 
+import os
 import json
 import subprocess
 import sys
@@ -36,7 +37,20 @@ def log(entry):
         pass
 
 
+def hide_owned_console():
+    """Hide only a private scheduled console, never the owner's shared terminal."""
+    if os.name != 'nt':return
+    import ctypes
+    kernel=ctypes.windll.kernel32
+    kernel.GetConsoleWindow.restype=ctypes.c_void_p
+    users=(ctypes.c_ulong*2)()
+    if kernel.GetConsoleProcessList(users,2)==1 and users[0]==os.getpid():
+        window=kernel.GetConsoleWindow()
+        if window:ctypes.windll.user32.ShowWindow(ctypes.c_void_p(window),0)
+
+
 def main():
+    hide_owned_console()
     # Cross-process lock: atomic create; stale lock (>timeout) is reclaimed.
     LOCK.parent.mkdir(parents=True, exist_ok=True)
     start = time.time()
@@ -58,6 +72,7 @@ def main():
             lock_fd = open(LOCK, "x")
     try:
         r = subprocess.run([sys.executable, str(SYNC_SCRIPT)],
+                           creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
                            capture_output=True, text=True, encoding="utf-8", timeout=570)
         out = (r.stdout or "") + (r.stderr or "")
         published = 0
