@@ -18,8 +18,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SYNC_SCRIPT = Path(r"C:\Users\mukun\Documents\mukund-chief-control-plane\scripts\sync_discord_chief.py")
-LOG = Path(r"C:\Users\mukun\DiscordArchive\chief\sync.log")
-LOCK = Path(r"C:\Users\mukun\DiscordArchive\chief\.sync.lock")
+ARCHIVE_ROOT = Path(r"C:\Users\mukun\DiscordArchive")
+LOG = ARCHIVE_ROOT / "sync.log"
+LOCK = ARCHIVE_ROOT / ".sync.lock"
 LOCK_TIMEOUT = 600  # seconds; give up if another sync genuinely hangs
 
 

@@ -18,11 +18,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-ARCHIVE_DIR = Path(r"C:\Users\mukun\DiscordArchive\chief")
+ARCHIVE_ROOT = Path(r"C:\Users\mukun\DiscordArchive")
+ARCHIVE_DIR = ARCHIVE_ROOT / "chief"
 REPO = Path(r"C:\Users\mukun\Documents\mukund-chief-control-plane")
 DEST_DIR = REPO / "conversations" / "discord"
-CHECKPOINT = ARCHIVE_DIR / ".sync-checkpoint.json"
+CHECKPOINT = ARCHIVE_ROOT / ".sync-checkpoint.json"
 CHIEF_CHANNEL_ID = "1551586294382067762"
+# Every channel subdirectory under the archive root gets synced, not just chief.
+CHANNEL_DIRS = sorted(
+    d for d in ARCHIVE_ROOT.iterdir() if d.is_dir()
+) if ARCHIVE_ROOT.exists() else []
 
 # Credential-like patterns: records containing these are REJECTED (skipped), not published.
 REJECT_PATTERNS = [
@@ -55,7 +60,7 @@ def load_checkpoint():
 
 
 def save_checkpoint(cp):
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    ARCHIVE_ROOT.mkdir(parents=True, exist_ok=True)
     CHECKPOINT.write_text(json.dumps(cp, indent=1), encoding="utf-8")
 
 
@@ -82,67 +87,71 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    if not ARCHIVE_DIR.exists():
+    if not ARCHIVE_ROOT.exists():
         print("No archive directory yet; nothing to sync.")
         return 0
 
     cp = load_checkpoint()
-    published = {}  # day -> list of records
+    published = {}  # "day:channel" -> list of records
     rejected = 0
 
-    for path in sorted(ARCHIVE_DIR.glob("*-chief.jsonl")):
-        day = path.name[:10]
-        state = cp.get(day, {"lines": 0, "last_hash": None})
-        lines = path.read_text(encoding="utf-8").splitlines()
-        new = lines[state["lines"]:]
-        if not new:
-            continue
-        out_records = []
-        for line in new:
-            line = line.strip()
-            if not line:
-                state["lines"] += 1
+    for archive_dir in CHANNEL_DIRS:
+        channel = archive_dir.name
+        for path in sorted(archive_dir.glob("*.jsonl")):
+            day = path.name[:10]
+            key = day + ":" + channel
+            state = cp.get(key, {"lines": 0, "last_hash": None})
+            lines = path.read_text(encoding="utf-8").splitlines()
+            new = lines[state["lines"]:]
+            if not new:
                 continue
-            try:
-                rec = json.loads(line)
-            except json.JSONDecodeError:
+            out_records = []
+            for line in new:
+                line = line.strip()
+                if not line:
+                    state["lines"] += 1
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    state["lines"] += 1
+                    continue  # append-only archive; skip corrupt line
+                content, bad = scan(str(rec.get("content") or ""))
                 state["lines"] += 1
-                continue  # append-only archive; skip corrupt line
-            if str(rec.get("channel_id")) != CHIEF_CHANNEL_ID:
-                state["lines"] += 1
-                continue  # never publish non-chief channels
-            content, bad = scan(str(rec.get("content") or ""))
-            state["lines"] += 1
-            if bad:
-                rejected += 1
-                print(f"REJECTED credential-like record ({day}) — not published.")
-                continue
-            rec["content"] = content
-            # strip anything not in the approved field set
-            allowed = ["timestamp", "direction", "channel_id", "channel_name",
-                       "thread_id", "session_id", "author_role", "message_id", "content"]
-            rec = {k: rec.get(k) for k in allowed}
-            out_records.append(rec)
-        if out_records:
-            published[day] = out_records
-        state["last_hash"] = hashlib.sha256(
-            "\n".join(lines[: state["lines"]]).encode("utf-8")).hexdigest()
-        cp[day] = state
+                if bad:
+                    rejected += 1
+                    print(f"REJECTED credential-like record ({key}) — not published.")
+                    continue
+                rec["content"] = content
+                # strip anything not in the approved field set
+                allowed = ["timestamp", "direction", "channel_id", "channel_name",
+                           "thread_id", "session_id", "author_role", "message_id", "content"]
+                rec = {k: rec.get(k) for k in allowed}
+                out_records.append(rec)
+            if out_records:
+                published[key] = out_records
+            state["last_hash"] = hashlib.sha256(
+                "\n".join(lines[: state["lines"]]).encode("utf-8")).hexdigest()
+            cp[key] = state
 
     if not published:
         print("Nothing new to sync.")
         return 0
 
     if args.dry_run:
-        for day, recs in published.items():
-            print(f"would publish {len(recs)} records to conversations/discord/{day}-chief.jsonl")
+        for key, recs in published.items():
+            fname = key.replace(":", "__") + ".jsonl"
+            print(f"would publish {len(recs)} records to conversations/discord/{fname}")
         print(f"rejected: {rejected}")
         return 0
 
     DEST_DIR.mkdir(parents=True, exist_ok=True)
     changed = []
-    for day, recs in published.items():
-        dest = DEST_DIR / f"{day}-chief.jsonl"
+    for key, recs in published.items():
+        # ":" is illegal in Windows filenames, so the "day:channel" checkpoint
+        # key is written to disk as "day__channel" and mapped back on read.
+        fname = key.replace(":", "__") + ".jsonl"
+        dest = DEST_DIR / fname
         existing = []
         if dest.exists():
             try:
