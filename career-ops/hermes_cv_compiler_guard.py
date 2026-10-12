@@ -123,6 +123,9 @@ def verified_attachment(path):
 def compile_tool(args,**kwargs):
     state=JOB.get()
     if not state:return json.dumps({'status':'FAIL','reason':'native CV job context required'})
+    import re
+    if not all(isinstance(args.get(k),str) and re.search(r'[A-Za-z0-9]',args[k]) for k in ('company','short_role')) or str(args.get('short_role','')).strip().lower()=='tailored':
+        return json.dumps({'status':'INPUT_REQUIRED','reason':'company and meaningful short_role are required; provide these and call again. No build attempt consumed.'})
     activate_job(state)
     if state.get('attempted'):return json.dumps({'status':'FAIL','reason':'compiler already invoked; no retries'})
     state['attempted']=True
@@ -137,7 +140,7 @@ def compile_tool(args,**kwargs):
         state['workspace']=workspace
         response={k:result.get(k) for k in ['status','stage','reason','elapsed_seconds','content_calls','renders','provider']}
         if time.monotonic()<state['deadline'] and result['delivery_allowed'] and delivery_allowed(result['pdf_path'],OUTPUT_ROOT):
-            exported=export_verified(result['pdf_path'],str(args.get('company') or str(args.get('job_id','application')).split('-')[0]),str(args.get('short_role') or 'Tailored'))
+            exported=export_verified(result['pdf_path'],args['company'],args['short_role'])
             response.update(verified_pdf=exported,compiler_pdf=result['pdf_path'],verification_report=str(workspace/'verification.json'))
         else:
             response.update(status='FAIL',instruction='CV generation failed. Report stage and reason. Do not attach any intermediate PDF, retry, or substitute the master.')
@@ -241,7 +244,7 @@ def register(ctx):
             'parameters':{'type':'object','properties':properties,'required':required,'additionalProperties':False}},handler=handler)
     tool('career_cv_master','Read approved CV design/facts. No span editing or character-count constraint.',{},[],master_tool)
     tool('career_cv_compile','Tailor a CV from JD in one bounded compiler invocation; returns verified PDF or failure. Never repair formatting.',
-         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'},'company':{'type':'string'},'short_role':{'type':'string','description':'One or two role words, e.g. Product Engineer'}},['jd','job_id'],compile_tool)
+         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'},'company':{'type':'string'},'short_role':{'type':'string','description':'One or two role words, e.g. Product Engineer'}},['jd','job_id','company','short_role'],compile_tool)
     tool('career_cv_build','Retired span builder; use career_cv_compile.',{},[],retired_build)
     from hermes_cover_tool import cover_tool
     tool('career_cover_compile','Build a verified one-page cover letter from five truthful paragraphs. Native tool: no shell access needed. Use with career_cv_compile for application packages.',

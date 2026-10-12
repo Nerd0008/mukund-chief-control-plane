@@ -14,11 +14,11 @@ def test_native_compiler_and_attachment_verification(tmp_path,monkeypatch):
     monkeypatch.setattr(g,'generate',offline_selection)
     token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':False})
     try:
-        r=json.loads(g.compile_tool({'jd':'Python and Windows graduate software support','job_id':'test'}))
+        r=json.loads(g.compile_tool({'jd':'Python and Windows graduate software support','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))
         assert r['status']=='PASS',r
         assert g.verified_attachment(r['verified_pdf'])
-        assert pathlib.Path(r['verified_pdf']).name=='Mukund_test_Tailored_CV.pdf'
-        assert json.loads(g.compile_tool({'jd':'same','job_id':'test'}))['status']=='FAIL'
+        assert pathlib.Path(r['verified_pdf']).name=='Mukund_Accenture_Security_Analyst_CV.pdf'
+        assert json.loads(g.compile_tool({'jd':'same','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))['status']=='FAIL'
         pathlib.Path(r['verified_pdf']).write_bytes(b'broken')
         assert not delivery_allowed(r['verified_pdf'],tmp_path)
     finally:g.JOB.reset(token)
@@ -94,7 +94,7 @@ def test_registered_tools_are_flow_compiler(monkeypatch):
     ctx=Context();g.register(ctx)
     assert ctx.tools['career_cv_compile']['handler'] is g.compile_tool
     assert ctx.tools['career_cv_build']['handler'] is g.retired_build
-    assert ctx.tools['career_cv_compile']['schema']['parameters']['required']==['jd','job_id']
+    assert ctx.tools['career_cv_compile']['schema']['parameters']['required']==['jd','job_id','company','short_role']
 
 def test_wall_clock_watchdog_uses_native_interrupt_seam(monkeypatch):
     import threading
@@ -182,12 +182,12 @@ def test_jd_attachment_can_activate_compiler_without_history_lock(monkeypatch):
         async def _run_agent(self,message,context,history,*a,**kw):
             assert runtime._current_max_iterations()==150
             assert g.pre_tool('patch',{'path':'unrelated.py'}) is None
-            assert g.pre_tool('tool_call',{'calls':[{'name':'career_cv_compile','arguments':{'jd':'Attached graduate role','job_id':'test'}}]}) is None
-            result=json.loads(g.compile_tool({'jd':'Attached graduate role','job_id':'test'}))
+            assert g.pre_tool('tool_call',{'calls':[{'name':'career_cv_compile','arguments':{'jd':'Attached graduate role','job_id':'test','company':'Accenture','short_role':'Security Analyst'}}]}) is None
+            result=json.loads(g.compile_tool({'jd':'Attached graduate role','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))
             assert result.get('reason')!='native CV job context required'
             assert runtime._current_max_iterations()==4
             assert g.pre_tool('patch',{'path':'cv_template.py'})['action']=='block'
-            assert json.loads(g.compile_tool({'jd':'retry','job_id':'test'}))['reason']=='compiler already invoked; no retries'
+            assert json.loads(g.compile_tool({'jd':'retry','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))['reason']=='compiler already invoked; no retries'
             return result
     class Media:
         async def send_document(self,*a,**kw):return True
@@ -195,3 +195,13 @@ def test_jd_attachment_can_activate_compiler_without_history_lock(monkeypatch):
     result=asyncio.run(Turn()._run_agent('[Content of message.txt]: Graduate programme requirements','',[]))
     assert result['stage']=='fixture'
     assert g.JOB.get() is None
+
+
+@pytest.mark.parametrize('args',[{'jd':'JD','job_id':'test'},{'company':'Accenture','short_role':'Tailored'},{'company':'','short_role':'Security Analyst'}])
+def test_filename_inputs_required_without_consuming_attempt(args):
+    token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':False})
+    try:
+        response=json.loads(g.compile_tool(args))
+        assert response['status']=='INPUT_REQUIRED'
+        assert not g.JOB.get()['attempted']
+    finally:g.JOB.reset(token)
