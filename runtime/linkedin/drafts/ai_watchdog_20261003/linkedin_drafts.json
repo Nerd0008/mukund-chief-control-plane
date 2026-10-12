@@ -1,0 +1,58 @@
+{
+  "drafts": [
+    {
+      "kind": "post",
+      "topic": "news",
+      "status": "draft_unsent",
+      "body": "Someone is buying used books in bulk, cutting off their spines, and scanning them. Not to resell. To feed AI models.\n\nI spent this week reading a journalist's ongoing investigation into what actually gets fed into training data. It is uncomfortable reading.\n\nA dataset of more than 191,000 books was used to train generative AI without the authors' permission. A nonprofit web archive has been quietly passing paywalled news articles to AI developers while telling publishers something different. And researchers showed that several popular models can reproduce long passages from the books they were trained on, close to word for word, after the companies building them said their models do not store copies of training data.\n\nSo the same pipeline that absorbs a person's work can hand it back out again.\n\nThat is why this kind of watchdog reporting exists. Nobody can challenge what they cannot see. Authors spent years on those books. Nowhere is there a record of what was taken, or from whom.\n\nI think this is a security problem as much as a copyright one. If we cannot trace where training data came from, we cannot protect the people it came from.\n\nWhere do you stand: should provenance tracking be a hard requirement for AI training pipelines, or is it already too late for that?\n\n#CyberSecurity #ArtificialIntelligence #DataPrivacy #InfoSec #AIGovernance",
+      "sources": [
+        "https://www.theatlantic.com/category/ai-watchdog/",
+        "https://www.theatlantic.com/technology/archive/2023/09/books3-database-generative-ai-training-copyright-infringement/675363/",
+        "https://www.theatlantic.com/technology/2025/11/common-crawl-ai-training-data/684567/",
+        "https://www.theatlantic.com/technology/2026/01/ai-memorization-research/685552/",
+        "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/"
+      ],
+      "fact_gate": {
+        "verdict": "pass",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false,
+      "news_fact_gate": {
+        "gate_name": "linkedin-news-claims",
+        "gate_version": 1,
+        "ran_at": "2026-10-03T02:12:21+00:00",
+        "body_sha256": "b2b444d720936f26736f5735a5b3c358fc579fcbaee2a480c3d0ee2585ae3800",
+        "sources": [
+          "https://www.theatlantic.com/category/ai-watchdog/",
+          "https://www.theatlantic.com/technology/archive/2023/09/books3-database-generative-ai-training-copyright-infringement/675363/",
+          "https://www.theatlantic.com/technology/2025/11/common-crawl-ai-training-data/684567/",
+          "https://www.theatlantic.com/technology/2026/01/ai-memorization-research/685552/",
+          "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/"
+        ],
+        "source_sha256": {},
+        "sources_unreadable": [
+          "https://www.theatlantic.com/category/ai-watchdog/",
+          "https://www.theatlantic.com/technology/archive/2023/09/books3-database-generative-ai-training-copyright-infringement/675363/",
+          "https://www.theatlantic.com/technology/2025/11/common-crawl-ai-training-data/684567/",
+          "https://www.theatlantic.com/technology/2026/01/ai-memorization-research/685552/",
+          "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/"
+        ],
+        "llm_used": false,
+        "ungrounded_numbers": [],
+        "ungrounded_entities": [],
+        "unsupported_claims": [],
+        "forbidden": [],
+        "warnings": [],
+        "verdict": "ungated",
+        "available": false,
+        "reason": "no source text could be read, so no claim could be verified"
+      },
+      "fact_gate_note": "Replaced a hand-written verdict with real gate runs on 2026-10-03."
+    }
+  ]
+}

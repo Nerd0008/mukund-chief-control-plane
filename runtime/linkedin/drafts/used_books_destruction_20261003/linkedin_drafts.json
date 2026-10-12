@@ -1,0 +1,77 @@
+{
+  "drafts": [
+    {
+      "kind": "post",
+      "topic": "news",
+      "status": "draft_unsent",
+      "body": "There is a version of AI training that does not happen in a data centre. It happens in a warehouse, with a knife.\n\nBooks are bought in bulk, their spines are sliced off so the pages can go through a scanner, and the physical copies are thrown away afterwards. That this happens has been public knowledge for more than a year. This month it became an argument.\n\nThe claim that went viral was that rare and out-of-print books are being destroyed, possibly millions of them. That part is not actually established. Reporting since has found no direct evidence tying the bulk purchases to a specific buyer, and it is unclear how rare the books being bought really are.\n\nBut here is what I keep coming back to. A scanned copy is not the same thing as the book. Once the pages are gone, the object is gone. If a title is out of print and the last physical copies are destroyed, there is no second run. The text may survive as training data. The book does not.\n\nWe usually frame AI training data as a copyright question. I think this is also a preservation question.\n\nShould there be a public record of which physical books are destroyed to train AI models?\n\n#CyberSecurity #ArtificialIntelligence #DataEthics #InfoSec #DigitalPreservation",
+      "sources": [
+        "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/"
+      ],
+      "fact_gate": {
+        "verdict": "pass",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false,
+      "publish_requires": "explicit owner authorization",
+      "news_fact_gate": {
+        "gate_name": "linkedin-news-claims",
+        "gate_version": 1,
+        "ran_at": "2026-10-03T02:15:30+00:00",
+        "body_sha256": "8e3700b56368c2fc4a4b50c95760bbe58b3885e06bcc15bdb7f3b561d3950c14",
+        "sources": [
+          "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/"
+        ],
+        "source_sha256": {
+          "https://www.theatlantic.com/technology/2026/08/ai-companies-buying-used-books-for-data/688167/": "8bd33b7574dd69279f3fc1978eb39642bc3a0ca5cdc9763fcd4765d3edb8cc16"
+        },
+        "sources_unreadable": [],
+        "llm_used": true,
+        "ungrounded_numbers": [],
+        "ungrounded_entities": [],
+        "unsupported_claims": [],
+        "forbidden": [],
+        "warnings": [],
+        "claims": [
+          {
+            "claim": "Books are bought in bulk, their spines are sliced off so the pages can go through a scanner, and the physical copies are thrown away afterwards.",
+            "verdict": "supported",
+            "evidence": "chopping off their spines to scan them more easily, and discarding them afterward."
+          },
+          {
+            "claim": "That this happens has been public knowledge for more than a year.",
+            "verdict": "supported",
+            "evidence": "The destruction of physical books in the process of training AI has been public knowledge for more than a year"
+          },
+          {
+            "claim": "This month it became an argument.",
+            "verdict": "supported",
+            "evidence": "Last week, the internet raged... debate over the practice intensified"
+          },
+          {
+            "claim": "The claim that went viral was that rare and out-of-print books are being destroyed, possibly millions of them.",
+            "verdict": "supported",
+            "evidence": "social-media posts and news articles accused AI companies of 'destroying the world’s books'—including 'millions of rare' ones... sparking concerns that the last remaining copies of out-of-print texts are being destroyed."
+          },
+          {
+            "claim": "Reporting since has found no direct evidence tying the bulk purchases to a specific buyer.",
+            "verdict": "supported",
+            "evidence": "acknowledged that no evidence directly connects the company to the recent wave of purchases that booksellers have described."
+          },
+          {
+            "claim": "It is unclear how rare the books being bought really are.",
+            "verdict": "supported",
+            "evidence": "it’s unclear how rare most of the books being bought actually are, or whether they’re of great value."
+          }
+        ],
+        "verdict": "pass",
+        "available": true
+      }
+    }
+  ]
+}

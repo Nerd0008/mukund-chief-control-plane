@@ -1,0 +1,40 @@
+{
+  "drafts": [
+    {
+      "kind": "post",
+      "topic": "personal",
+      "status": "draft_unsent",
+      "body": "Most daily technical work is repeating the same steps we did yesterday.\n\nI started building automation with AI agents. The idea is simple: use tools to build tools. I set up workflows that run on schedule, make decisions based on my own budget, and keep working even when I am asleep.\n\nThis is not about replacing human judgment. It is about using the right tool correctly to extend what one person can do. The right tool for the job always matters more than the most expensive one.\n\nHow much of your daily workflow do you trust to automated agents?\n\n#CyberSecurity #Automation #SecurityTools #TechEfficiency #Productivity",
+      "sources": [],
+      "fact_gate": {
+        "verdict": "pass",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false,
+      "news_fact_gate": {
+        "gate_name": "linkedin-news-claims",
+        "gate_version": 1,
+        "ran_at": "2026-10-03T02:12:20+00:00",
+        "body_sha256": "32ff098aa1c9db83ab8393c4a6d8431b5f6545dbbf8a9608515cc4d3db20a7e5",
+        "sources": [],
+        "source_sha256": {},
+        "sources_unreadable": [],
+        "llm_used": false,
+        "ungrounded_numbers": [],
+        "ungrounded_entities": [],
+        "unsupported_claims": [],
+        "forbidden": [],
+        "warnings": [],
+        "verdict": "ungated",
+        "available": false,
+        "reason": "no source text could be read, so no claim could be verified"
+      },
+      "fact_gate_note": "Replaced a hand-written verdict with real gate runs on 2026-10-03."
+    }
+  ]
+}

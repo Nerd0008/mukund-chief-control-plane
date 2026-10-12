@@ -1,0 +1,13 @@
+There is a version of AI training that does not happen in a data centre. It happens in a warehouse, with a knife.
+
+Books are bought in bulk, their spines are sliced off so the pages can go through a scanner, and the physical copies are thrown away afterwards. That this happens has been public knowledge for more than a year. This month it became an argument.
+
+The claim that went viral was that rare and out-of-print books are being destroyed, possibly millions of them. That part is not actually established. Reporting since has found no direct evidence tying the bulk purchases to a specific buyer, and it is unclear how rare the books being bought really are.
+
+But here is what I keep coming back to. A scanned copy is not the same thing as the book. Once the pages are gone, the object is gone. If a title is out of print and the last physical copies are destroyed, there is no second run. The text may survive as training data. The book does not.
+
+We usually frame AI training data as a copyright question. I think this is also a preservation question.
+
+Should there be a public record of which physical books are destroyed to train AI models?
+
+#CyberSecurity #ArtificialIntelligence #DataEthics #InfoSec #DigitalPreservation

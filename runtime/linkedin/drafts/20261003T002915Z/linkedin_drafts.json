@@ -1,0 +1,587 @@
+{
+  "generated_at": "2026-10-03T00:29:15+00:00",
+  "fact_gate": {
+    "verdict": "warn",
+    "invented": [],
+    "unsupportedFacts": [],
+    "forbidden": [],
+    "warnings": [
+      "built",
+      "achieved"
+    ],
+    "available": true,
+    "exit_code": 0
+  },
+  "drafts": [
+    {
+      "kind": "profile",
+      "status": "draft_unsent",
+      "applies_to": "LinkedIn headline and About section",
+      "headline": "Information Security MSc graduate with Security+ and ISC2 CC",
+      "headline_source": "config/profile.yml narrative.headline (verbatim)",
+      "about": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience.\nSecurity Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK\nSystems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration\nScripting & Automation: Python, PowerShell, SQL, API integration\nSecurity Controls: BitLocker, network segmentation, endpoint security\nFramework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF\nCommunication & Support: User support, technical documentation, stakeholder coordination",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 10,
+          "section": "Profile",
+          "text": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience."
+        },
+        {
+          "source": "cv.md",
+          "line": 74,
+          "section": "Technical Skills",
+          "text": "Security Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK"
+        },
+        {
+          "source": "cv.md",
+          "line": 75,
+          "section": "Technical Skills",
+          "text": "Systems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration"
+        },
+        {
+          "source": "cv.md",
+          "line": 76,
+          "section": "Technical Skills",
+          "text": "Scripting & Automation: Python, PowerShell, SQL, API integration"
+        },
+        {
+          "source": "cv.md",
+          "line": 77,
+          "section": "Technical Skills",
+          "text": "Security Controls: BitLocker, network segmentation, endpoint security"
+        },
+        {
+          "source": "cv.md",
+          "line": 78,
+          "section": "Technical Skills",
+          "text": "Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF"
+        },
+        {
+          "source": "cv.md",
+          "line": 79,
+          "section": "Technical Skills",
+          "text": "Communication & Support: User support, technical documentation, stakeholder coordination"
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "About text is canonical CV text verbatim; add nothing that the canonical sources do not state.",
+        "Update the live profile only in the owner's own browser session — this workflow never signs in."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:10",
+          "cv.md:74",
+          "cv.md:75",
+          "cv.md:76",
+          "cv.md:77",
+          "cv.md:78",
+          "cv.md:79"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": null,
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "post",
+      "topic": "project evidence",
+      "status": "draft_unsent",
+      "body": "Notes from a recent project:\n\nSafePaste - Sensitive Data Detection Browser Extension\n\nBuilt a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials and API keys before submitting pasted content.\n\nAchieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content.\n\nRefined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and choose whether to proceed.",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 54,
+          "section": "SafePaste - Sensitive Data Detection Browser Extension",
+          "text": "Built a Chrome extension using 25+ detection patterns to warn users about potential exposure of email addresses, credentials and API keys before submitting pasted content."
+        },
+        {
+          "source": "cv.md",
+          "line": 55,
+          "section": "SafePaste - Sensitive Data Detection Browser Extension",
+          "text": "Achieved 93.7% accuracy across 150+ manual test cases, including checks for false positives; kept all detection local to the browser to protect sensitive content."
+        },
+        {
+          "source": "cv.md",
+          "line": 56,
+          "section": "SafePaste - Sensitive Data Detection Browser Extension",
+          "text": "Refined detection rules through manual testing to reduce false positives, while allowing users to review flagged content and choose whether to proceed."
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "Framing line is structural; every substantive sentence is verbatim canonical text with its source line.",
+        "Add the owner's own reflection before publishing if desired — but do not add claims about experience, metrics or outcomes."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:54",
+          "cv.md:55",
+          "cv.md:56"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": null,
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "post",
+      "topic": "certification",
+      "status": "draft_unsent",
+      "body": "Certifications on record:\n\nCompTIA Security+\n\nISC2 Certified in Cybersecurity (CC)\n\nEthical Hacking with Kali Linux, IBM\n\nCyber Security Job Simulation, Deloitte & Mastercard via Forage",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 24,
+          "section": "certification",
+          "text": "CompTIA Security+"
+        },
+        {
+          "source": "cv.md",
+          "line": 25,
+          "section": "certification",
+          "text": "ISC2 Certified in Cybersecurity (CC)"
+        },
+        {
+          "source": "cv.md",
+          "line": 26,
+          "section": "certification",
+          "text": "Ethical Hacking with Kali Linux, IBM"
+        },
+        {
+          "source": "cv.md",
+          "line": 27,
+          "section": "certification",
+          "text": "Cyber Security Job Simulation, Deloitte & Mastercard via Forage"
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "Framing line is structural; every substantive sentence is verbatim canonical text with its source line.",
+        "Add the owner's own reflection before publishing if desired — but do not add claims about experience, metrics or outcomes."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:24",
+          "cv.md:25",
+          "cv.md:26",
+          "cv.md:27"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": null,
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "post",
+      "topic": "current study",
+      "status": "draft_unsent",
+      "body": "Where I am right now:\n\nMSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience.",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 10,
+          "section": "current study",
+          "text": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience."
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "Framing line is structural; every substantive sentence is verbatim canonical text with its source line.",
+        "Add the owner's own reflection before publishing if desired — but do not add claims about experience, metrics or outcomes."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:10"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": null,
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "post",
+      "topic": "tools in practice",
+      "status": "draft_unsent",
+      "body": "Tools I have been working in:\n\nSecurity Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK\n\nSystems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration\n\nScripting & Automation: Python, PowerShell, SQL, API integration\n\nSecurity Controls: BitLocker, network segmentation, endpoint security\n\nFramework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF\n\nCommunication & Support: User support, technical documentation, stakeholder coordination",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 74,
+          "section": "tools in practice",
+          "text": "Security Analysis: Phishing analysis, Windows Event Logs, network analysis, MITRE ATT&CK"
+        },
+        {
+          "source": "cv.md",
+          "line": 75,
+          "section": "tools in practice",
+          "text": "Systems & Support: Windows, Microsoft 365, Azure, account administration, endpoint configuration"
+        },
+        {
+          "source": "cv.md",
+          "line": 76,
+          "section": "tools in practice",
+          "text": "Scripting & Automation: Python, PowerShell, SQL, API integration"
+        },
+        {
+          "source": "cv.md",
+          "line": 77,
+          "section": "tools in practice",
+          "text": "Security Controls: BitLocker, network segmentation, endpoint security"
+        },
+        {
+          "source": "cv.md",
+          "line": 78,
+          "section": "tools in practice",
+          "text": "Framework Familiarity: ISO27001, Cyber Essentials, GDPR, NIST CSF"
+        },
+        {
+          "source": "cv.md",
+          "line": 79,
+          "section": "tools in practice",
+          "text": "Communication & Support: User support, technical documentation, stakeholder coordination"
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "Framing line is structural; every substantive sentence is verbatim canonical text with its source line.",
+        "Add the owner's own reflection before publishing if desired — but do not add claims about experience, metrics or outcomes."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:74",
+          "cv.md:75",
+          "cv.md:76",
+          "cv.md:77",
+          "cv.md:78",
+          "cv.md:79"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": null,
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "outreach",
+      "subtype": "networking",
+      "status": "draft_unsent",
+      "sent": false,
+      "recipient": null,
+      "recipient_kind": "networking contact (peer, alumni or community). No recipient is chosen.",
+      "channel": "LinkedIn message or connection note (owner-sent only)",
+      "body": "Hello,\n\nMSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience.\n\nI would be glad to connect and hear how you came to work in this area. If you have a moment, I would value your view on entering cyber security or IT support in the UK at my stage.\n\nThank you for your time.\n\nMukund Didwania",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 10,
+          "section": "Profile",
+          "text": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience."
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "No recipient is chosen, no connection request is generated and nothing is sent.",
+        "The introduction paragraph is the canonical Profile line verbatim; the rest is structural phrasing that makes no claim about experience."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:10"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": "LinkedIn message or connection note (owner-sent only)",
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    },
+    {
+      "kind": "outreach",
+      "subtype": "recruiter",
+      "status": "draft_unsent",
+      "sent": false,
+      "recipient": null,
+      "recipient_kind": "recruiter or agency contact. No recipient is chosen.",
+      "channel": "LinkedIn message (owner-sent only)",
+      "body": "Hello,\n\nMSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience.\n\nI am looking for a first role in cyber security or IT support in the UK, and I would be glad to be considered for anything on your books that suits a graduate at my stage.\n\nCertifications on record:\nCompTIA Security+\n\nI am happy to share my CV on request.\n\nThank you for your time.\n\nMukund Didwania",
+      "sources": [
+        {
+          "source": "cv.md",
+          "line": 10,
+          "section": "Profile",
+          "text": "MSc Information Security graduate from Royal Holloway with CompTIA Security+ and ISC2 CC. IT support and systems experience, complemented by practical projects in phishing analysis, endpoint risk assessment and security automation. Seeking a cybersecurity role to contribute technical and analytical skills while developing hands-on industry experience."
+        },
+        {
+          "source": "cv.md",
+          "line": 24,
+          "section": "Certifications",
+          "text": "CompTIA Security+"
+        }
+      ],
+      "voice_sources": [
+        "voice-dna.md",
+        "modes/_writing.md"
+      ],
+      "notes": [
+        "Nothing is sent, queued or scheduled, and no CV is attached or transmitted.",
+        "Certification text is the canonical Certifications line verbatim."
+      ],
+      "publish_requires": "explicit owner authorization",
+      "provenance": {
+        "generator": "career-ops/linkedin_workflow.py",
+        "generated_at": "2026-10-03T00:29:15+00:00",
+        "canonical_sources": {
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\cv.md": "c64bfffcc6ad081a8ddbb41f0b118c000eefba70d7763946550967cd5908d996",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\profile.yml": "88023ecfb05b592eea0ab96cca96e00fd7d9c6da406a11fe5522b55e11e6f7b4",
+          "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\config\\cv-facts.json": "69efa51230d58ec37e9e9b49135f3ebf63b9311ac2d2f13e453a2b567556b375"
+        },
+        "source_lines": [
+          "cv.md:10",
+          "cv.md:24"
+        ],
+        "rule": "substantive text is canonical source text verbatim; only structural connective phrasing is generated"
+      },
+      "unsent_state": {
+        "status": "draft_unsent",
+        "sent": false,
+        "sent_at": null,
+        "recipient_selected": false,
+        "recipient": null,
+        "channel": "LinkedIn message (owner-sent only)",
+        "connection_request_created": false,
+        "message_queued": false,
+        "scheduled": false,
+        "attachments_sent": 0,
+        "owner_approval_required": true,
+        "note": "Nothing has been sent, queued, scheduled or connected. This is a draft only; the owner sends it manually or not at all."
+      },
+      "fact_gate": {
+        "verdict": "warn",
+        "invented": [],
+        "unsupportedFacts": [],
+        "forbidden": [],
+        "warnings": [
+          "built",
+          "achieved"
+        ],
+        "available": true,
+        "exit_code": 0
+      },
+      "blocked": false
+    }
+  ]
+}
