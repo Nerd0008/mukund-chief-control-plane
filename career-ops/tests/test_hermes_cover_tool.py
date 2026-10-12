@@ -102,3 +102,19 @@ def test_closing_follows_body_without_fixed_gap_and_links_survive(tmp_path,repet
         assert pdf.page_count==1
         assert len(pdf[0].get_links())==2
         assert {link['uri'] for link in pdf[0].get_links()}=={'mailto:'+build_cover.EMAIL,build_cover.LINKEDIN}
+
+
+@pytest.mark.parametrize('text,passed',[("I have not worked with enterprise security tooling.",True),("I have worked with enterprise security tooling.",False),("I have not worked with enterprise security tooling. I use enterprise security tooling daily.",False)])
+def test_negated_generic_experience_is_not_positive_claim(text,passed):
+    gate={'available':True,'exit_code':1,'verdict':'block','unsupportedFacts':[{'kind':'tool','value':'enterprise security tooling'}],'invented':[],'forbidden':[]}
+    result=cover.cover_fact_result(gate,text)
+    assert (result['exit_code']==0)==passed
+
+def test_other_blockers_survive_negation_correction():
+    gate={'available':True,'exit_code':1,'verdict':'block','unsupportedFacts':[{'kind':'tool','value':'enterprise security tooling'}],'forbidden':[{'kind':'employment','value':'false claim'}]}
+    result=cover.cover_fact_result(gate,'I have not worked with enterprise security tooling.')
+    assert result['verdict']=='block' and result['exit_code']==1
+
+def test_fact_failure_has_specific_structured_reason():
+    result=cover.fact_failure_details({'available':True,'unsupportedFacts':[{'kind':'tool','value':'unsupported tool'}]})
+    assert result['stage']=='fact_verification' and result['issues'][0]['value']=='unsupported tool'

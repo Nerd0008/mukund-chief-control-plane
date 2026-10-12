@@ -41,16 +41,40 @@ def export_verified(source,company,role):
     if not verified(target):raise ValueError('exported cover verification failed')
     return target
 
+def cover_fact_result(gate,text):
+    """Correct only the known negative generic-tool false positive."""
+    import re
+    gate=dict(gate)
+    phrase='enterprise security tooling'
+    occurrences=list(re.finditer(re.escape(phrase),text,re.I))
+    negated=bool(occurrences) and all(re.search(r"(?i)(?:have not|haven't) worked with\s*$",text[max(0,m.start()-60):m.start()]) for m in occurrences)
+    blocked=gate.get('unsupportedFacts',[])
+    removable=[f for f in blocked if f.get('kind')=='tool' and str(f.get('value','')).lower()==phrase] if negated else []
+    if removable and gate.get('available') and gate.get('exit_code')==1:
+        gate['unsupportedFacts']=[f for f in blocked if f not in removable]
+        if not gate['unsupportedFacts'] and not gate.get('invented') and not gate.get('forbidden'):
+            gate.update(verdict='pass',exit_code=0,negation_correction='explicit lack of enterprise-tool experience is not a positive claim')
+    return gate
+
+def fact_failure_details(gate):
+    return {'stage':'fact_verification','reason':'cover letter fact gate did not pass',
+            'issues':[{ 'category':key,'kind':str(item.get('kind',''))[:60],'value':str(item.get('value',''))[:120]}
+                      for key in ('unsupportedFacts','invented','forbidden') for item in gate.get(key,[]) if isinstance(item,dict)],
+            'gate_available':bool(gate.get('available'))}
+
 def build(spec_path):
     import build_cover,cv_workflow,pymupdf
     sys.path.insert(0,str(HERE/'cv-template-prototype'))
     from cv_writing_policy import check
-    p=pathlib.Path(spec_path);s=json.loads(p.read_text());text='\n'.join(s['paragraphs'])
+    p=pathlib.Path(spec_path);s=json.loads(p.read_text(encoding='utf-8'));text='\n'.join(s['paragraphs'])
     if len(s['paragraphs'])!=5 or any(not t.strip() for t in s['paragraphs']):raise ValueError('five complete paragraphs required')
     if len(text)>2855:raise ValueError('cover letter exceeds 2855-character capacity')
     if check(text):raise ValueError('cover wording/encoding verification failed')
     gate=cv_workflow.fact_gate(cv_workflow.load_config(),text,label='cover',scratch=p.parent)
-    if not gate.get('available') or gate.get('exit_code')!=0 or gate.get('verdict')=='block':raise ValueError('cover letter fact gate did not pass')
+    gate=cover_fact_result(gate,text)
+    if not gate.get('available') or gate.get('exit_code')!=0 or gate.get('verdict')=='block':
+        p.with_name('failure.json').write_text(json.dumps(fact_failure_details(gate)),encoding='utf-8')
+        raise ValueError('cover letter fact gate did not pass')
     before={str(f):digest(f) for f in dependencies()}
     if build_cover.build(s)!=0:raise ValueError('cover letter formatting verification failed')
     out=pathlib.Path(s['out'])
@@ -81,7 +105,10 @@ def cover_tool(args,**kwargs):
         remaining=min(45,state['deadline']-time.monotonic())
         if remaining<=0:raise ValueError('application deadline reached')
         run=subprocess.run([sys.executable,str(HERE/'hermes_cover_tool.py'),str(path)],capture_output=True,text=True,timeout=remaining)
-        if run.returncode or not verified(out):return json.dumps({'status':'FAIL','reason':'cover content/fact/format verification failed','instruction':'No unverified PDF may be attached. No shell repair.'})
+        if run.returncode or not verified(out):
+            detail_path=workspace/'failure.json'
+            details=json.loads(detail_path.read_text(encoding='utf-8')) if detail_path.exists() else {'reason':'cover content/format verification failed'}
+            return json.dumps({'status':'FAIL',**details,'instruction':'Correct only the reported issues within the existing two-attempt budget. No unverified PDF, shell repair, or Codex counter reset. A new owner-requested build has a fresh request budget.'})
         try: exported=export_verified(out,str(args['company']),str(args.get('short_role') or args['role']))
         except (OSError,ValueError):return json.dumps({'status':'FAIL','reason':'verified cover export failed; check output folder access'})
         state['cover_succeeded']=True
