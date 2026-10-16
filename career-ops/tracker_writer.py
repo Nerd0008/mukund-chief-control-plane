@@ -421,11 +421,18 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
 
     url_idx = column_index_from_string(cfg["dedupe"]["url_column"])
     last = cfg["first_data_row"] - 1
+    ident_idx = {k: column_index_from_string(cfg["field_map"][k]) for k in ("company", "title")}
     url_keys = []
     for r in range(cfg["first_data_row"], ws.max_row + 1):
         v = ws.cell(row=r, column=url_idx).value
         if v not in (None, ""):
-            url_keys.append(normalize_url(v))
+            # A duplicate is a repeated *identity*, not a repeated link. Two rows
+            # can legitimately share a URL (a repost, or a row whose link was
+            # recorded from another source) while naming different companies or
+            # roles; those are separate records, not the writer duplicating work.
+            url_keys.append((normalize_url(v),
+                             str(ws.cell(r, ident_idx["company"]).value or ""),
+                             str(ws.cell(r, ident_idx["title"]).value or "")))
         if any(ws.cell(r, column_index_from_string(cfg["field_map"][k])).value not in (None, "") for k in ("company", "title", "url")):
             last = r
     dupes = sorted({k for k in url_keys if url_keys.count(k) > 1})
@@ -444,7 +451,9 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
     unresolved_dupes = []
     for key in dupes:
         matching = [r for r in range(cfg["first_data_row"], ws.max_row + 1)
-                    if normalize_url(ws.cell(r, url_idx).value) == key]
+                    if (normalize_url(ws.cell(r, url_idx).value),
+                        str(ws.cell(r, ident_idx["company"]).value or ""),
+                        str(ws.cell(r, ident_idx["title"]).value or "")) == key]
         id_cfg = cfg.get("id")
         note_col = cfg.get("field_map", {}).get("notes")
         canonical = [r for r in matching if id_cfg and ws[f"{id_cfg['column']}{r}"].value]
@@ -545,6 +554,18 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     before_hash = sha256_file(tracker_path)
     tr = Tracker(tracker_path, cfg)
     from tracker_integrity import assert_valid,bind_links
+    # Self-heal before validating. Earlier writes appended URL text without
+    # binding the hyperlink, so the identity check below would refuse every
+    # subsequent write. bind_links repairs each row's link from its own
+    # visible URL text (the only trusted source) before we judge it.
+    url_col_idx = column_index_from_string(cfg["dedupe"]["url_column"])
+    def _link_state():
+        col = list(tr.ws.iter_cols(min_col=url_col_idx, max_col=url_col_idx,
+                                   min_row=cfg["first_data_row"]))[0]
+        return {c.coordinate: (c.hyperlink.target if c.hyperlink else None) for c in col}
+    before_links = _link_state()
+    bind_links(tr.ws,cfg)
+    links_repaired = _link_state() != before_links
     assert_valid(tr.ws,cfg)
     pre_owned = tr.owned_snapshot()
     pre_rows = tr.last_data_row() - cfg["first_data_row"] + 1
@@ -661,12 +682,18 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         "tracker_sha256_before": before_hash,
     }
 
-    if not apply or not plan_rows:
+    if not apply or (not plan_rows and not links_repaired):
         tr.wb.close()
         result["planned_rows"] = [p["record"].get("id") for p in plan_rows if p["kind"] == "append"]
         if not plan_rows:
             result["reason"] = "no changes required: nothing to append or refresh"
         return result
+
+    if not plan_rows:
+        # Nothing to append, but the link repair above changed the sheet.
+        # Persist it so a no-op run heals the workbook instead of leaving the
+        # same corruption for the next run to trip over.
+        result["reason"] = "no changes required: nothing to append or refresh"
 
     # Owner mandate: the UK tracker carries exactly six columns
     # (Date Found, Company, Role Title, Apply Link, Application Deadline,
