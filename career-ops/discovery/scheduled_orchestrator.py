@@ -674,10 +674,17 @@ def run_region(region: str, args, *, deadline: float | None = None,
     # unified manifest: only candidates that passed the deterministic gates
     accepted_ids = {d["candidate_id"] for d in doc["eligibility"]["decisions"]
                     if d["decision"] == "accepted"}
+    eligible = [c for c in doc["canonical_candidates"]
+                if c.get("url") and c["candidate_id"] in accepted_ids]
+    # A board's search/category page is not a vacancy. It is filtered here as
+    # well as at the tracker write so it never reaches the tracker in the first
+    # place, and the exclusion is counted rather than silent.
+    listing_ids = {c["candidate_id"] for c in eligible
+                   if tw.listing_page_reason(c.get("url"))}
+    listing_excluded = [c for c in eligible if c["candidate_id"] in listing_ids]
     records = [rjs.build_record(region, c, rjs.load_policy(), run_id,
                                 {"stage": "unified-scheduled-discovery"})
-               for c in doc["canonical_candidates"]
-               if c.get("url") and c["candidate_id"] in accepted_ids]
+               for c in eligible if c["candidate_id"] not in listing_ids]
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "kind": "career-ops.unified-candidate-manifest",
@@ -685,7 +692,8 @@ def run_region(region: str, args, *, deadline: float | None = None,
         "read_only": True, "canonical_workbook_written": False,
         "counts": {"candidates": len(doc["canonical_candidates"]),
                    "tracker_candidates": doc["funnel"]["counts"]["tracker_candidates"],
-                   "manifest_records": len(records)},
+                   "manifest_records": len(records),
+                   "listing_pages_excluded": len(listing_excluded)},
         "records": records,
         "attribution": {src: entry["zero_attribution"]
                         for src, entry in (doc["funnel"].get("by_source") or {}).items()},

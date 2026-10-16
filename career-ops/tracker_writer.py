@@ -108,6 +108,69 @@ def normalize_url(value) -> str:
     return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), path, urlencode(query), ""))
 
 
+# Query parameter names that mean "this link is a search result, not a posting".
+# Matched exactly (not as substrings) so a legitimate parameter such as Vodafone's
+# ``customredirect`` or Glassdoor's ``jl`` is never mistaken for a search.
+SEARCH_QUERY_KEYS = {
+    "q", "query", "keywords", "keyword", "search", "searchterm", "not_found",
+    "pagenumber", "page", "l", "radius", "loc", "all_words",
+}
+
+# Path shapes that are a board's browse/landing page rather than one vacancy.
+LISTING_PATHS = {
+    "/jobs", "/jobs/", "/search", "/search/", "/careers", "/careers/",
+    "/careers.html", "/jobs.html", "/job-search", "/job-search/",
+}
+
+AGGREGATOR_HOSTS = ("indeed.", "simplyhired.", "totaljobs.", "reed.co.uk",
+                    "cv-library", "jobs.ac.uk", "monster.", "jobserve.")
+
+# Boards whose browse/category paths are shaped differently from a vacancy URL.
+# Bright Network serves postings at /graduate-jobs/<company>/<role>-<id> and
+# categories at /graduate-jobs/<category>/, so only the latter is a listing.
+BOARD_CATEGORY_PATHS = {
+    "brightnetwork.co.uk": re.compile(r"^/graduate-jobs/[^/]+/?$"),
+}
+
+
+def listing_page_reason(url) -> str:
+    """Return why ``url`` is a search/category page rather than a job posting.
+
+    A posting link identifies one vacancy; a listing link identifies a *query*
+    (``/search?q=…``) or a board's browse page (``/careers``). Recording those as
+    tracker rows is what produced rows whose "Apply Link" sends the owner to a
+    results page, so the writer rejects them and the cleanup pass removes the
+    ones already present.
+
+    Returns ``""`` when the URL looks like a real posting.
+    """
+    text = extract_url(url)
+    if not text:
+        return ""
+    try:
+        parts = urlsplit(text)
+    except ValueError:
+        return ""
+    host = parts.netloc.lower()
+    path = parts.path or ""
+    lowered = path.lower()
+    keys = {k.lower() for k, _ in parse_qsl(parts.query or "", keep_blank_values=True)}
+    if keys & SEARCH_QUERY_KEYS:
+        return "search query parameters: " + ",".join(sorted(keys & SEARCH_QUERY_KEYS)[:3])
+    if lowered in LISTING_PATHS:
+        return "board browse page: " + (path or "/")
+    # Indeed's result pages: /q-cybersecurity-intern-…-jobs.html and /Cyber-Security-Internship-jobs
+    if any(h in host for h in AGGREGATOR_HOSTS):
+        if lowered.startswith("/q-") and lowered.endswith(("-jobs.html", "-jobs.htm")):
+            return "aggregator search page: " + path
+        if re.fullmatch(r"/[^/]+-jobs(\.html?)?", lowered):
+            return "aggregator category page: " + path
+    for host_key, rx in BOARD_CATEGORY_PATHS.items():
+        if host_key in host and rx.search(lowered):
+            return "board category page: " + path
+    return ""
+
+
 def key_text(value) -> str:
     if value is None:
         return ""
@@ -242,6 +305,21 @@ class Tracker:
                     passed_rows.append(r)
                     break
         return passed_rows
+
+    def find_listing_rows(self) -> list[int]:
+        """Return row numbers whose Apply Link is a search/category page.
+
+        Discovery lanes occasionally return a board's results page instead of a
+        vacancy. Those rows are indistinguishable from real jobs in the digest
+        until the owner clicks and lands on a search screen, so they are removed
+        on the next write.
+        """
+        idx = self.url_col_idx()
+        rows = []
+        for r in range(self.first_data_row, self.last_data_row() + 1):
+            if listing_page_reason(self.ws.cell(r, idx).value):
+                rows.append(r)
+        return rows
 
     def delete_rows(self, rows: list[int]) -> None:
         """Delete rows from the worksheet (bottom-up to preserve row numbers)."""
@@ -575,9 +653,12 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
 
     # Owner marks dead roles as "passed" in the Status column. Delete them
     # before processing new records so the tracker stays clean.
+    # Rows whose Apply Link is a search/category page are removed for the same
+    # reason: they are not vacancies and cannot be applied to.
     passed_rows = tr.find_passed_rows()
-    if passed_rows:
-        tr.delete_rows(passed_rows)
+    listing_rows = tr.find_listing_rows()
+    if passed_rows or listing_rows:
+        tr.delete_rows(passed_rows + listing_rows)
         # Re-read keys after deletion so dedupe sees the cleaned state
         existing_ids = tr.ids()
         by_url, by_pair = tr.existing_keys()
@@ -603,6 +684,12 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         if not url_key:
             entry["decision"] = "rejected"
             entry["reason"] = "missing or unusable application URL"
+            outcomes.append(entry)
+            continue
+        listing_why = listing_page_reason(record.get("url"))
+        if listing_why:
+            entry["decision"] = "rejected"
+            entry["reason"] = "Apply Link is a search/category page, not a vacancy: " + listing_why
             outcomes.append(entry)
             continue
         if url_key in planned_url_keys or (pkey.strip("|") and pkey in planned_pair_keys):
@@ -675,6 +762,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             "rejected": sum(1 for o in outcomes if o["decision"] == "rejected"),
             "refreshed": sum(1 for o in outcomes if o["decision"] == "refreshed"),
             "passed_deleted": len(passed_rows),
+            "listing_deleted": len(listing_rows),
         },
         "outcomes": outcomes,
         "pre_data_rows": pre_rows,
@@ -682,7 +770,8 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         "tracker_sha256_before": before_hash,
     }
 
-    if not apply or (not plan_rows and not links_repaired):
+    if not apply or (not plan_rows and not links_repaired
+                     and not (passed_rows or listing_rows)):
         tr.wb.close()
         result["planned_rows"] = [p["record"].get("id") for p in plan_rows if p["kind"] == "append"]
         if not plan_rows:

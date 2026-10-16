@@ -282,7 +282,8 @@ def test_apply_is_reversible_and_verified(region, workspace, tmp_path):
     assert res["counts"]["appended"] == 2
     assert Path(res["backup"]).exists()
     assert res["verification"]["ok"], res["verification"]["problems"]
-    assert res["post_data_rows"] == pre_rows - res["counts"]["passed_deleted"] + 2
+    assert res["post_data_rows"] == (pre_rows - res["counts"]["passed_deleted"]
+                                     - res["counts"]["listing_deleted"] + 2)
     assert res["verification"]["owner_columns_unchanged"] is True
     assert res["verification"]["duplicate_urls_in_workbook"] == []
 
@@ -361,3 +362,102 @@ def test_summary_reports_real_ids_not_dates(region):
     tr.wb.close()
     for aid in data["actionable_ids"]:
         assert aid in real_ids, f"{aid!r} is not a real id in region {region}"
+
+
+# --------------------------------------------------------------------------- #
+# listing/search pages recorded as if they were vacancies
+# --------------------------------------------------------------------------- #
+
+LISTING_PAGE_URLS = [
+    "https://uk.indeed.com/q-cybersecurity-intern-l-united-kingdom-jobs.html",
+    "https://uk.indeed.com/Cyber-Security-Internship-jobs",
+    "https://www.simplyhired.co.uk/search?l=united+kingdom&q=it+support+internship",
+    "https://www.itjobboard.co.uk/jobs/?keywords%5Ball_words%5D=cyber&not_found=1",
+    "https://www.shell.com/careers.html",
+    "https://www.oxbury.com/careers",
+    "https://www.starlingbank.com/careers/#jobs",
+    "https://gamejobsuk.com/jobs?job_id=4664",
+    "https://www.findapprenticeship.service.gov.uk/apprenticeships?searchTerm=cyber",
+    "https://www.findapprenticeship.service.gov.uk/apprenticeships?levelIds=4&pageNumber=7",
+    "https://www.brightnetwork.co.uk/graduate-jobs/cyber-security/",
+]
+
+REAL_POSTING_URLS = [
+    "https://job-boards.greenhouse.io/gocardless/jobs/8066856?gh_src=885sh6b71us",
+    "https://jobs.vodafone.com/careers/job/563018692949428?customredirect=1&domain=vodafone.com",
+    "https://www.glassdoor.co.uk/job-listing/junior-grc-analyst-JV_IC3252741.htm?jl=1010236169589",
+    "https://careers-cooperparry.icims.com/jobs/2343/junior-cyber-security-consultant/job?in_iframe=1",
+    "https://www.reed.co.uk/jobs/junior-grc-security-analyst/57283372",
+    "https://www.cv-library.co.uk/job/225523024/junior-soc-analyst",
+    "https://jobs.glos.ac.uk/wrl/pages/vacancy.jsf?latest=00054071",
+    "https://symphony.com/company/apply/?gh_jid=8113704",
+    "https://www.theaacareers.co.uk/job-details/?id=500000233197",
+    # Bright Network postings live under /graduate-jobs/<company>/<role>-<id>
+    "https://www.brightnetwork.co.uk/graduate-jobs/deutsche-bank/technology-data-innovation-internship-programme-london-2026",
+]
+
+
+@pytest.mark.parametrize("url", LISTING_PAGE_URLS)
+def test_listing_page_reason_rejects_search_and_browse_pages(url):
+    """A link that identifies a query, not a vacancy, must be recognised."""
+    assert tw.listing_page_reason(url), f"not recognised as a listing page: {url}"
+
+
+@pytest.mark.parametrize("url", REAL_POSTING_URLS)
+def test_listing_page_reason_keeps_real_postings(url):
+    """A real posting link must never be mistaken for a listing page.
+
+    This is the guard against a cleanup pass deleting genuine roles: parameters
+    such as Vodafone's ``customredirect`` or Glassdoor's ``jl`` are not searches.
+    """
+    assert tw.listing_page_reason(url) == "", f"false positive on real posting: {url}"
+
+
+def test_listing_rows_are_deleted_on_write(tmp_path):
+    """A row whose Apply Link is a search page is removed by the next write."""
+    copy = copy_tracker("uk", tmp_path)
+    cfg = dict(tw.region_config(PROFILES, "uk"))
+    cfg["region"] = "uk"
+    tr = tw.Tracker(copy, cfg)
+    before = tr.last_data_row()
+    assert tw.listing_page_reason(tr.ws.cell(before, tw.column_index_from_string(
+        cfg["field_map"]["url"])).value) == ""
+    tr.wb.close()
+
+    # append a junk row: a real-looking company/title on a search URL
+    wb = openpyxl.load_workbook(copy)
+    ws = wb[cfg["sheet"]]
+    r = before + 1
+    ws.cell(r, 1, dt.date(2026, 10, 16))
+    ws.cell(r, tw.column_index_from_string(cfg["field_map"]["company"]), "Fake Board Ltd")
+    ws.cell(r, tw.column_index_from_string(cfg["field_map"]["title"]), "Cyber Security Intern")
+    ws.cell(r, tw.column_index_from_string(cfg["field_map"]["url"]),
+            "https://uk.indeed.com/Cyber-Security-Internship-jobs")
+    wb.save(copy)
+    wb.close()
+
+    res = tw.write_records(PROFILES, "uk", [make_record()], apply=True,
+                           tracker_override=str(copy), backup_dir=str(tmp_path))
+    assert res["applied"] is True
+    # the tracker copy already carries historical listing rows, so assert the
+    # one we planted is gone rather than an exact total
+    assert res["counts"]["listing_deleted"] >= 1
+    assert res["counts"]["appended"] == 1
+
+    tr = tw.Tracker(copy, cfg)
+    urls = [tr.ws.cell(r, tw.column_index_from_string(cfg["field_map"]["url"])).value
+            for r in range(cfg["first_data_row"], tr.last_data_row() + 1)]
+    tr.wb.close()
+    assert "https://uk.indeed.com/Cyber-Security-Internship-jobs" not in urls
+    assert any("greenhouse.io/exampleanalytics" in str(u) for u in urls)
+
+
+def test_new_listing_page_record_is_rejected(tmp_path):
+    """A manifest entry pointing at a search page is refused, not recorded."""
+    copy = copy_tracker("uk", tmp_path)
+    rec = make_record(url="https://uk.indeed.com/Cyber-Security-Internship-jobs")
+    res = tw.write_records(PROFILES, "uk", [rec], apply=True,
+                           tracker_override=str(copy), backup_dir=str(tmp_path))
+    assert res["counts"]["rejected"] == 1
+    assert res["counts"]["appended"] == 0
+    assert "search/category page" in res["outcomes"][0]["reason"]
