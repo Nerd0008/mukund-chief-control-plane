@@ -233,8 +233,13 @@ def accepted_candidates(doc):
     return out
 
 
-def tracker_rows(region, limit=10):
-    """Most recent rows from a region's canonical workbook. Read-only; never writes."""
+def tracker_rows(region, limit=None):
+    """Most recent rows from a region's canonical workbook. Read-only; never writes.
+
+    ``limit`` truncates the returned list. Pass ``None`` (the default) for every
+    row: the digest reports the true tracker total in its header, so a bounded
+    read there would state a smaller number than the workbook actually holds.
+    """
     try:
         from openpyxl import load_workbook
     except ImportError:  # pragma: no cover - environment specific
@@ -308,7 +313,7 @@ def tracker_rows(region, limit=10):
         return int(digits) if digits else 0
 
     out.sort(key=lambda r: (r["date"] or dt.date.min, _id_key(r)), reverse=True)
-    return out[:limit], None
+    return (out if limit is None else out[:limit]), None
 
 
 # --------------------------------------------------------------------------- #
@@ -325,8 +330,9 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         label = REGION_LABEL[region]
 
         # Always read tracker rows — they are the primary source for the digest.
-        # Read more than max_per_region so the digest can show "N more" when truncated.
-        tracked, tracker_error = tracker_rows(region, limit=max(max_per_region * 3, 50))
+        # Read every row so the header states the true tracker total; the listing
+        # below is sliced to max_per_region.
+        tracked, tracker_error = tracker_rows(region)
 
         if doc is None:
             head = [f"**{label}** — {len(tracked)} job(s) in tracker"]

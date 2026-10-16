@@ -132,6 +132,22 @@ def test_missing_run_is_unknown_never_no_jobs(isolated):
     assert "0 job(s) found" not in text
 
 
+def test_header_reports_true_tracker_total(isolated):
+    """The header count must be the workbook's real total, not a capped read.
+
+    The digest reads the whole workbook so the number it prints matches what the
+    owner sees when they open the tracker.
+    """
+    rows = [{"id": f"J{i}", "company": f"Co {i}", "title": f"Role {i}",
+             "url": f"https://example.org/j{i}"} for i in range(1, 13)]
+    write_tracker_rows(isolated, "uk", rows)
+    text, code = djl.build_digest(26.0, 100_000, 5)
+    assert code == 0
+    assert "12 job(s) in tracker" in text
+    # the listing is still capped, and says so
+    assert "7 more job(s) in this region not listed here" in text
+
+
 def test_tracker_rows_listed_with_source_url(isolated):
     write_tracker_rows(isolated, "uk", [
         {"id": "J1", "company": "Hoxhunt", "title": "Junior Security Engineer, GRC",
