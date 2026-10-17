@@ -14,13 +14,13 @@ def chinese_requested(message):
 
 def unexpected_chinese(text):
     if not isinstance(text,str):return False
-    prose=re.sub(r"```.*?```", "", text, flags=re.S)
-    # Preserve explicit quotes/code and incidental names. Catch prose even in mixed answers.
-    prose="\n".join(line for line in prose.splitlines() if not line.lstrip().startswith('>'))
-    for line in prose.splitlines():
-        han=sum('\u3400'<=c<='\u9fff' for c in line)
-        if han>=8 and han/max(1,sum(c.isalpha() for c in line))>=0.20:return True
-    return False
+    # Owner explicitly requires no Chinese anywhere in displayed output. Do not
+    # exempt short bullets, quoted text, code fences, or mixed English responses.
+    # Han script cannot distinguish Chinese from Japanese names: fail closed.
+    ranges=((0x3400,0x4DBF),(0x4E00,0x9FFF),(0xF900,0xFAFF),
+            (0x20000,0x2FA1F),(0x30000,0x323AF))
+    return any(any(lo<=ord(c)<=hi for lo,hi in ranges) for c in text)
+
 
 def checked_text(text,allow_chinese=False):
     return FAILURE if not allow_chinese and unexpected_chinese(text) else text
