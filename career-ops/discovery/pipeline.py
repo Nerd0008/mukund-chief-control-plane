@@ -925,6 +925,12 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
                                                 rjs.re.IGNORECASE):
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
 
+    from application_deadlines import deadline_priority
+    if rec.get('jd_is_closed'):
+        reasons.append('JD explicitly states the application is closed')
+    if deadline_priority(rec)[0]==4:
+        reasons.append('application deadline in JD has passed')
+
     work_auth = rjs._work_auth_block(rp)
     if work_auth["status"] == "UNKNOWN":
         flags.append(f"work authorisation for {rp['display_name']} is UNKNOWN — no owner-stated "
@@ -1157,10 +1163,16 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         jd_result = fetch_jd(url)
         rec["jd_text"] = jd_result.get("text") or ""
         rec["jd_fetch_state"] = jd_result.get("fetch_state", "fetch_failed")
+        from application_deadlines import extract_application_deadline, deadline_priority
+        rec["deadline_info"] = jd_result.get("deadline_info") or extract_application_deadline(rec["jd_text"],url)
+        rec["jd_is_closed"] = bool(jd_result.get("is_closed"))
         if jd_result.get("error"):
             rec["jd_fetch_error"] = jd_result["error"]
     funnel.set("jd_fetches_attempted", sum(1 for r in accepted if r.get("jd_text")))
     funnel.set("jd_fetches_failed", sum(1 for r in accepted if not r.get("jd_text")))
+
+    from application_deadlines import deadline_priority
+    accepted.sort(key=deadline_priority)
 
     # 4. deterministic gates ------------------------------------------------ #
     scope = rjs.lane_scope(region, schedules["regions"][region])
@@ -1187,6 +1199,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                      classifications.get(candidate_id(rec), {}).get("primary_label"),
                  "priority_watchlist": bool(rec.get("priority_watchlist")),
                  "watchlist_company": rec.get("watchlist_company"),
+                 "deadline_info": rec.get("deadline_info"),
                  **verdict}
         gated.append(entry)
         if verdict["decision"] != "accepted":

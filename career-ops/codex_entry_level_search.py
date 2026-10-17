@@ -52,6 +52,7 @@ from jd_fetcher import fetch_jd
 # owner's own Career Ops config/profile.yml, not a hardcoded list here.
 import owner_search_profile as osp
 from career_search_recall import posting_key, query_batches
+from application_deadlines import deadline_from_value, deadline_label, deadline_priority
 
 CODEX_EXE = Path(os.environ.get(
     "CAREER_OPS_CODEX_EXE",
@@ -444,18 +445,20 @@ def main() -> int:
                 "location": str(j.get("location") or "").strip() or "Unknown",
                 "url": url,
                 "deadline": deadline or "",
+                "deadline_info": jd.get("deadline_info") or deadline_from_value(deadline),
             })
 
+    collected.sort(key=deadline_priority)
     print(f"\n=== {len(collected)} new entry-level roles, "
           f"{len(rejected)} rejected by eligibility/liveness/title checks ===")
     for c in collected:
-        print(f"  + {c['company']} | {c['title']} | {c['location']}")
+        print(f"  + {c['company']} | {c['title']} | {c['location']} | Deadline: {deadline_label(c['deadline_info'])}")
     for t, _u, why in rejected[:10]:
         print(f"  - {t} ({why})")
 
     counts.update({'new_candidates':len(collected),'rejected':len(rejected),'distinct_query_batches':batch_count})
     decisions.extend({'title':t,'url':u,'reason':why} for t,u,why in rejected)
-    decisions.extend({'title':j['title'],'url':j['url'],'reason':'new candidate'} for j in collected)
+    decisions.extend({'title':j['title'],'url':j['url'],'reason':'new candidate','deadline_info':j['deadline_info']} for j in collected)
     print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha},ensure_ascii=True))
     if not collected:
         print('No NEW eligible candidates; this does not mean no jobs were retrieved. See reconciliation counts.')
@@ -490,12 +493,13 @@ def main() -> int:
             ws.cell(row=r, column=2, value=job["company"])
             ws.cell(row=r, column=3, value=job["title"])
             ws.cell(row=r, column=4, value=job["url"])
+            ws.cell(row=r, column=4).hyperlink=job["url"]
             if job.get("deadline"):
                 import datetime as _dt
                 ws.cell(row=r, column=5, value=_dt.date.fromisoformat(job["deadline"]))
                 ws.cell(row=r, column=5).number_format = "yyyy-mm-dd"
             else:
-                ws.cell(row=r, column=5, value="")
+                ws.cell(row=r, column=5, value=deadline_label(job["deadline_info"]))
             ws.cell(row=r, column=6, value="Not Applied")
         elif has_id_col:
             # Old UK schema: Job ID, Date Found, Company, Job Title, Location, ...
@@ -524,6 +528,7 @@ def main() -> int:
             ws.cell(row=r, column=url_col, value=job["url"])
 
     wb.save(tracker)
+    wb.close()
     if is_uk_new:
         print(f"\nWrote {len(collected)} rows to {tracker.name}")
     elif has_id_col:

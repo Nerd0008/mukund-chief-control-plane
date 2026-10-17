@@ -533,6 +533,10 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
         "salary": candidate.get("salary"),
         "source": f"Career Ops lane scan ({rp['display_name']}) run {run_id}",
     }
+    from application_deadlines import extract_application_deadline, deadline_label
+    info=candidate.get('deadline_info') or extract_application_deadline(candidate.get('jd_text') or '',candidate.get('url'))
+    rec['deadline_info']=info
+    rec['deadline']=deadline_label(info)
     if "last_checked" in cfg.get("field_map", {}):
         rec["last_checked"] = today
     if "visa_pathway" in cfg.get("field_map", {}):

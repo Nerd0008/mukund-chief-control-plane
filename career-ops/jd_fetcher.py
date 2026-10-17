@@ -15,6 +15,7 @@ Returns a dict with:
 from __future__ import annotations
 
 import re
+from application_deadlines import extract_application_deadline
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
@@ -102,6 +103,8 @@ def fetch_jd(url: str) -> dict:
         "text": "",
         "error": None,
         "fetch_state": "fetch_failed",
+        "deadline": None,
+        "deadline_info": extract_application_deadline("", url),
     }
 
     if not url or not url.lower().startswith(("http://", "https://")):
@@ -133,7 +136,8 @@ def fetch_jd(url: str) -> dict:
                 html = raw.decode("utf-8", errors="replace")
             result["text"] = _html_to_text(html)
             result["fetch_state"] = "validated_live"
-            result["deadline"] = extract_deadline(result["text"])
+            result["deadline_info"] = extract_application_deadline(result["text"], url)
+            result["deadline"] = result["deadline_info"]["date"]
             result["is_closed"] = is_job_closed(result["text"])
     except urllib.error.HTTPError as e:
         result["status"] = e.code
@@ -163,66 +167,9 @@ _CLOSED_PATTERNS = [
     re.compile(r"\bapplications\s+are\s+now\s+closed\b", re.I),
 ]
 
-_DEADLINE_PATTERNS = [
-    # "applications close on 15 November 2026" / "closing date: 31 Dec 2026" / "Apply by 1st January 2027"
-    re.compile(r"(?:applications?\s+close(?:\s+on)?|closing\s+date|deadline|apply\s+by)\s*[:\-]?\s*"
-               r"(\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+\s+\d{4})", re.I),
-    # "close/deadline/by 15 November 2026" (without "applications" prefix)
-    re.compile(r"(?:close|deadline|by)\s*[:\-]?\s*"
-               r"(\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+\s+\d{4})", re.I),
-    # "31/12/2026" or "31-12-2026" or "2026-12-31" near "close"/"deadline"
-    re.compile(r"(?:close|deadline|by)\s*[:\-]?\s*"
-               r"(\d{1,2}[/\-]\d{1,2}[/\-]\d{4}|\d{4}[/\-]\d{1,2}[/\-]\d{1,2})", re.I),
-    # "15 November" without year (assume current or next year)
-    re.compile(r"(?:close|deadline|by)\s*[:\-]?\s*"
-               r"(\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+)\b(?!\s*\d{4})", re.I),
-]
-
-_MONTHS = {m: i + 1 for i, m in enumerate(
-    ["january", "february", "march", "april", "may", "june",
-     "july", "august", "september", "october", "november", "december"])}
-
-
-def _parse_date_text(text: str):
-    """Parse a date string like '15 November 2026' or '31/12/2026' to a date."""
-    import datetime as dt
-    text = text.strip()
-    # Try ISO format first
-    try:
-        return dt.date.fromisoformat(text)
-    except ValueError:
-        pass
-    # Try "15 November 2026" or "15th November 2026"
-    m = re.match(r"(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s*(\d{4})?", text)
-    if m:
-        day = int(m.group(1))
-        month_name = m.group(2).lower()
-        if month_name in _MONTHS:
-            month = _MONTHS[month_name]
-            year = int(m.group(3)) if m.group(3) else dt.date.today().year
-            try:
-                return dt.date(year, month, day)
-            except ValueError:
-                return None
-    # Try "31/12/2026" or "31-12-2026"
-    m = re.match(r"(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})", text)
-    if m:
-        try:
-            return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
-        except ValueError:
-            return None
-    return None
-
-
 def extract_deadline(text: str):
-    """Extract application deadline from JD text. Returns date or None."""
-    for pat in _DEADLINE_PATTERNS:
-        m = pat.search(text)
-        if m:
-            parsed = _parse_date_text(m.group(1))
-            if parsed:
-                return parsed.isoformat()
-    return None
+    """Compatibility date-only API; structured JD deadline extraction is authoritative."""
+    return extract_application_deadline(text)['date']
 
 
 def is_job_closed(text: str) -> bool:

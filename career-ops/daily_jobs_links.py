@@ -43,6 +43,7 @@ Exit codes
 from __future__ import annotations
 
 import argparse
+from application_deadlines import deadline_from_value, deadline_label, deadline_priority
 import datetime as dt
 import json
 import re
@@ -114,7 +115,7 @@ _headers = _profile['required_headers']
 TRACKERS['uk'] = Path(_profile['tracker'])
 TRACKER_SCHEMA['uk'] = {
     'header_row': _profile['header_row'], 'sheet': _profile['sheet'], 'id': None,
-    **{name: _headers[_profile['field_map'][key]] for name,key in [('date','date_found'),('company','company'),('title','title'),('url','url')]},
+    **{name: _headers[_profile['field_map'][key]] for name,key in [('date','date_found'),('company','company'),('title','title'),('url','url'),('deadline','deadline')]},
     'status': _headers[_profile['status_columns']['application_status']],
 }
 
@@ -277,8 +278,10 @@ def tracker_rows(region, limit=None):
 
     # Build index map only for columns that exist
     index = {}
-    for key in ("id", "date", "company", "title", "url", "status"):
+    for key in ("id", "date", "company", "title", "url", "status", "deadline"):
         col_name = schema.get(key)
+        if key=="deadline" and not col_name:
+            col_name=next((h for h in ("Application Deadline","Closing Date","Deadline") if h in header),None)
         if col_name and col_name in header:
             index[key] = header.index(col_name)
 
@@ -301,6 +304,7 @@ def tracker_rows(region, limit=None):
             "status": (str(row[index["status"]]).strip()
                        if "status" in index and row[index["status"]] is not None else ""),
         }
+        record["deadline_info"]=deadline_from_value(row[index["deadline"]] if "deadline" in index else None)
         if is_synthetic(record["company"], record["title"], record["url"]):
             continue
         out.append(record)
@@ -313,6 +317,8 @@ def tracker_rows(region, limit=None):
         return int(digits) if digits else 0
 
     out.sort(key=lambda r: (r["date"] or dt.date.min, _id_key(r)), reverse=True)
+    # Stable sort retains newest-first ordering within equal deadline priority.
+    out.sort(key=deadline_priority)
     today = dt.date.today()
     for rec in out:
         age = (today - rec["date"]).days if rec["date"] else None
@@ -357,7 +363,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 for i, job in enumerate(tracked[:max_per_region], 1):
                     jobs.append([
                         f"  {i}. {job['company']} — {job['title']}  [{job['id']}]",
-                        f"     {job['url'] or 'URL: not stated by the source'}",
+                        f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})}",
                     ])
                 capped_out = max(0, len(tracked) - len(jobs))
                 total_jobs += len(tracked)
@@ -409,7 +415,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 age_note = f" ({age})" if age else ""
                 jobs.append([
                     f"  {i}. {job['company']} — {job['title']}{tag}{age_note}",
-                    f"     {job['url'] or 'URL: not stated by the source'}",
+                    f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})}",
                 ])
             capped_out = max(0, len(tracked) - len(jobs))
             total_jobs += len(tracked)
