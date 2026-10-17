@@ -112,6 +112,11 @@ def write_tracker_rows(tmp_path: Path, region: str, rows: list[dict]) -> Path:
 
     wb.save(path)
     wb.close()
+    # These fixture jobs represent positively verified open vacancies.
+    from job_liveness import record_verification
+    for i,row in enumerate(rows,1):
+        record={'company':row.get('company',f'Co {i}'),'title':row.get('title',f'Role {i}'),'url':row.get('url',f'https://example.org/j{i}')}
+        record_verification(record,{'vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})
     return path
 
 

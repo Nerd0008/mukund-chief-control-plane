@@ -54,7 +54,7 @@ def test_offline_production_dry_run_has_distinct_batches_and_exact_accounting(tm
     prompts=[];fetches=[]
     def fake_run(prompt,timeout):prompts.append(prompt);return json.dumps(rows)
     monkeypatch.setattr(search,'run_codex',fake_run)
-    def fake_fetch(url):fetches.append(url);return {'text':'Open role.','is_closed':False}
+    def fake_fetch(url):fetches.append(url);return {'text':'Open role.','is_closed':False,'vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}}
     monkeypatch.setattr(search,'fetch_jd',fake_fetch)
     monkeypatch.setattr(sys,'argv',['search','--batches','3','--batch-offset',str(offset),'--dry-run'])
     assert search.main()==0
@@ -104,7 +104,7 @@ def test_direct_search_delegates_only_to_guarded_writer(tmp_path,monkeypatch,cap
         def save(self,*a):pytest.fail('Direct search bypassed shared writer')
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),None,Book(),{},2,None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Cyber Intern','company':'Example','url':'https://employer.com/job/123'}]))
-    monkeypatch.setattr(search,'fetch_jd',lambda *a:{'text':'Open position.'})
+    monkeypatch.setattr(search,'fetch_jd',lambda *a:{'text':'Open position.','vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})
     calls=[]
     def writer(profiles,region,records,**kwargs):
         calls.append((region,records,kwargs))

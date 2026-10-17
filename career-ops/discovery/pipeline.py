@@ -882,7 +882,7 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     # a flag so the tracker records it as unverified.
     fetch_state = rec.get("fetch_state")
     if fetch_state == "bot_wall":
-        flags.append("destination behind bot wall (403/429) — live but unverified by bot")
+        flags.append("HTTP page blocked (403/429); separate positive availability evidence is required")
     elif fetch_state and fetch_state != "validated_live":
         reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
                        f"discovered-but-unverified or failed destination is never written")
@@ -926,6 +926,8 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
 
     from application_deadlines import deadline_priority
+    if rec.get('vacancy_status',{}).get('state') not in (None,'OPEN'):
+        reasons.append('current vacancy availability not verified OPEN')
     if rec.get('jd_is_closed'):
         reasons.append('JD explicitly states the application is closed')
     if deadline_priority(rec)[0]==4:
@@ -1166,6 +1168,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         from application_deadlines import extract_application_deadline, deadline_priority
         rec["deadline_info"] = jd_result.get("deadline_info") or extract_application_deadline(rec["jd_text"],url)
         rec["jd_is_closed"] = bool(jd_result.get("is_closed"))
+        from job_liveness import record_verification
+        rec["vacancy_status"] = record_verification(rec,jd_result)
         if jd_result.get("error"):
             rec["jd_fetch_error"] = jd_result["error"]
     funnel.set("jd_fetches_attempted", sum(1 for r in accepted if r.get("jd_text")))

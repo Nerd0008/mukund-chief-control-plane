@@ -1,48 +1,20 @@
 #!/usr/bin/env python3
-"""Daily job-links digest: every job found by the discovery lanes, with its apply link.
+"""Daily job delivery with independently verified, fresh vacancy availability.
 
-OWNER REQUEST (2026-10-03)
---------------------------
-"All the jobs you find daily I want the name and its link to apply in this chat
-also daily."
-
-This script is the delivery adapter for that request. It is DETERMINISTIC and
-READ-ONLY. It owns no career state, scores nothing, ranks nothing, re-words
-nothing and calls no model. Every line it prints is a field another workflow
-already wrote: the discovery run's own accepted classifications and the
-canonical regional workbooks' own rows.
-
-WHAT IT REPORTS
----------------
-Per region (uk / dubai / japan / singapore), from real artifacts only:
-
-  1. FOUND  — every accepted candidate from the region's most recent discovery
-              run, as `Company — Title` plus its own apply URL. The funnel's
-              `accepted` flag is the pipeline's own gate output; this script
-              does not re-judge it.
-  2. TRACKED— every row in that region's canonical workbook whose own
-              date-found/date-added column falls on the run's date, so the owner
-              can see what actually landed in the tracker.
-
-Safety contract
----------------
-* No network call, no browser, no GUI, no credential read, no model call.
-* Read-only against every workbook, ledger and runtime artifact. It writes
-  nothing anywhere.
-* A missing or stale run is reported as UNKNOWN/STALE, never as "no jobs".
-* No application, outreach, submission or LinkedIn action. Ever.
-* Synthetic/validation records (".invalid"/".test" hosts, "NOT A REAL VACANCY")
-  are filtered out so a test artifact can never appear as a real vacancy.
-
-Exit codes
-----------
-0  a digest was printed from at least one fresh run
-3  every region's run was missing or stale (digest printed with an explicit label)
+Read tracker history without modifying it. Only freshly verified OPEN jobs are
+listed; closed, expired and unverified records are counted and withheld.
+Formatting is network-free. The CLI first performs bounded public HTTP GET
+verification (30 records / 60 seconds), using a private evidence cache with a
+15-minute freshness limit. --no-refresh consumes only already-fresh evidence.
+No model, browser, credentials, applications, outreach or tracker writes.
+Missing/stale discovery artifacts remain explicitly labelled.
+Exit 0 indicates a fresh discovery/delivery source; 3 indicates stale/unknown.
 """
 
 from __future__ import annotations
 
 import argparse
+from job_liveness import load_cache, fresh_status, refresh
 from application_deadlines import deadline_from_value, deadline_label, deadline_priority
 import datetime as dt
 import json
@@ -343,6 +315,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     sections = []          # one dict per region, always kept
     fresh_regions = 0
     total_jobs = 0
+    verification=load_cache()
 
     for region in ACTIVE_REGIONS:
         doc, _path = latest_run_doc(region)
@@ -352,9 +325,21 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         # Read every row so the header states the true tracker total; the listing
         # below is sliced to max_per_region.
         tracked, tracker_error = tracker_rows(region)
+        tracked_total=len(tracked);withheld={'CLOSED':0,'UNKNOWN':0};current=[]
+        for job in tracked:
+            status=fresh_status(job,verification)
+            if status['state']=='OPEN':
+                if status.get('deadline_info',{}).get('type') in ('EXACT','ROLLING'):job['deadline_info']=status['deadline_info']
+                current.append(job)
+            else:withheld['CLOSED' if status['state']=='CLOSED' else 'UNKNOWN']+=1
+        tracked=current
+        tracked.sort(key=deadline_priority)
+        availability_note=f"  Availability: {len(tracked)} verified open; {withheld['CLOSED']} closed/expired withheld; {withheld['UNKNOWN']} unverified withheld."
+
 
         if doc is None:
-            head = [f"**{label}** — {len(tracked)} job(s) in tracker"]
+            head = [f"**{label}** — {tracked_total} job(s) in tracker"]
+            head.append(availability_note)
             if tracker_error:
                 head.append(f"  (tracker not read: {tracker_error})")
             jobs = []
@@ -382,9 +367,10 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         run_date = generated.date() if generated else None
         accepted = accepted_candidates(doc)
 
-        head = [f"**{label}** — {len(tracked)} job(s) in tracker"
+        head = [f"**{label}** — {tracked_total} job(s) in tracker"
                 + (f", {len(accepted)} found today" if accepted else "")]
 
+        head.append(availability_note)
         if stale:
             age_text = f"{age_h:.1f}h old" if age_h is not None else "no readable timestamp"
             head.append(f"  ⚠️ STALE/UNKNOWN — run is {age_text} (threshold {stale_hours}h). "
@@ -398,7 +384,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         jobs = []
         capped_out = 0
         if not tracked:
-            head.append("  No jobs in tracker.")
+            head.append("  No freshly verified open jobs to list; retained tracker history is unchanged.")
             if not accepted:
                 zero = (doc.get("funnel") or {}).get("counts", {}).get("zero_attribution") or {}
                 first_zero = zero.get("first_zero_stage")
@@ -436,7 +422,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     tail = [
         "",
         "Read-only: no application, no submission, no outreach, no tracker write.",
-        "Links are the source's own URL; a pre-screened vacancy is not re-verified live.",
+        "Only freshly verified open vacancies are listed. Unknown or expired records are withheld, not deleted.",
     ]
 
     def render(dropped: dict) -> str:
@@ -485,7 +471,15 @@ def main() -> int:
                              "a full 10-per-region digest.")
     parser.add_argument("--max-per-region", type=int, default=10,
                         help="max jobs listed per region before summarising the rest")
+    parser.add_argument('--verify-limit',type=int,default=30)
+    parser.add_argument('--verify-seconds',type=float,default=60)
+    parser.add_argument('--no-refresh',action='store_true',help='Read fresh evidence only; never treat stale/missing evidence as open')
     args = parser.parse_args()
+    if not args.no_refresh:
+        records=[]
+        for region in ACTIVE_REGIONS:records.extend(tracker_rows(region)[0])
+        refresh(records,limit=max(0,min(30,args.verify_limit)),budget_seconds=max(0,min(60,args.verify_seconds)))
+
 
     text, code = build_digest(args.stale_hours, args.budget, args.max_per_region)
     print(text)

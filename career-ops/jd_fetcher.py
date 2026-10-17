@@ -10,11 +10,14 @@ Returns a dict with:
   - status: HTTP status code
   - text: extracted plain text (or empty string on failure)
   - error: error message (or None)
-  - fetch_state: one of "validated_live", "bot_wall", "fetch_failed"
+  - fetch_state: transport only: "fetched", "bot_wall", "fetch_failed"
+  - vacancy_status: independent OPEN / CLOSED / UNKNOWN with evidence
 """
 from __future__ import annotations
 
 import re
+import json,time
+from job_liveness import assess, closure_evidence
 from application_deadlines import extract_application_deadline
 import urllib.error
 import urllib.request
@@ -92,11 +95,13 @@ def _html_to_text(html: str) -> str:
     return html.strip()
 
 
-def fetch_jd(url: str) -> dict:
+def fetch_jd(url: str, timeout=None) -> dict:
     """Fetch a job posting URL and return extracted text.
 
     Returns a dict with keys: url, status, text, error, fetch_state.
     """
+    started=time.monotonic()
+    request_timeout=TIMEOUT if timeout is None else max(0.1,float(timeout))
     result = {
         "url": url,
         "status": None,
@@ -104,6 +109,7 @@ def fetch_jd(url: str) -> dict:
         "error": None,
         "fetch_state": "fetch_failed",
         "deadline": None,
+        "vacancy_status": {"state":"UNKNOWN","evidence":"job not fetched"},
         "deadline_info": extract_application_deadline("", url),
     }
 
@@ -126,7 +132,7 @@ def fetch_jd(url: str) -> dict:
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+        with urllib.request.urlopen(req, timeout=request_timeout) as resp:
             result["status"] = resp.status
             raw = resp.read(MAX_BYTES)
             charset = resp.headers.get_content_charset() or "utf-8"
@@ -135,12 +141,16 @@ def fetch_jd(url: str) -> dict:
             except (LookupError, UnicodeDecodeError):
                 html = raw.decode("utf-8", errors="replace")
             result["text"] = _html_to_text(html)
-            result["fetch_state"] = "validated_live"
+            result["fetch_state"] = "fetched"  # HTTP transport success, not vacancy availability.
             result["deadline_info"] = extract_application_deadline(result["text"], url)
             result["deadline"] = result["deadline_info"]["date"]
-            result["is_closed"] = is_job_closed(result["text"])
+            result["vacancy_status"] = assess(html,result["text"],result["deadline_info"])
+            result["is_closed"] = result["vacancy_status"]["state"]=="CLOSED"
     except urllib.error.HTTPError as e:
         result["status"] = e.code
+        if e.code in (404,410):
+            result["vacancy_status"]={"state":"CLOSED","evidence":f"job URL returned HTTP {e.code}"}
+            result["is_closed"]=True
         if e.code in (403, 429):
             result["fetch_state"] = "bot_wall"
             result["error"] = f"HTTP {e.code} (bot wall)"
@@ -151,6 +161,12 @@ def fetch_jd(url: str) -> dict:
     except Exception as e:
         result["error"] = f"{type(e).__name__}: {e}"
 
+    if result['vacancy_status']['state']=='UNKNOWN':
+        remaining=request_timeout-(time.monotonic()-started)
+        if remaining>0.2:
+            fallback=_active_ats_record(url,remaining)
+            if fallback:
+                result.update(fallback)
     return result
 
 
@@ -158,14 +174,6 @@ def fetch_jd(url: str) -> dict:
 # deadline + liveness extraction
 # ---------------------------------------------------------------------------
 
-_CLOSED_PATTERNS = [
-    re.compile(r"\b(?:position|role)\s+(?:has\s+)?been\s+filled\b", re.I),
-    re.compile(r"\b(?:no\s+longer\s+accepting|closed\s+for\s+applications)\b", re.I),
-    re.compile(r"\b(?:deadline\s+has\s+passed|application\s+period\s+has\s+ended)\b", re.I),
-    re.compile(r"\bthis\s+(?:job|vacancy|role)\s+has\s+(?:closed|expired)\b", re.I),
-    re.compile(r"\bwe\s+are\s+no\s+longer\s+accepting\s+applications\b", re.I),
-    re.compile(r"\bapplications\s+are\s+now\s+closed\b", re.I),
-]
 
 def extract_deadline(text: str):
     """Compatibility date-only API; structured JD deadline extraction is authoritative."""
@@ -174,7 +182,7 @@ def extract_deadline(text: str):
 
 def is_job_closed(text: str) -> bool:
     """Check if the job page indicates the position is closed or filled."""
-    return any(p.search(text) for p in _CLOSED_PATTERNS)
+    return bool(closure_evidence(text))
 
 
 def fetch_jds(urls: list[str], *, timeout: int = TIMEOUT) -> list[dict]:
@@ -183,3 +191,27 @@ def fetch_jds(urls: list[str], *, timeout: int = TIMEOUT) -> list[dict]:
     for url in urls:
         results.append(fetch_jd(url))
     return results
+
+def _active_ats_record(url,timeout):
+    """One public read-only ATS lookup, only for known exact posting URL shapes."""
+    parsed=urlparse(url);host=(parsed.hostname or '').lower();path=parsed.path
+    endpoint=None;identity=None;vendor=None
+    if host in ('job-boards.greenhouse.io','boards.greenhouse.io'):
+        match=re.fullmatch(r'/([^/]+)/jobs/(\d+)/?',path)
+        if match:endpoint=f'https://boards-api.greenhouse.io/v1/boards/{match[1]}/jobs/{match[2]}';identity=match[2];vendor='Greenhouse'
+    elif host=='jobs.lever.co':
+        match=re.fullmatch(r'/([^/]+)/([a-zA-Z0-9-]+)/?',path)
+        if match:endpoint=f'https://api.lever.co/v0/postings/{match[1]}/{match[2]}?mode=json';identity=match[2];vendor='Lever'
+    if not endpoint:return None
+    try:
+        req=urllib.request.Request(endpoint,headers={'Accept':'application/json','User-Agent':USER_AGENT})
+        with urllib.request.urlopen(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
+        if str(data.get('id'))!=identity:return None
+        title=data.get('title') or data.get('text');content=data.get('content') or data.get('descriptionPlain') or data.get('description') or ''
+        if not title:return None
+        text=_html_to_text(content);deadline=extract_application_deadline(text,url)
+        state=assess('',text,deadline)
+        if state['state']!='CLOSED':state={'state':'OPEN','evidence':f'{vendor} public active posting API returned matching requisition {identity}','page_title':title}
+        return {'text':text,'deadline_info':deadline,'deadline':deadline['date'],
+                'vacancy_status':state,'is_closed':state['state']=='CLOSED','validation_source':endpoint}
+    except (OSError,ValueError,TypeError):return None

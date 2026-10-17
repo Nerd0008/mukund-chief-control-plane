@@ -47,6 +47,7 @@ CONTROL_PLANE = HERE.parent
 # JD fetcher for clearance/eligibility checks against full job descriptions
 sys.path.insert(0, str(HERE))
 from jd_fetcher import fetch_jd
+from job_liveness import record_verification
 
 # Owner profile: the search vocabulary and eligibility facts come from the
 # owner's own Career Ops config/profile.yml, not a hardcoded list here.
@@ -384,7 +385,7 @@ def main() -> int:
     existing_urls={posting_key(u) for u in existing_urls if posting_key(u)}
     seen = set()
     collected, rejected, decisions = [], [], []
-    counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0}
+    counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0,'review_only':0}
     for bi in selected_batches:
         queries = batches[bi]
         qtext = "\n".join(f"{i}. \"{q}\"" for i, q in enumerate(queries, 1))
@@ -422,7 +423,8 @@ def main() -> int:
             # Fetch full JD and check clearance/citizenship + liveness
             jd = fetch_jd(url)
             jd_text = jd.get("text") or ""
-            if jd.get("is_closed"):
+            verified=record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
+            if jd.get("is_closed") or verified['state']=='CLOSED':
                 rejected.append((title, url, "job page says position is closed/filled"))
                 continue
             deadline = jd.get("deadline")
@@ -435,6 +437,10 @@ def main() -> int:
                         continue
                 except ValueError:
                     pass
+            if verified['state']!='OPEN':
+                counts['review_only']+=1
+                decisions.append({'title':title,'url':url,'reason':'availability unverified; review-only lead','verification':verified})
+                continue
             clearance = clearance_hits(jd_text)
             if clearance:
                 rejected.append((title, url, f"clearance/citizenship required: {', '.join(clearance)}"))

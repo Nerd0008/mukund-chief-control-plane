@@ -402,7 +402,7 @@ def test_company_watch_findings_enter_the_funnel_with_attributable_exclusions(tm
 # full funnel run (offline, deterministic semantic, codex off)
 # --------------------------------------------------------------------------- #
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def run_doc(tmp_path_factory):
     out = tmp_path_factory.mktemp("discovery-run")
     rc, doc = run_cli(["run", "--region", "uk", "--records", str(CANDIDATES),
@@ -622,3 +622,9 @@ def test_run_requires_a_candidate_source():
     assert rc == 2
     assert doc["ok"] is False
     assert "no candidate source supplied" in doc["reason"]
+
+@pytest.fixture(autouse=True)
+def offline_active_posting_fetch(monkeypatch):
+    # Semantic-stage fixtures supply positive availability; no real HTTP is permitted.
+    monkeypatch.setattr(pipeline,'fetch_jd',lambda url,**kw:{'text':'Fixture job description.',
+        'fetch_state':'fetched','vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})

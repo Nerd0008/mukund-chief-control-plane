@@ -111,7 +111,7 @@ def test_direct_search_persists_and_orders_jd_deadlines_in_temporary_workbook(tm
     def fetch(url):
         text=('Applications reviewed on a rolling basis.' if url.endswith('Rolling') else 'Application deadline: '+tomorrow if url.endswith('Urgent') else 'No closing date provided.')
         info=extract(text,url)
-        return {'text':text,'deadline_info':info,'deadline':info['date']}
+        return {'text':text,'deadline_info':info,'deadline':info['date'],'vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}}
     monkeypatch.setattr(search,'fetch_jd',fetch)
     monkeypatch.setattr(sys,'argv',['search','--batches','1'])
     assert search.main()==0
