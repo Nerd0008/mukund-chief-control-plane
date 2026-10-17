@@ -86,6 +86,7 @@ from title_policy import (  # noqa: E402
     tier_b_hits,
     title_decision,
 )
+from jd_fetcher import fetch_jd  # noqa: E402
 
 SCHEMA_VERSION = 1
 DEFAULT_SEMANTIC = "auto"          # auto -> deepseek when healthy, else deterministic
@@ -912,7 +913,7 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append(why)
 
     blob = " ".join(str(rec.get(k) or "") for k in
-                    ("title", "company", "location", "summary", "description"))
+                    ("title", "company", "location", "summary", "description", "jd_text"))
     clearance = rjs.clearance_hits(blob)
     if clearance:
         reasons.append(f"clearance/citizenship requirement stated: {', '.join(clearance)}")
@@ -1145,6 +1146,21 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         funnel.skip("codex_accept", "no Codex second pass was run in this run")
     for rec in accepted:
         funnel.source_stages(rec.get("sources"), "semantic_accept")
+
+    # 3.5 JD fetch for clearance/eligibility checks ------------------------ #
+    # Fetch full job description text for each semantically accepted candidate
+    # so the clearance gate can run against the actual JD, not just snippets.
+    for rec in accepted:
+        url = tw.extract_url(rec.get("url"))
+        if not url:
+            continue
+        jd_result = fetch_jd(url)
+        rec["jd_text"] = jd_result.get("text") or ""
+        rec["jd_fetch_state"] = jd_result.get("fetch_state", "fetch_failed")
+        if jd_result.get("error"):
+            rec["jd_fetch_error"] = jd_result["error"]
+    funnel.set("jd_fetches_attempted", sum(1 for r in accepted if r.get("jd_text")))
+    funnel.set("jd_fetches_failed", sum(1 for r in accepted if not r.get("jd_text")))
 
     # 4. deterministic gates ------------------------------------------------ #
     scope = rjs.lane_scope(region, schedules["regions"][region])

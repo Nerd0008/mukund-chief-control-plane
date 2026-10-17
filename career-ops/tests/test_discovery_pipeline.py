@@ -521,6 +521,44 @@ def test_semantic_rejections_are_counted_and_attributed(tmp_path):
     assert z["reason"]
 
 
+def test_jd_fetch_feeds_the_clearance_gate(tmp_path, monkeypatch):
+    """A JD stating a clearance requirement must be rejected even when the
+    search snippet does not mention it.
+
+    Step 3.5 fetches the full job description after semantic acceptance so the
+    deterministic clearance gate reads the advert's real text, not just the
+    snippet. Before this step the gate only ever saw the snippet, so a cleared
+    role with a clean snippet passed.
+    """
+    import pipeline as pl
+
+    seen = []
+
+    def fake_fetch_jd(url, **kwargs):
+        seen.append(url)
+        return {"text": "This role requires SC clearance and 5 years UK residency.",
+                "fetch_state": "fetched", "error": None}
+
+    monkeypatch.setattr(pl, "fetch_jd", fake_fetch_jd, raising=True)
+
+    records = tmp_path / "sem.json"
+    records.write_text(json.dumps({"records": [
+        {"company": "Test JD (NOT A REAL VACANCY)", "title": "Cybersecurity Intern",
+         "location": "London, United Kingdom", "url": "https://jd.invalid/jobs/1"},
+    ]}), encoding="utf-8")
+    collected = pl.collect_from_records(records)
+    doc = pl.run_funnel(collected["candidates"], region="uk", mode=MODE_HIGH_RECALL,
+                        semantic="deepseek", deepseek_model="deepseek-flash", batch_size=5,
+                        codex_budget=0, codex_enabled=False, timeout=10,
+                        run_id="test-jd-fetch", collection=[
+                            {"source": SOURCE, "candidates": collected["candidates"],
+                             "coverage": {}}],
+                        deepseek_adapter=StubNativeBulk())
+    assert seen, "the full JD was never fetched for the accepted candidate"
+    reasons = doc["funnel"]["rejections_by_reason"]
+    assert any("clearance" in r for r in reasons), reasons
+
+
 SOURCE = pipeline.SOURCE_EXPLICIT
 
 
