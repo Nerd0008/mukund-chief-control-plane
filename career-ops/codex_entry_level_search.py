@@ -44,6 +44,15 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CONTROL_PLANE = HERE.parent
 
+# JD fetcher for clearance/eligibility checks against full job descriptions
+sys.path.insert(0, str(HERE))
+from jd_fetcher import fetch_jd
+
+# Owner profile: the search vocabulary and eligibility facts come from the
+# owner's own Career Ops config/profile.yml, not a hardcoded list here.
+import owner_search_profile as osp
+from career_search_recall import posting_key, query_batches
+
 CODEX_EXE = Path(os.environ.get(
     "CAREER_OPS_CODEX_EXE",
     r"C:\Users\mukun\AppData\Local\hermes\node\codex.cmd"))
@@ -165,7 +174,7 @@ QUERY_BATCHES: dict[str, list[list[str]]] = {
 }
 
 PROMPT_TEMPLATE = (
-    "Search the live web for entry-level cyber security jobs in {region} for 2026. "
+    "Search the live web for entry-level cyber security jobs in {region} for current and upcoming intakes. "
     "I need roles specifically for 0-1 year experience candidates: graduate schemes, "
     "internships, junior roles, trainee roles, entry-level positions.\n\n"
     "Search these queries and return ALL results you actually retrieve:\n{queries}\n\n"
@@ -179,17 +188,65 @@ PROMPT_TEMPLATE = (
 
 #: A title is entry-level when it carries one of these markers. Deterministic and
 #: local — the model's own judgement is not trusted for the accept decision.
+#: This is the fallback list; the live vocabulary comes from the owner profile
+#: (``owner_search_profile.entry_level_terms``) so a profile edit changes the
+#: search. Kept as the floor so a profile with no readable entry words still
+#: gates on the known-good terms rather than accepting everything.
 ENTRY_MARKERS = (
     "graduate", "intern", "internship", "junior", "entry level", "entry-level",
     "trainee", "apprentice", "apprenticeship", "new grad", "placement",
     "0-1 year", "0 - 1 year", "no experience", "fresher", "associate",
-    "analyst", "scheme",
+    "scheme",
 )
+# Removed: "analyst", "engineer" — these matched mid-level roles like
+# "Security Analyst" and "Software Engineer" that are not internships.
+# A title must carry an explicit early-career signal; a job title that only
+# says "analyst" or "engineer" is not entry-level.
 #: Hard negatives — a title carrying one of these is never entry-level.
 SENIOR_MARKERS = (
     "senior", "lead ", "principal", "manager", "head of", "director",
     "vp ", "chief", "architect", "3+ year", "5+ year", "experienced",
 )
+
+#: Clearance/citizenship tokens — checked against the FULL JD text, not just
+#: the title. A job requiring SC/DV/CTC or British citizenship is not eligible
+#: for the owner (Indian citizen on UK Graduate visa). Phrases allow a hyphen
+#: or space so the owner's own hyphenated spelling matches an advert's spaced
+#: one. Kept in sync with ``regional_job_search.CLEARANCE_TOKEN_RE``.
+CLEARANCE_TOKEN_RE = re.compile(
+    r"\b(?:SC|DV|CTC|NPPV|UKSV|BPSS)\b"
+    r"|security[\s-]clearance"
+    r"|national[\s-]security[\s-]clearance"
+    r"|police[\s-]clearance"
+    r"|british[\s-]citizen(?:ship)?"
+    r"|indefinite[\s-]leave[\s-]to[\s-]remain"
+    r"|indefinite[\s-]right[\s-]to[\s-]work"
+    r"|long[\s-]uk[\s-]residency",
+    re.IGNORECASE,
+)
+
+
+def _profile_terms():
+    """Live entry-level vocabulary from the owner profile; fallback on failure.
+
+    Returns ``(entry_terms, clearance_terms, profile_sha256)``. A profile that
+    cannot be read is reported on stderr and the known-good fallback is used —
+    the run continues, but the artifact records that it was not profile-driven.
+    """
+    try:
+        profile = osp.load_profile()
+        entry = tuple(dict.fromkeys((*ENTRY_MARKERS, 'off-cycle', *osp.entry_level_terms(profile))))
+        clearance = tuple(osp.clearance_terms(profile))
+        return entry, clearance, osp.profile_digest()
+    except osp.ProfileUnavailable as exc:
+        print(f"[profile] owner profile unavailable ({exc}); "
+              f"using the built-in entry-level vocabulary", file=sys.stderr)
+        return ENTRY_MARKERS, (), None
+
+
+def clearance_hits(text: str) -> list:
+    """Return sorted unique clearance/citizenship tokens found in text."""
+    return sorted({m.group(0).strip().lower() for m in CLEARANCE_TOKEN_RE.finditer(text or "")})
 
 
 def _tracker_columns(ws) -> dict:
@@ -230,15 +287,15 @@ def read_tracker_urls(path: Path):
             if id_col and len(row) >= id_col and row[id_col - 1].value:
                 last_id = str(row[id_col - 1].value)
         if url_col and len(row) >= url_col and row[url_col - 1].value:
-            urls.add(str(row[url_col - 1].value).strip().lower().rstrip("/"))
+            urls.add(posting_key(row[url_col - 1].value))
     return urls, ws, wb, cols, last_row, last_id
 
 
-def is_entry_level(title: str) -> bool:
+def is_entry_level(title: str, entry_markers=None) -> bool:
     t = (title or "").lower()
     if any(m in t for m in SENIOR_MARKERS):
         return False
-    return any(m in t for m in ENTRY_MARKERS)
+    return any(m in t for m in (entry_markers or ENTRY_MARKERS))
 
 
 def run_codex(prompt: str, timeout: int = 600) -> str:
@@ -282,27 +339,52 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=600, help="per-batch Codex timeout")
     ap.add_argument("--dry-run", action="store_true",
                     help="report what would be added; write nothing")
+    ap.add_argument("--show-profile", action="store_true",
+                    help="print the resolved profile-driven search block and exit")
     args = ap.parse_args()
+
+    if args.show_profile:
+        import json as _json
+        try:
+            snap = osp.snapshot()
+            snap["queries"] = osp.search_queries(
+                osp.load_profile(), REGION_LABEL[args.region])
+        except osp.ProfileUnavailable as exc:
+            print(f"owner profile unavailable: {exc}", file=sys.stderr)
+            return 2
+        print(_json.dumps(snap, indent=2, ensure_ascii=False))
+        return 0
 
     tracker = TRACKERS[args.region]
     if not tracker.exists():
         print(f"ERROR: tracker not found: {tracker}", file=sys.stderr)
         return 2
 
-    batches = QUERY_BATCHES[args.region]
-    offset = args.batch_offset
-    if offset < 0:
-        offset = datetime.now(timezone.utc).toordinal() % len(batches)
+    entry_terms, _clearance_terms, profile_sha = _profile_terms()
+    try:profile = osp.load_profile()
+    except osp.ProfileUnavailable:profile = {}
+    batches = query_batches(profile, REGION_LABEL[args.region], QUERY_BATCHES[args.region], datetime.now().year)
+    offset=args.batch_offset
+    if offset<0:offset=datetime.now(timezone.utc).toordinal()%len(batches)
+    offset%=len(batches)
+    batch_count=min(max(0,args.batches),len(batches))
+    selected_batches=([0] if batch_count else [])
+    for i in range(len(batches)):
+        candidate=(offset+i)%len(batches)
+        if candidate not in selected_batches and len(selected_batches)<batch_count:
+            selected_batches.append(candidate)
+    print(f"Search coverage: {batch_count} distinct batches; current/next-year and year-free queries")
 
     (existing_urls, ws, wb, cols, last_row, last_id) = read_tracker_urls(tracker)
     print(f"Tracker: {tracker.name}")
     print(f"Existing rows: {last_row - 1} (last id {last_id})")
-    print(f"Running {args.batches} batch(es) from offset {offset} of {len(batches)}")
+    print(f"Running {batch_count} batch(es) from offset {offset} of {len(batches)}")
 
-    seen = set(existing_urls)
-    collected, rejected = [], []
-    for n in range(args.batches):
-        bi = (offset + n) % len(batches)
+    existing_urls={posting_key(u) for u in existing_urls if posting_key(u)}
+    seen = set()
+    collected, rejected, decisions = [], [], []
+    counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0}
+    for bi in selected_batches:
         queries = batches[bi]
         qtext = "\n".join(f"{i}. \"{q}\"" for i, q in enumerate(queries, 1))
         prompt = PROMPT_TEMPLATE.format(region=REGION_LABEL[args.region], queries=qtext)
@@ -310,40 +392,79 @@ def main() -> int:
         try:
             out = run_codex(prompt, timeout=args.timeout)
         except subprocess.TimeoutExpired:
+            counts["timeouts"]+=1
             print(f"  batch {bi}: TIMEOUT after {args.timeout}s")
             continue
         jobs = parse_jobs(out)
         print(f"  batch {bi}: {len(jobs)} results returned")
+        counts["retrieved_records"]+=len(jobs)
         for j in jobs:
             title = str(j.get("job_title") or j.get("title") or "").strip()
             url = str(j.get("url") or "").strip()
-            key = url.lower().rstrip("/")
-            if not url or not title:
+            key = posting_key(url)
+            if not key or not title:
+                counts['invalid_records']+=1
+                decisions.append({'title':title,'reason':'invalid title or posting URL'})
+                continue
+            if key in existing_urls:
+                counts['already_tracked']+=1
+                decisions.append({'title':title,'url':url,'reason':'already tracked'})
                 continue
             if key in seen:
-                continue
-            if not is_entry_level(title):
-                rejected.append((title, url, "not entry-level by title"))
+                counts['repeated_in_run']+=1
+                decisions.append({'title':title,'url':url,'reason':'repeated in this run'})
                 continue
             seen.add(key)
+            if not is_entry_level(title, entry_terms):
+                rejected.append((title, url, "not entry-level by title"))
+                continue
+            # Fetch full JD and check clearance/citizenship + liveness
+            jd = fetch_jd(url)
+            jd_text = jd.get("text") or ""
+            if jd.get("is_closed"):
+                rejected.append((title, url, "job page says position is closed/filled"))
+                continue
+            deadline = jd.get("deadline")
+            if deadline:
+                import datetime as _dt
+                try:
+                    dl = _dt.date.fromisoformat(deadline)
+                    if dl < _dt.date.today():
+                        rejected.append((title, url, f"deadline passed ({deadline})"))
+                        continue
+                except ValueError:
+                    pass
+            clearance = clearance_hits(jd_text)
+            if clearance:
+                rejected.append((title, url, f"clearance/citizenship required: {', '.join(clearance)}"))
+                continue
             collected.append({
                 "title": title,
                 "company": str(j.get("company") or "").strip() or "Unknown",
                 "location": str(j.get("location") or "").strip() or "Unknown",
                 "url": url,
+                "deadline": deadline or "",
             })
 
     print(f"\n=== {len(collected)} new entry-level roles, "
-          f"{len(rejected)} rejected by title filter ===")
+          f"{len(rejected)} rejected by eligibility/liveness/title checks ===")
     for c in collected:
         print(f"  + {c['company']} | {c['title']} | {c['location']}")
     for t, _u, why in rejected[:10]:
         print(f"  - {t} ({why})")
 
+    counts.update({'new_candidates':len(collected),'rejected':len(rejected),'distinct_query_batches':batch_count})
+    decisions.extend({'title':t,'url':u,'reason':why} for t,u,why in rejected)
+    decisions.extend({'title':j['title'],'url':j['url'],'reason':'new candidate'} for j in collected)
+    print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha},ensure_ascii=True))
+    if not collected:
+        print('No NEW eligible candidates; this does not mean no jobs were retrieved. See reconciliation counts.')
     if args.dry_run:
+        wb.close()
         print("\n--dry-run: nothing written")
         return 0
     if not collected:
+        wb.close()
         print("\nNo new roles; tracker unchanged.")
         return 0
 
@@ -369,7 +490,12 @@ def main() -> int:
             ws.cell(row=r, column=2, value=job["company"])
             ws.cell(row=r, column=3, value=job["title"])
             ws.cell(row=r, column=4, value=job["url"])
-            ws.cell(row=r, column=5, value="")  # Deadline unknown from search
+            if job.get("deadline"):
+                import datetime as _dt
+                ws.cell(row=r, column=5, value=_dt.date.fromisoformat(job["deadline"]))
+                ws.cell(row=r, column=5).number_format = "yyyy-mm-dd"
+            else:
+                ws.cell(row=r, column=5, value="")
             ws.cell(row=r, column=6, value="Not Applied")
         elif has_id_col:
             # Old UK schema: Job ID, Date Found, Company, Job Title, Location, ...
