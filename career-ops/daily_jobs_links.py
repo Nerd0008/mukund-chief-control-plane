@@ -313,6 +313,19 @@ def tracker_rows(region, limit=None):
         return int(digits) if digits else 0
 
     out.sort(key=lambda r: (r["date"] or dt.date.min, _id_key(r)), reverse=True)
+    today = dt.date.today()
+    for rec in out:
+        age = (today - rec["date"]).days if rec["date"] else None
+        if age is None:
+            rec["age_label"] = "age unknown"
+        elif age == 0:
+            rec["age_label"] = "today"
+        elif age == 1:
+            rec["age_label"] = "yesterday"
+        elif age <= 7:
+            rec["age_label"] = f"{age} days ago"
+        else:
+            rec["age_label"] = f"{age} days old — may be closed"
     return (out if limit is None else out[:limit]), None
 
 
@@ -392,8 +405,10 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 tag = ""
                 if job["url"] and job["url"] in tracked_urls and job["id"]:
                     tag = f"  [{job['id']}]"
+                age = job.get("age_label", "")
+                age_note = f" ({age})" if age else ""
                 jobs.append([
-                    f"  {i}. {job['company']} — {job['title']}{tag}",
+                    f"  {i}. {job['company']} — {job['title']}{tag}{age_note}",
                     f"     {job['url'] or 'URL: not stated by the source'}",
                 ])
             capped_out = max(0, len(tracked) - len(jobs))
