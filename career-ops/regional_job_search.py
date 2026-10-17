@@ -300,10 +300,21 @@ def title_decision(title: str, title_policy: dict) -> tuple[bool, str]:
     return True, "title passes the owner's title policy"
 
 
+#: Clearance/citizenship requirements, matched against the FULL JD text.
+#:
+#: The named phrases allow a hyphen or space between their words: the owner's
+#: own ``clearance_filter`` writes "British-citizenship" and
+#: "indefinite-right-to-work", while job adverts write "British citizenship".
+#: Matching only the spaced form silently missed the hyphenated one.
 CLEARANCE_TOKEN_RE = re.compile(
-    r"\b(?:SC|DV|CTC|NPPV|UKSV|BPSS)\b|security clearance|national security clearance|"
-    r"police clearance|british citizen|british citizenship|indefinite leave to remain|"
-    r"indefinite right to work",
+    r"\b(?:SC|DV|CTC|NPPV|UKSV|BPSS)\b"
+    r"|security[\s-]clearance"
+    r"|national[\s-]security[\s-]clearance"
+    r"|police[\s-]clearance"
+    r"|british[\s-]citizen(?:ship)?"
+    r"|indefinite[\s-]leave[\s-]to[\s-]remain"
+    r"|indefinite[\s-]right[\s-]to[\s-]work"
+    r"|long[\s-]uk[\s-]residency",
     re.IGNORECASE,
 )
 

@@ -233,6 +233,34 @@ def test_eligibility_rejects_senior_titles_and_clearance_requirements():
     assert any("clearance" in r for r in cleared["reasons"])
 
 
+@pytest.mark.parametrize("phrase", [
+    "british-citizenship",
+    "security-clearance",
+    "national-security-clearance",
+    "police-clearance",
+    "indefinite-leave-to-remain",
+    "indefinite-right-to-work",
+    "long-uk-residency",
+])
+def test_clearance_matches_both_hyphenated_and_spaced_spellings(phrase):
+    """The owner's profile writes these hyphenated; adverts write them spaced.
+
+    Matching only the spaced form silently let hyphenated clearance and
+    residency requirements through the shared gate, which all four regions call.
+    """
+    assert rjs.clearance_hits(phrase), f"hyphenated form not matched: {phrase}"
+    assert rjs.clearance_hits(phrase.replace("-", " ")), f"spaced form not matched: {phrase}"
+
+
+def test_eligibility_rejects_a_hyphenated_clearance_requirement():
+    """End-to-end: the shared eligibility filter must reject the hyphenated spelling."""
+    v = _eval("uk", {"company": "X", "title": "Cybersecurity Intern", "location": "London, UK",
+                     "url": "https://regional-fixture.invalid/h",
+                     "summary": "Requires British-citizenship and long-uk-residency"})
+    assert v["decision"] == "rejected"
+    assert any("clearance" in r for r in v["reasons"])
+
+
 def test_eligibility_rejects_a_bare_remote_posting_outside_its_region():
     """A 'Remote'-titled posting located in another country is not region-eligible.
 
