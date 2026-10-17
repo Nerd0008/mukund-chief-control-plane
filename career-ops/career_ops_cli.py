@@ -231,7 +231,11 @@ def cmd_write(args) -> int:
         state_dir=getattr(args, "state_dir", None),
     )
     emit(result)
-    return 0 if result.get("applied") or not args.apply else 1
+    # Exit non-zero ONLY on a real error. A manifest whose records were all
+    # duplicates is a successful no-op: the tracker already holds those rows, so
+    # `--apply` appending nothing must not be reported as a failure (that is what
+    # made the nightly run exit 1). Mirrors _write_run_status().
+    return 1 if result.get("error") else 0
 
 
 def cmd_rollover(args) -> int:
