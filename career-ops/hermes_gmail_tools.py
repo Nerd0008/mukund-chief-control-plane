@@ -30,10 +30,37 @@ def install_language_policy(agent_class):
         # Native API-time seam: continuing sessions restore frozen system prompts.
         # Do not persist private reference payloads into that frozen cache/history.
         self.ephemeral_system_prompt=(previous or '')+'\n'+LANGUAGE_POLICY+owner_context
-        try:return old(self,user_message,system_message,*args,**kwargs)
-        finally:self.ephemeral_system_prompt=previous
+        from hermes_response_language import chinese_requested, checked_result, checked_text, BufferedText
+        allow=chinese_requested(user_message)
+        saved={};buffers=[]
+        # Reasoning is private model output, never an owner-facing progress report.
+        for name in ('reasoning_callback','interim_assistant_callback','stream_delta_callback'):
+            callback=getattr(self,name,None)
+            saved[name]=callback
+            if name=='reasoning_callback':setattr(self,name,None)
+            elif callback and name=='interim_assistant_callback':
+                def interim(text,*a,_callback=callback,**k):
+                    return _callback(checked_text(text,allow),*a,**k)
+                setattr(self,name,interim)
+            elif callback:
+                stream=BufferedText(callback,allow);buffers.append(stream);setattr(self,name,stream)
+        # Native positional run_conversation args: history, task_id, stream_callback.
+        args=list(args)
+        if len(args)>2 and args[2]:
+            stream=BufferedText(args[2],allow);buffers.append(stream);args[2]=stream
+        elif kwargs.get('stream_callback'):
+            stream=BufferedText(kwargs['stream_callback'],allow);buffers.append(stream);kwargs['stream_callback']=stream
+        try:
+            result=checked_result(old(self,user_message,system_message,*args,**kwargs),allow)
+            for stream in buffers:stream.flush()
+            return result
+        finally:
+            self.ephemeral_system_prompt=previous
+            for name,callback in saved.items():setattr(self,name,callback)
     agent_class.run_conversation=run
     agent_class._owner_english_policy_installed=True
+    import logging
+    logging.getLogger(__name__).info('Owner language guard v2 active: final/interim/stream validation; raw reasoning disabled')
 
 def command(script,verb):
     result=subprocess.run([sys.executable,str(HERE/script),verb],cwd=str(HERE.parent),capture_output=True,text=True,encoding='utf-8',timeout=240)
