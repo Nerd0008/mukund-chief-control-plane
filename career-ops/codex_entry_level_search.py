@@ -471,70 +471,29 @@ def main() -> int:
         print("\nNo new roles; tracker unchanged.")
         return 0
 
-    from openpyxl import load_workbook  # noqa: F401  (already imported above)
-
-    # Determine the schema: UK uses the new 5-field format, regional uses old format
-    is_uk_new = "Apply Link" in cols
-    has_id_col = bool(last_id) and str(last_id).startswith("J")
-    base = 0
-    if has_id_col:
-        try:
-            base = int(str(last_id).lstrip("J"))
-        except ValueError:
-            base = 0
-
-    for i, job in enumerate(collected):
-        r = last_row + 1 + i
-        now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-        if is_uk_new:
-            # New UK schema: Date Found, Company, Role Title, Apply Link, Application Deadline, Status
-            ws.cell(row=r, column=1, value=now)
-            ws.cell(row=r, column=2, value=job["company"])
-            ws.cell(row=r, column=3, value=job["title"])
-            ws.cell(row=r, column=4, value=job["url"])
-            ws.cell(row=r, column=4).hyperlink=job["url"]
-            if job.get("deadline"):
-                import datetime as _dt
-                ws.cell(row=r, column=5, value=_dt.date.fromisoformat(job["deadline"]))
-                ws.cell(row=r, column=5).number_format = "yyyy-mm-dd"
-            else:
-                ws.cell(row=r, column=5, value=deadline_label(job["deadline_info"]))
-            ws.cell(row=r, column=6, value="Not Applied")
-        elif has_id_col:
-            # Old UK schema: Job ID, Date Found, Company, Job Title, Location, ...
-            ws.cell(row=r, column=cols["Job ID"], value=f"J{base + 1 + i}")
-            ws.cell(row=r, column=cols.get("Date Found", 2), value=now)
-            ws.cell(row=r, column=cols.get("Company", 3), value=job["company"])
-            ws.cell(row=r, column=cols.get("Job Title", 4), value=job["title"])
-            ws.cell(row=r, column=cols.get("Location", 5), value=job["location"])
-            if cols.get("Official URL"):
-                ws.cell(row=r, column=cols["Official URL"], value=job["url"])
-            if cols.get("Discovery"):
-                ws.cell(row=r, column=cols["Discovery"], value="Codex direct search")
-        else:
-            # Regional schema: Date Found/Added, Company, Job Title/Role Title,
-            # Location, Direct Application URL, ...
-            date_col = cols.get("Date Found") or cols.get("Date Added") or 1
-            company_col = cols.get("Company") or 2
-            title_col = cols.get("Job Title") or cols.get("Role Title") or 3
-            loc_col = cols.get("Location") or 4
-            url_col = cols.get("Direct Application URL") or cols.get("URL") or 5
-
-            ws.cell(row=r, column=date_col, value=now)
-            ws.cell(row=r, column=company_col, value=job["company"])
-            ws.cell(row=r, column=title_col, value=job["title"])
-            ws.cell(row=r, column=loc_col, value=job["location"])
-            ws.cell(row=r, column=url_col, value=job["url"])
-
-    wb.save(tracker)
+    # The shared writer owns every append, lock, backup, fingerprint and verification.
+    # Do not delete unrelated existing tracker rows during direct-search delivery.
     wb.close()
-    if is_uk_new:
-        print(f"\nWrote {len(collected)} rows to {tracker.name}")
-    elif has_id_col:
-        print(f"\nWrote {len(collected)} rows; tracker now ends at J{base + len(collected)}")
-    else:
-        print(f"\nWrote {len(collected)} rows to {tracker.name}")
+    import tracker_writer as tw
+    profiles=tw.load_profiles()
+    records=[{'company':job['company'],'title':job['title'],'location':job['location'],
+              'url':job['url'],'date_found':datetime.now().date().isoformat(),
+              'deadline':deadline_label(job['deadline_info']),
+              'source':'Codex direct entry-level search'} for job in collected]
+    canonical=Path(tw.region_config(profiles,args.region)['tracker'])
+    backup_dir=profiles.get('backup_dir') if canonical.resolve()==tracker.resolve() else str(tracker.parent/'backups')
+    try:
+        result=tw.write_records(profiles,args.region,records,apply=True,
+            tracker_override=str(tracker),backup_dir=backup_dir,cleanup_existing=False)
+    except (ValueError,OSError) as exc:
+        print('TRACKER_WRITE_BLOCKED '+str(exc),file=sys.stderr)
+        return 2
+    print('TRACKER_WRITE_RESULT '+json.dumps(result,default=str,ensure_ascii=True))
+    if result.get('error'):
+        print('Tracker write failed verification; no successful append claimed.',file=sys.stderr)
+        return 2
+    count=(result.get('counts') or {}).get('appended',0) if result.get('applied') else 0
+    print(f"Guarded writer appended {count} rows; duplicates: {(result.get('counts') or {}).get('duplicates',0)}")
     return 0
 
 

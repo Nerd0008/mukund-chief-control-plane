@@ -91,3 +91,27 @@ def test_profile_disciplines_beyond_six_are_not_permanently_lost(monkeypatch):
     monkeypatch.setattr(osp,'discipline_terms',lambda p:['field'+str(i) for i in range(8)])
     queries=[q for b in query_batches({'present':True},'UK',[],2026) for q in b]
     assert all(any('field'+str(i)+' ' in q for q in queries) for i in range(8))
+
+@pytest.mark.parametrize('fails',[False,True])
+def test_direct_search_delegates_only_to_guarded_writer(tmp_path,monkeypatch,capsys,fails):
+    import tracker_writer as tw
+    tracker=tmp_path/'jobs.xlsx';tracker.touch()
+    monkeypatch.setitem(search.TRACKERS,'uk',tracker)
+    monkeypatch.setattr(search.osp,'load_profile',lambda:{})
+    monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
+    class Book:
+        def close(self):pass
+        def save(self,*a):pytest.fail('Direct search bypassed shared writer')
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),None,Book(),{},2,None))
+    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Cyber Intern','company':'Example','url':'https://employer.com/job/123'}]))
+    monkeypatch.setattr(search,'fetch_jd',lambda *a:{'text':'Open position.'})
+    calls=[]
+    def writer(profiles,region,records,**kwargs):
+        calls.append((region,records,kwargs))
+        return {'applied':not fails,'counts':{'appended':0 if fails else 1},**({'error':'verification failed'} if fails else {})}
+    monkeypatch.setattr(tw,'write_records',writer)
+    monkeypatch.setattr(sys,'argv',['search','--batches','1'])
+    assert search.main()==(2 if fails else 0)
+    assert len(calls)==1 and calls[0][2]['apply'] and calls[0][2]['cleanup_existing'] is False
+    assert calls[0][1][0]['company']=='Example'
+    assert tracker.read_bytes()==b''

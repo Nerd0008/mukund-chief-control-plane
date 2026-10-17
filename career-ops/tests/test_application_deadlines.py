@@ -99,7 +99,7 @@ def test_ambiguous_dates_do_not_get_rolling_priority():
 
 def test_direct_search_persists_and_orders_jd_deadlines_in_temporary_workbook(tmp_path,monkeypatch,capsys):
     import json,openpyxl,codex_entry_level_search as search
-    path=tmp_path/'tracker.xlsx';wb=openpyxl.Workbook();ws=wb.active
+    path=tmp_path/'tracker.xlsx';wb=openpyxl.Workbook();ws=wb.active;ws.title='Jobs'
     ws.append(['UK jobs']);ws.append(['Date Found','Company','Role Title','Apply Link','Application Deadline','Status'])
     wb.save(path);wb.close()
     monkeypatch.setitem(search.TRACKERS,'uk',path)

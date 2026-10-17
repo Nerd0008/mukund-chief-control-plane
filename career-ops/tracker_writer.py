@@ -618,7 +618,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
                   backup_dir: str | None = None, update_existing: bool = False,
                   extra_archive_dirs: list[str] | None = None,
                   tracker_override: str | None = None,
-                  today: dt.date | None = None) -> dict:
+                  today: dt.date | None = None, cleanup_existing: bool = True) -> dict:
     """Append deduplicated records to the regional workbook.
 
     Returns a Chief-readable result document. When ``apply`` is False nothing is
@@ -655,8 +655,8 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     # before processing new records so the tracker stays clean.
     # Rows whose Apply Link is a search/category page are removed for the same
     # reason: they are not vacancies and cannot be applied to.
-    passed_rows = tr.find_passed_rows()
-    listing_rows = tr.find_listing_rows()
+    passed_rows = tr.find_passed_rows() if cleanup_existing else []
+    listing_rows = tr.find_listing_rows() if cleanup_existing else []
     if passed_rows or listing_rows:
         tr.delete_rows(passed_rows + listing_rows)
         # Re-read keys after deletion so dedupe sees the cleaned state
