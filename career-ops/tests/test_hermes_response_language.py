@@ -34,12 +34,13 @@ def test_gate_never_reexecutes_or_mutates_task_evidence(monkeypatch):
         interim_assistant_callback=staticmethod(lambda text,**kw:out.append(text))
         def run_conversation(self,*a,**kw):
             calls.append(1)
-            assert self.reasoning_callback is None
+            self.reasoning_callback('Checking verified records before reporting.')
+            self.reasoning_callback(CHINESE)
             self.interim_assistant_callback(CHINESE,already_streamed=False)
             return {'final_response':CHINESE,'completed':True,'api_calls':1,'messages':[{'role':'assistant','content':CHINESE}]}
     gmail.install_language_policy(Agent)
     agent=Agent();result=agent.run_conversation('Report the completed job search')
-    assert calls==[1] and private==[] and out==[lang.FAILURE]
+    assert calls==[1] and private==['Checking verified records before reporting.',lang.FAILURE] and out==[lang.FAILURE]
     assert result['final_response']==lang.FAILURE
     assert result['completed'] and result['api_calls']==1
     assert result['messages'][0]['content']==CHINESE

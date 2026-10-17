@@ -9,3 +9,5 @@ This is a bounded Chinese-prose guard, not a universal language detector or a tr
 Validation: 38 tests passed across test_hermes_response_language.py, test_hermes_gmail_tools.py and test_hermes_owner_context.py. No live test messages or provider calls were made. Gateway was gracefully drained while active_agents=0 and restarted once through the existing hidden Hermes_Gateway scheduled launcher. The enabled career-gmail-local plugin imports the canonical repository source.
 
 Scope: only response-language enforcement and tests. No provider, tracker, Gmail permissions, CV compiler or application-agent deployment changes. Unrelated dirty files were preserved. Original guard backup is private under Documents/Codex/language-recovery/20261017-205800/.
+
+Owner correction: preserve native reasoning display and gate its text as well. All displayed channels now require English, including reasoning; explicit Chinese requests do not bypass the runtime guard. Native English reasoning is forwarded unchanged. No translation or additional provider call is added.

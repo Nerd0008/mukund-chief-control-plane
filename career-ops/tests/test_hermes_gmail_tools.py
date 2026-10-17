@@ -46,5 +46,5 @@ def test_english_policy_every_turn_including_cron_and_old_context():
         context,kwargs=Agent().run_conversation(text,'existing context',task_id='test')
         assert context.startswith('existing context')
         assert context.count(g.LANGUAGE_POLICY)==1
-        assert 'explicitly requests another language' in context
+        assert 'all displayed reasoning' in context
         assert kwargs=={'task_id':'test'}

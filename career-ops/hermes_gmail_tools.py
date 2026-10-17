@@ -13,7 +13,7 @@ GUIDANCE=('Local Career Ops Gmail access exists independently of manage_connecti
           'Exclude newsletters. Do not add unrelated CV or tracker blockers. Do not delete scan locks.')
 
 LANGUAGE_POLICY=('Owner communication language: English by default on every chat and scheduled job. '
-    'Write explanations, summaries, tool-progress text and final answers in English unless the owner explicitly requests another language. '
+    'Write all displayed reasoning, explanations, summaries, tool-progress text and final answers in English. '
     'Quoted foreign-language source text and proper names may remain unchanged, but explain them in English. '
     'Do not copy the language of old assistant messages or tool output into your response. '
     'Do not blame Windows locale/encoding for coherent foreign-language prose generated in your own answer without evidence.')
@@ -30,15 +30,14 @@ def install_language_policy(agent_class):
         # Native API-time seam: continuing sessions restore frozen system prompts.
         # Do not persist private reference payloads into that frozen cache/history.
         self.ephemeral_system_prompt=(previous or '')+'\n'+LANGUAGE_POLICY+owner_context
-        from hermes_response_language import chinese_requested, checked_result, checked_text, BufferedText
-        allow=chinese_requested(user_message)
+        from hermes_response_language import checked_result, checked_text, BufferedText
+        allow=False  # Owner requires English across every displayed response channel.
         saved={};buffers=[]
-        # Reasoning is private model output, never an owner-facing progress report.
+        # Preserve the existing reasoning display, applying the same language gate.
         for name in ('reasoning_callback','interim_assistant_callback','stream_delta_callback'):
             callback=getattr(self,name,None)
             saved[name]=callback
-            if name=='reasoning_callback':setattr(self,name,None)
-            elif callback and name=='interim_assistant_callback':
+            if callback and name in ('reasoning_callback','interim_assistant_callback'):
                 def interim(text,*a,_callback=callback,**k):
                     return _callback(checked_text(text,allow),*a,**k)
                 setattr(self,name,interim)
@@ -60,7 +59,7 @@ def install_language_policy(agent_class):
     agent_class.run_conversation=run
     agent_class._owner_english_policy_installed=True
     import logging
-    logging.getLogger(__name__).info('Owner language guard v2 active: final/interim/stream validation; raw reasoning disabled')
+    logging.getLogger(__name__).info('Owner language guard v2 active: final/interim/stream/reasoning English validation; reasoning display preserved')
 
 def command(script,verb):
     result=subprocess.run([sys.executable,str(HERE/script),verb],cwd=str(HERE.parent),capture_output=True,text=True,encoding='utf-8',timeout=240)
