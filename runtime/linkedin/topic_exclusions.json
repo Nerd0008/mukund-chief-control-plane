@@ -1,0 +1,49 @@
+{
+  "_note": "Topics the owner has already posted about or explicitly ruled out. The Sunday draft job (7db108b00189) MUST read this file and refuse to draft anything whose core topic matches an excluded entry. Owner standing instruction 2026-10-18.",
+  "updated": "2026-10-18",
+  "excluded": [
+    {
+      "topic": "AI + water",
+      "detail": "Any angle: water utilities/OT, data-centre water use, offsite power-plant water, reservoir or cooling demand.",
+      "reason": "Posted twice already. Water-utility OT post published 2026-10-06/07; data-centre water post published 2026-10-08. Owner: 'I have already talked about ai and water' (2026-10-18)."
+    },
+    {
+      "topic": "AI + data centres",
+      "detail": "Data-centre buildout, capacity, chips or energy demand.",
+      "reason": "Already used repeatedly. Only revisit with a genuinely new angle and explicit owner agreement."
+    },
+    {
+      "topic": "AI + health advice",
+      "detail": "AI chatbots or apps giving medical/symptom advice.",
+      "reason": "Already posted (2026-10-14)."
+    },
+    {
+      "topic": "AI + cyber agent identities",
+      "detail": "AI agents fabricating identities or social-engineering maintainers.",
+      "reason": "Already posted (2026-10-13)."
+    },
+    {
+      "topic": "AI + physical media destruction",
+      "detail": "Bulk destruction of books or physical media to train models.",
+      "reason": "Already posted (2026-10-03)."
+    },
+    {
+      "topic": "AI Watchdog training-data provenance",
+      "detail": "The Atlantic AI Watchdog angle on training data.",
+      "reason": "Already posted (2026-10-03); owner deleted it."
+    },
+    {
+      "topic": "Personal: building something that runs while asleep",
+      "detail": "The overnight-build / InboxDefender automation reflection.",
+      "reason": "Already posted (2026-10-15)."
+    }
+  ],
+  "standing_rules": [
+    "No company names in post bodies.",
+    "No country or town names in post bodies.",
+    "If a source article is supplied, the post must be about what happened, not the debate around it.",
+    "Lead with a concrete, physical, surprising event. Preserve source uncertainty.",
+    "Short paragraphs. Genuine engagement question. Under 1,000 characters.",
+    "Each week: 1 AI + cyber security post, 1 AI + non-cyber post, 1 personal reflection."
+  ]
+}
