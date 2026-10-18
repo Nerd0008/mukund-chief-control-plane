@@ -877,13 +877,16 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     # fetch/validation state may only reach the tracker when its destination was
     # actually validated live. A surface that declares no fetch_state (the
     # regional scan, Company Watch, …) is unaffected.
-    # Exception: bot_wall (403/429) means the page is live but blocks automated
-    # access — the vacancy is real, just unverifiable by bot. Allow through with
-    # a flag so the tracker records it as unverified.
+    # A verified exact employer destination supersedes stale discovery transport
+    # flags. A bot wall alone is never evidence of vacancy availability.
     fetch_state = rec.get("fetch_state")
+    resolution=(rec.get('vacancy_status') or {}).get('application_resolution') or {}
+    resolved_verified=(rec.get('vacancy_status',{}).get('state')=='OPEN'
+                       and rec.get('resolved_url') and resolution.get('title_match') is True
+                       and resolution.get('employer_match') is True and resolution.get('state')=='OPEN')
     if fetch_state == "bot_wall":
         flags.append("HTTP page blocked (403/429); separate positive availability evidence is required")
-    elif fetch_state and fetch_state != "validated_live":
+    elif fetch_state and fetch_state != "validated_live" and not resolved_verified:
         reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
                        f"discovered-but-unverified or failed destination is never written")
 
@@ -1170,6 +1173,10 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         rec["jd_is_closed"] = bool(jd_result.get("is_closed"))
         from job_liveness import record_verification
         rec["vacancy_status"] = record_verification(rec,jd_result)
+        rec['application_resolution']=jd_result.get('application_resolution')
+        if rec['vacancy_status']['state']=='OPEN' and jd_result.get('resolved_url'):
+            rec['resolved_url']=jd_result['resolved_url']
+            record_verification(dict(rec,url=rec['resolved_url']),jd_result)
         if jd_result.get("error"):
             rec["jd_fetch_error"] = jd_result["error"]
     funnel.set("jd_fetches_attempted", sum(1 for r in accepted if r.get("jd_text")))
@@ -1199,7 +1206,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         sources = rec.get("sources")
         entry = {"candidate_id": candidate_id(rec), "company": rec.get("company"),
                  "title": rec.get("title"), "location": rec.get("location"),
-                 "url": rec.get("url"), "sources": sources, "semantic_label":
+                 "url": rec.get("resolved_url") or rec.get("url"), "sources": sources, "semantic_label":
                      classifications.get(candidate_id(rec), {}).get("primary_label"),
                  "priority_watchlist": bool(rec.get("priority_watchlist")),
                  "watchlist_company": rec.get("watchlist_company"),

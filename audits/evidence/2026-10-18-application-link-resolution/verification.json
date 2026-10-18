@@ -1,0 +1,450 @@
+{
+  "checked_at": "2026-10-18T13:10:46.773204+00:00",
+  "mode": "public GET + production dry-run; no applications or canonical writes",
+  "results": [
+    {
+      "company": "Barclays",
+      "title": "2027 Technology Cyber and Security Summer Internship Programme Knutsford",
+      "url": "https://search.jobs.barclays/job/knutsford/2027-technology-cyber-and-security-summer-internship-programme-knutsford/13015/100411085584",
+      "http_status": 200,
+      "verification": {
+        "state": "OPEN",
+        "evidence": "Workday exact requisition is posted with canApply=true",
+        "page_title": "2027 Technology Cyber and Security Summer Internship Programme Knutsford",
+        "application_resolution": {
+          "source_url": "https://search.jobs.barclays/job/knutsford/2027-technology-cyber-and-security-summer-internship-programme-knutsford/13015/100411085584",
+          "outbound_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173/apply",
+          "destination_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+          "employer": null,
+          "title_match": true,
+          "employer_match": true,
+          "state": "OPEN"
+        },
+        "resolved_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+        "application_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173/apply",
+        "checked_at": "2026-10-18T13:10:41.688829+00:00",
+        "deadline_info": {
+          "type": "EXACT",
+          "date": "2026-11-01",
+          "source": "ATS",
+          "source_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+          "evidence": "Workday endDate: 2026-11-01"
+        },
+        "cache_persisted": false
+      },
+      "resolved_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+      "application_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173/apply",
+      "application_resolution": {
+        "source_url": "https://search.jobs.barclays/job/knutsford/2027-technology-cyber-and-security-summer-internship-programme-knutsford/13015/100411085584",
+        "outbound_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173/apply",
+        "destination_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+        "employer": null,
+        "title_match": true,
+        "employer_match": true,
+        "state": "OPEN"
+      },
+      "deadline_info": {
+        "type": "EXACT",
+        "date": "2026-11-01",
+        "source": "ATS",
+        "source_url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+        "evidence": "Workday endDate: 2026-11-01"
+      },
+      "elapsed_seconds": 1.672
+    },
+    {
+      "company": "American Express",
+      "title": "Campus Full-Time Information Security Engineer 2027",
+      "url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+      "http_status": 200,
+      "verification": {
+        "state": "UNKNOWN",
+        "evidence": "application destination found but vacancy identity/availability not verified",
+        "page_title": "Campus - Full Time - Information Security Engineer - 2027 (UK - London/Brighton/Burgess Hill)",
+        "application_resolution": {
+          "source_url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+          "outbound_url": "https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26013778?utm_source=jointheintake&utm_medium=referral",
+          "destination_url": "https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26013778?utm_source=jointheintake&utm_medium=referral",
+          "employer": "American Express",
+          "title_match": true,
+          "employer_match": true,
+          "state": "UNKNOWN"
+        },
+        "checked_at": "2026-10-18T13:10:41.470788+00:00",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": false,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+          "reason": "no reliable application deadline in available JD text"
+        }
+      },
+      "resolved_url": null,
+      "application_url": null,
+      "application_resolution": {
+        "source_url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+        "outbound_url": "https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26013778?utm_source=jointheintake&utm_medium=referral",
+        "destination_url": "https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26013778?utm_source=jointheintake&utm_medium=referral",
+        "employer": "American Express",
+        "title_match": true,
+        "employer_match": true,
+        "state": "UNKNOWN"
+      },
+      "deadline_info": {
+        "type": "UNKNOWN",
+        "date": null,
+        "rolling": false,
+        "evidence": "",
+        "source": "JD",
+        "source_url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+        "reason": "no reliable application deadline in available JD text"
+      },
+      "elapsed_seconds": 1.547
+    },
+    {
+      "company": "Deloitte",
+      "title": "Forensic Technology Summer Vacation Scheme 2027",
+      "url": "https://www.brightnetwork.co.uk/graduate-jobs/deloitte/forensic-technology-summer-vacation-scheme-2027",
+      "http_status": 200,
+      "verification": {
+        "state": "UNKNOWN",
+        "evidence": "no current positive vacancy availability evidence",
+        "page_title": "Forensic Technology Summer Vacation Scheme 2027",
+        "checked_at": "2026-10-18T13:10:40.662444+00:00",
+        "deadline_info": {
+          "type": "EXACT",
+          "date": "2026-10-19",
+          "rolling": true,
+          "evidence": "Deadline: 19th Oct 2026",
+          "source": "JD",
+          "source_url": "https://www.brightnetwork.co.uk/graduate-jobs/deloitte/forensic-technology-summer-vacation-scheme-2027",
+          "reason": "explicit application closing date"
+        }
+      },
+      "resolved_url": null,
+      "application_url": null,
+      "application_resolution": null,
+      "deadline_info": {
+        "type": "EXACT",
+        "date": "2026-10-19",
+        "rolling": true,
+        "evidence": "Deadline: 19th Oct 2026",
+        "source": "JD",
+        "source_url": "https://www.brightnetwork.co.uk/graduate-jobs/deloitte/forensic-technology-summer-vacation-scheme-2027",
+        "reason": "explicit application closing date"
+      },
+      "elapsed_seconds": 0.734
+    },
+    {
+      "company": "Addleshaw Goddard",
+      "title": "Cyber Security Graduate Scheme",
+      "url": "https://www.jointheintake.com/graduate-schemes/addleshaw-goddard-cyber-security-graduate-scheme-leeds-izwx7a",
+      "http_status": 200,
+      "verification": {
+        "state": "OPEN",
+        "page_title": "Cyber Security Graduate Scheme",
+        "evidence": "employer application fragment contains form bound to exact JobPosting identifier",
+        "application_resolution": {
+          "source_url": "https://www.jointheintake.com/graduate-schemes/addleshaw-goddard-cyber-security-graduate-scheme-leeds-izwx7a",
+          "outbound_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "destination_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "employer": "Addleshaw Goddard",
+          "title_match": true,
+          "employer_match": true,
+          "state": "OPEN"
+        },
+        "resolved_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+        "application_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral#Apply",
+        "checked_at": "2026-10-18T13:10:41.151217+00:00",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": false,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "reason": "no reliable application deadline in available JD text"
+        }
+      },
+      "resolved_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+      "application_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral#Apply",
+      "application_resolution": {
+        "source_url": "https://www.jointheintake.com/graduate-schemes/addleshaw-goddard-cyber-security-graduate-scheme-leeds-izwx7a",
+        "outbound_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+        "destination_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+        "employer": "Addleshaw Goddard",
+        "title_match": true,
+        "employer_match": true,
+        "state": "OPEN"
+      },
+      "deadline_info": {
+        "type": "UNKNOWN",
+        "date": null,
+        "rolling": false,
+        "evidence": "",
+        "source": "JD",
+        "source_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+        "reason": "no reliable application deadline in available JD text"
+      },
+      "elapsed_seconds": 1.156
+    },
+    {
+      "company": "Actica Consulting",
+      "title": "Graduate Cyber Security Consultant",
+      "url": "https://www.jointheintake.com/graduate-schemes/actica-consulting-graduate-cyber-security-consultant-guildford-g6ip4v",
+      "http_status": 200,
+      "verification": {
+        "state": "OPEN",
+        "evidence": "target job title and active application link",
+        "page_title": "Graduate Cyber Security Consultant",
+        "application_resolution": {
+          "source_url": "https://www.jointheintake.com/graduate-schemes/actica-consulting-graduate-cyber-security-consultant-guildford-g6ip4v",
+          "outbound_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+          "destination_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+          "employer": "Actica Consulting",
+          "title_match": true,
+          "employer_match": true,
+          "state": "OPEN"
+        },
+        "resolved_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+        "application_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d/applications/new",
+        "checked_at": "2026-10-18T13:10:41.362263+00:00",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": false,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+          "reason": "no reliable application deadline in available JD text"
+        }
+      },
+      "resolved_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+      "application_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d/applications/new",
+      "application_resolution": {
+        "source_url": "https://www.jointheintake.com/graduate-schemes/actica-consulting-graduate-cyber-security-consultant-guildford-g6ip4v",
+        "outbound_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+        "destination_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+        "employer": "Actica Consulting",
+        "title_match": true,
+        "employer_match": true,
+        "state": "OPEN"
+      },
+      "deadline_info": {
+        "type": "UNKNOWN",
+        "date": null,
+        "rolling": false,
+        "evidence": "",
+        "source": "JD",
+        "source_url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+        "reason": "no reliable application deadline in available JD text"
+      },
+      "elapsed_seconds": 0.625
+    },
+    {
+      "company": "Equilibrium Security",
+      "title": "Junior Penetration Tester",
+      "url": "https://equilibrium-security.co.uk/careers/junior-penetration-tester/",
+      "http_status": 200,
+      "verification": {
+        "state": "UNKNOWN",
+        "evidence": "no current positive vacancy availability evidence",
+        "page_title": "Junior Penetration Tester",
+        "checked_at": "2026-10-18T13:10:41.571299+00:00",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": false,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://equilibrium-security.co.uk/careers/junior-penetration-tester/",
+          "reason": "no reliable application deadline in available JD text"
+        },
+        "cache_persisted": false
+      },
+      "resolved_url": null,
+      "application_url": null,
+      "application_resolution": null,
+      "deadline_info": {
+        "type": "UNKNOWN",
+        "date": null,
+        "rolling": false,
+        "evidence": "",
+        "source": "JD",
+        "source_url": "https://equilibrium-security.co.uk/careers/junior-penetration-tester/",
+        "reason": "no reliable application deadline in available JD text"
+      },
+      "elapsed_seconds": 0.391
+    },
+    {
+      "company": "HP",
+      "title": "Information Security Engineer Internship 2026",
+      "url": "https://www.brightnetwork.co.uk/internships/cyber-security/",
+      "http_status": 200,
+      "verification": {
+        "state": "UNKNOWN",
+        "evidence": "category/search page is not an individual vacancy",
+        "checked_at": "2026-10-18T13:10:41.682820+00:00",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": true,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://www.brightnetwork.co.uk/internships/cyber-security/",
+          "reason": "ambiguous or conflicting application dates"
+        }
+      },
+      "resolved_url": null,
+      "application_url": null,
+      "application_resolution": null,
+      "deadline_info": {
+        "type": "UNKNOWN",
+        "date": null,
+        "rolling": true,
+        "evidence": "",
+        "source": "JD",
+        "source_url": "https://www.brightnetwork.co.uk/internships/cyber-security/",
+        "reason": "ambiguous or conflicting application dates"
+      },
+      "elapsed_seconds": 0.328
+    }
+  ],
+  "production_dry_run": {
+    "exit_code": 0,
+    "counts": {
+      "retrieved_records": 7,
+      "already_tracked": 2,
+      "repeated_in_run": 0,
+      "invalid_records": 0,
+      "timeouts": 0,
+      "review_only": 3,
+      "new_candidates": 1,
+      "rejected": 1,
+      "distinct_query_batches": 1
+    },
+    "decisions": [
+      {
+        "title": "2027 Technology Cyber and Security Summer Internship Programme Knutsford",
+        "url": "https://barclays.wd3.myworkdayjobs.com/External_Career_Site_Barclays/job/Knutsford-Radbroke-Hall/XMLNAME-2027-Technology-Cyber-and-Security-Summer-Internship-Programme-Knutsford_JR-0000129173",
+        "source_url": "https://search.jobs.barclays/job/knutsford/2027-technology-cyber-and-security-summer-internship-programme-knutsford/13015/100411085584",
+        "reason": "resolved employer posting already tracked"
+      },
+      {
+        "title": "Forensic Technology Summer Vacation Scheme 2027",
+        "url": "https://www.brightnetwork.co.uk/graduate-jobs/deloitte/forensic-technology-summer-vacation-scheme-2027",
+        "reason": "availability unverified; review-only lead",
+        "verification": {
+          "state": "UNKNOWN",
+          "evidence": "no current positive vacancy availability evidence",
+          "page_title": "Forensic Technology Summer Vacation Scheme 2027",
+          "checked_at": "2026-10-18T13:10:44.421306+00:00",
+          "deadline_info": {
+            "type": "EXACT",
+            "date": "2026-10-19",
+            "rolling": true,
+            "evidence": "Deadline: 19th Oct 2026",
+            "source": "JD",
+            "source_url": "https://www.brightnetwork.co.uk/graduate-jobs/deloitte/forensic-technology-summer-vacation-scheme-2027",
+            "reason": "explicit application closing date"
+          }
+        }
+      },
+      {
+        "title": "Graduate Cyber Security Consultant",
+        "url": "https://actica.pinpointhq.com/en/postings/973dc768-c64a-47d1-ae2c-9fc66aa2248d?utm_source=jointheintake&utm_medium=referral",
+        "source_url": "https://www.jointheintake.com/graduate-schemes/actica-consulting-graduate-cyber-security-consultant-guildford-g6ip4v",
+        "reason": "resolved employer posting already tracked"
+      },
+      {
+        "title": "Junior Penetration Tester",
+        "url": "https://equilibrium-security.co.uk/careers/junior-penetration-tester/",
+        "reason": "availability unverified; review-only lead",
+        "verification": {
+          "state": "UNKNOWN",
+          "evidence": "no current positive vacancy availability evidence",
+          "page_title": "Junior Penetration Tester",
+          "checked_at": "2026-10-18T13:10:46.448994+00:00",
+          "deadline_info": {
+            "type": "UNKNOWN",
+            "date": null,
+            "rolling": false,
+            "evidence": "",
+            "source": "JD",
+            "source_url": "https://equilibrium-security.co.uk/careers/junior-penetration-tester/",
+            "reason": "no reliable application deadline in available JD text"
+          }
+        }
+      },
+      {
+        "title": "Information Security Engineer Internship 2026",
+        "url": "https://www.brightnetwork.co.uk/internships/cyber-security/",
+        "reason": "availability unverified; review-only lead",
+        "verification": {
+          "state": "UNKNOWN",
+          "evidence": "category/search page is not an individual vacancy",
+          "checked_at": "2026-10-18T13:10:46.756207+00:00",
+          "deadline_info": {
+            "type": "UNKNOWN",
+            "date": null,
+            "rolling": true,
+            "evidence": "",
+            "source": "JD",
+            "source_url": "https://www.brightnetwork.co.uk/internships/cyber-security/",
+            "reason": "ambiguous or conflicting application dates"
+          }
+        }
+      },
+      {
+        "title": "Campus Full-Time Information Security Engineer 2027",
+        "url": "https://www.jointheintake.com/graduate-schemes/american-express-campus-full-time-information-security-engineer-2027-uk-london-brighton-burgess-hill-5uliy3",
+        "reason": "not entry-level by title"
+      },
+      {
+        "title": "Cyber Security Graduate Scheme",
+        "url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+        "source_url": "https://www.jointheintake.com/graduate-schemes/addleshaw-goddard-cyber-security-graduate-scheme-leeds-izwx7a",
+        "application_resolution": {
+          "source_url": "https://www.jointheintake.com/graduate-schemes/addleshaw-goddard-cyber-security-graduate-scheme-leeds-izwx7a",
+          "outbound_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "destination_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "employer": "Addleshaw Goddard",
+          "title_match": true,
+          "employer_match": true,
+          "state": "OPEN"
+        },
+        "reason": "new candidate",
+        "deadline_info": {
+          "type": "UNKNOWN",
+          "date": null,
+          "rolling": false,
+          "evidence": "",
+          "source": "JD",
+          "source_url": "https://joinus.addleshawgoddard.com/jobs/cyber-security-graduate-scheme-leeds-england-united-kingdom?utm_source=jointheintake&utm_medium=referral",
+          "reason": "no reliable application deadline in available JD text"
+        }
+      }
+    ],
+    "provider_calls": 0,
+    "tracker_writes": 0,
+    "tracker_sha256_before": "adbcb20ee0caf1c66b20292799fdef1570d78378733754cc93c7cb4dbff6a958",
+    "tracker_sha256_after": "adbcb20ee0caf1c66b20292799fdef1570d78378733754cc93c7cb4dbff6a958",
+    "tracker_unchanged": true
+  },
+  "offline_regression": {
+    "passed": 283,
+    "failed": 0,
+    "new_resolver_tests": 36
+  },
+  "browser_check": {
+    "Deloitte": "Apply now opens Sign up to Bright Network to apply; stopped without entering data or creating account"
+  },
+  "limitations": [
+    "American Express original Oracle URL found; automated live availability remains UNKNOWN in JavaScript shell.",
+    "Deloitte original destination gated behind Bright Network membership.",
+    "Equilibrium employer page has no identifiable application control.",
+    "HP category-page association is invalid; the Information Security Engineer listing belongs to American Express."
+  ]
+}

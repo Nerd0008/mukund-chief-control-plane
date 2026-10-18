@@ -181,6 +181,12 @@ PROMPT_TEMPLATE = (
     "internships, junior roles, trainee roles, entry-level positions.\n\n"
     "Search these queries and return ALL results you actually retrieve:\n{queries}\n\n"
     "For each result return: job_title, company, location, url, experience_requirements.\n\n"
+    "Resolve the original employer/ATS individual vacancy URL by following the advert's Apply link. "
+    "Prefer that verified original destination in url, with the discovery page in source_url. "
+    "Check the employer, role and intake agree across both pages. Never use a category/search page "
+    "as an individual job URL or associate an adjacent listing's employer with the role. "
+    "If only a specific aggregator advert can be retrieved, retain its real URL for local resolution; "
+    "never guess an employer URL or claim a blocked destination is open.\n\n"
     "Include a result only if it is for someone at the very start of their career: "
     "graduate, intern, internship, junior, entry level, trainee, apprentice, new grad, "
     "or 0-1 year experience.\n"
@@ -441,6 +447,20 @@ def main() -> int:
                 counts['review_only']+=1
                 decisions.append({'title':title,'url':url,'reason':'availability unverified; review-only lead','verification':verified})
                 continue
+            source_url=url
+            url=verified.get('resolved_url') or url
+            resolved_key=posting_key(url)
+            if url!=source_url and resolved_key in existing_urls:
+                counts['already_tracked']+=1
+                decisions.append({'title':title,'url':url,'source_url':source_url,'reason':'resolved employer posting already tracked'})
+                continue
+            if url!=source_url and resolved_key in seen:
+                counts['repeated_in_run']+=1
+                decisions.append({'title':title,'url':url,'source_url':source_url,'reason':'resolved employer posting repeated in this run'})
+                continue
+            seen.add(resolved_key)
+            if url!=source_url:
+                record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
             clearance = clearance_hits(jd_text)
             if clearance:
                 rejected.append((title, url, f"clearance/citizenship required: {', '.join(clearance)}"))
@@ -450,6 +470,8 @@ def main() -> int:
                 "company": str(j.get("company") or "").strip() or "Unknown",
                 "location": str(j.get("location") or "").strip() or "Unknown",
                 "url": url,
+                "source_url": source_url,
+                "application_resolution": jd.get('application_resolution'),
                 "deadline": deadline or "",
                 "deadline_info": jd.get("deadline_info") or deadline_from_value(deadline),
             })
@@ -464,7 +486,7 @@ def main() -> int:
 
     counts.update({'new_candidates':len(collected),'rejected':len(rejected),'distinct_query_batches':batch_count})
     decisions.extend({'title':t,'url':u,'reason':why} for t,u,why in rejected)
-    decisions.extend({'title':j['title'],'url':j['url'],'reason':'new candidate','deadline_info':j['deadline_info']} for j in collected)
+    decisions.extend({'title':j['title'],'url':j['url'],'source_url':j['source_url'],'application_resolution':j['application_resolution'],'reason':'new candidate','deadline_info':j['deadline_info']} for j in collected)
     print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha},ensure_ascii=True))
     if not collected:
         print('No NEW eligible candidates; this does not mean no jobs were retrieved. See reconciliation counts.')

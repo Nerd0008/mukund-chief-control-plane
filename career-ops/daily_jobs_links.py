@@ -329,6 +329,9 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         for job in tracked:
             status=fresh_status(job,verification)
             if status['state']=='OPEN':
+                if status.get('resolved_url'):
+                    job['source_url']=job['url']
+                    job['url']=status['resolved_url']
                 if status.get('deadline_info',{}).get('type') in ('EXACT','ROLLING'):job['deadline_info']=status['deadline_info']
                 current.append(job)
             else:withheld['CLOSED' if status['state']=='CLOSED' else 'UNKNOWN']+=1

@@ -527,7 +527,7 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
         "company": candidate.get("company") or "",
         "title": candidate.get("title") or "",
         "location": candidate.get("location") or "",
-        "url": tw.extract_url(candidate.get("url")),
+        "url": tw.extract_url(candidate.get("resolved_url") or candidate.get("url")),
         "date_found": today,
         "posted_date": candidate.get("posted_date"),
         "salary": candidate.get("salary"),

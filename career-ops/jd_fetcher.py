@@ -22,6 +22,7 @@ from application_deadlines import extract_application_deadline
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
+from application_links import extract as extract_links, public_url, aggregator, listing, title_matches, employer_matches, employer_name, fragment_route
 
 MAX_BYTES = 512 * 1024  # 512 KB cap
 TIMEOUT = 30  # seconds
@@ -95,12 +96,17 @@ def _html_to_text(html: str) -> str:
     return html.strip()
 
 
-def fetch_jd(url: str, timeout=None) -> dict:
+def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
     """Fetch a job posting URL and return extracted text.
 
     Returns a dict with keys: url, status, text, error, fetch_state.
     """
     started=time.monotonic()
+    visited=set(_seen or ())
+    if url in visited:
+        return {'url':url,'text':'','vacancy_status':{'state':'UNKNOWN','evidence':'application-link cycle'}}
+    visited.add(url)
+    html=''
     request_timeout=TIMEOUT if timeout is None else max(0.1,float(timeout))
     result = {
         "url": url,
@@ -113,7 +119,7 @@ def fetch_jd(url: str, timeout=None) -> dict:
         "deadline_info": extract_application_deadline("", url),
     }
 
-    if not url or not url.lower().startswith(("http://", "https://")):
+    if not public_url(url):
         result["error"] = "not a valid HTTP URL"
         return result
 
@@ -134,6 +140,8 @@ def fetch_jd(url: str, timeout=None) -> dict:
     try:
         with urllib.request.urlopen(req, timeout=request_timeout) as resp:
             result["status"] = resp.status
+            final_url=resp.geturl() if callable(getattr(resp,'geturl',None)) else url
+            result['final_url']=final_url
             raw = resp.read(MAX_BYTES)
             charset = resp.headers.get_content_charset() or "utf-8"
             try:
@@ -141,10 +149,17 @@ def fetch_jd(url: str, timeout=None) -> dict:
             except (LookupError, UnicodeDecodeError):
                 html = raw.decode("utf-8", errors="replace")
             result["text"] = _html_to_text(html)
+            # JS ATS shells often publish the full JD only as JobPosting JSON-LD.
+            # Preserve it for clearance/eligibility checks, not just title matching.
+            structured=extract_links(html,final_url)['posting']
+            if structured.get('description'):
+                description=_html_to_text(str(structured['description']))
+                if description not in result['text']:
+                    result['text'] += '\n'+description
             result["fetch_state"] = "fetched"  # HTTP transport success, not vacancy availability.
             result["deadline_info"] = extract_application_deadline(result["text"], url)
             result["deadline"] = result["deadline_info"]["date"]
-            result["vacancy_status"] = assess(html,result["text"],result["deadline_info"])
+            result["vacancy_status"] = assess(html,result["text"],result["deadline_info"],final_url)
             result["is_closed"] = result["vacancy_status"]["state"]=="CLOSED"
     except urllib.error.HTTPError as e:
         result["status"] = e.code
@@ -164,9 +179,63 @@ def fetch_jd(url: str, timeout=None) -> dict:
     if result['vacancy_status']['state']=='UNKNOWN':
         remaining=request_timeout-(time.monotonic()-started)
         if remaining>0.2:
-            fallback=_active_ats_record(url,remaining)
+            fallback=_active_ats_record(result.get('final_url') or url,remaining)
             if fallback:
                 result.update(fallback)
+    # Resolve only the target vacancy's explicit route, within the same elapsed budget.
+    # Aggregator controls are discovery evidence; only the destination can prove OPEN.
+    remaining=lambda:request_timeout-(time.monotonic()-started)
+    if html and result['vacancy_status']['state']!='CLOSED' and not listing(result.get('final_url') or url):
+        source=result.get('final_url') or url
+        page=extract_links(html,source)
+        if len(page['frames'])==1 and remaining()>0.2:
+            frame=public_url(page['frames'][0],source)
+            if frame and urlparse(frame).hostname==urlparse(source).hostname:
+                try:
+                    request=urllib.request.Request(frame,headers={'User-Agent':USER_AGENT})
+                    with urllib.request.urlopen(request,timeout=remaining()) as response:
+                        fragment=response.read(MAX_BYTES).decode('utf-8','replace')
+                    if fragment_route(page,fragment,source,frame):
+                        result['vacancy_status']={'state':'OPEN','page_title':page['title'],
+                            'evidence':'employer application fragment contains form bound to exact JobPosting identifier'}
+                        result['resolved_url']=source
+                        result['application_url']=source+'#Apply'
+                except (OSError,ValueError):pass
+        if len(page['links'])>1:
+            result['vacancy_status']={'state':'UNKNOWN','evidence':'multiple different application destinations; identity requires review','page_title':page['title']}
+        elif len(page['links'])==1:
+            link=page['links'][0];target=link['url']
+            external=urlparse(source).hostname!=urlparse(target).hostname
+            if (external or aggregator(source)) and _depth<2 and target not in visited and remaining()>0.2:
+                # Workday /apply is the same posting's form; read the job landing instead.
+                landing=target.removesuffix('/apply') if (urlparse(target).hostname or '').endswith('.myworkdayjobs.com') else target
+                child=fetch_jd(landing,remaining(),_depth=_depth+1,_seen=visited)
+                child_title=child.get('vacancy_status',{}).get('page_title') or ''
+                title_ok=title_matches(page['title'],child_title)
+                company_ok=employer_matches(source,link['label'],child.get('final_url') or landing,child.get('text') or '')
+                resolution={'source_url':url,'outbound_url':target,'destination_url':child.get('final_url') or landing,
+                            'employer':employer_name(link['label']),
+                            'title_match':title_ok,'employer_match':company_ok,
+                            'state':child.get('vacancy_status',{}).get('state','UNKNOWN')}
+                result['application_resolution']=resolution
+                if title_ok and company_ok and child.get('vacancy_status',{}).get('state') in ('OPEN','CLOSED'):
+                    result.update({k:child[k] for k in ('text','deadline_info','deadline','vacancy_status','is_closed','validation_source') if k in child})
+                    result['is_closed']=result['vacancy_status']['state']=='CLOSED'
+                    if result['vacancy_status']['state']=='OPEN':
+                        result['resolved_url']=child.get('resolved_url') or child.get('final_url') or landing
+                        result['application_url']=child.get('application_url') or target
+                else:
+                    result['vacancy_status']={'state':'UNKNOWN','evidence':'application destination found but vacancy identity/availability not verified','page_title':page['title']}
+            elif not external and not aggregator(source) and result['vacancy_status']['state']=='OPEN':
+                result['resolved_url']=source
+                result['application_url']=target
+            elif external or aggregator(source):
+                result['vacancy_status']={'state':'UNKNOWN','page_title':page['title'],
+                    'evidence':'application-link hop/time budget exhausted or cycle detected'}
+        result['is_closed']=result['vacancy_status']['state']=='CLOSED'
+    if listing(result.get('final_url') or url):
+        result['vacancy_status']={'state':'UNKNOWN','evidence':'category/search page is not an individual vacancy'}
+        result['is_closed']=False
     return result
 
 
@@ -189,7 +258,7 @@ def fetch_jds(urls: list[str], *, timeout: int = TIMEOUT) -> list[dict]:
     """Fetch multiple job URLs, return list of result dicts."""
     results = []
     for url in urls:
-        results.append(fetch_jd(url))
+        results.append(fetch_jd(url,timeout=timeout))
     return results
 
 def _active_ats_record(url,timeout):
@@ -202,10 +271,34 @@ def _active_ats_record(url,timeout):
     elif host=='jobs.lever.co':
         match=re.fullmatch(r'/([^/]+)/([a-zA-Z0-9-]+)/?',path)
         if match:endpoint=f'https://api.lever.co/v0/postings/{match[1]}/{match[2]}?mode=json';identity=match[2];vendor='Lever'
+    elif host.endswith('.myworkdayjobs.com'):
+        match=re.fullmatch(r'/(?:[a-z]{2}-[A-Z]{2}/)?([^/]+)/job/(.+?)(?:/apply)?/?',path)
+        requisition=re.search(r'_(JR[-\w]+|R[-\w]+)$',match[2]) if match else None
+        if match and requisition:
+            tenant=host.split('.')[0]
+            endpoint=f'https://{host}/wday/cxs/{tenant}/{match[1]}/job/{match[2]}'
+            identity=requisition[1];vendor='Workday'
     if not endpoint:return None
     try:
         req=urllib.request.Request(endpoint,headers={'Accept':'application/json','User-Agent':USER_AGENT})
         with urllib.request.urlopen(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
+        if vendor=='Workday':
+            info=data.get('jobPostingInfo') or {}
+            if info.get('jobReqId')!=identity or not info.get('title'):return None
+            content=info.get('jobDescription') or ''
+            deadline=extract_application_deadline(_html_to_text(content),url)
+            end_date=info.get('endDate')
+            if end_date and re.fullmatch(r'\d{4}-\d{2}-\d{2}',end_date):
+                deadline={'type':'EXACT','date':end_date,'source':'ATS','source_url':url,'evidence':'Workday endDate: '+end_date}
+            state=assess('',_html_to_text(content),deadline)
+            if state['state']!='CLOSED':
+                if info.get('posted') is False:state={'state':'CLOSED','evidence':'Workday exact requisition is no longer posted'}
+                elif info.get('canApply') is True and info.get('posted') is True:
+                    state={'state':'OPEN','evidence':'Workday exact requisition is posted with canApply=true'}
+                else:return None
+            state['page_title']=info['title']
+            return {'text':_html_to_text(content),'deadline_info':deadline,'deadline':deadline['date'],
+                    'vacancy_status':state,'is_closed':state['state']=='CLOSED','validation_source':endpoint}
         if str(data.get('id'))!=identity:return None
         title=data.get('title') or data.get('text');content=data.get('content') or data.get('descriptionPlain') or data.get('description') or ''
         if not title:return None

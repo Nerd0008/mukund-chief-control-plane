@@ -12,7 +12,7 @@ def closure_evidence(text):
     match=CLOSED.search(target)
     return match.group(0) if match else None
 
-def assess(html,text,deadline_info):
+def assess(html,text,deadline_info,url='https://vacancy.invalid/job/target'):
     closed=closure_evidence(text)
     if closed:return {'state':'CLOSED','evidence':closed}
     date=(deadline_info or {}).get('date')
@@ -35,14 +35,14 @@ def assess(html,text,deadline_info):
         except (ValueError,TypeError,AttributeError):continue
     # Positive application control on the target section, not a footer recommendation.
     target=re.split(r'\b(?:similar\s+(?:roles|jobs)|related\s+(?:roles|jobs))\b',html or '',maxsplit=1,flags=re.I)[0]
-    apply=re.search(r'<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>\s*(?:<[^>]+>\s*)*(?:apply\s+(?:now|for\s+this\s+(?:job|role|position))|apply)(?:\s*<[^>]+>)*\s*</a>',target,re.I)
-    h1=re.search(r'<h1\b[^>]*>(.*?)</h1>',target,re.I|re.S)
-    title=re.sub('<[^>]+>',' ',h1.group(1)).strip() if h1 else ''
+    from application_links import extract,aggregator
+    page=extract(target,url)
+    title=page['title']
     overlay=re.search(r'data-careersite--jobs--form-overlay-job-application-url-value=["\']([^"\']+)["\']',target,re.I)
     job_id=re.search(r'data-careersite--jobs--form-overlay-job-id-value=["\'](\d+)["\']',target,re.I)
     if overlay and job_id and title and '/jobs/'+job_id[1] in overlay[1] and overlay[1].endswith('/applications/new'):
         return {'state':'OPEN','evidence':'Teamtailor target application overlay matches job ID '+job_id[1],'page_title':title}
-    if apply and title and apply.group(1).lower().startswith(('http://','https://','/')):
+    if len(page['links'])==1 and page['specific'] and not aggregator(url):
         return {'state':'OPEN','evidence':'target job title and active application link','page_title':title}
     return {'state':'UNKNOWN','evidence':'no current positive vacancy availability evidence','page_title':title}
 
@@ -70,9 +70,21 @@ def record_verification(record,result,cache=None):
     info=dict(result.get('vacancy_status') or {'state':'UNKNOWN','evidence':'missing vacancy status'})
     if info.get('state')=='OPEN' and info.get('page_title'):
         expected=set(re.findall(r'[a-z0-9]+',str(record.get('title') or record.get('job_title') or '').lower()))
-        actual=set(re.findall(r'[a-z0-9]+',info['page_title'].lower()))
-        if expected and len(expected&actual)/len(expected)<0.75:
+        from application_links import title_matches
+        if expected and not title_matches(str(record.get('title') or record.get('job_title') or ''),info['page_title']):
             info={'state':'UNKNOWN','evidence':'destination title does not match tracker role'}
+    if result.get('application_resolution'):
+        info['application_resolution']=result['application_resolution']
+        employer=result['application_resolution'].get('employer')
+        if employer and info.get('state')=='OPEN':
+            from application_links import tokens
+            wanted=tokens(str(record.get('company') or ''))-{'ltd','limited','plc','inc'}
+            if wanted and not wanted<=tokens(employer):
+                info={'state':'UNKNOWN','evidence':'outbound employer does not match candidate company',
+                      'application_resolution':result['application_resolution']}
+    if info.get('state')=='OPEN' and result.get('resolved_url'):
+        info['resolved_url']=result['resolved_url']
+        info['application_url']=result.get('application_url')
     info['checked_at']=dt.datetime.now(dt.timezone.utc).isoformat()
     info['deadline_info']=result.get('deadline_info') or {'type':'UNKNOWN','date':None}
     key=identity_key(record)
