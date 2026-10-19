@@ -250,3 +250,42 @@ def test_discovery_stale_transport_requires_positive_resolved_identity():
     assert verdict()['decision']=='accepted'
     rec['vacancy_status']['application_resolution']['employer_match']=False
     assert verdict()['decision']=='rejected'
+
+
+# --- Regression: valueless HTML attributes must not crash the page parser ---
+# html.parser yields None (not '') for a present-but-valueless attribute such as
+# <div class>. dict.get(key, '') does not protect against that, so the parser
+# raised TypeError and aborted the whole JD-fetch pass.
+@pytest.mark.parametrize('html', [
+    '<div class>text</div>',
+    '<div class id>text</div>',
+    '<div class="a" id>b</div>',
+    '<div id>x</div>',
+    '<script type>var x=1;</script>',
+    '<div class="similar-jobs">x</div>',
+])
+def test_page_parser_tolerates_valueless_attributes(html):
+    p = links._Page()
+    p.feed(html)  # must not raise
+
+
+def test_valueless_class_attribute_does_not_hide_content():
+    # a valueless class on a container must not raise and must not block its links
+    html = f'<div class><a href="{TARGET}">Apply</a></div>'
+    p = links._Page()
+    p.feed(html)
+    assert any(l.get('url') == TARGET for l in p.links)
+
+
+def test_similar_jobs_block_still_hides_links_with_valueless_attributes():
+    # the blocking regex must still fire when an attribute is valueless-but-named,
+    # so links inside a similar-jobs block are not collected as postings.
+    blocked = f'<div class="similar-jobs" id><a href="{TARGET}">Apply</a></div>'
+    p = links._Page()
+    p.feed(blocked)
+    assert not any(l.get('url') == TARGET for l in p.links)
+
+    allowed = f'<div class="main"><a href="{TARGET}">Apply</a></div>'
+    q = links._Page()
+    q.feed(allowed)
+    assert any(l.get('url') == TARGET for l in q.links)

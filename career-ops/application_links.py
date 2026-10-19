@@ -82,9 +82,11 @@ class _Page(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
+        # html.parser yields None for a present-but-valueless attribute (e.g. <div class>),
+        # so a dict .get(key, '') default does NOT protect us. Coerce explicitly.
         blocked = tag in ('nav', 'header', 'footer', 'aside') or bool(re.search(
             r'(?:similar|related|recommended)[-_ ](?:jobs|roles)',
-            a.get('class', '') + ' ' + a.get('id', ''), re.I))
+            (a.get('class') or '') + ' ' + (a.get('id') or ''), re.I))
         inherited = any(x[2] for x in self.stack)
         if tag not in ('input', 'meta', 'link', 'br', 'hr', 'img', 'source', 'area', 'wbr'):
             self.stack.append((tag, a, blocked or inherited))
@@ -92,7 +94,7 @@ class _Page(HTMLParser):
             if tag == 'meta' and a.get('property') == 'og:title': self.meta_title = a.get('content', '')
             if tag == 'h1': self.h1 = []
             if tag == 'a': self.anchor = {'url': a.get('href'), 'parts': []}
-            if tag == 'script' and a.get('type', '').lower() == 'application/ld+json': self.script = []
+            if tag == 'script' and (a.get('type') or '').lower() == 'application/ld+json': self.script = []
             if tag == 'turbo-frame' and any(x[1].get('data-call-to-action--form-kind-value') == 'apply_url' for x in self.stack):
                 self.frames.append(a.get('src'))
             if tag == 'form': self.forms.append(a)
