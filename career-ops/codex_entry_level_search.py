@@ -53,6 +53,7 @@ from job_liveness import record_verification
 # owner's own Career Ops config/profile.yml, not a hardcoded list here.
 import owner_search_profile as osp
 from career_search_recall import posting_key, query_batches
+from posting_identity import identity_keys
 from application_deadlines import deadline_from_value, deadline_label, deadline_priority
 
 CODEX_EXE = Path(os.environ.get(
@@ -287,6 +288,8 @@ def read_tracker_urls(path: Path):
     id_col = cols.get("Job ID")
 
     urls = set()
+    identities = set()
+    company_col = cols.get("Company")
     last_row, last_id = 1, None
     for row in ws.iter_rows(min_row=2, values_only=False):
         # Track the last row that has any data in column A
@@ -295,8 +298,13 @@ def read_tracker_urls(path: Path):
             if id_col and len(row) >= id_col and row[id_col - 1].value:
                 last_id = str(row[id_col - 1].value)
         if url_col and len(row) >= url_col and row[url_col - 1].value:
-            urls.add(posting_key(row[url_col - 1].value))
-    return urls, ws, wb, cols, last_row, last_id
+            value = row[url_col - 1].value
+            urls.add(posting_key(value))
+            # Requisition-scoped identity: the same vacancy reached through an
+            # employer ATS URL and an aggregator URL must not become two rows.
+            company = row[company_col - 1].value if company_col and len(row) >= company_col else None
+            identities |= identity_keys(company, value)
+    return urls, identities, ws, wb, cols, last_row, last_id
 
 
 def is_entry_level(title: str, entry_markers=None) -> bool:
@@ -383,13 +391,14 @@ def main() -> int:
             selected_batches.append(candidate)
     print(f"Search coverage: {batch_count} distinct batches; current/next-year and year-free queries")
 
-    (existing_urls, ws, wb, cols, last_row, last_id) = read_tracker_urls(tracker)
+    (existing_urls, existing_identities, ws, wb, cols, last_row, last_id) = read_tracker_urls(tracker)
     print(f"Tracker: {tracker.name}")
     print(f"Existing rows: {last_row - 1} (last id {last_id})")
     print(f"Running {batch_count} batch(es) from offset {offset} of {len(batches)}")
 
     existing_urls={posting_key(u) for u in existing_urls if posting_key(u)}
     seen = set()
+    seen_identities = set()
     collected, rejected, decisions = [], [], []
     counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0,'review_only':0}
     for bi in selected_batches:
@@ -414,15 +423,23 @@ def main() -> int:
                 counts['invalid_records']+=1
                 decisions.append({'title':title,'reason':'invalid title or posting URL'})
                 continue
+            job_identities = identity_keys(j.get("company"), url)
             if key in existing_urls:
                 counts['already_tracked']+=1
                 decisions.append({'title':title,'url':url,'reason':'already tracked'})
                 continue
-            if key in seen:
+            if job_identities & existing_identities:
+                # A different URL naming the same ATS requisition: already applied for.
+                counts['already_tracked']+=1
+                decisions.append({'title':title,'url':url,
+                                  'reason':'already tracked (same requisition, different URL)'})
+                continue
+            if key in seen or (job_identities & seen_identities):
                 counts['repeated_in_run']+=1
                 decisions.append({'title':title,'url':url,'reason':'repeated in this run'})
                 continue
             seen.add(key)
+            seen_identities |= job_identities
             if not is_entry_level(title, entry_terms):
                 rejected.append((title, url, "not entry-level by title"))
                 continue
@@ -450,15 +467,19 @@ def main() -> int:
             source_url=url
             url=verified.get('resolved_url') or url
             resolved_key=posting_key(url)
-            if url!=source_url and resolved_key in existing_urls:
+            resolved_identities=identity_keys(j.get("company"), source_url, url)
+            if url!=source_url and (resolved_key in existing_urls
+                                    or resolved_identities & existing_identities):
                 counts['already_tracked']+=1
                 decisions.append({'title':title,'url':url,'source_url':source_url,'reason':'resolved employer posting already tracked'})
                 continue
-            if url!=source_url and resolved_key in seen:
+            if url!=source_url and (resolved_key in seen
+                                    or resolved_identities & seen_identities):
                 counts['repeated_in_run']+=1
                 decisions.append({'title':title,'url':url,'source_url':source_url,'reason':'resolved employer posting repeated in this run'})
                 continue
             seen.add(resolved_key)
+            seen_identities |= resolved_identities
             if url!=source_url:
                 record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
             clearance = clearance_hits(jd_text)

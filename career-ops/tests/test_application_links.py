@@ -201,7 +201,7 @@ def test_direct_search_dedupes_and_carries_resolved_destination(monkeypatch,tmp_
     p=tmp_path/'tracker';p.touch();monkeypatch.setitem(search.TRACKERS,'uk',p)
     class Book:
         def close(self):pass
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({posting_key(TARGET)} if already_tracked else set(),None,Book(),{},2,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({posting_key(TARGET)} if already_tracked else set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','title':TITLE,'url':SOURCE}]))
     monkeypatch.setattr(search,'fetch_jd',lambda url:{'vacancy_status':{'state':'OPEN','page_title':TITLE},'resolved_url':TARGET})

@@ -117,7 +117,7 @@ def test_expired_response_rejected_by_actual_search_command(tmp_path,monkeypatch
     p=tmp_path/'tracker';p.touch();monkeypatch.setitem(search.TRACKERS,'uk',p)
     class Book:
         def close(self):pass
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),None,Book(),{},2,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search.osp,'load_profile',lambda:{})
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'L&G','job_title':'Cyber Intern','url':'https://employer.com/expired'}]))
@@ -132,7 +132,7 @@ def test_unknown_not_admitted_as_open(tmp_path,monkeypatch,capsys):
     p=tmp_path/'tracker';p.touch();monkeypatch.setitem(search.TRACKERS,'uk',p)
     class Book:
         def close(self):pass
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),None,Book(),{},2,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search.osp,'load_profile',lambda:{})
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','job_title':'Cyber Intern','url':'https://employer.com/unknown'}]))

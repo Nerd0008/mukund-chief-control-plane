@@ -44,7 +44,7 @@ def test_offline_production_dry_run_has_distinct_batches_and_exact_accounting(tm
     class Book:
         def close(self):pass
         def save(self,*a):pytest.fail('dry run wrote workbook')
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},None,Book(),{},20,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},set(),None,Book(),{},20,None))
     rows=[{'job_title':'Cyber Security Intern','url':'https://jobs.example/known'},
           {'job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123?gh_src=one'},
           {'job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123'},
@@ -77,7 +77,7 @@ def test_no_new_is_not_reported_as_no_discovery(tmp_path,monkeypatch,capsys):
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     class Book:
         def close(self):pass
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},None,Book(),{},20,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},set(),None,Book(),{},20,None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Intern','url':'https://jobs.example/known'}]))
     monkeypatch.setattr(search,'fetch_jd',lambda *a:pytest.fail('already-tracked job fetched'))
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
@@ -102,7 +102,7 @@ def test_direct_search_delegates_only_to_guarded_writer(tmp_path,monkeypatch,cap
     class Book:
         def close(self):pass
         def save(self,*a):pytest.fail('Direct search bypassed shared writer')
-    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),None,Book(),{},2,None))
+    monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Cyber Intern','company':'Example','url':'https://employer.com/job/123'}]))
     monkeypatch.setattr(search,'fetch_jd',lambda *a:{'text':'Open position.','vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})
     calls=[]

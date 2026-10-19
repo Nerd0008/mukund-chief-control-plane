@@ -61,3 +61,34 @@ def test_guarded_append_can_preserve_existing_listing_and_passed_rows(tmp_path):
     result=tw.write_records(tw.load_profiles(),'uk',[rec],tracker_override=str(p),backup_dir=str(tmp_path/'backups'),apply=True,cleanup_existing=False)
     assert result['applied'] and result['counts']['passed_deleted']==result['counts']['listing_deleted']==0
     wb=openpyxl.load_workbook(p);assert wb['Jobs']['F4'].value=='passed' and wb['Jobs'].max_row==5;wb.close()
+
+def requisition_workbook(tmp_path,other_employer='American Express'):
+    p=tmp_path/'uk-req.xlsx';wb=openpyxl.Workbook();ws=wb.active;ws.title='Jobs'
+    ws.append(['UK jobs']);ws.append(['Date Found','Company','Role Title','Apply Link','Application Deadline','Status'])
+    ws.append(['2026-10-03','American Express','Information Security Engineer - 2027 (UK - Burgess Hill)','https://careers.americanexpress.com/en/sites/CX_1/job/26013761/','2026-10-23','Applied'])
+    ws.append(['2026-10-17',other_employer,'Information Security Engineer - 2027','https://egug.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/26013761',None,'Not Applied'])
+    from openpyxl.worksheet.datavalidation import DataValidation
+    spec=tw.region_config(tw.load_profiles(),'uk')['validations']['F']
+    validation=DataValidation(type='list',formula1=spec['formula1']);ws.add_data_validation(validation);validation.add('F3:F500')
+    wb.save(p);wb.close();return p
+
+def test_requisition_match_removes_a_relisted_applied_role(tmp_path):
+    """The reported regression: one Amex requisition tracked through the employer careers
+    URL (Applied) and the Oracle URL (Not Applied) must collapse to a single row."""
+    p=requisition_workbook(tmp_path);before=tw.sha256_file(p)
+    result=repair.repair(p,tw.load_profiles(),tmp_path/'backups',[4],apply=True)
+    assert result['applied'] and result['verification']['ok']
+    archived=result['duplicate_rows_archived'][0]
+    assert archived['match_basis']=='same ATS requisition' and archived['retained_original_rows']==[3]
+    assert tw.sha256_file(result['backup'])==before
+    wb=openpyxl.load_workbook(p);ws=wb['Jobs']
+    assert ws.max_row==3 and [ws.cell(3,c).value for c in (2,6)]==['American Express','Applied']
+    wb.close()
+
+def test_same_number_at_another_employer_is_not_a_duplicate(tmp_path):
+    """A bare numeric requisition ID is not unique across employers; removing on it alone
+    would delete a real vacancy."""
+    p=requisition_workbook(tmp_path,other_employer='Some Other Bank');before=tw.sha256_file(p)
+    with pytest.raises(ValueError,match='No exact compatible retained duplicate'):
+        repair.repair(p,tw.load_profiles(),tmp_path/'backups',[4],apply=True)
+    assert tw.sha256_file(p)==before
