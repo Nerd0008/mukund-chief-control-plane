@@ -84,7 +84,7 @@ def check_text(text: str, *, topic: str | None = None,
             title in declared or declared in title
         )
         if declared_hit:
-            report["matches"].append({
+            match = {
                 "topic": entry.get("topic"),
                 "status": entry.get("status"),
                 "used_on": entry.get("used_on"),
@@ -92,7 +92,13 @@ def check_text(text: str, *, topic: str | None = None,
                 "matched_by": "declared_topic",
                 "signals_hit": hits,
                 "strict": bool(entry.get("strict")),
-            })
+            }
+            # Same pending rule as the signal path: a topic planned for THIS
+            # week must not block its own approval.
+            if (entry.get("status") or "used").lower() == "pending":
+                report["warnings"].append({**match, "note": "planned topic, not yet published"})
+            else:
+                report["matches"].append(match)
             continue
 
         strict = bool(entry.get("strict"))
