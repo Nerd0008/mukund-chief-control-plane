@@ -1,0 +1,212 @@
+{
+  "post_text": "An AI system can flag a worker for dismissal. From next July it cannot make that dismissal stick on its own.\n\nOn 30 September a governor signed a set of workplace AI measures. One of them, the No Robo Bosses Act, says an employer may not rely solely on an automated decision system for discipline or termination. A human must corroborate the recommendation with other evidence. It takes effect on 1 July 2027.\n\nThe package goes further. A mass layoff caused by an AI system that replaces workers has to be reported. Workplace surveillance tools may not infer an employee's emotional state. Affected workers have to be told, and can ask what data the tool used.\n\nWhat strikes me is the order. The tool arrived first, at scale, and the rule is only now catching up. The law assumes the system is already in the room.\n\nIf you are entering the workforce, this matters: software can flag you or recommend disciplinary action, but it cannot decide on its own.\n\nDoes a human reviewing an AI recommendation change the outcome, or just the paperwork?",
+  "news_fact_gate": {
+    "gate_name": "linkedin-news-claims",
+    "gate_version": 1,
+    "ran_at": "2026-10-20T16:52:45+00:00",
+    "body_sha256": "435ce8f9e3a774910c3f9c79730299bac05712b6aa77d97f4e0e464563ce4e32",
+    "sources": [
+      "https://www.ebglaw.com/insights/publications/four-new-california-laws-reshape-the-rules-for-workplace-ai",
+      "https://www.pillsburylaw.com/en/news-and-insights/new-california-ai-laws.html",
+      "https://www.govbuddy.com/legislative-tracking/new-california-laws-2026-2027/"
+    ],
+    "source_sha256": {
+      "https://www.ebglaw.com/insights/publications/four-new-california-laws-reshape-the-rules-for-workplace-ai": "75656e98594a3060277d521fee3b5000e625503b285c13a53218f0d9ae53e3b0",
+      "https://www.pillsburylaw.com/en/news-and-insights/new-california-ai-laws.html": "48b0b43d8d5c634aea565108648e79a1f70a3f22847cc610e30f540bab6c35b5",
+      "https://www.govbuddy.com/legislative-tracking/new-california-laws-2026-2027/": "bf20335f8f77cf5b2b0923c97b387b872905dce8eb4992d53559330da7b2e5df"
+    },
+    "sources_unreadable": [],
+    "llm_used": true,
+    "ungrounded_numbers": [],
+    "ungrounded_entities": [],
+    "unsupported_claims": [],
+    "forbidden": [],
+    "warnings": [],
+    "grounded_numbers": [
+      "30",
+      "2027."
+    ],
+    "claims": [
+      {
+        "claim": "From next July an AI system cannot make a dismissal stick on its own.",
+        "verdict": "supported",
+        "evidence": "Employers have until the law’s July 1, 2027, effective date to ensure that their use of an ADS complies... employers “shall not rely solely on an ADS when making a disciplinary or termination decision”",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "On 30 September a governor signed a set of workplace AI measures.",
+        "verdict": "supported",
+        "evidence": "the state legislature passed four measures designed to protect workers from AI-driven decision-making and surveillance. Governor Gavin Newsom signed them into law on September 30, 2026.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The No Robo Bosses Act says an employer may not rely solely on an automated decision system for discipline or termination.",
+        "verdict": "supported",
+        "evidence": "Under the No Robo Bosses Act, employers may not use an ADS to: Make disciplinary or termination decisions based solely on ADS output.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "A human must corroborate the automated recommendation with other evidence.",
+        "verdict": "supported",
+        "evidence": "Employers that “primarily” rely on ADS data to make an adverse employment decision will need to assign a human reviewer to corroborate that decision by checking either the original data underlying the ADS output or other relevant corroborating or supporting information",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "The No Robo Bosses Act takes effect on 1 July 2027.",
+        "verdict": "supported",
+        "evidence": "Employers have until the law’s July 1, 2027, effective date to ensure that their use of an ADS complies with several key requirements.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "A mass layoff caused by an AI system that replaces workers has to be reported.",
+        "verdict": "supported",
+        "evidence": "require employers to notify individuals and certain agencies when a mass layoff, relocation, or closure occurs because of the adoption of an AI system or automation that replaces workers.",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Workplace surveillance tools may not infer an employee's emotional state.",
+        "verdict": "supported",
+        "evidence": "prohibit the use of AI-driven workplace monitoring that predicts or infers employees’ emotions",
+        "judge_runs": 3,
+        "judge_verdicts": [
+          "supported",
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Affected workers have to be told when an automated decision system is relied upon for discipline or termination.",
+        "verdict": "supported",
+        "evidence": "When an employer relies primarily on an ADS output for such a decision, the employer must... notify affected employees after the fact",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Affected workers can ask what data the tool used.",
+        "verdict": "supported",
+        "evidence": "upon request, provide employees a description of their own data used by the tool.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "An AI system can flag a worker for dismissal.",
+        "verdict": "supported",
+        "evidence": "A tool purchased for one purpose (such as scheduling or security) becomes an ADS for purposes of the No Robo Bosses Act when its scores, flags, or uses recommendations to inform discipline or termination.",
+        "judge_runs": 2,
+        "judge_verdicts": [
+          "supported",
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "A human must corroborate the automated decision system's recommendation with other evidence.",
+        "verdict": "supported",
+        "evidence": "the employer must ensure that a human corroborates the ADS output... by checking either the original data underlying the ADS output or other relevant corroborating or supporting information",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Affected workers have to be told, and can ask what data the tool used.",
+        "verdict": "supported",
+        "evidence": "notify affected employees after the fact, and, upon request, provide employees a description of their own data used by the tool.",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "A human must corroborate the AI recommendation with other evidence.",
+        "verdict": "supported",
+        "evidence": "the employer must ensure that a human corroborates the ADS output... by checking either the original data underlying the ADS output or other relevant corroborating or supporting information",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      },
+      {
+        "claim": "Affected workers have to be told when an automated decision system is used.",
+        "verdict": "supported",
+        "evidence": "When an employer relies primarily on an ADS output for such a decision, the employer must... notify affected employees after the fact",
+        "judge_runs": 1,
+        "judge_verdicts": [
+          "supported"
+        ],
+        "unanimous": true,
+        "disputed": false
+      }
+    ],
+    "judge_runs_used": 3,
+    "judge_runs_requested": 3,
+    "verdict": "pass",
+    "available": true
+  },
+  "personal_fact_gate": null,
+  "topic": {
+    "title": "AI and workplace decisions (employment law)",
+    "sources": []
+  },
+  "confirm_token": "435ce8f9e3a774910c3f9c79730299bac05712b6aa77d97f4e0e464563ce4e32",
+  "image_path": null,
+  "approved": true,
+  "day": "wednesday"
+}

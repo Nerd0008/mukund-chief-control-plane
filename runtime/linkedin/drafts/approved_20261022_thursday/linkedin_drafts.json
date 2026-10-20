@@ -1,0 +1,31 @@
+{
+  "post_text": "I check suspicious emails most days. Sender address, link domain, the tone of the request.\n\nThe ones that get me are rarely the obvious ones. They are the ones where the domain is off by one character, or the display name is right but the address underneath is wrong.\n\nI have built small tools to help with this. But the tool I trust most is still the pause. The moment of actually reading the address instead of the display name.\n\nThat pause is the whole defence.\n\nWhen did you last stop and read a sender's actual email address?\n\n#Phishing #CyberSecurity #InfoSec #Awareness",
+  "news_fact_gate": {
+    "gate_name": "linkedin-news-claims",
+    "gate_version": 1,
+    "ran_at": "2026-10-20T16:56:59+00:00",
+    "body_sha256": "c00f0da83655b87e850121614ee7577ead9eaf0f694a81e09e87370aee328a31",
+    "sources": [],
+    "source_sha256": {},
+    "sources_unreadable": [],
+    "llm_used": true,
+    "ungrounded_numbers": [],
+    "ungrounded_entities": [],
+    "unsupported_claims": [],
+    "forbidden": [],
+    "warnings": [],
+    "verdict": "pass",
+    "available": true,
+    "basis": "no-source post with no checkable claims about the world",
+    "reason": "no source cited and the post asserts no factual claim about the outside world"
+  },
+  "personal_fact_gate": null,
+  "topic": {
+    "title": "Personal: checking suspicious emails",
+    "sources": []
+  },
+  "confirm_token": "1b735883a13b514f597fa5552a11ffc44503122491ef4d33826f63c0beb271a7",
+  "image_path": null,
+  "approved": true,
+  "day": "thursday"
+}

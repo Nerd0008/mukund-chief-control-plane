@@ -1,0 +1,11 @@
+An AI system can flag a worker for dismissal. From next July it cannot make that dismissal stick on its own.
+
+On 30 September a governor signed a set of workplace AI measures. One of them, the No Robo Bosses Act, says an employer may not rely solely on an automated decision system for discipline or termination. A human must corroborate the recommendation with other evidence. It takes effect on 1 July 2027.
+
+The package goes further. A mass layoff caused by an AI system that replaces workers has to be reported. Workplace surveillance tools may not infer an employee's emotional state. Affected workers have to be told, and can ask what data the tool used.
+
+What strikes me is the order. The tool arrived first, at scale, and the rule is only now catching up. The law assumes the system is already in the room.
+
+If you are entering the workforce, this matters: software can flag you or recommend disciplinary action, but it cannot decide on its own.
+
+Does a human reviewing an AI recommendation change the outcome, or just the paperwork?

@@ -1,0 +1,11 @@
+I check suspicious emails most days. Sender address, link domain, the tone of the request.
+
+The ones that get me are rarely the obvious ones. They are the ones where the domain is off by one character, or the display name is right but the address underneath is wrong.
+
+I have built small tools to help with this. But the tool I trust most is still the pause. The moment of actually reading the address instead of the display name.
+
+That pause is the whole defence.
+
+When did you last stop and read a sender's actual email address?
+
+#Phishing #CyberSecurity #InfoSec #Awareness
