@@ -67,6 +67,14 @@
       "signals": ["suspicious email", "sender address", "display name", "link domain", "phishing"]
     },
     {
+      "topic": "AI + workplace decisions (employment law)",
+      "status": "used",
+      "used_on": "2026-10-21",
+      "evidence": "No Robo Bosses Act post (approved 2026-10-20; scheduled publish 2026-10-21). If the 08:00 run fails, revert this status to pending so a fresh post is not blocked.",
+      "strict": true,
+      "signals": ["no robo bosses", "automated decision system", "ads output", "workplace ai measures", "discipline or termination", "mass layoff", "workplace surveillance", "employment law"]
+    },
+    {
       "topic": "Old bot: agentic AI as offensive weapon",
       "status": "used",
       "used_on": "2026-07-22",
