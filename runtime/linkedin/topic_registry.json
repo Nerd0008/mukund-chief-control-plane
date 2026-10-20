@@ -1,0 +1,126 @@
+{
+  "_note": "Authoritative registry of LinkedIn topics already used. The reuse guard (scripts/topic_reuse_check.py) reads this file and REFUSES a draft whose text matches a used topic. Seeded from every published post, every approved draft, and the old bot's 18 posts. Going forward the publish path records the topic in the ledger so this registry can be rebuilt from evidence.",
+  "updated": "2026-10-18",
+  "topics": [
+    {
+      "topic": "AI + water",
+      "status": "used",
+      "used_on": "2026-10-06",
+      "evidence": "water-utility OT post (2026-10-06/07); data-centre water post (2026-10-08); third water draft blocked 2026-10-18",
+      "strict": true,
+      "signals": ["water utility", "water treatment", "water infrastructure", "data centre water", "data center water", "data centres' water", "data centers' water", "offsite water", "water footprint", "gallons of water", "water demand", "water strain", "water use", "water accounting", "water consumption", "water resources", "cooling water", "reservoir"]
+    },
+    {
+      "topic": "AI + data centres",
+      "status": "used",
+      "used_on": "2026-10-08",
+      "evidence": "data-centre water post (2026-10-08); repeated in earlier drafts",
+      "strict": true,
+      "signals": ["data centre", "data center", "data centres", "data centers", "server farm", "hyperscaler", "gpu cluster", "server hall"]
+    },
+    {
+      "topic": "AI + health advice",
+      "status": "used",
+      "used_on": "2026-10-14",
+      "evidence": "AI chatbot medical advice post (2026-10-14)",
+      "strict": true,
+      "signals": ["chatbot", "health advice", "medical advice", "symptom", "diagnosis", "clinical advice", "ai doctor", "self-diagnos"]
+    },
+    {
+      "topic": "AI + cyber agent autonomy",
+      "status": "used",
+      "used_on": "2026-10-13",
+      "evidence": "AI agents fabricated identities to pressure open-source maintainer (2026-10-13)",
+      "strict": true,
+      "signals": ["agentic ai", "autonomous attack", "fabricated identit", "fake identit", "lateral movement", "malware-free", "offensive ai", "social engineer"]
+    },
+    {
+      "topic": "AI + vulnerability discovery / zero-day exploitation",
+      "status": "used",
+      "used_on": "2026-07-23",
+      "evidence": "old bot post 2026-07-23 (AI model found and exploited zero-days); this week's Tuesday draft used it too",
+      "strict": true,
+      "signals": ["vulnerability discovery", "zero-day", "exploited zero", "resourceful hacker", "mythos"]
+    },
+    {
+      "topic": "AI + physical media destruction",
+      "status": "used",
+      "used_on": "2026-10-03",
+      "evidence": "used books destroyed to train AI models (2026-10-03)",
+      "strict": true,
+      "signals": ["used books", "book spine", "physical books", "scanning books", "spines off", "destroyed books"]
+    },
+    {
+      "topic": "Personal: building something that runs unattended",
+      "status": "used",
+      "used_on": "2026-10-15",
+      "evidence": "overnight-build / automation reflection (2026-10-15)",
+      "strict": true,
+      "signals": ["while i sleep", "while i'm asleep", "runs while", "overnight", "inboxdefender", "unattended"]
+    },
+    {
+      "topic": "Personal: checking suspicious emails",
+      "status": "pending",
+      "used_on": "2026-10-22",
+      "evidence": "this week's Thursday personal post (pending approval)",
+      "strict": true,
+      "signals": ["suspicious email", "sender address", "display name", "link domain", "phishing"]
+    },
+    {
+      "topic": "Old bot: agentic AI as offensive weapon",
+      "status": "used",
+      "used_on": "2026-07-22",
+      "evidence": "old bot posts 2026-07-22 (SANS agentic AI)",
+      "strict": false,
+      "signals": ["agentic ai", "aims itself", "offensive cyber", "autonomous threat"]
+    },
+    {
+      "topic": "Old bot: SOC and multi-layered network data",
+      "status": "used",
+      "used_on": "2026-07-22",
+      "evidence": "old bot posts 2026-07-22 (multi-layered SOC)",
+      "strict": false,
+      "signals": ["multi-layered", "soc", "network data", "siem", "defense architecture"]
+    },
+    {
+      "topic": "Old bot: shadow AI in the browser",
+      "status": "used",
+      "used_on": "2026-07-22",
+      "evidence": "old bot posts 2026-07-22/23 (shadow AI)",
+      "strict": false,
+      "signals": ["shadow ai", "browser tabs", "unsanctioned", "oauth integration"]
+    },
+    {
+      "topic": "Old bot: ransomware / production halt",
+      "status": "used",
+      "used_on": "2026-07-23",
+      "evidence": "old bot post 2026-07-23 (Fairlife production halt)",
+      "strict": false,
+      "signals": ["fairlife", "coca-cola", "coca cola", "production halt", "ransomware"]
+    },
+    {
+      "topic": "Old bot: information security masters / curiosity",
+      "status": "used",
+      "used_on": "2026-07-24",
+      "evidence": "old bot posts 2026-07-24/27",
+      "strict": false,
+      "signals": ["information security master", "msc", "curiosity", "behind the scenes", "beauty of cybersecurity"]
+    },
+    {
+      "topic": "Old bot: third-party AI model security",
+      "status": "used",
+      "used_on": "2026-07-24",
+      "evidence": "old bot post 2026-07-24",
+      "strict": false,
+      "signals": ["third-party ai", "third party ai", "evaluating the security", "ai model"]
+    },
+    {
+      "topic": "Old bot: enterprise AI agents as attack surface",
+      "status": "used",
+      "used_on": "2026-07-27",
+      "evidence": "old bot post 2026-07-27",
+      "strict": false,
+      "signals": ["attack surface", "enterprise ai agent", "network exposures"]
+    }
+  ]
+}
