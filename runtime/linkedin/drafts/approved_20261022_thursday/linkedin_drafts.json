@@ -3,7 +3,7 @@
   "news_fact_gate": {
     "gate_name": "linkedin-news-claims",
     "gate_version": 1,
-    "ran_at": "2026-10-20T16:56:59+00:00",
+    "ran_at": "2026-10-20T17:01:30+00:00",
     "body_sha256": "c00f0da83655b87e850121614ee7577ead9eaf0f694a81e09e87370aee328a31",
     "sources": [],
     "source_sha256": {},
