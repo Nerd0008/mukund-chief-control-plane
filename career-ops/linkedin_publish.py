@@ -679,6 +679,16 @@ def cmd_publish(args) -> int:
     draft = select_draft(doc, args.kind, args.index)
     body = draft_body(draft)
     body_sha = pre["body_sha256"]
+    # Carry the topic into the ledger so the registry can be rebuilt from
+    # evidence. The published ledger was previously a pure hash ledger, which
+    # is why a new post on an already-used topic passed it unnoticed.
+    topic_field = draft.get("topic")
+    if isinstance(topic_field, dict):
+        topic_title = topic_field.get("title")
+    elif isinstance(topic_field, str):
+        topic_title = topic_field
+    else:
+        topic_title = None
     if sha256_text(body) != body_sha:
         base.update({"ok": False, "performed": False, "refused": True,
                      "network_calls_spent": 0, "external_actions_taken": [],
@@ -706,6 +716,7 @@ def cmd_publish(args) -> int:
         base["recording"] = record_result(
             {"result": "dry_run", "body_sha256": body_sha, "kind": args.kind,
              "index": args.index, "approved": True, "dry_run": True,
+             "topic": topic_title,
              "oauth_credentials_present": pre["oauth_credentials_present"]}, ledger_path)
         emit(base)
         return 0
@@ -779,6 +790,7 @@ def cmd_publish(args) -> int:
                           sleep=None if args.no_backoff else __import__("time").sleep)
     record = {"result": "published" if result["ok"] else "failed",
               "kind": args.kind, "index": args.index, "body_sha256": body_sha,
+              "topic": topic_title,
               "post_urn": result.get("post_urn"), "post_url": result.get("post_url"),
               "image_urn": image_urn,
               "http_status": result.get("status"), "attempts": result.get("attempts"),
