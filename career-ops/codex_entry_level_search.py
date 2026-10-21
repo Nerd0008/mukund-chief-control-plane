@@ -229,6 +229,7 @@ from clearance_screening import (  # noqa: E402
     clearance_evidence,
     clearance_hits,
 )
+from experience_screening import experience_hits  # noqa: E402
 
 
 def _profile_terms():
@@ -476,6 +477,13 @@ def main() -> int:
             clearance = clearance_hits(jd_text)
             if clearance:
                 rejected.append((title, url, f"clearance/citizenship required: {', '.join(clearance)}"))
+                continue
+            # A title says nothing about the experience a role wants. "IT Support
+            # Analyst" and "Cyber Security Analyst" pass the title gate whether
+            # they want a graduate or five years on a service desk.
+            experience = experience_hits(jd_text)
+            if experience:
+                rejected.append((title, url, f"prior experience required: {experience[0][:100]}"))
                 continue
             collected.append({
                 "title": title,

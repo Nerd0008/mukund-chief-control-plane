@@ -308,6 +308,7 @@ def title_decision(title: str, title_policy: dict) -> tuple[bool, str]:
 #: matched styled-components class names (``<div class="sc-129pb7e-1 bh">``) as an
 #: ``SC`` clearance requirement.
 from clearance_screening import clearance_evidence, clearance_hits  # noqa: E402,F401
+from experience_screening import experience_hits  # noqa: E402
 
 
 # --------------------------------------------------------------------------- #
@@ -366,6 +367,13 @@ def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
         reasons.append(f"states {exp} years of required experience; owner targets internships/entry level")
     elif isinstance(exp, str) and re.search(r"\b([2-9]|1[0-9])\+?\s*(?:years|yrs)\b", exp, re.IGNORECASE):
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
+
+    # A structured field is only present when a lane populated it. Read the text
+    # too, or a posting whose description asks for "2+ years in a similar role"
+    # is accepted because nothing ever looked.
+    exp_hits = experience_hits(blob)
+    if exp_hits:
+        reasons.append(f"prior experience required: {exp_hits[0][:120]}")
 
     work_auth = _work_auth_block(rp)
     if work_auth["status"] == "UNKNOWN":
