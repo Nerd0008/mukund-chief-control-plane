@@ -52,8 +52,8 @@ from jd_fetcher import fetch_jd  # noqa: E402
 import tracker_writer as tw  # noqa: E402
 from tracker_integrity import assert_valid, bind_links  # noqa: E402
 
-DEFAULT_CACHE = HERE / "runtime" / "career-ops" / "prune-uk-cache.json"
-DEFAULT_BACKUP_DIR = HERE / "runtime" / "career-ops" / "backups"
+DEFAULT_CACHE = HERE.parent / "runtime" / "career-ops" / "prune-uk-cache.json"
+DEFAULT_BACKUP_DIR = HERE.parent / "runtime" / "career-ops" / "backups"
 
 FIRST_DATA_ROW = 3
 LAST_COL = 6
