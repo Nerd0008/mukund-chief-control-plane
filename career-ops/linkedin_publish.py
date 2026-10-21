@@ -453,6 +453,16 @@ def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
                   f"{ov.get('approved_at')} ({ov.get('reason')})")
 
 
+def _gate_available(gate: object) -> bool:
+    """True when ``gate`` is a record that actually produced a verdict.
+
+    A record carrying ``available: false`` means the gate could not run (missing
+    node, missing script, no JSON verdict). That is not a verdict, so it must not
+    be counted as a gate that was passed.
+    """
+    return isinstance(gate, dict) and gate.get("available", True) is not False
+
+
 def _news_gate_ok(gate: object, body: str, *, draft: dict | None = None) -> tuple[bool, str]:
     """True only when a provenance-bearing news-claims pass covers ``body``.
 
@@ -542,45 +552,75 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     #    trustworthy when it proves it came from a real run over THIS text
     #    (gate name + body hash), so provenance is required, not just "pass".
     #
-    # Neither gate being absent is a pass. A draft that carries no verdict, or a
-    # verdict that cannot prove its own provenance, is refused: silence is not
-    # evidence that the text was checked.
+    # The gate that covers the post's claims must carry a passing verdict.
+    #
+    # A news post's claims about the world are covered by ``news_fact_gate``; a
+    # post that makes claims about Mukund is covered by ``personal_fact_gate``
+    # (or the older ``fact_gate`` name). Which gate applies is a property of the
+    # post, so a news post that legitimately has no personal verdict must not be
+    # blocked for lacking one: demanding it made every news post unpublishable
+    # once the builder split the two gates (2026-10-21).
+    #
+    # What is still refused is a post carrying no usable gate record at all:
+    # silence is not evidence that the text was checked.
     fact_gate = draft.get("fact_gate")
     if fact_gate is None and isinstance(draft.get("personal_fact_gate"), dict):
         # The single-post "approved" artefact names it personal_fact_gate.
         fact_gate = draft.get("personal_fact_gate")
-    verdict = fact_gate.get("verdict") if isinstance(fact_gate, dict) else None
+    has_personal = _gate_available(fact_gate)
+    has_news = _gate_available(draft.get("news_fact_gate"))
+    verdict = fact_gate.get("verdict") if has_personal else None
     out["fact_gate_verdict"] = verdict
     out["draft_blocked_flag"] = bool(draft.get("blocked"))
-    personal_ok = isinstance(fact_gate, dict) and verdict in ("pass", "passed")
-    check("draft_passed_review", personal_ok,
-          f"personal-claims gate verdict {verdict!r}; draft blocked="
-          f"{bool(draft.get('blocked'))}" if personal_ok else
-          (f"no personal-claims gate verdict recorded in this artefact "
-           f"(verdict={verdict!r}); nothing verified the author's own claims"
-           if verdict is None else
-           f"personal-claims gate verdict is {verdict!r}"))
+    if not has_news and not has_personal:
+        check("draft_passed_review", False,
+              "no usable gate record on this artefact; nothing verified the text")
+    elif has_personal:
+        personal_ok = verdict in ("pass", "passed")
+        check("draft_passed_review", personal_ok,
+              f"personal-claims gate verdict {verdict!r}; draft blocked="
+              f"{bool(draft.get('blocked'))}" if personal_ok else
+              f"personal-claims gate verdict is {verdict!r}")
+    else:
+        check("draft_passed_review", True,
+              "no personal-claims gate record; the post's claims are covered by "
+              "the news-claims gate (checked below)")
 
     news_gate = draft.get("news_fact_gate")
-    news_ok, news_detail = _news_gate_ok(news_gate, body)
-    out["news_fact_gate_verdict"] = (news_gate.get("verdict")
-                                     if isinstance(news_gate, dict) else None)
-    if not news_ok:
-        # The gate refused. An explicit, attributable owner override bound to
-        # these exact bytes may still authorise publication; the gate record is
-        # left intact and the override is reported as what it is.
-        ov_ok, ov_detail = _override_ok(draft, body)
-        out["owner_override"] = ov_ok
-        out["owner_override_detail"] = ov_detail
-        if ov_ok:
+    if not _gate_available(news_gate):
+        # No usable news-claims record. That is only acceptable when the post is
+        # covered by the personal-claims gate above; otherwise its claims about
+        # the world were never checked.
+        out["owner_override"] = False
+        out["news_fact_gate_verdict"] = None
+        if has_personal:
             check("draft_passed_news_claims", True,
-                  f"{news_detail} — OVERRIDDEN by owner: {ov_detail}")
+                  "no news-claims gate record; the post makes no claims about "
+                  "the world (personal-claims gate applies)")
         else:
             check("draft_passed_news_claims", False,
-                  f"{news_detail}; and {ov_detail}")
+                  "no news-claims gate record on this draft; the post's claims "
+                  "about the world were not checked")
     else:
-        out["owner_override"] = False
-        check("draft_passed_news_claims", True, news_detail)
+        news_ok, news_detail = _news_gate_ok(news_gate, body)
+        out["news_fact_gate_verdict"] = (news_gate.get("verdict")
+                                         if isinstance(news_gate, dict) else None)
+        if not news_ok:
+            # The gate refused. An explicit, attributable owner override bound to
+            # these exact bytes may still authorise publication; the gate record is
+            # left intact and the override is reported as what it is.
+            ov_ok, ov_detail = _override_ok(draft, body)
+            out["owner_override"] = ov_ok
+            out["owner_override_detail"] = ov_detail
+            if ov_ok:
+                check("draft_passed_news_claims", True,
+                      f"{news_detail} — OVERRIDDEN by owner: {ov_detail}")
+            else:
+                check("draft_passed_news_claims", False,
+                      f"{news_detail}; and {ov_detail}")
+        else:
+            out["owner_override"] = False
+            check("draft_passed_news_claims", True, news_detail)
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()
