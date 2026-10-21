@@ -541,6 +541,14 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
                 "status_was": draft.get("status")})
 
     check("draft_is_publishable_text", bool(body), "draft body is non-empty")
+    # A cancelled artefact must never be published, whatever else it carries. The
+    # cancel step clears the approval and the confirm token, but relying on that
+    # alone means a stale flag on the command line could still send a cancelled
+    # post out; this refuses it on the artefact's own record.
+    cancelled = bool(draft.get("cancelled"))
+    check("draft_not_cancelled", not cancelled,
+          f"artefact is cancelled: {draft.get('cancelled_reason')!r}"
+          if cancelled else "artefact is not cancelled")
     check("body_within_linkedin_limit", len(body) <= MAX_PUBLISH_BODY_CHARS,
           f"{len(body)} chars (LinkedIn commentary limit {MAX_PUBLISH_BODY_CHARS})")
 
