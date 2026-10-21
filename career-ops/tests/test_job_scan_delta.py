@@ -160,6 +160,44 @@ def test_ct_key_is_empty_when_the_role_is_unnamed():
     assert jsd.ct_key('', 'Graduate SOC Analyst') == ''
 
 
+def test_batch_result_counts_parses_the_searches_own_lines():
+    out = ('Search coverage: 2 distinct batches\n'
+           '--- batch 0: 6 queries ---\n  batch 0: 7 results returned\n'
+           '--- batch 1: 6 queries ---\n  batch 1: 0 results returned\n')
+    assert jsd.batch_result_counts(out) == [7, 0]
+
+
+def test_search_failed_flags_a_search_that_returned_nothing_at_all():
+    """The outage that hides as 'no new jobs': every batch empty."""
+    out = ('--- batch 0: 6 queries ---\n  batch 0: 0 results returned\n'
+           '--- batch 1: 6 queries ---\n  batch 1: 0 results returned\n')
+    reason = jsd.search_failed(out)
+    assert reason and '2 batch(es) returned 0 results' in reason
+
+
+def test_search_failed_is_quiet_when_any_batch_returned_results():
+    """Real results that were all duplicates is a HEALTHY empty cycle."""
+    out = ('  batch 0: 5 results returned\n  batch 1: 0 results returned\n')
+    assert jsd.search_failed(out) == ''
+
+
+def test_search_failed_flags_timeouts_with_no_results():
+    out = '--- batch 0: 6 queries ---\n  batch 0: TIMEOUT after 600s\n'
+    reason = jsd.search_failed(out)
+    assert reason and 'timed out' in reason
+
+
+def test_search_failed_ignores_a_timeout_alongside_real_results():
+    out = ('  batch 0: 4 results returned\n'
+           '  batch 1: TIMEOUT after 600s\n')
+    assert jsd.search_failed(out) == ''
+
+
+def test_search_failed_is_quiet_on_output_with_no_batch_lines():
+    """A run that never reached a batch is caught by write_ok, not here."""
+    assert jsd.search_failed('no batches ran') == ''
+
+
 def test_digest_gives_every_role_a_link_and_ends_with_a_summary():
     import datetime as dt
     items = [

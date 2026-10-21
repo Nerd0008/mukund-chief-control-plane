@@ -64,6 +64,11 @@ URL_COL = 4
 #: (the search's own default rotates by DAY, which would repeat every run).
 SLOT_SECONDS = 7200
 
+#: Raw stdout/stderr of the most recent search, kept so a cycle can always be
+#: diagnosed after the fact. The scan stays silent on Discord when there is
+#: nothing new, which previously left no evidence at all of what the search did.
+SEARCH_LOG = RUNTIME / "job-scan-last-search.log"
+
 
 def read_tracker(path: pathlib.Path) -> list[dict]:
     """Every data row with its real hyperlink target, not just the cell text."""
@@ -143,6 +148,34 @@ def role_keys(company: str, title: str, url: str) -> list[str]:
 
 def already_seen(company: str, title: str, url: str, seen: dict) -> bool:
     return any(k in seen for k in role_keys(company, title, url))
+
+
+#: The search prints one of these per batch. They are the ONLY way to tell a
+#: healthy empty cycle ("the web had nothing new") from a broken one ("Codex
+#: returned nothing at all"), because both leave the tracker unchanged and both
+#: print no new roles.
+BATCH_RESULTS_RE = re.compile(r"batch\s+\d+:\s+(\d+)\s+results returned")
+BATCH_TIMEOUT_RE = re.compile(r"batch\s+\d+:\s+TIMEOUT")
+
+
+def batch_result_counts(stdout: str) -> list[int]:
+    return [int(m.group(1)) for m in BATCH_RESULTS_RE.finditer(stdout)]
+
+
+def search_failed(stdout: str) -> str:
+    """A reason when the search ran but produced no usable results, else ''.
+
+    Silence is the correct output for a healthy cycle with nothing new, but it is
+    the WRONG output for a search that never ran: that would report an outage as
+    "no new jobs" and the owner would never learn the scan had stopped working.
+    """
+    counts = batch_result_counts(stdout)
+    timeouts = len(BATCH_TIMEOUT_RE.findall(stdout))
+    if counts and all(c == 0 for c in counts):
+        return f"every one of {len(counts)} batch(es) returned 0 results"
+    if not counts and timeouts:
+        return f"{timeouts} batch(es) timed out and none returned results"
+    return ""
 
 
 def run_search(offset: int, timeout: int) -> tuple[int, str, str]:
@@ -280,11 +313,21 @@ def main() -> int:
         slot = (args.batch_offset if args.batch_offset is not None
                 else int(dt.datetime.now(dt.timezone.utc).timestamp() // SLOT_SECONDS))
         code, out, err = run_search(slot, args.timeout)
+        if not args.dry_run:
+            write_atomic(SEARCH_LOG,
+                         f"# batch-offset {slot}  exit {code}\n{out}\n"
+                         f"--- stderr ---\n{err}\n")
         found = search_found(out)
         ok, why = write_ok(out, err, code)
         if code not in (0,) and not found:
             print("Job scan FAILED: the search did not complete.\n"
                   f"exit {code}; {(err or out).strip()[-400:]}")
+            return 3
+        broken = search_failed(out)
+        if broken:
+            print(f"Job scan WARNING: the search ran but produced nothing - {broken}. "
+                  "This cycle proves nothing about new roles.\n"
+                  f"Check Codex, then read {SEARCH_LOG}.")
             return 3
 
     rows = read_tracker(tracker)
