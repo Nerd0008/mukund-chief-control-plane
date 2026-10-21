@@ -133,6 +133,11 @@ def flat_post_draft(doc: dict) -> dict | None:
     for key in ("status", "subtype", "publish_requires", "confirm_token"):
         if key in doc:
             draft[key] = doc[key]
+    # A cancelled artefact must be refused on its own record, so the flag has to
+    # survive normalisation — without lifting it the publisher cannot see it.
+    for key in ("cancelled", "cancelled_reason"):
+        if key in doc:
+            draft[key] = doc[key]
     # The personal-claims gate is stored under its own name in this shape.
     for key in ("fact_gate", "personal_fact_gate", "news_fact_gate",
                 "owner_override", "owner_approval"):
