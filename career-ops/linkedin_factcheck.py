@@ -31,7 +31,9 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -57,6 +59,116 @@ MIN_GROUNDING_CHARS = 1500
 # runs are recorded so a verdict can be audited. Without this, the same post
 # could be blocked today and passed tomorrow with nothing changed.
 JUDGE_RUNS = 3
+
+# The judge needs the ``google-genai`` client library. That library is not a
+# dependency of every interpreter this repo runs under: the Hermes runtime venv
+# carries the ``google`` namespace through its auth packages but no
+# ``google.genai``, so an in-process import fails and every gate silently
+# degrades to ``ungated`` — which the publisher refuses, leaving nothing
+# publishable. Rather than depend on luck about which interpreter happened to be
+# used, the judge is run in a subprocess under the first candidate that can
+# actually import the library, and the reason is recorded when none can.
+JUDGE_CANDIDATES = (
+    os.environ.get("LINKEDIN_JUDGE_PYTHON") or "",
+    str(Path.home() / "Desktop" / "Pythob Bot" / "chief_of_staff_bot"
+        / ".venv" / "Scripts" / "python.exe"),
+    str(Path.home() / "Desktop" / "Pythob Bot" / "chief_of_staff_bot"
+        / ".venv" / "bin" / "python"),
+    sys.executable,
+)
+
+_JUDGE_PROBE_CACHE: dict[str, bool] = {}
+
+# Self-contained judge child: reads {prompt, model, api_key, runs} as JSON on
+# stdin, prints {"runs": [[claims...], ...]} or {"error": "..."} on stdout.
+_JUDGE_CHILD = r'''
+import json, re, sys
+try:
+    from google import genai
+except Exception as exc:
+    print(json.dumps({"error": "genai unavailable: %s" % exc}))
+    sys.exit(0)
+req = json.load(sys.stdin)
+prompt = req["prompt"]; model = req["model"]; api_key = req["api_key"]
+runs = max(1, int(req.get("runs", 1)))
+try:
+    client = genai.Client(api_key=api_key)
+except Exception as exc:
+    print(json.dumps({"error": "model client failed: %s" % exc}))
+    sys.exit(0)
+out = []
+for _ in range(runs):
+    try:
+        resp = client.models.generate_content(model=model, contents=prompt)
+        raw = str(getattr(resp, "text", "") or "")
+    except Exception:
+        continue
+    m = re.search(r"\{.*\}", raw, re.DOTALL)
+    if not m:
+        continue
+    try:
+        parsed = json.loads(m.group(0))
+    except json.JSONDecodeError:
+        continue
+    claims = parsed.get("claims")
+    if isinstance(claims, list):
+        out.append(claims)
+print(json.dumps({"runs": out}))
+'''
+
+
+def _has_genai(interp: str) -> bool:
+    """True when ``interp`` can import google.genai. Result is cached."""
+    if not interp:
+        return False
+    if interp in _JUDGE_PROBE_CACHE:
+        return _JUDGE_PROBE_CACHE[interp]
+    try:
+        proc = subprocess.run([interp, "-c", "import google.genai"],
+                              capture_output=True, timeout=120)
+        ok = proc.returncode == 0
+    except Exception:
+        ok = False
+    _JUDGE_PROBE_CACHE[interp] = ok
+    return ok
+
+
+def resolve_judge_interpreter() -> str | None:
+    """First candidate interpreter that can import google.genai, or None."""
+    for cand in JUDGE_CANDIDATES:
+        if cand and _has_genai(cand):
+            return cand
+    return None
+
+
+def run_judge(prompt: str, *, model: str, api_key: str | None,
+              runs: int) -> dict:
+    """Run the claim judge under an interpreter that has google-genai.
+
+    Returns ``{"runs": [[claims...], ...], "reason": str|None}``. A failure is
+    reported as a reason with no runs, never as an empty passing answer.
+    """
+    interp = resolve_judge_interpreter()
+    if not interp:
+        return {"runs": [], "reason": "no interpreter with google-genai available"}
+    try:
+        proc = subprocess.run(
+            [interp, "-c", _JUDGE_CHILD],
+            input=json.dumps({"prompt": prompt, "model": model,
+                              "api_key": api_key, "runs": runs}),
+            capture_output=True, text=True, timeout=900)
+    except Exception as exc:
+        return {"runs": [], "reason": f"judge interpreter failed: {type(exc).__name__}: {exc}"}
+    lines = [ln for ln in (proc.stdout or "").strip().splitlines() if ln.strip()]
+    if not lines:
+        return {"runs": [], "reason": f"judge produced no output (rc={proc.returncode})"}
+    try:
+        parsed = json.loads(lines[-1])
+    except json.JSONDecodeError as exc:
+        return {"runs": [], "reason": f"judge output was not JSON: {exc}"}
+    if parsed.get("error"):
+        return {"runs": [], "reason": str(parsed["error"])}
+    return {"runs": parsed.get("runs") or [], "reason": None}
 
 CACHE_META = re.compile(r"^#\s*source-(url|fetched|chars):\s*(.*)$", re.MULTILINE)
 
@@ -309,10 +421,8 @@ def llm_verify_claims(post_text: str, source_text: str, *,
     """
     if not api_key:
         return {"used": False, "claims": [], "reason": "no model API key available"}
-    try:
-        from google import genai
-    except Exception as exc:  # pragma: no cover - environment dependent
-        return {"used": False, "claims": [], "reason": f"genai unavailable: {exc}"}
+    # The judge itself runs in run_judge(), under an interpreter that has
+    # google-genai; see the note on JUDGE_CANDIDATES above.
 
     # A figure the deterministic check has already located in the source is
     # verified by exact match, not by the model's judgement. Without this the
@@ -353,32 +463,10 @@ SOURCE:
 POST:
 \"\"\"{post_text}\"\"\"
 """
-    try:
-        client = genai.Client(api_key=api_key)
-    except Exception as exc:
-        return {"used": False, "claims": [], "reason": f"model client failed: {exc}"}
-
-    def one_run() -> list[dict] | None:
-        try:
-            resp = client.models.generate_content(model=model, contents=prompt)
-            raw = str(getattr(resp, "text", "") or "")
-        except Exception:
-            return None
-        match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if not match:
-            return None
-        try:
-            parsed = json.loads(match.group(0))
-        except json.JSONDecodeError:
-            return None
-        claims = parsed.get("claims")
-        return claims if isinstance(claims, list) else None
-
-    all_runs: list[list[dict]] = []
-    for _ in range(max(1, runs)):
-        got = one_run()
-        if got is not None:
-            all_runs.append(got)
+    judged = run_judge(prompt, model=model, api_key=api_key, runs=max(1, runs))
+    if judged["reason"]:
+        return {"used": False, "claims": [], "reason": judged["reason"]}
+    all_runs: list[list[dict]] = judged["runs"]
 
     if not all_runs:
         return {"used": False, "claims": [],
@@ -438,10 +526,7 @@ def llm_check_no_world_claims(post_text: str, *, api_key: str | None,
     """
     if not api_key:
         return {"used": False, "claims": [], "reason": "no model API key available"}
-    try:
-        from google import genai
-    except Exception as exc:  # pragma: no cover - environment dependent
-        return {"used": False, "claims": [], "reason": f"genai unavailable: {exc}"}
+    # The judge itself runs in run_judge(); see the note on JUDGE_CANDIDATES.
 
     prompt = f"""You are a strict fact-checker. The POST below cites no source.
 
@@ -462,31 +547,15 @@ Be strict. A general statement presented as a fact about the world counts.
 POST:
 \"\"\"{post_text}\"\"\"
 """
-    try:
-        client = genai.Client(api_key=api_key)
-    except Exception as exc:
-        return {"used": False, "claims": [], "reason": f"model client failed: {exc}"}
+    judged = run_judge(prompt, model=model, api_key=api_key, runs=max(1, runs))
+    if judged["reason"]:
+        return {"used": False, "claims": [], "reason": judged["reason"]}
 
     seen: dict[str, str] = {}
     parsed_any = False
-    for _ in range(max(1, runs)):
-        try:
-            resp = client.models.generate_content(model=model, contents=prompt)
-            raw = str(getattr(resp, "text", "") or "")
-        except Exception:
-            continue
-        match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if not match:
-            continue
-        try:
-            parsed = json.loads(match.group(0))
-        except json.JSONDecodeError:
-            continue
-        claims = parsed.get("claims")
-        if not isinstance(claims, list):
-            continue
+    for run_claims in judged["runs"]:
         parsed_any = True
-        for c in claims:
+        for c in run_claims:
             if isinstance(c, dict) and c.get("claim"):
                 seen[_normalise_claim(str(c["claim"]))] = str(c["claim"])
     if not parsed_any:
