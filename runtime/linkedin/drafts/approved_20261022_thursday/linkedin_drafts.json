@@ -34,17 +34,13 @@
     "title": "Personal: checking suspicious emails",
     "sources": []
   },
-  "confirm_token": "1b735883a13b514f597fa5552a11ffc44503122491ef4d33826f63c0beb271a7",
+  "confirm_token": null,
   "image_path": null,
-  "approved": true,
+  "approved": false,
   "day": "thursday",
   "blocked": false,
-  "owner_approval": {
-    "approved": true,
-    "approved_by": "Mukund",
-    "approved_at": "1792533107.006",
-    "approval_method": "explicit Discord approval",
-    "hermes_message_id": 32977,
-    "body_sha256": "1b735883a13b514f597fa5552a11ffc44503122491ef4d33826f63c0beb271a7"
-  }
+  "owner_approval": null,
+  "cancelled": true,
+  "cancelled_at": "2026-10-21T23:43:13.942200+00:00",
+  "cancelled_reason": "owner cancelled 2026-10-22"
 }
