@@ -83,7 +83,7 @@ def test_write_ok_detects_a_blocked_write():
 def test_write_ok_detects_an_unconfirmed_append():
     stdout = 'TRACKER_WRITE_RESULT {"applied": false, "error": "integrity failed"}\n'
     ok, why = jsd.write_ok(stdout, '', 2)
-    assert ok is False and 'did not confirm' in why
+    assert ok is False and 'integrity failed' in why
 
 
 def test_write_ok_accepts_a_confirmed_append():
@@ -94,6 +94,70 @@ def test_write_ok_accepts_a_confirmed_append():
 def test_write_ok_treats_no_candidates_as_a_clean_no_op():
     """A run that found nothing writes no result line - that is not a failure."""
     assert jsd.write_ok('No new roles; tracker unchanged.', '', 0)[0] is True
+
+
+def test_write_ok_treats_a_duplicate_no_op_as_success():
+    """The regression: `applied: false` on a no-op is NOT a failed write.
+
+    It made a healthy cycle print "close Excel and re-run the scan" when nothing
+    had been blocked, and reported a role as unsaved when the writer had simply
+    recognised it as a duplicate.
+    """
+    stdout = ('TRACKER_WRITE_RESULT {"applied": false, "result": "no-op", '
+              '"error": null, "problems": 0, "counts": {"input": 1, "appended": 0, '
+              '"duplicates": 1}}\n')
+    assert jsd.write_ok(stdout, '', 0) == (True, '')
+
+
+def test_write_ok_still_flags_rows_that_needed_appending_but_did_not_land():
+    stdout = ('TRACKER_WRITE_RESULT {"applied": false, "result": "partial", '
+              '"error": null, "problems": 0, "counts": {"appended": 2}}\n')
+    ok, why = jsd.write_ok(stdout, '', 0)
+    assert ok is False and 'did not confirm' in why
+
+
+def test_write_ok_flags_workbook_problems():
+    stdout = ('TRACKER_WRITE_RESULT {"applied": true, "error": null, '
+              '"problems": 3, "counts": {"appended": 1}}\n')
+    ok, why = jsd.write_ok(stdout, '', 0)
+    assert ok is False and 'problem' in why
+
+
+def test_ct_key_matches_across_ats_and_aggregator_urls():
+    """The G-Research case: same role, aggregator URL in the tracker, ATS URL found."""
+    k = jsd.ct_key('G-Research', 'Security Operations Placement Year')
+    assert k == 'ct:g research|security operations placement year'
+
+
+def test_already_seen_suppresses_a_role_tracked_under_a_different_url():
+    seen = {jsd.ct_key('G-Research', 'Security Operations Placement Year'): 't'}
+    assert jsd.already_seen(
+        'G-Research', 'Security Operations Placement Year',
+        'https://gresearch.wd103.myworkdayjobs.com/x/Security-Operations-Placement-Year_R3795',
+        seen) is True
+
+
+def test_already_seen_is_false_for_a_genuinely_new_role():
+    seen = {jsd.ct_key('Acme', 'Graduate SOC Analyst'): 't'}
+    assert jsd.already_seen('Beta', 'Cyber Internship', 'https://beta.example/1',
+                            seen) is False
+
+
+def test_already_seen_matches_on_the_url_alone():
+    seen = {jsd.posting_key('https://x.example/job/1'): 't'}
+    assert jsd.already_seen('Unknown', '', 'https://x.example/job/1?utm_source=a',
+                            seen) is True
+
+
+def test_role_keys_carries_both_identities():
+    keys = jsd.role_keys('Acme', 'Graduate SOC Analyst', 'https://acme.example/1')
+    assert jsd.posting_key('https://acme.example/1') in keys
+    assert jsd.ct_key('Acme', 'Graduate SOC Analyst') in keys
+
+
+def test_ct_key_is_empty_when_the_role_is_unnamed():
+    assert jsd.ct_key('Acme', '') == ''
+    assert jsd.ct_key('', 'Graduate SOC Analyst') == ''
 
 
 def test_digest_gives_every_role_a_link_and_ends_with_a_summary():

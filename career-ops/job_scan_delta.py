@@ -114,6 +114,37 @@ def save_ledger(path: pathlib.Path, seen: dict) -> None:
     write_atomic(path, json.dumps(payload, ensure_ascii=False, indent=1, sort_keys=True))
 
 
+def ct_key(company: str, title: str) -> str:
+    """A company+title identity, matching the guarded writer's duplicate rule.
+
+    URL identity alone is not enough. A role already tracked from an aggregator
+    comes back from the employer's own ATS with a different URL, so a URL-only
+    ledger calls it new and re-reports a role the owner already has. The writer
+    already treats company+title as the same posting ("posting URL may have
+    moved"), so the report uses the same rule and the two agree.
+    """
+    def norm(s: str) -> str:
+        return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+    c, t = norm(company), norm(title)
+    return f"ct:{c}|{t}" if c and t else ""
+
+
+def role_keys(company: str, title: str, url: str) -> list[str]:
+    keys = []
+    u = posting_key(url)
+    if u:
+        keys.append(u)
+    k = ct_key(company, title)
+    if k:
+        keys.append(k)
+    return keys
+
+
+def already_seen(company: str, title: str, url: str, seen: dict) -> bool:
+    return any(k in seen for k in role_keys(company, title, url))
+
+
 def run_search(offset: int, timeout: int) -> tuple[int, str, str]:
     cmd = [PY, str(SEARCH), "--region", REGION, "--batches", "1",
            "--batch-offset", str(offset), "--timeout", str(timeout)]
@@ -156,18 +187,33 @@ def search_found(stdout: str) -> list[dict]:
 
 
 def write_ok(stdout: str, stderr: str, code: int) -> tuple[bool, str]:
-    """Did the guarded writer actually persist this run's rows?"""
-    if "TRACKER_WRITE_BLOCKED" in stderr or "TRACKER_WRITE_BLOCKED" in stdout:
-        return False, "the tracker was locked or refused the write"
+    """Did the guarded writer actually persist this run's rows?
+
+    `applied: false` on its own is NOT a failure. The writer also returns it for a
+    clean no-op, which is exactly what a duplicate candidate or an empty candidate
+    list produces. Treating that as a failure cried wolf: it told the owner to
+    close Excel and re-run the scan when nothing had been blocked at all, and it
+    reported a healthy cycle as broken. Only a real refusal counts here.
+    """
+    blob = f"{stdout}\n{stderr}"
+    if "TRACKER_WRITE_BLOCKED" in blob or "PermissionError" in blob:
+        return False, "the tracker was locked by Excel or refused the write"
     result = parse_tagged(stdout, "TRACKER_WRITE_RESULT")
     if result is None:
         # No candidates at all is a clean no-op, not a failure.
         if code == 0:
             return True, ""
         return False, f"search exited {code}"
-    if result.get("error") or result.get("applied") is False:
+    if result.get("error"):
+        return False, f"the writer reported: {result['error']}"
+    if result.get("problems"):
+        return False, f"the writer reported {result['problems']} workbook problem(s)"
+    if result.get("applied") is True:
+        return True, ""
+    counts = result.get("counts") or {}
+    if counts.get("appended", 0):
         return False, "the guarded writer did not confirm the append"
-    return True, ""
+    return True, ""  # nothing needed appending: duplicates or no candidates
 
 
 def build_digest(items: list[dict], when: dt.datetime) -> str:
@@ -193,6 +239,15 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=600, help="per-batch Codex timeout")
     ap.add_argument("--skip-search", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--batch-offset",
+        type=int,
+        default=None,
+        help="override the search's query-batch rotation. Default: the 2-hour "
+             "slot, so scheduled runs spread across the whole query set. Set it "
+             "explicitly to walk the batches on demand (0..N-1); the search "
+             "applies its own modulo, so any non-negative value is safe.",
+    )
     args = ap.parse_args()
 
     lock = acquire_run_lock(RUNTIME / ".job-scan-delta.lock")
@@ -212,15 +267,18 @@ def main() -> int:
     # is not sent his whole existing list as "new" the moment this is switched on.
     baseline = not seen
     if baseline:
-        seen = {posting_key(r["url"]): now.isoformat()
-                for r in read_tracker(tracker) if posting_key(r["url"])}
+        seen = {}
+        for r in read_tracker(tracker):
+            for k in role_keys(r["company"], r["title"], r["url"]):
+                seen[k] = now.isoformat()
         if not args.dry_run:
             save_ledger(LEDGER, seen)
 
     found: list[dict] = []
     ok, why = True, ""
     if not args.skip_search:
-        slot = int(dt.datetime.now(dt.timezone.utc).timestamp() // SLOT_SECONDS)
+        slot = (args.batch_offset if args.batch_offset is not None
+                else int(dt.datetime.now(dt.timezone.utc).timestamp() // SLOT_SECONDS))
         code, out, err = run_search(slot, args.timeout)
         found = search_found(out)
         ok, why = write_ok(out, err, code)
@@ -231,13 +289,15 @@ def main() -> int:
 
     rows = read_tracker(tracker)
     new = [r for r in rows
-           if r["status"] == "Not Applied" and posting_key(r["url"])
-           and posting_key(r["url"]) not in seen]
+           if r["status"] == "Not Applied"
+           and not already_seen(r["company"], r["title"], r["url"], seen)]
 
     # If the tracker write was blocked, the roles still exist and the owner
     # should see them; they simply are not persisted yet.
     if not ok and not new:
-        new = [f for f in found if posting_key(f["url"]) and posting_key(f["url"]) not in seen]
+        new = [f for f in found
+               if not already_seen(f.get("company", ""), f.get("title", ""),
+                                   f.get("url", ""), seen)]
 
     if baseline:
         print(f"Job scan baseline established: {len(seen)} existing role(s) recorded as "
@@ -257,8 +317,8 @@ def main() -> int:
 
     if not args.dry_run:
         for r in new:
-            k = posting_key(r["url"])
-            if k:
+            for k in role_keys(r.get("company", ""), r.get("title", ""),
+                               r.get("url", "")):
                 seen[k] = now.isoformat()
         save_ledger(LEDGER, seen)
     return 0
