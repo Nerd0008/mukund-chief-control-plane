@@ -26,6 +26,7 @@ from __future__ import annotations
 import concurrent.futures as cf
 import datetime as dt
 import json
+import os
 import pathlib
 import re
 import sys
@@ -37,6 +38,36 @@ sys.path.insert(0, str(HERE))
 import career_google_auth as auth  # noqa: E402
 
 API = "https://gmail.googleapis.com/gmail/v1/users/me"
+
+
+def acquire_run_lock(path: pathlib.Path):
+    """Take an exclusive lock for the run, or return None if another run holds it.
+
+    Two sweeps used to write the same report file, so the later one silently
+    replaced a good report with a partial one - which made the rejection counts
+    non-repeatable and could destroy the audit trail a reconciliation was built
+    from. The second run now exits cleanly and leaves the existing report alone.
+    """
+    f = open(path, "a+b")
+    try:
+        f.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        f.close()
+        return None
+    return f
+
+
+def write_atomic(path: pathlib.Path, text: str) -> None:
+    """Write via a temp file + replace so a crash never leaves a truncated report."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(path)
 
 #: Unambiguous rejection language. Decisive on its own, whatever else the mail
 #: says.
@@ -202,11 +233,10 @@ def fetch_bodies(days, cache_path, token):
             if done % 100 == 0:
                 print(f"  fetched {done}/{len(todo)}", flush=True)
                 cache_path.parent.mkdir(parents=True, exist_ok=True)
-                cache_path.write_text(json.dumps(cache, ensure_ascii=False),
-                                      encoding="utf-8")
+                write_atomic(cache_path, json.dumps(cache, ensure_ascii=False))
 
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False))
     errors = sum(1 for r in cache.values() if r.get("error"))
     print(f"cached {len(cache)} messages ({errors} fetch errors)", flush=True)
     return cache
@@ -251,6 +281,12 @@ def main() -> int:
     cache_path = runtime / f"gmail-bodies-{days}d.json"
     out_path = runtime / f"gmail-outcomes-{days}d.json"
 
+    lock = acquire_run_lock(runtime / f".gmail-outcome-sweep-{days}d.lock")
+    if lock is None:
+        print(f"another sweep for {days}d is already running; leaving "
+              f"{out_path.name} untouched")
+        return 0
+
     token = auth.access_token()
     if not token:
         print(json.dumps({"ok": False, "reason": "no access token"}))
@@ -267,8 +303,7 @@ def main() -> int:
         "rejections": rejections,
         "near_misses": near,
     }
-    out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2),
-                        encoding="utf-8")
+    write_atomic(out_path, json.dumps(report, ensure_ascii=False, indent=2))
     print(f"confirmed rejections: {len(rejections)}")
     print(f"written {out_path}")
     return 0
