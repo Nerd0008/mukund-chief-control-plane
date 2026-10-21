@@ -130,3 +130,58 @@ def test_cache_hit_short_circuits_the_fetch():
     hits, closed, readable = tp.screen(URL, 1, {
         URL: {"hits": ["sc"], "closed": True, "readable": True}})
     assert (hits, closed, readable) == (["sc"], True, True)
+
+
+# --- browser verdicts ------------------------------------------------------- #
+#
+# Most job pages return no machine-readable signal either way, so fetch_jd
+# reports UNKNOWN. A browser can see what the fetch cannot, which is why a
+# Codex verdict is an input to the decision rather than a hint.
+
+def verdict(state, evidence="reason"):
+    return {URL: {"url": URL, "verdict": state, "evidence": evidence}}
+
+
+def test_browser_closed_verdict_removes_the_row():
+    r, cache = make("Not Applied", closed=False)
+    out = tp.classify([r], cache, 1,
+                      verdict("CLOSED", "Greenhouse says job no longer open"))[0]
+    assert out["decision"] == "remove"
+    assert "no longer open" in out["reason"]
+
+
+def test_browser_open_verdict_keeps_a_row_the_fetch_thought_closed():
+    r, cache = make("Not Applied", closed=True)
+    out = tp.classify([r], cache, 1,
+                      verdict("OPEN", "live posting with apply control"))[0]
+    assert out["decision"] == "keep"
+    assert out["expired"] is False
+
+
+def test_open_verdict_promotes_the_row_into_the_open_block():
+    a, _ = make("Applied")
+    b, _ = make("Not Applied", closed=True)
+    out = tp.classify([b, a], {}, 1, verdict("OPEN"))
+    assert [x["status"] for x in tp.order(out)] == ["not applied", "applied"]
+
+
+def test_unknown_verdict_removes_nothing():
+    """UNKNOWN is not evidence of closure, so the row survives for review."""
+    r, cache = make("Not Applied", closed=False)
+    out = tp.classify([r], cache, 1,
+                      verdict("UNKNOWN", "page showed no job content"))[0]
+    assert out["decision"] == "keep"
+
+
+def test_clearance_still_wins_over_an_open_verdict():
+    """A live posting does not make a vetting bar acceptable."""
+    r, cache = make("Not Applied", hits=("sc",), closed=False)
+    out = tp.classify([r], cache, 1, verdict("OPEN", "live"))[0]
+    assert out["decision"] == "remove"
+    assert out["reason"].startswith("clearance/citizenship")
+
+
+def test_verdict_matching_a_url_the_row_does_not_have_is_ignored():
+    r, cache = make("Not Applied", url="https://example.com/other")
+    out = tp.classify([r], cache, 1, verdict("CLOSED"))[0]
+    assert out["decision"] == "keep"

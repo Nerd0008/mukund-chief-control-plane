@@ -114,19 +114,38 @@ def deadline_passed(value, today=None):
         return False
 
 
-def classify(rows, cache, timeout):
-    """Attach a keep/remove decision and an ordering bucket to every row."""
+def classify(rows, cache, timeout, verdicts=None):
+    """Attach a keep/remove decision and an ordering bucket to every row.
+
+    ``verdicts`` maps a posting URL to a browser-checked verdict from Codex
+    (``CLOSED`` / ``OPEN`` / ``UNKNOWN``). It exists because most job pages give
+    no machine-readable signal either way: ``fetch_jd`` returns UNKNOWN, which
+    is not evidence the vacancy is live. A browser can see what the fetch
+    cannot, so its CLOSED verdict removes the row and its OPEN verdict promotes
+    it to the verified-open block.
+    """
+    verdicts = verdicts or {}
     today = dt.date.today()
     for r in rows:
         status = str(r["values"][5] or "").strip().lower()
         r["status"] = status
         r["hits"], closed, r["readable"] = screen(r["url"], timeout, cache)
         r["deadline_passed"] = deadline_passed(r["values"][4], today)
+
+        v = verdicts.get(r["url"]) or {}
+        r["verdict"] = str(v.get("verdict") or "").upper()
+        r["verdict_evidence"] = str(v.get("evidence") or "")
+        if r["verdict"] == "OPEN":
+            closed = False
         r["expired"] = closed or r["deadline_passed"]
 
         if r["hits"]:
             r["decision"] = "remove"
             r["reason"] = "clearance/citizenship: " + ", ".join(r["hits"])
+            r["bucket"] = None
+        elif r["verdict"] == "CLOSED":
+            r["decision"] = "remove"
+            r["reason"] = "browser check: " + (r["verdict_evidence"] or "closed")
             r["bucket"] = None
         elif r["expired"] and status not in HISTORY_STATUSES:
             r["decision"] = "remove"
@@ -251,6 +270,8 @@ def main(argv=None):
     ap.add_argument("--profiles", default=None,
                     help="profiles JSON (defaults to the Career Ops install's)")
     ap.add_argument("--cache", default=str(DEFAULT_CACHE))
+    ap.add_argument("--verdicts", default=None,
+                    help="Codex browser verdicts JSON; CLOSED rows are removed")
     ap.add_argument("--report", default=None)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
@@ -265,7 +286,12 @@ def main(argv=None):
             cache = {}
     pathlib.Path(args.cache).parent.mkdir(parents=True, exist_ok=True)
 
-    rows = classify(read_rows(args.tracker), cache, args.timeout)
+    verdicts = {}
+    if args.verdicts:
+        raw = json.loads(pathlib.Path(args.verdicts).read_text(encoding="utf-8-sig"))
+        verdicts = {v["url"]: v for v in raw if v.get("url")}
+
+    rows = classify(read_rows(args.tracker), cache, args.timeout, verdicts)
     kept = order(rows)
     pathlib.Path(args.cache).write_text(json.dumps(cache, indent=2), encoding="utf-8")
 
