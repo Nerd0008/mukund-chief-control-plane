@@ -217,7 +217,15 @@
     "verdict": "pass",
     "available": true
   },
-  "personal_fact_gate": null,
+  "personal_fact_gate": {
+    "verdict": "pass",
+    "invented": [],
+    "unsupportedFacts": [],
+    "forbidden": [],
+    "warnings": [],
+    "available": true,
+    "exit_code": 0
+  },
   "topic": {
     "title": "AI and workplace decisions (employment law)",
     "sources": []
@@ -225,5 +233,14 @@
   "confirm_token": "c9e8637de14d2150084f33963349f640ace015979a8d569661d0eff8b9aa41f8",
   "image_path": null,
   "approved": true,
-  "day": "wednesday"
+  "day": "wednesday",
+  "blocked": false,
+  "owner_approval": {
+    "approved": true,
+    "approved_by": "Mukund",
+    "approved_at": "1792531613.298",
+    "approval_method": "explicit Discord approval",
+    "hermes_message_id": 32952,
+    "body_sha256": "c9e8637de14d2150084f33963349f640ace015979a8d569661d0eff8b9aa41f8"
+  }
 }

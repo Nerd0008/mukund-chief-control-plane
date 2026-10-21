@@ -19,7 +19,17 @@
     "basis": "no-source post with no checkable claims about the world",
     "reason": "no source cited and the post asserts no factual claim about the outside world"
   },
-  "personal_fact_gate": null,
+  "personal_fact_gate": {
+    "verdict": "warn",
+    "invented": [],
+    "unsupportedFacts": [],
+    "forbidden": [],
+    "warnings": [
+      "built"
+    ],
+    "available": true,
+    "exit_code": 0
+  },
   "topic": {
     "title": "Personal: checking suspicious emails",
     "sources": []
@@ -27,5 +37,14 @@
   "confirm_token": "1b735883a13b514f597fa5552a11ffc44503122491ef4d33826f63c0beb271a7",
   "image_path": null,
   "approved": true,
-  "day": "thursday"
+  "day": "thursday",
+  "blocked": false,
+  "owner_approval": {
+    "approved": true,
+    "approved_by": "Mukund",
+    "approved_at": "1792533107.006",
+    "approval_method": "explicit Discord approval",
+    "hermes_message_id": 32977,
+    "body_sha256": "1b735883a13b514f597fa5552a11ffc44503122491ef4d33826f63c0beb271a7"
+  }
 }
