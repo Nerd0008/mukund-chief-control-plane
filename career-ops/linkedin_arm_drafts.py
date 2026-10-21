@@ -33,6 +33,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import hashlib
 import json
 import os
@@ -97,16 +98,91 @@ def run_personal_gate(body: str, label: str) -> dict:
     return cvw.fact_gate(cfg, body, label=label, scratch=scratch)
 
 
+def cancel(path: Path, reason: str | None) -> int:
+    """Cancel an artefact so it can never be published.
+
+    Cancelling is not deleting: the artefact is kept as evidence of what was
+    drafted and approved, with an explicit cancelled record naming the reason. A
+    cancelled artefact is refused by the publish path and dropped from the
+    schedule, so a later run cannot pick it up.
+
+    Refuses when the text is already live: cancelling the artefact cannot
+    unpublish it, and saying otherwise would be a false report.
+    """
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    body = doc.get("post_text") or ""
+    if not body.strip():
+        print(json.dumps({"ok": False, "reason": "artefact has no post_text"}))
+        return 1
+    sha = sha256_text(body)
+
+    ledger = CONTROL_PLANE / "runtime" / "linkedin" / "published" / "posts.jsonl"
+    if ledger.exists():
+        for line in ledger.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            if rec.get("body_sha256") == sha and rec.get("result") == "published":
+                print(json.dumps({
+                    "ok": False,
+                    "reason": ("this text is already live "
+                               f"({rec.get('post_urn')}); cancelling the artefact "
+                               "cannot unpublish it"),
+                }, indent=2))
+                return 1
+
+    doc["cancelled"] = True
+    doc["cancelled_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
+    doc["cancelled_reason"] = reason or "owner cancelled"
+    doc["approved"] = False
+    doc["owner_approval"] = None
+    doc["confirm_token"] = None
+    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    sched_path = CONTROL_PLANE / "runtime" / "linkedin" / "drafts" / "schedule.json"
+    dropped = None
+    if sched_path.exists():
+        sched = json.loads(sched_path.read_text(encoding="utf-8"))
+        day = doc.get("day")
+        if day and day in sched:
+            dropped = sched.pop(day)
+            sched_path.write_text(json.dumps(sched, indent=2, ensure_ascii=False),
+                                  encoding="utf-8")
+
+    print(json.dumps({
+        "ok": True,
+        "cancelled": str(path),
+        "day": doc.get("day"),
+        "body_sha256": sha,
+        "reason": doc["cancelled_reason"],
+        "removed_from_schedule": bool(dropped),
+        "schedule_title": (dropped or {}).get("title"),
+    }, indent=2, ensure_ascii=False))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--drafts", required=True, help="path to linkedin_drafts.json")
-    ap.add_argument("--approve-message-id", type=int, required=True,
+    ap.add_argument("--approve-message-id", type=int,
                     help="Hermes message id of the owner's Discord approval")
+    ap.add_argument("--cancel", action="store_true",
+                    help="cancel this artefact: mark it cancelled, drop it from "
+                         "the schedule, and refuse to publish it")
+    ap.add_argument("--cancel-reason", default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="run both gates and report, write nothing")
     args = ap.parse_args()
 
     path = Path(args.drafts)
+    if args.cancel:
+        return cancel(path, args.cancel_reason)
+
+    if args.approve_message_id is None:
+        print(json.dumps({"ok": False,
+                          "reason": "arming requires --approve-message-id "
+                                    "(or use --cancel)"}))
+        return 1
     doc = json.loads(path.read_text(encoding="utf-8"))
     body = doc.get("post_text") or ""
     if not body.strip():
