@@ -47,6 +47,7 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 import linkedin_factcheck as fc  # noqa: E402
 import topic_reuse_check as trc  # noqa: E402
+import cv_workflow as cvw  # noqa: E402
 
 DRAFTS_DIR = CONTROL_PLANE / "runtime" / "linkedin" / "drafts"
 INPUT = Path(__file__).resolve().parent / "drafts_input.json"
@@ -101,28 +102,55 @@ def build_one(spec: dict) -> dict:
     return result
 
 
-def write_draft(spec: dict, gate: dict) -> Path:
-    """Write the approved artefact, carrying the real gate record through."""
+def personal_gate(text: str, label: str) -> dict:
+    """Run the real personal-claims gate over one post.
+
+    Returns the gate's own verdict document, never a verdict of this script's.
+    An unavailable gate (no node, no script, no JSON verdict) is reported as
+    ``available: false`` so the publisher refuses the post rather than treating
+    silence as a pass. The scratch path MUST be absolute: the gate runs node with
+    its own cwd, so a relative path is resolved against the install root and the
+    target file is then reported as missing.
+    """
+    try:
+        cfg = cvw.load_config(CAREER_OPS / "cv_workflow_config.json")
+        scratch = (CONTROL_PLANE / "runtime" / "linkedin" / ".gate-scratch").resolve()
+        return cvw.fact_gate(cfg, text, label=label, scratch=scratch)
+    except Exception as exc:  # pragma: no cover - environment dependent
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"}
+
+
+def write_draft(spec: dict, gate: dict) -> tuple[Path, dict]:
+    """Write the approved artefact, carrying the real gate records through.
+
+    Returns ``(directory, record)`` so the caller can see whether the
+    personal-claims gate blocked the post and keep it out of the schedule. A
+    non-passing gate is never written as a pass: it is carried as what it is, and
+    flagged ``blocked`` so the artefact can be neither armed nor published.
+    """
     day = spec["day"]
     out_dir = DRAFTS_DIR / spec["dir"]
     out_dir.mkdir(parents=True, exist_ok=True)
     body = spec["post_text"]
     token = hashlib.sha256(body.strip().encode("utf-8")).hexdigest()
+    personal = personal_gate(body, f"draft-{day}")
+    blocked = isinstance(personal, dict) and personal.get("verdict") == "block"
     doc = {
         "post_text": body,
         "news_fact_gate": gate,
-        "personal_fact_gate": spec.get("personal_fact_gate"),
+        "personal_fact_gate": personal,
         "topic": {"title": spec.get("title", ""),
                   "sources": [spec["source_url"]] if spec.get("source_url") else []},
         "confirm_token": token,
         "image_path": str(out_dir / "image.jpg") if (out_dir / "image.jpg").exists() else None,
         "approved": True,
+        "blocked": blocked,
         "day": day,
     }
     (out_dir / "post_text.txt").write_text(body, encoding="utf-8")
     (out_dir / "linkedin_drafts.json").write_text(
         json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
-    return out_dir
+    return out_dir, doc
 
 
 def main() -> int:
@@ -165,7 +193,12 @@ def main() -> int:
             if args.dry_run:
                 print("  PASS  (dry-run: no artefact written)")
             else:
-                d = write_draft(spec, res["gate"])
+                d, rec = write_draft(spec, res["gate"])
+                if rec.get("blocked"):
+                    exit_code = 1
+                    print("  BLOCKED  personal-claims gate refused this post; "
+                          "it is not added to the schedule and must not be armed")
+                    continue
                 token = hashlib.sha256(spec["post_text"].strip().encode()).hexdigest()
                 schedule[spec["day"]] = {
                     "draft_path": str(d / "linkedin_drafts.json"),
