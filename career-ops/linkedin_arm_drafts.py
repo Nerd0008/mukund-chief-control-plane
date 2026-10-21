@@ -114,6 +114,10 @@ def main() -> int:
         return 1
 
     sha = sha256_text(body)
+    # The gate hashes the prose-normalised text, not the raw body: that is what
+    # provenance_ok() compares against. Binding the approval to the raw text and
+    # the gate to the prose is correct — they are two different things.
+    gate_sha = fc.sha256_text(fc.post_prose(body))
     day = doc.get("day") or path.parent.name
     old_news = doc.get("news_fact_gate") or {}
     sources = list(old_news.get("sources") or [])
@@ -121,6 +125,7 @@ def main() -> int:
     print(f"artefact : {path}")
     print(f"day      : {day}")
     print(f"body sha : {sha}")
+    print(f"gate sha : {gate_sha}")
     print(f"sources  : {len(sources)}")
 
     # A gate record that already proves it ran over these exact bytes is reused.
@@ -136,13 +141,13 @@ def main() -> int:
         news_source = "re-run: the stored record does not cover this text"
     personal = run_personal_gate(body, f"draft-{day}")
 
-    news_ok = news.get("verdict") == "pass" and news.get("body_sha256") == sha
+    news_ok = news.get("verdict") == "pass" and news.get("body_sha256") == gate_sha
     personal_verdict = personal.get("verdict")
     personal_ok = personal_verdict in ("pass", "warn")
     personal_blocked = personal_verdict == "block"
 
     print(f"news gate: {news.get('verdict')}  ({news_source}; "
-          f"provenance match: {news.get('body_sha256') == sha})")
+          f"provenance match: {news.get('body_sha256') == gate_sha})")
     print(f"personal gate: {personal_verdict}  available={personal.get('available')}"
           + (f"  warnings={personal.get('warnings')!r}" if personal.get("warnings") else ""))
 
@@ -153,7 +158,7 @@ def main() -> int:
         "ok": bool(news_ok and personal_ok and ok),
         "body_sha256": sha,
         "news_gate_verdict": news.get("verdict"),
-        "news_gate_provenance_match": news.get("body_sha256") == sha,
+        "news_gate_provenance_match": news.get("body_sha256") == gate_sha,
         "personal_gate_verdict": personal_verdict,
         "personal_gate_available": personal.get("available"),
         "approval": ok,
