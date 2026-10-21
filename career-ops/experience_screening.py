@@ -110,7 +110,11 @@ _NOT_CANDIDATE_RE = re.compile(
     r"(?:within|in)\s+the\s+last\b"
     # inclusive phrasing: the experience is optional, not required
     r"|could\s+also\s+be|also\s+consider|would\s+also|also\s+welcome"
-    r"|also\s+open\s+to|equally\s+consider|or\s+a\s+graduate",
+    r"|also\s+open\s+to|equally\s+consider|or\s+a\s+graduate"
+    # "we encourage applications from those with previous work experience"
+    # means the scheme WELCOMES applicants with experience, not that it requires it
+    r"|(?:encourage|welcome)\s+applications\s+from"
+    r"|applications\s+from\s+those\s+with",
     re.IGNORECASE,
 )
 

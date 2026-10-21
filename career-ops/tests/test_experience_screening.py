@@ -194,3 +194,10 @@ def test_the_two_genuine_rows_the_second_round_must_keep():
         'At least 2 years of experience in technical support, QA or a related field')
     assert es.experience_hits(
         'Have previous experience in compliance, audit, security or risk')
+
+
+def test_a_scheme_that_welcomes_applicants_with_experience_is_not_a_requirement():
+    """Live Addleshaw Goddard row: a graduate scheme, not an experience gate."""
+    assert es.experience_hits(
+        'We encourage applications from those with previous work experience '
+        '(such as experience gained through an industrial placement)') == []
