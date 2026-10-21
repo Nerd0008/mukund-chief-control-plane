@@ -93,6 +93,52 @@ _NEGATION_RE = re.compile(
     re.IGNORECASE,
 )
 
+#: Contexts where a year phrase describes the employer, the website or an
+#: eligibility CAP — never the candidate. Each pattern below was a real false
+#: positive against the live tracker, not a hypothetical.
+_NOT_CANDIDATE_RE = re.compile(
+    # the employer's own history
+    r"our\s+history|founded|established\s+in|since\s+\d{4}"
+    r"|we(?:'ve|\s+have)\s+been|over\s+the\s+past|past\s+\w+\s+years"
+    r"|working\s+with\s+the\s+team\s+over"
+    # website chrome, including the cookie banner
+    r"|cookies?|your\s+preferences|this\s+website|browser"
+    # an upper bound is the opposite of a requirement
+    r"|fewer\s+than|less\s+than|no\s+more\s+than|maximum\s+of"
+    # a degree awarded recently is an eligibility rule, not experience
+    r"|\b(?:achieved|completed|awarded|graduated|finished)\s+"
+    r"(?:within|in)\s+the\s+last\b"
+    # inclusive phrasing: the experience is optional, not required
+    r"|could\s+also\s+be|also\s+consider|would\s+also|also\s+welcome"
+    r"|also\s+open\s+to|equally\s+consider|or\s+a\s+graduate",
+    re.IGNORECASE,
+)
+
+#: A duration attached to a programme, scheme or contract describes the training,
+#: not the candidate's history.
+_DURATION_RE = re.compile(
+    r"\b\w+[\s-]years?[\s-](?:programme|scheme|contract|training|degree|course|placement)"
+    r"|\b(?:programme|scheme|contract|training)\s+(?:is|will|runs|lasts|over)"
+    r"|\bover\s+\w+\s+years\b|\bduring\s+the\s+\w+\s+years\b"
+    r"|\b\d[\s-]year\s+(?:programme|scheme|contract|training)\b"
+    # the employer's own "40-year track record" — a bare "proven track record"
+    # is a requirement on the candidate and must survive
+    r"|\b\w+[\s-]years?[\s-]track\s+record",
+    re.IGNORECASE,
+)
+
+#: Verbs describing what the role GIVES the candidate — "gain industry
+#: experience" is an offer, not a requirement.
+_BENEFIT_RE = re.compile(
+    r"\b(?:gain|build|develop|learn|acquire|broaden|exposure\s+to|"
+    r"opportunity\s+to)\b",
+    re.IGNORECASE,
+)
+
+#: A range whose lower bound is in months is entry-level: "6 months to 2 years".
+_MONTH_FLOOR_RE = re.compile(r"\b\d{1,2}\s*months?\s*(?:-|\u2013|\u2014|to)\s*$",
+                             re.IGNORECASE)
+
 _WORD_NUMBERS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
@@ -114,13 +160,30 @@ def _negated(text, start):
 
 
 def _context_ok(text, start, end):
-    """True when an experience word sits near the year phrase."""
+    """True when a year phrase is a requirement on the candidate.
+
+    Each disqualifier here answers a false positive observed on the live tracker:
+    the employer's track record, a programme's duration, a cookie banner, an
+    eligibility cap, and a range that starts in months.
+    """
     lo = max(0, start - CONTEXT_CHARS)
     hi = min(len(text), end + CONTEXT_CHARS)
     window = text[lo:hi]
+
     if not _EXPERIENCE_WORD_RE.search(window):
         return False
-    return not _STUDY_YEAR_RE.search(window)
+    if _STUDY_YEAR_RE.search(window):
+        return False
+    if _NOT_CANDIDATE_RE.search(window):
+        return False
+    if _DURATION_RE.search(window):
+        return False
+    if _MONTH_FLOOR_RE.search(text[max(0, start - 20):start]):
+        return False
+    # "gain industry experience" offers experience; it does not require it.
+    if _BENEFIT_RE.search(text[max(0, start - 40):start]):
+        return False
+    return True
 
 
 def experience_hits(text, min_years: int = MIN_YEARS) -> list:
@@ -155,7 +218,14 @@ def experience_hits(text, min_years: int = MIN_YEARS) -> list:
     for m in STRONG_PHRASE_RE.finditer(t):
         if _negated(t, m.start()):
             continue
-        if _STUDY_YEAR_RE.search(t[max(0, m.start() - CONTEXT_CHARS):m.end() + CONTEXT_CHARS]):
+        window = t[max(0, m.start() - CONTEXT_CHARS):m.end() + CONTEXT_CHARS]
+        if _STUDY_YEAR_RE.search(window):
+            continue
+        if _NOT_CANDIDATE_RE.search(window):
+            continue
+        if _DURATION_RE.search(window):
+            continue
+        if _BENEFIT_RE.search(t[max(0, m.start() - 40):m.start()]):
             continue
         snippet = " ".join(t[max(0, m.start() - 30):m.end() + 30].split())
         if snippet not in hits:

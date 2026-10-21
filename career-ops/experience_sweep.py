@@ -50,22 +50,29 @@ def cfg_sheet():
 
 
 def screen(url, timeout, cache):
-    """Return (hits, readable) for one posting, using the shared cache."""
+    """Return (hits, readable) for one posting, using the shared text cache.
+
+    The cache stores the fetched TEXT, not the verdict. Tightening the screener
+    then costs nothing to re-check — which matters, because the first version of
+    this screener produced five distinct false positives against the live
+    tracker and each fix had to be re-run over the whole workbook.
+    """
     if not isinstance(url, str) or not url.startswith(('http://', 'https://')):
         return [], False
-    if url in cache:
-        c = cache[url]
-        return c.get('hits') or [], bool(c.get('readable'))
-    try:
-        jd = fetch_jd(url, timeout=timeout)
-    except Exception:  # noqa: BLE001 - a failed fetch is data, not a crash
-        jd = {}
-    text = jd.get('text') if isinstance(jd, dict) else None
-    hits = experience_hits(text) if isinstance(text, str) and text.strip() else []
-    readable = isinstance(text, str) and bool(text.strip())
-    cache[url] = {'hits': hits, 'readable': readable,
-                  'checked_at': dt.datetime.now(dt.timezone.utc).isoformat()}
-    return hits, readable
+    entry = cache.get(url)
+    if isinstance(entry, dict) and 'text' in entry:
+        text = entry['text'] or ''
+    else:
+        try:
+            jd = fetch_jd(url, timeout=timeout)
+        except Exception:  # noqa: BLE001 - a failed fetch is data, not a crash
+            jd = {}
+        raw = jd.get('text') if isinstance(jd, dict) else None
+        text = raw if isinstance(raw, str) else ''
+        cache[url] = {'text': text,
+                      'checked_at': dt.datetime.now(dt.timezone.utc).isoformat()}
+    readable = bool(text.strip())
+    return (experience_hits(text) if readable else []), readable
 
 
 def main() -> int:

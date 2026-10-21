@@ -115,3 +115,82 @@ def test_empty_and_missing_text_is_safe():
 def test_evidence_is_reported_for_a_human():
     ev = es.experience_evidence(IT_SUPPORT_JD)
     assert ev and all('phrase' in e for e in ev)
+
+
+# --- the false positives the live sweep produced --------------------------- #
+# Each of these is verbatim context from a real tracker row that the first
+# version of this screener wrongly flagged. A false positive deletes a role the
+# owner could have applied to, so every one of them is pinned here.
+
+def test_the_employers_own_track_record_is_not_a_requirement():
+    assert es.experience_hits(
+        'We are a product development consultancy, with a 40-year track record '
+        'of helping ambitious clients') == []
+
+
+def test_a_programme_duration_is_not_a_requirement():
+    assert es.experience_hits(
+        'Our two-year programme is founded on recognised industry training') == []
+    assert es.experience_hits(
+        'Over three years, you will build hands-on experience while studying') == []
+    assert es.experience_hits(
+        'This non-rotational two-year scheme will provide the successful graduate '
+        'with experience across the team') == []
+
+
+def test_an_eligibility_cap_is_not_a_requirement():
+    """A ceiling on experience excludes nobody who has less."""
+    assert es.experience_hits(
+        "Master's students must have fewer than two years of relevant, full-time "
+        'work experience') == []
+
+
+def test_a_cookie_banner_is_not_a_requirement():
+    assert es.experience_hits(
+        'We use cookies on this website to give you the most relevant experience '
+        'by remembering your preferences') == []
+
+
+def test_a_range_starting_in_months_is_entry_level():
+    """'6 months to 2 years' is a six-month floor, not a two-year one."""
+    assert es.experience_hits(
+        '6 months to 2 years of hands-on experience in a SOC or similar') == []
+
+
+def test_gaining_experience_is_an_offer_not_a_requirement():
+    assert es.experience_hits(
+        'You will develop practical technical skills, gain industry experience '
+        'and learn from experienced professionals') == []
+
+
+def test_a_genuine_requirement_still_survives_the_tightening():
+    """The tightening must not have thrown out the real signal."""
+    assert es.experience_hits('2+ years of experience in a similar IT support role')
+    assert es.experience_hits('4+ years of experience in a SOC, security operations')
+    assert es.experience_hits('Proven experience in providing technical support')
+    assert es.experience_hits('Existing experience in the same or a similar IT role')
+
+
+# --- second round of real tracker false positives -------------------------- #
+
+def test_degree_recency_is_not_experience():
+    """'Degree achieved within the last two years' is an eligibility rule."""
+    assert es.experience_hits(
+        'A degree in a relevant subject (Computer Science, IT etc.) achieved '
+        'within the last two years. Strong organisational skills') == []
+
+
+def test_inclusive_phrasing_is_not_a_requirement():
+    """Both of these were live tracker rows that the owner can apply to."""
+    assert es.experience_hits(
+        'Commercial experience but this could also be a Graduate') == []
+    assert es.experience_hits(
+        'We also consider applications from those with previous work experience '
+        'such as experience gained through a placement') == []
+
+
+def test_the_two_genuine_rows_the_second_round_must_keep():
+    assert es.experience_hits(
+        'At least 2 years of experience in technical support, QA or a related field')
+    assert es.experience_hits(
+        'Have previous experience in compliance, audit, security or risk')
