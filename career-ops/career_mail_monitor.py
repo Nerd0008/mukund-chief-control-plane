@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from contextlib import contextmanager
 
 from career_google_auth import GoogleError, access_token, status
 from career_google_clients import GmailReader, DeadlineCalendar
@@ -308,12 +309,43 @@ def apply_report(report, tracker, calendar, audit_path):
     return receipt
 
 
+@contextmanager
+def scan_lock(runtime):
+    """OS-held lock releases after crashes; the persistent file is not a lock state."""
+    path = Path(runtime) / "scan-os.lock"
+    fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o600)
+    acquired = False
+    try:
+        if os.fstat(fd).st_size == 0:
+            os.write(fd, b"0")
+        os.lseek(fd, 0, os.SEEK_SET)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            acquired = True
+        except OSError:
+            raise ValueError("another Gmail scan is running") from None
+        yield
+    finally:
+        if acquired:
+            if os.name == "nt":
+                import msvcrt
+                os.lseek(fd, 0, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
+
 def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracker=None, baseline_report=None):
     runtime = Path(runtime)
     runtime.mkdir(parents=True, exist_ok=True)
-    lock = runtime / "scan.lock"
-    fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    try:
+    with scan_lock(runtime):
         approved = read_json(runtime / "write-approval.json", {})
         if apply and not approved.get("approved_report_id"):
             raise ValueError("automatic writes disabled: owner must approve the initial dry-run report")
@@ -388,9 +420,6 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
             "last_completed_at": report["generated_at"]})
         atomic_json(runtime / "last-applied.json", report)
         return report
-    finally:
-        os.close(fd)
-        lock.unlink()
 
 
 def schedule_plan(config):
@@ -415,8 +444,11 @@ def main(argv=None):
     root = Path(args.runtime)
     try:
         if args.command == "status":
-            result = {"oauth": status(), "automatic_writes_enabled": bool(read_json(root / "write-approval.json", {}).get("approved_report_id")),
+            result = {"oauth": status(verify=True), "automatic_writes_enabled": bool(read_json(root / "write-approval.json", {}).get("approved_report_id")),
                       "scan_interval_minutes": config["scan_interval_minutes"], "gmail_read_only": True}
+            result["last_run"] = read_json(root / "health.json", {})
+            print(json.dumps(result, indent=2))
+            return 0 if result["oauth"]["oauth_ready"] else 1
         elif args.command == "schedule-plan":
             result = schedule_plan(config)
         elif args.command == "enable-writes":
@@ -432,13 +464,27 @@ def main(argv=None):
             result = {k: report[k] for k in ("mode", "scan_mode", "report_id", "counts", "gmail_mutations",
                                            "model_calls", "tracker_writes", "calendar_writes")}
             result["private_report"] = str(root / ("last-applied.json" if args.apply else "last-dry-run.json"))
+            if args.apply:
+                atomic_json(root / "health.json", {"ok": True, "checked_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "last_success_at": report["generated_at"], "report_id": report["report_id"],
+                    "counts": report["counts"], "gmail_mutations": 0})
         print(json.dumps(result, indent=2))
         return 0
     except Exception as exc:
         # Arbitrary exceptions may contain credential or mailbox data. Do not echo.
         reason = str(exc) if isinstance(exc, GoogleError) else "Local scan/configuration failed; checkpoint not advanced"
-        print(json.dumps({"ok": False, "reason": reason, "error_type": type(exc).__name__,
-                          "gmail_mutations": 0, "secrets_printed": False}))
+        result = {"ok": False, "reason": reason, "error_type": type(exc).__name__,
+                  "failure_reason": exc.reason if isinstance(exc, GoogleError) else "local_failure",
+                  "gmail_mutations": 0, "secrets_printed": False}
+        if args.command == "scan" and args.apply:
+            try:
+                previous = read_json(root / "health.json", {})
+                atomic_json(root / "health.json", {**result, "checked_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "last_success_at": previous.get("last_success_at"),
+                    "owner_action_required": isinstance(exc, GoogleError) and exc.reason in {"invalid_grant", "invalid_client", "access_denied", "missing_credentials"}})
+            except (OSError, ValueError):
+                pass
+        print(json.dumps(result))
         return 1
 
 

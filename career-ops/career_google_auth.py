@@ -58,9 +58,9 @@ def http_json(method, url, *, token=None, data=None, form=False):
     except urllib.error.HTTPError as exc:
         try:
             body = json.loads(exc.read()).get("error", {})
-            reasons = [e.get("reason") for e in body.get("errors", [])]
-            reason = next((r for r in reasons if r in {"rateLimitExceeded", "userRateLimitExceeded", "dailyLimitExceeded", "insufficientPermissions", "forbidden"}), None)
-        except (ValueError, TypeError):
+            reasons = [body] if isinstance(body, str) else [e.get("reason") for e in body.get("errors", [])]
+            reason = next((r for r in reasons if r in {"invalid_grant", "invalid_client", "unauthorized_client", "access_denied", "admin_policy_enforced", "rateLimitExceeded", "userRateLimitExceeded", "dailyLimitExceeded", "insufficientPermissions", "forbidden"}), None)
+        except (ValueError, TypeError, AttributeError):
             reason = None
         raise GoogleError("request" + (" " + reason if reason else ""), exc.code, reason) from None
     except (OSError, ValueError, urllib.error.URLError):
@@ -69,54 +69,111 @@ def http_json(method, url, *, token=None, data=None, form=False):
 
 def state():
     try:
-        return json.loads(read_secret(TARGETS["token_state"]) or "{}")
+        saved = json.loads(read_secret(TARGETS["token_state"]) or "{}")
+        return saved if isinstance(saved, dict) else {}
     except (ValueError, TypeError):
         return {}
 
 
-def status():
+def valid_expiry(value):
+    try:
+        expires = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return expires.tzinfo is not None and expires > dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=90)
+    except (ValueError, TypeError):
+        return False
+
+
+def status(*, verify=False):
+    """Local status is conservative; explicit health checks verify one refresh."""
+    if verify:
+        try:
+            refresh_access_token()
+        except GoogleError as exc:
+            result = status()
+            result.update(oauth_ready=False, refresh_verified=False,
+                          failure_reason=exc.reason or "refresh_failed", http_status=exc.status)
+            return result
     present = {key: bool(read_secret(target)) for key, target in TARGETS.items()}
     saved = state()
+    credentials = all(present[k] for k in ("client_id", "client_secret"))
+    scopes_ok = set(saved.get("scopes") or []) == set(SCOPES)
+    fresh = present["access_token"] and valid_expiry(saved.get("expires_at"))
+    verified = bool(saved.get("refresh_verified_at")) and not saved.get("failure_reason")
+    ready = credentials and present["refresh_token"] and scopes_ok and fresh and verified
+    reason = saved.get("failure_reason") or (
+        "missing_client_credentials" if not credentials else
+        "missing_refresh_token" if not present["refresh_token"] else
+        "scope_mismatch" if not scopes_ok else
+        "access_token_expired_or_invalid" if not fresh else
+        "refresh_not_verified" if not verified else None)
     return {"storage": "Windows Credential Manager", "present": present,
             "scopes": saved.get("scopes", []), "access_token_expiry": saved.get("expires_at"),
-            "oauth_ready": all(present[k] for k in ("client_id", "client_secret", "refresh_token"))
-            and set(saved.get("scopes", [])) == set(SCOPES)}
+            "credentials_present": credentials, "refresh_token_present": present["refresh_token"],
+            "refresh_verified": bool(verified and fresh),
+            "refresh_verified_at": saved.get("refresh_verified_at"),
+            "refresh_token_expiry": saved.get("refresh_token_expires_at"),
+            "oauth_ready": bool(ready), "failure_reason": reason,
+            "verification": "cached; use status --verify for a live refresh"}
 
 
-def save_tokens(tokens):
+def save_tokens(tokens, *, refreshed=False):
     granted = str(tokens.get("scope") or "").split()
     if set(granted) != set(SCOPES):
         raise GoogleError("consent scopes differ from the two requested scopes")
     if not tokens.get("access_token"):
         raise GoogleError("token response missing access token")
+    try:
+        lifetime = int(tokens.get("expires_in", 0))
+        if lifetime <= 90:
+            raise ValueError("invalid token lifetime")
+        refresh_lifetime = int(tokens["refresh_token_expires_in"]) if tokens.get("refresh_token_expires_in") is not None else None
+    except (ValueError, TypeError, OverflowError):
+        raise GoogleError("invalid token expiry", reason="invalid_token_response") from None
     for key in ("access_token", "refresh_token"):
         if tokens.get(key) and not store_secret(TARGETS[key], tokens[key]):
             raise GoogleError("credential storage")
-    expiry = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=int(tokens.get("expires_in", 0)))
+    expiry = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=lifetime)
     metadata = {"scopes": granted, "expires_at": expiry.isoformat()}
+    if refreshed:
+        metadata["refresh_verified_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
+        if state().get("refresh_token_expires_at"):
+            metadata["refresh_token_expires_at"] = state()["refresh_token_expires_at"]
+    if refresh_lifetime is not None:
+        metadata["refresh_token_expires_at"] = (dt.datetime.now(dt.timezone.utc) +
+            dt.timedelta(seconds=refresh_lifetime)).isoformat()
     if not store_secret(TARGETS["token_state"], json.dumps(metadata)):
         raise GoogleError("credential storage")
 
 
-def access_token():
-    if not status()["oauth_ready"]:
-        raise GoogleError("OAuth authorization required")
+def refresh_access_token():
     saved = state()
+    if not all(read_secret(TARGETS[k]) for k in ("client_id", "client_secret", "refresh_token")):
+        raise GoogleError("OAuth authorization required", reason="missing_credentials")
+    if set(saved.get("scopes") or []) != set(SCOPES):
+        raise GoogleError("OAuth scopes differ", reason="scope_mismatch")
     try:
-        expires = dt.datetime.fromisoformat(saved["expires_at"])
-    except (KeyError, ValueError):
-        expires = dt.datetime.min.replace(tzinfo=dt.timezone.utc)
-    token = read_secret(TARGETS["access_token"])
-    if token and expires > dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=90):
-        return token
-    response = http_json("POST", TOKEN_URL, form=True, data={
-        "client_id": read_secret(TARGETS["client_id"]),
-        "client_secret": read_secret(TARGETS["client_secret"]),
-        "refresh_token": read_secret(TARGETS["refresh_token"]), "grant_type": "refresh_token"})
-    # Google may omit scope on refresh; the original verified grant stays authoritative.
-    response.setdefault("scope", " ".join(saved["scopes"]))
-    save_tokens(response)
+        response = http_json("POST", TOKEN_URL, form=True, data={
+            "client_id": read_secret(TARGETS["client_id"]),
+            "client_secret": read_secret(TARGETS["client_secret"]),
+            "refresh_token": read_secret(TARGETS["refresh_token"]), "grant_type": "refresh_token"})
+        # Google may omit scope on refresh; the original verified grant stays authoritative.
+        response.setdefault("scope", " ".join(saved["scopes"]))
+        save_tokens(response, refreshed=True)
+    except GoogleError as exc:
+        saved.update(failure_reason=exc.reason or "refresh_failed", refresh_verified_at=None)
+        if not store_secret(TARGETS["token_state"], json.dumps(saved)):
+            raise GoogleError("credential storage") from None
+        raise
     return response["access_token"]
+
+
+def access_token():
+    saved = state()
+    if status()["oauth_ready"]:
+        return read_secret(TARGETS["access_token"])
+    if saved.get("failure_reason") == "invalid_grant":
+        raise GoogleError("reauthorization required", reason="invalid_grant")
+    return refresh_access_token()
 
 
 def authorize(timeout=300):
@@ -154,7 +211,7 @@ def authorize(timeout=300):
             "access_type": "offline", "prompt": "consent"})
         if not webbrowser.open(url):
             raise GoogleError("system browser could not be opened")
-        print("Complete the two-scope consent in your browser. Waiting up to five minutes.")
+        print(f"Complete the two-scope consent in your browser. Waiting up to {timeout} seconds.", flush=True)
         end = time.monotonic() + timeout
         while not received and time.monotonic() < end:
             server.handle_request()
@@ -173,6 +230,8 @@ def authorize(timeout=300):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["status", "store-client", "authorize"])
+    parser.add_argument("--verify", action="store_true", help="Verify a live token refresh once")
+    parser.add_argument("--timeout", type=int, default=300, help="Browser consent wait in seconds (30–900)")
     args = parser.parse_args(argv)
     try:
         if args.command == "store-client":
@@ -181,9 +240,17 @@ def main(argv=None):
                 if not value or not store_secret(TARGETS[key], value):
                     raise GoogleError("credential storage")
         elif args.command == "authorize":
-            authorize()
-        print(json.dumps(status(), indent=2))
-        return 0
+            if not 30 <= args.timeout <= 900:
+                raise GoogleError("consent timeout must be 30–900 seconds")
+            if args.timeout == 300:
+                authorize()
+            else:
+                authorize(timeout=args.timeout)
+        result = status(verify=args.verify or args.command == "authorize")
+        if args.verify or args.command == "authorize":
+            result["verification"] = "live refresh"
+        print(json.dumps(result, indent=2))
+        return 0 if not (args.verify or args.command == "authorize") or result["oauth_ready"] else 1
     except GoogleError as exc:
         print(json.dumps({"ok": False, "reason": str(exc), "secrets_printed": False}))
         return 1
