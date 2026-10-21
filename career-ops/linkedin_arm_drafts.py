@@ -123,7 +123,17 @@ def main() -> int:
     print(f"body sha : {sha}")
     print(f"sources  : {len(sources)}")
 
-    news = run_news_gate(body, sources)
+    # A gate record that already proves it ran over these exact bytes is reused.
+    # It is not re-run for its own sake: re-running costs judge calls and, if the
+    # claim model is unavailable at that moment, would downgrade text that was
+    # genuinely verified. A record that does NOT match is re-run, because that is
+    # the case where the text was edited after the gate ran.
+    if fc.provenance_ok(old_news, body)[0]:
+        news = old_news
+        news_source = "reused: record already proves it ran over this text"
+    else:
+        news = run_news_gate(body, sources)
+        news_source = "re-run: the stored record does not cover this text"
     personal = run_personal_gate(body, f"draft-{day}")
 
     news_ok = news.get("verdict") == "pass" and news.get("body_sha256") == sha
@@ -131,8 +141,8 @@ def main() -> int:
     personal_ok = personal_verdict in ("pass", "warn")
     personal_blocked = personal_verdict == "block"
 
-    print(f"news gate: {news.get('verdict')}  (provenance match: "
-          f"{news.get('body_sha256') == sha})")
+    print(f"news gate: {news.get('verdict')}  ({news_source}; "
+          f"provenance match: {news.get('body_sha256') == sha})")
     print(f"personal gate: {personal_verdict}  available={personal.get('available')}"
           + (f"  warnings={personal.get('warnings')!r}" if personal.get("warnings") else ""))
 
