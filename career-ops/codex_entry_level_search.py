@@ -221,17 +221,13 @@ SENIOR_MARKERS = (
 #: the title. A job requiring SC/DV/CTC or British citizenship is not eligible
 #: for the owner (Indian citizen on UK Graduate visa). Phrases allow a hyphen
 #: or space so the owner's own hyphenated spelling matches an advert's spaced
-#: one. Kept in sync with ``regional_job_search.CLEARANCE_TOKEN_RE``.
-CLEARANCE_TOKEN_RE = re.compile(
-    r"\b(?:SC|DV|CTC|NPPV|UKSV|BPSS)\b"
-    r"|security[\s-]clearance"
-    r"|national[\s-]security[\s-]clearance"
-    r"|police[\s-]clearance"
-    r"|british[\s-]citizen(?:ship)?"
-    r"|indefinite[\s-]leave[\s-]to[\s-]remain"
-    r"|indefinite[\s-]right[\s-]to[\s-]work"
-    r"|long[\s-]uk[\s-]residency",
-    re.IGNORECASE,
+#: one.
+#:
+#: The canonical implementation lives in ``clearance_screening``; this lane no
+#: longer keeps its own copy of the regex.
+from clearance_screening import (  # noqa: E402
+    clearance_evidence,
+    clearance_hits,
 )
 
 
@@ -251,11 +247,6 @@ def _profile_terms():
         print(f"[profile] owner profile unavailable ({exc}); "
               f"using the built-in entry-level vocabulary", file=sys.stderr)
         return ENTRY_MARKERS, (), None
-
-
-def clearance_hits(text: str) -> list:
-    """Return sorted unique clearance/citizenship tokens found in text."""
-    return sorted({m.group(0).strip().lower() for m in CLEARANCE_TOKEN_RE.finditer(text or "")})
 
 
 def _tracker_columns(ws) -> dict:

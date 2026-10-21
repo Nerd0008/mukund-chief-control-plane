@@ -302,25 +302,12 @@ def title_decision(title: str, title_policy: dict) -> tuple[bool, str]:
 
 #: Clearance/citizenship requirements, matched against the FULL JD text.
 #:
-#: The named phrases allow a hyphen or space between their words: the owner's
-#: own ``clearance_filter`` writes "British-citizenship" and
-#: "indefinite-right-to-work", while job adverts write "British citizenship".
-#: Matching only the spaced form silently missed the hyphenated one.
-CLEARANCE_TOKEN_RE = re.compile(
-    r"\b(?:SC|DV|CTC|NPPV|UKSV|BPSS)\b"
-    r"|security[\s-]clearance"
-    r"|national[\s-]security[\s-]clearance"
-    r"|police[\s-]clearance"
-    r"|british[\s-]citizen(?:ship)?"
-    r"|indefinite[\s-]leave[\s-]to[\s-]remain"
-    r"|indefinite[\s-]right[\s-]to[\s-]work"
-    r"|long[\s-]uk[\s-]residency",
-    re.IGNORECASE,
-)
-
-
-def clearance_hits(text: str) -> list:
-    return sorted({m.group(0).strip().lower() for m in CLEARANCE_TOKEN_RE.finditer(text or "")})
+#: The canonical token list and the visible-text rule live in
+#: ``clearance_screening`` so every lane shares one implementation. The previous
+#: hand-maintained copy of this regex drifted from the search lane's copy and
+#: matched styled-components class names (``<div class="sc-129pb7e-1 bh">``) as an
+#: ``SC`` clearance requirement.
+from clearance_screening import clearance_evidence, clearance_hits  # noqa: E402,F401
 
 
 # --------------------------------------------------------------------------- #
