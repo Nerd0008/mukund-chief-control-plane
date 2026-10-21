@@ -26,7 +26,6 @@ from __future__ import annotations
 import concurrent.futures as cf
 import datetime as dt
 import json
-import os
 import pathlib
 import re
 import sys
@@ -36,38 +35,9 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import career_google_auth as auth  # noqa: E402
+from run_lock import acquire_run_lock, write_atomic  # noqa: E402
 
 API = "https://gmail.googleapis.com/gmail/v1/users/me"
-
-
-def acquire_run_lock(path: pathlib.Path):
-    """Take an exclusive lock for the run, or return None if another run holds it.
-
-    Two sweeps used to write the same report file, so the later one silently
-    replaced a good report with a partial one - which made the rejection counts
-    non-repeatable and could destroy the audit trail a reconciliation was built
-    from. The second run now exits cleanly and leaves the existing report alone.
-    """
-    f = open(path, "a+b")
-    try:
-        f.seek(0)
-        if os.name == "nt":
-            import msvcrt
-            msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
-        else:
-            import fcntl
-            fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except OSError:
-        f.close()
-        return None
-    return f
-
-
-def write_atomic(path: pathlib.Path, text: str) -> None:
-    """Write via a temp file + replace so a crash never leaves a truncated report."""
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    tmp.replace(path)
 
 #: Unambiguous rejection language. Decisive on its own, whatever else the mail
 #: says.

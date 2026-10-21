@@ -1,0 +1,137 @@
+"""Tests for job_scan_delta - the every-2-hours "only what is new" job scan.
+
+The failure this suite exists to prevent: the ledger wrapper being read as if it
+were the seen-mapping, which made EVERY role in the tracker look new and posted
+the owner's whole 74-role list on every cycle.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import pathlib
+
+import pytest
+
+HERE = pathlib.Path(__file__).resolve().parent
+MOD_PATH = HERE.parent / 'job_scan_delta.py'
+
+_spec = importlib.util.spec_from_file_location('jsd', MOD_PATH)
+jsd = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(jsd)
+
+
+def test_load_ledger_returns_the_seen_mapping_not_the_wrapper(tmp_path):
+    """The regression: reading the wrapper makes every role look new."""
+    p = tmp_path / 'scan-seen.json'
+    p.write_text(json.dumps({'updated_at': 'x', 'count': 2,
+                             'seen': {'https://a/1': 't', 'https://b/2': 't'}}),
+                 encoding='utf-8')
+    seen = jsd.load_ledger(p)
+    assert set(seen) == {'https://a/1', 'https://b/2'}
+    assert 'seen' not in seen and 'count' not in seen
+
+
+def test_load_ledger_missing_file_is_empty(tmp_path):
+    assert jsd.load_ledger(tmp_path / 'nope.json') == {}
+
+
+def test_load_ledger_survives_corrupt_json(tmp_path):
+    p = tmp_path / 'scan-seen.json'
+    p.write_text('{not json', encoding='utf-8')
+    assert jsd.load_ledger(p) == {}
+
+
+def test_save_then_load_round_trips(tmp_path):
+    p = tmp_path / 'scan-seen.json'
+    jsd.save_ledger(p, {'https://a/1': '2026-01-01T00:00:00+00:00'})
+    assert set(jsd.load_ledger(p)) == {'https://a/1'}
+    payload = json.loads(p.read_text(encoding='utf-8'))
+    assert payload['count'] == 1
+
+
+def test_save_ledger_leaves_no_temp_file(tmp_path):
+    p = tmp_path / 'scan-seen.json'
+    jsd.save_ledger(p, {'https://a/1': 't'})
+    assert not list(tmp_path.glob('*.tmp'))
+
+
+def test_posting_key_ignores_tracking_params():
+    """Two URLs for the same posting must collapse to one ledger key."""
+    a = jsd.posting_key('https://x.example/job/1?utm_source=news&gh_src=Simplify')
+    b = jsd.posting_key('https://x.example/job/1')
+    assert a == b and a != ''
+
+
+def test_search_found_reads_the_reconciliation_tag():
+    stdout = ('noise\n'
+              'SEARCH_RECONCILIATION {"counts":{},"decisions":['
+              '{"title":"SOC Analyst","url":"https://a/1","reason":"new candidate"},'
+              '{"title":"Too Senior","url":"https://b/2","reason":"too_senior"}]}\n')
+    found = jsd.search_found(stdout)
+    assert [f['url'] for f in found] == ['https://a/1']
+
+
+def test_search_found_without_the_tag_is_empty():
+    assert jsd.search_found('nothing machine readable here') == []
+
+
+def test_write_ok_detects_a_blocked_write():
+    ok, why = jsd.write_ok('', 'TRACKER_WRITE_BLOCKED PermissionError', 2)
+    assert ok is False and 'locked' in why
+
+
+def test_write_ok_detects_an_unconfirmed_append():
+    stdout = 'TRACKER_WRITE_RESULT {"applied": false, "error": "integrity failed"}\n'
+    ok, why = jsd.write_ok(stdout, '', 2)
+    assert ok is False and 'did not confirm' in why
+
+
+def test_write_ok_accepts_a_confirmed_append():
+    stdout = 'TRACKER_WRITE_RESULT {"applied": true, "counts": {"appended": 2}}\n'
+    assert jsd.write_ok(stdout, '', 0)[0] is True
+
+
+def test_write_ok_treats_no_candidates_as_a_clean_no_op():
+    """A run that found nothing writes no result line - that is not a failure."""
+    assert jsd.write_ok('No new roles; tracker unchanged.', '', 0)[0] is True
+
+
+def test_digest_gives_every_role_a_link_and_ends_with_a_summary():
+    import datetime as dt
+    items = [
+        {'company': 'Acme', 'title': 'Graduate SOC Analyst',
+         'url': 'https://acme.example/1', 'deadline': '2026-11-01'},
+        {'company': 'Beta', 'title': 'Cyber Internship',
+         'url': 'https://beta.example/2', 'deadline': ''},
+    ]
+    text = jsd.build_digest(items, dt.datetime(2026, 10, 21, 23, 0))
+    assert 'https://acme.example/1' in text
+    assert 'https://beta.example/2' in text
+    assert 'Graduate SOC Analyst' in text and 'Cyber Internship' in text
+    assert text.rstrip().splitlines()[-1].startswith('Summary: 2 new role(s) - ')
+    assert 'Acme' in text.rstrip().splitlines()[-1]
+
+
+def test_digest_falls_back_to_the_title_when_the_company_is_unknown():
+    import datetime as dt
+    text = jsd.build_digest([{'company': 'Unknown', 'title': 'Security Intern',
+                              'url': 'https://x/1', 'deadline': ''}],
+                            dt.datetime(2026, 10, 21, 23, 0))
+    assert 'Security Intern' in text
+
+
+def test_digest_counts_match_the_roles_listed():
+    import datetime as dt
+    items = [{'company': f'C{i}', 'title': f'Role {i}', 'url': f'https://x/{i}',
+              'deadline': ''} for i in range(3)]
+    text = jsd.build_digest(items, dt.datetime(2026, 10, 21, 23, 0))
+    assert '3 new role(s) found' in text
+
+
+def test_slot_advances_one_batch_every_two_hours():
+    """The search's own default rotates by DAY, which would repeat all day."""
+    assert jsd.SLOT_SECONDS == 7200
+
+
+if __name__ == '__main__':
+    raise SystemExit(pytest.main([__file__, '-q']))
