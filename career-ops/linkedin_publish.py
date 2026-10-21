@@ -576,11 +576,18 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
         check("draft_passed_review", False,
               "no usable gate record on this artefact; nothing verified the text")
     elif has_personal:
-        personal_ok = verdict in ("pass", "passed")
-        check("draft_passed_review", personal_ok,
-              f"personal-claims gate verdict {verdict!r}; draft blocked="
-              f"{bool(draft.get('blocked'))}" if personal_ok else
-              f"personal-claims gate verdict is {verdict!r}")
+        # The gate's own vocabulary is pass | warn | block (verify-cv-facts.mjs);
+        # only 'block' refuses (exit 1). A 'warn' is a caution a human should
+        # read, so it is surfaced in the check detail rather than hidden.
+        personal_ok = verdict in ("pass", "passed", "warn")
+        if personal_ok:
+            detail = f"personal-claims gate verdict {verdict!r}"
+            if isinstance(fact_gate, dict) and fact_gate.get("warnings"):
+                detail += f"; warnings={fact_gate['warnings']!r}"
+            detail += f"; draft blocked={bool(draft.get('blocked'))}"
+        else:
+            detail = f"personal-claims gate verdict is {verdict!r}"
+        check("draft_passed_review", personal_ok, detail)
     else:
         check("draft_passed_review", True,
               "no personal-claims gate record; the post's claims are covered by "
