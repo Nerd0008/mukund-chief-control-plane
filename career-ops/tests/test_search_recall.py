@@ -45,12 +45,12 @@ def test_offline_production_dry_run_has_distinct_batches_and_exact_accounting(tm
         def close(self):pass
         def save(self,*a):pytest.fail('dry run wrote workbook')
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},set(),None,Book(),{},20,None))
-    rows=[{'job_title':'Cyber Security Intern','url':'https://jobs.example/known'},
-          {'job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123?gh_src=one'},
-          {'job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123'},
-          {'job_title':'Security Operations Placement Year','company':'Test','url':'https://jobs.example/placement'},
-          {'job_title':'Senior SOC Analyst','url':'https://jobs.example/senior'},
-          {'job_title':'Intern','url':''}]
+    rows=[{'location':'London, United Kingdom','job_title':'Cyber Security Intern','url':'https://jobs.example/known'},
+          {'location':'London, United Kingdom','job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123?gh_src=one'},
+          {'location':'London, United Kingdom','job_title':'Cyber Security Internship','company':'Galaxy','url':'https://jobs.example/123'},
+          {'location':'London, United Kingdom','job_title':'Security Operations Placement Year','company':'Test','url':'https://jobs.example/placement'},
+          {'location':'London, United Kingdom','job_title':'Senior SOC Analyst','url':'https://jobs.example/senior'},
+          {'location':'London, United Kingdom','job_title':'Intern','url':''}]
     prompts=[];fetches=[]
     def fake_run(prompt,timeout):prompts.append(prompt);return json.dumps(rows)
     monkeypatch.setattr(search,'run_codex',fake_run)
@@ -59,12 +59,12 @@ def test_offline_production_dry_run_has_distinct_batches_and_exact_accounting(tm
     monkeypatch.setattr(sys,'argv',['search','--batches','3','--batch-offset',str(offset),'--dry-run'])
     assert search.main()==0
     assert len(prompts)==len(set(prompts))==3
-    assert 'cyber security internship' in prompts[0]
     assert all('current and upcoming intakes' in prompt for prompt in prompts)
     assert len(fetches)==2
     text=capsys.readouterr().out
     report=json.loads(next(l.split(' ',1)[1] for l in text.splitlines() if l.startswith('SEARCH_RECONCILIATION ')))
     c=report['counts']
+    assert report['selected_batch_indices'][0]==offset
     assert c['retrieved_records']==18 and c['new_candidates']==2 and c['rejected']==1
     assert c['already_tracked']==3 and c['invalid_records']==3 and c['repeated_in_run']==9
     assert sum(c[k] for k in ('already_tracked','repeated_in_run','invalid_records','rejected','new_candidates'))==18
@@ -78,7 +78,7 @@ def test_no_new_is_not_reported_as_no_discovery(tmp_path,monkeypatch,capsys):
     class Book:
         def close(self):pass
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:({'https://jobs.example/known'},set(),None,Book(),{},20,None))
-    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Intern','url':'https://jobs.example/known'}]))
+    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'location':'London, United Kingdom','job_title':'Intern','url':'https://jobs.example/known'}]))
     monkeypatch.setattr(search,'fetch_jd',lambda *a:pytest.fail('already-tracked job fetched'))
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0
@@ -103,7 +103,7 @@ def test_direct_search_delegates_only_to_guarded_writer(tmp_path,monkeypatch,cap
         def close(self):pass
         def save(self,*a):pytest.fail('Direct search bypassed shared writer')
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),set(),None,Book(),{},2,None))
-    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'job_title':'Cyber Intern','company':'Example','url':'https://employer.com/job/123'}]))
+    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'location':'London, United Kingdom','job_title':'Cyber Intern','company':'Example','url':'https://employer.com/job/123'}]))
     monkeypatch.setattr(search,'fetch_jd',lambda *a:{'text':'Open position.','vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})
     calls=[]
     def writer(profiles,region,records,**kwargs):
@@ -115,3 +115,11 @@ def test_direct_search_delegates_only_to_guarded_writer(tmp_path,monkeypatch,cap
     assert len(calls)==1 and calls[0][2]['apply'] and calls[0][2]['cleanup_existing'] is False
     assert calls[0][1][0]['company']=='Example'
     assert tracker.read_bytes()==b''
+
+
+@pytest.fixture(autouse=True)
+def isolate_direct_canonical_plan(monkeypatch,tmp_path):
+    import codex_entry_level_search as search
+    monkeypatch.setattr(search,'SEARCH_STATE_DIR',tmp_path/'direct-search')
+    monkeypatch.setattr(search,'canonical_plan',lambda region,tracker,records:{
+        'counts':{'appended':len(records),'duplicates':0},'outcomes':[]})

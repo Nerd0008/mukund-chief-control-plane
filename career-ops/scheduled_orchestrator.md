@@ -59,7 +59,7 @@ narrow rule cannot become the production discovery gate by accident.
 # one region, production policy, bounded dry run (what the scheduled task does)
 python career-ops/discovery/scheduled_orchestrator.py run --region uk --scheduled \
     --require-live-web --mode high_recall --budget-seconds 2700 --scan-timeout 900 \
-    --web-queries 8 --max-urls 24 --retries 1
+    --web-queries 28 --max-urls 24 --retries 1
 
 # all four regions, one unified manifest + one unified funnel document
 python career-ops/discovery/scheduled_orchestrator.py run-all --scheduled --require-live-web
@@ -163,7 +163,7 @@ labelled `search_listing` and can never be written as a vacancy; only a
 |---|---|---|
 | `--budget-seconds` | 2700 | overall wall clock; the per-query timeout shrinks to fit the remaining budget |
 | `--scan-timeout` | 900 | structured worker timeout (the launcher also passes `--timeout` to the lane scan) |
-| `--web-queries` | 8 | queries per region, selected round-robin across surfaces so every required class is attempted first |
+| `--web-queries` | 28 | maximum per region; persisted cursor rotates through the full matrix, reserving time for classification and verification |
 | `--limit-per-query` | 5 | results kept per query |
 | `--max-urls` | 24 | URL validation budget per region (a hostile site cannot consume the whole scan) |
 | `--per-query-timeout` | 180 | one research call |
@@ -236,3 +236,6 @@ production-ready) when any of these holds:
 Owner evaluation gates that remain untouched: applying a manifest to a canonical
 tracker (`career_ops_cli.py write --apply`), any application submission, any
 outreach message, and any public/published content.
+
+
+Current search safety/acceptance and flagged-unverified policy: [22 October audit repair](docs/search-audit-repair-2026-10-22.md). Automatic promotions preserve existing rows and require fresh run-bound manifests.

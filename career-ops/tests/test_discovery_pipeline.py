@@ -517,7 +517,7 @@ def test_semantic_rejections_are_counted_and_attributed(tmp_path):
     assert reasons.get("semantic_label: wrong_discipline (deepseek_bulk)") == 1
     assert reasons.get("semantic_label: too_senior (deepseek_bulk)") == 1
     z = doc["funnel"]["zero_attribution"]
-    assert z["first_zero_stage"] in {"deepseek_accept", "deterministic_eligibility_pass"}
+    assert z["first_zero_stage"] in {"semantic_accept", "deterministic_eligibility_pass"}
     assert z["reason"]
 
 

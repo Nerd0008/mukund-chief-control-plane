@@ -92,6 +92,8 @@ def normalize_url(value) -> str:
     through a different link, so they must not create a second tracker row.
     """
     url = extract_url(value)
+    from application_links import canonical_posting_url
+    url = canonical_posting_url(url) if url else url
     if not url:
         return ""
     try:
@@ -153,6 +155,8 @@ def listing_page_reason(url) -> str:
         parts = urlsplit(text)
     except ValueError:
         return ""
+    from application_links import listing
+    if listing(text):return "board/listing URL does not identify one vacancy"
     host = parts.netloc.lower()
     path = parts.path or ""
     lowered = path.lower()
@@ -672,7 +676,20 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     next_seq = (_next_sequential_id(existing_ids, cfg["id"]["prefix"], cfg["id"].get("start", 1))
                 if (cfg.get("id") or {}).get("style") == "sequential" else 0)
     planned_url_keys = set()
+    from posting_identity import identity_keys
+    by_requisition={}; existing_pair_urls={}
+    for row in range(tr.first_data_row,tr.last_data_row()+1):
+        company=tr.ws.cell(row,column_index_from_string(cfg['dedupe']['company_column'])).value
+        title=tr.ws.cell(row,column_index_from_string(cfg['dedupe']['title_column'])).value
+        url=tr.ws.cell(row,tr.url_col_idx()).value
+        for key in identity_keys(company,url):by_requisition.setdefault(key,row)
+        existing_pair_urls.setdefault(pair_key(company,title),[]).append(url)
     planned_pair_keys = set()
+    planned_pair_urls = {}
+    planned_requisitions=set()
+    def distinct_requisitions(company, first, second):
+        a=identity_keys(company,first); b=identity_keys(company,second)
+        return bool(a and b and not (a & b))
 
     for rec in records:
         record = dict(rec)
@@ -683,6 +700,10 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             "title": record.get("title"),
             "url": extract_url(record.get("url")),
         }
+        from application_links import identity_review_reason
+        identity_reason=identity_review_reason(record.get("company"),record.get("title"))
+        if identity_reason:
+            entry.update(decision="rejected",reason=identity_reason);outcomes.append(entry);continue
         if not url_key:
             entry["decision"] = "rejected"
             entry["reason"] = "missing or unusable application URL"
@@ -694,7 +715,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             entry["reason"] = "Apply Link is a search/category page, not a vacancy: " + listing_why
             outcomes.append(entry)
             continue
-        if url_key in planned_url_keys or (pkey.strip("|") and pkey in planned_pair_keys):
+        if identity_keys(record.get('company'),record.get('url')) & planned_requisitions or url_key in planned_url_keys or (pkey.strip("|") and pkey in planned_pair_keys and not all(distinct_requisitions(record.get("company"),old,record.get("url")) for old in planned_pair_urls.get(pkey,[]))):
             entry["decision"] = "duplicate-in-manifest"
             outcomes.append(entry)
             continue
@@ -704,7 +725,11 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             entry["decision"] = "duplicate"
             entry["reason"] = "already present in canonical workbook"
             entry["existing_row"] = matched_row
-        elif pkey.strip("|") and pkey in by_pair:
+        elif identity_keys(record.get('company'),record.get('url')) & set(by_requisition):
+            matched_row=next(by_requisition[key] for key in identity_keys(record.get('company'),record.get('url')) if key in by_requisition)
+            entry.update(decision='duplicate',reason='same employer-scoped requisition',existing_row=matched_row)
+        elif (pkey.strip("|") and pkey in by_pair and not all(distinct_requisitions(
+                record.get("company"),old,record.get("url")) for old in existing_pair_urls[pkey])):
             matched_row = by_pair[pkey]
             entry["decision"] = "duplicate"
             entry["reason"] = "same company+title already present (posting URL may have moved)"
@@ -745,8 +770,10 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             existing_ids.append(str(rid))
             record["id"] = str(rid)
         planned_url_keys.add(url_key)
+        planned_requisitions.update(identity_keys(record.get("company"),record.get("url")))
         if pkey.strip("|"):
             planned_pair_keys.add(pkey)
+            planned_pair_urls.setdefault(pkey,[]).append(record.get("url"))
         entry["decision"] = "appended"
         entry["id"] = str(rid)
         outcomes.append(entry)

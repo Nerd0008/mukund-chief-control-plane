@@ -405,6 +405,10 @@ def build_query_matrix(region: str, *, families: tuple = tuple(ROLE_FAMILIES),
             provenance="owner-provided company watchlist hook")
         for scope, site in OWNER_ATS_SITE_QUERIES:
             add("watchlist", scope, f'{site} "{name}"', provenance="owner company watchlist × ATS")
+    recent=(dt.datetime.now(dt.timezone.utc).date()-dt.timedelta(days=30)).isoformat()
+    add('recent_entry','employer_careers',f'{DISCIPLINE_CLAUSE} {ENTRY_CLAUSE} {location_clause} after:{recent}',provenance='additive recent-posting discovery, not a deadline filter')
+    for site in ('pinpointhq.com','recruitee.com','bamboohr.com','breezy.hr'):
+        add('additional_ats','employer_careers',f'site:{site} {DISCIPLINE_CLAUSE} {ENTRY_CLAUSE} {location_clause}',provenance='additional public ATS coverage')
     return out
 
 
@@ -510,9 +514,9 @@ class CodexWebSearchProvider(ResearchProvider):
                 "installed runtime cannot be shown to perform live web research")
         return out
 
-    def _run_one(self, exe, query: str, *, limit: int, timeout: int) -> dict:
+    def _run_one(self, exe, query: str, *, limit: int, timeout: int, prompt=None) -> dict:
         import subprocess  # noqa: PLC0415
-        prompt = CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
+        prompt = prompt or CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
         # The prompt is passed on STDIN, not argv. On Windows the resolver lands on
         # `codex.CMD` (an npm shim) and cmd.exe treats an embedded newline in an
         # argument as a command terminator, so a multi-line argv prompt is silently
@@ -528,7 +532,8 @@ class CodexWebSearchProvider(ResearchProvider):
                "error": None, "raw_events": 0, "elapsed_s": None}
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                                  input=prompt)
+                                  input=prompt, encoding="utf-8", errors="replace",
+                                  creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
         except Exception as exc:  # noqa: BLE001
             out["error"] = f"{type(exc).__name__}: {exc}"
             return out
@@ -568,6 +573,8 @@ class CodexWebSearchProvider(ResearchProvider):
         if not out["web_search_observed"]:
             # Fail truthfully: no live search was observed, so no result is accepted.
             return out
+        if not final_message and not out.get("error"):
+            out["error"]="live search observed but final research response missing"
         if final_message:
             payload, err = _parse_json_array(final_message)
             if err:
@@ -593,7 +600,13 @@ class CodexWebSearchProvider(ResearchProvider):
             return doc
         doc["resolved_executable"] = str(exe)
         for q in queries:
-            res = self._run_one(exe, q["query"], limit=limit_per_query, timeout=timeout)
+            import time
+            remaining=getattr(self,'deadline',None)
+            remaining=remaining-time.time() if remaining is not None else timeout
+            if remaining<=1:
+                doc['queries'].append({**q,'executed':False,'web_search_observed':False,'results':[],'error':'overall search budget exhausted'})
+                continue
+            res = self._run_one(exe, q["query"], limit=limit_per_query, timeout=min(timeout,max(1,int(remaining))))
             doc["requests"] += 1
             doc["cli_version"] = res.get("cli_version") or doc["cli_version"]
             entry = dict(q)
@@ -716,23 +729,23 @@ def make_provider(kind: str, *, captured: Path | None = None,
 
 
 def _parse_json_array(text: str):
-    """Extract the first JSON array from a model reply (tolerantly)."""
-    if not isinstance(text, str) or not text.strip():
-        return None, "empty response"
-    blobs = []
-    fence = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
-    if fence:
-        blobs.append(fence.group(1))
-    blobs.append(text)
-    for blob in blobs:
-        start = blob.find("[")
-        end = blob.rfind("]")
-        if start >= 0 and end > start:
-            try:
-                return json.loads(blob[start:end + 1]), None
-            except json.JSONDecodeError:
-                continue
-    return None, "no parseable JSON array in the response"
+    """Combine result arrays without silently dropping a worker's smaller batch."""
+    if not isinstance(text,str) or not text.strip():return None,'empty response'
+    decoder=json.JSONDecoder();cursor=0;found=False;records=[];seen=set()
+    while True:
+        start=text.find('[',cursor)
+        if start<0:break
+        try:array,length=decoder.raw_decode(text[start:])
+        except ValueError:
+            cursor=start+1
+            continue
+        cursor=start+length
+        if not isinstance(array,list):continue
+        found=True
+        for record in array:
+            key=json.dumps(record,sort_keys=True)
+            if key not in seen:records.append(record);seen.add(key)
+    return (records,None) if found else (None,'no parseable JSON array in the response')
 
 
 # --------------------------------------------------------------------------- #
@@ -813,6 +826,7 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
         return record
     scheme = (parsed.scheme or "").casefold()
     if scheme not in ("http", "https"):
+        record["failure_kind"] = "invalid_url"
         record["error"] = f"refusing non-http(s) scheme '{scheme}'"
         record["status"] = FETCH_VALIDATION_FAILED
         return record
@@ -822,7 +836,8 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
         record["robots"] = why
         if not allowed:
             record["error"] = why
-            record["status"] = FETCH_VALIDATION_FAILED
+            record["status"] = FETCH_NOT_ATTEMPTED
+            record["failure_kind"] = "robots"
             return record
     try:
         req = urllib.request.Request(str(url), headers={"User-Agent": USER_AGENT})
@@ -840,7 +855,8 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
             desc = META_DESC_RE.search(text) or META_DESC_RE_ALT.search(text)
             if desc:
                 record["meta_description"] = re.sub(r"\s+", " ", desc.group(1)).strip()[:500]
-            lowered = text.casefold()
+            from application_links import mask_recommendations
+            lowered=mask_recommendations(text).casefold()
             for marker in EXPIRED_MARKERS:
                 if marker in lowered:
                     record["expired_marker"] = marker
@@ -851,6 +867,7 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
             record["status"] = FETCH_VALIDATION_FAILED
             if record["expired_marker"]:
                 record["error"] = f"page states the posting is closed: {record['expired_marker']}"
+                record["failure_kind"] = "closed"
     except urllib.error.HTTPError as exc:
         record["http_status"] = exc.code
         if exc.code in (403, 429):
@@ -862,6 +879,8 @@ def fetch_validate(url: str, *, timeout: int = FETCH_TIMEOUT,
     except Exception as exc:  # noqa: BLE001
         record["status"] = FETCH_VALIDATION_FAILED
         record["error"] = f"{type(exc).__name__}: {exc}"
+    if record['status']==FETCH_VALIDATION_FAILED and not record.get('failure_kind'):
+        record['failure_kind']='closed' if record.get('http_status') in (404,410) else 'transport'
     return record
 
 
@@ -1022,9 +1041,14 @@ def run_research(queries: list, provider, *, region: str, limit_per_query: int =
             fetch = None
             if validate and validation_budget > 0:
                 validation_budget -= 1
-                fetch = validate_fn(url, respect_robots=respect_robots)
+                import time
+                left=getattr(provider,'deadline',None)
+                left=left-time.time() if left is not None else None
+                if left is None:fetch=validate_fn(url,respect_robots=respect_robots)
+                elif left>1:fetch=validate_fn(url,respect_robots=respect_robots,timeout=min(FETCH_TIMEOUT,left))
             candidate = normalise_result(result=result, query_entry=row, fetch=fetch,
                                          source_timestamp=started)
+            candidate['source_failure_kind']=(fetch or {}).get('failure_kind') or ('closed' if (fetch or {}).get('http_status') in (404,410) or (fetch or {}).get('expired_marker') else 'transport' if (fetch or {}).get('status')==FETCH_VALIDATION_FAILED else None)
             state = candidate["fetch_state"]
             if state == FETCH_VALIDATED_LIVE:
                 telemetry["validated_live"] += 1

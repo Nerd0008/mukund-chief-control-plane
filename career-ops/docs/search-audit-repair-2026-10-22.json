@@ -1,0 +1,116 @@
+{
+  "audited_search_controls": "PASS",
+  "focused_tests": {
+    "passed": 601,
+    "failed": 0
+  },
+  "whole_career_regression": {
+    "passed": 1442,
+    "failed": 26,
+    "new_failures": 0,
+    "baseline_comparison": "same 26 failures with committed writer/direct-search code loaded in test process"
+  },
+  "scheduled_path": {
+    "run_id": "unified-uk-20261022T222950Z",
+    "elapsed_seconds": 265.23,
+    "diagnostic_limits": {
+      "web_queries": 2,
+      "regional_worker_skipped": true,
+      "canonical_apply": false
+    },
+    "funnel_counts": {
+      "discovered_raw": 1515,
+      "canonical_candidates": 1515,
+      "cross_source_duplicates_removed": 0,
+      "after_hard_negative_prefilter": 170,
+      "semantically_reviewed": 170,
+      "deepseek_accept": 0,
+      "semantic_accept": 55,
+      "codex_semantic_accept": 55,
+      "codex_escalated": 0,
+      "codex_accept": 0,
+      "deterministic_eligibility_pass": 21,
+      "duplicates_removed": 4,
+      "tracker_candidates": 17,
+      "historical_seed_records": 1438,
+      "current_source_records": 77,
+      "jd_fetches_attempted": 55,
+      "jd_fetches_failed": 2,
+      "accepted_availability_unverified": 20,
+      "discovered_raw_by_source": {
+        "company-watch findings": 505,
+        "gmail_job_alert": 1009,
+        "linkedin job-discovery export": 0,
+        "open-web research (codex-style)": 1,
+        "owner priority watchlist (company careers/ATS + role-family research)": 0,
+        "recruiter/intermediary watch findings": 0,
+        "regional run-health scan record": 0
+      }
+    },
+    "jd_verification": {
+      "attempted": 55,
+      "with_text": 53,
+      "states": {
+        "UNKNOWN": 43,
+        "CLOSED": 11,
+        "OPEN": 1
+      },
+      "failures": {
+        "HTTP 404": 1,
+        "HTTP 410": 1
+      }
+    },
+    "canonical_sha256_before": "72ae3ce74bc18869d4ff1e8d6e226178dc3a4a0bcf113e43593edf6b5da646d5",
+    "canonical_sha256_after": "72ae3ce74bc18869d4ff1e8d6e226178dc3a4a0bcf113e43593edf6b5da646d5",
+    "source_unchanged_during_live": true
+  },
+  "private_copy_apply": {
+    "private_copy_only": true,
+    "input": 21,
+    "first_apply": {
+      "input": 21,
+      "appended": 17,
+      "duplicates": 4,
+      "rejected": 0,
+      "refreshed": 0,
+      "passed_deleted": 0,
+      "listing_deleted": 0
+    },
+    "verification_pass": true,
+    "repeat": {
+      "input": 21,
+      "appended": 0,
+      "duplicates": 21,
+      "rejected": 0,
+      "refreshed": 0,
+      "passed_deleted": 0,
+      "listing_deleted": 0
+    },
+    "owner_passed_row_preserved": true,
+    "canonical_unchanged": true,
+    "canonical_sha256": "72ae3ce74bc18869d4ff1e8d6e226178dc3a4a0bcf113e43593edf6b5da646d5"
+  },
+  "worker_web_search_observed": true,
+  "submission_outreach_gmail_mutations": 0,
+  "limitations": [
+    "Unverified availability remains explicitly flagged, not OPEN.",
+    "The full 28-query scheduled cycle has not been run live in this maintenance window.",
+    "26 pre-existing failures outside the repaired search path remain."
+  ],
+  "scheduled_tasks": [
+    {
+      "TaskName": "ChiefCareerNightly",
+      "Enabled": true,
+      "State": "Ready",
+      "NextRunTime": "2026-10-23T23:30:00.0000000+01:00"
+    },
+    {
+      "TaskName": "ChiefCareerScan-UK",
+      "Enabled": true,
+      "State": "Ready",
+      "NextRunTime": "2026-10-22T23:45:00.0000000+01:00"
+    }
+  ],
+  "owner_principals_preserved": true,
+  "automatic_search_preserves_existing_rows": true
+}

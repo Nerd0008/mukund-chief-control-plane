@@ -44,6 +44,7 @@ set LOGDIR=%CP%\runtime\career-ops\scan-runs
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 "%PY%" "%CP%\career-ops\discovery\scheduled_orchestrator.py" run --region %REGION% --scheduled --require-live-web --mode high_recall --semantic codex --codex-model gpt-6-sol --codex on --codex-budget 8 --budget-seconds 2700 --scan-timeout 900 --web-queries 28 --limit-per-query 10 --max-urls 60 --per-query-timeout 180 --retries 1 --out-dir "%CP%\runtime\career-ops\discovery" > "%LOGDIR%\%REGION%-unified-last-stdout.json" 2>&1
 set RC=%ERRORLEVEL%
+if %RC% neq 0 exit /b %RC%
 rem --- discovery -> tracker handoff (owner instruction 2026-10-09) -------
 rem The orchestrator above is read-only: it writes a candidate manifest and
 rem stops. Without this step a found role stayed in the manifest and never
@@ -53,7 +54,7 @@ rem detection, the hash-checked backup and post-write verification still
 rem apply. A locked workbook (Excel open) fails safely and changes nothing.
 set PROMOTEDIR=%CP%\runtime\career-ops\promote
 if not exist "%PROMOTEDIR%" mkdir "%PROMOTEDIR%"
-"%PY%" "%CP%\career-ops\promote_manifest.py" --region %REGION% --apply > "%PROMOTEDIR%\%REGION%-promote-last.json" 2>&1
+"%PY%" "%CP%\career-ops\promote_manifest.py" --region %REGION% --apply --scan-report "%LOGDIR%\%REGION%-unified-last-stdout.json" > "%PROMOTEDIR%\%REGION%-promote-last.json" 2>&1
 set PRC=%ERRORLEVEL%
 if %PRC% neq 0 echo [warn] promote exited %PRC% for %REGION%; see %PROMOTEDIR%\%REGION%-promote-last.json
-exit /b %RC%
+exit /b %PRC%

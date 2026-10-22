@@ -143,7 +143,8 @@ def write_json_atomic(path: Path, obj) -> None:
 
 CANDIDATE_FIELDS = ("company", "title", "location", "url", "description", "summary",
                     "posted_date", "salary", "experience_required", "employment_type",
-                    "vendor", "intermediary", "source_detail", "fetch_state", "result_kind")
+                    "vendor", "intermediary", "source_detail", "fetch_state", "result_kind",
+                    "source_failure_kind", "source_generated_at", "historical_seed")
 
 
 def normalise_candidate(raw: dict, source: str) -> dict:
@@ -390,8 +391,8 @@ def collect_from_web_research(path: Path, region: str) -> dict:
     missing fields) and enters the SAME funnel as every other surface.
 
     A destination that could not be validated live is kept as a candidate but
-    labelled with its ``fetch_state``; the deterministic gates refuse tracker
-    handoff for anything that is not ``validated_live`` (fail-closed).
+    labelled with its ``fetch_state``; confirmed closure is rejected; unavailable verification stays explicitly
+    flagged under the owner-approved unverified-lead policy.
     """
     try:
         doc = read_json(path)
@@ -659,6 +660,9 @@ def canonical_key(rec: dict) -> tuple:
     company + title when no URL was supplied — and then only when both are
     present, so two URL-less records are never merged on an empty key.
     """
+    from posting_identity import identity_keys
+    keys=identity_keys(rec.get('company'),rec.get('url'),rec.get('resolved_url')) if rec.get('company') else set()
+    if keys:return ('requisition',sorted(keys)[0])
     url = tw.normalize_url(rec.get("url"))
     if url:
         return ("url", url)
@@ -867,6 +871,9 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     reasons: list = []
     flags: list = []
 
+    from application_links import identity_review_reason
+    identity_reason=identity_review_reason(rec.get("company"),rec.get("title"))
+    if identity_reason:reasons.append(identity_reason)
     url = tw.extract_url(rec.get("url"))
     if not url or not url.lower().startswith(("http://", "https://")):
         reasons.append("no usable application URL — a posting without a URL is not writable state")
@@ -898,9 +905,13 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     # A destination that FAILED validation (dead link, expired marker, non-http scheme,
     # robots refusal) is still refused — a failed validation is a negative result,
     # not an absence of evidence.
-    if fetch_state == "validation_failed":
-        reasons.append(f"source URL failed validation (fetch_state={fetch_state}) — "
-                       f"an unusable destination is never written")
+    if fetch_state == "validation_failed" and not resolved_verified:
+        status=(rec.get('vacancy_status') or {}).get('state')
+        failure=rec.get('source_failure_kind')
+        if status=='CLOSED' or failure in ('invalid_url','closed'):
+            reasons.append(f"source URL failed validation (fetch_state={fetch_state}) — unusable destination")
+        else:
+            flags.append("source transport unavailable; availability UNVERIFIED")
     elif fetch_state == "bot_wall":
         flags.append("HTTP page blocked (403/429); availability UNVERIFIED — added as an "
                      "unverified lead, verify before applying")
@@ -946,6 +957,9 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
                                                 rjs.re.IGNORECASE):
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
 
+    from experience_screening import experience_hits
+    required_experience=experience_hits(rec.get('jd_text') or '')
+    if required_experience: reasons.append('prior experience required: '+required_experience[0])
     from application_deadlines import deadline_priority
     # Only a PROVEN-CLOSED vacancy is rejected. UNKNOWN availability is an unverified lead,
     # not a rejection (owner instruction 2026-10-22: still add if not verified open).
@@ -977,7 +991,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     max_tokens: int | None = None,
                     deepseek_adapter=None, codex_adapter=None,
                     codex_model: str | None = None,
-                    codex_workdir: str | None = None) -> dict:
+                    codex_workdir: str | None = None, deadline=None) -> dict:
     max_tokens = max_tokens or DEFAULT_MAX_TOKENS
     if semantic == "off":
         return {"provider": "none", "requested": "off",
@@ -992,14 +1006,14 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                 doc = deepseek_bulk_classify(candidates, model=deepseek_model,
                                              batch_size=batch_size, timeout=timeout,
                                              max_tokens=max_tokens,
-                                             adapter=deepseek_adapter, mode=mode)
+                                             adapter=deepseek_adapter, mode=mode, deadline=deadline)
                 doc["requested"] = semantic
                 doc["probe"] = probe
                 if doc.get("classified", 0) > 0:
                     return doc
                 if semantic=='auto':
                     rescue=_codex_semantic_pass(candidates,batch_size=batch_size,timeout=timeout,
-                        codex_adapter=codex_adapter,mode=mode,codex_model=codex_model,codex_workdir=codex_workdir)
+                        codex_adapter=codex_adapter,mode=mode,codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
                     rescue['deepseek_attempt']={k:doc.get(k) for k in ('requests','errors','limitation','terminal_failure')}
                     rescue['deepseek_probe']=probe
                     rescue['requested']=semantic
@@ -1022,7 +1036,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
             codex_doc = _codex_semantic_pass(candidates, batch_size=batch_size, timeout=timeout,
                                              codex_adapter=codex_adapter, mode=mode,
                                              codex_model=codex_model,
-                                             codex_workdir=codex_workdir)
+                                             codex_workdir=codex_workdir,deadline=deadline)
             if codex_doc.get("classifications"):
                 codex_doc["requested"] = semantic
                 codex_doc["deepseek_probe"] = probe
@@ -1041,7 +1055,7 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
         codex_doc = _codex_semantic_pass(candidates, batch_size=batch_size, timeout=timeout,
                                          codex_adapter=codex_adapter, mode=mode,
                                          codex_model=codex_model,
-                                         codex_workdir=codex_workdir)
+                                         codex_workdir=codex_workdir,deadline=deadline)
         if codex_doc.get("classifications"):
             codex_doc["requested"] = semantic
             return codex_doc
@@ -1062,13 +1076,13 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
 def _codex_semantic_pass(candidates: list, *, batch_size: int, timeout: int,
                          codex_adapter=None, mode: str,
                          codex_model: str | None = None,
-                         codex_workdir: str | None = None) -> dict:
+                         codex_workdir: str | None = None, deadline=None) -> dict:
     """Run the Codex CLI as the bulk semantic classifier (DeepSeek fallback)."""
     model = codex_model or CODEX_CLASSIFY_MODEL
     probe = codex_probe(model)
     doc = codex_bulk_classify(candidates, batch_size=batch_size, timeout=timeout,
                               adapter=codex_adapter, mode=mode,
-                              model=model, workdir=codex_workdir)
+                              model=model, workdir=codex_workdir,deadline=deadline)
     doc["probe"] = probe
     return doc
 
@@ -1081,7 +1095,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                codex_workdir: str | None = None,
                codex_model: str | None = None,
                collection: list | None = None, fetch_descriptions: bool = True,
-               posting_resolver=None) -> dict:
+               posting_resolver=None, deadline=None) -> dict:
     policy = rjs.load_policy()
     schedules = rjs.load_schedules()
     profiles = tw.load_profiles()
@@ -1109,10 +1123,12 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                     f"discoveries -> {collapse['counts']['canonical_candidates']} canonical "
                     f"candidates ({collapse['counts']['cross_source_duplicates_removed']} "
                     f"duplicate discoveries of an already-canonical vacancy)")
-    candidates = canonical
+    candidates = sorted(canonical,key=lambda rec: bool(rec.get("historical_seed")))
     for rec in candidates:
         funnel.source_stages(rec.get("sources"), "canonical")
 
+    funnel.set('historical_seed_records',sum(bool(c.get('historical_seed')) for c in candidates))
+    funnel.set('current_source_records',sum(not c.get('historical_seed') for c in candidates))
     # 1. prefilter --------------------------------------------------------- #
     pre = prefilter(candidates, mode=mode, funnel=funnel)
     kept = [c for c, d in zip(candidates, pre["decisions"]) if d["decision"] == "pass"]
@@ -1122,7 +1138,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                                    batch_size=batch_size, timeout=timeout, mode=mode,
                                    max_tokens=max_tokens, deepseek_adapter=deepseek_adapter,
                                    codex_adapter=codex_adapter, codex_model=codex_model,
-                                   codex_workdir=codex_workdir)
+                                   codex_workdir=codex_workdir,deadline=deadline)
     classifications = semantic_doc.get("classifications") or {}
     funnel.set("semantically_reviewed", len(classifications))
     for rec in kept:
@@ -1151,18 +1167,19 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         if provider == "deepseek":
             funnel.set("deepseek_accept", len(accepted))
         elif provider == "codex":
-            # A Codex semantic pass ran. The stage counter keeps its historic name
-            # (the funnel schema is consumed downstream), but the doc records which
-            # provider actually produced the acceptances.
-            funnel.set("deepseek_accept", len(accepted))
-            funnel.note("semantic pass provider: codex (deepseek was unreachable); "
-                        "the deepseek_accept counter reports this pass's acceptances")
+            funnel.set("deepseek_accept", 0)
+            funnel.skip("deepseek_accept", "semantic provider was Codex, not DeepSeek")
+            funnel.set("codex_semantic_accept",len(accepted))
         else:
             funnel.set("deepseek_accept", 0)
             funnel.skip("deepseek_accept",
                         f"no DeepSeek pass was made in this run (provider: "
                         f"{provider}); the declared deterministic rule "
                         "classifier or an explicit provider choice was used instead")
+
+    funnel.set("semantic_accept",len(accepted))
+    if semantic_doc.get("requested")=="off":
+        funnel.skip("semantic_accept","semantic stage disabled by caller")
 
     # 3. bounded Codex second pass ------------------------------------------ #
     codex_doc = {"provider": "openai-codex-cli", "requested": codex_enabled, "requests": 0,
@@ -1171,7 +1188,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     if codex_enabled:
         codex_doc = codex_escalate(kept, classifications, budget=codex_budget,
                                    timeout=timeout, adapter=codex_adapter,
-                                   workdir=codex_workdir)
+                                   workdir=codex_workdir,deadline=deadline)
         codex_cls = codex_doc.get("classifications") or {}
         effective = dict(classifications)
         effective.update(codex_cls)
@@ -1189,6 +1206,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                     "no candidate met the deterministic escalation conditions, so no Codex "
                     "call was made (see codex.limitation)")
         funnel.skip("codex_accept", "no Codex second pass was run in this run")
+    funnel.set("semantic_accept",len(accepted))
     for rec in accepted:
         funnel.source_stages(rec.get("sources"), "semantic_accept")
 
@@ -1196,7 +1214,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     jd_attempts=0
     rate_limited_hosts=set()
     if posting_resolver is not None:
-        accepted.sort(key=posting_resolver.priority)
+        accepted.sort(key=lambda rec:(bool(rec.get('historical_seed')),posting_resolver.priority(rec)))
     # Fetch full job description text for each semantically accepted candidate
     # so the clearance gate can run against the actual JD, not just snippets.
     for rec in (accepted if fetch_descriptions else []):
@@ -1212,7 +1230,10 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                 'error':'rate limit backoff'}
         else:
             jd_attempts+=1
-            jd_result = fetch_jd(url)
+            import time
+            left=deadline-time.time() if deadline is not None else 30
+            jd_result = fetch_jd(url,timeout=min(12,left)) if left>1 else {
+                'text':'','vacancy_status':{'state':'UNKNOWN','evidence':'verification budget exhausted'},'error':'verification budget exhausted'}
             if jd_result.get('status')==429 and (jd_result.get('vacancy_status') or {}).get('state')!='OPEN':
                 rate_limited_hosts.add(host)
         if (posting_resolver is not None and
@@ -1292,7 +1313,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                      if (g.get("vacancy_status") or {}).get("state") != "OPEN")
     funnel.set("accepted_availability_unverified", unverified)
     if unverified:
-        funnel.note(f"{unverified} of {len(passed)} accepted role(s) were added with "
+        funnel.note(f"{unverified} of {len(passed)} eligible lead(s) have "
                     f"availability UNVERIFIED (owner instruction 2026-10-22: still add if "
                     f"not verified open) — these rows need a manual open-check before applying")
 
@@ -1303,7 +1324,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         if rec is None:
             continue
         records.append(rjs.build_record(region, rec, policy, run_id, {"stage": "discovery"}))
-    probe = tw.write_records(profiles, region, records, apply=False) if records else (
+    probe = tw.write_records(profiles, region, records, apply=False,cleanup_existing=False) if records else (
         {"tracker": str(tw.region_config(profiles, region)["tracker"]), "counts": {},
          "cross_month_index": {}, "outcomes": [], "applied": False})
     counts = probe.get("counts") or {}
@@ -1352,7 +1373,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                                    "source", "sources", "duplicate_discoveries",
                                    "canonical_key", "provenance", "fetch_state", "result_kind",
                                    "priority_watchlist", "watchlist_company",
-                                   "watchlist_query_families")}
+                                   "watchlist_query_families", "vacancy_status", "deadline_info",
+                                   "resolved_url", "verified_posting", "discovered_posting", "source_generated_at", "historical_seed")}
             for c in candidates
         ],
         "priority_watchlist": priority_watchlist_block(candidates, passed),
@@ -1362,7 +1384,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "eligibility": {"input": len(accepted), "decisions": gated,
                         "passed": len(passed)},
         "dedupe": {"engine": "career-ops/tracker_writer.py (shared with Career Ops)",
-                   "tracker": probe.get("tracker"), "counts": counts,
+                   "tracker": probe.get("tracker"), "counts": counts, "error":probe.get("error"),
                    "cross_month_index": probe.get("cross_month_index"),
                    "outcomes": probe.get("outcomes", [])[:25], "applied": False},
         "funnel": funnel.document(),

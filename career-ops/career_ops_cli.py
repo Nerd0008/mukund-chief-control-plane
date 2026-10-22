@@ -202,6 +202,7 @@ def cmd_write(args) -> int:
         update_existing=args.update_existing,
         extra_archive_dirs=args.archive_dir,
         tracker_override=args.tracker,
+        cleanup_existing=not getattr(args,"preserve_existing_rows",False),
     )
     result["mode"] = "apply" if args.apply else "dry-run"
     result["provenance"] = {"manifest": args.manifest, "writer": "career-ops/tracker_writer.py"}
@@ -445,6 +446,7 @@ def main(argv=None) -> int:
     p.add_argument("--region", required=True); p.add_argument("--manifest", required=True)
     p.add_argument("--apply", action="store_true")
     p.add_argument("--update-existing", action="store_true")
+    p.add_argument("--preserve-existing-rows",action="store_true",help="append/reconcile only; never remove existing passed/listing rows")
     p.add_argument("--tracker"); p.add_argument("--backup-dir")
     p.add_argument("--archive-dir", action="append")
     p.add_argument("--state-dir", help="run-health directory (default: runtime/career-ops/run-health)")

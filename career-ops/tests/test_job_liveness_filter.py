@@ -59,20 +59,20 @@ def test_is_job_closed(text, expected):
 
 
 # ---------------------------------------------------------------------------
-# entry-level marker tightening
+# supported neutral titles reach JD screening; this is not final eligibility
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("title,expected", [
     ("Cyber Security Intern", True),
     ("Graduate Security Analyst", True),
     ("Junior SOC Analyst", True),
-    ("Security Analyst", False),
+    ("Security Analyst", True),
     ("Software Engineer", False),
-    ("Service Desk Analyst", False),
-    ("IT Support Engineer", False),
+    ("Service Desk Analyst", True),
+    ("IT Support Engineer", True),
     ("Trainee SOC Analyst", True),
     ("Information Security Intern", True),
-    ("Security Engineer, Cloud", False),
+    ("Security Engineer, Cloud", True),
 ])
 def test_is_entry_level(title, expected):
     assert ces.is_entry_level(title, ces.ENTRY_MARKERS) is expected

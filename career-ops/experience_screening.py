@@ -163,6 +163,13 @@ def _negated(text, start):
     return bool(_NEGATION_RE.search(text[max(0, start - 45):start]))
 
 
+def _optional_requirement(text, start, end):
+    # Optionality must qualify this requirement, not an unrelated following bullet.
+    after=re.split(r'[.!?;\n]',text[end:end+85],maxsplit=1)[0]
+    before=re.split(r'[.!?;\n]',text[max(0,start-45):start])[-1]
+    return bool(re.search(r'desirable|advantageous|preferred|not\s+(?:essential|required)|nice[ -]to[ -]have',before+' '+after,re.I))
+
+
 def _context_ok(text, start, end):
     """True when a year phrase is a requirement on the candidate.
 
@@ -212,7 +219,7 @@ def experience_hits(text, min_years: int = MIN_YEARS) -> list:
             continue
         if not _context_ok(t, m.start(), m.end()):
             continue
-        if _negated(t, m.start()):
+        if _negated(t, m.start()) or _optional_requirement(t,m.start(),m.end()):
             continue
         span = t[max(0, m.start() - 40):m.end() + 40].strip()
         snippet = " ".join(span.split())
@@ -220,8 +227,11 @@ def experience_hits(text, min_years: int = MIN_YEARS) -> list:
             hits.append(snippet)
 
     for m in STRONG_PHRASE_RE.finditer(t):
-        if _negated(t, m.start()):
+        if _negated(t, m.start()) or _optional_requirement(t,m.start(),m.end()):
             continue
+        prefix=t[max(0,m.start()-30):m.start()]
+        small=re.search(r'\b(?:0\s*[-–]\s*1|one|1)\s+years?\s+(?:of\s+)?$',prefix,re.I)
+        if small: continue
         window = t[max(0, m.start() - CONTEXT_CHARS):m.end() + CONTEXT_CHARS]
         if _STUDY_YEAR_RE.search(window):
             continue

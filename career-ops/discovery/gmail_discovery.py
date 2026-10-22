@@ -87,6 +87,14 @@ def collect(region,args,*,root=ROOT,fetcher=fetch):
         rec={**(meta or item.get('discovered') or {'company':j.get('company'),'title':j.get('title')}),'url':safe_url(canonical_posting_url(j['url'])),
              'source':'gmail_job_alert','fetch_state':'validated_live' if meta else 'discovered_unverified',
              'result_kind':'job_posting' if meta else 'unknown','_collection_source':'gmail_job_alert'}
+        received=j.get('received_at')
+        try:
+            stamp=dt.datetime.fromisoformat(str(received).replace('Z','+00:00'))
+            if stamp.tzinfo is None:stamp=stamp.replace(tzinfo=dt.timezone.utc)
+            age=(dt.datetime.now(dt.timezone.utc)-stamp).total_seconds()/3600
+        except (ValueError,TypeError):age=float('inf')
+        rec['source_generated_at']=received
+        rec['historical_seed']=age<0 or age>getattr(args,'ingest_stale_hours',26)
         out.append(rec)
     if live:save(cache_path,cache)
     validated=sum(c['fetch_state']=='validated_live' for c in out)

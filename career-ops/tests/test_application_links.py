@@ -186,7 +186,7 @@ def test_jsonld_description_retained_for_clearance_gate(monkeypatch):
 
 def test_digest_uses_fresh_verified_original_destination(monkeypatch):
     import daily_jobs_links as digest
-    rec={'company':'Example','title':TITLE,'url':SOURCE,'date':dt.date.today(),'id':'','status':'Not Applied'}
+    rec={'location':'London, United Kingdom','company':'Example','title':TITLE,'url':SOURCE,'date':dt.date.today(),'id':'','status':'Not Applied'}
     live.record_verification(rec,{'vacancy_status':{'state':'OPEN','page_title':TITLE},'resolved_url':TARGET})
     monkeypatch.setattr(digest,'tracker_rows',lambda region:([dict(rec)],None))
     monkeypatch.setattr(digest,'latest_run_doc',lambda region:(None,None))
@@ -203,7 +203,7 @@ def test_direct_search_dedupes_and_carries_resolved_destination(monkeypatch,tmp_
         def close(self):pass
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:({posting_key(TARGET)} if already_tracked else set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
-    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','title':TITLE,'url':SOURCE}]))
+    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'location':'London, United Kingdom','company':'Example','title':TITLE,'url':SOURCE}]))
     monkeypatch.setattr(search,'fetch_jd',lambda url:{'vacancy_status':{'state':'OPEN','page_title':TITLE},'resolved_url':TARGET})
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0
@@ -215,7 +215,7 @@ def test_direct_search_dedupes_and_carries_resolved_destination(monkeypatch,tmp_
 
 def test_regional_writer_uses_resolved_url_without_rewriting_source_identity():
     import regional_job_search as rjs
-    candidate={'company':'Example','title':TITLE,'location':'London','url':SOURCE,'resolved_url':TARGET}
+    candidate={'location':'London, United Kingdom','company':'Example','title':TITLE,'location':'London','url':SOURCE,'resolved_url':TARGET}
     record=rjs.build_record('uk',candidate,rjs.load_policy(),'test',{})
     assert record['url']==TARGET and candidate['url']==SOURCE
 
@@ -246,7 +246,7 @@ def test_discovery_stale_transport_is_accepted_as_an_unverified_lead():
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'discovery'))
     import pipeline
     import regional_job_search as rjs
-    rec={'company':'Example','title':'Cyber Security Intern','location':'London, United Kingdom',
+    rec={'location':'London, United Kingdom','company':'Example','title':'Cyber Security Intern','location':'London, United Kingdom',
          'url':SOURCE,'fetch_state':'discovered_unverified','jd_text':'Cyber internship in London',
          'vacancy_status':{'state':'OPEN'}}
     policy=rjs.load_policy();scope=rjs.lane_scope('uk',rjs.load_schedules()['regions']['uk'])
@@ -332,3 +332,11 @@ def test_smartrecruiters_expired_description_stays_closed(monkeypatch):
     api={'id':'744000123','name':TITLE,'company':{'identifier':'Example'},'jobAd':{'sections':{'jobDescription':{'text':'This job has expired.'}}}}
     transport(monkeypatch,{url:'<title>JavaScript shell</title>',endpoint:api})
     assert jd.fetch_jd(url,timeout=5)['vacancy_status']['state']=='CLOSED'
+
+
+@pytest.fixture(autouse=True)
+def isolate_direct_canonical_plan(monkeypatch,tmp_path):
+    import codex_entry_level_search as search
+    monkeypatch.setattr(search,'SEARCH_STATE_DIR',tmp_path/'direct-search')
+    monkeypatch.setattr(search,'canonical_plan',lambda region,tracker,records:{
+        'counts':{'appended':len(records),'duplicates':0},'outcomes':[]})

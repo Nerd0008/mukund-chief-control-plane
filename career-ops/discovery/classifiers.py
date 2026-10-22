@@ -25,6 +25,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -263,7 +264,7 @@ def _dispatch_batch(adapter, batch: list, resolved: str, timeout: int, max_token
 def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                            batch_size: int = DEFAULT_BATCH_SIZE, timeout: int = 120,
                            max_tokens: int = DEFAULT_MAX_TOKENS,
-                           adapter=None, mode: str = MODE_HIGH_RECALL) -> dict:
+                           adapter=None, mode: str = MODE_HIGH_RECALL, deadline=None) -> dict:
     """Classify the candidate pool with DeepSeek in bounded batches.
 
     A batch that returns no parseable JSON is retried once at half the batch
@@ -313,6 +314,12 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                                if observed else "model list not observed; requested id used unverified")
 
     for start in range(0, len(records), batch_size):
+        remaining=deadline-time.time() if deadline is not None else timeout
+        if remaining<1:
+            out['limitation']='overall discovery budget exhausted; remaining candidates unclassified'
+            for rec in records[start:]:out['classifications'][candidate_id(rec)]=_unclassified(rec,'overall discovery budget exhausted')
+            break
+        timeout=min(timeout,max(1,int(remaining)))
         out["batches"] += 1
         payload, error, usage = _dispatch_batch(adapter, records[start:start + batch_size],
                                                 resolved, timeout, max_tokens)
@@ -336,6 +343,12 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
             for half in halves:
                 if not half:
                     continue
+                if deadline is not None:
+                    remaining=deadline-time.time()
+                    if remaining<1:
+                        ok=False
+                        break
+                    timeout=min(timeout,max(1,int(remaining)))
                 payload_h, error_h, usage_h = _dispatch_batch(adapter, half, resolved,
                                                               timeout, max_tokens)
                 out["requests"] += 1
@@ -524,7 +537,7 @@ def codex_probe(model: str = CODEX_CLASSIFY_MODEL, *, adapter=None) -> dict:
 def codex_bulk_classify(records: list, *, model: str = CODEX_CLASSIFY_MODEL,
                         batch_size: int = DEFAULT_BATCH_SIZE, timeout: int = 300,
                         adapter=None, mode: str = MODE_HIGH_RECALL,
-                        workdir: str | None = None) -> dict:
+                        workdir: str | None = None, deadline=None) -> dict:
     """Classify the candidate pool with the Codex CLI as the semantic engine.
 
     Used when the DeepSeek provider is unreachable (observed 2026-10-03:
@@ -579,6 +592,12 @@ def codex_bulk_classify(records: list, *, model: str = CODEX_CLASSIFY_MODEL,
     out["model_observed"] = model
 
     for start in range(0, len(records), batch_size):
+        remaining=deadline-time.time() if deadline is not None else timeout
+        if remaining<1:
+            out['limitation']='overall discovery budget exhausted; remaining candidates unclassified'
+            for rec in records[start:]:out['classifications'][candidate_id(rec)]=_unclassified(rec,'overall discovery budget exhausted')
+            break
+        timeout=min(timeout,max(1,int(remaining)))
         out["batches"] += 1
         batch = records[start:start + batch_size]
         payload, error, usage = _dispatch_codex_batch(adapter, batch, model, timeout, workdir)
@@ -593,6 +612,12 @@ def codex_bulk_classify(records: list, *, model: str = CODEX_CLASSIFY_MODEL,
             for half in halves:
                 if not half:
                     continue
+                if deadline is not None:
+                    remaining=deadline-time.time()
+                    if remaining<1:
+                        ok=False
+                        break
+                    timeout=min(timeout,max(1,int(remaining)))
                 payload_h, error_h, usage_h = _dispatch_codex_batch(adapter, half, model,
                                                                     timeout, workdir)
                 out["requests"] += 1
@@ -658,7 +683,7 @@ def _codex_adapter():
 
 
 def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDGET,
-                   timeout: int = 300, adapter=None, workdir: str | None = None) -> dict:
+                   timeout: int = 300, adapter=None, workdir: str | None = None, deadline=None) -> dict:
     """Bounded Codex second pass. Never called for the whole raw scan."""
     out = {
         "provider": "openai-codex-cli",
@@ -699,6 +724,12 @@ def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDG
 
     batch_size = 4
     for start in range(0, len(pairs), batch_size):
+        remaining=deadline-time.time() if deadline is not None else timeout
+        if remaining<1:
+            out['limitation']='overall discovery budget exhausted; no further escalation'
+            out['dropped_due_to_budget'].extend({'candidate_id':c['candidate_id'],'reason':'elapsed budget exhausted'} for _r,c,_why in pairs[start:])
+            break
+        timeout=min(timeout,max(1,int(remaining)))
         chunk = pairs[start:start + batch_size]
         prompt = build_escalation_prompt([rec for rec, _c, _r in chunk],
                                          [c for _rec, c, _r in chunk])

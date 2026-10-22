@@ -70,7 +70,7 @@ def test_validation_failure_is_still_refused():
     """A failed validation is a NEGATIVE result (dead link, expired marker, non-2xx,
     robots refusal), not an absence of evidence — a dead link must never reach the
     tracker."""
-    v = _verdict(_role(fetch_state='validation_failed'))
+    v = _verdict(_role(fetch_state='validation_failed',source_failure_kind='closed'))
     assert v['decision'] == 'rejected'
     assert any('failed validation' in r for r in v['reasons'])
 

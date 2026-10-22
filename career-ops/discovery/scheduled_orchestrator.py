@@ -198,7 +198,7 @@ def surface_class(surface: str | None) -> str | None:
     return None
 
 
-def select_queries(matrix: list, limit: int) -> list:
+def select_queries(matrix: list, limit: int, offset: int = 0) -> list:
     """Pick at most ``limit`` queries, round-robin across surfaces.
 
     The query matrix lists the broad public surfaces (LinkedIn Jobs, Indeed, open
@@ -218,6 +218,8 @@ def select_queries(matrix: list, limit: int) -> list:
         groups[scope].append(entry)
     out: list = []
     round_index = 0
+    requested=limit
+    limit=len(matrix)
     while len(out) < limit:
         progressed = False
         for scope in order:
@@ -230,7 +232,8 @@ def select_queries(matrix: list, limit: int) -> list:
         if not progressed:
             break
         round_index += 1
-    return out
+    offset%=len(out) if out else 1
+    return (out[offset:]+out[:offset])[:requested]
 
 
 # --------------------------------------------------------------------------- #
@@ -317,12 +320,18 @@ def run_web_research(region: str, args, *, deadline: float) -> dict:
         watchlist = wr.load_watchlist(WATCHLIST_RUNTIME / "company-watchlist.json")
     matrix = wr.build_query_matrix(region, include_watchlist=watchlist)
     remaining = max(0.0, deadline - time.time())
-    per_query = max(30, min(int(args.per_query_timeout),
-                            int(remaining / max(1, args.web_queries)) or 30))
-    queries = select_queries(matrix, args.web_queries)
+    # Reserve half of the remaining run for classification and JD verification.
+    # A larger query budget must not consume the entire run before those stages.
+    web_seconds=max(0.0,remaining/2)
+    per_query=max(1,min(int(args.per_query_timeout),int(web_seconds/max(1,args.web_queries)) or 1))
+    cursor_path=(Path(args.out_dir) if args.out_dir else DEFAULT_RUNTIME_DIR)/f'query-cursor-{region}.json'
+    try: query_offset=int(read_json(cursor_path).get('next_offset',0))
+    except (OSError,ValueError,TypeError):query_offset=0
+    queries = select_queries(matrix, args.web_queries,query_offset)
     provider = wr.make_provider(args.provider,
                                 captured=Path(args.captured) if args.captured else None,
                                 executable=args.executable)
+    provider.deadline=min(deadline,time.time()+web_seconds)
     probe = provider.probe()
     out = {
         "lane": "open_web_research",
@@ -349,7 +358,11 @@ def run_web_research(region: str, args, *, deadline: float) -> dict:
                               limit_per_query=args.limit_per_query, timeout=per_query,
                               validate=(not args.no_validate), max_urls=args.max_urls)
         doc["query_matrix_limited"] = len(queries) < len(matrix)
-        doc["query_matrix_size"] = len(queries)
+        doc["query_matrix_size"] = len(matrix)
+        observed=[q for q in doc.get('queries',[]) if q.get('web_search_observed')]
+        if observed:
+            last=next((i for i,q in reversed(list(enumerate(queries))) if q.get('query_id')==observed[-1].get('query_id')),0)
+            write_json_atomic(cursor_path,{'next_offset':(query_offset+last+1)%len(matrix), 'updated_at':now_utc()})
         out_dir = Path(args.web_out_dir) if args.web_out_dir else WEB_RESEARCH_DIR
         out_dir.mkdir(parents=True, exist_ok=True)
         export_path = out_dir / f"web-research-{region}-{doc['export_id']}.json"
@@ -398,6 +411,9 @@ def _ingest_export(path: Path, region: str, collector, *, stale_hours: float,
     info["age_hours"] = age_hours(generated)
     info["stale"] = bool(info["age_hours"] is not None and info["age_hours"] > stale_hours)
     block = collector(path, region)
+    for rec in block.get('candidates',[]):
+        rec['source_generated_at']=generated
+        rec['historical_seed']=info['stale']
     block["source"] = lane
     block.setdefault("coverage", {})["export_age_hours"] = info["age_hours"]
     block["coverage"]["export_stale"] = info["stale"]
@@ -644,7 +660,7 @@ def run_region(region: str, args, *, deadline: float | None = None,
         deepseek_model=args.model, batch_size=args.batch_size,
         codex_budget=args.codex_budget, codex_enabled=live and (args.codex == "on"),
         timeout=args.per_query_timeout, run_id=run_id,
-        max_tokens=args.max_tokens, collection=collection, fetch_descriptions=live,
+        max_tokens=args.max_tokens, collection=collection, fetch_descriptions=live, deadline=deadline,
         posting_resolver=posting_resolver,
         codex_model=getattr(args, "codex_model", None))
 
@@ -748,11 +764,15 @@ def run_region(region: str, args, *, deadline: float | None = None,
     doc["manifest"] = manifest["counts"]
 
     # requirement: refuse to call the lane production-ready without a live mechanism
-    doc["production_ready"] = bool(mechanism["operational"])
+    doc["production_ready"] = bool(mechanism["operational"]) and not bool(doc.get("dedupe",{}).get("error"))
     if not doc["production_ready"]:
         doc["no_go"] = ("no functioning current-web search mechanism was proven in this run; "
                         "the live research lane is NOT production-ready and the schedule must "
                         "not be treated as cut over (recorded blocker, no fixture fallback)")
+    if doc.get("dedupe",{}).get("error"):
+        doc["no_go"]="canonical tracker reconciliation failed; no healthy delivery claim"
+    write_json_atomic(health_file,doc)
+    write_json_atomic(region_dir / "latest.json",doc)
     return doc
 
 
@@ -905,7 +925,7 @@ def aggregate(region_docs: dict, args) -> dict:
         },
     }
     unified["summary_line"] = pipeline._summary_line(unified)
-    unified["production_ready"] = bool(operational)
+    unified["production_ready"] = bool(operational) and not any(d.get("dedupe",{}).get("error") for d in region_docs.values())
     if not unified["production_ready"]:
         unified["no_go"] = ("no region proved a functioning current-web search mechanism, so "
                             "the live research lane is NOT production-ready and no cutover is "
@@ -1221,7 +1241,7 @@ def main(argv=None) -> int:
         sp.add_argument("--codex-model", default=None,
                         help="model slug for the Codex CLI semantic pass "
                              "(default: the discovery default)")
-        sp.add_argument("--batch-size", type=int, default=8)
+        sp.add_argument("--batch-size", type=int, default=32)
         sp.add_argument("--max-tokens", type=int, default=None)
         sp.add_argument("--codex", choices=("on", "off"), default=DEFAULT_CODEX_ESCALATION)
         sp.add_argument("--codex-budget", type=int, default=DEFAULT_CODEX_BUDGET)

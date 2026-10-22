@@ -91,12 +91,28 @@ def normalized_manifest(region: str, doc: dict) -> Path:
     return target
 
 
-def promote(region: str, *, apply: bool) -> dict:
+def read_manifest_run(region):
+    path=MANIFEST_DIR / region / 'latest.json'
+    try:return json.loads(path.read_text(encoding='utf-8'))
+    except (OSError,ValueError):return None
+
+
+def promote(region: str, *, apply: bool, expected_run_id=None) -> dict:
     doc = read_manifest(region)
     if doc is None:
         return {"region": region, "state": "manifest-missing",
                 "path": str(manifest_path(region))}
 
+    generated=doc.get('generated_at')
+    try:
+        created=datetime.fromisoformat(str(generated).replace('Z','+00:00'))
+        age=(datetime.now(timezone.utc)-created).total_seconds()
+    except (ValueError,TypeError):age=-1
+    if age<0 or age>21600 or not doc.get('run_id') or (expected_run_id and doc['run_id']!=expected_run_id):
+        return {'region':region,'state':'manifest-refused','error':'manifest missing/future/stale or run mismatch'}
+    latest=read_manifest_run(region)
+    if not latest or latest.get('run_id')!=doc['run_id']:
+        return {'region':region,'state':'manifest-refused','error':'manifest does not belong to latest completed scan'}
     records = doc.get("records") or []
     generated = doc.get("generated_at")
     if not records:
@@ -111,7 +127,7 @@ def promote(region: str, *, apply: bool) -> dict:
 
     source_manifest = normalized_manifest(region, doc)
     cmd = [sys.executable, str(CLI), "write", "--region", region,
-           "--manifest", str(source_manifest)]
+           "--manifest", str(source_manifest), "--preserve-existing-rows"]
     if apply:
         cmd.append("--apply")
     run = subprocess.run(cmd, capture_output=True, text=True, cwd=str(CONTROL_PLANE))
@@ -122,10 +138,13 @@ def promote(region: str, *, apply: bool) -> dict:
                 "stdout_tail": (run.stdout or "")[-800:],
                 "stderr_tail": (run.stderr or "")[-800:]}
 
+    if run.returncode!=0 or result.get('error'):
+        return {'region':region,'state':'writer-failed','exit_code':run.returncode,
+                'error':result.get('error') or 'writer returned nonzero','counts':result.get('counts') or {}}
     counts = result.get("counts") or {}
     return {
         "region": region,
-        "state": "applied" if apply else "dry-run",
+        "state": ("applied" if result.get("applied") else "no-op") if apply else "dry-run",
         "manifest_generated_at": generated,
         "records_in_manifest": len(records),
         "skipped_unnamed_employer": skipped_unnamed,
@@ -144,12 +163,22 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Promote a discovery manifest into the canonical regional tracker.")
     ap.add_argument("--region", action="append", dest="regions",
                     help="region to promote (repeatable); default uk")
+    ap.add_argument("--expected-run-id")
+    ap.add_argument("--scan-report")
     ap.add_argument("--apply", action="store_true",
                     help="write to the canonical tracker (default: dry run)")
     args = ap.parse_args()
 
     regions = args.regions or list(DEFAULT_REGIONS)
-    reports = [promote(r, apply=args.apply) for r in regions]
+    expected={}
+    if args.scan_report:
+        try:
+            report=json.loads(Path(args.scan_report).read_text(encoding='utf-8'))
+            expected={r:(report.get('regions') or {}).get(r,{}).get('run_id') for r in regions} if report.get('regions') else {r:report.get('run_id') for r in regions if report.get('region')==r}
+            if any(not expected.get(r) for r in regions):raise ValueError('scan report does not identify requested region')
+        except (OSError,ValueError,TypeError) as exc:
+            print(json.dumps({'error':'invalid scan report; no promotion','failure_type':type(exc).__name__}));return 2
+    reports = [promote(r, apply=args.apply,expected_run_id=expected.get(r) or args.expected_run_id) for r in regions]
 
     total = sum((r.get("counts") or {}).get("appended", 0) for r in reports)
     out = {
@@ -165,7 +194,7 @@ def main() -> int:
     (LOG_DIR / f"promote-{stamp}.json").write_text(
         json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    if any(r.get("state") == "writer-failed" for r in reports):
+    if any(r.get("state") in ("writer-failed","manifest-refused") for r in reports):
         return 2
     if all(r.get("state") == "manifest-missing" for r in reports):
         return 3

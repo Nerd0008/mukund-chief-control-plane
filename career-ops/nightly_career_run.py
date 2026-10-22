@@ -179,7 +179,8 @@ def scan(args, regions: list[str]) -> dict:
     result = run(cmd, timeout=args.budget_seconds * len(regions) + 300)
     capture = NIGHTLY_DIR / f"{stamp}-scan-stdout.json"
     capture.write_text(result.get("stdout") or "", encoding="utf-8")
-    doc = read_json(DISCOVERY / "latest.json") or {}
+    try:doc=json.loads(result.get("stdout") or "{}")
+    except (ValueError,TypeError):doc={}
     funnel = doc.get("funnel") or {}
     return {
         "exit_code": result["exit_code"],
@@ -190,6 +191,7 @@ def scan(args, regions: list[str]) -> dict:
         "live": doc.get("live"),
         "generated_at": doc.get("generated_at"),
         "run_id": doc.get("run_id"),
+        "region_runs":{r:v.get('run_id') for r,v in (doc.get('regions') or {}).items()} if isinstance(doc.get('regions'),dict) else {},
         "funnel_counts": funnel.get("counts") or {},
         "summary_line": doc.get("summary_line"),
         "stderr_tail": (result.get("stderr") or "")[-600:],
@@ -206,6 +208,15 @@ def tracker_sync(args, regions: list[str], stamp: str) -> dict:
             per_region[region] = entry
             continue
         manifest = read_json(manifest_path) or {}
+        expected=getattr(args,'expected_region_runs',{}).get(region)
+        from promote_manifest import read_manifest_run
+        latest=read_manifest_run(region)
+        generated=manifest.get('generated_at')
+        try: age=(dt.datetime.now(dt.timezone.utc)-dt.datetime.fromisoformat(str(generated).replace('Z','+00:00'))).total_seconds()
+        except (TypeError,ValueError):age=-1
+        if (age<0 or age>21600 or not manifest.get('run_id') or not latest
+                or latest.get('run_id')!=manifest['run_id'] or (expected and expected!=manifest['run_id'])):
+            entry.update(ok=False,error='stale, mismatched or unbound manifest');per_region[region]=entry;continue
         records = manifest.get("records") or []
         kept, dropped = [], []
         for rec in records:
@@ -225,7 +236,7 @@ def tracker_sync(args, regions: list[str], stamp: str) -> dict:
         write_json(filtered, {"records": kept, "note": "synthetic records removed by "
                                                        "nightly_career_run.py"})
         cmd = [str(PYTHON), str(CAREER_OPS / "career_ops_cli.py"), "write",
-               "--region", region, "--manifest", str(filtered)]
+               "--region", region, "--manifest", str(filtered), "--preserve-existing-rows"]
         if not args.dry_run_trackers:
             cmd.append("--apply")
         result = run(cmd, timeout=900)
@@ -288,7 +299,7 @@ def main(argv=None) -> int:
     ap.add_argument("--mode", default="high_recall")
     ap.add_argument("--budget-seconds", type=int, default=2700)
     ap.add_argument("--scan-timeout", type=int, default=900)
-    ap.add_argument("--web-queries", type=int, default=8)
+    ap.add_argument("--web-queries", type=int, default=28)
     ap.add_argument("--max-urls", type=int, default=24)
     ap.add_argument("--per-query-timeout", type=int, default=180)
     ap.add_argument("--retries", type=int, default=1)
@@ -309,7 +320,10 @@ def main(argv=None) -> int:
 
     try:
         scan_block = {"skipped": "scan skipped by the caller"} if args.skip_scan else scan(args, regions)
-        trackers = tracker_sync(args, regions, stamp)
+        args.expected_region_runs=scan_block.get('region_runs') or {}
+        if not args.skip_scan and (scan_block.get('exit_code')!=0 or scan_block.get('timed_out') or not all(args.expected_region_runs.get(r) for r in regions)):
+            trackers={r:{'ok':False,'error':'fresh discovery failed; no promotion attempted'} for r in regions}
+        else:trackers = tracker_sync(args, regions, stamp)
         view = applied_view(args)
     finally:
         release_lock()

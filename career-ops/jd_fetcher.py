@@ -22,7 +22,7 @@ from application_deadlines import extract_application_deadline
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
-from application_links import extract as extract_links, public_url, aggregator, listing, title_matches, employer_matches, employer_name, fragment_route, canonical_posting_url, page_identity
+from application_links import extract as extract_links, public_url, aggregator, listing, title_matches, employer_matches, employer_name, fragment_route, canonical_posting_url, page_identity, mask_recommendations
 
 MAX_BYTES = 512 * 1024  # 512 KB cap
 TIMEOUT = 30  # seconds
@@ -151,6 +151,7 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
                 html = raw.decode(charset, errors="replace")
             except (LookupError, UnicodeDecodeError):
                 html = raw.decode("utf-8", errors="replace")
+            html=mask_recommendations(html)
             result["text"] = _html_to_text(html)
             identity = page_identity(html, final_url)
             if identity: result['discovered_posting'] = identity
@@ -280,6 +281,12 @@ def _active_ats_record(url,timeout):
     if host in ('job-boards.greenhouse.io','boards.greenhouse.io'):
         match=re.fullmatch(r'/([^/]+)/jobs/(\d+)/?',path)
         if match:endpoint=f'https://boards-api.greenhouse.io/v1/boards/{match[1]}/jobs/{match[2]}';identity=match[2];vendor='Greenhouse'
+    elif host=='jobs.ashbyhq.com':
+        match=re.fullmatch(r'/([^/]+)/([a-fA-F0-9-]{36})(?:/application)?/?',path)
+        if match:endpoint=f'https://api.ashbyhq.com/posting-api/job-board/{match[1]}';identity=match[2];vendor='Ashby'
+    elif host=='apply.workable.com':
+        match=re.fullmatch(r'/([^/]+)/j/([A-Za-z0-9]+)(?:/apply)?/?',path)
+        if match:endpoint=f'https://www.workable.com/api/accounts/{match[1]}?details=true';identity=match[2];vendor='Workable'
     elif host=='jobs.lever.co':
         match=re.fullmatch(r'/([^/]+)/([a-zA-Z0-9-]+)/?',path)
         if match:endpoint=f'https://api.lever.co/v0/postings/{match[1]}/{match[2]}?mode=json';identity=match[2];vendor='Lever'
@@ -300,6 +307,35 @@ def _active_ats_record(url,timeout):
         req=urllib.request.Request(endpoint,headers={'Accept':'application/json','User-Agent':USER_AGENT})
         with urllib.request.urlopen(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
         if not isinstance(data,dict):return None
+        if vendor in ('Ashby','Workable'):
+            # Documented unauthenticated GET feeds of published jobs. Never infer
+            # closure from absence (feeds can be partial/limited or unavailable).
+            jobs=data.get('jobs')
+            if not isinstance(jobs,list):return None
+            matches=[]
+            for job in jobs:
+                if not isinstance(job,dict):continue
+                if vendor=='Ashby':
+                    joburl=job.get('jobUrl') or ''
+                    if canonical_posting_url(joburl).rstrip('/')!=canonical_posting_url(url).removesuffix('/application').rstrip('/'):continue
+                    if job.get('isListed') is not True or not public_url(job.get('applyUrl')):continue
+                else:
+                    if str(job.get('shortcode'))!=identity:continue
+                    if job.get('state') and job['state']!='published':continue
+                matches.append(job)
+            if len(matches)!=1:return None
+            job=matches[0];title=job.get('title');content=job.get('descriptionPlain') or job.get('description') or job.get('descriptionHtml')
+            if not title or not content:return None
+            text=_html_to_text(content);deadline=extract_application_deadline(text,url)
+            state=assess('',text,deadline)
+            if state['state']!='CLOSED':
+                state={'state':'OPEN','evidence':f'{vendor} public published-jobs feed returned exact posting {identity}'}
+            state['page_title']=title
+            loc=job.get('location') or ''
+            if isinstance(loc,dict):loc=', '.join(str(loc[k]) for k in ('city','country') if loc.get(k))
+            return {'text':text,'deadline_info':deadline,'deadline':deadline['date'],
+                'vacancy_status':state,'is_closed':state['state']=='CLOSED','validation_source':endpoint,
+                'posting_identity':{'title':title,'location':loc},'application_url':job.get('applyUrl') or url}
         if vendor=='SmartRecruiters':
             if str(data.get('id'))!=identity or not data.get('name'):return None
             if (data.get('company') or {}).get('identifier')!=match[1]:return None

@@ -105,7 +105,7 @@ def test_direct_search_persists_and_orders_jd_deadlines_in_temporary_workbook(tm
     monkeypatch.setitem(search.TRACKERS,'uk',path)
     monkeypatch.setattr(search.osp,'load_profile',lambda:{})
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
-    rows=[{'company':name,'job_title':'Cyber Intern','url':'https://employer.com/'+name} for name in ('Unknown','Rolling','Urgent')]
+    rows=[{'company':name,'job_title':'Cyber Intern','url':'https://employer.com/'+name} for name in ('NoDeadlineFixture','Rolling','Urgent')]
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps(rows))
     tomorrow=(dt.date.today()+dt.timedelta(days=1)).isoformat()
     def fetch(url):
@@ -116,7 +116,7 @@ def test_direct_search_persists_and_orders_jd_deadlines_in_temporary_workbook(tm
     monkeypatch.setattr(sys,'argv',['search','--batches','1'])
     assert search.main()==0
     wb=openpyxl.load_workbook(path);ws=wb.active
-    assert [ws.cell(r,2).value for r in (3,4,5)]==['Urgent','Rolling','Unknown']
+    assert [ws.cell(r,2).value for r in (3,4,5)]==['Urgent','Rolling','NoDeadlineFixture']
     assert ws.cell(3,5).value.date()==dt.date.fromisoformat(tomorrow)
     assert ws.cell(4,5).value=='ROLLING' and ws.cell(5,5).value=='UNKNOWN'
     assert ws.max_column==6

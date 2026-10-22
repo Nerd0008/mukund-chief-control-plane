@@ -56,7 +56,7 @@ def test_main_defaults_to_active_regions(monkeypatch, tmp_path):
 
     def fake_scan(args, regions):
         calls["scan"] = list(regions)
-        return {"exit_code": 0, "production_ready": True, "live": True}
+        return {"exit_code": 0, "production_ready": True, "live": True, "region_runs":{r:"fixture-run" for r in regions}}
 
     def fake_track(args, regions, stamp):
         calls["track"] = list(regions)
@@ -80,7 +80,7 @@ def test_main_honours_explicit_region_resume(monkeypatch, tmp_path):
 
     def fake_scan(args, regions):
         calls["scan"] = list(regions)
-        return {"exit_code": 0, "production_ready": True, "live": True}
+        return {"exit_code": 0, "production_ready": True, "live": True, "region_runs":{r:"fixture-run" for r in regions}}
 
     def fake_track(args, regions, stamp):
         calls["track"] = list(regions)

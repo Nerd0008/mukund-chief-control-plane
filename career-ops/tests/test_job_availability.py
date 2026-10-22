@@ -73,12 +73,12 @@ def test_closed_page_cannot_be_resurrected_by_api(monkeypatch):
     assert jd.fetch_jd('https://job-boards.greenhouse.io/example/jobs/123')['vacancy_status']['state']=='CLOSED'
 
 def test_stale_cache_never_authorizes_delivery():
-    record={'company':'Example','title':'Intern','url':'https://employer.com/1'}
+    record={'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/1'}
     old=(dt.datetime.now(dt.timezone.utc)-dt.timedelta(minutes=16)).isoformat()
     assert status.fresh_status(record,{status.identity_key(record):{'state':'OPEN','checked_at':old}})['state']=='UNKNOWN'
 
 def test_cached_deadline_expiry_overrides_open_state():
-    record={'company':'Example','title':'Intern','url':'https://employer.com/1'}
+    record={'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/1'}
     cache={status.identity_key(record):{'state':'OPEN','checked_at':dt.datetime.now(dt.timezone.utc).isoformat(),'deadline_info':{'type':'EXACT','date':'2020-01-01'}}}
     assert status.fresh_status(record,cache)['state']=='CLOSED'
 
@@ -106,7 +106,7 @@ def test_past_deadline_never_surfaces_even_with_open_cache(monkeypatch):
     assert 'Past — Cyber Intern' not in text
 
 def test_refresh_is_bounded_and_reuses_fresh_positive_evidence():
-    records=[{'company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(5)]
+    records=[{'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(5)]
     calls=[]
     def fetch(url,timeout):calls.append(url);return {'vacancy_status':{'state':'OPEN','evidence':'fixture'}}
     assert status.refresh(records,limit=2,fetcher=fetch)['checked']==2
@@ -144,7 +144,7 @@ def test_unknown_admitted_only_as_flagged_lead(tmp_path,monkeypatch,capsys):
     assert report['counts']['new_candidates']==1 and report['counts']['unverified_candidates']==1
 
 def test_refresh_prioritises_unchecked_records_instead_of_repeating_first_page():
-    records=[{'company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(4)]
+    records=[{'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(4)]
     calls=[]
     def fetch(url,timeout):calls.append(url);return {'vacancy_status':{'state':'UNKNOWN','evidence':'fixture blocked'}}
     status.refresh(records,limit=2,fetcher=fetch)
@@ -152,7 +152,7 @@ def test_refresh_prioritises_unchecked_records_instead_of_repeating_first_page()
     assert calls==[r['url'] for r in records]
 
 def test_corrupt_cache_entry_fails_closed():
-    record={'company':'Example','title':'Intern','url':'https://employer.com/1'}
+    record={'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/1'}
     assert status.fresh_status(record,{status.identity_key(record):'corrupt'})['state']=='UNKNOWN'
 
 def test_teamtailor_application_overlay_is_positive_evidence():
@@ -166,8 +166,16 @@ def test_structured_expiry_timestamp_on_same_day_is_not_treated_as_future():
     assert status.assess(html,'Intern Apply now',{})['state']=='CLOSED'
 
 def test_cache_write_failure_cannot_authorize_delivery(monkeypatch):
-    record={'company':'Example','title':'Intern','url':'https://employer.com/1'}
+    record={'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/1'}
     monkeypatch.setattr(status,'save_cache',lambda *a:(_ for _ in ()).throw(OSError('busy')))
     result=status.record_verification(record,{'vacancy_status':{'state':'OPEN','evidence':'fixture'}})
     assert result['cache_persisted'] is False
     assert status.fresh_status(record,status.load_cache())['state']=='UNKNOWN'
+
+
+@pytest.fixture(autouse=True)
+def isolate_direct_canonical_plan(monkeypatch,tmp_path):
+    import codex_entry_level_search as search
+    monkeypatch.setattr(search,'SEARCH_STATE_DIR',tmp_path/'direct-search')
+    monkeypatch.setattr(search,'canonical_plan',lambda region,tracker,records:{
+        'counts':{'appended':len(records),'duplicates':0},'outcomes':[]})

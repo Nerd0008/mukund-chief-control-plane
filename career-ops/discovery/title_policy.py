@@ -123,7 +123,7 @@ DISCIPLINE_FAMILIES = {
     "it_support_security_adjacent": [
         "it support", "service desk", "helpdesk", "help desk",
         "desktop support", "application support", "technical support",
-        "it operations", "it analyst", "systems administrator",
+        "it operations", "it analyst", "systems administrator", "it administrator",
         "endpoint", "it infrastructure",
     ],
 }

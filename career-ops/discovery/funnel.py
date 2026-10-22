@@ -36,6 +36,8 @@ COUNT_KEYS = (
     "after_hard_negative_prefilter",
     "semantically_reviewed",
     "deepseek_accept",
+    "semantic_accept",
+    "codex_semantic_accept",
     "codex_escalated",
     "codex_accept",
     "deterministic_eligibility_pass",
@@ -48,11 +50,10 @@ STAGE_ORDER = (
     ("after_hard_negative_prefilter", "every discovered candidate was removed by Tier B "
                                       "hard-negative / non-cyber / no-signal hints"),
     ("semantically_reviewed", "no candidate reached the semantic stage"),
-    ("deepseek_accept", "the semantic stage accepted nothing"),
+    ("semantic_accept", "the semantic stage accepted nothing"),
     ("deterministic_eligibility_pass", "every semantically accepted candidate failed a "
                                        "deterministic gate (location, work authorisation, "
                                        "clearance, experience or URL)"),
-    ("duplicates_removed", "all eligible candidates were already canonical/known (dedupe)"),
     ("tracker_candidates", "nothing remained for tracker handoff"),
 )
 

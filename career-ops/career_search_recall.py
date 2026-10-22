@@ -31,6 +31,16 @@ def query_batches(profile,region,fallback,year):
             q=' '.join(x for x in (discipline,level,region,scope) if x)
             if q not in seen:batch.append(q);seen.add(q)
         batches.append(batch)
+    # Reach less prominent employer/ATS boards as well as broad web results.
+    for sites in (('jobs.ashbyhq.com','apply.workable.com'),
+                  ('job-boards.greenhouse.io','jobs.lever.co'),
+                  ('myworkdayjobs.com','jobs.smartrecruiters.com'),
+                  ('jobs.nhs.uk','findajob.dwp.gov.uk')):
+        batch=[]
+        for site in sites:
+            for discipline in ('security analyst','cyber security','IT support'):
+                batch.append(f'site:{site} {discipline} (junior OR graduate OR internship OR trainee) {region}')
+        batches.append(batch)
     # Preserve varied legacy query coverage, refresh stale years, and do not quote exact titles.
     for group in fallback:
         batch=[]
@@ -39,3 +49,8 @@ def query_batches(profile,region,fallback,year):
             if q not in seen:batch.append(q);seen.add(q)
         if batch:batches.append(batch[:6])
     return [b for b in batches if b]
+
+
+def select_batches(total, count, offset):
+    """The logged offset is the actual first batch; no permanently pinned batch 0."""
+    return [(offset+i)%total for i in range(min(max(0,count),total))] if total else []

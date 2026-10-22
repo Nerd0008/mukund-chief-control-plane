@@ -83,7 +83,13 @@ def listing(url):
     p = urlsplit(url)
     parts = [s for s in p.path.split('/') if s]
     host = (p.hostname or '').lower().removeprefix('www.')
-    return ((host == 'brightnetwork.co.uk' and (not parts or len(parts) < 3))
+    ats_board=host in ('job-boards.greenhouse.io','boards.greenhouse.io','jobs.lever.co','jobs.ashbyhq.com','apply.workable.com','jobs.smartrecruiters.com')
+    exact_query=bool(parse_qs(p.query).get('gh_jid'))
+    return ((ats_board and len(parts)<2 and not exact_query)
+            or (host.endswith('.myworkdayjobs.com') and '/job/' not in p.path)
+            or (host in ('job-boards.greenhouse.io','boards.greenhouse.io') and p.path.rstrip('/')=='/embed/job_board')
+            or (host.endswith('whatjobs.com') and bool(re.fullmatch(r'/company/[^/]+/jobs/?',p.path)))
+            or (host == 'brightnetwork.co.uk' and (not parts or len(parts) < 3))
             or (host == 'jointheintake.com' and len(parts) < 2)
             or bool(re.search(r'/(?:jobs/search|job-search|search-jobs)(?:/|$)', p.path)))
 
@@ -218,3 +224,44 @@ def fragment_route(page, fragment_html, posting_url, frame_url):
                 and form.get('method', '').lower() == 'post'):
             return True
     return False
+
+
+def mask_recommendations(html):
+    """Remove related-job containers without discarding deadline sidebars."""
+    class Mask(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=False)
+            self.root={'tag':'','attrs':{},'start':'','end':'','children':[]};self.stack=[self.root]
+        def handle_starttag(self,tag,attrs):
+            node={'tag':tag,'attrs':dict(attrs),'start':self.get_starttag_text(),'end':'','children':[]}
+            self.stack[-1]['children'].append(node)
+            if tag not in ('br','hr','img','input','meta','link','source','area','wbr','embed','param','col','base'):self.stack.append(node)
+        def handle_startendtag(self,tag,attrs):
+            self.stack[-1]['children'].append(self.get_starttag_text())
+        def handle_endtag(self,tag):
+            for i in range(len(self.stack)-1,0,-1):
+                if self.stack[i]['tag']==tag:
+                    self.stack[i]['end']='</'+tag+'>';del self.stack[i:];break
+        def handle_data(self,value):self.stack[-1]['children'].append(value)
+        def handle_entityref(self,value):self.handle_data('&'+value+';')
+        def handle_charref(self,value):self.handle_data('&#'+value+';')
+        def handle_comment(self,value):self.handle_data('<!--'+value+'-->')
+        def render(self,node):
+            if isinstance(node,str):return node
+            attrs=node['attrs'];marker=(attrs.get('class') or '')+' '+(attrs.get('id') or '')
+            if re.search(r'(?:similar|related|recommended)[-_ ](?:jobs|roles)',marker,re.I):return ''
+            inner=''.join(self.render(x) for x in node['children'])
+            if node['tag']=='aside' and re.search(r'\b(?:similar|related|recommended)\s+(?:jobs|roles)\b',re.sub('<[^>]+>',' ',inner),re.I):return ''
+            return node['start']+inner+node['end']
+    parser=Mask();parser.feed(html or '');return parser.render(parser.root)
+
+
+def identity_review_reason(company,title):
+    """Availability may be unknown; employer/role identity must still be usable."""
+    name=' '.join(re.findall(r'[a-z0-9]+',str(company or '').casefold()))
+    role=str(title or '').strip()
+    if not name or name in ('unknown','unknown company','not stated','n a','none') or not role or role.casefold() in ('unknown','not stated','n/a'):
+        return 'employer or role identity unresolved; review-only'
+    if name in ('targetjobs','targetjobs uk','bright network','brightnetwork','totaljobs','linkedin','indeed','jobright','jobright ai'):
+        return 'job-board sender is not an identified employer; review-only'
+    return ''

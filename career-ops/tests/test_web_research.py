@@ -487,7 +487,8 @@ def test_fetch_validate_detects_a_closed_posting_marker(monkeypatch):
 def test_fetch_validate_obeys_robots_disallow(monkeypatch):
     _patch_urlopen(monkeypatch, robots_body=b"User-agent: *\nDisallow: /jobs\n")
     rec = wr.fetch_validate("https://acme.invalid/jobs/secret")
-    assert rec["status"] == wr.FETCH_VALIDATION_FAILED
+    assert rec["status"] == wr.FETCH_NOT_ATTEMPTED
+    assert rec["failure_kind"] == "robots"
     assert "robots.txt disallows" in rec["error"]
 
 
@@ -682,7 +683,7 @@ def test_lane_cli_run_with_funnel_reports_the_full_telemetry(tmp_path):
     assert "deterministic_eligibility_pass" in telemetry
     assert "tracker_candidates" in telemetry
     assert doc["funnel"]["safety"]["canonical_workbook_written"] is False
-    assert doc["funnel"]["zero_attribution"]["first_zero_stage"]
+    assert bool(doc["funnel"]["zero_attribution"]["first_zero_stage"]) == (telemetry["tracker_candidates"]==0)
 
 
 def test_lane_cli_default_run_is_read_only(tmp_path):
