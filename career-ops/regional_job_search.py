@@ -518,7 +518,7 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
     rp = region_policy(region, policy)
     cfg = dict(tw.region_config(tw.load_profiles(), region))
     today = dt.date.today().isoformat()
-    verified=candidate.get("verified_posting") or {}
+    verified=candidate.get("verified_posting") or candidate.get("discovered_posting") or {}
     rec = {
         "company": verified.get("company") or candidate.get("company") or "",
         "title": verified.get("title") or candidate.get("title") or "",

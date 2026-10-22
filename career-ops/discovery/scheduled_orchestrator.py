@@ -634,12 +634,18 @@ def run_region(region: str, args, *, deadline: float | None = None,
 
     candidates = [c for b in collection for c in b["candidates"]]
     mode = args.mode
+    posting_resolver = None
+    if live and provider_kind == 'codex':
+        from posting_resolution import PostingResolver
+        posting_resolver = PostingResolver(wr.make_provider('codex', executable=args.executable), deadline=deadline,
+            state_path=(Path(args.out_dir) if args.out_dir else DEFAULT_RUNTIME_DIR) / f'posting-recovery-{region}.json')
     funnel_doc = pipeline.run_funnel(
         candidates, region=region, mode=mode, semantic=args.semantic if live else "off",
         deepseek_model=args.model, batch_size=args.batch_size,
         codex_budget=args.codex_budget, codex_enabled=live and (args.codex == "on"),
         timeout=args.per_query_timeout, run_id=run_id,
         max_tokens=args.max_tokens, collection=collection, fetch_descriptions=live,
+        posting_resolver=posting_resolver,
         codex_model=getattr(args, "codex_model", None))
 
     mechanism = live_mechanism_summary(lanes["web_research"])

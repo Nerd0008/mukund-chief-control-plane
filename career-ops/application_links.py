@@ -12,7 +12,8 @@ import re
 from html.parser import HTMLParser
 from urllib.parse import parse_qs, urljoin, urlsplit, urlunsplit
 
-AGGREGATORS = frozenset(('jointheintake.com', 'brightnetwork.co.uk', 'gradcracker.com'))
+AGGREGATORS = frozenset(('jointheintake.com', 'brightnetwork.co.uk', 'gradcracker.com', 'linkedin.com', 'uk.linkedin.com', 'totaljobs.com',
+    'haystackapp.io', 'alion.io', 'swiftcruit.ai', 'cybersecurityjobs.tech', 'cybersecurityjobslist.com'))
 APPLY = re.compile(r'^(?:apply(?:\s+(?:now|online(?:\s+now)?|for\s+(?:(?:this|the)\s+)?(?:job|role|position)))?|i[’\']m\s+interested|apply\s+on\s+.+?[’\']s\s+(?:site|website))$', re.I)
 
 
@@ -39,6 +40,40 @@ def public_url(value, base=''):
         return None
 
 
+def canonical_posting_url(url):
+    """Mail notification links identify the same public job; never fetch the login route."""
+    parsed = urlsplit(url)
+    if (parsed.hostname or '').lower() in ('www.linkedin.com', 'uk.linkedin.com', 'linkedin.com'):
+        match = re.fullmatch(r'/(?:comm/)?jobs/view/(?:[^/]*-)?(\d+)/?', parsed.path)
+        if match:
+            return 'https://www.linkedin.com/jobs/view/' + match[1]
+    return url
+
+
+def page_identity(html, url):
+    """Read target posting metadata; this is identity evidence, NOT proof of OPEN."""
+    page = extract(html, url)
+    posting = page['posting']
+    org = posting.get('hiringOrganization') or {}
+    locations = posting.get('jobLocation') or []
+    if isinstance(locations, dict): locations = [locations]
+    places = []
+    for loc in locations:
+        address = loc.get('address') or {}
+        places.extend(str(address[k]) for k in ('addressLocality', 'addressRegion', 'addressCountry')
+                      if isinstance(address.get(k), str))
+    company = org.get('name') if isinstance(org, dict) else None
+    if (urlsplit(url).hostname or '').lower() in ('www.linkedin.com', 'uk.linkedin.com', 'linkedin.com'):
+        # Only the public target top card, never similar-job recommendations.
+        company_match = re.search(r'<a\b[^>]*class=["\'][^"\']*topcard__org-name-link[^"\']*["\'][^>]*>(.*?)</a>', html, re.I|re.S)
+        location_match = re.search(r'<span\b[^>]*class=["\'][^"\']*topcard__flavor--bullet[^"\']*["\'][^>]*>(.*?)</span>', html, re.I|re.S)
+        clean = lambda v: ' '.join(entities.unescape(re.sub('<[^>]+>', ' ', v)).split())
+        if company_match: company = clean(company_match[1])
+        if location_match: places = [clean(location_match[1])]
+    if not company or not page['specific'] or not page['title'] or not places: return None
+    return {'company': company, 'title': page['title'], 'location': ', '.join(dict.fromkeys(places))}
+
+
 def aggregator(url):
     host = (urlsplit(url).hostname or '').lower().removeprefix('www.')
     return host in AGGREGATORS
@@ -58,6 +93,7 @@ def tokens(text):
 
 
 def title_matches(expected, actual):
+    expected = re.sub(r'^.+?\s+Jobs\s*[-–—]\s*', '', entities.unescape(expected or ''), flags=re.I)
     wanted = tokens(expected)
     found = tokens(actual)
     # Years must agree; broad token overlap must not accept a different intake.
@@ -133,6 +169,13 @@ def extract(html, url):
             target = public_url(link['url'], url)
             if target and APPLY.fullmatch(link['text']) and not listing(target):
                 candidates[target] = {'url': target, 'label': link['text']}
+    if specific:
+        for form in page.forms:
+            target = public_url(form.get('action'), url)
+            if (target and (form.get('method') or 'get').lower() == 'get'
+                    and urlsplit(target).hostname == urlsplit(url).hostname
+                    and re.search(r'/apply/?$', urlsplit(target).path)):
+                candidates[target] = {'url': target, 'label': 'Apply'}
     return {'title': title, 'posting': posting, 'specific': specific,
             'links': list(candidates.values()), 'frames': page.frames, 'forms': page.forms}
 

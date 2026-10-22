@@ -3,6 +3,7 @@ import datetime as dt,html,ipaddress,json,re,socket,time,urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 from career_job_mail import ROOT,safe_url,save
+from application_links import canonical_posting_url, page_identity
 
 
 def public_url(url):
@@ -16,6 +17,7 @@ class PublicRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req,fp,code,msg,headers,newurl)
 
 def fetch(url,timeout=8):
+    url=canonical_posting_url(url)
     public_url(url)
     opener=urllib.request.build_opener(PublicRedirect)
     request=urllib.request.Request(url,headers={'User-Agent':'CareerOpsReadOnly/1.0'})
@@ -64,17 +66,25 @@ def collect(region,args,*,root=ROOT,fetcher=fetch):
     cap=min(20,max(0,getattr(args,'max_urls',20)));end=time.monotonic()+min(90,max(0,getattr(args,'budget_seconds',90)))
     if getattr(args,"gmail_deadline",None) is not None:end=min(end,time.monotonic()+max(0,args.gmail_deadline-time.time()))
     attempts=0;out=[];today=dt.datetime.now(dt.timezone.utc).date().isoformat()
+    # Never-checked links come before yesterday's already-checked links.
+    def priority(job):
+        try: received=dt.datetime.fromisoformat(job.get('received_at') or '').timestamp()
+        except (ValueError,TypeError): received=0
+        return (cache.get(job['job_id'],{}).get('checked_day',''), -received)
+    jobs=sorted(jobs,key=priority)
     for j in jobs:
         cid=j['job_id'];item=cache.get(cid,{})
         if item.get('checked_day')!=today and live and attempts<cap and time.monotonic()<end:
             attempts+=1
             try:
-                meta=posting(fetcher(j['url'],timeout=min(8,max(1,end-time.monotonic()))))
-                item={'checked_day':today,'posting':meta,'state':'validated_live' if meta else 'needs_review'}
+                page=fetcher(j['url'],timeout=min(8,max(1,end-time.monotonic())))
+                meta=posting(page)
+                discovered=page_identity(page,canonical_posting_url(j['url']))
+                item={'checked_day':today,'posting':meta,'discovered':discovered,'state':'validated_live' if meta else 'needs_review'}
             except Exception as e:item={'checked_day':today,'posting':None,'state':'unavailable','error_type':type(e).__name__}
             cache[cid]=item
         meta=item.get('posting') if item.get('checked_day')==today else None
-        rec={**(meta or {'company':None,'title':j.get('title')}),'url':safe_url(j['url']),
+        rec={**(meta or item.get('discovered') or {'company':j.get('company'),'title':j.get('title')}),'url':safe_url(canonical_posting_url(j['url'])),
              'source':'gmail_job_alert','fetch_state':'validated_live' if meta else 'discovered_unverified',
              'result_kind':'job_posting' if meta else 'unknown','_collection_source':'gmail_job_alert'}
         out.append(rec)

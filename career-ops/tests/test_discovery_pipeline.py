@@ -628,3 +628,44 @@ def offline_active_posting_fetch(monkeypatch):
     # Semantic-stage fixtures supply positive availability; no real HTTP is permitted.
     monkeypatch.setattr(pipeline,'fetch_jd',lambda url,**kw:{'text':'Fixture job description.',
         'fetch_state':'fetched','vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}})
+
+
+def test_rate_limited_host_is_deferred_for_rest_of_scan(tmp_path,monkeypatch):
+    seen=[]
+    monkeypatch.setattr(pipeline,'fetch_jd',lambda url,**kw:seen.append(url) or {
+        'status':429,'text':'','fetch_state':'bot_wall','vacancy_status':{'state':'UNKNOWN','evidence':'rate limited'}})
+    path=tmp_path/'records.json'
+    path.write_text(json.dumps({'records':[{'company':'Acme','title':f'Cybersecurity Intern {i}',
+        'location':'London, United Kingdom','url':f'https://www.linkedin.com/comm/jobs/view/{100+i}'} for i in (1,2)]}))
+    collected=pipeline.collect_from_records(path)
+    doc=pipeline.run_funnel(collected['candidates'],region='uk',mode=MODE_HIGH_RECALL,
+        semantic='deepseek',deepseek_model='deepseek-flash',batch_size=5,codex_budget=0,
+        codex_enabled=False,timeout=10,run_id='rate-limit-test',deepseek_adapter=StubNativeBulk())
+    assert len(seen)==1
+    assert doc['jd_verification']['attempted']==1
+    assert doc['jd_verification']['failures']['rate limit backoff']==1
+
+
+def test_recovered_official_posting_reaches_normal_eligibility_and_dedupe(tmp_path,monkeypatch):
+    from posting_resolution import PostingResolver
+    original={'company':'Acme','title':'Cybersecurity Intern','location':'London, United Kingdom',
+              'url':'https://www.linkedin.com/comm/jobs/view/123'}
+    path=tmp_path/'records.json';path.write_text(json.dumps({'records':[original]}))
+    collected=pipeline.collect_from_records(path)
+    monkeypatch.setattr(pipeline,'fetch_jd',lambda *a,**k:{'text':'','fetch_state':'fetched',
+        'vacancy_status':{'state':'UNKNOWN','evidence':'source has no application destination'}})
+    class Search:
+        def research(self,*a,**k):return {'queries':[{'web_search_observed':True,
+            'results':[{'url':'https://jobs.acme.test/jobs/123'}]}]}
+    resolver=PostingResolver(Search(),fetcher=lambda *a,**k:{'text':'Cybersecurity intern in London.',
+        'vacancy_status':{'state':'OPEN','page_title':'Cybersecurity Intern'},
+        'posting_identity':{k:original[k] for k in ('company','title','location')}})
+    doc=pipeline.run_funnel(collected['candidates'],region='uk',mode=MODE_HIGH_RECALL,
+        semantic='deepseek',deepseek_model='deepseek-flash',batch_size=5,codex_budget=0,
+        codex_enabled=False,timeout=10,run_id='posting-recovery-test',deepseek_adapter=StubNativeBulk(),
+        posting_resolver=resolver)
+    assert doc['eligibility']['decisions'][0]['vacancy_status']['state']=='OPEN'
+    assert doc['eligibility']['decisions'][0]['decision']=='accepted'
+    assert doc['funnel']['counts']['tracker_candidates']==1
+    assert doc['posting_recovery'][0]['resolved'] is True
+    assert doc['safety']['canonical_workbook_written'] is False

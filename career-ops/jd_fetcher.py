@@ -22,7 +22,7 @@ from application_deadlines import extract_application_deadline
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
-from application_links import extract as extract_links, public_url, aggregator, listing, title_matches, employer_matches, employer_name, fragment_route
+from application_links import extract as extract_links, public_url, aggregator, listing, title_matches, employer_matches, employer_name, fragment_route, canonical_posting_url, page_identity
 
 MAX_BYTES = 512 * 1024  # 512 KB cap
 TIMEOUT = 30  # seconds
@@ -123,6 +123,9 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
         result["error"] = "not a valid HTTP URL"
         return result
 
+    source_url = url
+    url = canonical_posting_url(url)
+    result['retrieval_url'] = url
     parsed = urlparse(url)
     if not parsed.hostname:
         result["error"] = "no hostname in URL"
@@ -149,6 +152,8 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
             except (LookupError, UnicodeDecodeError):
                 html = raw.decode("utf-8", errors="replace")
             result["text"] = _html_to_text(html)
+            identity = page_identity(html, final_url)
+            if identity: result['discovered_posting'] = identity
             # JS ATS shells often publish the full JD only as JobPosting JSON-LD.
             # Preserve it for clearance/eligibility checks, not just title matching.
             structured=extract_links(html,final_url)['posting']

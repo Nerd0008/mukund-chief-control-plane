@@ -1080,7 +1080,8 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                deepseek_adapter=None, codex_adapter=None,
                codex_workdir: str | None = None,
                codex_model: str | None = None,
-               collection: list | None = None, fetch_descriptions: bool = True) -> dict:
+               collection: list | None = None, fetch_descriptions: bool = True,
+               posting_resolver=None) -> dict:
     policy = rjs.load_policy()
     schedules = rjs.load_schedules()
     profiles = tw.load_profiles()
@@ -1193,14 +1194,33 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
 
     # 3.5 JD fetch for clearance/eligibility checks ------------------------ #
     jd_attempts=0
+    rate_limited_hosts=set()
+    if posting_resolver is not None:
+        accepted.sort(key=posting_resolver.priority)
     # Fetch full job description text for each semantically accepted candidate
     # so the clearance gate can run against the actual JD, not just snippets.
     for rec in (accepted if fetch_descriptions else []):
         url = tw.extract_url(rec.get("url"))
         if not url:
             continue
-        jd_attempts+=1
-        jd_result = fetch_jd(url)
+        from urllib.parse import urlsplit
+        from application_links import canonical_posting_url
+        host=urlsplit(canonical_posting_url(url)).hostname
+        if host in rate_limited_hosts:
+            jd_result={'text':'','fetch_state':'bot_wall',
+                'vacancy_status':{'state':'UNKNOWN','evidence':'host returned HTTP 429 earlier in this run; deferred'},
+                'error':'rate limit backoff'}
+        else:
+            jd_attempts+=1
+            jd_result = fetch_jd(url)
+            if jd_result.get('status')==429 and (jd_result.get('vacancy_status') or {}).get('state')!='OPEN':
+                rate_limited_hosts.add(host)
+        if (posting_resolver is not None and
+                (jd_result.get('vacancy_status') or {}).get('state') == 'UNKNOWN'):
+            recovered = posting_resolver(rec, jd_result)
+            if recovered: jd_result = recovered
+        if jd_result.get('discovered_posting'):
+            rec['discovered_posting'] = jd_result['discovered_posting']
         rec['jd_validation_source']=jd_result.get('validation_source')
         rec["jd_text"] = jd_result.get("text") or ""
         rec["jd_fetch_state"] = jd_result.get("fetch_state", "fetch_failed")
@@ -1240,7 +1260,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
             "classification labels and rejections_by_reason for the per-candidate reason")
     gated = []
     for rec in accepted:
-        verified=rec.get("verified_posting") or {}
+        verified=rec.get("verified_posting") or rec.get("discovered_posting") or {}
         gate_rec={**rec,**{k:v for k,v in verified.items() if k in ("company","title","location") and v}}
         verdict = deterministic_gates(region, gate_rec, policy, scope)
         sources = rec.get("sources")
@@ -1347,6 +1367,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                    "outcomes": probe.get("outcomes", [])[:25], "applied": False},
         "funnel": funnel.document(),
         "jd_gap": {**jd_gap_report(candidates),"measured_at":"discovery input, before post-semantic JD fetch"},
+        "posting_recovery":getattr(posting_resolver, "evidence", []),
         "jd_verification":{
             "attempted":jd_attempts,
             "with_text":sum(bool(r.get("jd_text")) for r in accepted),

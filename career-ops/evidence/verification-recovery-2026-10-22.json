@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-22",
+  "baseline_commit": "eff431ecff4828a637be98e1ca4888a33a44024e",
+  "unknown_baseline": 65,
+  "linkedin_unknown": 54,
+  "linkedin_email_notification_links": 52,
+  "controlled_live_cases": 3,
+  "observed_live_searches": 3,
+  "recovered_verified_open": 2,
+  "unresolved": 1,
+  "fresh_official_reverification": {
+    "verified_open": 2,
+    "eligible": 2,
+    "proposed_distinct_new_rows": 2,
+    "tracker_writes": 0,
+    "workbook_before": "9340232290bc43b03cadfc0f2169fd33959d44bcc85dcdbb76bc0ee698ec4f36",
+    "workbook_after": "9340232290bc43b03cadfc0f2169fd33959d44bcc85dcdbb76bc0ee698ec4f36"
+  },
+  "tests": {
+    "passed": 425,
+    "failed": 0,
+    "seconds": 37.521
+  },
+  "scope": "focused resolver, discovery, scheduled path, writer, deadlines, digest and regional regression; not a full new market discovery scan",
+  "limits": {
+    "recovery_queries_per_run": 4,
+    "recovery_elapsed_budget_seconds": 180,
+    "single_search_timeout_seconds": 60,
+    "destination_fetches_per_query": 3,
+    "destination_fetch_timeout_seconds": 12,
+    "positive_cache_seconds": 900,
+    "negative_retry_seconds": 3600
+  },
+  "safety": {
+    "canonical_workbook_unchanged": true,
+    "applications_submitted": 0,
+    "outreach": 0,
+    "gmail_mutations": 0,
+    "main_merge": false
+  }
+}
