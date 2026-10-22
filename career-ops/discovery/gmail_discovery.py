@@ -59,7 +59,7 @@ def posting(page):
 def collect(region,args,*,root=ROOT,fetcher=fetch):
     root=Path(root);path=root/'jobs.json';cache_path=root/'validated-postings.json'
     if not path.exists():return {'lane':'gmail_job_alerts','available':False,'block':{'source':'gmail_job_alert','candidates':[],'coverage':{'available':False,'reason':'no newsletter list yet'}}}
-    jobs=json.loads(path.read_text(encoding='utf-8'));cache=json.loads(cache_path.read_text()) if cache_path.exists() else {}
+    jobs=json.loads(path.read_text(encoding='utf-8'));cache=json.loads(cache_path.read_text(encoding='utf-8')) if cache_path.exists() else {}
     live=not getattr(args,'no_live',False) and not getattr(args,'no_validate',False)
     cap=min(20,max(0,getattr(args,'max_urls',20)));end=time.monotonic()+min(90,max(0,getattr(args,'budget_seconds',90)))
     if getattr(args,"gmail_deadline",None) is not None:end=min(end,time.monotonic()+max(0,args.gmail_deadline-time.time()))

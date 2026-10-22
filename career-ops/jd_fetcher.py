@@ -179,9 +179,16 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
     if result['vacancy_status']['state']=='UNKNOWN':
         remaining=request_timeout-(time.monotonic()-started)
         if remaining>0.2:
-            fallback=_active_ats_record(result.get('final_url') or url,remaining)
+            fallback=_active_ats_record(url,remaining)
+            if not fallback and result.get('final_url') and result['final_url']!=url:
+                remaining=request_timeout-(time.monotonic()-started)
+                if remaining>0.2:fallback=_active_ats_record(result['final_url'],remaining)
             if fallback:
                 result.update(fallback)
+                if result['vacancy_status']['state']=='OPEN':
+                    result.setdefault('resolved_url',url)
+                    result.setdefault('application_url',url)
+                    return result
     # Resolve only the target vacancy's explicit route, within the same elapsed budget.
     # Aggregator controls are discovery evidence; only the destination can prove OPEN.
     remaining=lambda:request_timeout-(time.monotonic()-started)
@@ -219,7 +226,7 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
                             'state':child.get('vacancy_status',{}).get('state','UNKNOWN')}
                 result['application_resolution']=resolution
                 if title_ok and company_ok and child.get('vacancy_status',{}).get('state') in ('OPEN','CLOSED'):
-                    result.update({k:child[k] for k in ('text','deadline_info','deadline','vacancy_status','is_closed','validation_source') if k in child})
+                    result.update({k:child[k] for k in ('text','deadline_info','deadline','vacancy_status','is_closed','validation_source','posting_identity') if k in child})
                     result['is_closed']=result['vacancy_status']['state']=='CLOSED'
                     if result['vacancy_status']['state']=='OPEN':
                         result['resolved_url']=child.get('resolved_url') or child.get('final_url') or landing
@@ -271,6 +278,11 @@ def _active_ats_record(url,timeout):
     elif host=='jobs.lever.co':
         match=re.fullmatch(r'/([^/]+)/([a-zA-Z0-9-]+)/?',path)
         if match:endpoint=f'https://api.lever.co/v0/postings/{match[1]}/{match[2]}?mode=json';identity=match[2];vendor='Lever'
+    elif host=='jobs.smartrecruiters.com':
+        match=re.fullmatch(r'/([^/]+)/(\d+)(?:-[^/]+)?/?',path)
+        if match:
+            endpoint=f'https://api.smartrecruiters.com/v1/companies/{match[1]}/postings/{match[2]}'
+            identity=match[2];vendor='SmartRecruiters'
     elif host.endswith('.myworkdayjobs.com'):
         match=re.fullmatch(r'/(?:[a-z]{2}-[A-Z]{2}/)?([^/]+)/job/(.+?)(?:/apply)?/?',path)
         requisition=re.search(r'_(JR[-\w]+|R[-\w]+)$',match[2]) if match else None
@@ -282,6 +294,22 @@ def _active_ats_record(url,timeout):
     try:
         req=urllib.request.Request(endpoint,headers={'Accept':'application/json','User-Agent':USER_AGENT})
         with urllib.request.urlopen(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
+        if not isinstance(data,dict):return None
+        if vendor=='SmartRecruiters':
+            if str(data.get('id'))!=identity or not data.get('name'):return None
+            if (data.get('company') or {}).get('identifier')!=match[1]:return None
+            sections=(data.get('jobAd') or {}).get('sections') or {}
+            content='\n'.join(str(v.get('text') or '') for v in sections.values() if isinstance(v,dict))
+            if not content:return None
+            text=_html_to_text(content);deadline=extract_application_deadline(text,url)
+            state=assess('',text,deadline)
+            if state['state']!='CLOSED':
+                state={'state':'OPEN','evidence':'SmartRecruiters public active posting API returned matching company and requisition '+identity}
+            state['page_title']=data['name']
+            return {'text':text,'deadline_info':deadline,'deadline':deadline['date'],
+                    'vacancy_status':state,'is_closed':state['state']=='CLOSED','validation_source':endpoint,
+                    'posting_identity':{'company':data['company'].get('name') or match[1],
+                        'title':data['name'],'location':(data.get('location') or {}).get('fullLocation') or (data.get('location') or {}).get('city')}}
         if vendor=='Workday':
             info=data.get('jobPostingInfo') or {}
             if info.get('jobReqId')!=identity or not info.get('title'):return None

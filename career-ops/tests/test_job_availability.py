@@ -82,7 +82,7 @@ def test_cached_deadline_expiry_overrides_open_state():
     cache={status.identity_key(record):{'state':'OPEN','checked_at':dt.datetime.now(dt.timezone.utc).isoformat(),'deadline_info':{'type':'EXACT','date':'2020-01-01'}}}
     assert status.fresh_status(record,cache)['state']=='CLOSED'
 
-def test_unknown_and_closed_withheld_without_removing_history(monkeypatch):
+def test_unknown_flagged_and_closed_withheld_without_removing_history(monkeypatch):
     import daily_jobs_links as digest
     records=[{'company':name,'title':'Cyber Intern','url':'https://employer.com/'+name,'date':dt.date.today(),'id':'','status':'Not Applied','deadline_info':{'type':'UNKNOWN','date':None}} for name in ('Closed','Unknown','Open')]
     for rec in records:
@@ -91,9 +91,10 @@ def test_unknown_and_closed_withheld_without_removing_history(monkeypatch):
     monkeypatch.setattr(digest,'latest_run_doc',lambda region:(None,None))
     text,_=digest.build_digest(26,12000,10)
     assert 'Open — Cyber Intern' in text
-    assert 'Closed — Cyber Intern' not in text and 'Unknown — Cyber Intern' not in text
+    assert 'Closed — Cyber Intern' not in text and 'Unknown — Cyber Intern' in text
+    assert 'UNVERIFIED — confirm before applying' in text
     assert '3 job(s) in tracker' in text and len(records)==3
-    assert '1 closed/expired withheld' in text and '1 unverified withheld' in text
+    assert '1 closed/expired withheld' in text and '1 unverified leads flagged' in text
 
 def test_past_deadline_never_surfaces_even_with_open_cache(monkeypatch):
     import daily_jobs_links as digest
@@ -127,7 +128,7 @@ def test_expired_response_rejected_by_actual_search_command(tmp_path,monkeypatch
     report=json.loads(next(l.split(' ',1)[1] for l in capsys.readouterr().out.splitlines() if l.startswith('SEARCH_RECONCILIATION ')))
     assert report['counts']['new_candidates']==0 and report['counts']['rejected']==1
 
-def test_unknown_not_admitted_as_open(tmp_path,monkeypatch,capsys):
+def test_unknown_admitted_only_as_flagged_lead(tmp_path,monkeypatch,capsys):
     import codex_entry_level_search as search
     p=tmp_path/'tracker';p.touch();monkeypatch.setitem(search.TRACKERS,'uk',p)
     class Book:
@@ -140,7 +141,7 @@ def test_unknown_not_admitted_as_open(tmp_path,monkeypatch,capsys):
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0
     report=json.loads(next(l.split(' ',1)[1] for l in capsys.readouterr().out.splitlines() if l.startswith('SEARCH_RECONCILIATION ')))
-    assert report['counts']['new_candidates']==0 and report['counts']['review_only']==1
+    assert report['counts']['new_candidates']==1 and report['counts']['unverified_candidates']==1
 
 def test_refresh_prioritises_unchecked_records_instead_of_repeating_first_page():
     records=[{'company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(4)]

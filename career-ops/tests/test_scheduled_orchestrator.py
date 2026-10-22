@@ -530,6 +530,7 @@ def test_no_live_disables_default_provider_probe_and_semantic_escalation(tmp_pat
     funnel=so.pipeline.run_funnel
     def offline_funnel(*args,**kwargs):
         assert kwargs['semantic']=='off' and kwargs['codex_enabled'] is False
+        assert kwargs['fetch_descriptions'] is False
         return funnel(*args,**kwargs)
     monkeypatch.setattr(so.pipeline,'run_funnel',offline_funnel)
     argv=offline_argv(tmp_path);argv[argv.index('--codex')+1]='on';argv[argv.index('--semantic')+1]='auto'

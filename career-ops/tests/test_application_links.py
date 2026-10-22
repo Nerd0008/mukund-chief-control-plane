@@ -235,7 +235,14 @@ def test_no_new_request_after_elapsed_budget_is_spent(monkeypatch):
     assert calls==[SOURCE]
 
 
-def test_discovery_stale_transport_requires_positive_resolved_identity():
+def test_discovery_stale_transport_is_accepted_as_an_unverified_lead():
+    """Owner instruction 2026-10-22: still add if not verified open.
+
+    A stale transport flag on a discovered destination no longer rejects the role. It is
+    added and flagged as unverified, because the browserless verifier cannot prove OPEN on
+    JS-rendered ATS pages and demanding that proof emptied the tracker. Only a proven-closed
+    destination blocks a role.
+    """
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'discovery'))
     import pipeline
     import regional_job_search as rjs
@@ -244,12 +251,16 @@ def test_discovery_stale_transport_requires_positive_resolved_identity():
          'vacancy_status':{'state':'OPEN'}}
     policy=rjs.load_policy();scope=rjs.lane_scope('uk',rjs.load_schedules()['regions']['uk'])
     verdict=lambda:pipeline.deterministic_gates('uk',rec,policy,scope)
-    assert verdict()['decision']=='rejected'
+    v=verdict()
+    assert v['decision']=='accepted'
+    assert any('UNVERIFIED' in f for f in v['flags'])
+    # A positively resolved employer destination is recognised as verified: the unverified
+    # flag is dropped, and the role stays accepted.
     rec['resolved_url']=TARGET
     rec['vacancy_status']['application_resolution']={'title_match':True,'employer_match':True,'state':'OPEN'}
-    assert verdict()['decision']=='accepted'
-    rec['vacancy_status']['application_resolution']['employer_match']=False
-    assert verdict()['decision']=='rejected'
+    v=verdict()
+    assert v['decision']=='accepted'
+    assert not any('UNVERIFIED' in f for f in v['flags'])
 
 
 # --- Regression: valueless HTML attributes must not crash the page parser ---
@@ -289,3 +300,35 @@ def test_similar_jobs_block_still_hides_links_with_valueless_attributes():
     q = links._Page()
     q.feed(allowed)
     assert any(l.get('url') == TARGET for l in q.links)
+
+
+def test_smartrecruiters_original_id_survives_redirect_to_oneclick_form(monkeypatch):
+    url='https://jobs.smartrecruiters.com/Example/744000123-Cyber-Security-Intern?oga=true'
+    endpoint='https://api.smartrecruiters.com/v1/companies/Example/postings/744000123'
+    api={'id':'744000123','name':TITLE,'company':{'identifier':'Example','name':'Example'},'jobAd':{'sections':{'jobDescription':{'text':'A cyber internship at Example.'},'qualifications':{'text':'SC clearance required'}}}}
+    calls=transport(monkeypatch,{url:('https://jobs.smartrecruiters.com/oneclick-ui/company/Example/publication/uuid','<h1>Apply</h1>'),endpoint:api})
+    result=jd.fetch_jd(url,timeout=5)
+    assert result['vacancy_status']['state']=='OPEN'
+    assert result['resolved_url']==url and 'SC clearance required' in result['text']
+    assert calls==[url,endpoint]
+    api['id']='wrong'
+    assert jd.fetch_jd(url,timeout=5)['vacancy_status']['state']=='UNKNOWN'
+    api['id']='744000123';api['company']['identifier']='Wrong'
+    assert jd.fetch_jd(url,timeout=5)['vacancy_status']['state']=='UNKNOWN'
+
+
+def test_employer_interested_button_resolves_to_exact_smartrecruiters_job(monkeypatch):
+    url='https://jobs.smartrecruiters.com/Example/744000123-Cyber-Security-Intern'
+    endpoint='https://api.smartrecruiters.com/v1/companies/Example/postings/744000123'
+    api={'id':'744000123','name':TITLE,'company':{'identifier':'Example'},'jobAd':{'sections':{'jobDescription':{'text':'Example cyber internship'}}}}
+    transport(monkeypatch,{TARGET:f'<h1>{TITLE}</h1><a href="{url}">I’m interested</a>',url:'<title>JavaScript form</title>',endpoint:api})
+    result=jd.fetch_jd(TARGET,timeout=5)
+    assert result['vacancy_status']['state']=='OPEN' and result['resolved_url']==url
+
+
+def test_smartrecruiters_expired_description_stays_closed(monkeypatch):
+    url='https://jobs.smartrecruiters.com/Example/744000123-Intern'
+    endpoint='https://api.smartrecruiters.com/v1/companies/Example/postings/744000123'
+    api={'id':'744000123','name':TITLE,'company':{'identifier':'Example'},'jobAd':{'sections':{'jobDescription':{'text':'This job has expired.'}}}}
+    transport(monkeypatch,{url:'<title>JavaScript shell</title>',endpoint:api})
+    assert jd.fetch_jd(url,timeout=5)['vacancy_status']['state']=='CLOSED'

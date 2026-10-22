@@ -461,3 +461,36 @@ def test_new_listing_page_record_is_rejected(tmp_path):
     assert res["counts"]["rejected"] == 1
     assert res["counts"]["appended"] == 0
     assert "search/category page" in res["outcomes"][0]["reason"]
+
+
+def test_unverified_flag_persists_without_changing_url_status_or_schema(tmp_path):
+    workbook = copy_tracker("uk", tmp_path)
+    records = [make_record(company="Unverified Example", url="https://employer.example/jobs/901",
+                           availability={"state": "UNKNOWN", "evidence": "HTTP 403 bot wall"}),
+               make_record(company="Verified Example", url="https://employer.example/jobs/902",
+                           availability={"state": "OPEN", "evidence": "active posting"})]
+    result = tw.write_records(PROFILES, "uk", records, apply=True,
+                              tracker_override=str(workbook), backup_dir=str(tmp_path),
+                              cleanup_existing=False)
+    assert result["applied"], result
+    cfg = tw.region_config(PROFILES, "uk")
+    book = openpyxl.load_workbook(workbook)
+    sheet = book[cfg["sheet"]]
+    assert sheet.max_column == 6
+    for record in records:
+        cell = next(c for c in sheet[cfg["dedupe"]["url_column"]] if c.value == record["url"])
+        assert cell.hyperlink.target == record["url"]
+        assert sheet[f"{cfg['status_columns']['application_status']}{cell.row}"].value == "Not Applied"
+        if record["availability"]["state"] == "UNKNOWN":
+            assert "UNVERIFIED" in cell.number_format
+            assert "HTTP 403 bot wall" in cell.comment.text
+        else:
+            assert "UNVERIFIED" not in cell.number_format
+            assert cell.comment is None
+    book.close()
+    before = h(workbook)
+    repeated = tw.write_records(PROFILES, "uk", records, apply=True,
+                                tracker_override=str(workbook), backup_dir=str(tmp_path),
+                                cleanup_existing=False)
+    assert repeated["counts"]["appended"] == 0
+    assert h(workbook) == before

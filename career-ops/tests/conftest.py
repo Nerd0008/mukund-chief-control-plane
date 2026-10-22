@@ -2,7 +2,17 @@
 import pathlib,sys
 import pytest
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1] / "discovery"))
 @pytest.fixture(autouse=True)
 def private_liveness_test_cache(tmp_path,monkeypatch):
     import job_liveness
     monkeypatch.setattr(job_liveness,'CACHE_PATH',tmp_path/'vacancy-status.json')
+
+@pytest.fixture(scope="session", autouse=True)
+def private_newsletter_fixture_root(tmp_path_factory):
+    # Session scope also isolates module-scoped scheduled-run fixtures.
+    import gmail_discovery
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setitem(gmail_discovery.collect.__kwdefaults__, "root",
+                      tmp_path_factory.mktemp("newsletter-fixtures"))
+        yield

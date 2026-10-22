@@ -881,14 +881,32 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     # flags. A bot wall alone is never evidence of vacancy availability.
     fetch_state = rec.get("fetch_state")
     resolution=(rec.get('vacancy_status') or {}).get('application_resolution') or {}
-    resolved_verified=(rec.get('vacancy_status',{}).get('state')=='OPEN'
+    resolved_verified=((rec.get('vacancy_status') or {}).get('state')=='OPEN'
                        and rec.get('resolved_url') and resolution.get('title_match') is True
                        and resolution.get('employer_match') is True and resolution.get('state')=='OPEN')
-    if fetch_state == "bot_wall":
-        flags.append("HTTP page blocked (403/429); separate positive availability evidence is required")
+    verified_api=(rec.get('vacancy_status') or {}).get('verification_source') or ''
+    if ((rec.get('vacancy_status') or {}).get('state')=='OPEN' and rec.get('resolved_url')
+            and verified_api.startswith(('https://api.smartrecruiters.com/v1/companies/',
+                'https://boards-api.greenhouse.io/v1/boards/','https://api.lever.co/v0/postings/'))):
+        resolved_verified=True
+    # Owner instruction 2026-10-22: an UNVERIFIED destination is written and flagged, not
+    # discarded — only POSITIVE evidence of closure blocks a role. The verifier is a
+    # browserless HTTP fetch that cannot prove OPEN on JS-rendered ATS pages, so demanding
+    # proof of availability rejected every discovered role and the tracker stayed empty. A
+    # proven-closed destination (HTTP 404/410, "closed" stated in the JD) is still rejected
+    # by the availability gate below.
+    # A destination that FAILED validation (dead link, expired marker, non-http scheme,
+    # robots refusal) is still refused — a failed validation is a negative result,
+    # not an absence of evidence.
+    if fetch_state == "validation_failed":
+        reasons.append(f"source URL failed validation (fetch_state={fetch_state}) — "
+                       f"an unusable destination is never written")
+    elif fetch_state == "bot_wall":
+        flags.append("HTTP page blocked (403/429); availability UNVERIFIED — added as an "
+                     "unverified lead, verify before applying")
     elif fetch_state and fetch_state != "validated_live" and not resolved_verified:
-        reasons.append(f"source URL not validated live (fetch_state={fetch_state}) — a "
-                       f"discovered-but-unverified or failed destination is never written")
+        flags.append(f"source URL not validated live (fetch_state={fetch_state}); availability "
+                     f"UNVERIFIED — added as an unverified lead, verify before applying")
 
     # Fail-closed result-kind gate (source-agnostic): a discovery result that a
     # surface declares to be a search/listing page is not a vacancy posting, so it
@@ -929,8 +947,14 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
 
     from application_deadlines import deadline_priority
-    if rec.get('vacancy_status',{}).get('state') not in (None,'OPEN'):
-        reasons.append('current vacancy availability not verified OPEN')
+    # Only a PROVEN-CLOSED vacancy is rejected. UNKNOWN availability is an unverified lead,
+    # not a rejection (owner instruction 2026-10-22: still add if not verified open).
+    availability = (rec.get('vacancy_status') or {}).get('state')
+    if availability == 'CLOSED':
+        reasons.append('current vacancy availability is CLOSED (proven closed)')
+    elif availability != 'OPEN':
+        flags.append('availability UNVERIFIED (no confirmed OPEN check) — added as an '
+                     'unverified lead, verify before applying')
     if rec.get('jd_is_closed'):
         reasons.append('JD explicitly states the application is closed')
     if deadline_priority(rec)[0]==4:
@@ -973,6 +997,14 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                 doc["probe"] = probe
                 if doc.get("classified", 0) > 0:
                     return doc
+                if semantic=='auto':
+                    rescue=_codex_semantic_pass(candidates,batch_size=batch_size,timeout=timeout,
+                        codex_adapter=codex_adapter,mode=mode,codex_model=codex_model,codex_workdir=codex_workdir)
+                    rescue['deepseek_attempt']={k:doc.get(k) for k in ('requests','errors','limitation','terminal_failure')}
+                    rescue['deepseek_probe']=probe
+                    rescue['requested']=semantic
+                    if rescue.get('classified',0)>0:return rescue
+                    doc['codex_attempt']=rescue
                 fallback = {candidate_id(c): deterministic_classify(c, mode=mode)
                             for c in candidates}
                 return {"provider": "none", "requested": semantic, "probe": probe,
@@ -981,7 +1013,8 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                                        "classifications; the declared deterministic rule "
                                        "classifier was used instead — this is NOT a model pass"),
                         "deepseek_attempt": {k: doc.get(k) for k in
-                                             ("requests", "errors", "limitation", "usage")}}
+                                             ("requests", "errors", "limitation", "usage", "terminal_failure")},
+                        "codex_attempt":doc.get('codex_attempt')}
             if semantic == "deepseek":
                 raise SystemExit("--semantic deepseek requested but the provider is not "
                                  "healthy: " + str(probe.get("reason")))
@@ -1047,7 +1080,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                deepseek_adapter=None, codex_adapter=None,
                codex_workdir: str | None = None,
                codex_model: str | None = None,
-               collection: list | None = None) -> dict:
+               collection: list | None = None, fetch_descriptions: bool = True) -> dict:
     policy = rjs.load_policy()
     schedules = rjs.load_schedules()
     profiles = tw.load_profiles()
@@ -1159,13 +1192,16 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         funnel.source_stages(rec.get("sources"), "semantic_accept")
 
     # 3.5 JD fetch for clearance/eligibility checks ------------------------ #
+    jd_attempts=0
     # Fetch full job description text for each semantically accepted candidate
     # so the clearance gate can run against the actual JD, not just snippets.
-    for rec in accepted:
+    for rec in (accepted if fetch_descriptions else []):
         url = tw.extract_url(rec.get("url"))
         if not url:
             continue
+        jd_attempts+=1
         jd_result = fetch_jd(url)
+        rec['jd_validation_source']=jd_result.get('validation_source')
         rec["jd_text"] = jd_result.get("text") or ""
         rec["jd_fetch_state"] = jd_result.get("fetch_state", "fetch_failed")
         from application_deadlines import extract_application_deadline, deadline_priority
@@ -1174,12 +1210,14 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         from job_liveness import record_verification
         rec["vacancy_status"] = record_verification(rec,jd_result)
         rec['application_resolution']=jd_result.get('application_resolution')
+        if rec['vacancy_status']['state']=='OPEN' and jd_result.get('posting_identity'):
+            rec['verified_posting']=jd_result['posting_identity']
         if rec['vacancy_status']['state']=='OPEN' and jd_result.get('resolved_url'):
             rec['resolved_url']=jd_result['resolved_url']
             record_verification(dict(rec,url=rec['resolved_url']),jd_result)
         if jd_result.get("error"):
             rec["jd_fetch_error"] = jd_result["error"]
-    funnel.set("jd_fetches_attempted", sum(1 for r in accepted if r.get("jd_text")))
+    funnel.set("jd_fetches_attempted", jd_attempts)
     funnel.set("jd_fetches_failed", sum(1 for r in accepted if not r.get("jd_text")))
 
     from application_deadlines import deadline_priority
@@ -1202,15 +1240,22 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
             "classification labels and rejections_by_reason for the per-candidate reason")
     gated = []
     for rec in accepted:
-        verdict = deterministic_gates(region, rec, policy, scope)
+        verified=rec.get("verified_posting") or {}
+        gate_rec={**rec,**{k:v for k,v in verified.items() if k in ("company","title","location") and v}}
+        verdict = deterministic_gates(region, gate_rec, policy, scope)
         sources = rec.get("sources")
-        entry = {"candidate_id": candidate_id(rec), "company": rec.get("company"),
-                 "title": rec.get("title"), "location": rec.get("location"),
+        entry = {"candidate_id": candidate_id(rec), "company": gate_rec.get("company"),
+                 "title": gate_rec.get("title"), "location": gate_rec.get("location"),
                  "url": rec.get("resolved_url") or rec.get("url"), "sources": sources, "semantic_label":
                      classifications.get(candidate_id(rec), {}).get("primary_label"),
                  "priority_watchlist": bool(rec.get("priority_watchlist")),
                  "watchlist_company": rec.get("watchlist_company"),
                  "deadline_info": rec.get("deadline_info"),
+                 "vacancy_status":rec.get("vacancy_status"),
+                 "jd_fetch_state":rec.get("jd_fetch_state"),
+                 "jd_fetch_error":rec.get("jd_fetch_error"),
+                 "jd_text_characters":len(rec.get("jd_text") or ""),
+                 "jd_validation_source":rec.get("jd_validation_source"),
                  **verdict}
         gated.append(entry)
         if verdict["decision"] != "accepted":
@@ -1220,6 +1265,16 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
             funnel.source_stages(sources, "deterministic_eligibility_pass")
     passed = [g for g in gated if g["decision"] == "accepted"]
     funnel.set("deterministic_eligibility_pass", len(passed))
+    # Unverified availability is an accepted lead, not a rejection, so it must be counted
+    # explicitly: otherwise a run that added 40 unverified roles looks identical to a run
+    # that verified 40, and the owner cannot tell which rows still need checking.
+    unverified = sum(1 for g in passed
+                     if (g.get("vacancy_status") or {}).get("state") != "OPEN")
+    funnel.set("accepted_availability_unverified", unverified)
+    if unverified:
+        funnel.note(f"{unverified} of {len(passed)} accepted role(s) were added with "
+                    f"availability UNVERIFIED (owner instruction 2026-10-22: still add if "
+                    f"not verified open) — these rows need a manual open-check before applying")
 
     # 5. shared dedupe ------------------------------------------------------ #
     records = []
@@ -1291,7 +1346,12 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                    "cross_month_index": probe.get("cross_month_index"),
                    "outcomes": probe.get("outcomes", [])[:25], "applied": False},
         "funnel": funnel.document(),
-        "jd_gap": jd_gap_report(candidates),
+        "jd_gap": {**jd_gap_report(candidates),"measured_at":"discovery input, before post-semantic JD fetch"},
+        "jd_verification":{
+            "attempted":jd_attempts,
+            "with_text":sum(bool(r.get("jd_text")) for r in accepted),
+            "states":dict(Counter((r.get("vacancy_status") or {}).get("state","UNKNOWN") for r in accepted)),
+            "failures":dict(Counter(r.get("jd_fetch_error") for r in accepted if r.get("jd_fetch_error")))},
         "collection": collection or [],
         "safety": {
             "canonical_workbook_written": False,

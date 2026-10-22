@@ -13,7 +13,7 @@ from html.parser import HTMLParser
 from urllib.parse import parse_qs, urljoin, urlsplit, urlunsplit
 
 AGGREGATORS = frozenset(('jointheintake.com', 'brightnetwork.co.uk', 'gradcracker.com'))
-APPLY = re.compile(r'^(?:apply(?:\s+(?:now|online(?:\s+now)?|for\s+(?:(?:this|the)\s+)?(?:job|role|position)))?|apply\s+on\s+.+?[’\']s\s+(?:site|website))$', re.I)
+APPLY = re.compile(r'^(?:apply(?:\s+(?:now|online(?:\s+now)?|for\s+(?:(?:this|the)\s+)?(?:job|role|position)))?|i[’\']m\s+interested|apply\s+on\s+.+?[’\']s\s+(?:site|website))$', re.I)
 
 
 def public_url(value, base=''):
@@ -151,7 +151,9 @@ def employer_matches(source_url, label, destination_url, destination_html):
         brand = ''.join(sorted(required))
     target_host = (urlsplit(destination_url).hostname or '').lower().replace('-', '')
     readable = entities.unescape(re.sub('<[^>]+>', ' ', destination_html or ''))
-    return bool(brand and (all(t in target_host for t in required) or required <= tokens(readable)))
+    compact=re.sub(r'[^a-z0-9]', '', readable.lower())
+    return bool(brand and (all(t in target_host for t in required) or required <= tokens(readable)
+                          or all(len(t)>=4 and t in compact for t in required)))
 
 
 def employer_name(label):

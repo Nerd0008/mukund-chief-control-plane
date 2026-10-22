@@ -100,8 +100,10 @@ def normalize_url(value) -> str:
         return url.strip().lower().rstrip("/")
     if not parts.netloc:
         return url.strip().lower().rstrip("/")
+    ignored=set(TRACKING_PARAMS)
+    if parts.hostname=="jobs.smartrecruiters.com":ignored.update(("oga","trid"))
     query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True)
-             if k.lower() not in TRACKING_PARAMS and not k.lower().startswith("utm_")]
+             if k.lower() not in ignored and not k.lower().startswith("utm_")]
     path = re.sub(r"/{2,}", "/", parts.path)
     if path.endswith("/") and len(path) > 1:
         path = path.rstrip("/")
@@ -841,6 +843,18 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             dst = tr.ws.cell(row=r, column=c)
             if src.has_style:
                 dst._style = copy.copy(src._style)
+
+        # Persist the owner-approved uncertainty without changing the six-column schema
+        # or the underlying URL/application status. A display prefix is visible in Excel;
+        # the note carries the machine-readable marker and reason after cache expiry.
+        from openpyxl.comments import Comment
+        link_cell=tr.ws[f"{cfg['dedupe']['url_column']}{r}"]
+        marker='"UNVERIFIED — "@'
+        if link_cell.number_format==marker:link_cell.number_format='General'
+        availability=record.get('availability') or {}
+        if availability and availability.get('state') not in ('OPEN','CLOSED'):
+            link_cell.number_format=marker
+            link_cell.comment=Comment('UNVERIFIED — availability not confirmed. Check before applying.\n'+str(availability.get('evidence') or 'No positive open verification.'), 'Career Ops')
 
     # explicit refresh of non-owned columns on duplicate rows
     refresh_map = set(cfg.get("refreshable_columns", []))

@@ -1,0 +1,54 @@
+{
+  "checked_at": "2026-10-22T18:03:32.373752+00:00",
+  "replayed_run_id": "unified-uk-20261021T224502Z",
+  "kind": "saved 72 semantic acceptances + fresh public GET + production deterministic gates + read-only canonical dedupe",
+  "elapsed_seconds": 9.2,
+  "candidates_checked": 72,
+  "availability": {
+    "UNKNOWN": 65,
+    "OPEN": 5,
+    "CLOSED": 2
+  },
+  "eligible_total": 65,
+  "eligible_by_availability": {
+    "UNKNOWN": 60,
+    "OPEN": 5
+  },
+  "dedupe_counts": {
+    "input": 65,
+    "appended": 49,
+    "duplicates": 16,
+    "rejected": 0,
+    "refreshed": 0,
+    "passed_deleted": 0,
+    "listing_deleted": 0
+  },
+  "provider_calls": 0,
+  "tracker_writes": 0,
+  "tracker_before": "9340232290bc43b03cadfc0f2169fd33959d44bcc85dcdbb76bc0ee698ec4f36",
+  "tracker_after": "9340232290bc43b03cadfc0f2169fd33959d44bcc85dcdbb76bc0ee698ec4f36",
+  "tracker_unchanged": true,
+  "rejection_reasons": {
+    "source URL failed validation (fetch_state=validation_failed) \u2014 an unusable destination is never written": 3,
+    "location '' outside the region scope": 4,
+    "clearance/citizenship requirement stated: sc, security clearance": 1,
+    "current vacancy availability is CLOSED (proven closed)": 2,
+    "JD explicitly states the application is closed": 2
+  },
+  "new_row_availability": {
+    "OPEN": 3,
+    "UNKNOWN_flagged": 46
+  },
+  "focused_regression": {
+    "passed": 320,
+    "failed": 0
+  },
+  "related_baseline_comparison": {
+    "tests": 78,
+    "passed": 58,
+    "failed_before": 20,
+    "failed_after": 20,
+    "new_failures": 0,
+    "note": "Committed HEAD writer loaded in memory; no checkout/reset/stash. Existing owner-workbook fixture assumptions; no production LinkedIn/rollover changes."
+  }
+}

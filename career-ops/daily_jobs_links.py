@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Daily job delivery with independently verified, fresh vacancy availability.
 
-Read tracker history without modifying it. Only freshly verified OPEN jobs are
-listed; closed, expired and unverified records are counted and withheld.
+Read tracker history without modifying it. Verified OPEN jobs and visibly flagged unverified leads are listed;
+closed and expired records are counted and withheld.
 Formatting is network-free. The CLI first performs bounded public HTTP GET
 verification (30 records / 60 seconds), using a private evidence cache with a
 15-minute freshness limit. --no-refresh consumes only already-fresh evidence.
@@ -325,19 +325,25 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
         # Read every row so the header states the true tracker total; the listing
         # below is sliced to max_per_region.
         tracked, tracker_error = tracker_rows(region)
-        tracked_total=len(tracked);withheld={'CLOSED':0,'UNKNOWN':0};current=[]
+        tracked_total=len(tracked);withheld={'CLOSED':0,'UNKNOWN':0};current=[];verified_open=0
         for job in tracked:
             status=fresh_status(job,verification)
             if status['state']=='OPEN':
+                verified_open+=1
+                job['availability_label']='VERIFIED OPEN'
                 if status.get('resolved_url'):
                     job['source_url']=job['url']
                     job['url']=status['resolved_url']
                 if status.get('deadline_info',{}).get('type') in ('EXACT','ROLLING'):job['deadline_info']=status['deadline_info']
                 current.append(job)
-            else:withheld['CLOSED' if status['state']=='CLOSED' else 'UNKNOWN']+=1
+            elif status['state']=='CLOSED':withheld['CLOSED']+=1
+            else:
+                withheld['UNKNOWN']+=1
+                job['availability_label']='UNVERIFIED — confirm before applying'
+                current.append(job)
         tracked=current
         tracked.sort(key=deadline_priority)
-        availability_note=f"  Availability: {len(tracked)} verified open; {withheld['CLOSED']} closed/expired withheld; {withheld['UNKNOWN']} unverified withheld."
+        availability_note=f"  Availability: {verified_open} verified open; {withheld['CLOSED']} closed/expired withheld; {withheld['UNKNOWN']} unverified leads flagged."
 
 
         if doc is None:
@@ -351,7 +357,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 for i, job in enumerate(tracked[:max_per_region], 1):
                     jobs.append([
                         f"  {i}. {job['company']} — {job['title']}  [{job['id']}]",
-                        f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})}",
+                        f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNVERIFIED — confirm before applying')}",
                     ])
                 capped_out = max(0, len(tracked) - len(jobs))
                 total_jobs += len(tracked)
@@ -404,7 +410,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 age_note = f" ({age})" if age else ""
                 jobs.append([
                     f"  {i}. {job['company']} — {job['title']}{tag}{age_note}",
-                    f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})}",
+                    f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNVERIFIED — confirm before applying')}",
                 ])
             capped_out = max(0, len(tracked) - len(jobs))
             total_jobs += len(tracked)

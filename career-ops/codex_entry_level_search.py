@@ -453,9 +453,8 @@ def main() -> int:
                 except ValueError:
                     pass
             if verified['state']!='OPEN':
-                counts['review_only']+=1
-                decisions.append({'title':title,'url':url,'reason':'availability unverified; review-only lead','verification':verified})
-                continue
+                counts['unverified_candidates']=counts.get('unverified_candidates',0)+1
+                decisions.append({'title':title,'url':url,'reason':'availability UNVERIFIED; retained as flagged lead','verification':verified})
             source_url=url
             url=verified.get('resolved_url') or url
             resolved_key=posting_key(url)
@@ -485,12 +484,14 @@ def main() -> int:
             if experience:
                 rejected.append((title, url, f"prior experience required: {experience[0][:100]}"))
                 continue
+            identity=verified.get("posting_identity") or {}
             collected.append({
-                "title": title,
-                "company": str(j.get("company") or "").strip() or "Unknown",
-                "location": str(j.get("location") or "").strip() or "Unknown",
+                "title": identity.get("title") or title,
+                "company": identity.get("company") or str(j.get("company") or "").strip() or "Unknown",
+                "location": identity.get("location") or str(j.get("location") or "").strip() or "Unknown",
                 "url": url,
                 "source_url": source_url,
+                "availability": verified,
                 "application_resolution": jd.get('application_resolution'),
                 "deadline": deadline or "",
                 "deadline_info": jd.get("deadline_info") or deadline_from_value(deadline),
@@ -526,7 +527,7 @@ def main() -> int:
     profiles=tw.load_profiles()
     records=[{'company':job['company'],'title':job['title'],'location':job['location'],
               'url':job['url'],'date_found':datetime.now().date().isoformat(),
-              'deadline':deadline_label(job['deadline_info']),
+              'deadline':deadline_label(job['deadline_info']),'availability':job['availability'],
               'source':'Codex direct entry-level search'} for job in collected]
     canonical=Path(tw.region_config(profiles,args.region)['tracker'])
     backup_dir=profiles.get('backup_dir') if canonical.resolve()==tracker.resolve() else str(tracker.parent/'backups')

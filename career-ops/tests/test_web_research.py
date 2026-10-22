@@ -576,7 +576,12 @@ def test_pipeline_source_declares_its_own_funnel_counters(tmp_path):
 # fail-closed behaviour
 # --------------------------------------------------------------------------- #
 
-def test_unverified_and_failed_destinations_never_reach_the_tracker(tmp_path):
+def test_unverified_results_become_unverified_leads_while_dead_links_are_refused(tmp_path):
+    """Owner instruction 2026-10-22: still add if not verified open.
+
+    An unverified destination is an accepted lead (flagged). A destination that FAILED
+    validation (dead link) is a negative result and is still refused.
+    """
     rc, doc = run_cli(["run", "--region", "uk",
                        "--web-research", str(UNVERIFIED_EXPORT),
                        "--semantic", "off", "--codex", "off",
@@ -584,25 +589,30 @@ def test_unverified_and_failed_destinations_never_reach_the_tracker(tmp_path):
     assert rc == 0
     decisions = {d["company"]: d for d in doc["eligibility"]["decisions"]}
     assert decisions["Validated Live Ltd (NOT A REAL VACANCY)"]["decision"] == "accepted"
-    for company in ("Unverified Ltd (NOT A REAL VACANCY)",
-                    "Deadlink Ltd (NOT A REAL VACANCY)"):
-        d = decisions[company]
-        assert d["decision"] == "rejected"
-        assert any("not validated live" in r for r in d["reasons"])
-        assert any("fetch_state=" in r for r in d["reasons"])
+    unverified = decisions["Unverified Ltd (NOT A REAL VACANCY)"]
+    assert unverified["decision"] == "accepted"
+    assert any("UNVERIFIED" in f for f in unverified["flags"])
+    dead = decisions["Deadlink Ltd (NOT A REAL VACANCY)"]
+    assert dead["decision"] == "rejected"
+    assert any("failed validation" in r for r in dead["reasons"])
     # the URL-less record is refused for the missing application URL
     nourl = decisions["No Url Ltd (NOT A REAL VACANCY)"]
     assert nourl["decision"] == "rejected"
     assert any("no usable application URL" in r for r in nourl["reasons"])
-    # exactly the validated, URL-bearing record survives
-    assert doc["funnel"]["counts"]["deterministic_eligibility_pass"] == 1
+    # the validated record and the unverified lead survive; the dead link does not
+    assert doc["funnel"]["counts"]["deterministic_eligibility_pass"] == 2
 
 
-def test_a_run_over_only_unverified_results_collapses_to_an_attributable_zero(tmp_path):
+def test_a_run_over_only_dead_links_collapses_to_an_attributable_zero(tmp_path):
+    """Owner instruction 2026-10-22: unverified destinations are leads, so an
+    all-unverified run no longer collapses to zero. Only destinations that FAILED
+    validation (dead links) still collapse the funnel, and the zero is still
+    attributed to the deterministic gate rather than reported as a silent zero."""
     doc = json.loads(UNVERIFIED_EXPORT.read_text(encoding="utf-8"))
-    doc["candidates"] = [c for c in doc["candidates"] if c["fetch_state"] != "validated_live"]
+    doc["candidates"] = [c for c in doc["candidates"]
+                         if c["fetch_state"] == "validation_failed"]
     doc["candidates"] = [c for c in doc["candidates"] if c.get("url")]
-    p = tmp_path / "unverified-only.json"
+    p = tmp_path / "deadlink-only.json"
     p.write_text(json.dumps(doc), encoding="utf-8")
     rc, run = run_cli(["run", "--region", "uk", "--web-research", str(p),
                        "--semantic", "off", "--codex", "off", "--out-dir", str(tmp_path / "out")])
@@ -612,7 +622,7 @@ def test_a_run_over_only_unverified_results_collapses_to_an_attributable_zero(tm
     entry = run["funnel"]["by_source"][pipeline.SOURCE_WEB_RESEARCH]
     assert entry["zero_attribution"]["first_zero_stage"] == "deterministic_eligibility_pass"
     assert "deterministic gate" in entry["zero_attribution"]["reason"]
-    assert "not validated live" in json.dumps(entry["rejections_by_reason"])
+    assert "failed validation" in json.dumps(entry["rejections_by_reason"])
 
 
 def test_a_web_research_run_writes_no_canonical_workbook(tmp_path):

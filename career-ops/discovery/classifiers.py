@@ -318,6 +318,14 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
                                                 resolved, timeout, max_tokens)
         out["requests"] += 1
         out["usage"] = _add_usage(out["usage"], usage)
+        terminal_reason=terminal_provider_error(error)
+        if terminal_reason:
+            out['terminal_failure']=terminal_reason
+            out['limitation']='DeepSeek unavailable: '+terminal_reason+'; remaining requests cancelled'
+            out['errors'].append({'batch':out['batches'],'error':terminal_reason,'remaining_candidates':len(records)-start})
+            for rec in records[start:]:
+                out['classifications'][candidate_id(rec)]=_unclassified(rec,'provider unavailable: '+terminal_reason)
+            break
         if error and len(records[start:start + batch_size]) > 1:
             # split once: a truncated/empty batch is retried in halves before failing
             out["split_retries"] += 1
@@ -359,6 +367,14 @@ def deepseek_bulk_classify(records: list, *, model: str = "deepseek-flash",
         out["limitation"] = ("the deepseek pass produced no usable classifications; the funnel "
                             "records this instead of treating the pool as empty")
     return out
+
+
+def terminal_provider_error(error):
+    if not error:return None
+    message=str(error.get('error') or '').lower()
+    for marker in ('insufficient balance','insufficient_quota','invalid_api_key','invalid api key','payment required'):
+        if marker in message:return marker.replace(' ','_')
+    return None
 
 
 def _unclassified(record: dict, reason: str) -> dict:

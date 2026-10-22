@@ -518,10 +518,11 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
     rp = region_policy(region, policy)
     cfg = dict(tw.region_config(tw.load_profiles(), region))
     today = dt.date.today().isoformat()
+    verified=candidate.get("verified_posting") or {}
     rec = {
-        "company": candidate.get("company") or "",
-        "title": candidate.get("title") or "",
-        "location": candidate.get("location") or "",
+        "company": verified.get("company") or candidate.get("company") or "",
+        "title": verified.get("title") or candidate.get("title") or "",
+        "location": verified.get("location") or candidate.get("location") or "",
         "url": tw.extract_url(candidate.get("resolved_url") or candidate.get("url")),
         "date_found": today,
         "posted_date": candidate.get("posted_date"),
@@ -530,6 +531,7 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
     }
     from application_deadlines import extract_application_deadline, deadline_label
     info=candidate.get('deadline_info') or extract_application_deadline(candidate.get('jd_text') or '',candidate.get('url'))
+    rec['availability']=candidate.get('vacancy_status') or {'state':'UNKNOWN','evidence':'availability not checked'}
     rec['deadline_info']=info
     rec['deadline']=deadline_label(info)
     if "last_checked" in cfg.get("field_map", {}):

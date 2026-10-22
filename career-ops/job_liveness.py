@@ -73,6 +73,8 @@ def record_verification(record,result,cache=None):
         from application_links import title_matches
         if expected and not title_matches(str(record.get('title') or record.get('job_title') or ''),info['page_title']):
             info={'state':'UNKNOWN','evidence':'destination title does not match tracker role'}
+    if result.get('validation_source'):
+        info['verification_source']=result['validation_source']
     if result.get('application_resolution'):
         info['application_resolution']=result['application_resolution']
         employer=result['application_resolution'].get('employer')
@@ -82,6 +84,8 @@ def record_verification(record,result,cache=None):
             if wanted and not wanted<=tokens(employer):
                 info={'state':'UNKNOWN','evidence':'outbound employer does not match candidate company',
                       'application_resolution':result['application_resolution']}
+    if info.get('state')=='OPEN' and result.get('posting_identity'):
+        info['posting_identity']=result['posting_identity']
     if info.get('state')=='OPEN' and result.get('resolved_url'):
         info['resolved_url']=result['resolved_url']
         info['application_url']=result.get('application_url')

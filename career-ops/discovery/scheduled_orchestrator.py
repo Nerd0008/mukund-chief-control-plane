@@ -126,7 +126,7 @@ DEFAULT_RETRIES = 1
 #: reported as stale, never silently treated as fresh findings.
 DEFAULT_INGEST_STALE_HOURS = 48
 DEFAULT_SEMANTIC = "auto"
-DEFAULT_CODEX_ESCALATION = "off"
+DEFAULT_CODEX_ESCALATION = "on"
 DEFAULT_CODEX_BUDGET = 0
 
 # --- the required source classes ------------------------------------------------ #
@@ -639,7 +639,7 @@ def run_region(region: str, args, *, deadline: float | None = None,
         deepseek_model=args.model, batch_size=args.batch_size,
         codex_budget=args.codex_budget, codex_enabled=live and (args.codex == "on"),
         timeout=args.per_query_timeout, run_id=run_id,
-        max_tokens=args.max_tokens, collection=collection,
+        max_tokens=args.max_tokens, collection=collection, fetch_descriptions=live,
         codex_model=getattr(args, "codex_model", None))
 
     mechanism = live_mechanism_summary(lanes["web_research"])

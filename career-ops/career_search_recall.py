@@ -7,6 +7,9 @@ def posting_key(url):
     try:
         p=urlsplit(value)
         if p.scheme.lower() not in ('http','https') or not p.netloc:return ''
+        if p.hostname=='jobs.smartrecruiters.com':
+            from tracker_writer import normalize_url
+            return normalize_url(value)
         query=[(k,v) for k,v in parse_qsl(p.query,keep_blank_values=True)
                if not k.lower().startswith('utm_') and k.lower() not in ('gh_src','source','referrer')]
         # Preserve path/query value case and requisition IDs. Do not merge company/title alone.
