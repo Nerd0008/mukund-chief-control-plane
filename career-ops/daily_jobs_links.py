@@ -339,11 +339,11 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
             elif status['state']=='CLOSED':withheld['CLOSED']+=1
             else:
                 withheld['UNKNOWN']+=1
-                job['availability_label']='UNVERIFIED — confirm before applying'
+                job['availability_label']='UNCONFIRMED — confirm before applying'
                 current.append(job)
         tracked=current
         tracked.sort(key=deadline_priority)
-        availability_note=f"  Availability: {verified_open} verified open; {withheld['CLOSED']} closed/expired withheld; {withheld['UNKNOWN']} unverified leads flagged."
+        availability_note=f"  Availability: {verified_open} verified open; {withheld['CLOSED']} closed/expired withheld; {withheld['UNKNOWN']} unconfirmed leads flagged."
 
 
         if doc is None:
@@ -357,7 +357,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 for i, job in enumerate(tracked[:max_per_region], 1):
                     jobs.append([
                         f"  {i}. {job['company']} — {job['title']}  [{job['id']}]",
-                        f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNVERIFIED — confirm before applying')}",
+                        f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNCONFIRMED — confirm before applying')}",
                     ])
                 capped_out = max(0, len(tracked) - len(jobs))
                 total_jobs += len(tracked)
@@ -410,7 +410,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
                 age_note = f" ({age})" if age else ""
                 jobs.append([
                     f"  {i}. {job['company']} — {job['title']}{tag}{age_note}",
-                    f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNVERIFIED — confirm before applying')}",
+                    f"     {job['url'] or 'URL: not stated by the source'} | Deadline: {deadline_label(job.get('deadline_info') or {})} | Availability: {job.get('availability_label','UNCONFIRMED — confirm before applying')}",
                 ])
             capped_out = max(0, len(tracked) - len(jobs))
             total_jobs += len(tracked)
@@ -431,7 +431,7 @@ def build_digest(stale_hours: float, budget: int, max_per_region: int) -> tuple[
     tail = [
         "",
         "Read-only: no application, no submission, no outreach, no tracker write.",
-        "Only freshly verified open vacancies are listed. Unknown or expired records are withheld, not deleted.",
+        "Unconfirmed vacancies are included and flagged. Confirmed closed/expired vacancies are withheld, not deleted.",
     ]
 
     def render(dropped: dict) -> str:

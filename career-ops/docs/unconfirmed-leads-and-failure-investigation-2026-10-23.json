@@ -1,0 +1,277 @@
+{
+  "date": "2026-10-23",
+  "branch": "fix/e3-whole-repo-architecture",
+  "baseline_commit": "1be0514f2a34712cd678977af62ae5695e0dc9f5",
+  "canonical_label_migration": {
+    "tracker_sha256_before": "ad38b32493619d4d3e76d15b1951aa1f05a66de0abc3cdfb851487dd5d1b4cc1",
+    "tracker_sha256_after": "b8027d178aa629c00285192394e8a5d970048593aad03c6794f80cc52d49e895",
+    "post_data_rows": 145,
+    "values_and_links_unchanged": true,
+    "dimensions_unchanged": true,
+    "repeat_noop": true,
+    "availability_tag_changes": [
+      {
+        "cell": "D124",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D125",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D126",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D130",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D131",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D132",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D133",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D134",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D135",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D136",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D137",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D138",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D139",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D140",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D141",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D142",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D143",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D144",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D145",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D146",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      },
+      {
+        "cell": "D147",
+        "before": "\"UNVERIFIED \u2014 \"@",
+        "after": "\"UNCONFIRMED \u2014 \"@"
+      }
+    ]
+  },
+  "regression": {
+    "passed": 1444,
+    "failed": 26,
+    "seconds": 145.61,
+    "same_failures_as_previous": true
+  },
+  "focused_tags": {
+    "passed": 85,
+    "failed": 0
+  },
+  "fixture_isolated_rollover": {
+    "passed": 32,
+    "failed": 0
+  },
+  "investigation_probes": {
+    "mail_existing_metadata": {
+      "deduped": true,
+      "workbook_unchanged": true
+    },
+    "mail_explicit_approved_new": {
+      "error": "ValueError: new or ambiguous mailbox application requires canonical writer reconciliation; no row restored",
+      "workbook_unchanged": true
+    },
+    "publish_plan": {
+      "neither": {
+        "exit": 1,
+        "ok": false,
+        "blockers": [
+          "draft_passed_review",
+          "draft_passed_news_claims"
+        ],
+        "network_calls": 0
+      },
+      "news_only": {
+        "exit": 0,
+        "ok": true,
+        "blockers": [],
+        "network_calls": 0
+      },
+      "personal_only": {
+        "exit": 0,
+        "ok": true,
+        "blockers": [],
+        "network_calls": 0
+      },
+      "mixed_news_only": {
+        "exit": 0,
+        "ok": true,
+        "blockers": [],
+        "network_calls": 0
+      },
+      "mixed_personal_only": {
+        "exit": 0,
+        "ok": true,
+        "blockers": [],
+        "network_calls": 0
+      },
+      "stale_personal_hash": {
+        "exit": 0,
+        "ok": true,
+        "blockers": [],
+        "network_calls": 0
+      }
+    },
+    "linkedin_manifest": {
+      "ok": false,
+      "reason": "region 'uk' has no non-owner provenance column; refusing to hand off without provenance",
+      "records": 0,
+      "targets": {
+        "provenance": null,
+        "prior_signal": null,
+        "live_status": null,
+        "posted_date": null,
+        "last_checked": null,
+        "owner_column_keys_excluded": [
+          "deadline"
+        ]
+      }
+    },
+    "singapore": {
+      "baseline": {
+        "ok": true,
+        "problems": []
+      },
+      "company_false_marker": {
+        "ok": true,
+        "problems": []
+      },
+      "company_without_marker": {
+        "ok": true,
+        "problems": []
+      },
+      "owner_status": {
+        "ok": false,
+        "problems": [
+          "duplicate URL keys inside workbook: [('https://ensigninfosecurity.wd3.myworkdayjobs.com/en-US/Ensign_Careers/job/Technical-Graduate-Programme-2026_JOBREQ-0003500', 'Ensign InfoSecurity', 'Technical Graduate Programme 2026')]"
+        ]
+      },
+      "marker": {
+        "ok": false,
+        "problems": [
+          "duplicate URL keys inside workbook: [('https://ensigninfosecurity.wd3.myworkdayjobs.com/en-US/Ensign_Careers/job/Technical-Graduate-Programme-2026_JOBREQ-0003500', 'Ensign InfoSecurity', 'Technical Graduate Programme 2026')]"
+        ]
+      }
+    },
+    "linkedin_legacy_provenance_control": {
+      "ok": true,
+      "records": 1,
+      "provenance_column": "discovery",
+      "schema_override_in_memory_only": true
+    }
+  },
+  "failed_tests": [
+    "career-ops.tests.test_career_current_layout::test_url_less_owner_row_occupies_append_position",
+    "career-ops.tests.test_career_current_layout::test_accepted_snapshot_recovers_dedupe_without_restoring_workbook",
+    "career-ops.tests.test_career_current_layout::test_ambiguous_snapshot_identity_is_never_fuzzily_merged",
+    "career-ops.tests.test_career_mail_bounded_apply::test_new_compact_application_preserves_existing_cells",
+    "career-ops.tests.test_linkedin_publish.TestPublishGuards::test_a_draft_with_no_recorded_review_is_refused_not_assumed_pass",
+    "career-ops.tests.test_linkedin_publish.TestNewsClaimsGate::test_a_missing_news_record_is_refused",
+    "career-ops.tests.test_linkedin_workflow::test_manifest_never_carries_application_state",
+    "career-ops.tests.test_linkedin_workflow::test_manifest_provenance_names_the_linkedin_signal_source",
+    "career-ops.tests.test_linkedin_workflow::test_handoff_dry_run_is_default_and_leaves_the_canonical_tracker_untouched",
+    "career-ops.tests.test_linkedin_workflow::test_handoff_manifest_is_written_inside_the_linkedin_runtime_only",
+    "career-ops.tests.test_linkedin_workflow::test_handoff_apply_to_a_copy_appends_verifies_and_leaves_canonical_untouched",
+    "career-ops.tests.test_linkedin_workflow::test_replaying_a_written_linkedin_job_is_deduped",
+    "career-ops.tests.test_linkedin_workflow::test_handoff_manifest_records_posted_date_when_known",
+    "career-ops.tests.test_linkedin_workflow::test_ineligible_signal_is_excluded_from_the_manifest_by_default",
+    "career-ops.tests.test_linkedin_workflow::test_ineligible_signal_can_only_be_included_as_a_labelled_test_row",
+    "career-ops.tests.test_tracker_rollover::test_plan_is_read_only[uk]",
+    "career-ops.tests.test_tracker_rollover::test_dry_run_writes_nothing[uk]",
+    "career-ops.tests.test_tracker_rollover::test_rollover_archives_and_rotates[uk]",
+    "career-ops.tests.test_tracker_rollover::test_rotated_rows_feed_the_cross_month_dedupe_index[uk]",
+    "career-ops.tests.test_tracker_rollover::test_rollover_refuses_when_a_row_carries_owner_state",
+    "career-ops.tests.test_tracker_rollover::test_archive_only_rerun_is_unchanged",
+    "career-ops.tests.test_tracker_rollover::test_rotated_rows_can_be_restored_from_the_backup",
+    "career-ops.tests.test_tracker_rollover::test_cli_rollover_emits_one_json_object[uk]",
+    "career-ops.tests.test_tracker_rollover::test_run_health_records_both_workers",
+    "career-ops.tests.test_tracker_rollover::test_cli_run_health_emits_one_json_object",
+    "career-ops.tests.test_workbook_recovery::test_duplicate_discovery_ack_fails_closed_on_conflict[company]"
+  ],
+  "changed_source_hashes": {
+    "career-ops/tracker_writer.py": "df78a8dc064e75b5a4392ef17ba6daf3cc70c47724ea1ad80b4a4976ef2acd00",
+    "career-ops/daily_jobs_links.py": "858eadd8cb079de2627e313c7b782b3b8dc6d3fd31c827bc57fbff8dbf0d0d30",
+    "career-ops/tests/test_tracker_writer.py": "501c26587c77b73ef9caeca9847fb43a3f2166e6ed83e7fef80980185946a58d",
+    "career-ops/tests/test_job_availability.py": "28910d5fc12e2b810143daa5fabd289f71f9e4eb91f38b38cff006df57e6e60c"
+  },
+  "private_evidence_directory": "C:\\Users\\mukun\\Documents\\Codex\\career-failure-investigation-20261023",
+  "unrelated_failure_fixes_implemented": false,
+  "no_main_merge": true,
+  "no_applications_or_outreach": true,
+  "no_gmail_or_calendar_calls": true,
+  "limits": [
+    "No fresh live vacancy verification claim",
+    "No LinkedIn publication attempted",
+    "Legacy builder inspected not executed; historical use unproven",
+    "Synthetic planning probes do not prove a published unchecked post"
+  ]
+}

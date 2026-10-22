@@ -650,6 +650,17 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     before_links = _link_state()
     bind_links(tr.ws,cfg)
     links_repaired = _link_state() != before_links
+    # Upgrade only the display marker already owned by Career Ops. Values,
+    # hyperlink targets, owner notes/statuses and the six-column schema stay intact.
+    availability_tag_changes=[]
+    for row in range(tr.first_data_row,tr.last_data_row()+1):
+        cell=tr.ws.cell(row,url_col_idx)
+        if cell.number_format=='"UNVERIFIED — "@':
+            previous=cell.number_format
+            cell.number_format='"UNCONFIRMED — "@'
+            if cell.comment and cell.comment.author=='Career Ops' and cell.comment.text.startswith('UNVERIFIED'):
+                cell.comment.text=cell.comment.text.replace('UNVERIFIED','UNCONFIRMED',1)
+            availability_tag_changes.append({'cell':cell.coordinate,'before':previous,'after':cell.number_format})
     assert_valid(tr.ws,cfg)
     pre_owned = tr.owned_snapshot()
     pre_rows = tr.last_data_row() - cfg["first_data_row"] + 1
@@ -797,21 +808,22 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         "pre_data_rows": pre_rows,
         "cross_month_index": {"sources": cross["sources"], "keys": len(cross["url_keys"])},
         "tracker_sha256_before": before_hash,
+        "availability_tag_changes":availability_tag_changes,
     }
 
-    if not apply or (not plan_rows and not links_repaired
+    if not apply or (not plan_rows and not links_repaired and not availability_tag_changes
                      and not (passed_rows or listing_rows)):
         tr.wb.close()
         result["planned_rows"] = [p["record"].get("id") for p in plan_rows if p["kind"] == "append"]
         if not plan_rows:
-            result["reason"] = "no changes required: nothing to append or refresh"
+            result["reason"] = ("availability labels planned" if availability_tag_changes else "no changes required: nothing to append or refresh")
         return result
 
     if not plan_rows:
         # Nothing to append, but the link repair above changed the sheet.
         # Persist it so a no-op run heals the workbook instead of leaving the
         # same corruption for the next run to trip over.
-        result["reason"] = "no changes required: nothing to append or refresh"
+        result["reason"] = "availability labels updated" if availability_tag_changes else "existing workbook maintenance"
 
     # Owner mandate: the UK tracker carries exactly six columns
     # (Date Found, Company, Role Title, Apply Link, Application Deadline,
@@ -876,12 +888,12 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         # the note carries the machine-readable marker and reason after cache expiry.
         from openpyxl.comments import Comment
         link_cell=tr.ws[f"{cfg['dedupe']['url_column']}{r}"]
-        marker='"UNVERIFIED — "@'
+        marker='"UNCONFIRMED — "@'
         if link_cell.number_format==marker:link_cell.number_format='General'
         availability=record.get('availability') or {}
-        if availability and availability.get('state') not in ('OPEN','CLOSED'):
+        if availability.get('state') not in ('OPEN','CLOSED'):
             link_cell.number_format=marker
-            link_cell.comment=Comment('UNVERIFIED — availability not confirmed. Check before applying.\n'+str(availability.get('evidence') or 'No positive open verification.'), 'Career Ops')
+            link_cell.comment=Comment('UNCONFIRMED — availability not confirmed. Check before applying.\n'+str(availability.get('evidence') or 'No positive open verification.'), 'Career Ops')
 
     # explicit refresh of non-owned columns on duplicate rows
     refresh_map = set(cfg.get("refreshable_columns", []))

@@ -482,10 +482,10 @@ def test_unverified_flag_persists_without_changing_url_status_or_schema(tmp_path
         assert cell.hyperlink.target == record["url"]
         assert sheet[f"{cfg['status_columns']['application_status']}{cell.row}"].value == "Not Applied"
         if record["availability"]["state"] == "UNKNOWN":
-            assert "UNVERIFIED" in cell.number_format
+            assert "UNCONFIRMED" in cell.number_format
             assert "HTTP 403 bot wall" in cell.comment.text
         else:
-            assert "UNVERIFIED" not in cell.number_format
+            assert "UNCONFIRMED" not in cell.number_format
             assert cell.comment is None
     book.close()
     before = h(workbook)
@@ -494,3 +494,43 @@ def test_unverified_flag_persists_without_changing_url_status_or_schema(tmp_path
                                 cleanup_existing=False)
     assert repeated["counts"]["appended"] == 0
     assert h(workbook) == before
+
+
+def test_missing_availability_is_always_unconfirmed(tmp_path):
+    workbook = copy_tracker("uk", tmp_path)
+    result = tw.write_records(PROFILES, "uk", [make_record()], apply=True,
+        tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)
+    assert result["counts"]["appended"] == 1
+    book = openpyxl.load_workbook(workbook)
+    cell = next(c for c in book["Jobs"]["D"] if c.value == make_record()["url"])
+    assert "UNCONFIRMED" in cell.number_format
+    assert cell.hyperlink.target == cell.value
+    book.close()
+
+
+def test_legacy_tag_migration_preserves_owner_cells_and_is_idempotent(tmp_path):
+    from openpyxl.comments import Comment
+    workbook = copy_tracker("uk", tmp_path)
+    book = openpyxl.load_workbook(workbook); sheet = book["Jobs"]
+    cell = sheet["D3"]; cell.number_format = '\"UNVERIFIED — \"@'
+    cell.comment = Comment("UNVERIFIED — fixture evidence", "Career Ops")
+    def values_links(ws):
+        return [(c.coordinate, c.value, c.hyperlink.target if c.hyperlink else None)
+                for row in ws for c in row]
+    before_cells = values_links(sheet)
+    book.save(workbook); book.close(); before_hash = h(workbook)
+    dry = tw.write_records(PROFILES, "uk", [], apply=False,
+        tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)
+    assert dry["availability_tag_changes"] and h(workbook) == before_hash
+    result = tw.write_records(PROFILES, "uk", [], apply=True,
+        tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)
+    assert result["applied"] and result["counts"]["appended"] == 0
+    book = openpyxl.load_workbook(workbook); sheet = book["Jobs"]
+    assert values_links(sheet) == before_cells
+    assert sheet.max_column == 6
+    assert "UNCONFIRMED" in sheet["D3"].number_format
+    assert sheet["D3"].comment.text == "UNCONFIRMED — fixture evidence"
+    book.close(); after_hash = h(workbook)
+    repeated = tw.write_records(PROFILES, "uk", [], apply=True,
+        tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)
+    assert not repeated["applied"] and h(workbook) == after_hash
