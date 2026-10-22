@@ -59,6 +59,7 @@ MIN_GROUNDING_CHARS = 1500
 # runs are recorded so a verdict can be audited. Without this, the same post
 # could be blocked today and passed tomorrow with nothing changed.
 JUDGE_RUNS = 3
+JUDGE_SOURCE_CHARS = 120000
 
 # The judge needs the ``google-genai`` client library. That library is not a
 # dependency of every interpreter this repo runs under: the Hermes runtime venv
@@ -458,7 +459,7 @@ Rules:
 - Be strict. If the SOURCE does not clearly support it, it is not supported.
 {grounding_note}
 SOURCE:
-\"\"\"{source_text[:20000]}\"\"\"
+\"\"\"{source_text[:JUDGE_SOURCE_CHARS]}\"\"\"
 
 POST:
 \"\"\"{post_text}\"\"\"
@@ -615,6 +616,8 @@ def verify_post(post_text: str, sources: list[str], *,
         "body_sha256": sha256_text(body),
         "sources": list(sources),
         "source_sha256": {u: sha256_text(t) for u, t in source_texts.items()},
+        "source_chars_total": len(combined),
+        "source_chars_fed": min(len(combined), JUDGE_SOURCE_CHARS) if use_llm and source_texts else 0,
         "sources_unreadable": unavailable,
         "llm_used": False,
         "ungrounded_numbers": [],
