@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html
 import json
 import os
 import re
@@ -391,11 +392,20 @@ def _normalise_claim(text: str) -> str:
 
 
 def _normalise_evidence(text: str) -> str:
-    return re.sub(r"\s+", " ", re.sub(r"[\u200b-\u200f\u2060]", "", text)).casefold().strip()
+    """Compare quotations after removing only source presentation markup.
+
+    Keep words and numbers intact: HTML entities, Markdown link destinations,
+    invisible layout characters and spacing before punctuation are not facts.
+    """
+    text = html.unescape(text)
+    text = re.sub(r"\[([^\]\n]+)\]\([^\n)]+\)", r"\1", text)
+    text = re.sub(r"[\u200b-\u200f\u2060]", "", text)
+    text = re.sub(r"\s+", " ", text)
+    return re.sub(r"\s+([.,;:!?])", r"\1", text).casefold().strip()
 
 
 def _evidence_present(evidence: str, source: str) -> bool:
-    fragments = [p.strip() for p in re.split(r"\.{3}|\u2026", evidence) if p.strip()]
+    fragments = [p.strip() for p in re.split(r"\[\s*(?:\.{3}|\u2026)\s*\]|\.{3}|\u2026", evidence) if p.strip()]
     return bool(fragments) and all(
         len(_normalise_evidence(p)) >= 12
         and _normalise_evidence(p) in _normalise_evidence(source)

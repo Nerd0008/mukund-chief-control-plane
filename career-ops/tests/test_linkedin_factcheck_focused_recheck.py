@@ -143,5 +143,23 @@ sys.modules['google'] = google
         self.assertFalse(result["used"])
 
 
+
+class TestSourceQuotationFormatting(unittest.TestCase):
+    def test_markdown_link_text_and_html_entities_are_valid_quotes(self):
+        source = "Developers [released urgent new fixes](https://example.com/fix) in PHP&#46; Older versions have reached end of life ."
+        self.assertTrue(fc._evidence_present("Developers released urgent new fixes in PHP.", source))
+        self.assertTrue(fc._evidence_present("Older versions have reached end of life.", source))
+
+    def test_bracketed_omission_preserves_exact_fragments(self):
+        source = "Two flaws are grouped under two CVEs, with severity reaching CVSS 9.2. Some other text. These vulnerabilities allow unauthenticated remote code execution in PHP itself."
+        evidence = "grouped under two CVEs, with severity reaching CVSS 9.2. [...] These vulnerabilities allow unauthenticated remote code execution in PHP itself."
+        self.assertTrue(fc._evidence_present(evidence, source))
+
+    def test_formatting_normalisation_never_changes_facts(self):
+        source = "A [single researcher](https://example.com) completed the work in a week&#46;"
+        self.assertFalse(fc._evidence_present("A single researcher completed the work in a day.", source))
+        self.assertFalse(fc._evidence_present("A single researcher completed the work in a week. [...] This invented detail was not reported.", source))
+
+
 if __name__ == "__main__":
     unittest.main()
