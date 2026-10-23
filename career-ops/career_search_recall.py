@@ -20,7 +20,9 @@ def query_batches(profile,region,fallback,year):
     import owner_search_profile as osp
     disciplines=osp.discipline_terms(profile) if profile else []
     disciplines=disciplines or ['cyber security','information security','IT support']
-    levels=('internship','graduate scheme','placement','junior','trainee','apprentice','off-cycle internship','entry level')
+    uk_scope = str(region).strip().casefold() in ('uk', 'the uk', 'united kingdom', 'the united kingdom')
+    levels=('internship','graduate scheme','placement','junior','trainee','off-cycle internship','entry level')
+    if not uk_scope:levels=levels+('apprentice',)
     # Each batch is different, with no-year/current-year/next-year coverage.
     batches=[];seen=set()
     for i,level in enumerate(levels):
@@ -45,6 +47,7 @@ def query_batches(profile,region,fallback,year):
     for group in fallback:
         batch=[]
         for q in group:
+            if re.search(r"\bapprentice(?:ship)?\b", q, re.I):continue
             q=re.sub(r'\b20\d{2}\b',str(year),q).replace('"','')
             if q not in seen:batch.append(q);seen.add(q)
         if batch:batches.append(batch[:6])

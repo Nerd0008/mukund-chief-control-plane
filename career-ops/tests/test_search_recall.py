@@ -22,7 +22,7 @@ def test_queries_have_diverse_levels_and_years():
     assert any('2026' in q for q in queries)
     assert any('2027' in q for q in queries)
     assert any(not any(str(y) in q for y in (2026,2027)) for q in queries)
-    for word in ['internship','graduate','placement','junior','trainee','apprentice','off-cycle']:
+    for word in ['internship','graduate','placement','junior','trainee','off-cycle']:
         assert any(word in q for q in queries)
     assert all('"' not in q for q in queries)
 

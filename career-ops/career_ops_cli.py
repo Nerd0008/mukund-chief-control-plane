@@ -394,15 +394,19 @@ def cmd_scan(args) -> int:
     # context the default locale encoding is cp1252, which raises
     # UnicodeDecodeError in the reader thread and silently empties stdout — so the
     # encoding is pinned here rather than inherited from the locale.
-    proc = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True,
-                          encoding="utf-8", errors="replace",
-                          timeout=args.timeout, shell=False, env=env)
+    from effective_search_policy import discovery_environment, effective_policy
+    with discovery_environment(args.region, lane["env"], root) as effective_env:
+        env.update(effective_env)
+        proc = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
+                              timeout=args.timeout, shell=False, env=env)
     finished = dt.datetime.now(dt.timezone.utc)
     record = {
         "region": args.region,
         "command": cmd,
         "cwd": str(root),
-        "lane_env": lane["env"],
+        "lane_env": effective_env,
+        "effective_search_policy": effective_policy(args.region),
         "started_at": started.replace(microsecond=0).isoformat(),
         "finished_at": finished.replace(microsecond=0).isoformat(),
         "duration_s": round((finished - started).total_seconds(), 1),

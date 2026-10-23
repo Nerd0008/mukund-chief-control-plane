@@ -42,11 +42,14 @@ import pathlib
 import re
 import subprocess
 import sys
+import time
+import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 CONTROL_PLANE = HERE.parent
 sys.path.insert(0, str(HERE))
 
+from posting_identity import identity_keys
 from career_search_recall import posting_key  # noqa: E402
 from run_lock import acquire_run_lock, write_atomic  # noqa: E402
 
@@ -68,6 +71,8 @@ SLOT_SECONDS = 7200
 #: diagnosed after the fact. The scan stays silent on Discord when there is
 #: nothing new, which previously left no evidence at all of what the search did.
 SEARCH_LOG = RUNTIME / "job-scan-last-search.log"
+CURSOR = RUNTIME / "job-scan-cursor.json"
+RUNS = RUNTIME / "job-scan-runs"
 
 
 def read_tracker(path: pathlib.Path) -> list[dict]:
@@ -136,17 +141,15 @@ def ct_key(company: str, title: str) -> str:
 
 
 def role_keys(company: str, title: str, url: str) -> list[str]:
-    keys = []
-    u = posting_key(url)
-    if u:
-        keys.append(u)
-    k = ct_key(company, title)
-    if k:
-        keys.append(k)
-    return keys
+    """Use posting URLs and employer-scoped requisitions, never title equality."""
+    keys = sorted(identity_keys(company, url))
+    key = posting_key(url)
+    return ([key] if key else []) + keys
 
 
 def already_seen(company: str, title: str, url: str, seen: dict) -> bool:
+    # Old ct: ledger entries cannot prove that another requisition is the same
+    # vacancy. Current-run writer receipts prevent replaying old tracker rows.
     return any(k in seen for k in role_keys(company, title, url))
 
 
@@ -169,6 +172,9 @@ def search_failed(stdout: str) -> str:
     the WRONG output for a search that never ran: that would report an outage as
     "no new jobs" and the owner would never learn the scan had stopped working.
     """
+    coverage = parse_tagged(stdout, "SEARCH_COVERAGE")
+    if coverage and coverage.get("coverage_complete") is True:
+        return ""  # an observed, completed query can legitimately have no results
     counts = batch_result_counts(stdout)
     timeouts = len(BATCH_TIMEOUT_RE.findall(stdout))
     if counts and all(c == 0 for c in counts):
@@ -178,9 +184,11 @@ def search_failed(stdout: str) -> str:
     return ""
 
 
-def run_search(offset: int, timeout: int) -> tuple[int, str, str]:
+def run_search(offset: int, timeout: int, *, dry_run: bool = False) -> tuple[int, str, str]:
     cmd = [PY, str(SEARCH), "--region", REGION, "--batches", "1",
            "--batch-offset", str(offset), "--timeout", str(timeout)]
+    if dry_run:
+        cmd.append("--dry-run")
     try:
         proc = subprocess.run(  # noqa: S603
             cmd, capture_output=True, text=True, encoding="utf-8",
@@ -203,20 +211,76 @@ def parse_tagged(stdout: str, tag: str) -> dict | None:
 
 
 def search_found(stdout: str) -> list[dict]:
-    """The candidates the search accepted this run, with their apply URLs."""
-    doc = parse_tagged(stdout, "SEARCH_RECONCILIATION") or {}
-    out = []
-    for d in doc.get("decisions") or []:
-        if d.get("reason") != "new candidate" or not d.get("url"):
+    """Proposed rows, used only for truthful unsaved-write diagnostics."""
+    return current_run_roles(stdout, dry_run=True)
+
+
+def tagged_records(stdout: str, tag: str) -> list[dict]:
+    return [doc for line in stdout.splitlines()
+            if (doc := parse_tagged(line, tag)) is not None]
+
+
+def current_run_roles(stdout: str, *, dry_run: bool = False) -> list[dict]:
+    """Attribute only verified append outcomes from this invocation's batches."""
+    delivery = {posting_key(row.get("url")): row
+                for doc in tagged_records(stdout, "SEARCH_DELIVERY") + tagged_records(stdout, "SEARCH_PROPOSALS")
+                for row in doc.get("records", [])}
+    roles = []
+    tag = "SEARCH_RECONCILIATION" if dry_run else "TRACKER_WRITE_RESULT"
+    for result in tagged_records(stdout, tag):
+        if not dry_run and (result.get("applied") is not True or result.get("error") or result.get("problems")):
             continue
-        out.append({
-            "company": "Unknown",
-            "title": str(d.get("title") or "").strip(),
-            "url": str(d.get("url") or "").strip(),
-            "deadline": "",
-            "location": "",
-        })
-    return out
+        outcomes = result.get("canonical_outcomes", []) if dry_run else result.get("outcomes", [])
+        for row in outcomes:
+            if row.get("decision") == "appended" and row.get("url"):
+                detail = delivery.get(posting_key(row["url"]), {})
+                roles.append(dict(row, status="Not Applied",
+                    availability=detail.get("availability", {"state": "UNKNOWN"}),
+                    deadline=detail.get("deadline", "")))
+    return roles
+
+
+def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
+                 max_batches: int = 3, budget_seconds: int = 1200,
+                 pool_size: int = 1) -> tuple[int, str, str, dict]:
+    """Move beyond duplicate-only batches, with bounded time and saved progress."""
+    started = time.monotonic()
+    outputs, errors, receipts = [], [], []
+    code = 0
+    next_offset = offset % max(1, pool_size)
+    for _ in range(min(max(1, max_batches), max(1, pool_size))):
+        remaining = budget_seconds - (time.monotonic() - started)
+        if remaining <= 305:
+            break
+        current = next_offset
+        code, out, err = run_search(current, max(1, min(timeout, int(remaining) - 305)), dry_run=dry_run)
+        outputs.append(out)
+        errors.append(err)
+        coverage = parse_tagged(out, "SEARCH_COVERAGE") or {}
+        complete = code == 0 and coverage.get("coverage_complete") is True
+        receipts.append({"batch_offset": current, "exit_code": code, "complete": complete,
+                         "coverage": coverage,
+                         "reconciliation": parse_tagged(out, "SEARCH_RECONCILIATION"),
+                         "new_rows": len(current_run_roles(out, dry_run=dry_run))})
+        if not complete:
+            code = code or 3
+            break
+        next_offset = (current + 1) % max(1, pool_size)
+        if not dry_run:
+            write_atomic(CURSOR, json.dumps({"next_offset": next_offset, "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}))
+        roles = current_run_roles(out, dry_run=dry_run)
+        if any((row.get("availability") or {}).get("state") == "OPEN" for row in roles):
+            break
+        # Unverified leads remain labelled; use the remaining bounded budget
+        # to look for independently confirmed-open vacancies.
+    summary = {"batches_attempted": len(receipts), "query_pool_batches": pool_size,
+               "completed_batches": sum(r["complete"] for r in receipts),
+               "next_offset": next_offset, "elapsed_seconds": round(time.monotonic() - started, 2),
+               "coverage_complete": bool(receipts) and all(r["complete"] for r in receipts),
+               "market_exhausted": False, "batches": receipts}
+    if not receipts:
+        code = 3
+    return code, "\n".join(outputs), "\n".join(errors), summary
 
 
 def write_ok(stdout: str, stderr: str, code: int) -> tuple[bool, str]:
@@ -258,6 +322,9 @@ def build_digest(items: list[dict], when: dt.datetime) -> str:
         lines.append(f"{i}. {it['company']} - {it['title']}" if it["company"] != "Unknown"
                      else f"{i}. {it['title']}")
         lines.append(f"   {it['url']}")
+        availability = it.get("availability") or {}
+        if availability.get("state") != "OPEN":
+            lines.append("   Availability: UNVERIFIED — lead, not a confirmed-open vacancy")
         if it.get("deadline"):
             lines.append(f"   Deadline: {it['deadline']}")
         lines.append("")
@@ -271,6 +338,8 @@ def main() -> int:
     ap.add_argument("--tracker", default=None)
     ap.add_argument("--timeout", type=int, default=600, help="per-batch Codex timeout")
     ap.add_argument("--skip-search", action="store_true")
+    ap.add_argument("--max-batches", type=int, default=3)
+    ap.add_argument("--budget-seconds", type=int, default=1200)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument(
         "--batch-offset",
@@ -299,9 +368,10 @@ def main() -> int:
     # First run: the roles already in the tracker are the baseline, so the owner
     # is not sent his whole existing list as "new" the moment this is switched on.
     baseline = not seen
+    baseline_rows = read_tracker(tracker) if baseline else []
     if baseline:
         seen = {}
-        for r in read_tracker(tracker):
+        for r in baseline_rows:
             for k in role_keys(r["company"], r["title"], r["url"]):
                 seen[k] = now.isoformat()
         if not args.dry_run:
@@ -310,16 +380,25 @@ def main() -> int:
     found: list[dict] = []
     ok, why = True, ""
     if not args.skip_search:
-        slot = (args.batch_offset if args.batch_offset is not None
-                else int(dt.datetime.now(dt.timezone.utc).timestamp() // SLOT_SECONDS))
-        code, out, err = run_search(slot, args.timeout)
+        import codex_entry_level_search as direct
+        import owner_search_profile as owner_profile
+        from career_search_recall import query_batches
+        pool_size = len(query_batches(owner_profile.load_profile(), direct.REGION_LABEL[REGION],
+                                      direct.QUERY_BATCHES[REGION], dt.datetime.now().year))
+        slot = args.batch_offset if args.batch_offset is not None else direct.read_cursor(CURSOR, 0)
+        code, out, err, coverage_summary = run_searches(slot, args.timeout, dry_run=args.dry_run,
+            max_batches=args.max_batches, budget_seconds=args.budget_seconds, pool_size=pool_size)
+        if not args.dry_run:
+            stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
+            write_atomic(RUNS / f"{stamp}.json", json.dumps({"coverage": coverage_summary,
+                "stdout": out, "stderr": err, "exit_code": code, "tracker": str(tracker)}, indent=2))
         if not args.dry_run:
             write_atomic(SEARCH_LOG,
                          f"# batch-offset {slot}  exit {code}\n{out}\n"
                          f"--- stderr ---\n{err}\n")
         found = search_found(out)
         ok, why = write_ok(out, err, code)
-        if code not in (0,) and not found:
+        if code not in (0,):
             print("Job scan FAILED: the search did not complete.\n"
                   f"exit {code}; {(err or out).strip()[-400:]}")
             return 3
@@ -330,7 +409,7 @@ def main() -> int:
                   f"Check Codex, then read {SEARCH_LOG}.")
             return 3
 
-    rows = read_tracker(tracker)
+    rows = current_run_roles(out, dry_run=args.dry_run) if not args.skip_search else []
     new = [r for r in rows
            if r["status"] == "Not Applied"
            and not already_seen(r["company"], r["title"], r["url"], seen)]
@@ -343,7 +422,7 @@ def main() -> int:
                                    f.get("url", ""), seen)]
 
     if baseline:
-        print(f"Job scan baseline established: {len(seen)} existing role(s) recorded as "
+        print(f"Job scan baseline established: {len(baseline_rows)} existing role(s) recorded as "
               f"already seen. Only roles found from now on will be reported.")
 
     if not new:

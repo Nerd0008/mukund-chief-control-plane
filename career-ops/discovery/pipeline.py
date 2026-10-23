@@ -867,9 +867,13 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
     These gates run AFTER semantic classification and cannot be overridden by a
     model: a title/AI verdict never substitutes for them.
     """
+    from effective_search_policy import role_decision
     rp = rjs.region_policy(region, policy)
     reasons: list = []
     flags: list = []
+    role_ok, role_reason = role_decision(region, rec.get("title"))
+    if not role_ok:
+        reasons.append(role_reason)
 
     from application_links import identity_review_reason
     identity_reason=identity_review_reason(rec.get("company"),rec.get("title"))
@@ -938,7 +942,7 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
                 "work_authorisation": rjs._work_auth_block(rp)}
 
     ok, why = rjs.location_matches(scope, rec.get("location"), rec.get("title"), url,
-                                   require_explicit_region=(region != "uk"))
+                                   require_explicit_region=(region != "uk"), country_hint=rjs.location_country(rec))
     if ok:
         flags.append(why)
     else:
@@ -958,6 +962,10 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append(f"states a multi-year experience requirement ('{exp}')")
 
     from experience_screening import experience_hits
+    from student_eligibility import student_requirement
+    student_reason = student_requirement(rec.get('jd_text') or '')
+    if student_reason:
+        reasons.append(student_reason)
     required_experience=experience_hits(rec.get('jd_text') or '')
     if required_experience: reasons.append('prior experience required: '+required_experience[0])
     from application_deadlines import deadline_priority
@@ -1282,7 +1290,10 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     gated = []
     for rec in accepted:
         verified=rec.get("verified_posting") or rec.get("discovered_posting") or {}
-        gate_rec={**rec,**{k:v for k,v in verified.items() if k in ("company","title","location") and v}}
+        gate_rec={**rec,**{k:v for k,v in verified.items() if k in ("company","title","location","country","country_code") and v}}
+        from verification_evidence import save_evidence
+        evidence_path = save_evidence(gate_rec, {"text": gate_rec.get("jd_text"),
+                                               "vacancy_status": gate_rec.get("vacancy_status")})
         verdict = deterministic_gates(region, gate_rec, policy, scope)
         sources = rec.get("sources")
         entry = {"candidate_id": candidate_id(rec), "company": gate_rec.get("company"),
@@ -1296,6 +1307,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
                  "jd_fetch_state":rec.get("jd_fetch_state"),
                  "jd_fetch_error":rec.get("jd_fetch_error"),
                  "jd_text_characters":len(rec.get("jd_text") or ""),
+                 "evidence_path": evidence_path,
                  "jd_validation_source":rec.get("jd_validation_source"),
                  **verdict}
         gated.append(entry)
@@ -1354,9 +1366,20 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         else:
             funnel.source_stages(sources_for_outcome, "tracker_candidates")
 
+    from effective_search_policy import effective_policy
+    proposed_ids = {tw.normalize_url(row.get("url")) for row in new_rows}
+    proposed_records = [row for row in passed if tw.normalize_url(row.get("url")) in proposed_ids]
+    quality = {"historical_seed_records": sum(bool(row.get("historical_seed")) for row in candidates),
+               "current_source_records": sum(not row.get("historical_seed") for row in candidates),
+               "proposed_new_rows": len(new_rows),
+               "confirmed_open_proposals": sum((row.get("vacancy_status") or {}).get("state") == "OPEN" for row in proposed_records),
+               "availability_unverified_proposals": sum((row.get("vacancy_status") or {}).get("state") != "OPEN" for row in proposed_records),
+               "note": "OPEN describes vacancy availability only, not confirmation of every candidate-specific eligibility requirement"}
     return {
         "run_id": run_id,
         "region": region,
+        "effective_search_policy": effective_policy(region),
+        "discovery_quality": quality,
         "title_policy_mode": mode,
         "semantic": {k: v for k, v in semantic_doc.items() if k != "classifications"},
         "codex": {k: v for k, v in codex_doc.items() if k != "classifications"},

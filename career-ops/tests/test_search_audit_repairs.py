@@ -372,3 +372,36 @@ def test_direct_worker_retains_observed_query_evidence(monkeypatch):
     monkeypatch.setattr(web,'CodexWebSearchProvider',Provider)
     result=direct.run_codex('fixture')
     assert str(result)=='[]' and result.evidence['executed_queries']==['actual public query']
+
+
+
+def test_intake_year_variant_with_unknown_requisition_is_review_only(book_copy, tmp_path):
+    profiles, path = book_copy
+    old = {'company': 'Intake Audit Fixture', 'title': 'Security Operations Placement Year',
+           'date_found': '2026-10-23', 'url': 'https://intermediary.audit.invalid/job/security-placement'}
+    tw.write_records(profiles, 'uk', [old], apply=True, tracker_override=str(path), backup_dir=str(tmp_path), cleanup_existing=False)
+    incoming = dict(old, title='Security Operations Placement Year 2027', url='https://another.audit.invalid/job/security-placement-2027')
+    result = tw.write_records(profiles, 'uk', [incoming], apply=False, tracker_override=str(path), cleanup_existing=False)
+    assert result['counts']['appended'] == 0
+    assert 'review' in result['outcomes'][0]['reason'].lower()
+
+
+def test_intake_year_variant_with_distinct_proven_requisitions_survives(book_copy, tmp_path):
+    profiles, path = book_copy
+    old = {'company': 'Intake Requisition Fixture', 'title': 'Security Operations Placement Year',
+           'date_found': '2026-10-23', 'url': 'https://careers.audit.invalid/jobs/90000221'}
+    tw.write_records(profiles, 'uk', [old], apply=True, tracker_override=str(path), backup_dir=str(tmp_path), cleanup_existing=False)
+    incoming = dict(old, title='Security Operations Placement Year 2027', url='https://careers.audit.invalid/jobs/90000222')
+    result = tw.write_records(profiles, 'uk', [incoming], apply=False, tracker_override=str(path), cleanup_existing=False)
+    assert result['counts']['appended'] == 1
+
+
+
+def test_intake_year_variants_inside_one_manifest_do_not_duplicate(book_copy):
+    profiles, path = book_copy
+    records = [{'company': 'Manifest Intake Fixture', 'title': title, 'date_found': '2026-10-23',
+                'url': f'https://intermediary.audit.invalid/job/{slug}'} for title, slug in [
+                    ('Security Operations Placement Year', 'security-placement'),
+                    ('Security Operations Placement Year 2027', 'security-placement-2027')]]
+    result = tw.write_records(profiles, 'uk', records, apply=False, tracker_override=str(path), cleanup_existing=False)
+    assert result['counts']['appended'] == 1 and result['counts']['rejected'] == 1

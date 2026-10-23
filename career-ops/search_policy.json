@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "basis": "Existing direct and unified production high_recall discovery mode; hard eligibility remains separate.",
+  "regions": {
+    "uk": {
+      "mode": "high_recall",
+      "include": [
+        "internships",
+        "placements",
+        "graduate",
+        "junior",
+        "trainee",
+        "entry-level cyber and IT-security"
+      ],
+      "exclude": [
+        "apprenticeships"
+      ],
+      "unverified_leads": "retain with explicit flags; never count as confirmed-open vacancies"
+    }
+  }
+}

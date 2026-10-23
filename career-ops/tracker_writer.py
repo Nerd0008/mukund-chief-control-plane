@@ -713,13 +713,18 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
                 if (cfg.get("id") or {}).get("style") == "sequential" else 0)
     planned_url_keys = set()
     from posting_identity import identity_keys
-    by_requisition={}; existing_pair_urls={}
+    by_requisition={}; existing_pair_urls={}; existing_intakes={}
+    def intake_key(company, title):
+        # Formatting/year changes are not proof of a new requisition.
+        stable = re.sub(r"\b20\d{2}\b", " ", str(title or ""))
+        return pair_key(company, stable)
     for row in range(tr.first_data_row,tr.last_data_row()+1):
         company=tr.ws.cell(row,column_index_from_string(cfg['dedupe']['company_column'])).value
         title=tr.ws.cell(row,column_index_from_string(cfg['dedupe']['title_column'])).value
         url=tr.ws.cell(row,tr.url_col_idx()).value
         for key in identity_keys(company,url):by_requisition.setdefault(key,row)
         existing_pair_urls.setdefault(pair_key(company,title),[]).append(url)
+        existing_intakes.setdefault(intake_key(company, title), []).append((title, url, row))
     planned_pair_keys = set()
     planned_pair_urls = {}
     planned_requisitions=set()
@@ -785,6 +790,16 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             plan_rows.append({"kind": "refresh", "row": int(matched_row), "record": record})
             continue
 
+        ambiguous = next(((old_title, old_url, row) for old_title, old_url, row
+            in existing_intakes.get(intake_key(record.get("company"), record.get("title")), [])
+            if pair_key(record.get("company"), old_title) != pkey
+            and not distinct_requisitions(record.get("company"), old_url, record.get("url"))), None)
+        if ambiguous:
+            entry.update(decision="rejected", existing_row=ambiguous[2],
+                reason="intake-year/title variant of an existing role without distinct requisition evidence; identity review-only")
+            outcomes.append(entry)
+            continue
+
         # assign an id (schemas without an id column keep record["id"] unset)
         rid = record.get("id")
         id_cfg = cfg.get("id")
@@ -810,6 +825,8 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         if pkey.strip("|"):
             planned_pair_keys.add(pkey)
             planned_pair_urls.setdefault(pkey,[]).append(record.get("url"))
+        existing_intakes.setdefault(intake_key(record.get("company"), record.get("title")), []).append(
+            (record.get("title"), record.get("url"), None))
         entry["decision"] = "appended"
         entry["id"] = str(rid)
         outcomes.append(entry)

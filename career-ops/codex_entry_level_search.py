@@ -38,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -183,7 +184,7 @@ PROMPT_TEMPLATE = (
     "I need roles specifically for 0-1 year experience candidates: graduate schemes, "
     "internships, junior roles, trainee roles, entry-level positions.\n\n"
     "Search these queries and return ALL results you actually retrieve:\n{queries}\n\n"
-    "For each result return: job_title, company, location, url, experience_requirements.\n\n"
+    "For each result return: job_title, company, location, country, url, experience_requirements. Country must come from the vacancy evidence; use null when unknown, never infer it from the search query.\n\n"
     "Resolve the original employer/ATS individual vacancy URL by following the advert's Apply link. "
     "Prefer that verified original destination in url, with the discovery page in source_url. "
     "Check the employer, role and intake agree across both pages. Never use a category/search page "
@@ -191,7 +192,7 @@ PROMPT_TEMPLATE = (
     "If only a specific aggregator advert can be retrieved, retain its real URL for local resolution; "
     "never guess an employer URL or claim a blocked destination is open.\n\n"
     "Include a result only if it is for someone at the very start of their career: "
-    "graduate, intern, internship, junior, entry level, trainee, apprentice, new grad, "
+    "graduate, intern, internship, junior, entry level, trainee, new grad, "
     "or 0-1 year experience.\n"
     "Exclude senior, lead, principal, manager, head of, or any role asking for 3+ years.\n\n"
     "Return ONLY a JSON array. Never invent a result: if you did not retrieve it, omit it."
@@ -318,17 +319,56 @@ class SearchResponse(str):
 
 
 def run_codex(prompt: str, timeout: int = 600) -> str:
-    """Run one Codex live-web search and return its raw stdout."""
-    sys.path.insert(0,str(HERE/'discovery'))
-    from web_research import CodexWebSearchProvider
-    provider=CodexWebSearchProvider(executable=CODEX_EXE,model=CODEX_MODEL)
-    result=provider._run_one(provider.resolve(),'bounded direct career search',limit=100,
-                             timeout=timeout,prompt=prompt)
-    if result.get('error') or not result.get('web_search_observed'):
-        raise RuntimeError('search unavailable or live web_search not observed: '+str(result.get('error') or 'unobserved search'))
-    return SearchResponse(json.dumps(result.get('results') or [],ensure_ascii=True),
-        {key:result.get(key) for key in ('web_search_observed','executed_queries','raw_events','elapsed_s')})
+    """Run each requested query in its own observed worker within one budget.
 
+    A search event from one query cannot certify the other five queries. Keep
+    partial discoveries and their coverage receipt, but never call a partial
+    batch complete or write its candidates automatically.
+    """
+    sys.path.insert(0, str(HERE / 'discovery'))
+    from web_research import CodexWebSearchProvider
+    provider = CodexWebSearchProvider(executable=CODEX_EXE, model=CODEX_MODEL)
+    executable = provider.resolve()
+    query_pattern = r'^\d+\.\s+"([^"\n]+)"\s*$'
+    queries = re.findall(query_pattern, prompt, re.M)
+    single_legacy_call = not queries
+    queries = queries or ['bounded direct career search']
+    started = time.monotonic()
+    results, receipts = [], []
+    for index, query in enumerate(queries):
+        remaining = timeout - (time.monotonic() - started)
+        if remaining <= 1:
+            receipts.append({'requested_query': query, 'complete': False,
+                             'error': 'batch elapsed budget exhausted', 'executed_queries': []})
+            continue
+        worker_prompt = prompt
+        if not single_legacy_call:
+            worker_prompt = re.sub(query_pattern,
+                lambda match: f'1. "{query}"' if match.group(1) == query else '', prompt, flags=re.M)
+            worker_prompt += '\nExecute EXACTLY this one query: ' + query + '\n'
+        per_query = max(1, min(int(remaining), max(1, int(remaining / (len(queries) - index)))))
+        result = provider._run_one(executable, query, limit=100,
+                                   timeout=per_query, prompt=worker_prompt)
+        complete = bool(result.get('web_search_observed')) and not result.get('error')
+        receipts.append({'requested_query': query, 'complete': complete,
+                         'web_search_observed': bool(result.get('web_search_observed')),
+                         'executed_queries': result.get('executed_queries') or [],
+                         'raw_events': result.get('raw_events', 0),
+                         'error': result.get('error'), 'results_returned': len(result.get('results') or [])})
+        print(f"  query {index + 1}/{len(queries)}: {'complete' if complete else 'INCOMPLETE'}; {len(result.get('results') or [])} records", flush=True)
+        if complete:
+            results.extend(result.get('results') or [])
+    completed = sum(receipt['complete'] for receipt in receipts)
+    if not completed:
+        raise RuntimeError('search unavailable or live web_search not observed: ' +
+                           '; '.join(str(r.get('error') or 'unobserved search') for r in receipts))
+    evidence = {'web_search_observed': True, 'queries_requested': len(queries),
+                'queries_completed': completed, 'coverage_complete': completed == len(queries),
+                'query_receipts': receipts, 'retrieved_records': results,
+                'executed_queries': [q for r in receipts for q in r.get('executed_queries', [])],
+                'raw_events': sum(r.get('raw_events') or 0 for r in receipts),
+                'elapsed_s': round(time.monotonic() - started, 2)}
+    return SearchResponse(json.dumps(results, ensure_ascii=True), evidence)
 
 
 def parse_jobs(text: str) -> list:
@@ -424,6 +464,7 @@ def main() -> int:
     ap.add_argument("--show-profile", action="store_true",
                     help="print the resolved profile-driven search block and exit")
     args = ap.parse_args()
+    run_deadline = time.time() + max(1, args.timeout * max(1, args.batches)) + 180
 
     if args.show_profile:
         import json as _json
@@ -442,6 +483,9 @@ def main() -> int:
         print(f"ERROR: tracker not found: {tracker}", file=sys.stderr)
         return 2
 
+    from effective_search_policy import effective_policy, role_decision
+    resolved_policy = effective_policy(args.region)
+    print("EFFECTIVE_SEARCH_POLICY " + json.dumps(resolved_policy, ensure_ascii=True))
     entry_terms, _clearance_terms, profile_sha = _profile_terms()
     try:profile = osp.load_profile()
     except osp.ProfileUnavailable:profile = {}
@@ -463,14 +507,15 @@ def main() -> int:
     seen = set()
     seen_identities = set()
     collected, rejected, decisions = [], [], []
-    counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0,'review_only':0}
+    evidence_files = []
+    counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0,'review_only':0,'incomplete_batches':0,'verification_budget_exhausted':0}
     sys.path.insert(0,str(HERE/'discovery'))
     import pipeline as shared_pipeline, regional_job_search as rjs
     from title_policy import tier_a_signals
     from posting_resolution import PostingResolver
     from web_research import CodexWebSearchProvider
     resolver=PostingResolver(CodexWebSearchProvider(executable=CODEX_EXE,model=CODEX_MODEL),
-        state_path=SEARCH_STATE_DIR/(args.region+'-posting-recovery.json'))
+        state_path=SEARCH_STATE_DIR/(args.region+'-posting-recovery.json'), deadline=run_deadline)
     policy=rjs.load_policy();scope=rjs.lane_scope(args.region,rjs.load_schedules()['regions'][args.region])
     rate_limited_hosts=set()
     completed_batches=[]
@@ -500,10 +545,15 @@ def main() -> int:
         if bi>=0:
             completed_batches.append(bi)
             execution_evidence.append({"batch":bi,**(getattr(out,"evidence",None) or {"web_search_observed":None,"note":"execution evidence not supplied by injected worker"})})
+        if getattr(out, "evidence", {}).get("coverage_complete") is False:
+            counts["incomplete_batches"] += 1
         jobs = parse_jobs(out)
         print(f"  batch {bi}: {len(jobs)} results returned")
         counts["retrieved_records"]+=len(jobs)
         for j in jobs:
+            if time.time() >= run_deadline:
+                counts["verification_budget_exhausted"] += 1
+                break
             title = str(j.get("job_title") or j.get("title") or "").strip()
             url = str(j.get("url") or "").strip()
             key = posting_key(url)
@@ -531,6 +581,10 @@ def main() -> int:
             if not is_entry_level(title, entry_terms):
                 rejected.append((title, url, "not entry-level by title"))
                 continue
+            role_ok, role_reason = role_decision(args.region, title)
+            if not role_ok:
+                rejected.append((title, url, role_reason))
+                continue
             title_signals=tier_a_signals(title)
             if title_signals['non_cyber'] and not title_signals['strong_cyber']:
                 rejected.append((title,url,'non-cyber role title'))
@@ -546,11 +600,15 @@ def main() -> int:
                 if jd.get('status')==429:rate_limited_hosts.add(host)
             identity=jd.get('posting_identity') or jd.get('discovered_posting') or {}
             candidate={'company':identity.get('company') or j.get('company'),
-                'title':identity.get('title') or title,'location':identity.get('location') or j.get('location'), 'url':url}
+                'title':identity.get('title') or title,'location':identity.get('location') or j.get('location'),
+                'country':identity.get('country') or j.get('country'), 'posting_identity':identity, 'url':url}
             if (jd.get('vacancy_status') or {}).get('state')=='UNKNOWN':
                 recovered=resolver(candidate,jd)
                 if recovered:jd=recovered
             jd_text = jd.get("text") or ""
+            from verification_evidence import save_evidence
+            evidence_files.append({"title": title, "url": url,
+                                   "path": save_evidence(candidate, jd)})
             verified=record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
             if jd.get("is_closed") or verified['state']=='CLOSED':
                 rejected.append((title, url, "job page says position is closed/filled"))
@@ -598,7 +656,7 @@ def main() -> int:
                 rejected.append((title, url, f"prior experience required: {experience[0][:100]}"))
                 continue
             identity=verified.get("posting_identity") or jd.get('discovered_posting') or {}
-            candidate.update({k:v for k,v in identity.items() if k in ('company','title','location') and v})
+            candidate.update({k:v for k,v in identity.items() if k in ('company','title','location','country','country_code') and v})
             signals=tier_a_signals(' '.join((candidate.get('title') or '',jd_text)))
             if not signals['discipline_families']:
                 rejected.append((title,url,'no supported cyber/IT discipline evidence'))
@@ -649,18 +707,29 @@ def main() -> int:
     counts.update({'new_candidates':canonical_counts.get('appended',0),'rejected':len(rejected),'distinct_query_batches':batch_count})
     decisions.extend({'title':t,'url':u,'reason':why} for t,u,why in rejected)
     decisions.extend({'title':j['title'],'url':j['url'],'source_url':j['source_url'],'application_resolution':j['application_resolution'],'reason':'eligible discovery; see canonical outcome','deadline_info':j['deadline_info']} for j in collected)
-    print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha,'selected_batch_indices':selected_batches,'execution_evidence':execution_evidence,'canonical_outcomes':probe.get('outcomes',[])},ensure_ascii=True))
+    print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha,'selected_batch_indices':selected_batches,'execution_evidence':execution_evidence,'canonical_outcomes':probe.get('outcomes',[]),'candidate_evidence':evidence_files},ensure_ascii=True))
     print(f"Canonical plan: {counts['new_candidates']} proposed NEW rows; {duplicates} duplicate rows avoided.")
     def advance():
         if args.batch_offset<0 and completed_batches:
             save_cursor(cursor,(completed_batches[-1]+1)%len(batches))
     if not collected:
         print('No NEW eligible candidates; this does not mean no jobs were retrieved. See reconciliation counts.')
+    coverage = {"requested_batches": batch_count, "query_pool_batches": len(batches),
+                "completed_batches": len(completed_batches) - counts.get("incomplete_batches", 0),
+                "coverage_complete": not counts["timeouts"] and not counts.get("incomplete_batches") and not counts.get("verification_budget_exhausted"),
+                "query_receipts": execution_evidence,
+                "market_exhausted": False}
+    proposed_urls = {posting_key(row.get("url")) for row in probe.get("outcomes", []) if row.get("decision") == "appended"}
+    proposals = [row for row in writer_records(collected) if posting_key(row.get("url")) in proposed_urls]
+    print("SEARCH_PROPOSALS " + json.dumps({"records": proposals,
+        "confirmed_open_proposals": sum(row["availability"]["state"] == "OPEN" for row in proposals),
+        "availability_unverified_proposals": sum(row["availability"]["state"] != "OPEN" for row in proposals)}, ensure_ascii=True))
+    print("SEARCH_COVERAGE " + json.dumps(coverage, ensure_ascii=True))
     if args.dry_run:
         print("\n--dry-run: tracker unchanged; no cursor advancement")
-        return 2 if counts["timeouts"] else 0
-    if counts['timeouts']:
-        retain_candidates(args.region,collected,'partial search; retry with fresh verification')
+        return 2 if counts["timeouts"] or counts.get("incomplete_batches") or counts.get("verification_budget_exhausted") else 0
+    if not coverage['coverage_complete']:
+        retain_candidates(args.region,collected,'partial search or verification; retry with fresh verification')
         return 2
     if not counts['new_candidates']:
         if counts['timeouts']:return 2
@@ -685,6 +754,10 @@ def main() -> int:
         print('TRACKER_WRITE_BLOCKED '+str(exc),file=sys.stderr)
         return 2
     print('TRACKER_WRITE_RESULT '+json.dumps(result,default=str,ensure_ascii=True))
+    appended_urls = {posting_key(row.get("url")) for row in result.get("outcomes", [])
+                     if row.get("decision") == "appended"} if result.get("applied") and not result.get("error") else set()
+    print("SEARCH_DELIVERY " + json.dumps({"records": [row for row in writer_records(collected)
+          if posting_key(row.get("url")) in appended_urls]}, default=str, ensure_ascii=True))
     if result.get('error'):
         pending=retain_candidates(args.region,collected,'writer failed')
         print('Candidates retained for verified retry: '+str(pending))

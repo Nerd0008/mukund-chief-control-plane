@@ -62,13 +62,11 @@ def test_posting_key_ignores_tracking_params():
     assert a == b and a != ''
 
 
-def test_search_found_reads_the_reconciliation_tag():
-    stdout = ('noise\n'
-              'SEARCH_RECONCILIATION {"counts":{},"decisions":['
-              '{"title":"SOC Analyst","url":"https://a/1","reason":"new candidate"},'
-              '{"title":"Too Senior","url":"https://b/2","reason":"too_senior"}]}\n')
-    found = jsd.search_found(stdout)
-    assert [f['url'] for f in found] == ['https://a/1']
+def test_search_found_reads_canonical_append_outcomes():
+    stdout = 'SEARCH_RECONCILIATION ' + json.dumps({"canonical_outcomes": [
+        {"company": "Acme", "title": "SOC Analyst", "url": "https://a/1", "decision": "appended"},
+        {"company": "Known", "title": "SOC Analyst", "url": "https://b/2", "decision": "duplicate"}]})
+    assert [f['url'] for f in jsd.search_found(stdout)] == ['https://a/1']
 
 
 def test_search_found_without_the_tag_is_empty():
@@ -129,12 +127,10 @@ def test_ct_key_matches_across_ats_and_aggregator_urls():
     assert k == 'ct:g research|security operations placement year'
 
 
-def test_already_seen_suppresses_a_role_tracked_under_a_different_url():
+def test_unknown_legacy_title_identity_does_not_hide_new_requisition():
     seen = {jsd.ct_key('G-Research', 'Security Operations Placement Year'): 't'}
-    assert jsd.already_seen(
-        'G-Research', 'Security Operations Placement Year',
-        'https://gresearch.wd103.myworkdayjobs.com/x/Security-Operations-Placement-Year_R3795',
-        seen) is True
+    assert not jsd.already_seen('G-Research', 'Security Operations Placement Year',
+        'https://gresearch.wd103.myworkdayjobs.com/x/Security-Operations-Placement-Year_R3795', seen)
 
 
 def test_already_seen_is_false_for_a_genuinely_new_role():
@@ -150,9 +146,10 @@ def test_already_seen_matches_on_the_url_alone():
 
 
 def test_role_keys_carries_both_identities():
-    keys = jsd.role_keys('Acme', 'Graduate SOC Analyst', 'https://acme.example/1')
-    assert jsd.posting_key('https://acme.example/1') in keys
-    assert jsd.ct_key('Acme', 'Graduate SOC Analyst') in keys
+    keys = jsd.role_keys('Acme', 'Graduate SOC Analyst', 'https://acme.example/jobs/12345678')
+    assert jsd.posting_key('https://acme.example/jobs/12345678') in keys
+    assert 'req:acme:12345678' in keys
+    assert jsd.ct_key('Acme', 'Graduate SOC Analyst') not in keys
 
 
 def test_ct_key_is_empty_when_the_role_is_unnamed():

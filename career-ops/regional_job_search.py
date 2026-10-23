@@ -221,8 +221,26 @@ def location_hint_from_url(url) -> str:
     return re.sub(r"\s+", " ", segment.replace("-", " ").replace("_", " ").replace("+", " ")).strip().lower()
 
 
+def location_country(record: dict) -> str | None:
+    """Only explicit vacancy country fields qualify; search scope is not evidence."""
+    for obj in (record.get("verified_posting"), record.get("posting_identity"),
+                record.get("discovered_posting"), record):
+        if not isinstance(obj, dict):
+            continue
+        for key in ("country_code", "countryCode", "country", "location_country"):
+            value = obj.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        location = obj.get("location")
+        if isinstance(location, dict):
+            value = location_country(location)
+            if value:
+                return value
+    return None
+
+
 def location_matches(scope: dict, location, title, url,
-                     require_explicit_region: bool = False) -> tuple[bool, str]:
+                     require_explicit_region: bool = False, *, country_hint: str | None = None) -> tuple[bool, str]:
     """Mirror of scan.mjs ``buildLocationFilter`` (order of tiers matters).
 
     ``require_explicit_region`` is the regional-worker's stricter mode: a
@@ -245,17 +263,28 @@ def location_matches(scope: dict, location, title, url,
 
     lower = location.strip().lower() if isinstance(location, str) else ""
     hint = location_hint_from_url(url)
-    if lower == "" and hint == "":
+    if lower == "" and hint == "" and not country_hint:
         if require_explicit_region:
             return False, ("no location data — the region is not evidenced, and a non-UK region tracker "
                            "requires an explicit region match")
-        return True, "no location data (not penalised)"
+        return False, "location country unresolved: no location or country evidence"
 
     def matches(m):
         return (lower != "" and m(lower)) or (hint != "" and m(hint))
 
     if block_hard and any(matches(m) for m in block_hard):
         return False, f"block_hard match in '{location or hint}'"
+    if country_hint and block and any(matches(m) for m in block):
+        return False, f"blocked location '{location or hint}' conflicts with country metadata"
+    if country_hint:
+        country = str(country_hint).strip().casefold()
+        country = {"gb": "united kingdom", "gbr": "united kingdom", "uk": "united kingdom",
+                   "us": "united states", "usa": "united states", "ca": "canada",
+                   "ae": "united arab emirates", "sg": "singapore", "jp": "japan"}.get(country, country)
+        if any(m(country) for m in block_hard + block):
+            return False, f"blocked country metadata '{country_hint}'"
+        if any(m(country) for m in always + allow):
+            return True, f"country metadata '{country_hint}' confirms location '{location}'"
     if always and any(matches(m) for m in always):
         return True, f"always_allow match in '{location or hint}'"
     if block and any(matches(m) for m in block):
@@ -269,7 +298,7 @@ def location_matches(scope: dict, location, title, url,
                        "posting is not region-eligible without an explicit location")
     if title_signals_remote(title):
         return True, "title marks the role remote (rescued by the allow list)"
-    return False, f"location '{location or ''}' outside the region scope"
+    return False, f"location country unresolved for '{location or ''}'; explicit country evidence required"
 
 
 def _as_list(value) -> list:
@@ -331,7 +360,9 @@ def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
             "work_authorisation": _work_auth_block(rp),
         }
 
-    ok, why = title_decision(str(record.get("title") or ""), title_policy)
+    from effective_search_policy import role_decision
+    ok, why = (role_decision(region, record.get("title")) if region == "uk"
+               else title_decision(str(record.get("title") or ""), title_policy))
     if not ok:
         reasons.append(why)
     else:
@@ -350,14 +381,14 @@ def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
         }
 
     ok, why = location_matches(scope, record.get("location"), record.get("title"), url,
-                               require_explicit_region=(region != "uk"))
+                               require_explicit_region=(region != "uk"), country_hint=location_country(record))
     if not ok:
         reasons.append(why)
     else:
         flags.append(why)
 
     blob = " ".join(str(record.get(k) or "") for k in
-                    ("title", "company", "location", "summary", "description"))
+                    ("title", "company", "location", "summary", "description", "jd_text"))
     hits = clearance_hits(blob)
     if hits:
         reasons.append(f"clearance/citizenship requirement stated: {', '.join(hits)}")
@@ -371,6 +402,13 @@ def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
     # A structured field is only present when a lane populated it. Read the text
     # too, or a posting whose description asks for "2+ years in a similar role"
     # is accepted because nothing ever looked.
+    availability = (record.get("vacancy_status") or {}).get("state")
+    if availability == "CLOSED" or record.get("jd_is_closed"):
+        reasons.append("current vacancy availability is CLOSED (proven closed)")
+    from student_eligibility import student_requirement
+    student_reason = student_requirement(blob)
+    if student_reason:
+        reasons.append(student_reason)
     exp_hits = experience_hits(blob)
     if exp_hits:
         reasons.append(f"prior experience required: {exp_hits[0][:120]}")

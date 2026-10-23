@@ -68,7 +68,7 @@ TIER_B_EXTRA_NEGATIVES = ["chief", "ciso", "executive", "team lead",
 #: Seniority / early-career level signals.
 LEVEL_TERMS = [
     "intern", "internship", "placement", "industrial placement", "off-cycle",
-    "spring week", "spring insight", "apprentice", "apprenticeship",
+    "spring week", "spring insight", "summer vacation scheme", "summer analyst", "apprentice", "apprenticeship",
     "graduate", "grad", "new grad", "new graduate", "graduate scheme",
     "junior", "entry level", "entry-level", "trainee", "associate",
     "analyst", "l1", "level 1", "level one",

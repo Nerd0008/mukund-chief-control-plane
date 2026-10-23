@@ -167,7 +167,8 @@ def test_a_genuine_requirement_still_survives_the_tightening():
     """The tightening must not have thrown out the real signal."""
     assert es.experience_hits('2+ years of experience in a similar IT support role')
     assert es.experience_hits('4+ years of experience in a SOC, security operations')
-    assert es.experience_hits('Proven experience in providing technical support')
+    # A technical proficiency statement does not establish mandatory employment tenure.
+    assert not es.experience_hits('Proven experience in providing technical support')
     assert es.experience_hits('Existing experience in the same or a similar IT role')
 
 

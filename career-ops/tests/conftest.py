@@ -16,3 +16,9 @@ def private_newsletter_fixture_root(tmp_path_factory):
         patch.setitem(gmail_discovery.collect.__kwdefaults__, "root",
                       tmp_path_factory.mktemp("newsletter-fixtures"))
         yield
+
+
+@pytest.fixture(autouse=True)
+def private_verification_evidence(tmp_path, monkeypatch):
+    import verification_evidence
+    monkeypatch.setattr(verification_evidence, 'ROOT', tmp_path/'verification-evidence')

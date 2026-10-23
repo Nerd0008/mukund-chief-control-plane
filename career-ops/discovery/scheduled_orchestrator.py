@@ -572,12 +572,20 @@ def live_mechanism_summary(web: dict) -> dict:
     probe = web.get("probe") or {}
     observed = int(provider.get("web_search_observed_queries") or 0)
     reused = bool(web.get("reused_export"))
+    requested = int(web.get("queries_selected_total") or len(provider.get("queries") or []))
+    query_records = provider.get("queries") or []
+    completed = sum(bool(row.get("executed") and row.get("web_search_observed") and not row.get("error"))
+                    for row in query_records)
+    coverage_complete = bool(requested) and completed == requested and not reused
     out = {
         "mechanism": (f"replayed capture ({web.get('export_file')})" if reused
                       else provider.get("provider")),
         "probe_available": probe.get("available"),
         "live_search_queries_observed": 0 if reused else observed,
         "requests": 0 if reused else provider.get("requests"),
+        "queries_requested": requested,
+        "queries_completed": 0 if reused else completed,
+        "coverage_complete": coverage_complete,
         "cli_version": provider.get("cli_version"),
         "resolved_executable": provider.get("resolved_executable"),
         "limitation": provider.get("limitation") or web.get("limitation"),
@@ -764,11 +772,13 @@ def run_region(region: str, args, *, deadline: float | None = None,
     doc["manifest"] = manifest["counts"]
 
     # requirement: refuse to call the lane production-ready without a live mechanism
-    doc["production_ready"] = bool(mechanism["operational"]) and not bool(doc.get("dedupe",{}).get("error"))
+    doc["production_ready"] = bool(mechanism["operational"]) and mechanism["coverage_complete"] and not bool(doc.get("dedupe",{}).get("error"))
     if not doc["production_ready"]:
         doc["no_go"] = ("no functioning current-web search mechanism was proven in this run; "
                         "the live research lane is NOT production-ready and the schedule must "
                         "not be treated as cut over (recorded blocker, no fixture fallback)")
+    if mechanism["operational"] and not mechanism["coverage_complete"]:
+        doc["no_go"] = f"Live research incomplete: {mechanism['queries_completed']} of {mechanism['queries_requested']} requested queries completed; no complete-coverage claim or automatic promotion"
     if doc.get("dedupe",{}).get("error"):
         doc["no_go"]="canonical tracker reconciliation failed; no healthy delivery claim"
     write_json_atomic(health_file,doc)

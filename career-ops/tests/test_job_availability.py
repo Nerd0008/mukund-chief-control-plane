@@ -136,7 +136,7 @@ def test_unknown_admitted_only_as_flagged_lead(tmp_path,monkeypatch,capsys):
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:(set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search.osp,'load_profile',lambda:{})
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
-    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','job_title':'Cyber Intern','url':'https://employer.com/unknown'}]))
+    monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','job_title':'Cyber Intern','location':'London, United Kingdom','url':'https://employer.com/unknown'}]))
     monkeypatch.setattr(search,'fetch_jd',lambda url:{'status':403,'fetch_state':'bot_wall','text':'','vacancy_status':{'state':'UNKNOWN','evidence':'blocked'}})
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0

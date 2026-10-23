@@ -197,6 +197,23 @@ def _context_ok(text, start, end):
     return True
 
 
+def _employer_statement(text, start, end):
+    """Identify the grammatical subject of THIS requirement, not a nearby bullet.
+
+    Employer biographies and candidate requirements can share one paragraph.
+    Bound the subject check to the current sentence/clause, and let an explicit
+    candidate subject nearer the phrase override an earlier employer subject.
+    """
+    prefix = re.split(r"[.!?;\n]", text[max(0, start - 180):start])[-1]
+    if re.search(r"\b(?:looking\s+for|seeking|hiring|recruiting|requiring|requires?|must|essential|someone)\b", prefix, re.I):
+        return False
+    subjects = list(re.finditer(
+        r"\b(?P<employer>we(?:\s+have|\s+are|'ve)|our\s+(?:firm|company|team|business|organisation|organization))\b"
+        r"|\b(?P<candidate>you(?:'ll|'ve|\s+will|\s+must|\s+should|\s+have)?|applicants?|candidates?|requirements?)\b",
+        prefix, re.I))
+    return bool(subjects and subjects[-1].group('employer'))
+
+
 def experience_hits(text, min_years: int = MIN_YEARS) -> list:
     """Return the prior-experience requirements found in a job description.
 
@@ -212,6 +229,13 @@ def experience_hits(text, min_years: int = MIN_YEARS) -> list:
     hits = []
 
     for m in _YEARS_RE.finditer(t):
+        # Target the year phrase itself. A nearby programme duration must not
+        # suppress a separate applicant-experience requirement in the next clause.
+        duration_prefix = t[max(0, m.start() - 90):m.start()]
+        if re.search(r"\b(?:scheme|programme|program|placement|internship|course|contract)\s+(?:length|duration)\s*(?:(?:is|of)\s*)?[:\-–—\s]*$", duration_prefix, re.I):
+            continue
+        if _employer_statement(t, m.start(), m.end()):
+            continue
         low = _to_int(m.group(1))
         high = _to_int(m.group(2))
         floor = low if low is not None else high
@@ -227,6 +251,14 @@ def experience_hits(text, min_years: int = MIN_YEARS) -> list:
             hits.append(snippet)
 
     for m in STRONG_PHRASE_RE.finditer(t):
+        # Technical proficiency can be demonstrated through projects or study.
+        # A bare "proven experience using AI/Python" is not employment history.
+        if re.fullmatch(r"proven\s+experience", m.group(0), re.I):
+            clause = re.split(r"[.;\n]", t[max(0, m.start() - 60):m.end() + 100])[0]
+            if not re.search(r"\b(?:professional|commercial|industrial|industry|corporate|employment|work\s+experience)\b", clause, re.I):
+                continue
+        if _employer_statement(t, m.start(), m.end()):
+            continue
         if _negated(t, m.start()) or _optional_requirement(t,m.start(),m.end()):
             continue
         prefix=t[max(0,m.start()-30):m.start()]

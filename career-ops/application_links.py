@@ -58,8 +58,18 @@ def page_identity(html, url):
     locations = posting.get('jobLocation') or []
     if isinstance(locations, dict): locations = [locations]
     places = []
+    countries = []
     for loc in locations:
+        if not isinstance(loc, dict):
+            continue
         address = loc.get('address') or {}
+        if not isinstance(address, dict):
+            continue
+        country = address.get('addressCountry')
+        if isinstance(country, dict):
+            country = country.get('name') or country.get('identifier')
+        if isinstance(country, str) and country.strip():
+            countries.append(country.strip())
         places.extend(str(address[k]) for k in ('addressLocality', 'addressRegion', 'addressCountry')
                       if isinstance(address.get(k), str))
     company = org.get('name') if isinstance(org, dict) else None
@@ -71,7 +81,10 @@ def page_identity(html, url):
         if company_match: company = clean(company_match[1])
         if location_match: places = [clean(location_match[1])]
     if not company or not page['specific'] or not page['title'] or not places: return None
-    return {'company': company, 'title': page['title'], 'location': ', '.join(dict.fromkeys(places))}
+    identity = {'company': company, 'title': page['title'], 'location': ', '.join(dict.fromkeys(places))}
+    if len(set(countries)) == 1:
+        identity['country'] = countries[0]
+    return identity
 
 
 def aggregator(url):
@@ -262,6 +275,6 @@ def identity_review_reason(company,title):
     role=str(title or '').strip()
     if not name or name in ('unknown','unknown company','not stated','n a','none') or not role or role.casefold() in ('unknown','not stated','n/a'):
         return 'employer or role identity unresolved; review-only'
-    if name in ('targetjobs','targetjobs uk','bright network','brightnetwork','totaljobs','linkedin','indeed','jobright','jobright ai'):
+    if name in ('targetjobs','targetjobs uk','bright network','brightnetwork','totaljobs','linkedin','indeed','jobright','jobright ai','myinternshipabroad','my internship abroad'):
         return 'job-board sender is not an identified employer; review-only'
     return ''
