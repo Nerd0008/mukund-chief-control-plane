@@ -504,6 +504,51 @@ POST:
             "disputed": disputed,
         })
 
+    # A batch answer makes the model extract and judge many claims at once. It
+    # can miss a passage even though it received the complete source (observed
+    # with the Reuters and Wiz passages in a 74k-character prompt). Recheck
+    # rejected claims individually. Only a majority of fresh runs with quoted
+    # source evidence can overturn the batch verdict; absent or failed runs
+    # leave the rejection intact.
+    for claim in claims:
+        if claim["verdict"] == "supported":
+            continue
+        focused_prompt = f"""You are a strict fact-checker. Judge this ONE claim against
+the SOURCE. Return only JSON in this shape:
+{{"claims":[{{"claim":{json.dumps(claim['claim'])},
+"verdict":"supported or unsupported or overstated",
+"evidence":"short exact quote from SOURCE if supported, otherwise empty"}}]}}
+Use "supported" only if the source clearly establishes the entire claim,
+including timing and causation. Do not infer missing details. Quote source
+evidence for any supported verdict.
+
+SOURCE:
+{source_text[:JUDGE_SOURCE_CHARS]}
+
+CLAIM:
+{claim['claim']}
+"""
+        focused = run_judge(focused_prompt, model=model, api_key=api_key,
+                            runs=max(1, runs))
+        if focused.get("reason") or len(focused.get("runs", [])) < max(1, runs):
+            continue
+        supported = []
+        for run_claims in focused["runs"]:
+            if len(run_claims) != 1 or not isinstance(run_claims[0], dict):
+                continue
+            answer = run_claims[0]
+            evidence = str(answer.get("evidence", "")).strip()
+            normalise = lambda s: re.sub(r"\s+", " ",
+                                          re.sub(r"[\u200b-\u200f\u2060]", "", s)).casefold()
+            if (str(answer.get("verdict", "")).lower() == "supported"
+                    and len(evidence) >= 20
+                    and normalise(evidence) in normalise(source_text)):
+                supported.append(evidence)
+        if len(supported) > runs // 2:
+            claim["verdict"] = "supported"
+            claim["evidence"] = supported[0]
+            claim["focused_recheck"] = True
+
     if not claims:
         return {"used": False, "claims": [],
                 "reason": "model returned no claims in any run"}
