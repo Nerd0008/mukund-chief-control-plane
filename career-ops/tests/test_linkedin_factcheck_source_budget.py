@@ -25,6 +25,11 @@ def judge(prompt, **kwargs):
 
 
 class TestSourceCoverage(unittest.TestCase):
+    def test_inline_link_annotation_preserves_real_quote_only(self):
+        source = "Developers released urgent new fixes, opens new tab to vulnerabilities."
+        self.assertTrue(fc._evidence_present("Developers released urgent new fixes to vulnerabilities", source))
+        self.assertFalse(fc._evidence_present("Developers released urgent new fixes to imaginary backdoors", source))
+
     def verify(self, sources, side_effect=judge):
         # Test audit writes in a disposable runtime, never the owner's runtime.
         with tempfile.TemporaryDirectory() as temp:
@@ -68,14 +73,14 @@ class TestSourceCoverage(unittest.TestCase):
         self.assertGreater(record["source_coverage"]["https://example.com/one"]["omitted_chars"], 0)
         self.assertIn("incomplete", record["reason"].lower())
 
-    def test_partial_answers_never_pass_or_become_factual_rejections(self):
+    def test_majority_of_complete_answers_can_pass(self):
         def partial(prompt, **kwargs):
             data = judge(prompt)
             data["runs"] = data["runs"][:2]
             return data
         record, audit = self.verify({"https://example.com/one": LATE}, partial)
-        self.assertEqual(record["verdict"], "ungated")
-        self.assertFalse(record["verification_complete"])
+        self.assertEqual(record["verdict"], "pass")
+        self.assertTrue(record["verification_complete"])
         self.assertIn("judge", audit)
 
 

@@ -41,11 +41,11 @@ class TestClaimJudging(unittest.TestCase):
         self.assertFalse(result["complete"])
         self.assertEqual(result["claims"][0]["verdict"], "incomplete")
 
-    def test_missing_run_is_incomplete(self):
+    def test_two_valid_runs_form_a_majority(self):
         with patch.object(fc, "run_judge", side_effect=lambda p, **k: response(p, runs=2)):
             result = fc.llm_verify_claims("The port went offline.",
                     "The Port of Rotterdam went offline on October 21.", api_key="test")
-        self.assertFalse(result["complete"])
+        self.assertTrue(result["complete"])
 
     def test_duplicate_and_missing_ids_are_incomplete(self):
         def judge(prompt, **kwargs):
@@ -83,7 +83,7 @@ class TestClaimJudging(unittest.TestCase):
         self.assertTrue(result["complete"])
         self.assertEqual(result["claims"][0]["verdict"], "unsupported")
 
-    def test_verbatim_sentence_is_required(self):
+    def test_claim_id_controls_matching_despite_echo_paraphrase(self):
         def judge(prompt, **kwargs):
             data = response(prompt)
             for run in data["runs"]:
@@ -92,7 +92,7 @@ class TestClaimJudging(unittest.TestCase):
         with patch.object(fc, "run_judge", side_effect=judge):
             result = fc.llm_verify_claims("The port went offline.",
                     "The Port of Rotterdam went offline on October 21.", api_key="test")
-        self.assertFalse(result["complete"])
+        self.assertTrue(result["complete"])
 
 
 

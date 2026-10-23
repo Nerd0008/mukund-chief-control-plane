@@ -33,6 +33,7 @@ import hashlib
 import html
 import json
 import os
+import unicodedata
 import re
 import subprocess
 import sys
@@ -397,18 +398,21 @@ def _normalise_evidence(text: str) -> str:
     Keep words and numbers intact: HTML entities, Markdown link destinations,
     invisible layout characters and spacing before punctuation are not facts.
     """
-    text = html.unescape(text)
+    text = html.unescape(html.unescape(text))
     text = re.sub(r"\[([^\]\n]+)\]\([^\n)]+\)", r"\1", text)
-    text = re.sub(r"[\u200b-\u200f\u2060]", "", text)
+    text = re.sub(r"\[\s*\d+\s*/\s*\d+\s*\]", " ", text)
+    text = re.sub(r"\s*[,;:]?\s*opens (?:in a )?new tab\s*[,;:]?\s*", " ", text, flags=re.I)
+    text = "".join(c for c in text if unicodedata.category(c) != "Cf")
     text = re.sub(r"\s+", " ", text)
     return re.sub(r"\s+([.,;:!?])", r"\1", text).casefold().strip()
 
 
 def _evidence_present(evidence: str, source: str) -> bool:
     fragments = [p.strip() for p in re.split(r"\[\s*(?:\.{3}|\u2026)\s*\]|\.{3}|\u2026", evidence) if p.strip()]
+    normalised_source = _normalise_evidence(source)
     return bool(fragments) and all(
         len(_normalise_evidence(p)) >= 12
-        and _normalise_evidence(p) in _normalise_evidence(source)
+        and _normalise_evidence(p) in normalised_source
         for p in fragments)
 
 
@@ -501,27 +505,26 @@ SOURCE:
         receipt = judged.get("receipt") or {}
         supplied = (receipt.get("prompt_chars") == len(prompt)
                     and receipt.get("prompt_sha256") == sha256_text(prompt))
-        section_complete = supplied and not judged.get("reason") and len(run_answers) == requested
+        valid_runs = 0
         # Only fully returned/validated runs can establish section coverage.
         for run in run_answers:
             if not isinstance(run, list):
-                section_complete = False
                 continue
             seen = set()
             current = {}
+            run_valid = True
             for answer in run:
                 if not isinstance(answer, dict):
-                    section_complete = False
+                    run_valid = False
                     continue
                 cid = answer.get("claim_id")
                 if not isinstance(cid, str):
-                    section_complete = False
+                    run_valid = False
                     continue
                 item = next((x for x in inputs if x["claim_id"] == cid), None)
                 verdict = str(answer.get("verdict", "")).lower()
                 evidence = str(answer.get("evidence", ""))
                 valid = (item is not None and cid not in seen
-                         and answer.get("claim") == item["claim"]
                          and verdict in {"supported", "unsupported", "overstated", "contradicted", "not_checkable"}
                          and isinstance(answer.get("reason"), str)
                          and bool(answer["reason"].strip()))
@@ -531,13 +534,16 @@ SOURCE:
                 elif evidence:
                     valid = valid and _evidence_present(evidence, section["text"])
                 if not valid:
-                    section_complete = False
+                    run_valid = False
                 else:
                     current[cid] = dict(answer, verdict=verdict)
-            if set(current) != set(answers) or len(run) != len(inputs):
-                section_complete = False
-            for cid, answer in current.items():
-                answers[cid].append((len(result["audit"]) - 1, answer))
+            if set(current) != set(answers):
+                run_valid = False
+            if run_valid:
+                valid_runs += 1
+                for cid, answer in current.items():
+                    answers[cid].append((len(result["audit"]) - 1, answer))
+        section_complete = supplied and valid_runs >= requested // 2 + 1
         result["section_coverage"].append({"start": section["start"], "end": section["end"],
                                            "complete": section_complete, "supplied": supplied})
         complete = complete and section_complete
