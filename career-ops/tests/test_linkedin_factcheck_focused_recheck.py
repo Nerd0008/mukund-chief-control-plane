@@ -47,6 +47,18 @@ class TestClaimJudging(unittest.TestCase):
                     "The Port of Rotterdam went offline on October 21.", api_key="test")
         self.assertTrue(result["complete"])
 
+    def test_one_fabricated_quote_cannot_count_as_a_valid_run(self):
+        def judge(prompt, **kwargs):
+            data = response(prompt)
+            data["runs"][0][0]["evidence"] = "An invented source quotation."
+            return data
+        with patch.object(fc, "run_judge", side_effect=judge):
+            result = fc.llm_verify_claims("The port went offline.",
+                    "The Port of Rotterdam went offline on October 21.", api_key="test")
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["claims"][0]["judge_runs"], 2)
+        self.assertEqual(result["claims"][0]["verdict"], "supported")
+
     def test_duplicate_and_missing_ids_are_incomplete(self):
         def judge(prompt, **kwargs):
             data = response(prompt)
