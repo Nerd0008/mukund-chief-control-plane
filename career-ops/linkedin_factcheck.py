@@ -617,17 +617,18 @@ POST:
             "reason": None}
 
 
-def combine_sources(source_texts: dict, *, per_source: int = 14000) -> str:
+def combine_sources(source_texts: dict, *, per_source: int | None = None) -> str:
     """Join source texts without silently dropping any of them.
 
-    Truncating the concatenation dropped whole sources: with three articles the
-    third was cut off entirely, so the judge reported its claims unsupported
-    because it never saw the article. Each source gets its own budget instead.
+    Preserve every readable article. A former 14,000-character per-source cut
+    removed the Wiz passage about one researcher, a week and months, while the
+    gate misleadingly reported that all 74,077 combined characters were fed.
+    An explicit ``per_source`` limit remains available for callers that need it.
     """
     parts = []
     for url, text in source_texts.items():
         body = (text or "").strip()
-        if len(body) > per_source:
+        if per_source is not None and len(body) > per_source:
             body = body[:per_source]
         parts.append(f"[SOURCE: {url}]\n{body}")
     return "\n\n".join(parts)

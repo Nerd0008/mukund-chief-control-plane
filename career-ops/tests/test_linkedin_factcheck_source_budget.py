@@ -33,3 +33,11 @@ def test_second_source_reaches_claim_judge():
     assert "Grounding fact: blue otters sing." in prompts[0]
     assert record["source_chars_total"] == len(combined)
     assert record["source_chars_fed"] == len(combined)
+
+
+def test_late_passage_is_not_cut_from_an_individual_source():
+    late = "A single researcher completed in a week what a team would take months."
+    source = "A" * 15000 + late
+    combined = fc.combine_sources({"https://example.com/wiz": source})
+    assert late in combined
+    assert len(combined) > 15000
