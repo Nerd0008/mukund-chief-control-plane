@@ -559,6 +559,30 @@ def verify_workbook(path: Path, cfg: dict, *, expect_data_rows: int | None = Non
     if unresolved_dupes:
         problems.append(f"duplicate URL keys inside workbook: {unresolved_dupes[:5]}")
 
+    # Validate every acknowledgement, including rows which no longer belong to
+    # a duplicate group. Changing company/role/URL must not orphan provenance.
+    note_col = cfg.get("field_map", {}).get("notes")
+    id_col = (cfg.get("id") or {}).get("column")
+    if note_col:
+        for row in range(cfg["first_data_row"], last + 1):
+            note = str(ws[f"{note_col}{row}"].value or "")
+            if not note.startswith("Career Ops duplicate discovery of "):
+                continue
+            match = re.fullmatch(r"Career Ops duplicate discovery of (.+); owner records preserved\.", note)
+            parents = [n for n in range(cfg["first_data_row"], last + 1)
+                       if id_col and match and n != row
+                       and str(ws[f"{id_col}{n}"].value or "") == match.group(1)]
+            compatible = len(parents) == 1
+            if compatible:
+                parent = parents[0]
+                compatible = (bool(normalize_url(ws.cell(row, url_idx).value))
+                    and normalize_url(ws.cell(row, url_idx).value) == normalize_url(ws.cell(parent, url_idx).value)
+                    and all(ws[f"{cfg['field_map'][k]}{row}"].value == ws[f"{cfg['field_map'][k]}{parent}"].value for k in ("company", "title"))
+                    and not (id_col and ws[f"{id_col}{row}"].value)
+                    and all(ws[f"{c}{row}"].value in (None, "") for c in cfg.get("owner_columns", []) if c != note_col))
+            if not compatible:
+                problems.append(f"invalid duplicate discovery acknowledgement at {note_col}{row}")
+
     owned_ok = True
     if pre_owned:
         for r, cols in pre_owned.items():
@@ -624,7 +648,8 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
                   backup_dir: str | None = None, update_existing: bool = False,
                   extra_archive_dirs: list[str] | None = None,
                   tracker_override: str | None = None,
-                  today: dt.date | None = None, cleanup_existing: bool = True) -> dict:
+                  today: dt.date | None = None, cleanup_existing: bool = True,
+                  confirmed_mail: bool = False) -> dict:
     """Append deduplicated records to the regional workbook.
 
     Returns a Chief-readable result document. When ``apply`` is False nothing is
@@ -715,7 +740,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         identity_reason=identity_review_reason(record.get("company"),record.get("title"))
         if identity_reason:
             entry.update(decision="rejected",reason=identity_reason);outcomes.append(entry);continue
-        if not url_key:
+        if not url_key and not (confirmed_mail and record.get("owner_confirmed_application") is True):
             entry["decision"] = "rejected"
             entry["reason"] = "missing or unusable application URL"
             outcomes.append(entry)
@@ -780,7 +805,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         if rid:
             existing_ids.append(str(rid))
             record["id"] = str(rid)
-        planned_url_keys.add(url_key)
+        if url_key: planned_url_keys.add(url_key)
         planned_requisitions.update(identity_keys(record.get("company"),record.get("url")))
         if pkey.strip("|"):
             planned_pair_keys.add(pkey)
@@ -859,6 +884,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
                 value = parse_date(value, cfg["date_type"][canonical] == "iso_string")
             if value not in (None, ""):
                 ws_cell.value = value
+                if isinstance(value, str): ws_cell.data_type = "s"
         # defaulted status/metadata columns.
         # Deliberately the ONLY source of application-state values on append:
         # an incoming manifest must never be able to set a status such as
@@ -867,6 +893,10 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             column = cfg["status_columns"].get(key)
             if column and tr.ws[f"{column}{r}"].value in (None, "") and key not in cfg["field_map"]:
                 tr.ws[f"{column}{r}"] = default
+        # Only the bounded mailbox adapter can assert an explicitly owner-confirmed
+        # new application. Ordinary discovery/CLI writes cannot set Applied.
+        if confirmed_mail and record.get("owner_confirmed_application") is True:
+            tr.ws[f"{cfg['status_columns']['application_status']}{r}"] = "Applied"
         # fit-tier formula
         for spec in cfg.get("formula_map", {}).values():
             col = spec["column"]
@@ -911,7 +941,9 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
                 continue
             if col in cfg.get("date_type", {}) or canonical in cfg.get("date_type", {}):
                 value = parse_date(value, cfg.get("date_type", {}).get(canonical) == "iso_string")
-            tr.ws[f"{col}{r}"] = value
+            cell = tr.ws[f"{col}{r}"]
+            cell.value = value
+            if isinstance(value, str): cell.data_type = "s"
 
     if appends:
         new_last = append_row + len(appends) - 1

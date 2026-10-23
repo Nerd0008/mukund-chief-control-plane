@@ -647,7 +647,7 @@ def handoff(cfg: dict, region: str, manifest: dict, *, tracker: str | None = Non
         d = runtime_dir(cfg) / "handoffs"
         d.mkdir(parents=True, exist_ok=True)
         path: str = str(d / (f"linkedin-handoff-{region}-"
-                             f"{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}.json"))
+                             f"{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%S%fZ}.json"))
     else:
         path = str(manifest_path)
     return cw.handoff_to_career_ops(cc, region, manifest, tracker=tracker, apply=apply,
@@ -993,16 +993,20 @@ def build_linkedin_drafts(cfg: dict, *, out_dir: Path, scratch: Path,
     drafts = _attach_provenance_and_unsent_state(cfg, drafts)
 
     # ---- fact gate over every draft ------------------------------------- #
-    combined = "\n\n".join(d.get("body") or d.get("about") or "" for d in drafts)
-    combined += "\n" + " ".join(d.get("headline") or "" for d in drafts)
-    gate = cvw.fact_gate(cv_config(cfg), combined, label="linkedin-drafts", scratch=scratch)
-    gate_ok = not (gate.get("available") and gate.get("verdict") == "block")
-    for draft in drafts:
-        draft["fact_gate"] = gate
-        draft["blocked"] = not gate_ok
-        if not gate_ok:
-            draft["status"] = "blocked_fact_gate"
-            draft["unsent_state"]["status"] = draft["status"]
+    import linkedin_personal_review as personal_review
+    gates=[]
+    for index,draft in enumerate(drafts):
+        body=(draft.get("body") or draft.get("about") or draft.get("headline") or "").strip()
+        gate=personal_review.review(cv_config(cfg),body,label=f"linkedin-draft-{index}",scratch=scratch)
+        gates.append(gate)
+        draft["fact_gate"]=gate
+        draft["blocked"]=not (gate.get("available") and gate.get("verdict") in ("pass","passed","warn"))
+        if draft["blocked"]:
+            draft["status"]="blocked_fact_gate"
+            draft["unsent_state"]["status"]=draft["status"]
+    gate_ok=not any(d["blocked"] for d in drafts)
+    gate={"available":all(g.get("available") for g in gates),
+          "verdict":"pass" if gate_ok else "block","reviews":len(gates)}
 
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "linkedin_drafts.json").write_text(

@@ -465,7 +465,8 @@ def _gate_available(gate: object) -> bool:
     node, missing script, no JSON verdict). That is not a verdict, so it must not
     be counted as a gate that was passed.
     """
-    return isinstance(gate, dict) and gate.get("available", True) is not False
+    return (isinstance(gate, dict) and gate.get("available", True) is not False
+            and bool(gate.get("verdict")))
 
 
 def _news_gate_ok(gate: object, body: str, *, draft: dict | None = None) -> tuple[bool, str]:
@@ -565,82 +566,40 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     #    trustworthy when it proves it came from a real run over THIS text
     #    (gate name + body hash), so provenance is required, not just "pass".
     #
-    # The gate that covers the post's claims must carry a passing verdict.
-    #
-    # A news post's claims about the world are covered by ``news_fact_gate``; a
-    # post that makes claims about Mukund is covered by ``personal_fact_gate``
-    # (or the older ``fact_gate`` name). Which gate applies is a property of the
-    # post, so a news post that legitimately has no personal verdict must not be
-    # blocked for lacking one: demanding it made every news post unpublishable
-    # once the builder split the two gates (2026-10-21).
-    #
-    # What is still refused is a post carrying no usable gate record at all:
-    # silence is not evidence that the text was checked.
-    fact_gate = draft.get("fact_gate")
-    if fact_gate is None and isinstance(draft.get("personal_fact_gate"), dict):
-        # The single-post "approved" artefact names it personal_fact_gate.
-        fact_gate = draft.get("personal_fact_gate")
-    has_personal = _gate_available(fact_gate)
-    has_news = _gate_available(draft.get("news_fact_gate"))
-    verdict = fact_gate.get("verdict") if has_personal else None
+    # Never infer claim coverage from a missing record. Both specialist checks
+    # run for every post: each may pass because it found no applicable claims.
+    # This preserves news-only/personal-only content without accepting unchecked
+    # mixed claims or trusting a caller's self-declared scope.
+    fact_gate = draft.get("fact_gate") or draft.get("personal_fact_gate")
+    verdict = fact_gate.get("verdict") if _gate_available(fact_gate) else None
     out["fact_gate_verdict"] = verdict
     out["draft_blocked_flag"] = bool(draft.get("blocked"))
-    if not has_news and not has_personal:
-        check("draft_passed_review", False,
-              "no usable gate record on this artefact; nothing verified the text")
-    elif has_personal:
-        # The gate's own vocabulary is pass | warn | block (verify-cv-facts.mjs);
-        # only 'block' refuses (exit 1). A 'warn' is a caution a human should
-        # read, so it is surfaced in the check detail rather than hidden.
-        personal_ok = verdict in ("pass", "passed", "warn")
-        if personal_ok:
-            detail = f"personal-claims gate verdict {verdict!r}"
-            if isinstance(fact_gate, dict) and fact_gate.get("warnings"):
-                detail += f"; warnings={fact_gate['warnings']!r}"
-            detail += f"; draft blocked={bool(draft.get('blocked'))}"
-        else:
-            detail = f"personal-claims gate verdict is {verdict!r}"
-        check("draft_passed_review", personal_ok, detail)
-    else:
-        check("draft_passed_review", True,
-              "no personal-claims gate record; the post's claims are covered by "
-              "the news-claims gate (checked below)")
-
+    from linkedin_personal_review import scope_matches
+    personal_ok = (_gate_available(fact_gate)
+                   and fact_gate.get("gate_name") == "verify-cv-facts"
+                   and fact_gate.get("body_sha256") == sha256_text(body.strip())
+                   and verdict in ("pass", "passed", "warn")
+                   and fact_gate.get("exit_code", 0) == 0
+                   and scope_matches(fact_gate, body))
+    check("draft_passed_review", bool(personal_ok),
+          "personal-claims review covers exact final text" if personal_ok else
+          "nothing verified the author's own claims over this exact text (missing, stale or failed gate)")
     news_gate = draft.get("news_fact_gate")
-    if not _gate_available(news_gate):
-        # No usable news-claims record. That is only acceptable when the post is
-        # covered by the personal-claims gate above; otherwise its claims about
-        # the world were never checked.
-        out["owner_override"] = False
-        out["news_fact_gate_verdict"] = None
-        if has_personal:
-            check("draft_passed_news_claims", True,
-                  "no news-claims gate record; the post makes no claims about "
-                  "the world (personal-claims gate applies)")
+    news_ok, news_detail = _news_gate_ok(news_gate, body)
+    out["news_fact_gate_verdict"] = news_gate.get("verdict") if isinstance(news_gate, dict) else None
+    out["owner_override"] = False
+    if not news_ok:
+        ov_ok, ov_detail = _override_ok(draft, body)
+        out["owner_override"] = ov_ok
+        out["owner_override_detail"] = ov_detail
+        if ov_ok:
+            news_ok, news_detail = True, f"{news_detail} — OVERRIDDEN by owner: {ov_detail}"
         else:
-            check("draft_passed_news_claims", False,
-                  "no news-claims gate record on this draft; the post's claims "
-                  "about the world were not checked")
-    else:
-        news_ok, news_detail = _news_gate_ok(news_gate, body)
-        out["news_fact_gate_verdict"] = (news_gate.get("verdict")
-                                         if isinstance(news_gate, dict) else None)
-        if not news_ok:
-            # The gate refused. An explicit, attributable owner override bound to
-            # these exact bytes may still authorise publication; the gate record is
-            # left intact and the override is reported as what it is.
-            ov_ok, ov_detail = _override_ok(draft, body)
-            out["owner_override"] = ov_ok
-            out["owner_override_detail"] = ov_detail
-            if ov_ok:
-                check("draft_passed_news_claims", True,
-                      f"{news_detail} — OVERRIDDEN by owner: {ov_detail}")
-            else:
-                check("draft_passed_news_claims", False,
-                      f"{news_detail}; and {ov_detail}")
-        else:
-            out["owner_override"] = False
-            check("draft_passed_news_claims", True, news_detail)
+            news_detail += "; " + ov_detail
+    check("draft_passed_news_claims", news_ok, news_detail)
+    check("draft_not_blocked", not bool(draft.get("blocked")) or out["owner_override"],
+          "blocked drafts require an exact owner fact-check override or fresh unblocked reviews")
+    out["personal_fact_warnings"] = fact_gate.get("warnings", []) if isinstance(fact_gate, dict) else []
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()

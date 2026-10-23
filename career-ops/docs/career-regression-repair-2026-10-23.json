@@ -1,0 +1,82 @@
+{
+  "status": "PASS",
+  "branch": "fix/e3-whole-repo-architecture",
+  "baseline_commit": "7156bfb213ffeb276441cb1371622d80314dc43f",
+  "career_ops": {
+    "passed": 1510,
+    "failed": 0,
+    "new_regression_cases": 40,
+    "original_26_now_pass": true
+  },
+  "company_watch": {
+    "passed": 35,
+    "failed": 0
+  },
+  "focused_linkedin_scope": {
+    "passed": 101,
+    "failed": 0
+  },
+  "owner_state": {
+    "uk": {
+      "before": "b8027d178aa629c00285192394e8a5d970048593aad03c6794f80cc52d49e895",
+      "after": "b8027d178aa629c00285192394e8a5d970048593aad03c6794f80cc52d49e895",
+      "unchanged": true
+    },
+    "dubai": {
+      "before": "1ca896f604da3cb25047a0c617f15855aea763888f55c4eeb192b0ab6d1ab101",
+      "after": "1ca896f604da3cb25047a0c617f15855aea763888f55c4eeb192b0ab6d1ab101",
+      "unchanged": true
+    },
+    "japan": {
+      "before": "608554b7d4ea48e6520e97e9374a1465ae4caebce251c5a6fde6c3727428b6de",
+      "after": "608554b7d4ea48e6520e97e9374a1465ae4caebce251c5a6fde6c3727428b6de",
+      "unchanged": true
+    },
+    "singapore": {
+      "before": "3d9a3921837ae8ba055f8ba12677173d96d0e1823d9b5fbe6a64445eb5b940e9",
+      "after": "3d9a3921837ae8ba055f8ba12677173d96d0e1823d9b5fbe6a64445eb5b940e9",
+      "unchanged": true
+    },
+    "mail_sidecar": {
+      "before": "09d06662c6f75326004cae87496e9711e40b13a74a8905a9d47ea93ae3dbe297",
+      "after": "09d06662c6f75326004cae87496e9711e40b13a74a8905a9d47ea93ae3dbe297",
+      "unchanged": true
+    }
+  },
+  "recovery_directory": "C:\\Users\\mukun\\Documents\\Codex\\career-regression-repair-20261023",
+  "source_sha256": {
+    "career-ops/career_mail_bounded_apply.py": "50d4d992703d196aa2b470cd4e7b50088e04c1d39596e8d14857de9e3ff013f0",
+    "career-ops/career_mail_tracker.py": "7c3cead61f2178fc0e71900e424a2a986074947c2553787c26f6d3cc13ca877f",
+    "career-ops/tracker_writer.py": "479fe4f2565f9c99df356e8c222078029856a2e8c0b9f12ee247a514b4c38bbc",
+    "career-ops/linkedin_publish.py": "4f9c77cbc3bfda5b072f71d0979da9b2125035880905b0e7b92630210262f2ab",
+    "career-ops/linkedin_workflow.py": "9ac0a3d9384972da3894b951c2da3ee973888d90e28e4c65b881ce15568f1d99",
+    "career-ops/linkedin_personal_review.py": "b53d3c9d51b3f2ab1850a92f84947a743571a6073c4c08dd9af40deda8849722",
+    "company-watch/company_watch.py": "b8b5d18dec2b23e0519f94c4a629d5d77aafc66a49150d67b46c057c182b2b61",
+    "company-watch/tests/test_company_watch.py": "c0c0a8787de0fd48c52954fec8798bc4f5981cf73464d16500f1e749ed37f655",
+    "career-ops/tests/test_career_current_layout.py": "d54f16570b06ce28b55ced75e5eaee963a4ed6f423d619d893e70d02af651f09",
+    "career-ops/tests/test_career_mail_bounded_apply.py": "cecbed3590258cebd3cef84783b159b3a4ef8d280625429fff511d1e265c5986",
+    "career-ops/tests/test_linkedin_publish.py": "124d296421ed4b4e301e639870b5169af0fc5960d4109d5dd0204350b51b3bc2",
+    "career-ops/tests/test_linkedin_workflow.py": "6f1c7f442b312fea2b2881464a6a9b474f976b597a20c495a3a00efe354d821d",
+    "career-ops/tests/test_tracker_rollover.py": "2e8e12eb46a1772a944165299277a7ca152c0d5ae47966abef63499782c53635",
+    "career-ops/tests/test_workbook_recovery.py": "897fa0632a258e76d0b48669f89b09bdfebd13f348b53e64db487439c53a482d",
+    "career-ops/tests/test_mail_current_integration.py": "74ad2e7d1c755a99aa9a91d1792960fc50d10450682b3a0389619964acbe96eb",
+    "career-ops/tests/test_linkedin_personal_review.py": "768b305142fd60fa9293d2f19357649eba6304eb7df8ca6c39a987bd784b0563"
+  },
+  "runtime_only_builder_sha256": "a2626b01c93287c10f6c6adc05775cebbdd16cea3d058eb7abd0e379eedf0b24",
+  "runtime_only_builder_patch": "legacy-linkedin-builder-review.patch.json",
+  "no_main_merge": true,
+  "no_applications_outreach_or_publication": true,
+  "no_gmail_calendar_oauth_calls": true,
+  "transient_test_metadata_record": {
+    "count": 1,
+    "restored_exact_pretest_backup": true,
+    "owner_workbook_rows_changed": 0
+  },
+  "limits": [
+    "No live Gmail OAuth or provider-health acceptance",
+    "No live LinkedIn publication",
+    "Mixed or ambiguous personal/news text retains conservative full-text personal review",
+    "Workbook/metadata/calendar commit is resumable and ordered, not distributed atomicity",
+    "Legacy runtime-only builder syntax checked, not executed"
+  ]
+}

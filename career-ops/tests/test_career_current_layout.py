@@ -10,6 +10,12 @@ from tracker_writer import Tracker
 from career_google_clients import GmailReader
 from career_google_auth import GoogleError
 
+@pytest.fixture(autouse=True)
+def isolated_mail_runtime(tmp_path,monkeypatch):
+    # Successful current-layout writes must never address the owner's sidecar.
+    monkeypatch.setenv('LOCALAPPDATA',str(tmp_path/'private-local'))
+
+
 def profiles(path):
     cfg=json.loads((Path(__file__).resolve().parents[1]/'regional_profiles.json').read_text())
     uk=copy.deepcopy(cfg['regions']['uk']);uk['tracker']=str(path)
@@ -25,8 +31,8 @@ def test_url_less_owner_row_occupies_append_position(tmp_path):
     p=tmp_path/'tracker.xlsx';workbook(p);cfg=profiles(p);before=digest(p)
     tr=Tracker(p,cfg['regions']['uk']);assert tr.last_data_row()==3;tr.wb.close()
     tracker=WorkbookTracker(cfg,tmp_path/'backup');rows,_=tracker.read();assert len(rows)==1
-    tracker.upsert(dict(application_id='new',company='Other Company',role='Other Role',region='uk'))
-    wb=openpyxl.load_workbook(p);ws=wb['Jobs'];assert ws['F3'].value=='Applied';assert ws['B4'].value=='Other Company';assert ws['G2'].value=='Career Ops Job ID';assert ws['G4'].value=='UK-MAIL-new';assert ws['H2'].value.startswith('Career Ops Email');wb.close()
+    tracker.upsert(dict(application_id='new',company='Other Company',role='Other Role',region='uk',owner_confirmed_application=True))
+    wb=openpyxl.load_workbook(p);ws=wb['Jobs'];assert ws['F3'].value=='Applied';assert ws['B4'].value=='Other Company';assert ws.max_column==6;assert ws['F4'].value=='Applied';wb.close()
 
 def test_stale_layout_rejected_by_mail_and_general_tracker(tmp_path):
     p=tmp_path/'tracker.xlsx';workbook(p);wb=openpyxl.load_workbook(p);wb['Jobs']['B2']='Stale';wb.save(p);wb.close();cfg=profiles(p)
@@ -81,7 +87,7 @@ def test_accepted_snapshot_recovers_dedupe_without_restoring_workbook(tmp_path,m
     tracker=WorkbookTracker(cfg,tmp_path/'b');records,_=tracker.read()
     assert records[0]['seen_message_ids']==['accepted-message'];assert digest(p)==before
     assert records[0]['row']==3 and records[0]['canonical_owner_status']=='Applied'
-    assert tracker.accepted_state_recovered_records==1
+    assert tracker.accepted_state_recovered_records==0  # current sidecar already restored the IDs
 
 def test_accepted_snapshot_tampering_aborts(tmp_path,monkeypatch):
     p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);snapshot.write_bytes(snapshot.read_bytes()+b'changed')
@@ -89,7 +95,7 @@ def test_accepted_snapshot_tampering_aborts(tmp_path,monkeypatch):
 
 def test_ambiguous_snapshot_identity_is_never_fuzzily_merged(tmp_path,monkeypatch):
     p,cfg,snapshot=accepted_fixture(tmp_path,monkeypatch);wb=openpyxl.load_workbook(p);ws=wb['Jobs'];ws['B4']='Owner Company';ws['C4']='Owner Role';wb.save(p);wb.close()
-    with pytest.raises(ValueError,match='reconciliation'):WorkbookTracker(cfg,tmp_path/'b').read()
+    with pytest.raises(ValueError,match='ambiguous mailbox sidecar identity'):WorkbookTracker(cfg,tmp_path/'b').read()
 
 def test_rollover_clears_hyperlinks_before_reusing_plain_range_rows(tmp_path):
     from tracker_rollover import _clear_block

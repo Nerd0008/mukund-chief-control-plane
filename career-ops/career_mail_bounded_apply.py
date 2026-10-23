@@ -1,5 +1,6 @@
 """One report-scoped owner approval. Never enables scheduled/general Gmail writes."""
 from __future__ import annotations
+import contextlib, shutil
 import copy, datetime as dt, hashlib, json, os, tempfile
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
@@ -106,14 +107,35 @@ def exclusive_file(path):
             try:yield stream
             finally:fcntl.flock(stream,fcntl.LOCK_UN)
 
+@contextlib.contextmanager
+def mail_write_lock(path):
+    lock=path.with_suffix(path.suffix+'.career-mail.lock')
+    fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
+    try:yield
+    finally:os.close(fd);lock.unlink()
+
+
+class StagedWorkbooks(dict):
+    """Workbook bytes plus isolated metadata to commit under the same locks."""
+    metadata = ()
+
+
 def stage_workbooks(plan,profiles,before,root):
     import openpyxl,shutil
     root=Path(root);root.mkdir(parents=True,exist_ok=True);staged=copy.deepcopy(profiles)
     touched={r['region'] for r in plan['records']}
+    metadata_before={}
     for region in touched:
         src=Path(profiles['regions'][region]['tracker']);target=root/(region+'.xlsx');shutil.copy2(src,target)
         if digest(target)!=before[region]:raise ValueError('workbook changed before staging')
         staged['regions'][region]['tracker']=str(target)
+        sidecar=profiles['regions'][region].get('mail_metadata_sidecar')
+        if sidecar:
+            original=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/sidecar
+            metadata_before[region]=digest(original) if original.exists() else None
+            isolated=root/(region+'-mail-metadata.json')
+            if original.exists(): shutil.copy2(original,isolated)
+            staged['regions'][region]['mail_metadata_sidecar']=str(isolated.resolve())
     tracker=WorkbookTracker(staged,root/'staging-backups');receipts=[]
     for record in plan['records']:
         receipts.append({'application_id':record['application_id'],'new':not bool(record.get('row')),'region':record['region'],'write':tracker.upsert(record)})
@@ -131,20 +153,44 @@ def stage_workbooks(plan,profiles,before,root):
             from career_mail_tracker import HEADERS
             email_columns={c.column for c in new[cfg['header_row']] if c.value in HEADERS.values()}
             added_rows={r['row'] for r in plan['records'] if r['region']==region and r.get('owner_confirmed_application') and not any(x['write']['row']==r['row'] and not x['new'] for x in receipts)}
-            new_allowed={ci((cfg.get('id') or cfg.get('mail_identity'))['column']),ci(cfg['field_map']['company']),ci(cfg['field_map']['title']),ci(cfg['status_columns']['application_status'])}
+            new_allowed={ci(c) for c in cfg['field_map'].values()}
+            new_allowed.add(ci(cfg['status_columns']['application_status']))
+            identity=cfg.get('id') or cfg.get('mail_identity')
+            if identity: new_allowed.add(ci(identity['column']))
             for row in ws:
                 for cell in row:
                     if cell.column in email_columns:continue
                     if cell.row in added_rows and cell.column in new_allowed and cell.value is None:continue
                     if cell.value!=new[cell.coordinate].value:raise ValueError('staging would overwrite an existing canonical cell')
         finally:original.close();updated.close()
-    return {region:Path(staged['regions'][region]['tracker']).read_bytes() for region in touched},receipts
+    result=StagedWorkbooks({region:Path(staged['regions'][region]['tracker']).read_bytes() for region in touched})
+    metadata=[]
+    for region in touched:
+        sidecar=profiles['regions'][region].get('mail_metadata_sidecar')
+        if sidecar:
+            original=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/sidecar
+            isolated=Path(staged['regions'][region]['mail_metadata_sidecar'])
+            if (digest(original) if original.exists() else None)!=metadata_before[region]:
+                raise ValueError('metadata changed during staging')
+            if isolated.exists():
+                metadata.append({'region':region,'path':str(original),
+                    'before':metadata_before[region],'data':isolated.read_bytes()})
+    result.metadata=metadata
+    return result,receipts
 
 def commit_staged(staged,profiles,before,calendar_events,calendar,audit_path):
     from career_google_auth import GoogleError
     audit={'state':'preflight','before_hashes':before,'workbooks':[],'calendar':[]}
     atomic_json(audit_path,audit)
     with ExitStack() as stack:
+        # Share the same fail-fast lock as normal mailbox/discovery writers.
+        for region,cfg in profiles['regions'].items():
+            if region in before:
+                stack.enter_context(mail_write_lock(Path(cfg['tracker'])))
+        for meta in getattr(staged,'metadata',()):
+            p=Path(meta['path'])
+            if (digest(p) if p.exists() else None)!=meta['before']:
+                raise ValueError('concurrent metadata change; staged apply aborted before writes')
         streams={region:stack.enter_context(exclusive_file(cfg['tracker'])) for region,cfg in profiles['regions'].items() if region in before}
         for region,stream in streams.items():
             data=stream.read();stream.seek(0)
@@ -155,6 +201,19 @@ def commit_staged(staged,profiles,before,calendar_events,calendar,audit_path):
             after=hashlib.sha256(stream.read()).hexdigest()
             if after!=hashlib.sha256(data).hexdigest():raise ValueError('workbook write verification failed; preserve backup')
             audit['workbooks'].append({'region':region,'before':before[region],'after':after});atomic_json(audit_path,audit)
+        for meta in getattr(staged,'metadata',()):
+            p=Path(meta['path']);p.parent.mkdir(parents=True,exist_ok=True)
+            if p.exists():
+                backup=Path(audit_path).parent/'metadata-backups'/(p.name+'.'+meta['before'])
+                backup.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,backup)
+                if digest(backup)!=meta['before']:raise ValueError('metadata backup verification failed')
+            fd,name=tempfile.mkstemp(dir=p.parent,suffix='.tmp');os.close(fd)
+            temp=Path(name)
+            try:
+                temp.write_bytes(meta['data']);json.loads(temp.read_text(encoding='utf-8'))
+                if (digest(p) if p.exists() else None)!=meta['before']:raise ValueError('metadata changed during staged commit')
+                os.replace(temp,p)
+            finally:temp.unlink(missing_ok=True)
         for event in calendar_events:
             exists=True
             try:calendar._call('GET',event['id'])

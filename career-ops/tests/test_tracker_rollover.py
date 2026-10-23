@@ -57,6 +57,17 @@ def copy_tracker(region: str, dest_dir: Path) -> Path:
     dest = dest_dir / f"{region}-{src.name}"
     dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dest)
+    # Isolate fixture membership from changing owner data. This is a temporary
+    # copy only; keep all rows and owner state, but reserve TARGET_MONTH for probes.
+    cfg = cfg_of(region)
+    book = openpyxl.load_workbook(dest)
+    sheet = book[cfg["sheet"]]
+    for row in range(cfg["first_data_row"], sheet.max_row + 1):
+        cell = sheet[f"{cfg['field_map']['date_found']}{row}"]
+        if ro.month_of(cell.value) == TARGET_MONTH:
+            cell.value = None
+    book.save(dest)
+    book.close()
     return dest
 
 

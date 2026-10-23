@@ -112,7 +112,7 @@ def write_manifest_cli(tmp_path: Path, records: list[dict], tracker: Path,
            "--tracker", str(tracker), "--backup-dir", str(tmp_path / "backups"),
            "--archive-dir", str(archive_dir)]
     if apply:
-        cmd.append("--apply")
+        cmd.extend(["--apply", "--preserve-existing-rows"])
     proc = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True,
                           encoding="utf-8", errors="replace", timeout=300)
     assert proc.stdout.strip(), proc.stderr
@@ -522,14 +522,14 @@ def test_handoff_appends_provenance_then_dedupes_on_repeat(tmp_path):
     assert TW.sha256_file(tracker) != before
     assert applied["verification"]["ok"] is True
 
-    # provenance + prior-company signal landed, application state came from defaults
+    # UK keeps six columns. Durable manifest carries provenance; application
+    # state remains the profile default and no owner field stores discovery.
+    assert manifest["records"][-1]["discovery"].startswith("COMPANY WATCH")
     tr = TW.Tracker(tracker, UK_CFG)
     last = tr.last_data_row()
-    assert tr.ws[f"Q{last}"].value.startswith("COMPANY WATCH")
-    assert "greenhouse" in tr.ws[f"Q{last}"].value
-    assert tr.ws[f"R{last}"].value.startswith("Prior application/CV evidence")
-    assert tr.ws[f"J{last}"].value == "To Review"
-    assert tr.ws[f"N{last}"].value in (None, "")   # unknown gap is never invented
+    assert tr.ws.max_column == 6
+    status_column = UK_CFG["status_columns"]["application_status"]
+    assert tr.ws[f"{status_column}{last}"].value == UK_CFG["defaults"]["application_status"]
     tr.wb.close()
 
     # the same handoff again must append nothing (shared dedupe)
@@ -547,6 +547,7 @@ def test_handoff_refuses_when_no_provenance_column_exists(tmp_path):
     region_cfg = json.loads(json.dumps(UK_CFG))
     region_cfg["field_map"] = {k: v for k, v in region_cfg["field_map"].items()
                                if k not in ("discovery", "source")}
+    region_cfg.pop("column_ceiling", None)  # no fixed-schema manifest storage either
     doc = {"findings": [{"decision": "new", "attribution_confidence": "high",
                          "region_route": "uk", "owner_filter_eligible": True,
                          "company": "Testco", "title": "T", "url": "https://x.invalid/1",

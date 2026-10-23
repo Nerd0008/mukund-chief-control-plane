@@ -34,9 +34,23 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def posting_evidence(url):
+    """One canonical projection for public posting identity (never signed queries)."""
+    import re
+    from urllib.parse import urlsplit,parse_qs
+    parsed=urlsplit(str(url or ''))
+    refs=re.findall(r"\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|SYS-\d{4,})\b",parsed.path,re.I)
+    for key,values in parse_qs(parsed.query).items():
+        if key.lower() in {'jobid','requisitionid','reqid'}:
+            refs.extend(v for v in values if re.fullmatch(r'[A-Za-z0-9_-]{3,40}',v))
+    return {'canonical_job_host':parsed.hostname or '', 'canonical_job_path':parsed.path,
+            'job_reference_ids':sorted(set(refs))}
+
+
 class WorkbookTracker:
     def __init__(self, profiles, backup_dir):
-        self.profiles, self.backup_dir = resolve_profiles(profiles)["regions"], Path(backup_dir)
+        self.profile = resolve_profiles(profiles)
+        self.profiles, self.backup_dir = self.profile["regions"], Path(backup_dir)
         self.accepted_state = (Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / profiles["accepted_mail_state"]
                                if profiles.get("accepted_mail_state") else None)
 
@@ -67,17 +81,8 @@ class WorkbookTracker:
                         "thread_ids": [], "owner_confirmed_fields": ["company", "role"]}
                     record.update(region=region, row=row)
                     # Public posting references only; never retain URL queries or fragments.
-                    import re
-                    from urllib.parse import urlsplit, parse_qs
                     url = str(cells[ci(fm["url"]) - 1] or "") if fm.get("url") else ""
-                    parsed = urlsplit(url)
-                    refs = re.findall(r"\b(?:WD\d{6,}|JR-\d{6,}|R-\d{6,}|R\d{6,}|SYS-\d{4,})\b", parsed.path, re.I)
-                    for key, values in parse_qs(parsed.query).items():
-                        if key.lower() in {"jobid", "requisitionid", "reqid"}:
-                            refs.extend(v for v in values if re.fullmatch(r"[A-Za-z0-9_-]{3,40}",v))
-                    record["job_reference_ids"] = sorted(set(refs))
-                    record["canonical_job_host"] = parsed.hostname or ""
-                    record["canonical_job_path"] = parsed.path
+                    record.update(posting_evidence(url))
                     record["canonical_owner_status"] = cells[ci(cfg["status_columns"]["application_status"]) - 1]
                     records.append(record)
             finally:
@@ -106,23 +111,72 @@ class WorkbookTracker:
     def _upsert_sidecar(self,record,cfg,path):
         lock=path.with_suffix(path.suffix+'.career-mail.lock');fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY);temp=None
         try:
-            before=digest(path);records,_=self.read()
-            matches=[r for r in records if r['region']==record['region'] and r['company'].casefold()==record['company'].casefold() and r['role'].casefold()==record['role'].casefold()
-                     and (record.get('row') is None or r['row']==record['row'])]
-            if len(matches)!=1:raise ValueError('new or ambiguous mailbox application requires canonical writer reconciliation; no row restored')
-            current=matches[0]
-            store=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/cfg['mail_metadata_sidecar'];store.parent.mkdir(parents=True,exist_ok=True)
+            before=digest(path); records,_=self.read()
+            workbook_after=before
+            if digest(path)!=before:raise ValueError("canonical workbook changed during identity read")
+            store=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/cfg['mail_metadata_sidecar']
+            metadata_before=digest(store) if store.exists() else None
             state=json.loads(store.read_text(encoding='utf-8')) if store.exists() else {'records':{}}
+            candidates=[r for r in records if r['region']==record['region']
+                        and r['company'].casefold()==record['company'].casefold()
+                        and r['role'].casefold()==record['role'].casefold()]
+            if len(candidates)>1:
+                raise ValueError('ambiguous mailbox application identity; reconciliation required')
+            if not candidates:
+                if (record.get('owner_confirmed_application') is not True or record.get('row')
+                        or record['application_id'] in state['records'] or record.get('needs_review')):
+                    raise ValueError('new or owner-deleted mailbox application requires owner reconciliation; no row restored')
+                evidence=posting_evidence(record.get('job_url') or record.get('url'))
+                for key,value in evidence.items():
+                    incoming=record.get(key)
+                    if incoming and (set(incoming)!=set(value) if key=='job_reference_ids' else incoming!=value):
+                        raise ValueError('new mailbox posting evidence requires owner reconciliation before insertion')
+                # Shared writer, under the already-held shared lock. Missing URLs
+                # are allowed only for this explicitly confirmed mailbox path.
+                import tracker_writer as writer
+                writer_profile={**self.profile, 'canonical_dir':self.profile.get('canonical_dir',str(path.parent)),
+                                'career_ops_root':self.profile.get('career_ops_root',str(path.parent))}
+                result=writer._write_records_unlocked(writer_profile,record['region'],[{
+                    'company':record['company'],'title':record['role'],
+                    'url':record.get('job_url') or record.get('url'),
+                    'date_found':record.get('application_date') or record.get('last_update_timestamp'),
+                    'owner_confirmed_application':True}],apply=True,confirmed_mail=True,
+                    cleanup_existing=False,backup_dir=str(self.backup_dir))
+                if result.get('error') or result['counts']['appended']!=1:
+                    raise ValueError('confirmed mailbox application writer reconciliation failed')
+                workbook_after=result['tracker_sha256_after']
+                records,_=self.read()
+                candidates=[r for r in records if r['region']==record['region']
+                            and r['company'].casefold()==record['company'].casefold()
+                            and r['role'].casefold()==record['role'].casefold()]
+            if len(candidates)!=1:
+                raise ValueError('ambiguous mailbox application identity; reconciliation required')
+            current=candidates[0]
+            if record.get('row') and record['row']!=current['row']:
+                raise ValueError('canonical row changed identity; reconciliation required')
+            for key in ('canonical_job_host','canonical_job_path','job_reference_ids'):
+                if record.get(key) and record[key]!=current.get(key):
+                    raise ValueError('conflicting mailbox posting evidence; reconciliation required')
+            if (current.get('seen_message_ids') and current['application_id']!=record['application_id']):
+                raise ValueError('conflicting mailbox application ID; reconciliation required')
+            store.parent.mkdir(parents=True,exist_ok=True)
             saved=copy.deepcopy(record);saved.pop('row',None)
             for key in ('canonical_job_host','canonical_job_path','job_reference_ids'):saved[key]=current.get(key)
             state['records'][record['application_id']]=saved
+            if (digest(store) if store.exists() else None)!=metadata_before:
+                raise ValueError('metadata changed concurrently; sidecar write refused')
             if store.exists():
-                self.backup_dir.mkdir(parents=True,exist_ok=True);shutil.copy2(store,self.backup_dir/(store.name+'.'+digest(store)+'.json'))
+                self.backup_dir.mkdir(parents=True,exist_ok=True)
+                backup=self.backup_dir/(store.name+'.'+metadata_before+'.json')
+                shutil.copy2(store,backup)
+                if digest(backup)!=metadata_before:raise ValueError('metadata backup verification failed')
             handle,name=tempfile.mkstemp(dir=store.parent,suffix='.tmp');os.close(handle);temp=Path(name)
             temp.write_text(json.dumps(state,sort_keys=True),encoding='utf-8');json.loads(temp.read_text(encoding='utf-8'))
-            if digest(path)!=before:raise ValueError('canonical workbook changed concurrently; sidecar write refused')
+            if digest(path)!=workbook_after:raise ValueError('canonical workbook changed concurrently; sidecar write refused')
+            if (digest(store) if store.exists() else None)!=metadata_before:
+                raise ValueError('metadata changed concurrently; sidecar write refused')
             os.replace(temp,store);record['row']=current['row']
-            return {'region':record['region'],'row':current['row'],'before_sha256':before,'after_sha256':digest(path),'metadata_store':'private_sidecar'}
+            return {'region':record['region'],'row':current['row'],'before_sha256':before,'after_sha256':digest(path),'metadata_store':'private_sidecar','metadata_path':str(store)}
         finally:
             os.close(fd);lock.unlink()
             if temp and temp.exists():temp.unlink()

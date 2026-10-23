@@ -1,0 +1,7 @@
+{
+  "format": "unified-diff",
+  "apply_options": [
+    "--unidiff-zero"
+  ],
+  "patch": "--- a/runtime/linkedin/create_approved_drafts.py\n+++ b/runtime/linkedin/create_approved_drafts.py\n@@ -9,0 +10,2 @@\n+import linkedin_workflow as workflow\n+import linkedin_personal_review\n@@ -95,12 +97,4 @@\n-    if post['source_url']:\n-        gate_result = verify_post(post['post_text'], [post['source_url']])\n-    else:\n-        gate_result = {\n-            'verdict': 'pass',\n-            'gate_name': 'linkedin-news-claims',\n-            'gate_version': 1,\n-            'body_sha256': hashlib.sha256(post['post_text'].encode()).hexdigest(),\n-            'unsupported_claims': [],\n-            'reason': 'Personal post, no news claims'\n-        }\n-    \n+    gate_result = verify_post(post['post_text'], [post['source_url']] if post['source_url'] else [])\n+    personal_gate = linkedin_personal_review.review(workflow.cv_config(workflow.load_config()),\n+        post['post_text'], label=day, scratch=draft_dir/'fact-review')\n+\n@@ -125,6 +119 @@\n-        'personal_fact_gate': {\n-            'verdict': 'pass',\n-            'gate_name': 'verify-cv-facts',\n-            'version': 1,\n-            'body_sha256': confirm_token\n-        },\n+        'personal_fact_gate': personal_gate,\n"
+}

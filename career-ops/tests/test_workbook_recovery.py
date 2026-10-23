@@ -49,3 +49,26 @@ def test_duplicate_discovery_ack_fails_closed_on_conflict(tmp_path,change):
  else:s['Z33']='arbitrary override'
  w.save(p);w.close()
  assert not tw.verify_workbook(p,cfg)['ok']
+
+
+@pytest.mark.parametrize("change",["url","role","missing_parent","self_identity"])
+def test_acknowledgements_are_validated_outside_duplicate_groups(tmp_path,change):
+ import tracker_writer as tw
+ from openpyxl import load_workbook
+ cfg=tw.region_config(tw.load_profiles(),"singapore")
+ w=load_workbook(cfg["tracker"]);s=w[cfg["sheet"]]
+ if change=="url":s[f"{cfg['field_map']['url']}33"]="https://example.test/different"
+ elif change=="role":s["C33"]="Different Role"
+ elif change=="missing_parent":s["Z33"]="Career Ops duplicate discovery of DOES-NOT-EXIST; owner records preserved."
+ else:s[f"{cfg['id']['column']}33"]="SELF-ID"
+ p=tmp_path/"conflict.xlsx";w.save(p);w.close()
+ assert not tw.verify_workbook(p,cfg)["ok"]
+
+
+def test_distinct_owner_records_can_share_url_without_false_marker(tmp_path):
+ import tracker_writer as tw
+ from openpyxl import load_workbook
+ cfg=tw.region_config(tw.load_profiles(),"singapore")
+ w=load_workbook(cfg["tracker"]);s=w[cfg["sheet"]];s["B33"]="Distinct Employer";s["Z33"]=None
+ p=tmp_path/"distinct.xlsx";w.save(p);w.close()
+ assert tw.verify_workbook(p,cfg)["ok"]

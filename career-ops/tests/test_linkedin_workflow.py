@@ -316,17 +316,14 @@ def test_handoff_apply_to_a_copy_appends_verifies_and_leaves_canonical_untouched
     assert tw.sha256_file(copy) != copy_before
     assert tw.sha256_file(CANONICAL) == canonical_before
 
-    region_cfg = dict(tw.region_config(PROFILES, "uk"))
-    region_cfg["region"] = "uk"
-    tr = tw.Tracker(copy, region_cfg)
-    try:
-        col = region_cfg["field_map"][manifest["provenance_column"]]
-        values = [tr.ws[f"{col}{r}"].value for r in
-                  range(region_cfg["first_data_row"], tr.last_data_row() + 1)]
-    finally:
-        tr.wb.close()
-    assert any(isinstance(v, str) and v.startswith(liw.LINKEDIN_PROVENANCE_PREFIX)
-               for v in values), "LinkedIn provenance was not written"
+    # Six-column UK keeps provenance in the durable handoff manifest, never
+    # by repurposing an owner column or adding a seventh column.
+    stored = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+    assert stored["records"][0]["discovery"].startswith(liw.LINKEDIN_PROVENANCE_PREFIX)
+    book = __import__("openpyxl").load_workbook(copy)
+    assert book["Jobs"].max_column == 6
+    book.close()
+
 
 
 @needs_workbook
@@ -518,3 +515,31 @@ def test_no_canonical_asset_is_modified_by_a_draft_run(tmp_path):
 def test_expired_posting_remains_ineligible():
     job=one_job(posted_at='2026-01-01')
     assert liw.dedupe_signals(CFG,'uk',job)['job_decisions'][0]['owner_filter_eligible'] is False
+
+
+def test_writer_error_is_not_a_success_and_handoff_preserves_owner_rows(tmp_path, monkeypatch):
+    import subprocess
+    commands=[]
+    def failed(cmd, **kwargs):
+        commands.append(cmd)
+        return subprocess.CompletedProcess(cmd,0,stdout='{"applied":false,"error":"verification failed"}',stderr="")
+    monkeypatch.setattr(liw.cw.subprocess,"run",failed)
+    result=liw.cw.handoff_to_career_ops(liw.cw_config(CFG),"uk",{"records":[one_job()[0]]},
+        apply=True,manifest_path=str(tmp_path/"handoff.json"))
+    assert result["ok"] is False
+    assert "--preserve-existing-rows" in commands[0]
+
+
+def test_draft_reviews_bind_each_exact_body(tmp_path, monkeypatch):
+    import hashlib
+    checked=[]
+    def verify(cfg,text,**kwargs):
+        checked.append(text)
+        return {"available":True,"verdict":"pass","exit_code":0}
+    monkeypatch.setattr(cvw,"fact_gate",verify)
+    result=liw.build_linkedin_drafts(CFG,out_dir=tmp_path/"out",scratch=tmp_path/"scratch")
+    assert len(checked)==len(result["drafts"])
+    for draft,body in zip(result["drafts"],checked):
+        full=(draft.get("body") or draft.get("about") or draft.get("headline") or "").strip()
+        assert draft["fact_gate"]["body_sha256"]==hashlib.sha256(full.encode("utf-8")).hexdigest()
+        assert body==__import__("linkedin_personal_review").personal_text(full)

@@ -88,7 +88,8 @@ def drafts_file(tmp_path: Path, body: str = "Notes from a recent project: exampl
                          "text": "canonical line"}]}
     if verdict is not None:
         post["fact_gate"] = {"verdict": verdict, "invented": [], "unsupportedFacts": [],
-                             "forbidden": [], "available": True, "exit_code": 0}
+                             "forbidden": [], "available": True, "exit_code": 0,
+                             "gate_name": "verify-cv-facts", "body_sha256": lp.sha256_text(body.strip())}
     if news_verdict is not None:
         post["news_fact_gate"] = {
             "gate_name": "linkedin-news-claims", "gate_version": 1,
@@ -274,7 +275,7 @@ def approved_file(tmp_path: Path, body: str, news: dict | None,
         "post_text": body,
         "news_fact_gate": news,
         "personal_fact_gate": {"verdict": personal, "gate_name": "verify-cv-facts",
-                               "version": 1},
+                               "version": 1, "body_sha256": lp.sha256_text(body.strip())},
         "topic": {"title": "t", "sources": []},
         "confirm_token": lp.sha256_text(body),
         "approved": True,
@@ -641,3 +642,40 @@ def test_unavailable_approval_history_fails_closed(tmp_path):
     receipt = approval_receipt(body)
     assert not lp._owner_approval_ok({'owner_approval':receipt},body,
                                     db_path=tmp_path/'missing.db')[0]
+
+
+@pytest.mark.parametrize("mutation", ["missing_personal", "missing_news", "stale_personal",
+    "wrong_personal_gate", "unavailable_personal", "empty_personal", "declared_news_only"])
+def test_exact_claim_coverage_fails_closed(tmp_path, mutation):
+    body = "I hold a synthetic qualification. A synthetic vendor announced a 45 percent increase."
+    path = approved_file(tmp_path, body, news_gate(body, "pass"))
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    if mutation in ("missing_personal", "declared_news_only"):
+        doc.pop("personal_fact_gate")
+        doc["claim_scope"] = "news"  # self-declared scope is not verification
+    elif mutation == "missing_news": doc.pop("news_fact_gate")
+    elif mutation == "stale_personal": doc["personal_fact_gate"]["body_sha256"] = "0" * 64
+    elif mutation == "wrong_personal_gate": doc["personal_fact_gate"]["gate_name"] = "invented"
+    elif mutation == "unavailable_personal": doc["personal_fact_gate"]["available"] = False
+    else: doc["personal_fact_gate"] = {}
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with configured()[0], configured()[1], configured()[2]:
+        code, result = run(lp.main, ["plan", "--drafts", str(path), "--approve-publish",
+            "--confirm-token", lp.sha256_text(body), "--ledger", str(tmp_path/"ledger")])
+    assert code == 1 and not result["ok"]
+    assert result["network_calls_spent"] == 0
+    assert not (tmp_path/"ledger").exists()
+
+
+@pytest.mark.parametrize('mutation',['blocked_flag','failed_personal_process'])
+def test_inconsistent_review_state_refuses_even_passing_verdicts(tmp_path,mutation):
+    body='Synthetic offline review-state fixture.'
+    path=approved_file(tmp_path,body,news_gate(body,'pass'))
+    doc=json.loads(path.read_text(encoding='utf-8'))
+    if mutation=='blocked_flag':doc['blocked']=True
+    else:doc['personal_fact_gate']['exit_code']=1
+    path.write_text(json.dumps(doc),encoding='utf-8')
+    with configured()[0],configured()[1],configured()[2]:
+        code,result=run(lp.main,['plan','--drafts',str(path),'--approve-publish',
+            '--confirm-token',lp.sha256_text(body),'--ledger',str(tmp_path/'ledger')])
+    assert code==1 and result['network_calls_spent']==0

@@ -6,6 +6,12 @@ import career_mail_bounded_apply as b
 from career_mail_tracker import WorkbookTracker,digest,HEADERS
 
 
+@pytest.fixture(autouse=True)
+def isolated_mail_runtime(tmp_path,monkeypatch):
+    # Successful current-layout writes must never address the owner's sidecar.
+    monkeypatch.setenv('LOCALAPPDATA',str(tmp_path/'private-local'))
+
+
 def signal(item='S01',company='Acme',role='Graduate Engineer',mid='m',**kw):
     return dict(item=item,company=company,role=role,gmail_message_id=mid,gmail_thread_id='t',category='confident existing application match',last_update_timestamp='2026-10-01T10:00:00Z',latest_status='assessment',deadline={},**kw)
 def row(**kw):

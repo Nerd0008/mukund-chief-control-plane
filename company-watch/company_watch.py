@@ -488,9 +488,8 @@ def provenance_targets(region_cfg: dict) -> dict:
     """Which canonical columns carry Company Watch provenance for this region.
 
     Never an owner column: the regional trackers keep their Notes column (Z)
-    owner-only, so a region without a non-owner provenance column simply gets
-    provenance recorded in the handoff manifest and the Company Watch workbook
-    instead of in the tracker.
+    owner-only. Fixed-column regions keep their provenance in the durable handoff
+    manifest instead. A region without either supported storage mode is refused.
     """
     field_map = region_cfg.get("field_map", {})
     owner = set(region_cfg.get("owner_columns", []))
@@ -503,10 +502,11 @@ def provenance_targets(region_cfg: dict) -> dict:
         return None
 
     return {
-        "provenance": pick(["discovery", "source"]),
+        "provenance": pick(["discovery", "source"]) or ("discovery" if region_cfg.get("column_ceiling") else None),
+        "storage": "manifest" if region_cfg.get("column_ceiling") else "column",
         "prior_signal": pick(["prior_company_signal"]),
         "live_status": pick(["live_status"]),
-        "posted_date": pick(["posted_date"]),
+        "posted_date": pick(["posted_date"]) or ("posted_date" if region_cfg.get("column_ceiling") else None),
         "last_checked": pick(["last_checked"]),
         "owner_column_keys_excluded": sorted(owner_keys),
     }
@@ -598,9 +598,9 @@ def handoff_to_career_ops(cfg: dict, region: str, manifest: dict, *, tracker: st
         return {"invoked": False, "reason": "no eligible records to hand off",
                 "mode": "apply" if apply else "dry-run"}
     mpath = Path(manifest_path) if manifest_path else (
-        paths["runtime_dir"] / f"handoff-{region}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}.json")
+        paths["runtime_dir"] / f"handoff-{region}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%S%fZ}.json")
     mpath.parent.mkdir(parents=True, exist_ok=True)
-    mpath.write_text(json.dumps({"records": manifest["records"]}, indent=2, ensure_ascii=False),
+    mpath.write_text(json.dumps({"provenance_storage": "manifest", "region": region, "records": manifest["records"]}, indent=2, ensure_ascii=False),
                      encoding="utf-8")
     cmd = [sys.executable, str(paths["cli"]), "write", "--region", region, "--manifest", str(mpath)]
     if tracker:
@@ -610,7 +610,7 @@ def handoff_to_career_ops(cfg: dict, region: str, manifest: dict, *, tracker: st
     for d in extra_archive_dirs or []:
         cmd += ["--archive-dir", str(d)]
     if apply:
-        cmd += ["--apply"]
+        cmd += ["--apply", "--preserve-existing-rows"]
     proc = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True,
                           encoding="utf-8", errors="replace", timeout=600)
     result: dict = {"invoked": True, "command": " ".join(cmd), "exit_code": proc.returncode,
@@ -624,7 +624,9 @@ def handoff_to_career_ops(cfg: dict, region: str, manifest: dict, *, tracker: st
         result["stderr_tail"] = (proc.stderr or "")[-2000:]
         result["ok"] = False
         return result
-    result["ok"] = proc.returncode == 0
+    result["ok"] = (proc.returncode == 0 and isinstance(result["result"], dict)
+                    and not result["result"].get("error")
+                    and (not result["result"].get("applied") or result["result"].get("verification", {}).get("ok") is True))
     return result
 
 
