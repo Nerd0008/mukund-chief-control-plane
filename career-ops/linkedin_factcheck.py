@@ -496,79 +496,91 @@ CLAIMS:
 SOURCE:
 {section['text']}
 '''
-        judged = run_judge(prompt, model=model, api_key=api_key, runs=requested)
-        run_answers = judged.get("runs", [])
-        result["audit"].append({"prompt": prompt, "model": model,
-                                "section_start": section["start"], "section_end": section["end"],
-                                "result": judged})
-        result["runs_used"] += len(run_answers)
-        receipt = judged.get("receipt") or {}
-        supplied = (receipt.get("prompt_chars") == len(prompt)
-                    and receipt.get("prompt_sha256") == sha256_text(prompt))
+        section_id = len(result["section_coverage"])
         valid_runs = 0
-        # Only fully returned/validated runs can establish section coverage.
-        for run in run_answers:
-            if not isinstance(run, list):
-                continue
-            seen = set()
-            current = {}
-            run_valid = True
-            for answer in run:
-                if not isinstance(answer, dict):
-                    run_valid = False
+        supplied = False
+        for attempt in range(3):
+            if valid_runs >= requested:
+                break
+            judged = run_judge(prompt, model=model, api_key=api_key, runs=requested - valid_runs)
+            run_answers = judged.get("runs", [])
+            receipt = judged.get("receipt") or {}
+            receipt_ok = (receipt.get("prompt_chars") == len(prompt)
+                          and receipt.get("prompt_sha256") == sha256_text(prompt))
+            supplied = supplied or receipt_ok
+            audit = {"prompt": prompt, "model": model, "section_start": section["start"],
+                     "section_end": section["end"], "attempt": attempt + 1,
+                     "result": judged, "run_validation": []}
+            result["audit"].append(audit)
+            result["runs_used"] += len(run_answers)
+            for run in run_answers:
+                if not receipt_ok:
+                    audit["run_validation"].append({"valid": False, "reason": "receipt mismatch"})
                     continue
-                cid = answer.get("claim_id")
-                if not isinstance(cid, str):
-                    run_valid = False
+                if not isinstance(run, list):
+                    audit["run_validation"].append({"valid": False, "reason": "run is not a list"})
                     continue
-                item = next((x for x in inputs if x["claim_id"] == cid), None)
-                verdict = str(answer.get("verdict", "")).lower()
-                evidence = str(answer.get("evidence", ""))
-                valid = (item is not None and cid not in seen
-                         and verdict in {"supported", "unsupported", "overstated", "contradicted", "not_checkable"}
-                         and isinstance(answer.get("reason"), str)
-                         and bool(answer["reason"].strip()))
-                seen.add(cid)
-                if verdict in {"supported", "overstated", "contradicted"}:
-                    valid = valid and _evidence_present(evidence, section["text"])
-                elif evidence:
-                    valid = valid and _evidence_present(evidence, section["text"])
-                if not valid:
-                    run_valid = False
-                else:
-                    current[cid] = dict(answer, verdict=verdict)
-            if set(current) != set(answers):
-                run_valid = False
-            if run_valid:
-                valid_runs += 1
-                for cid, answer in current.items():
-                    answers[cid].append((len(result["audit"]) - 1, answer))
+                seen = set()
+                current = {}
+                errors = []
+                for answer in run:
+                    if not isinstance(answer, dict):
+                        errors.append("answer is not an object")
+                        continue
+                    cid = answer.get("claim_id")
+                    if not isinstance(cid, str):
+                        errors.append("missing claim_id")
+                        continue
+                    item = next((x for x in inputs if x["claim_id"] == cid), None)
+                    verdict = str(answer.get("verdict", "")).lower()
+                    evidence = str(answer.get("evidence", ""))
+                    valid = (item is not None and cid not in seen
+                             and verdict in {"supported", "unsupported", "overstated", "contradicted", "not_checkable"}
+                             and isinstance(answer.get("reason"), str)
+                             and bool(answer["reason"].strip()))
+                    seen.add(cid)
+                    if verdict in {"supported", "overstated", "contradicted"}:
+                        valid = valid and _evidence_present(evidence, section["text"])
+                    elif evidence:
+                        valid = valid and _evidence_present(evidence, section["text"])
+                    if not valid:
+                        errors.append(f"invalid answer for {cid}")
+                    else:
+                        current[cid] = dict(answer, verdict=verdict)
+                if set(current) != set(answers):
+                    errors.append("claim coverage mismatch")
+                audit["run_validation"].append({"valid": not errors, "reason": "; ".join(errors) if errors else None})
+                if not errors and valid_runs < requested:
+                    valid_runs += 1
+                    for cid, answer in current.items():
+                        answers[cid].append((section_id, answer))
         section_complete = supplied and valid_runs >= requested // 2 + 1
         result["section_coverage"].append({"start": section["start"], "end": section["end"],
                                            "complete": section_complete, "supplied": supplied})
         complete = complete and section_complete
-    majority = requested // 2 + 1
+    section_majorities = [sum(sid == section_id for sid, _ in answers[inputs[0]["claim_id"]]) // 2 + 1
+                          for section_id in range(len(result["section_coverage"]))]
     for item in inputs:
         records = answers[item["claim_id"]]
         chosen = None
         # Contradictions take precedence over support from a conflicting source.
         for verdict in ("contradicted", "overstated", "supported"):
-            for section_id in range(len(result["audit"])):
+            for section_id in range(len(result["section_coverage"])):
                 matches = [a for sid, a in records if sid == section_id and a["verdict"] == verdict]
-                if len(matches) >= majority:
+                if len(matches) >= section_majorities[section_id]:
                     chosen = matches[0]
                     break
             if chosen:
                 break
         if chosen is None and all(
-                sum(a["verdict"] == "not_checkable" for sid, a in records if sid == section_id) >= majority
-                for section_id in range(len(result["audit"]))):
+                sum(a["verdict"] == "not_checkable" for sid, a in records if sid == section_id) >= section_majorities[section_id]
+                for section_id in range(len(result["section_coverage"]))):
             chosen = next(a for _, a in records if a["verdict"] == "not_checkable")
         if chosen is None:
             # Absence of evidence only counts after all sections were checked.
             no_support = all(sum(a["verdict"] == "unsupported" for sid, a in records
-                                 if sid == section_id) >= majority
-                             for section_id in range(len(result["audit"])))
+                                 if sid == section_id) >= section_majorities[section_id]
+                             for section_id in range(len(result["section_coverage"])))
             if complete and no_support:
                 chosen = next(a for _, a in records if a["verdict"] == "unsupported")
             else:

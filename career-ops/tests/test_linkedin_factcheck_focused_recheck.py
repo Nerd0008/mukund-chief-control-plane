@@ -56,8 +56,45 @@ class TestClaimJudging(unittest.TestCase):
             result = fc.llm_verify_claims("The port went offline.",
                     "The Port of Rotterdam went offline on October 21.", api_key="test")
         self.assertTrue(result["complete"])
-        self.assertEqual(result["claims"][0]["judge_runs"], 2)
+        self.assertEqual(result["claims"][0]["judge_runs"], 3)
         self.assertEqual(result["claims"][0]["verdict"], "supported")
+
+    def test_invalid_run_is_retried_until_three_valid_runs(self):
+        calls = 0
+        def judge(prompt, **kwargs):
+            nonlocal calls
+            calls += 1
+            data = response(prompt, runs=2 if calls == 1 else 1)
+            if calls == 1:
+                data["runs"][0][0]["claim_id"] = "wrong-id"
+            return data
+        with patch.object(fc, "run_judge", side_effect=judge):
+            result = fc.llm_verify_claims("The port went offline.",
+                    "The Port of Rotterdam went offline on October 21.", api_key="test")
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["claims"][0]["verdict"], "supported")
+        self.assertEqual(result["claims"][0]["judge_runs"], 3)
+        self.assertEqual(calls, 3)
+        self.assertFalse(result["audit"][0]["run_validation"][0]["valid"])
+        self.assertIn("wrong-id", result["audit"][0]["run_validation"][0]["reason"])
+
+    def test_split_two_valid_runs_remains_incomplete_after_retries(self):
+        calls = 0
+        def judge(prompt, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls > 1:
+                return response(prompt, evidence="invented quote", runs=1)
+            data = response(prompt, runs=2)
+            data["runs"][1][0].update(verdict="unsupported", evidence="")
+            return data
+        with patch.object(fc, "run_judge", side_effect=judge):
+            result = fc.llm_verify_claims("The port went offline.",
+                    "The Port of Rotterdam went offline on October 21.", api_key="test")
+        self.assertFalse(result["complete"])
+        self.assertEqual(result["claims"][0]["verdict"], "incomplete")
+        self.assertEqual(result["claims"][0]["judge_verdicts"], ["supported", "unsupported"])
+        self.assertEqual(calls, 3)
 
     def test_duplicate_and_missing_ids_are_incomplete(self):
         def judge(prompt, **kwargs):
