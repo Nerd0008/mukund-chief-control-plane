@@ -92,7 +92,7 @@ def drafts_file(tmp_path: Path, body: str = "Notes from a recent project: exampl
                              "gate_name": "verify-cv-facts", "body_sha256": lp.sha256_text(body.strip())}
     if news_verdict is not None:
         post["news_fact_gate"] = {
-            "gate_name": "linkedin-news-claims", "gate_version": 1,
+            "gate_name": "linkedin-news-claims", "gate_version": 2, "verification_complete": True,
             "ran_at": "2026-09-24T22:00:00+00:00",
             "body_sha256": lp.sha256_text(body.strip()),
             "verdict": news_verdict, "unsupported_claims": [],
@@ -257,7 +257,7 @@ def news_gate(body: str, verdict: str, *, gate_name: str = "linkedin-news-claims
     import hashlib
     return {
         "gate_name": gate_name,
-        "gate_version": 1,
+        "gate_version": 2, "verification_complete": True,
         "ran_at": "2026-10-03T00:00:00+00:00",
         "body_sha256": sha if sha is not None else hashlib.sha256(
             body.strip().encode("utf-8")).hexdigest(),
