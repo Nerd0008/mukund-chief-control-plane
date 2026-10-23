@@ -48,3 +48,12 @@ def test_focused_recheck_does_not_accept_missing_evidence_or_runs():
     with patch.object(fc, "run_judge", side_effect=judge):
         result = fc.llm_verify_claims("Unsupported claim", "Source", api_key="test")
     assert result["claims"][0]["verdict"] == "unsupported"
+
+
+def test_focused_excerpt_keeps_relevant_later_source():
+    source = ("[SOURCE: first]\n" + "Unrelated opening.\n\n" +
+              "[SOURCE: second]\n" + "A single researcher with an AI model completed in a week "
+              "what would have taken a team months of work.")
+    excerpt = fc.focused_source_excerpt(source, "One researcher with an AI model did in a week what a team would take months")
+    assert "[SOURCE: second]" in excerpt
+    assert "completed in a week" in excerpt

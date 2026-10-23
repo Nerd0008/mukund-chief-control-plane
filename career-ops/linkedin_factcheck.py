@@ -513,6 +513,7 @@ POST:
     for claim in claims:
         if claim["verdict"] == "supported":
             continue
+        excerpt = focused_source_excerpt(source_text, claim["claim"])
         focused_prompt = f"""You are a strict fact-checker. Judge this ONE claim against
 the SOURCE. Return only JSON in this shape:
 {{"claims":[{{"claim":{json.dumps(claim['claim'])},
@@ -523,7 +524,7 @@ including timing and causation. Do not infer missing details. Quote source
 evidence for any supported verdict.
 
 SOURCE:
-{source_text[:JUDGE_SOURCE_CHARS]}
+{excerpt}
 
 CLAIM:
 {claim['claim']}
@@ -540,9 +541,12 @@ CLAIM:
             evidence = str(answer.get("evidence", "")).strip()
             normalise = lambda s: re.sub(r"\s+", " ",
                                           re.sub(r"[\u200b-\u200f\u2060]", "", s)).casefold()
+            fragments = [f.strip() for f in re.split(r"\.{3}|\u2026", evidence)
+                         if len(f.strip()) >= 20]
             if (str(answer.get("verdict", "")).lower() == "supported"
-                    and len(evidence) >= 20
-                    and normalise(evidence) in normalise(source_text)):
+                    and fragments
+                    and all(normalise(part) in normalise(source_text)
+                            for part in fragments)):
                 supported.append(evidence)
         if len(supported) > runs // 2:
             claim["verdict"] = "supported"
@@ -627,6 +631,34 @@ def combine_sources(source_texts: dict, *, per_source: int = 14000) -> str:
             body = body[:per_source]
         parts.append(f"[SOURCE: {url}]\n{body}")
     return "\n\n".join(parts)
+
+
+def focused_source_excerpt(source_text: str, claim: str, *, max_chars: int = 18000) -> str:
+    """Bring the most relevant source paragraphs next to a disputed claim."""
+    stop = {"the", "and", "that", "with", "from", "into", "what", "would",
+            "could", "were", "have", "been", "this", "their", "about",
+            "there", "which", "first", "still", "last"}
+    terms = set(re.findall(r"[a-z0-9]+", claim.casefold())) - stop
+    passages = []
+    current_source = ""
+    for paragraph in re.split(r"\n\s*\n", source_text):
+        if paragraph.startswith("[SOURCE: "):
+            current_source = paragraph.splitlines()[0]
+        for chunk in (paragraph[i:i + 1800] for i in range(0, len(paragraph), 1800)):
+            words = set(re.findall(r"[a-z0-9]+", chunk.casefold()))
+            score = len(terms & words)
+            if score:
+                passages.append((score, current_source, chunk))
+    passages.sort(key=lambda p: p[0], reverse=True)
+    selected = []
+    length = 0
+    for _, header, chunk in passages:
+        item = f"{header}\n{chunk}"
+        if length + len(item) > max_chars:
+            continue
+        selected.append(item)
+        length += len(item)
+    return "\n\n".join(selected)
 
 
 def verify_post(post_text: str, sources: list[str], *,
