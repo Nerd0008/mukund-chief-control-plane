@@ -35,6 +35,7 @@ from remote_queue.retry_policy import (
 )
 
 LIVE_QUEUE_ROOT = REPO_ROOT / "remote-queue"
+_LIVE_KILL_AT_IMPORT = (LIVE_QUEUE_ROOT / ".poller.kill").read_bytes() if (LIVE_QUEUE_ROOT / ".poller.kill").exists() else None
 AUTHORITY = "tasks-or-issues/2026-09-24-full-operational-vps-cutover.md"
 
 
@@ -459,7 +460,7 @@ class TestIsolationGuards(unittest.TestCase):
     """The live queue must not be reachable from this suite."""
 
     def test_live_queue_is_not_touched(self):
-        self.assertFalse((LIVE_QUEUE_ROOT / ".poller.kill").exists())
+        self.assertEqual((LIVE_QUEUE_ROOT / ".poller.kill").read_bytes() if (LIVE_QUEUE_ROOT / ".poller.kill").exists() else None, _LIVE_KILL_AT_IMPORT)
         for name in ("pending", "running", "completed", "blocked"):
             directory = LIVE_QUEUE_ROOT / name
             if directory.exists():

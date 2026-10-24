@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Hermes GitHub Remote Queue — JSON schema validation and atomic claiming.
+"""Hermes GitHub Remote Queue â€” JSON schema validation and atomic claiming.
 
 Canonical data path: remote-queue/ (git-tracked, matches spec and GitHub UI).
 Python package path: remote_queue/ (code only).
 
 After every state transition (claim/complete/block), changes are committed
-and pushed to origin/main so task state is visible remotely on GitHub.
+and pushed to the validated current/upstream branch so task state is visible remotely on GitHub.
 """
 
 import json
@@ -30,7 +30,10 @@ PENDING_DIR = QUEUE_DIR / "pending"
 RUNNING_DIR = QUEUE_DIR / "running"
 COMPLETED_DIR = QUEUE_DIR / "completed"
 BLOCKED_DIR = QUEUE_DIR / "blocked"
-LOG_DIR = QUEUE_DIR / "logs"
+RUNTIME_DIR = Path(os.environ.get("HERMES_POLLER_RUNTIME_DIR") or (
+    REPO_ROOT.parent / (REPO_ROOT.name + "-queue-runtime") if os.environ.get("HERMES_REPO_ROOT")
+    else Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "hermes/remote-queue/runtime"))
+LOG_DIR = Path(os.environ.get("HERMES_QUEUE_LOG_ROOT") or RUNTIME_DIR / "logs")
 
 REQUIRED_FIELDS = ["task_id", "created_at", "objective", "authority", "priority", "allowed_scope", "requires_owner_approval", "status"]
 VALID_PRIORITIES = {"critical", "high", "medium", "low"}
@@ -160,7 +163,8 @@ def claim_task(task_path: Path) -> bool:
         pass
 
     try:
-        _git_commit_and_push(f"queue: claim {task_id}")
+        if not _git_commit_and_push(f"queue: claim {task_id}"):
+            return False
     except Exception as exc:
         log_event(f"CRITICAL: claim publish raised for {task_id}: {type(exc).__name__}: {exc}")
         return False
@@ -283,57 +287,56 @@ def record_execution_attempt(task_id: str, attempt: int, result: Dict[str, Any],
 def _is_non_fast_forward(stderr: str) -> bool:
     """True when a push was rejected because origin advanced independently."""
     lowered = (stderr or "").lower()
-    return any(
-        marker in lowered
-        for marker in (
-            "non-fast-forward",
-            "fetch first",
-            "updates were rejected",
-            "failed to push some refs",
-            "remote rejected",
-        )
-    )
+    return "non-fast-forward" in lowered or "fetch first" in lowered
+
 
 
 def _git_commit_and_push(message: str) -> bool:
     """Commit queue changes and push. Returns True on success, logs truthfully."""
-    # Stage only queue changes
-    rc, _, stderr = _git(["add", "remote-queue/"])
-    if rc != 0:
-        log_event(f"CRITICAL: git add failed: {stderr[:200]}")
-        return False
-
-    # Commit
-    rc, stdout, stderr = _git(["commit", "-m", message, "--", "remote-queue/"])
-    if rc != 0:
-        # Nothing to commit is OK (idempotent)
-        if "nothing to commit" in stdout.lower() or "nothing to commit" in stderr.lower():
-            return True
-        log_event(f"CRITICAL: git commit failed: {stderr[:200]}")
-        return False
-
-    # Push
-    rc, _, stderr = _git(["push", "origin", "main"])
-    if rc != 0:
-        log_event(f"CRITICAL: git push failed: {stderr[:300]}")
-        if _is_non_fast_forward(stderr):
-            # The scheduled poller and an interactive session can publish at the
-            # same time, so a rejected push is a normal race rather than a
-            # failure. Rebase onto the advanced origin and retry exactly once so
-            # queue state is not silently left unpublished.
-            rc2, _, err2 = _git(["pull", "--rebase"])
-            if rc2 == 0:
-                rc3, _, err3 = _git(["push", "origin", "main"])
-                if rc3 == 0:
-                    log_event(f"queue push recovered after rebase retry: {message}")
-                    return True
-                log_event(f"CRITICAL: git push retry failed: {err3[:300]}")
-            else:
+    from remote_queue.git_safety import target, isolated, published
+    try:
+        branch = target(_git)
+        if QUEUE_DIR.resolve() != (REPO_ROOT / "remote-queue").resolve():
+            raise ValueError("queue directory is outside the publication checkout")
+        paths = set()
+        areas = []
+        for area in ("pending", "running", "completed", "blocked"):
+            pattern = f"remote-queue/{area}/*.json"
+            rc, output, _ = _git(["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", pattern])
+            if rc: raise ValueError("cannot enumerate queue state changes")
+            found = {p for p in output.split("\0") if p}
+            if found:
+                paths.update(found)
+                areas.append(f":(glob){pattern}")
+        paths = sorted(paths)
+        for offset in range(0, len(paths), 20):
+            if _git(["add", "-A", "--", *paths[offset:offset+20]])[0]:
+                raise ValueError("cannot stage queue state")
+        if areas:
+            changed = _git(["diff", "--cached", "--quiet", "--", *areas])[0]
+            if changed not in (0, 1): raise ValueError("cannot inspect staged queue state")
+            if changed and _git(["commit", "-m", message, "--", *areas])[0]:
+                raise ValueError("cannot commit queue state")
+        # Always push: a previous attempt may already have committed locally.
+        push = ["push", "origin", f"HEAD:refs/heads/{branch}"]
+        rc, _, error = _git(push)
+        if not rc:
+            return published(_git, branch)
+        log_event("CRITICAL: queue push failed")
+        clean_rc, dirty, _ = _git(["status", "--porcelain"])
+        if (_is_non_fast_forward(error) and isolated(REPO_ROOT, _git)
+                and clean_rc == 0 and not dirty):
+            if _git(["fetch", "origin", branch])[0] == 0:
+                rc, _, _ = _git(["rebase", f"origin/{branch}"])
+                if rc == 0:
+                    return _git(push)[0] == 0 and published(_git, branch)
                 _git(["rebase", "--abort"])
-                log_event(f"CRITICAL: push recovery rebase failed: {err2[:300]}")
+                log_event("CRITICAL: isolated queue recovery conflict; local commit preserved")
+        return False
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
+        log_event(f"CRITICAL: queue publication blocked ({type(exc).__name__}): {exc}")
         return False
 
-    return True
 
 
 def _git(cmd, timeout=60):

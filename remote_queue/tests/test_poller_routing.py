@@ -36,6 +36,7 @@ import remote_queue.queue_schema as qs
 import remote_queue.poller as poller
 
 LIVE_QUEUE_ROOT = REPO_ROOT / "remote-queue"
+_LIVE_KILL_AT_IMPORT = (LIVE_QUEUE_ROOT / ".poller.kill").read_bytes() if (LIVE_QUEUE_ROOT / ".poller.kill").exists() else None
 
 
 class TestHandleTaskRouting(unittest.TestCase):
@@ -76,8 +77,8 @@ class TestHandleTaskRouting(unittest.TestCase):
         for key, value in self._orig.items():
             setattr(qs, key, value)
         shutil.rmtree(self.temp_dir, ignore_errors=True)
-        self.assertFalse(
-            (LIVE_QUEUE_ROOT / ".poller.kill").exists(),
+        self.assertEqual(
+            (LIVE_QUEUE_ROOT / ".poller.kill").read_bytes() if (LIVE_QUEUE_ROOT / ".poller.kill").exists() else None, _LIVE_KILL_AT_IMPORT,
             "routing tests must not touch the live queue",
         )
 
@@ -143,8 +144,8 @@ class TestHandleTaskRouting(unittest.TestCase):
 
 
 class TestRoutingIsolation(unittest.TestCase):
-    def test_live_kill_switch_absent(self):
-        self.assertFalse((LIVE_QUEUE_ROOT / ".poller.kill").exists())
+    def test_live_kill_switch_preserved(self):
+        self.assertEqual((LIVE_QUEUE_ROOT / ".poller.kill").read_bytes() if (LIVE_QUEUE_ROOT / ".poller.kill").exists() else None, _LIVE_KILL_AT_IMPORT)
 
 
 if __name__ == "__main__":

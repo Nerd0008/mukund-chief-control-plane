@@ -18,7 +18,7 @@ from typing import Any, Dict, Optional
 
 from remote_queue.retry_policy import MAX_ATTEMPTS
 
-REPO_ROOT = Path(__file__).parent.parent
+REPO_ROOT = Path(os.environ.get("HERMES_REPO_ROOT") or Path(__file__).parent.parent).resolve()
 
 
 def _find_hermes_cli() -> Optional[str]:

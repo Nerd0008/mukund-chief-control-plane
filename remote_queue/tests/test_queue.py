@@ -345,7 +345,8 @@ class TestQueueLifecycleDefects(_DisposableQueueCase):
         _run_git(["config", "user.name", "second"], cwd=second)
 
         if conflicting:
-            target = second / "remote-queue" / "logs" / "queue.log"
+            target = second / "remote-queue" / "completed" / "conflict.json"
+            target.parent.mkdir(parents=True,exist_ok=True)
             target.write_text("second writer appended a log line\n", encoding="utf-8")
         else:
             target = second / "remote-queue" / "completed" / "second-writer.json"
@@ -393,7 +394,8 @@ class TestQueueLifecycleDefects(_DisposableQueueCase):
         qs.QUEUE_DIR = work / "remote-queue"
         qs._git_commit_and_push = self._orig["_git_commit_and_push"]
 
-        (work / "remote-queue" / "logs" / "queue.log").write_text(
+        (work / "remote-queue" / "completed").mkdir(parents=True,exist_ok=True)
+        (work / "remote-queue" / "completed" / "conflict.json").write_text(
             "our writer appended a log line\n", encoding="utf-8"
         )
 
@@ -470,17 +472,17 @@ class TestPollerCLI(_DisposableQueueCase):
 
     def test_kill_switch_toggles_only_the_disposable_queue(self):
         live_kill = LIVE_QUEUE_ROOT / ".poller.kill"
-        self.assertFalse(live_kill.exists())
+        self.assertEqual(live_kill.exists(), _LIVE_SNAPSHOT_AT_IMPORT["kill_switch"])
 
         result = self._poller("--kill")
         self.assertEqual(result.returncode, 0, result.stderr[-500:])
         self.assertTrue(self.disposable_kill.exists())
-        self.assertFalse(live_kill.exists())
+        self.assertEqual(live_kill.exists(), _LIVE_SNAPSHOT_AT_IMPORT["kill_switch"])
 
         result = self._poller("--resume")
         self.assertEqual(result.returncode, 0, result.stderr[-500:])
         self.assertFalse(self.disposable_kill.exists())
-        self.assertFalse(live_kill.exists())
+        self.assertEqual(live_kill.exists(), _LIVE_SNAPSHOT_AT_IMPORT["kill_switch"])
 
     def test_invalid_pending_task_reaches_a_terminal_state(self):
         """DEFECT: block_task() raises for a pending task, which previously
@@ -492,6 +494,9 @@ class TestPollerCLI(_DisposableQueueCase):
             json.dumps(invalid), encoding="utf-8"
         )
 
+        _run_git(["add", "remote-queue"], self.work)
+        _run_git(["commit", "-m", "fixture: published invalid request"], self.work)
+        _run_git(["push"], self.work)
         result = self._poller("--once")
 
         self.assertEqual(result.returncode, 0, result.stderr[-500:])
@@ -554,8 +559,8 @@ class TestIsolationGuards(unittest.TestCase):
         )
         self.assertEqual(result.stdout.strip(), "")
 
-    def test_live_kill_switch_absent(self):
-        self.assertFalse((LIVE_QUEUE_ROOT / ".poller.kill").exists())
+    def test_live_kill_switch_preserved(self):
+        self.assertEqual((LIVE_QUEUE_ROOT / ".poller.kill").exists(), _LIVE_SNAPSHOT_AT_IMPORT["kill_switch"])
 
     def test_default_paths_still_target_the_live_queue(self):
         """The env overrides must not change production defaults."""
@@ -595,8 +600,7 @@ def tearDownModule():
             "live queue state changed during an isolated test run: "
             f"before={_LIVE_SNAPSHOT_AT_IMPORT} after={after}"
         )
-    if (LIVE_QUEUE_ROOT / ".poller.kill").exists():
-        raise AssertionError("live kill switch exists after an isolated test run")
+
 
 
 if __name__ == "__main__":

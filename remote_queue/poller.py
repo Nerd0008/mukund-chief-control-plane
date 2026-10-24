@@ -30,8 +30,9 @@ from remote_queue.retry_policy import (
 # suite: HERMES_REPO_ROOT / HERMES_QUEUE_ROOT redirect all paths, and
 # HERMES_POLLER_MUTEX avoids contending with the live scheduled poller.
 QUEUE_ROOT = Path(os.environ.get("HERMES_QUEUE_ROOT") or (REPO_ROOT / "remote-queue"))
-LOCK_FILE = QUEUE_ROOT / ".poller.lock"
-KILL_SWITCH_FILE = QUEUE_ROOT / ".poller.kill"
+CONTROL_ROOT = Path(os.environ.get("HERMES_POLLER_RUNTIME_DIR") or QUEUE_ROOT)
+LOCK_FILE = CONTROL_ROOT / ".poller.lock"
+KILL_SWITCH_FILE = CONTROL_ROOT / ".poller.kill"
 MUTEX_NAME = os.environ.get("HERMES_POLLER_MUTEX") or "HermesRemoteQueuePoller"
 _MUTEX_HANDLE = None
 
@@ -56,89 +57,32 @@ def _git(cmd, timeout=60):
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
-def git_pull_safely() -> bool:
-    """Safely pull latest main, stashing unrelated local changes first.
-
-    Strategy:
-    1. Check for any uncommitted working-tree changes
-    2. Stash tracked changes, then stash untracked files
-    3. Pull with rebase
-    4. Pop untracked stash, then tracked stash
-    5. If stash pop conflicts, abort merge and report
-    """
-    rc, stdout, _ = _git(["status", "--porcelain"])
-    if rc != 0:
-        log_event("git status failed")
+def git_pull_safely(allow_publish=True) -> bool:
+    """Synchronize only a clean independent checkout; never stash owner files."""
+    from remote_queue.git_safety import target, isolated
+    try:
+        branch = target(_git)
+        if not isolated(REPO_ROOT, _git):
+            raise ValueError("polling requires an independent configured checkout")
+        rc, status, _ = _git(["status", "--porcelain"])
+        if rc or status:
+            raise ValueError("dirty checkout preserved; no automatic stash or cleanup")
+        if _git(["fetch", "origin", branch])[0]:
+            raise ValueError("queue fetch failed")
+        rc, counts, _ = _git(["rev-list", "--left-right", "--count", f"HEAD...origin/{branch}"])
+        if rc: raise ValueError("queue history cannot be compared")
+        ahead, behind = map(int, counts.split())
+        if ahead:
+            if not allow_publish: raise ValueError("check-only preserves unpublished commits")
+            if not _git_commit_and_push("queue: retry unpublished state"):
+                raise ValueError("unpublished queue history requires review")
+        elif behind and _git(["merge", "--ff-only", f"origin/{branch}"])[0]:
+            raise ValueError("queue fast-forward failed")
+        return True
+    except (ValueError, OSError, subprocess.SubprocessError) as exc:
+        log_event(f"Queue sync blocked: {exc}")
         return False
 
-    # Every tracked/untracked change matters to git pull --rebase, including
-    # runtime queue telemetry such as remote-queue/logs/queue.log.  Ignoring
-    # queue-path changes here creates a self-poisoning loop: log_event() dirties
-    # queue.log, the poller thinks the tree is clean, and git pull then refuses
-    # to run.  Stash the complete working tree and restore it after the pull.
-    lines = [l for l in stdout.split('\n') if l.strip()]
-
-    if not lines:
-        # Clean working tree, safe to pull
-        rc, _, stderr = _git(["pull", "--rebase"])
-        if rc == 0:
-            log_event("git pull: success")
-            return True
-        else:
-            log_event(f"git pull failed: {stderr[:200]}")
-            return False
-
-    # Separate tracked vs untracked
-    tracked_lines = [l for l in lines if l[0] != '?']
-    untracked_lines = [l for l in lines if l[0] == '?']
-
-    ts = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    stash_msg = f"poller-autostash-{ts}"
-
-    # Stash tracked changes first
-    if tracked_lines:
-        rc, _, stderr = _git(["stash", "push", "-m", stash_msg])
-        if rc != 0:
-            log_event(f"git stash failed: {stderr[:200]}")
-            return False
-
-    # Stash untracked files separately
-    if untracked_lines:
-        rc, _, stderr = _git(["stash", "push", "-u", "-m", f"{stash_msg}-untracked"])
-        if rc != 0:
-            log_event(f"git stash untracked failed: {stderr[:200]}")
-            if tracked_lines:
-                _git(["stash", "pop"])
-            return False
-
-    # Pull with rebase
-    rc, _, stderr = _git(["pull", "--rebase"])
-    if rc != 0:
-        _git(["rebase", "--abort"])
-        log_event(f"git pull failed, aborting rebase: {stderr[:200]}")
-        if untracked_lines:
-            _git(["stash", "pop"])
-        if tracked_lines:
-            _git(["stash", "pop"])
-        return False
-
-    # Pop stashes in reverse order (untracked first, then tracked)
-    if untracked_lines:
-        rc, _, stderr = _git(["stash", "pop"])
-        if rc != 0:
-            log_event(f"git stash pop CONFLICT: {stderr[:300]}")
-            _git(["merge", "--abort"])
-            return False
-
-    if tracked_lines:
-        rc, _, stderr = _git(["stash", "pop"])
-        if rc != 0:
-            log_event(f"git stash pop (tracked) CONFLICT: {stderr[:300]}")
-            _git(["merge", "--abort"])
-            return False
-
-    log_event("git pull: success (with stash/restore)")
-    return True
 
 
 def acquire_lock() -> bool:
@@ -371,22 +315,24 @@ def handle_operational_build(task: dict) -> dict:
     return result
 
 
-def run_poll_cycle():
+def run_poll_cycle(check_only=False):
     ensure_dirs()
 
-    if check_kill_switch():
+    if check_kill_switch() and not check_only:
         log_event("Kill switch active")
-        return
+        return {"status":"halted","exit_code":0,"dispatches":0}
 
-    if not git_pull_safely():
-        log_event("Skipping poll cycle: git pull failed")
-        return
+    synchronized = git_pull_safely(allow_publish=False) if check_only else git_pull_safely()
+    if not synchronized:
+        log_event("Skipping poll cycle: synchronization blocked")
+        return {"status":"blocked","exit_code":1,"dispatches":0}
 
     pending = find_pending_tasks()
-    if not pending:
-        return
+    if check_only or not pending:
+        return {"status":"checked" if check_only else "idle","exit_code":0,"dispatches":0,"pending":len(pending),"repo_root":str(REPO_ROOT),"queue_root":str(QUEUE_ROOT),"halted":check_kill_switch()}
 
     for task_path in pending:
+        if check_kill_switch(): return {"status":"halted","exit_code":0,"dispatches":0}
         task, errors = load_task_file(task_path)
         task_id = task_path.stem
 
@@ -417,21 +363,26 @@ def run_poll_cycle():
 
         if task.get("requires_owner_approval", False):
             try:
-                claim_task(task_path)
+                if not claim_task(task_path):
+                    return {"status":"claim_publication_failed","exit_code":1,"dispatches":0}
                 block_task(task_id, "owner_approval_required", "Requires owner approval", "Other tasks continue")
             except Exception as e:
                 log_event(f"Error blocking: {e}")
             continue
 
         if claim_task(task_path):
+            if check_kill_switch(): return {"status":"halted_after_claim","exit_code":0,"dispatches":0}
             log_event(f"Claimed task: {task_id}")
             _run_task_with_bounded_retry(task_id, task or {})
-            return
+            return {"status":"processed","exit_code":0,"dispatches":1}
+        return {"status":"claim_publication_failed","exit_code":1,"dispatches":0}
+    return {"status":"processed","exit_code":0,"dispatches":0}
 
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Hermes Remote Queue Poller")
+    parser.add_argument("--check-only", action="store_true", help="Synchronize isolated checkout, never claim/dispatch")
     parser.add_argument("--once", action="store_true", help="Run one poll cycle")
     parser.add_argument("--status", action="store_true", help="Show queue status")
     parser.add_argument("--kill", action="store_true", help="Activate kill switch")
@@ -440,6 +391,7 @@ def main():
     args = parser.parse_args()
 
     ensure_dirs()
+    CONTROL_ROOT.mkdir(parents=True,exist_ok=True)
 
     if args.kill:
         KILL_SWITCH_FILE.write_text("killed")
@@ -477,10 +429,13 @@ def main():
                 print(f"    {b.stem}: <invalid>")
         return
 
-    if args.once:
+    if args.once or args.check_only:
         if acquire_lock():
             try:
-                run_poll_cycle()
+                result=run_poll_cycle(check_only=args.check_only)
+                if isinstance(result,dict):
+                    print(json.dumps(result))
+                    return result.get("exit_code",0)
             finally:
                 release_lock()
         else:
@@ -516,4 +471,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main() or 0)
