@@ -55,6 +55,7 @@ E3_MODULES = [
     "e3_cli.py",
     "e3_planner.py",
     "e3_router.py",
+    "router_brain.py",
     "e3_team_assembly.py",
     "e3_integrator.py",
     "e3_verifier.py",

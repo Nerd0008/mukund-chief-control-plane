@@ -26,6 +26,28 @@ CODEX_EXECUTABLE_ENV = ("CODEX_EXECUTABLE", "CODEX_CLI_PATH")
 CODEX_BIN_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "OpenAI" / "Codex" / "bin"
 
 
+# Preserve the installed runtime's independently added native-binary preference.
+SHIM_SUFFIXES = (".cmd", ".bat", ".ps1")
+
+def _prefer_native_executable(candidate: Path) -> Path:
+    """Return a native executable for `candidate` when `candidate` is a shim.
+
+    A shim is never rejected outright (it may be the only install), but when a
+    native build of the same tool is on PATH and validates, that build is
+    returned instead so argv prompts are not truncated by `cmd.exe`.
+    """
+    if candidate.suffix.lower() not in SHIM_SUFFIXES:
+        return candidate
+    native = shutil.which(f"{candidate.stem}.exe")
+    if not native:
+        return candidate
+    native_path = Path(native)
+    if native_path == candidate or not native_path.is_file():
+        return candidate
+    if _codex_version_of(native_path) is None:
+        return candidate
+    return native_path
+
 def _default_model() -> str:
     """Model slug for dispatches that do not name one.
 
@@ -97,7 +119,7 @@ def _resolve_codex_executable() -> Path:
 
     on_path = shutil.which("codex")
     if on_path:
-        candidate = Path(on_path)
+        candidate = _prefer_native_executable(Path(on_path))
         if _codex_version_of(candidate) is not None:
             return candidate
 
@@ -226,8 +248,10 @@ def parse_doctor_identity(report: Dict[str, Any],
 class CodexExecutionAdapter:
     """Executes non-interactive Codex CLI commands."""
 
-    def __init__(self, execution_profile: str = "safe"):
-        self.executable = _resolve_codex_executable()
+    def __init__(self, execution_profile: str = "safe", executable=None):
+        self.executable = Path(executable) if executable is not None else _resolve_codex_executable()
+        if executable is not None and not _codex_version_of(self.executable):
+            raise ValueError("Configured Codex executable is unavailable")
         self.execution_profile = execution_profile
         self._profile_config = self._resolve_profile(execution_profile)
 
@@ -235,6 +259,8 @@ class CodexExecutionAdapter:
         """Resolve execution profile."""
         if profile_name == "safe":
             return SAFE_EXECUTION_PROFILE.copy()
+        elif profile_name == "router":
+            return {"sandbox": "read-only"}
         elif profile_name == "unsafe":
             return UNSAFE_EXECUTION_PROFILE.copy()
         else:
@@ -273,6 +299,17 @@ class CodexExecutionAdapter:
         if model:
             cmd.extend(["--model", model])
 
+        if self.execution_profile == "router":
+            if model != "gpt-6.1-sol":
+                raise ValueError("Router model must remain gpt-6.1-sol")
+            effort = contract.get("reasoning_effort", "high")
+            if effort not in ("high", "xhigh", "max"):
+                raise ValueError("Router requires high or greater reasoning effort")
+            cmd.extend(["--ephemeral", "--ignore-user-config", "--ignore-rules",
+                        "--disable", "shell_tool", "--disable", "unified_exec",
+                        "--disable", "multi_agent", "--config", 'web_search="disabled"',
+                        "--config", 'model_reasoning_effort="' + effort + '"'])
+
         cwd = contract.get('working_directory')
         if cwd:
             cmd.extend(["--cd", cwd])
@@ -296,6 +333,8 @@ class CodexExecutionAdapter:
                 timeout=timeout,
                 cwd=cwd or ".",
                 input=objective,
+                encoding='utf-8', errors='replace',
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
             )
             elapsed = time.time() - start_time
 

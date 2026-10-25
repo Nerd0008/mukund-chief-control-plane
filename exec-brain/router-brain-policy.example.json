@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "enabled": false,
+  "model": "gpt-6.1-sol",
+  "selection_policy": "provider_blind_evidence",
+  "executable": null
+}

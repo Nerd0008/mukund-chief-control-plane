@@ -7,6 +7,7 @@ Stage 2 production enablement requires explicit owner approval.
 
 import sqlite3
 import uuid
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -124,6 +125,7 @@ class E3ShadowOrchestrator:
         self.capability_registry: Optional[CapabilityRegistry] = None
         self.worker_registry = WorkerRegistry()
         self.router: Optional[E3Router] = None
+        self.router_brain = None  # injected by the application-facing service
 
         if db_path:
             self._connect()
@@ -150,36 +152,17 @@ class E3ShadowOrchestrator:
     @classmethod
     def _apply_owner_route_preference(cls, candidates: List[RouterCandidate],
                                       node: Dict[str, Any], task_family: str) -> List[RouterCandidate]:
-        """Keep LongCat first for ordinary general-purpose text work.
-
-        Coding/repository work retains the ordinary evidence-based ranking,
-        whose Codex capability is purpose-built for it.  Image nodes are left
-        untouched so Google remains image-only.
-        """
-        general_families = {
-            "other", "writing", "research", "analysis", "summarization",
-            "decision-support", "monitoring",
-        }
-        if task_family not in general_families or cls._is_image_node(node):
-            return candidates
-        return sorted(candidates, key=lambda candidate: (
-            0 if candidate.worker_id == "longcat-2.0" else 1,
-            -candidate.score, candidate.worker_id, candidate.role,
-        ))
+        """Compatibility seam: preserve provider-neutral evidence/router ordering."""
+        return list(candidates)
 
     @classmethod
     def _approved_fallbacks(cls, node: Dict[str, Any], primary_worker: str,
-                            registry: Any) -> List[str]:
-        """Return the explicit bounded text fallback for a primary failure.
-
-        Codex is the only approved automatic text fallback.  DeepSeek may lack
-        credit, Google is image-only, and no disabled provider may re-enter
-        routing through a fallback path.
-        """
-        if (primary_worker == "codex-cli" or cls._is_image_node(node)
-                or not registry.is_routable("codex-cli")):
+                            registry: Any, ranked_candidates=None) -> List[str]:
+        """Use only the already-gated ranking; no hidden preferred provider."""
+        if cls._is_image_node(node):
             return []
-        return ["codex-cli"]
+        return list(dict.fromkeys(c.worker_id for c in (ranked_candidates or [])
+                    if c.worker_id != primary_worker and registry.is_routable(c.worker_id)))
 
     def rehearse(self, objective: str, fingerprint: TaskFingerprint,
                  simulate_outputs: Optional[Dict[str, Any]] = None,
@@ -540,6 +523,16 @@ class E3ShadowOrchestrator:
             out["outcome"] = "REJECTED_DECOMPOSITION"
             return out
 
+        # Deployed CLI execution uses the same reasoner as application calls.
+        # Disposable/test databases remain explicit offline injection seams.
+        production_db = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes/exec-brain/orchestration.db"
+        if self.router_brain is None and self.db_path.resolve() == production_db.resolve():
+            from router_brain import RouterBrain, RouterDecisionError
+            try:
+                self.router_brain = RouterBrain.configured()
+            except RouterDecisionError as exc:
+                out.update(outcome="ROUTING_BLOCKED", blocking_reason=str(exc))
+                return out
         candidates_by_node: Dict[str, List[RouterCandidate]] = {}
         if self.router:
             for node in plan["nodes"]:
@@ -555,6 +548,19 @@ class E3ShadowOrchestrator:
                 candidates_by_node[node["node_id"]] = self._apply_owner_route_preference(
                     candidates_by_node[node["node_id"]], node,
                     fingerprint.task_family)
+                if self.router_brain is not None:
+                    from router_brain import RouterDecisionError
+                    try:
+                        candidates_by_node[node["node_id"]], receipt = self.router_brain.rank(
+                            candidates_by_node[node["node_id"]], objective=objective,
+                            task_family=fingerprint.task_family,
+                            roles=node.get("capability_roles", []),
+                            timeout=min(45, dispatch_timeout))
+                        out.setdefault("router_decisions", []).append(receipt)
+                    except RouterDecisionError as exc:
+                        out.update(outcome="ROUTING_BLOCKED", blocking_reason=str(exc))
+                        out.setdefault("router_decisions", []).append(exc.receipt)
+                        return out
         out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
         out["candidate_rankings"] = {
             node_id: [
@@ -603,7 +609,8 @@ class E3ShadowOrchestrator:
             assignment.node_id: self._approved_fallbacks(
                 next(node for node in plan["nodes"]
                      if node["node_id"] == assignment.node_id),
-                assignment.worker_id, registry)
+                assignment.worker_id, registry,
+                candidates_by_node.get(assignment.node_id, []))
             for assignment in assembly.assignments
         }
         out["fallback_workers_by_node"] = fallback_workers_by_node

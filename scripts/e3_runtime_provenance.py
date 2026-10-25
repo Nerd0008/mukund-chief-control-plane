@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = REPO_ROOT / "exec-brain"
 RUNTIME_MODULES = (
     "e3_service.py", "chief_routing.py", "discord_chief_bridge.py", "department_dispatch.py",
+    "router_brain.py", "e3_router.py", "e3_shadow_orchestrator.py", "codex_adapter.py",
 )
 
 

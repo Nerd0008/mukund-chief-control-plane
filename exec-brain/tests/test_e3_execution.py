@@ -493,7 +493,7 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Stage 2 is disabled"):
                 orch.orchestrate_and_execute("task", fp, plan=plan)
 
-    def test_general_text_prefers_longcat_and_never_offers_google_as_fallback(self):
+    def test_general_text_preserves_evidence_order_and_no_google_fallback(self):
         from e3_router import RouterCandidate
         candidates = [
             RouterCandidate("codex-cli", "openai", "codex-cli", "builder",
@@ -504,7 +504,7 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
         ordered = E3ShadowOrchestrator._apply_owner_route_preference(
             candidates, {"capability_roles": ["builder"]}, "other")
         self.assertEqual([candidate.worker_id for candidate in ordered],
-                         ["longcat-2.0", "codex-cli"])
+                         ["codex-cli", "longcat-2.0"])
         registry = _registry(FakeAdapter(["x"]))
         self.assertEqual(E3ShadowOrchestrator._approved_fallbacks(
             {"capability_roles": ["vision"]}, "longcat-2.0", registry), [])

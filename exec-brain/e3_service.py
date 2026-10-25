@@ -56,6 +56,13 @@ class E3ApplicationService:
                     "routable_workers": registry.routable_worker_ids(),
                     "plan_id": plan.get("plan_id"), "task_family": task_family,
                     "required_role": required_role}
+        if self.orchestrator_factory is None:
+            from router_brain import RouterBrain, RouterDecisionError
+            try:
+                orch.router_brain = RouterBrain.configured()
+            except RouterDecisionError as exc:
+                return {"status": "FAILED", "provider_call_made": False,
+                        "error": str(exc), "router_decision": exc.receipt}
         cases = {node["node_id"]: [{"name": "non-empty verified AI output",
                                      "field": "content_present", "expected": True}]
                  for node in plan.get("nodes", [])}
@@ -70,11 +77,13 @@ class E3ApplicationService:
         if out.get("outcome") != "EXECUTION_COMPLETE" or not first.get("content"):
             return {"status": "FAILED", "provider_call_made": bool(assignments),
                     "error": "e3_execution_incomplete", "assignments": assignments,
+                    "router_decisions": out.get("router_decisions", []),
                     "stage2_allowed_workers": state.get("allowed_workers", [])}
         return {"status": "COMPLETED", "provider_call_made": True,
                 "content": first["content"], "worker_id": first.get("worker_id"),
                 "provider": first.get("provider"), "model": first.get("model"),
                 "assignments": assignments,
+                "router_decisions": out.get("router_decisions", []),
                 "stage2_allowed_workers": state.get("allowed_workers", [])}
 
 
@@ -125,6 +134,16 @@ class E3ApplicationService:
                     "error": "e3_chat_no_eligible_worker",
                     "stage2_allowed_workers": state.get("allowed_workers", [])}
 
+        routing_receipt = None
+        if not dry_run and self.orchestrator_factory is None:
+            from router_brain import RouterBrain, RouterDecisionError
+            try:
+                candidates, routing_receipt = RouterBrain.configured().rank(
+                    candidates, objective=objective, task_family=task_family,
+                    roles=[required_role], timeout=min(45, timeout))
+            except RouterDecisionError as exc:
+                return {"status": "FAILED", "provider_call_made": False,
+                        "error": str(exc), "router_decision": exc.receipt}
         chosen = candidates[0]
         if dry_run:
             return {"status": "DRY_RUN", "provider_call_made": False,
@@ -168,4 +187,5 @@ class E3ApplicationService:
                 "provider": result.get("provider") or chosen.provider,
                 "model": result.get("model") or chosen.model,
                 "e2_usage_linkage": e2_linkage,
+                "router_decision": routing_receipt,
                 "stage2_allowed_workers": state.get("allowed_workers", [])}

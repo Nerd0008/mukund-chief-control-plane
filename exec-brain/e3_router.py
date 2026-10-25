@@ -35,6 +35,8 @@ class RouterCandidate:
         self.evidence_references = evidence_references if evidence_references is not None else []
         self.score = float(score)
         self.score_components = dict(score_components or {})
+        self.capability_hints = []
+        self.evidence_metrics = {}
 
 
 class MetaSelector:
@@ -76,7 +78,8 @@ class E3Router:
         historical_evidence = historical_evidence if historical_evidence is not None else []
 
         for role in required_roles:
-            eligible = self.registry.find_eligible_workers(task_family, role, risk_class="R1")
+            eligible = self.registry.find_eligible_workers(
+                task_family, role, risk_class=getattr(task_fingerprint, "risk_class", "R1"))
             for entry in eligible:
                 wid = entry["worker_id"]
                 state = entry["state"]
@@ -107,6 +110,9 @@ class E3Router:
                     score=score,
                     score_components=components,
                 ))
+                candidates[-1].capability_hints = list(worker.get("capability_hints") or [])
+                candidates[-1].evidence_metrics = {k: entry.get(k) for k in (
+                    "state", "evidence_count", "first_pass_successes", "first_pass_attempts", "last_qualified_at")}
 
         # Deterministic evidence/task-fit ordering.  Worker id is only the final
         # tie-break so insertion/SQL row order can never make one model "sticky".
