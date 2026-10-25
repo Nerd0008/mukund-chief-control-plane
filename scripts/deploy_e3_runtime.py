@@ -59,6 +59,7 @@ E3_MODULES = [
     "workflow_routing.py",
     "native_router_plugin.py",
     "router_gateway_entry.py",
+    "hermes_cli.main_router.py",
     "e3_team_assembly.py",
     "e3_integrator.py",
     "e3_verifier.py",

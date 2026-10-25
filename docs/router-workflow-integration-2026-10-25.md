@@ -18,7 +18,7 @@ Full Career Ops plus initial router suites: **1667 passed**, zero failures, 182.
 
 One synthetic live text acceptance: PASS, 39.063 seconds, selected OpenAI/GPT-6.1 Sol; no owner content sent and no tools or external writes. Model identity is requested/receipt identity; the served model is not independently attested.
 
-The initial archived copy produced layout-hash failures because Git archives use stored line endings while the owner-approved current workbook/layout files retain the live bytes. Current source approval hashes match, and the actual live-source CV integration tests pass. A simultaneous Hermes search-scope change temporarily invalidated a funnel counter fixture; Hermes updated its own fixture and the full current suite then passed. Its scope edits are preserved and excluded from this routing commit.
+The initial archived copy produced layout-hash failures because Git archives use stored line endings while the owner-approved current layout files retain the live bytes. Current source approval hashes match, and the actual live-source CV integration tests pass. A simultaneous Hermes search-scope change temporarily invalidated a funnel counter fixture; Hermes updated its own fixture and the full current suite then passed. Its scope edits are preserved and excluded from this routing commit.
 
 ## Rollout and limits
 
@@ -27,3 +27,5 @@ Use the existing backed-up runtime deployer; install `router-brain-local`; enabl
 A single protocol-compatible transport still consults the brain but offers no interchangeable worker choice. This does not invent additional qualified providers. Pre-existing image/STT `e3` backend settings are not replaced by a text CLI: unavailable media backends remain a separate capability limitation. Deterministic, non-model tools do not require model-selection calls. Direct developer invocations bypassing the guarded service launcher are not represented as covered production gateway paths.
 
 No reset, clean, stash, blanket staging, main merge or unrelated configuration changes are part of this integration.
+
+The hidden service launchers use `hermes_cli.main_router.py`, a thin entry shim into the same guard. Its name is intentionally recognized by Hermes native lifecycle matching; status/stop/restart can identify the real gateway process without changing Hermes core.

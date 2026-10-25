@@ -287,3 +287,10 @@ def test_guarded_gateway_rechecks_registration_each_call():
     callbacks.clear()
     with pytest.raises(RuntimeError):host.run_llm_execution_middleware({},lambda request:None)
     assert len(calls)==1
+
+
+def test_guarded_launcher_is_recognized_by_native_lifecycle_controls():
+    from gateway.status import looks_like_gateway_command_line
+    command='python "'+str(ROOT/'exec-brain/hermes_cli.main_router.py')+'" gateway run'
+    assert looks_like_gateway_command_line(command)
+    assert not looks_like_gateway_command_line(command.replace('gateway run','gateway status'))

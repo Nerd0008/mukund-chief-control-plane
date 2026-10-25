@@ -14,6 +14,7 @@ RUNTIME_MODULES = (
     "e3_service.py", "chief_routing.py", "discord_chief_bridge.py", "department_dispatch.py",
     "workflow_routing.py", "native_router_plugin.py",
     "router_gateway_entry.py",
+    "hermes_cli.main_router.py",
     "router_brain.py", "e3_router.py", "e3_shadow_orchestrator.py", "codex_adapter.py",
 )
 
