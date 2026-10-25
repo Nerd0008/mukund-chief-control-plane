@@ -1006,6 +1006,42 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     deepseek_adapter=None, codex_adapter=None,
                     codex_model: str | None = None,
                     codex_workdir: str | None = None, deadline=None) -> dict:
+    if semantic in ('off','deterministic') or deepseek_adapter is not None or codex_adapter is not None:
+        return _execute_semantic_stage(candidates,semantic=semantic,deepseek_model=deepseek_model,
+            batch_size=batch_size,timeout=timeout,mode=mode,max_tokens=max_tokens,
+            deepseek_adapter=deepseek_adapter,codex_adapter=codex_adapter,
+            codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
+    from workflow_routing import select
+    offers=[]
+    if semantic in ('auto','deepseek'):
+        health=deepseek_probe(deepseek_model)
+        if health.get('available'):
+            offers.append({'id':'deepseek','provider':'deepseek','model':deepseek_model,
+                'capabilities':['classification','structured-json'],'evidence':{'health':'observed-available'}})
+    if semantic in ('auto','codex'):
+        offers.append({'id':'codex','provider':'openai','model':codex_model or 'gpt-6-sol',
+                       'capabilities':['classification','structured-json']})
+    chosen,receipt=select('career.discovery.semantic',offers,
+        task='Classify recruitment relevance, seniority and eligibility from structured job descriptions.',
+        timeout=min(30,timeout))
+    attempts=[]
+    for backend in receipt.get('worker_order',[chosen]):
+        if backend not in {o['id'] for o in offers}:raise ValueError('unauthorized semantic fallback')
+        result=_execute_semantic_stage(candidates,semantic=backend,deepseek_model=deepseek_model,
+            batch_size=batch_size,timeout=timeout,mode=mode,max_tokens=max_tokens,
+            codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
+        attempts.append({'provider':result.get('provider'),'classified':result.get('classified',0)})
+        result.update(requested=semantic,router_decision=receipt,routed_attempts=list(attempts))
+        if result.get('provider')!='none' and (result.get('classified',0)>0 or result.get('classifications')):return result
+    return result
+
+
+def _execute_semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
+                    batch_size: int, timeout: int, mode: str,
+                    max_tokens: int | None = None,
+                    deepseek_adapter=None, codex_adapter=None,
+                    codex_model: str | None = None,
+                    codex_workdir: str | None = None, deadline=None) -> dict:
     max_tokens = max_tokens or DEFAULT_MAX_TOKENS
     if semantic == "off":
         return {"provider": "none", "requested": "off",
@@ -1015,7 +1051,10 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
         # Provider order: DeepSeek when healthy (cheap, bulk), else the Codex CLI.
         # `--semantic codex` pins Codex and never consults DeepSeek.
         if semantic in ("auto", "deepseek"):
-            probe = deepseek_probe(deepseek_model)
+            # An explicitly injected transport is an offline/test execution seam.
+            # Never probe a different, real provider for an injected adapter.
+            probe = ({"available": True, "reason": "injected_adapter", "status": "INJECTED"}
+                     if deepseek_adapter is not None else deepseek_probe(deepseek_model))
             if probe["available"]:
                 doc = deepseek_bulk_classify(candidates, model=deepseek_model,
                                              batch_size=batch_size, timeout=timeout,

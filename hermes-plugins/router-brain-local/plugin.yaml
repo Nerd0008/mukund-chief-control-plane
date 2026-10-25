@@ -1,0 +1,3 @@
+name: router-brain-local
+version: 1.0.0
+description: Mandatory shared router decisions for native Hermes and auxiliary LLM execution.

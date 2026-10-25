@@ -96,7 +96,11 @@ req = json.load(sys.stdin)
 prompt = req["prompt"]; model = req["model"]; api_key = req["api_key"]
 runs = max(1, int(req.get("runs", 1)))
 try:
-    client = genai.Client(api_key=api_key)
+    import os
+    from pathlib import Path
+    sys.path.insert(0,str(Path(os.environ['LOCALAPPDATA'])/'hermes/exec-brain'))
+    from workflow_routing import RoutedGenAIClient
+    client = RoutedGenAIClient(genai.Client(api_key=api_key))
 except Exception as exc:
     print(json.dumps({"error": "model client failed: %s" % exc}))
     sys.exit(0)

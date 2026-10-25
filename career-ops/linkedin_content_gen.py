@@ -204,7 +204,10 @@ def _get_gemini_client():
         return None
     try:
         from google import genai
-        return genai.Client(api_key=GEMINI_API_KEY)
+        import sys
+        sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'exec-brain'))
+        from workflow_routing import RoutedGenAIClient
+        return RoutedGenAIClient(genai.Client(api_key=GEMINI_API_KEY))
     except Exception:
         return None
 

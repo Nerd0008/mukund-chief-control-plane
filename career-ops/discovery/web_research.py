@@ -481,14 +481,8 @@ class CodexWebSearchProvider(ResearchProvider):
     def resolve(self):
         if self._resolved is not None:
             return self._resolved
-        import codex_adapter  # noqa: PLC0415 - existing adapter, no credential access
-        if self._executable_override:
-            exe = Path(self._executable_override)
-            if codex_adapter._codex_version_of(exe) is None:  # noqa: SLF001
-                raise RuntimeError(f"Codex CLI at {exe} did not validate via --version")
-            self._resolved = exe
-        else:
-            self._resolved = codex_adapter._resolve_codex_executable()  # noqa: SLF001
+        from workflow_routing import resolve_codex
+        self._resolved = resolve_codex(self._executable_override)
         return self._resolved
 
     def probe(self, *, timeout: int = 240) -> dict:
@@ -516,6 +510,10 @@ class CodexWebSearchProvider(ResearchProvider):
 
     def _run_one(self, exe, query: str, *, limit: int, timeout: int, prompt=None) -> dict:
         import subprocess  # noqa: PLC0415
+        from workflow_routing import select
+        _, self.router_decision = select('career.discovery.web',
+            [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
+            task=query, family='research', timeout=min(30,timeout))
         prompt = prompt or CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
         # The prompt is passed on STDIN, not argv. On Windows the resolver lands on
         # `codex.CMD` (an npm shim) and cmd.exe treats an embedded newline in an

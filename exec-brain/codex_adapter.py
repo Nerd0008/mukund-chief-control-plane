@@ -259,7 +259,7 @@ class CodexExecutionAdapter:
         """Resolve execution profile."""
         if profile_name == "safe":
             return SAFE_EXECUTION_PROFILE.copy()
-        elif profile_name == "router":
+        elif profile_name in ("router", "bounded_text", "classification"):
             return {"sandbox": "read-only"}
         elif profile_name == "unsafe":
             return UNSAFE_EXECUTION_PROFILE.copy()
@@ -299,9 +299,10 @@ class CodexExecutionAdapter:
         if model:
             cmd.extend(["--model", model])
 
-        if self.execution_profile == "router":
-            if model != "gpt-6.1-sol":
-                raise ValueError("Router model must remain gpt-6.1-sol")
+        if self.execution_profile in ("router", "bounded_text", "classification"):
+            allowed_models = ("gpt-6-sol", "gpt-6.1-sol") if self.execution_profile == "classification" else ("gpt-6.1-sol",)
+            if model not in allowed_models:
+                raise ValueError("Model is not approved for this bounded profile")
             effort = contract.get("reasoning_effort", "high")
             if effort not in ("high", "xhigh", "max"):
                 raise ValueError("Router requires high or greater reasoning effort")

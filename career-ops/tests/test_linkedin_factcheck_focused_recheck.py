@@ -152,6 +152,11 @@ class TestJudgeTransportAndProvenance(unittest.TestCase):
 google = types.ModuleType('google')
 google.genai = types.SimpleNamespace(Client=lambda **kw: types.SimpleNamespace(models=types.SimpleNamespace(generate_content=lambda **kw: types.SimpleNamespace(text='{"claims":[]}'))))
 sys.modules['google'] = google
+# This child-transport fixture isolates both external SDK and routing dependencies.
+# Routing allow/deny behaviour is covered separately by test_proposed_routes.py.
+router = types.ModuleType('workflow_routing')
+router.RoutedGenAIClient = lambda client: client
+sys.modules['workflow_routing'] = router
 """
         prompt = "A" * 16000 + "A late passage with Unicode: café." + "B" * 100000
         with patch.object(fc, "resolve_judge_interpreter", return_value=sys.executable), patch.object(fc, "_JUDGE_CHILD", prelude + fc._JUDGE_CHILD):

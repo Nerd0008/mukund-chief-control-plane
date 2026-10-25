@@ -13,7 +13,7 @@ import time
 import uuid
 
 POLICY_PATH = Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'hermes/exec-brain/router-brain-policy.json'
-PROMPT_VERSION = 'evidence-only-router-v1'
+PROMPT_VERSION = 'evidence-only-router-v2'
 
 
 class RouterDecisionError(RuntimeError):
@@ -76,7 +76,7 @@ class RouterBrain:
             'handle exactly once in preference order), needs_owner (boolean), '
             'reason_codes (1-6 codes from TASK_FIT, QUALIFICATION, VERIFIED_EVIDENCE, '
             'HEALTH, INSUFFICIENT_EVIDENCE). If no defensible decision is possible, '
-            'set needs_owner true. Do not include hidden reasoning or prose.\nINPUT\n')
+            'set needs_owner true. Ordinary equivalence between approved compatible transports does not require owner input. Do not include hidden reasoning or prose.\nINPUT\n')
         prompt = instructions + json.dumps(brief, ensure_ascii=False, sort_keys=True)
         started = time.monotonic()
         receipt = {'request_id': request_id, 'prompt_version': PROMPT_VERSION,

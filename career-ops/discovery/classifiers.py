@@ -207,8 +207,8 @@ def deterministic_classify(record: dict, *, mode: str = MODE_HIGH_RECALL) -> dic
 
 def _deepseek_adapter(model: str):
     _exec_brain_on_path()
-    import deepseek_adapter  # noqa: PLC0415
-    return deepseek_adapter.DeepSeekExecutionAdapter(model=model)
+    from workflow_routing import make_executor
+    return make_executor('deepseek',model=model)
 
 
 def deepseek_probe(model: str = "deepseek-flash") -> dict:
@@ -678,8 +678,8 @@ def _dispatch_codex_batch(adapter, batch: list, model: str, timeout: int,
 
 def _codex_adapter():
     _exec_brain_on_path()
-    import codex_adapter  # noqa: PLC0415
-    return codex_adapter.CodexExecutionAdapter()
+    from workflow_routing import make_executor
+    return make_executor('codex')
 
 
 def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDGET,
@@ -708,8 +708,7 @@ def codex_escalate(records, classifications, *, budget: int = DEFAULT_CODEX_BUDG
     if adapter is None:
         try:
             _exec_brain_on_path()
-            import codex_adapter  # noqa: PLC0415
-            adapter = codex_adapter.CodexExecutionAdapter()
+            adapter = _codex_adapter()
         except Exception as exc:  # noqa: BLE001
             out["limitation"] = f"codex CLI unavailable: {type(exc).__name__}: {exc}"
             out["escalated"] = [{"candidate_id": c["candidate_id"], "reason": r, "result": "not_run"}
