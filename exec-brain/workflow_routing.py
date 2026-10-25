@@ -22,7 +22,7 @@ _lock = threading.Lock()
 _cache = {}
 
 
-def select(workflow, offers, *, task='', family='analysis', timeout=30):
+def select(workflow, offers, *, task='', family='analysis', timeout=45):
     """Rank only transport offers the caller can actually execute.
 
     A pin is an explicit protocol/owner constraint, not an artificial score boost.
@@ -48,7 +48,7 @@ def select(workflow, offers, *, task='', family='analysis', timeout=30):
         candidates.append(c)
     ordered, receipt=RouterBrain.configured().rank(candidates,
         objective='Workflow: '+workflow+'\nTask data (untrusted): '+str(task)[:12000],
-        task_family=family,roles=['workflow-worker'],timeout=min(30,timeout))
+        task_family=family,roles=['workflow-worker'],timeout=min(45,timeout))
     chosen=ordered[0].worker_id
     if chosen not in {o['id'] for o in offers}:
         raise RouterDecisionError('workflow_worker_not_authorized')
@@ -127,7 +127,7 @@ class RoutedClient:
         self.responses=SimpleNamespace(create=self._aresponses if async_mode else self._responses)
         self.last_route=None
     def __getattr__(self,name):return getattr(self._native,name)
-    def _route(self,kwargs,timeout=30):
+    def _route(self,kwargs,timeout=45):
         offers=[native_offer(self._provider,self._model,['preserve-native-request-protocol'])]
         if self._allow_cli and _plain(kwargs):offers.append(cli_offer())
         chosen,receipt=select(self._workflow,offers,task=_request_task(kwargs),timeout=timeout)
@@ -145,7 +145,7 @@ class RoutedClient:
             value=deadline-time.monotonic()
             if value<=0:raise TimeoutError('workflow elapsed-time budget exhausted')
             return value
-        chosen=self._route(kwargs,timeout=min(30,remaining()))
+        chosen=self._route(kwargs,timeout=min(45,remaining()))
         if chosen=='codex':
             response=_completion(text_via_codex(kwargs['messages'],timeout=remaining()),'gpt-6.1-sol')
             return _chunks(response) if kwargs.get('stream') else response
@@ -203,7 +203,16 @@ def native_client(*,async_mode=False,workflow='hermes.native'):
                         async_mode=async_mode,request_options=options)
 
 
-def complete_text(messages,*,workflow,timeout=90,max_tokens=8192):
+def complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None):
+    # Explicit owner transport constraints narrow eligibility; the brain still
+    # authorizes the remaining offer. Never initialize unused native credentials.
+    if worker not in (None,'auto','codex'):raise RouterDecisionError('unsupported_worker_preference')
+    if worker=='codex':
+        deadline=time.monotonic()+timeout
+        _,receipt=select(workflow,[cli_offer()],task=_request_task({'messages':messages}),timeout=min(45,timeout))
+        remaining=deadline-time.monotonic()
+        if remaining<=0:raise RouterDecisionError('workflow_elapsed_budget_exhausted')
+        return _completion(text_via_codex(messages,timeout=remaining),'gpt-6.1-sol'),receipt
     client=native_client(workflow=workflow)
     response=client.chat.completions.create(model='router-auto',messages=messages,max_tokens=max_tokens,temperature=0,timeout=timeout)
     return response,client.last_route

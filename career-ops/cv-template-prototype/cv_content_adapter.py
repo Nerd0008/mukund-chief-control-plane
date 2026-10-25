@@ -24,6 +24,14 @@ def resolve_plan(plan):
         result[key]=dict(bank['slots'][key][selection],variant=selection)
     return result
 
+class RoutedContentPlanner:
+    """Picklable explicit worker constraint survives the compiler subprocess."""
+    def __init__(self,worker):self.worker=worker
+    def __call__(self,request):return generate(dict(request,worker=self.worker))
+    @property
+    def last_metadata(self):return getattr(generate,'last_metadata',None)
+
+
 def generate(request):
     import os
     sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2]/'exec-brain'))
@@ -41,7 +49,7 @@ def generate(request):
         {'role':'user','content':json.dumps({'job_description':request['jd'],'capacities':request['capacities'],
             'writing_policy':policy(),'available_evidence_variants':bank['slots'],'mode':request['mode'],
             'affected':request.get('affected',[])},ensure_ascii=False)}]
-    response,receipt=complete_text(messages,workflow='career.cv.plan',timeout=90,max_tokens=8192)
+    response,receipt=complete_text(messages,workflow='career.cv.plan',timeout=90,max_tokens=8192,worker=request.get('worker'))
     choice=response.choices[0]
     generate.last_metadata={'provider':receipt.get('selected_provider'),
         'model':response.model,'model_calls':1,'router_decision':receipt,

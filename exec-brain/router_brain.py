@@ -22,6 +22,19 @@ class RouterDecisionError(RuntimeError):
         self.receipt = receipt
 
 
+def cli_failure_code(output):
+    """Classify locally; never persist provider bodies, stderr, prompts or tokens."""
+    if output.get('status') == 'TIMEOUT': return 'router_cli_timeout'
+    text=' '.join(str(output.get(k) or '') for k in ('error','stderr','final_message')).lower()
+    if any(s in text for s in ('usage limit','quota exceeded','insufficient_quota','insufficient balance','rate limit','too many requests')):
+        return 'router_cli_usage_limit'
+    if any(s in text for s in ('unauthorized','authentication','not logged in','login required','401')):
+        return 'router_cli_auth'
+    if any(s in text for s in ('unrecognized','unexpected argument','unknown argument','not found','no such file')):
+        return 'router_cli_configuration'
+    return 'router_cli_failed'
+
+
 class RouterBrain:
     def __init__(self, adapter, *, receipt_root=None):
         self.adapter = adapter
@@ -91,8 +104,14 @@ class RouterBrain:
                     'working_directory': workspace, 'timeout': timeout,
                     'allowed_tools': [], 'permission_scope': {'read_only': True}})
             receipt['provider_call_made'] = True
+            metadata=output.get('dispatch_metadata') or {}
+            for key in ('resolved_executable','resolved_version'):
+                if isinstance(metadata.get(key),str): receipt[key]=metadata[key]
+            receipt['cli_status']=output.get('status') if output.get('status') in ('COMPLETED','FAILED','TIMEOUT') else 'UNKNOWN'
+            if type(output.get('exit_code')) is int: receipt['cli_exit_code']=output['exit_code']
+            receipt['timeout_seconds']=timeout
             if output.get('status') != 'COMPLETED':
-                raise RouterDecisionError('router_cli_failed')
+                raise RouterDecisionError(cli_failure_code(output))
             for event in output.get('raw_output') or []:
                 if event.get('type') in ('item.started', 'item.completed'):
                     kind = (event.get('item') or {}).get('type')

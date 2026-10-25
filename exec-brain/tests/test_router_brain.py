@@ -83,7 +83,7 @@ def test_empty_eligible_set_does_not_invoke_model():
 
 def test_failure_no_deterministic_or_provider_fallback():
     adapter=SimpleNamespace(dispatch=lambda contract:{'status':'TIMEOUT'})
-    with pytest.raises(RouterDecisionError,match='router_cli_failed'):
+    with pytest.raises(RouterDecisionError,match='router_cli_timeout'):
         RouterBrain(adapter).rank([candidate('allowed','vendor',1)],objective='task',task_family='code',roles=[])
 
 
@@ -167,3 +167,22 @@ def test_audit_storage_failure_blocks_a_decision(tmp_path):
     with pytest.raises(RouterDecisionError,match='router_receipt_unavailable'):
         RouterBrain(Adapter(),receipt_root=blocked).rank([candidate('allowed','vendor',1)],objective='synthetic',task_family='code',roles=[])
     assert blocked.read_text()=='preserve'
+
+
+@pytest.mark.parametrize('output,expected',[
+    ({'status':'TIMEOUT'},'router_cli_timeout'),
+    ({'status':'FAILED','stderr':'Usage limit reached PRIVATE-TOKEN'},'router_cli_usage_limit'),
+    ({'status':'FAILED','stderr':'401 unauthorized PRIVATE-TOKEN'},'router_cli_auth'),
+    ({'status':'FAILED','stderr':'unexpected argument --foo'},'router_cli_configuration'),
+    ({'status':'FAILED','stderr':'unknown private failure'},'router_cli_failed'),
+])
+def test_failure_receipt_is_specific_without_raw_output(tmp_path,output,expected):
+    output=dict(output,dispatch_metadata={'resolved_executable':'codex.exe','resolved_version':'fixture','objective_summary':'PRIVATE-JD'},exit_code=1)
+    brain=RouterBrain(SimpleNamespace(dispatch=lambda contract:output),receipt_root=tmp_path)
+    with pytest.raises(RouterDecisionError,match=expected):
+        brain.rank([candidate('allowed','vendor',1)],objective='PRIVATE-JD',task_family='writing',roles=[])
+    text=next(tmp_path.glob('*.json')).read_text()
+    receipt=json.loads(text)
+    assert receipt['resolved_version']=='fixture' and receipt['cli_exit_code']==1
+    assert receipt['timeout_seconds']==45
+    assert 'PRIVATE' not in text and 'stderr' not in text

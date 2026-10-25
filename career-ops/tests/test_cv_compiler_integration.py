@@ -217,3 +217,28 @@ def test_provider_failure_explains_fresh_request_not_placeholder(tmp_path,monkey
         assert 'no Codex counter reset' in result['instruction']
         assert 'CV from another JD' in result['instruction']
     finally:g.JOB.reset(token)
+
+
+def test_current_owner_codex_preference_is_scoped_to_request():
+    runtime=types.SimpleNamespace(_current_max_iterations=lambda:150)
+    class Turn:
+        async def _run_agent(self,*a,**kw):return g.JOB.get().get('content_worker')
+    class Media:
+        async def send_document(self,*a,**kw):pass
+    g.install_runtime(runtime,Turn,Media)
+    assert asyncio.run(Turn()._run_agent('Build my CV using Codex','',[]))=='codex'
+    assert asyncio.run(Turn()._run_agent('Build my CV','',[{'role':'user','content':'use Codex'}])) is None
+
+
+def test_explicit_codex_cv_tool_passes_picklable_planner(tmp_path,monkeypatch):
+    called=[]
+    monkeypatch.setattr(g,'OUTPUT_ROOT',tmp_path)
+    def compile(*args,**kwargs):
+        called.append(args[3]);return {'status':'FAIL','delivery_allowed':False}
+    monkeypatch.setattr(g,'compile_prototype',compile)
+    token=g.JOB.set({'deadline':time.monotonic()+180,'attempted':False,'content_worker':'codex'})
+    try:
+        result=json.loads(g.compile_tool({'jd':'synthetic','job_id':'test','company':'Example','short_role':'Engineer','content_worker':'auto'}))
+        assert result['status']=='FAIL' and len(called)==1
+        assert isinstance(called[0],g.RoutedContentPlanner) and called[0].worker=='codex'
+    finally:g.JOB.reset(token)

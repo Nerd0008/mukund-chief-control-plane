@@ -294,3 +294,57 @@ def test_guarded_launcher_is_recognized_by_native_lifecycle_controls():
     command='python "'+str(ROOT/'exec-brain/hermes_cli.main_router.py')+'" gateway run'
     assert looks_like_gateway_command_line(command)
     assert not looks_like_gateway_command_line(command.replace('gateway run','gateway status'))
+
+
+def test_router_uses_45_seconds_without_retries():
+    calls=[]
+    class Brain:
+        def rank(self,rows,**kwargs):calls.append(kwargs['timeout']);return rows,{}
+    with patch.object(wr.RouterBrain,'configured',return_value=Brain()):
+        wr.select('bounded',[wr.cli_offer()],task='synthetic')
+    assert calls==[45]
+
+
+def test_explicit_codex_never_initializes_or_calls_native():
+    with patch.object(wr,'native_client',side_effect=AssertionError('No native access')),patch.object(wr,'text_via_codex',return_value='synthetic') as worker:
+        response,receipt=wr.complete_text([{'role':'user','content':'synthetic'}],workflow='career.cv.plan',worker='codex')
+    assert receipt['selected_provider']=='openai' and response.model=='gpt-6.1-sol'
+    assert 0<worker.call_args.kwargs['timeout']<=90
+
+
+def test_explicit_codex_still_requires_brain_authorization():
+    with patch.object(wr,'select',side_effect=RouterDecisionError('router_cli_timeout')),patch.object(wr,'text_via_codex') as worker:
+        with pytest.raises(RouterDecisionError):wr.complete_text([],workflow='fixture',worker='codex')
+    worker.assert_not_called()
+
+
+def test_router_error_is_nonretryable_through_host_classification():
+    from agent.error_classifier import classify_api_error
+    from hermes_cli import plugins
+    error=RouterDecisionError('router_cli_timeout')
+    with patch.object(plugins,'invoke_hook',return_value=[plugin.router_error_classification(error=error)]):
+        result=classify_api_error(error,provider='nous',model='fixture')
+    assert not result.retryable and not result.should_fallback and not result.should_compress
+    assert not result.should_rotate_credential
+    assert result.error_context['component']=='router_brain'
+    assert plugin.router_error_classification(error=RuntimeError('router_cli_timeout')) is None
+
+
+def test_router_copy_is_specific_and_preserves_unrelated_errors():
+    module=SimpleNamespace(nonretryable_copy=lambda *a,**kw:'original')
+    plugin.install_failure_copy(module)
+    error=SimpleNamespace(error_context={'component':'router_brain','router_failure':'router_cli_timeout'})
+    text=module.nonretryable_copy(error,provider='nous',summary='PRIVATE-TOKEN')
+    assert 'Codex router' in text and 'Nous' not in text and 'PRIVATE-TOKEN' not in text
+    assert 'without automatic retries' in text
+    assert module.nonretryable_copy(SimpleNamespace(error_context={}))=='original'
+
+
+def test_codex_cv_preference_survives_pickling_and_reaches_worker():
+    import pickle
+    sys.path.insert(0,str(ROOT/'career-ops/cv-template-prototype'))
+    import cv_content_adapter as cv
+    planner=pickle.loads(pickle.dumps(cv.RoutedContentPlanner('codex')))
+    with patch.object(cv,'generate',return_value={'fixture':'result'}) as generate:
+        assert planner({'jd':'synthetic'})=={'fixture':'result'}
+        assert generate.call_args.args[0]['worker']=='codex'
