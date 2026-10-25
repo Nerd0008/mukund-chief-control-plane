@@ -13,6 +13,7 @@ import tracker_writer as tw
 
 RECEIPT = {'application_confirmation', 'application_received'}
 REJECTION = re.compile(r'\b(?:we (?:have )?decided not to (?:move forward|progress|proceed)|'
+                       r'(?:we (?:have )?)?decided to progress with other candidates|'
                        r'not (?:be |been |to )?(?:progressing|proceeding|successful|selected|move forward|moving forward)|(?:your application|you) (?:has |have )?'
                        r'(?:been )?(?:unsuccessful|not (?:been )?selected)|unfortunately.{0,100}'
                        r'(?:not (?:move forward|progress|proceed)|unsuccessful))\b', re.I)

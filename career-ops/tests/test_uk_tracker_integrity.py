@@ -89,6 +89,8 @@ def test_explicit_mail_only_and_replay(tmp_path):
     assert evidence_status('We have received your application', '') == 'Applied'
     assert evidence_status('Thank You for Your Application', '') == 'Applied'
     assert evidence_status('Application update', 'We have decided not to move forward with your application.') == 'Rejected'
+    assert evidence_status('inforcer - Thank you for your job application!',
+                           'We have reviewed your application and experience, unfortunately we have decided to progress with other candidates that align more closely.') == 'Rejected'
     assert evidence_status('Application update', 'Your application is under review.') is None
     path = workbook(tmp_path, [['2026-10-20', 'Canonical', 'Cyber Security Intern', 'https://jobs.example/jobs/123456', None, 'Not Applied']])
     message = {'id': 'm1', 'thread_id': 't1', 'subject': 'Thank you for applying to Canonical',

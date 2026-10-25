@@ -17,7 +17,7 @@ MONTHS = {name.lower(): i for i, name in enumerate(
     "January February March April May June July August September October November December".split(), 1)}
 PATTERNS = [
     ("deadline_extension", r"deadline (?:has been |is |was )?(?:extended|extension)|extended (?:the |your )?deadline"),
-    ("rejection", r"not (?:be |been |to )?(?:proceeding|progressing|successful|selected|move forward|moving forward)|not to (?:move forward|progress|proceed)|unsuccessful|other candidates"),
+    ("rejection", r"not (?:be |been |to )?(?:proceeding|progressing|successful|selected|move forward|moving forward)|not to (?:move forward|progress|proceed)|decided to progress with other candidates|unsuccessful|other candidates"),
     ("withdrawal", r"application (?:has been |was |is )?withdrawn|withdrawal of your application"),
     ("offer", r"offer of employment|pleased to offer you|formal offer|conditional offer"),
     ("assessment_centre", r"assessment cent(?:re|er)"),
