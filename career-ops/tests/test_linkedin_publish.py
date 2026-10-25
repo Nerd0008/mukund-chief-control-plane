@@ -376,7 +376,7 @@ class TestNewsClaimsGate:
 # --------------------------------------------------------------------------- #
 
 class TestPublishFlow:
-    def test_dry_run_sends_nothing_and_records_a_dry_run(self, tmp_path):
+    def test_dry_run_sends_nothing_and_leaves_ledger_unchanged(self, tmp_path):
         d = drafts_file(tmp_path)
         ledger = tmp_path / "ledger.jsonl"
         body_sha = lp.sha256_text("Notes from a recent project: example.")
@@ -391,7 +391,7 @@ class TestPublishFlow:
         assert transport.calls == []
         assert out["external_actions_taken"] == []
         rows = lp.read_ledger(ledger)
-        assert len(rows) == 1 and rows[0]["result"] == "dry_run"
+        assert rows == [] and not ledger.exists()
 
     def test_real_publish_logs_urn_timestamp_and_result(self, tmp_path):
         d = drafts_file(tmp_path)

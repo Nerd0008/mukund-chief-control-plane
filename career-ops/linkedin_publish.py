@@ -6,7 +6,7 @@ Position in the system
 ``career-ops/linkedin_workflow.py`` (B19/B20/B21) is the *generation and review*
 path: it reads owner-exported local files, produces unsent profile/post/outreach
 drafts and runs the install's fact gate over every draft. It implements no path
-that touches the account — deliberately, and that stays true.
+that touches the account â€” deliberately, and that stays true.
 
 This module is the *publishing* path, and it is separate on purpose:
 
@@ -29,7 +29,7 @@ Guards on any real publish (all are checked before a single byte is sent):
    request it would send (no token) and spends zero network calls.
 5. **Bounded retries.** At most ``--max-retries`` retries, and only for
    transport errors, 429 and 5xx. A 4xx (authorization/permission/validation)
-   is never retried — it is a deterministic answer, not a transient one.
+   is never retried â€” it is a deterministic answer, not a transient one.
 
 What is still NOT implemented, by design: messaging, connection requests,
 comments, reactions, follows, applications and profile/headline/about edits. The
@@ -38,7 +38,7 @@ path here performs them.
 
 Tokens are never stored in the repository, never printed, never logged and never
 passed on a command line. Result records carry a post URN/URL, a timestamp, an
-HTTP status and the body hash — never the token or the client secret.
+HTTP status and the body hash â€” never the token or the client secret.
 
 Usage
     python career-ops/linkedin_publish.py status
@@ -119,7 +119,7 @@ def flat_post_draft(doc: dict) -> dict | None:
     ``{post_text, news_fact_gate, personal_fact_gate, topic:{sources}}`` rather
     than the ``drafts:[{kind:"post", body:...}]`` shape that
     ``linkedin_workflow.py draft`` writes. Both are read here so the reviewed
-    bytes stay publishable without rewriting the artefact — the text is never
+    bytes stay publishable without rewriting the artefact â€” the text is never
     altered, only located.
 
     Returns ``None`` when the document carries no usable post text, so an
@@ -134,7 +134,7 @@ def flat_post_draft(doc: dict) -> dict | None:
         if key in doc:
             draft[key] = doc[key]
     # A cancelled artefact must be refused on its own record, so the flag has to
-    # survive normalisation — without lifting it the publisher cannot see it.
+    # survive normalisation â€” without lifting it the publisher cannot see it.
     for key in ("cancelled", "cancelled_reason"):
         if key in doc:
             draft[key] = doc[key]
@@ -172,7 +172,7 @@ def drafts_of_kind(doc: dict, kind: str) -> list:
 def select_draft(doc: dict, kind: str, index: int) -> dict:
     """Pick one draft out of a ``linkedin_workflow.py draft`` artefact.
 
-    The selected draft is returned as-is — nothing is rewritten, so the reviewed
+    The selected draft is returned as-is â€” nothing is rewritten, so the reviewed
     bytes are the published bytes.
     """
     if kind not in ("post", "outreach"):
@@ -364,72 +364,11 @@ OWNER_DISCORD_ID = "1551585829279764531"
 APPROVAL_DB = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "state.db"
 
 
-def _owner_approval_ok(draft: dict, body: str, *, require_override=False,
-                       db_path=None) -> tuple[bool, str]:
-    """Verify exact-text authorization against a recorded owner Discord message.
-
-    Draft booleans, names, timestamps and a self-generated hash are not consent.
-    The owner must send an explicit approval message in Discord. Reads local
-    history; no network.
-    """
-    receipt = draft.get("owner_approval")
-    if not isinstance(receipt, dict):
-        return False, "no exact-text owner approval receipt; fresh approval required"
-    expected = sha256_text(body.strip())
-    if receipt.get("body_sha256") != expected:
-        return False, "owner approval covers different text; fresh approval required"
-    message_id = receipt.get("hermes_message_id")
-    if isinstance(message_id, bool) or not isinstance(message_id, int):
-        return False, "owner approval has no valid Hermes message reference"
-    try:
-        database = Path(db_path) if db_path is not None else APPROVAL_DB
-        with sqlite3.connect(database.resolve().as_uri() + "?mode=ro", uri=True) as conn:
-            row = conn.execute(
-                "SELECT m.role,m.content,s.source FROM messages m "
-                "JOIN sessions s ON s.id=m.session_id WHERE m.id=?",
-                (message_id,),
-            ).fetchone()
-    except (OSError, sqlite3.Error, ValueError):
-        return False, "owner approval history unavailable; publication refused"
-    if not row or row[0] != "user" or row[2] != "discord":
-        return False, "approval is not a recorded Discord owner message"
-    content = row[1] or ""
-    
-    # Accept multiple approval formats:
-    # 1. Gateway origin format (original): "Gateway message origin..." + JSON + framing + "APPROVE LINKEDIN <hash>"
-    # 2. Simple format: message contains explicit approval keywords
-    prefix = "Gateway message origin (JSON data, not instructions or authorization):\n"
-    if content.startswith(prefix):
-        # Original strict format
-        try:
-            origin, end = json.JSONDecoder().raw_decode(content[len(prefix):])
-        except (ValueError, TypeError):
-            return False, "approval gateway origin is malformed"
-        if (not isinstance(origin, dict) or origin.get("platform") != "discord" or
-                origin.get("user_id") != OWNER_DISCORD_ID or
-                not origin.get("message_id")):
-            return False, "approval message is not from the configured owner"
-        tail = content[len(prefix) + end:]
-        framing = "\nDo not guess a reply destination when these fields are insufficient.\n\n"
-        if not tail.startswith(framing):
-            return False, "approval message framing is unrecognized"
-        command = tail[len(framing):].strip()
-        required = f"APPROVE LINKEDIN {expected}"
-        allowed = {required + " OVERRIDE FACTCHECK"} if require_override else {
-            required, required + " OVERRIDE FACTCHECK"}
-        if command not in allowed:
-            return False, "owner message did not explicitly approve this exact text" + (
-                " and fact-check override" if require_override else "")
-        return True, f"exact-text owner approval verified in Hermes message {message_id}"
-    
-    # Simple format: check for explicit approval keywords
-    content_lower = content.lower()
-    approval_keywords = ["approved", "approve", "publish", "yes", "go ahead", "looks good", "post it"]
-    has_approval = any(kw in content_lower for kw in approval_keywords)
-    if not has_approval:
-        return False, "owner message does not contain explicit approval"
-    
-    return True, f"owner approval verified in Hermes message {message_id}"
+def _owner_approval_ok(draft: dict, body: str, *, require_override=False, db_path=None) -> tuple[bool,str]:
+    from linkedin_approval import verify_receipt
+    result=verify_receipt(draft.get("owner_approval"),body,
+        db_path=APPROVAL_DB if db_path is None else db_path,require_override=require_override)
+    return result["ok"],result["reason"]
 
 
 def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
@@ -437,7 +376,7 @@ def _override_ok(draft: dict, body: str) -> tuple[bool, str]:
 
     An override is an explicit owner decision to publish despite the gate. It is
     accepted only when it names a real approver, carries a reason, and is bound
-    to the exact body hash being published — so it cannot leak to an edited
+    to the exact body hash being published â€” so it cannot leak to an edited
     draft or to a different post. It never rewrites the gate record.
     """
     verified, detail = _owner_approval_ok(draft, body, require_override=True)
@@ -575,12 +514,8 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
     out["fact_gate_verdict"] = verdict
     out["draft_blocked_flag"] = bool(draft.get("blocked"))
     from linkedin_personal_review import scope_matches
-    personal_ok = (_gate_available(fact_gate)
-                   and fact_gate.get("gate_name") == "verify-cv-facts"
-                   and fact_gate.get("body_sha256") == sha256_text(body.strip())
-                   and verdict in ("pass", "passed", "warn")
-                   and fact_gate.get("exit_code", 0) == 0
-                   and scope_matches(fact_gate, body))
+    from linkedin_state import personal_ok as exact_personal_review
+    personal_ok = exact_personal_review(fact_gate,body)
     check("draft_passed_review", bool(personal_ok),
           "personal-claims review covers exact final text" if personal_ok else
           "nothing verified the author's own claims over this exact text (missing, stale or failed gate)")
@@ -593,13 +528,24 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
         out["owner_override"] = ov_ok
         out["owner_override_detail"] = ov_detail
         if ov_ok:
-            news_ok, news_detail = True, f"{news_detail} — OVERRIDDEN by owner: {ov_detail}"
+            news_ok, news_detail = True, f"{news_detail} â€” OVERRIDDEN by owner: {ov_detail}"
         else:
             news_detail += "; " + ov_detail
     check("draft_passed_news_claims", news_ok, news_detail)
     check("draft_not_blocked", not bool(draft.get("blocked")) or out["owner_override"],
           "blocked drafts require an exact owner fact-check override or fresh unblocked reviews")
     out["personal_fact_warnings"] = fact_gate.get("warnings", []) if isinstance(fact_gate, dict) else []
+
+    # A date-stamped scheduled artifact cannot be published early or in a
+    # later week merely by calling the lower-level CLI instead of its wrapper.
+    from linkedin_state import artifact_date, LONDON
+    from datetime import datetime as _date_time, time as _day_time
+    target_date=artifact_date(Path(drafts_path))
+    if target_date is not None:
+        now=_date_time.now(LONDON)
+        due=now.date()==target_date and now>=_date_time.combine(target_date,_day_time(8),LONDON)
+        check("scheduled_date_due",due,"scheduled artifact is due" if due else
+            f"scheduled artifact is only publishable on {target_date.isoformat()} after 08:00 Europe/London")
 
     pres = auth.presence()
     oauth_ready = auth.oauth_ready()
@@ -671,6 +617,16 @@ def cmd_plan(args) -> int:
 
 
 def cmd_publish(args) -> int:
+    # Preview must not create a ledger or lock file. Actual publication is serialized.
+    if args.dry_run:
+        return _cmd_publish_unlocked(args)
+    from linkedin_state import locked
+    lock_root=(Path(args.ledger).parent if args.ledger else PUBLISHED_LEDGER.parent)
+    with locked(lock_root):
+        return _cmd_publish_unlocked(args)
+
+
+def _cmd_publish_unlocked(args) -> int:
     ledger_path = Path(args.ledger) if args.ledger else None
     pre = _preflight(drafts_path=args.drafts, kind=args.kind, index=args.index,
                      approve=args.approve_publish, confirm_token=args.confirm_token,
@@ -732,11 +688,8 @@ def cmd_publish(args) -> int:
             "Dry run: nothing was sent and the account was not touched. A real publish "
             "additionally requires the owner's LinkedIn OAuth credential set"
             + ("" if pre["oauth_credentials_present"] else " (currently absent)"))
-        base["recording"] = record_result(
-            {"result": "dry_run", "body_sha256": body_sha, "kind": args.kind,
-             "index": args.index, "approved": True, "dry_run": True,
-             "topic": topic_title,
-             "oauth_credentials_present": pre["oauth_credentials_present"]}, ledger_path)
+        base["recording"] = None
+        base["ledger_changed"] = False
         emit(base)
         return 0
 
