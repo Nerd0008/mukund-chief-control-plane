@@ -419,7 +419,8 @@ def test_run_reports_every_funnel_counter(run_doc):
     assert counts["semantically_reviewed"] == 8
     assert counts["deepseek_accept"] == 0                  # deterministic fallback, not deepseek
     assert counts["codex_escalated"] == 0
-    assert counts["deterministic_eligibility_pass"] == 5   # clearance, India posting and missing URL gate out
+    assert counts["deterministic_eligibility_pass"] == 2   # graduate roles pass; junior titles without JD evidence need review
+    assert any("junior IT scope review-only" in reason for reason in run_doc["funnel"]["rejections_by_reason"])
     assert counts["tracker_candidates"] >= 0
     assert run_doc["funnel"]["rejections_by_reason"]
     # the fallback run made no DeepSeek call, and says so rather than reporting a funnel zero

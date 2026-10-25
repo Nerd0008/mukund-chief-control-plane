@@ -1,21 +1,20 @@
 {
   "schema_version": 1,
-  "basis": "Existing direct and unified production high_recall discovery mode; hard eligibility remains separate.",
+  "basis": "Direct user scope clarification, 2026-10-25; canonical owner policy supplies the JD requirement.",
   "regions": {
     "uk": {
       "mode": "high_recall",
       "include": [
         "internships",
         "placements",
-        "graduate",
-        "junior",
-        "trainee",
-        "entry-level cyber and IT-security"
+        "graduate roles",
+        "junior IT only with affirmative no-experience or internship/graduate-equivalent JD evidence"
       ],
       "exclude": [
         "apprenticeships"
       ],
-      "unverified_leads": "retain with explicit flags; never count as confirmed-open vacancies"
+      "unverified_leads": "retain with explicit flags; never count as confirmed-open vacancies",
+      "owner_policy_path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\mukund-chief-of-staff\\career-system\\policy.yaml"
     }
   }
 }

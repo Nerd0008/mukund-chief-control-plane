@@ -1,0 +1,11 @@
+# Confirmed UK search scope — 25 October 2026
+
+The owner confirmed internships and graduate roles, with junior IT roles allowed only when the JD explicitly permits no prior work experience or experience comparable to internships and graduate programmes. A junior title alone, an unavailable JD or silence about experience does not meet that condition. Unclear roles require review. Existing mandatory-experience, student-status, geography, work-authorisation, clearance, availability and identity checks still apply.
+
+The canonical career policy now records this instruction. The production search configuration references that file; effective-policy receipts include its SHA256 and scope. Both the direct/two-hour path and nightly unified pipeline use the same JD evidence decision. Collection remains broad enough to retrieve candidates for verification; it does not establish eligibility. Non-UK scope is unchanged. No tracker rows or application statuses were edited for this policy update, and no schedule was paused or changed.
+
+The new scope matrix initially reproduced ten incorrect acceptances across the two gates. After the change, missing/ambiguous experience evidence is review-only. Positive controls include no prior experience, 0–1 years, internships accepted, graduate-level experience sufficient and roles suitable for recent graduates. Negative controls preserve rejection for actual three-year requirements, apprenticeships, internship experience explicitly excluded, and roles not suitable for graduates.
+
+Validation: the full suite passed 1,613 tests. Final focused validation passed 80 tests after adding the negated-graduate and graduate-level-experience controls (36 confirmed-scope cases and 44 search-reliability cases). The transport test now supplies affirmative entry-level evidence separately from link availability; the funnel test expects JD-less junior roles to require review. A historical parser test selects a completed scan rather than assuming the latest mutable runtime log succeeded. Existing Pillow deprecation warnings are unrelated.
+
+Private validation artifacts: `search_fix/scope-before.xml`, `search_fix/confirmed-scope-final-suite.xml`, and `search_fix/scope-final-controls.xml` in the owner workspace. This clarification supersedes the pending scope question in the 23 October reliability report.

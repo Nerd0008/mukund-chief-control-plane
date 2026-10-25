@@ -950,6 +950,12 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
 
     blob = " ".join(str(rec.get(k) or "") for k in
                     ("title", "company", "location", "summary", "description", "jd_text"))
+    from effective_search_policy import scope_evidence_decision
+    scope_ok, scope_reason = scope_evidence_decision(region, rec.get('title'), rec.get('jd_text') or rec.get('description') or '')
+    if not scope_ok:
+        reasons.append(scope_reason)
+    else:
+        flags.append(scope_reason)
     clearance = rjs.clearance_hits(blob)
     if clearance:
         reasons.append(f"clearance/citizenship requirement stated: {', '.join(clearance)}")

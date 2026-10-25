@@ -1,7 +1,7 @@
 """Shared UK production discovery scope and auditable effective policy.
 
-Preserve the existing direct/unified high-recall scope. Legacy intern-only
-portal rules remain visible as conflicts and available for explicit diagnostics.
+Collect broadly in both lanes, then apply the confirmed owner scope from the
+canonical career policy. Legacy intern-only portals are overlaid per run.
 No candidate work-authorisation, education, clearance or experience fact is set here.
 """
 from pathlib import Path
@@ -19,10 +19,18 @@ def effective_policy(region="uk", *, path=None):
     raw = target.read_bytes()
     config = json.loads(raw)
     row = config.get("regions", {}).get(region, {"mode": "inherit"})
-    return {"schema_version": config["schema_version"], "region": region, **row,
+    authority = {}
+    if region == 'uk' and row.get('owner_policy_path'):
+        import yaml
+        source = Path(row['owner_policy_path'])
+        owner_raw = source.read_bytes()
+        owner = yaml.safe_load(owner_raw) or {}
+        authority = {'owner_scope': owner['role_scope'], 'owner_policy_path': str(source),
+                     'owner_policy_sha256': hashlib.sha256(owner_raw).hexdigest()}
+    return {"schema_version": config["schema_version"], "region": region, **row, **authority,
             "policy_path": str(target), "policy_sha256": hashlib.sha256(raw).hexdigest(),
             "eligibility_source": "existing owner profile, regional policy and explicit vacancy evidence",
-            "legacy_policy_conflicts": (["Installed portal and older Chief-of-Staff policy say internship-only; current direct and unified production mode is high_recall. Scope confirmation remains recorded separately."]
+            "legacy_policy_conflicts": [] if authority else (["Legacy internship-only collection configuration differs from high_recall; owner scope is not configured."]
                                         if region == "uk" and row.get("mode") == "high_recall" else [])}
 
 
@@ -85,3 +93,46 @@ def discovery_environment(region, lane_env, career_root):
         yield env
     finally:
         overlay.unlink(missing_ok=True)
+
+
+def scope_evidence_decision(region, title, jd_text):
+    """Owner scope is separate from title collection and mandatory experience.
+
+    Internship/graduate titles retain all existing eligibility checks. Other IT
+    roles need affirmative entry-level evidence in the vacancy JD; absence of an
+    experience rejection is not affirmative evidence. Unclear leads need review.
+    """
+    policy = effective_policy(region)
+    if not policy.get('owner_scope', {}).get('junior_it', {}).get('require_jd_evidence'):
+        return True, 'regional JD scope inherited'
+    if re.search(r'\b(?:intern(?:ship)?s?|placements?|graduates?|grad|summer analyst|summer vacation scheme)\b', str(title), re.I):
+        return True, 'internship or graduate role; other eligibility checks still apply'
+    text = str(jd_text or '')
+    text = re.split(r'\b(?:similar|related|recommended)\s+(?:jobs|roles|offers)\b', text, maxsplit=1, flags=re.I)[0]
+    experience = r'(?:(?:prior|previous|professional|commercial|industry|relevant|work)\s+){0,3}experience'
+    no_experience = (
+        rf'\bno\s+{experience}\s+(?:is\s+)?(?:required|needed|necessary)\b',
+        rf'\b{experience}\s+(?:is\s+)?not\s+(?:required|needed|necessary)\b',
+        rf"\b(?:do\s+not|don['’]t)\s+need\s+(?:any\s+)?{experience}\b",
+        r'\b0\s*[-–—]\s*1\s+years?\s+(?:of\s+)?(?:(?:relevant|work|professional)\s+){0,2}experience\b',
+        r'\b(?:suitable\s+for|open\s+to|welcom(?:e|es|ing))\s+(?:recent\s+|new\s+)?graduates?\b',
+        r'\b(?:recent\s+|new\s+)?graduates?\s+(?:are\s+)?(?:welcome|eligible)\b',
+        r'\b(?:this|the)\s+(?:role|position)\s+is\s+(?:an?\s+)?(?:internship|graduate\s+(?:role|position|scheme|programme|program))\b',
+    )
+    for sentence in re.split(r'[.;\n]', text):
+        for pattern in no_experience:
+            for match in re.finditer(pattern, sentence, re.I):
+                prefix = sentence[max(0, match.start()-35):match.start()]
+                if re.search(r"\b(?:not|never|cannot|don't|doesn't)\s+$", prefix, re.I):
+                    continue
+                return True, 'JD explicitly permits no prior experience or graduate entry'
+        if not re.search(r'\b(?:internships?|placements?|graduate(?:[- ]level|\s+(?:programme|program|scheme))?)\b', sentence, re.I):
+            continue
+        if not re.search(r'\bexperience\b', sentence, re.I):
+            continue
+        if re.search(r"\b(?:not|never|cannot|doesn['’]t|don['’]t|do\s+not|does\s+not)\b", sentence, re.I):
+            continue
+        if re.search(r'\b(?:accepted|acceptable|sufficient|counts?|qualifies|equivalent)\b', sentence, re.I):
+            return True, 'JD explicitly accepts internship or graduate-programme experience'
+    return False, ('junior IT scope review-only: JD must explicitly permit no prior work experience '
+                   'or internship/graduate-equivalent experience')

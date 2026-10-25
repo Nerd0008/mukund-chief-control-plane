@@ -174,8 +174,15 @@ def test_a_real_committed_uk_run_health_still_parses_when_present():
     runs = sorted((CONTROL_PLANE / "runtime/career-ops/scan-runs").glob("scan-uk-*.json"))
     if not runs:
         pytest.skip("no committed UK scan run-health file yet")
-    data = json.loads(runs[-1].read_text(encoding="utf-8"))
-    counters = rjs.parse_scan_counters(data.get("stdout_tail") or "")
+    # The latest runtime record can legitimately be an unsuccessful scan.
+    # Exercise the parser on a completed historical record, not mutable health.
+    for run in reversed(runs):
+        data = json.loads(run.read_text(encoding="utf-8"))
+        counters = rjs.parse_scan_counters(data.get("stdout_tail") or "")
+        if counters["jobs_found"] is not None:
+            break
+    else:
+        pytest.skip("no completed UK scan record with legacy counters present")
     assert counters["jobs_found"] is not None
     offers = rjs.parse_scan_offers(data.get("stdout_tail") or "")
     assert all(o["url"] is None for o in offers)

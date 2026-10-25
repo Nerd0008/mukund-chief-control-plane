@@ -389,6 +389,12 @@ def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
 
     blob = " ".join(str(record.get(k) or "") for k in
                     ("title", "company", "location", "summary", "description", "jd_text"))
+    from effective_search_policy import scope_evidence_decision
+    scope_ok, scope_reason = scope_evidence_decision(region, record.get('title'), record.get('jd_text') or record.get('description') or '')
+    if not scope_ok:
+        reasons.append(scope_reason)
+    else:
+        flags.append(scope_reason)
     hits = clearance_hits(blob)
     if hits:
         reasons.append(f"clearance/citizenship requirement stated: {', '.join(hits)}")

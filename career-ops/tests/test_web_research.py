@@ -583,8 +583,15 @@ def test_unverified_results_become_unverified_leads_while_dead_links_are_refused
     An unverified destination is an accepted lead (flagged). A destination that FAILED
     validation (dead link) is a negative result and is still refused.
     """
+    # This is a transport/availability test. Supply affirmative scope evidence
+    # independently, so an unknown junior JD cannot mask the transport result.
+    export = json.loads(UNVERIFIED_EXPORT.read_text(encoding="utf-8"))
+    for candidate in export['candidates']:
+        candidate['description'] = 'No prior work experience is required.'
+    source = tmp_path / 'scope-eligible-unverified.json'
+    source.write_text(json.dumps(export), encoding='utf-8')
     rc, doc = run_cli(["run", "--region", "uk",
-                       "--web-research", str(UNVERIFIED_EXPORT),
+                       "--web-research", str(source),
                        "--semantic", "off", "--codex", "off",
                        "--out-dir", str(tmp_path / "out")])
     assert rc == 0
