@@ -184,7 +184,44 @@ def key_text(value) -> str:
 
 
 def pair_key(company, title) -> str:
-    return f"{key_text(company)}||{key_text(title)}"
+    from posting_identity import company_key
+    employer = company_key(company)
+    role = key_text(title)
+    role = re.sub(r"^20\d{2} ", "", role)
+    role = re.sub(r" position located in .*$", "", role)
+    role = re.sub(r" knutsford$", "", role)
+    role = re.sub(r"\binternship\b", "intern", role)
+    role = role.replace("governance risk compliance", "grc")
+    role = re.sub(r"\bgrc grc\b", "grc", role)
+    if employer in {'dvtrading', 'chanel', 'hsbc', 'lloydsbankinggroup'}:
+        role = re.sub(r"\b(?:summer )?20\d{2}$", "", role).strip()
+    return f"{employer}||{role}"
+
+
+def sort_status_date(ws, cfg):
+    """Move complete UK rows, including hyperlinks and comments, into owner order."""
+    if cfg.get("region") != "uk":
+        return
+    first = cfg["first_data_row"]
+    last = max((r for r in range(first, ws.max_row + 1)
+                if ws.cell(r, 2).value or ws.cell(r, 3).value), default=first - 1)
+    rows = []
+    for r in range(first, last + 1):
+        cells = [copy.copy(ws.cell(r, c)) for c in range(1, 7)]
+        status = str(cells[5].value or "").strip()
+        rank = {"Not Applied": 0, "Applied": 1, "Rejected": 2}.get(status, 1)
+        date = parse_date(cells[0].value, False)
+        ordinal = date.toordinal() if isinstance(date, dt.date) else 0
+        rows.append(((rank, -ordinal, r), cells))
+    for target, (_, cells) in enumerate(sorted(rows, key=lambda item: item[0]), first):
+        for col, source in enumerate(cells, 1):
+            dest = ws.cell(target, col)
+            dest.value = source.value
+            dest.data_type = source.data_type
+            dest._style = copy.copy(source._style)
+            dest.hyperlink = copy.copy(source.hyperlink) if source.hyperlink else None
+            dest.comment = copy.copy(source.comment) if source.comment else None
+            dest.number_format = source.number_format
 
 
 def parse_date(value, as_string: bool):
@@ -712,7 +749,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     next_seq = (_next_sequential_id(existing_ids, cfg["id"]["prefix"], cfg["id"].get("start", 1))
                 if (cfg.get("id") or {}).get("style") == "sequential" else 0)
     planned_url_keys = set()
-    from posting_identity import identity_keys
+    from posting_identity import identity_keys, is_aggregator, company_key
     by_requisition={}; existing_pair_urls={}; existing_intakes={}
     def intake_key(company, title):
         # Formatting/year changes are not proof of a new requisition.
@@ -729,8 +766,12 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     planned_pair_urls = {}
     planned_requisitions=set()
     def distinct_requisitions(company, first, second):
+        from urllib.parse import urlsplit
         a=identity_keys(company,first); b=identity_keys(company,second)
-        return bool(a and b and not (a & b))
+        return bool(a and b and not (a & b) and not is_aggregator(first)
+                    and not is_aggregator(second)
+                    and urlsplit(str(first)).hostname == urlsplit(str(second)).hostname
+                    and company_key(company) != 'tencent')
 
     for rec in records:
         record = dict(rec)
@@ -1026,6 +1067,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         assert sha256_file(backup_path) == before_hash, "backup hash mismatch"
 
     tmp_path = tracker_path.with_suffix(".write-tmp.xlsx")
+    sort_status_date(tr.ws, cfg)
     bind_links(tr.ws,cfg)
     assert_valid(tr.ws,cfg)
     tr.wb.save(tmp_path)
@@ -1034,7 +1076,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     tr.wb.close()
     expected_rows = pre_rows + len(appends)
     verified = verify_workbook(tmp_path, cfg, expect_data_rows=expected_rows,
-                              expect_appended=len(appends), pre_owned=pre_owned)
+                              expect_appended=len(appends), pre_owned=None if region == 'uk' else pre_owned)
     result["verification_of_temp"] = verified
     if not verified["ok"]:
         tmp_path.unlink(missing_ok=True)
@@ -1052,7 +1094,7 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     staged_hash=sha256_file(tmp_path)
     tmp_path.replace(tracker_path)
     after = verify_workbook(tracker_path, cfg, expect_data_rows=expected_rows,
-                           expect_appended=len(appends), pre_owned=pre_owned)
+                           expect_appended=len(appends), pre_owned=None if region == 'uk' else pre_owned)
     result.update({
         "applied": True,
         "backup": str(backup_path),

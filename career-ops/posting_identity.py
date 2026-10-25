@@ -26,6 +26,8 @@ from urllib.parse import urlsplit
 
 # Requisition identifiers, most specific first. Each pattern captures exactly one group.
 _REQUISITION_PATTERNS = (
+    # Workday numeric requisitions with a location suffix, used by LBG.
+    re.compile(r'_(\d{5,}-\d+)(?:[/?#]|$)'),
     # Workday: .../job/<location>/<slug>_JR-0000129173  or  ..._R0004565
     re.compile(r'_([A-Za-z]{1,4}-?\d{4,})(?:[/?#]|$)'),
     # Oracle / Taleo / PeopleSoft candidate experience: /job/26013761
@@ -88,7 +90,12 @@ def is_aggregator(url) -> bool:
 
 def company_key(name) -> str:
     """Employer name reduced to a comparison key."""
-    return re.sub(r'[^a-z0-9]', '', str(name or '').lower())
+    value = str(name or '').strip()
+    if value.casefold().startswith('tencent'):
+        value = re.sub(r'(?i)\s+uk(?:\s*-\s*prosple)?$', '', value)
+    if value.casefold().startswith('experian'):
+        value = re.sub(r'(?i)\s*-\s*london$', '', value)
+    return re.sub(r'[^a-z0-9]', '', value.lower())
 
 
 def identity_keys(company, url, resolved_url=None) -> set:

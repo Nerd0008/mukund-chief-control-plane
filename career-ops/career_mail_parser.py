@@ -17,7 +17,7 @@ MONTHS = {name.lower(): i for i, name in enumerate(
     "January February March April May June July August September October November December".split(), 1)}
 PATTERNS = [
     ("deadline_extension", r"deadline (?:has been |is |was )?(?:extended|extension)|extended (?:the |your )?deadline"),
-    ("rejection", r"not (?:be )?(?:proceeding|progressing)|unsuccessful|not successful|other candidates|not been selected"),
+    ("rejection", r"not (?:be |been |to )?(?:proceeding|progressing|successful|selected|move forward|moving forward)|not to (?:move forward|progress|proceed)|unsuccessful|other candidates"),
     ("withdrawal", r"application (?:has been |was |is )?withdrawn|withdrawal of your application"),
     ("offer", r"offer of employment|pleased to offer you|formal offer|conditional offer"),
     ("assessment_centre", r"assessment cent(?:re|er)"),
@@ -29,7 +29,7 @@ PATTERNS = [
     ("psychometric_assessment", r"psychometric|situational judg(?:e)?ment|\bsjt\b|numerical (?:assessment|reasoning|test)|verbal (?:assessment|reasoning|test)"),
     ("online_assessment", r"online assessment|complete (?:an |the |your )?assessment|shl|cappfinity|testgorilla"),
     ("application_under_review", r"application (?:is |has been )?(?:under review|being reviewed)|reviewing your application"),
-    ("application_received", r"received your application|application (?:has been |was |is )?received|your application for [^\n.!?]{2,180}? has been received"),
+    ("application_received", r"(?:received your application|received (?:your|the) application|application (?:has been |was |is )?received|your application for [^\n.!?]{2,180}? has been received)"),
     ("application_confirmation", r"thank(?:s| you) for (?:applying|your application)|application (?:confirmation|has been submitted)"),
     ("recruiter_update", r"update (?:on|regarding) your application|application update|recruitment update"),
 ]
@@ -76,6 +76,8 @@ def classify_recruitment(subject, body):
         return None
     text = subject + "\n" + body
     text = re.sub(r"(?i)if you[^.!?\n]{0,250}(?:unsuccessful|not successful)[^.!?\n]*", "", text)
+    if re.search(PATTERNS[1][1], text, re.I):
+        return "rejection"
     if re.search(r"(?i)thanks for taking|thank you for completing", subject):
         return "assessment_completed"
     if re.search(r"(?i)(?:invitation|invited|reminder).{0,80}(?:assessment|test)|assessment (?:invitation|reminder)", subject):

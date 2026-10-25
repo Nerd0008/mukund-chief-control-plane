@@ -60,7 +60,7 @@ def test_guarded_append_can_preserve_existing_listing_and_passed_rows(tmp_path):
     rec={'company':'New Employer','title':'Cyber Intern','url':'https://employer.com/jobs/789','date_found':'2026-10-17'}
     result=tw.write_records(tw.load_profiles(),'uk',[rec],tracker_override=str(p),backup_dir=str(tmp_path/'backups'),apply=True,cleanup_existing=False)
     assert result['applied'] and result['counts']['passed_deleted']==result['counts']['listing_deleted']==0
-    wb=openpyxl.load_workbook(p);assert wb['Jobs']['F4'].value=='passed' and wb['Jobs'].max_row==5;wb.close()
+    wb=openpyxl.load_workbook(p);assert 'passed' in [wb['Jobs'].cell(r,6).value for r in range(3,6)] and wb['Jobs'].max_row==5;wb.close()
 
 def requisition_workbook(tmp_path,other_employer='American Express'):
     p=tmp_path/'uk-req.xlsx';wb=openpyxl.Workbook();ws=wb.active;ws.title='Jobs'

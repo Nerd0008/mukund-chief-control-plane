@@ -234,7 +234,9 @@ def test_manifest_cannot_set_application_state(tmp_path):
     last = max(r for r in range(cfg["first_data_row"], ws.max_row + 1)
                if ws.cell(row=r, column=url_col).value not in (None, ""))
     scol = tw.column_index_from_string(cfg["status_columns"]["application_status"])
-    assert ws.cell(row=last, column=scol).value == cfg["defaults"]["application_status"] != "Applied", \
+    target = next(r for r in range(cfg["first_data_row"], ws.max_row + 1)
+                  if ws.cell(r, url_col).value == rec["url"])
+    assert ws.cell(row=target, column=scol).value == cfg["defaults"]["application_status"] != "Applied", \
         "manifest smuggled an application status"
     wb.close()
 
@@ -526,10 +528,13 @@ def test_legacy_tag_migration_preserves_owner_cells_and_is_idempotent(tmp_path):
         tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)
     assert result["applied"] and result["counts"]["appended"] == 0
     book = openpyxl.load_workbook(workbook); sheet = book["Jobs"]
-    assert values_links(sheet) == before_cells
+    assert sorted((str(value), str(link)) for _, value, link in values_links(sheet)) == sorted(
+        (str(value), str(link)) for _, value, link in before_cells)
     assert sheet.max_column == 6
-    assert "UNCONFIRMED" in sheet["D3"].number_format
-    assert sheet["D3"].comment.text == "UNCONFIRMED — fixture evidence"
+    tagged = next(sheet.cell(r, 4) for r in range(3, sheet.max_row + 1)
+                  if sheet.cell(r, 4).value == cell.value)
+    assert "UNCONFIRMED" in tagged.number_format
+    assert tagged.comment.text == "UNCONFIRMED — fixture evidence"
     book.close(); after_hash = h(workbook)
     repeated = tw.write_records(PROFILES, "uk", [], apply=True,
         tracker_override=str(workbook), backup_dir=str(tmp_path), cleanup_existing=False)

@@ -405,6 +405,14 @@ def run_scan(config, runtime, *, apply=False, reader=None, calendar=None, tracke
                       "proposed_calendar_events": [e for e in report["proposed_calendar_events"]
                           if e["extendedProperties"]["private"]["careerOpsApplication"] in allowed_ids]}
         receipt = apply_report(apply_plan, tracker, calendar, runtime / (report["report_id"] + "-audit.json"))
+        # The mail sidecar records recruitment events, but the six-column UK
+        # workbook needs its own evidence-only status transition.
+        if config.get("regional_profiles"):
+            from tracker_mail_reconcile import reconcile_file
+            uk_path = Path(read_json(REPO / config["regional_profiles"], {})["regions"]["uk"]["tracker"])
+            report["uk_status_reconciliation"] = reconcile_file(
+                uk_path, window["messages"], audit_path=runtime / "uk-status-audit.json",
+                apply=True, limit=config["max_messages"])
         # Retain uncertain notifications durably even after advancing Gmail history.
         review_path = runtime / "pending-review.json"
         for signal in report["needs_review"]:
