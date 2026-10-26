@@ -433,6 +433,27 @@ def writer_records(collected):
              'source':'Codex direct entry-level search'} for job in collected]
 
 
+def retry_country_records(pending, fresh):
+    """Restore source-backed country only for the exact same posting/company/title.
+
+    A fresh explicit country always wins, including a conflicting foreign one.
+    No employer, title, region, deadline or availability is inferred here.
+    """
+    def key(row):
+        return (posting_key(row.get('url')), str(row.get('company') or '').strip().casefold(),
+                str(row.get('job_title') or row.get('title') or '').strip().casefold())
+    prior = {key(row): row for row in pending if isinstance(row, dict)}
+    result = []
+    for source in fresh:
+        row = dict(source)
+        previous = prior.get(key(row), {})
+        if not row.get('country') and not row.get('country_code'):
+            row.update({field: previous[field] for field in ('country','country_code')
+                        if isinstance(previous.get(field), str) and previous[field].strip()})
+        result.append(row)
+    return result
+
+
 def retain_candidates(region, collected, reason):
     """Atomic private retry queue; never replay saved eligibility as authority."""
     import uuid
@@ -441,7 +462,10 @@ def retain_candidates(region, collected, reason):
     try:old=json.loads(path.read_text(encoding='utf-8')).get('records',[])
     except (OSError,ValueError,TypeError):old=[]
     records={posting_key(r.get('url')):r for r in old if isinstance(r,dict) and posting_key(r.get('url'))}
-    records.update({posting_key(r['url']):r for r in writer_records(collected)})
+    for original, record in zip(collected, writer_records(collected)):
+        # Private retry provenance is richer than the six-column writer input.
+        record.update({k: original[k] for k in ('country','country_code') if original.get(k)})
+        records[posting_key(record['url'])] = record
     temp=path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
     try:
         temp.write_text(json.dumps({'records':list(records.values()),'created_at':datetime.now(timezone.utc).isoformat(),
@@ -556,7 +580,8 @@ def main() -> int:
     except (OSError,ValueError,TypeError):pending_records=[]
     # Retry retained discoveries through ALL current checks, never replay old
     # OPEN/deadline claims or write a saved manifest blindly.
-    work_batches=([-1] if pending_records else [])+selected_batches
+    # Fresh source metadata takes precedence over a retained copy of the same posting.
+    work_batches=selected_batches+([-1] if pending_records else [])
     for bi in work_batches:
         queries = batches[bi] if bi>=0 else []
         qtext = "\n".join(f"{i}. \"{q}\"" for i, q in enumerate(queries, 1))
@@ -581,7 +606,7 @@ def main() -> int:
             execution_evidence.append({"batch":bi,**(getattr(out,"evidence",None) or {"web_search_observed":None,"note":"execution evidence not supplied by injected worker"})})
         if getattr(out, "evidence", {}).get("coverage_complete") is False:
             counts["incomplete_batches"] += 1
-        jobs = parse_jobs(out)
+        jobs = retry_country_records(pending_records, parse_jobs(out)) if bi >= 0 else parse_jobs(out)
         print(f"  batch {bi}: {len(jobs)} results returned")
         counts["retrieved_records"]+=len(jobs)
         for j in jobs:
@@ -635,7 +660,9 @@ def main() -> int:
             identity=jd.get('posting_identity') or jd.get('discovered_posting') or {}
             candidate={'company':identity.get('company') or j.get('company'),
                 'title':identity.get('title') or title,'location':identity.get('location') or j.get('location'),
-                'country':identity.get('country') or j.get('country'), 'posting_identity':identity, 'url':url}
+                'country':identity.get('country') or j.get('country'),
+                'country_code':identity.get('country_code') or j.get('country_code'),
+                'posting_identity':identity, 'url':url}
             if (jd.get('vacancy_status') or {}).get('state')=='UNKNOWN':
                 recovered=resolver(candidate,jd)
                 if recovered:jd=recovered
@@ -705,6 +732,8 @@ def main() -> int:
                 "title": identity.get("title") or title,
                 "company": identity.get("company") or str(j.get("company") or "").strip() or "Unknown",
                 "location": identity.get("location") or str(j.get("location") or "").strip() or "Unknown",
+                "country": candidate.get("country"),
+                "country_code": candidate.get("country_code"),
                 "url": url,
                 "source_url": source_url,
                 "availability": verified,
