@@ -166,7 +166,7 @@ def patch_eb(runtime_root: Path, backup_dir: Path, dry_run: bool) -> dict:
     return record
 
 
-def deploy(runtime_root: Path, dry_run: bool) -> dict:
+def deploy(runtime_root: Path, dry_run: bool, *, allow_runtime_newer: bool = False) -> dict:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup_dir = runtime_root / "backups" / f"e3-deploy-{stamp}"
     files = []
@@ -185,8 +185,14 @@ def deploy(runtime_root: Path, dry_run: bool) -> dict:
             continue
         entry["source_sha256"] = _sha256(src)
         entry["destination_sha256_before"] = _sha256(dst)
-        if entry["source_sha256"] == entry["destination_sha256_before"]:
+        if (entry["source_sha256"] == entry["destination_sha256_before"] or
+                (dst.is_file() and src.read_bytes().replace(b"\r\n", b"\n") ==
+                 dst.read_bytes().replace(b"\r\n", b"\n"))):
             entry["action"] = "up-to-date"
+            files.append(entry)
+            continue
+        if dst.exists() and dst.stat().st_mtime_ns > src.stat().st_mtime_ns and not allow_runtime_newer:
+            entry["action"] = "skipped-runtime-newer"
             files.append(entry)
             continue
         entry["action"] = "would-copy" if dry_run else "copied"
@@ -209,6 +215,7 @@ def deploy(runtime_root: Path, dry_run: bool) -> dict:
         "dry_run": dry_run,
         "files": files,
         "copied": [f["name"] for f in files if f["action"] == "copied"],
+        "skipped_runtime_newer": [f["name"] for f in files if f["action"] == "skipped-runtime-newer"],
         "eb_py": eb_record,
         "note": ("E1/E2-owned files (eb.py except the e3-* registration patch, "
                  "governor.py, governor.db, exec_brain.db) are not modified."),
@@ -239,6 +246,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--runtime-root", default=None)
+    parser.add_argument("--allow-runtime-newer", action="store_true",
+                        help="explicitly authorize backup-backed overwrite of newer runtime code")
     parser.add_argument("--restore", default=None,
                         help="restore a previous backup directory")
     args = parser.parse_args()
@@ -249,10 +258,10 @@ def main() -> int:
         print(json.dumps(report, indent=2))
         return 0
 
-    report = deploy(runtime_root, args.dry_run)
+    report = deploy(runtime_root, args.dry_run, allow_runtime_newer=args.allow_runtime_newer)
     print(json.dumps({k: report[k] for k in
                       ("deployed_at_utc", "source_git_sha", "runtime_root",
-                       "backup_dir", "dry_run", "copied", "eb_py")}, indent=2))
+                       "backup_dir", "dry_run", "copied", "skipped_runtime_newer", "eb_py")}, indent=2))
     return 0
 
 

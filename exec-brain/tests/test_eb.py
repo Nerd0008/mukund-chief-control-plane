@@ -14,7 +14,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-EB = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "exec-brain" / "eb.py"
+SOURCE = Path(__file__).resolve().parents[1]
+EB = SOURCE / "eb.py"
 TEST_HOME = Path(tempfile.mkdtemp(prefix="eb-test-"))
 
 
@@ -304,68 +305,25 @@ class TestMatrix(EBTest):
         con.close()
         self.assertEqual(n, 1)
 
-    # T13 regression: live systems untouched (static check)
-    # Updated for E2: allows governor.db, adapters.py, governor.py, test_governor.py
-    # Updated for E3: allows the deployed E3 orchestration module set and the
-    # e3-* CLI bindings (deployed by scripts/deploy_e3_runtime.py).
+    # T13: use the deployer's module declaration; never duplicate its allowlist.
     def test_t13_no_gateway_modification(self):
-        hooks = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "hooks"
-        self.assertTrue((hooks / "discord-chief-archive" / "handler.py").exists())
-        # E1 + E2 + E3 files under exec-brain
-        eb_dir = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "exec-brain"
-        allowed = ("eb.py", "exec_brain.db", "tests", "chain-head.json",
-                   "backups", "governor.db", "adapters.py", "governor.py",
-                   "test_governor.py", "gov-chain-head.json", "telemetry.log",
-                   "telemetry.lock", "prune.log", "deepseek-config.json",
-                   "capability_registry.py", "task_fingerprint.py",
-                   "decision_rationale.py", "execution_dag.py",
-                   "worker_contract.py", "worker_registry.py",
-                   "qualification_gate.py", "e3_commands.py",
-                   "orchestration_db.py", "test_e3.py",
-                   "codex_adapter.py", "exec_adapters.py",
-                   "deepseek_adapter.py", "deepseek_keyaccess.py",
-                   "gemini_adapter.py", "gemini_keyaccess.py",
-                   "generic_openai_adapter.py",
-                   "orchestration.db", "e3-stage2-state.json", "stage2_control.py",
-                   # The owner-approved Chief routing bridge is deployed beside
-                   # the E3 runtime.  Both modules are deterministic local
-                   # routing surfaces; naming them explicitly preserves this
-                   # guard's fail-closed behavior for every other file.
-                   "chief_routing.py", "discord_chief_bridge.py",
-                   "chief_context.py", "department_dispatch.py",
-                   "hermes_e3_provider.py", "e3_service.py",
-                   # E3 orchestration modules + CLI bindings (deployed)
-                   "e3_cli.py", "e3_planner.py", "e3_router.py",
-                   "e3_team_assembly.py", "e3_integrator.py", "e3_verifier.py",
-                   "e3_conflict.py", "e3_context.py", "e3_permissions.py",
-                   "e3_decomposition_review.py", "e3_evidence.py",
-                   "e3_escalate.py", "e3_exploration.py", "e3_replan.py",
-                   "e3_qualification_benchmark.py", "e3_shadow_orchestrator.py",
-                   "e3_production_rehearsal.py", "e3_execution.py",
-                   "e3_execution_rehearsal.py",
-                   # E4 resource continuity, deployed because the deployed
-                   # e3-status surface imports it for the recorded provider
-                   # content-side stop pressure view (see
-                   # scripts/deploy_e3_runtime.py). Every other unexpected file
-                   # still fails this check.
-                   "resource_monitor.py",
-                   "__pycache__")
-        # SQLite WAL sidecars are runtime artifacts of an ALREADY-allowed
-        # project database, not newly deployed files. They are created and
-        # left behind whenever a process opens one of these dbs in WAL mode
-        # and exits uncleanly (a killed/timed-out worker), so enumerating only
-        # the db basename made this static check fail on normal runtime debris
-        # rather than on a real live-system modification. Accept exactly the
-        # sidecars of allowed databases; every other unexpected file still
-        # fails the check.
-        sidecars = {
-            f"{name}-wal" for name in allowed if name.endswith(".db")
-        } | {
-            f"{name}-shm" for name in allowed if name.endswith(".db")
-        }
-        allowed_names = set(allowed) | sidecars
-        for f in eb_dir.iterdir():
-            self.assertIn(f.name, allowed_names, f"unexpected file {f}")
+        scripts = SOURCE.parent / "scripts"
+        sys.path.insert(0, str(scripts))
+        from runtime_contract import audit_runtime, source_files
+        if os.environ.get("EB_TEST_LIVE") == "1":
+            runtime = Path(os.environ["LOCALAPPDATA"]) / "hermes" / "exec-brain"
+            hooks = runtime.parent / "hooks"
+            self.assertTrue((hooks / "discord-chief-archive" / "handler.py").exists())
+            report = audit_runtime(runtime)
+        else:
+            with tempfile.TemporaryDirectory(prefix="eb-contract-") as tmp:
+                runtime = Path(tmp)
+                for name, source in source_files().items():
+                    shutil.copy2(source, runtime / name)
+                report = audit_runtime(runtime)
+        self.assertEqual(report["unexpected"], [], report)
+        self.assertEqual(report["missing_source"], [], report)
+        self.assertEqual(report["wrong_type"], [], report)
 
     # T14 curated summary excludes raw text
     def test_t14_summary_no_raw_text(self):

@@ -13,9 +13,38 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# Import governor modules
+# Always import recovered repository source, never an accidental runtime copy.
+import sys
+from unittest.mock import patch
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import governor
 import adapters
+from contextlib import ExitStack
+_ISOLATION = None
+
+def setUpModule():
+    """Offline in both pytest and unittest; never use owner credentials/stores."""
+    global _ISOLATION
+    _ISOLATION = ExitStack()
+    tmp_path = Path(_ISOLATION.enter_context(tempfile.TemporaryDirectory(prefix="governor-suite-")))
+    for attr, value in {
+        "GOV_DIR": tmp_path, "HERMES_DIR": tmp_path / "hermes",
+        "http_get": lambda *a, **kw: (0, "offline fixture", {}),
+        "run_cmd": lambda *a, **kw: (1, "", "offline fixture"),
+        "check_credential_manager": lambda *a: False,
+        "get_deepseek_key": lambda: None,
+    }.items():
+        _ISOLATION.enter_context(patch.object(adapters, attr, value))
+    _ISOLATION.enter_context(patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}))
+    for attr, basename in [("GOV_DIR", None), ("GOV_DB_PATH", "governor.db"),
+        ("GOV_CHAIN_HEAD_PATH", "gov-chain-head.json"), ("GOV_PRUNE_LOG_PATH", "prune.log"),
+        ("GOV_TELEMETRY_LOG_PATH", "telemetry.log"), ("GOV_LOCK_PATH", "telemetry.lock"),
+        ("DEEPSEEK_CONFIG_PATH", "deepseek-config.json")]:
+        _ISOLATION.enter_context(patch.object(governor, attr, tmp_path / basename if basename else tmp_path))
+
+def tearDownModule():
+    if _ISOLATION is not None:
+        _ISOLATION.close()
 
 
 class TestNousAdapter(unittest.TestCase):
