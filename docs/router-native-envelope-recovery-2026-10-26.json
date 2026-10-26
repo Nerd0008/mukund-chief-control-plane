@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-26",
+  "branch": "fix/e3-whole-repo-architecture",
+  "core_fix_commit": "3d299c23aec3414b0220fad0583ff5dc67fe89c0",
+  "cv_client_compatibility_commit": "a75b97a1561c51a61c5039594de6d2370e787af5",
+  "root_causes": [
+    "The free LongCat endpoint now returns HTTP 404 with an explicit no-longer-free response.",
+    "Our previous compatibility check incorrectly interpreted native Nous tags and session_id as model-level capabilities, excluding every qualified alternate.",
+    "The shared CV native client injected a legacy model-specific thinking setting alongside reasoning."
+  ],
+  "before_after": {
+    "extra_body_field_names": [
+      "reasoning",
+      "session_id",
+      "tags"
+    ],
+    "models": [
+      {
+        "model": "stepfun/step-3.7-flash:free",
+        "before": false,
+        "after": true
+      },
+      {
+        "model": "reflection/beam-1.0-501b-a23b:free",
+        "before": false,
+        "after": true
+      },
+      {
+        "model": "ornith/ornith-1.5-122b:free",
+        "before": false,
+        "after": true
+      }
+    ]
+  },
+  "live_endpoint_withdrawal": {
+    "error": "provider_model_withdrawn",
+    "http_status": 404,
+    "retry_after_seconds": null,
+    "failure_scope": "model"
+  },
+  "tests": {
+    "focused": {
+      "tests": 125,
+      "failures": 0,
+      "errors": 0
+    },
+    "router_and_deployment": {
+      "tests": 688,
+      "failures": 0,
+      "errors": 0
+    },
+    "shared_cv_route": {
+      "tests": 100,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "live_native_request_matrix": [
+    {
+      "scenario": "text",
+      "real_tool_actions": 0,
+      "passed": true,
+      "selected_model": "ornith/ornith-1.5-122b:free",
+      "metadata_preserved": true,
+      "elapsed_seconds": 10.922
+    },
+    {
+      "scenario": "tools",
+      "real_tool_actions": 0,
+      "passed": true,
+      "selected_model": "ornith/ornith-1.5-122b:free",
+      "metadata_preserved": true,
+      "elapsed_seconds": 9.453
+    },
+    {
+      "scenario": "stream",
+      "real_tool_actions": 0,
+      "passed": true,
+      "selected_model": "ornith/ornith-1.5-122b:free",
+      "metadata_preserved": true,
+      "elapsed_seconds": 24.859
+    },
+    {
+      "scenario": "image",
+      "real_tool_actions": 0,
+      "passed": true,
+      "selected_model": "ornith/ornith-1.5-122b:free",
+      "metadata_preserved": true,
+      "elapsed_seconds": 12.782
+    }
+  ],
+  "live_cv_content_route": {
+    "workflow": "career.cv.content",
+    "synthetic_content_only": true,
+    "pdfs_generated": 0,
+    "passed": true,
+    "selected_provider": "nous",
+    "selected_model": "ornith/ornith-1.5-122b:free",
+    "elapsed_seconds": 12.391
+  },
+  "qualification_with_real_provider_metadata": [
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true,
+        "vision": true
+      },
+      "elapsed_seconds": 12.657
+    },
+    {
+      "model": "reflection/beam-1.0-501b-a23b:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true
+      },
+      "elapsed_seconds": 6.266
+    },
+    {
+      "model": "ornith/ornith-1.5-122b:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true,
+        "vision": true
+      },
+      "elapsed_seconds": 12.969
+    }
+  ],
+  "deployed_modules_match": 17,
+  "runtime_drift_count": 0,
+  "safety": {
+    "default_provider_not_changed": true,
+    "paid_models_not_enabled": true,
+    "cv_renderer_template_not_changed": true,
+    "real_tool_actions_in_tests": 0,
+    "failed_owner_requests_not_replayed": true,
+    "unrelated_dirty_work_preserved": true,
+    "no_reset_stash_clean_rebase": true
+  },
+  "limitations": [
+    "Protocol qualification is not a guarantee of indefinite vendor availability.",
+    "Current qualifications use the existing seven-day validity and explicit refresh mechanism.",
+    "The native worker remains selected by the existing provider-blind Codex brain; Codex CLI is not substituted for tool-call transport."
+  ]
+}
