@@ -38,3 +38,12 @@ Bounded live tests before activation:
 | Same cover content after scoped fact-gate fix | PASS, no additional model call | 2.594 seconds |
 
 CV protected dependency hashes were identical before/after. Both QA PDFs were rendered and visually checked: one page, no clipping/overlap, existing typography/sections intact and cover closing follows its text. No Gmail mutations, tracker/Calendar writes, messages, applications or LinkedIn publishing were performed. Private PDF content, profile facts and credentials are not included in this evidence.
+
+## Completion
+
+- Final relevant offline regression: **1,845 passed, 0 failed**, 215.26 seconds. Sixteen existing Pillow deprecation warnings; no skipped tests. Independent isolated policy selection: 47 passed.
+- Repair commit: `cb5ad0fdcb6739b5de4ced2e9969cabe67ff33c5`, pushed to the feature branch.
+- Runtime deployment: eight intended routing modules only, with backup `e3-deploy-20261026T054224Z`. No provider credential/configuration change and no audio integration.
+- Installed-runtime acceptance: **PASS**, eight source/runtime hashes identical, `physical-relay-v1`, image interface registered, zero audio registrations; synthetic routed native response completed in 11.985 seconds. Controller remained Nous/LongCat.
+- Gateway reloaded through existing hidden owner-context launcher, new PID 19468, guarded router entrypoint. No visible console launcher added.
+- Runtime state/logs, owner profiles, private QA outputs and unrelated dirty files deliberately excluded from the commit.
