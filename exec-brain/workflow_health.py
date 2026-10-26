@@ -66,6 +66,8 @@ def metadata(error):
         category = 'provider_context_limit'
     elif status == 429 and code in ('insufficient_quota', 'quota_exhausted', 'billing_limit_exceeded'):
         category = 'provider_quota_exhausted'
+    elif status == 404 and str(body.get('message') or '').startswith('This model is no longer free.'):
+        category = 'provider_model_withdrawn'
     elif status == 404 and code == 'insufficient_credits_for_paid_model':
         category = 'provider_model_billing_blocked'
     elif status is not None:
@@ -83,7 +85,7 @@ def metadata(error):
         category = 'workflow_execution_failed'
     scope = ('provider' if category in ('provider_unavailable','provider_connection_error',
               'provider_billing_blocked','provider_quota_exhausted') else
-             'model' if category in ('provider_rate_limit','provider_model_not_found','provider_model_billing_blocked','provider_timeout') else 'request')
+             'model' if category in ('provider_rate_limit','provider_model_not_found','provider_model_withdrawn','provider_model_billing_blocked','provider_timeout') else 'request')
     return {'error':category, 'http_status':status, 'retry_after_seconds':retry_after(error), 'failure_scope':scope}
 
 
@@ -137,7 +139,7 @@ def record_failure(route, error):
     # recovery. Do not rotate models to bypass a permission restriction.
     category = detail['error']
     duration = max(30, detail['retry_after_seconds'] or 0) if detail['failure_scope'] != 'request' else 0
-    if category in ('provider_model_not_found','provider_model_billing_blocked','provider_billing_blocked','provider_quota_exhausted'):
+    if category in ('provider_model_not_found','provider_model_withdrawn','provider_model_billing_blocked','provider_billing_blocked','provider_quota_exhausted'):
         duration = max(duration, 600)
     now = time.time()
     keys = [model] + (['*'] if detail['failure_scope'] == 'provider' else [])
@@ -148,6 +150,19 @@ def record_failure(route, error):
                 cooldown=MAX(health.cooldown,excluded.cooldown),failures=health.failures+1,
                 last_failure=excluded.last_failure,last_code=excluded.last_code''',
                 (provider,key,now+duration if duration else 0,now,category))
+    if category=='provider_model_withdrawn':
+        # This is an explicit public endpoint withdrawal, not a guessed outage.
+        # Requalification is the only way to clear it if the route returns.
+        import json
+        with database() as con:
+            row=con.execute('SELECT metadata FROM qualification WHERE provider=? AND model=?',(provider,model)).fetchone()
+            if row:
+                try:proof=json.loads(row['metadata'])
+                except (TypeError,ValueError):proof={}
+                proof['withdrawn']=True
+                con.execute('UPDATE qualification SET metadata=? WHERE provider=? AND model=?',(json.dumps(proof),provider,model))
+            else:
+                con.execute('INSERT INTO qualification VALUES(?,?,?,?,?)',(provider,model,'',now,json.dumps({'withdrawn':True})))
     return detail
 
 

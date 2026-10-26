@@ -8,11 +8,15 @@ from workflow_health import metadata
 
 def probe(client,model,vision=False):
     checks={k:False for k in ('chat','tools','tool_continuation','stream','english')}
+    from providers import get_provider_profile
+    extras=get_provider_profile('nous').build_extra_body(session_id='synthetic-native-qualification')
+    def completion(**kwargs):
+        return client.chat.completions.create(**dict(kwargs,extra_body={**extras,**kwargs.get('extra_body',{})}))
     base=[{'role':'system','content':'Respond in English only. Follow the requested synthetic protocol exactly.'},
           {'role':'user','content':'Call qualification_probe with value CHECK. Do not perform any real action.'}]
     tool={'type':'function','function':{'name':'qualification_probe','description':'Synthetic protocol check. Never executed.',
           'parameters':{'type':'object','properties':{'value':{'type':'string'}},'required':['value'],'additionalProperties':False}}}
-    first=client.chat.completions.create(model=model,messages=base,tools=[tool],
+    first=completion(model=model,messages=base,tools=[tool],
              tool_choice={'type':'function','function':{'name':'qualification_probe'}},max_tokens=2048,timeout=25)
     checks['chat']=bool(first.choices)
     msg=first.choices[0].message
@@ -21,11 +25,11 @@ def probe(client,model,vision=False):
     if checks['tools']:
         continuation=base+[msg.model_dump(exclude_none=True),{'role':'tool','tool_call_id':calls[0].id,'content':'CHECK'},
                             {'role':'user','content':'Return exactly QUALIFIED in English, with no other text.'}]
-        final=client.chat.completions.create(model=model,messages=continuation,max_tokens=1024,timeout=25)
+        final=completion(model=model,messages=continuation,max_tokens=1024,timeout=25)
         text=final.choices[0].message.content or ''
         checks['tool_continuation']=text.strip()=='QUALIFIED'
         checks['english']=checks['tool_continuation'] and not any('\u3400'<=c<='\u9fff' for c in text)
-    with client.chat.completions.create(model=model,messages=[{'role':'user','content':'Return exactly STREAM_OK in English.'}],
+    with completion(model=model,messages=[{'role':'user','content':'Return exactly STREAM_OK in English.'}],
                                             max_tokens=1024,stream=True,timeout=25) as stream:
         pieces=[];finished=False
         for chunk in stream:
@@ -39,7 +43,7 @@ def probe(client,model,vision=False):
         image=io.BytesIO();Image.new('RGB',(16,16),(255,0,0)).save(image,format='PNG')
         url='data:image/png;base64,'+base64.b64encode(image.getvalue()).decode()
         try:
-            answer=client.chat.completions.create(model=model,messages=[{'role':'user','content':[
+            answer=completion(model=model,messages=[{'role':'user','content':[
             {'type':'text','text':'What single color fills this image? Reply RED, GREEN or BLUE only.'},
             {'type':'image_url','image_url':{'url':url}}]}],max_tokens=1024,timeout=25)
             checks['vision']=(answer.choices[0].message.content or '').strip().upper()=='RED'
@@ -72,7 +76,7 @@ def main():
                 checks=probe(client,model,vision="image" in row["input_modalities"])
                 result['qualified']=qualify(model,checks);result['checks']=checks
             except Exception as exc:
-                qualify(model,{})
+                qualify(model,{'withdrawn':metadata(exc)['error']=='provider_model_withdrawn'})
                 result.update({k:v for k,v in metadata(exc).items() if v is not None})
                 if not compatible:result['error']='catalog_capability_mismatch'
             result['elapsed_seconds']=round(time.monotonic()-start,3);report.append(result)

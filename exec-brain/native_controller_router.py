@@ -29,11 +29,16 @@ def qualify(model,metadata):
     config,sha=policy()
     assert model in {r['model'] for r in config['models']}
     # Store allowlisted booleans, never synthetic response content or errors.
-    safe={k:metadata.get(k) is True for k in ('chat','tools','tool_continuation','stream','english','vision')}
+    safe={k:metadata.get(k) is True for k in ('chat','tools','tool_continuation','stream','english','vision','withdrawn')}
     with database() as con:
+        previous=con.execute('SELECT metadata FROM qualification WHERE provider=? AND model=?',(config['provider'],model)).fetchone()
+        try:was_withdrawn=previous is not None and json.loads(previous['metadata']).get('withdrawn') is True
+        except (ValueError,TypeError,AttributeError):was_withdrawn=True
+        core_pass=all(safe[k] for k in ('chat','tools','tool_continuation','stream','english'))
+        safe['withdrawn']=safe['withdrawn'] or (was_withdrawn and not core_pass)
         con.execute('INSERT OR REPLACE INTO qualification VALUES(?,?,?,?,?)',
                     (config['provider'],model,sha,time.time(),json.dumps(safe)))
-    return all(safe[k] for k in ("chat","tools","tool_continuation","stream","english"))
+    return not safe["withdrawn"] and all(safe[k] for k in ("chat","tools","tool_continuation","stream","english"))
 
 
 def compatible(request,row):
@@ -57,7 +62,11 @@ def compatible(request,row):
         if value is None or key in basic:continue
         if key=='extra_body':
             if not isinstance(value,dict):return False
-            if any(aliases.get(k,k) not in row['parameters'] for k in value):return False
+            # These are endpoint-level Hermes attribution/affinity fields, not
+            # optional model capabilities. Preserve them exactly on every model.
+            if 'tags' in value and (not isinstance(value['tags'],list) or any(not isinstance(t,str) for t in value['tags'])):return False
+            if 'session_id' in value and not isinstance(value['session_id'],str):return False
+            if any(k not in ('tags','session_id') and aliases.get(k,k) not in row['parameters'] for k in value):return False
         elif aliases.get(key,key) not in row['parameters']:return False
     return True
 
@@ -69,10 +78,13 @@ def offers(provider,model,api_mode,request):
     if provider!='nous' or api_mode not in ('','chat','chat_completions'):return [primary]
     config,sha=policy()
     if model not in {r['model'] for r in config['models']}:return [primary]
-    result=[primary]
+    result=[]
     now=time.time()
     with database() as con:
         qualified={r['model']:dict(r) for r in con.execute('SELECT * FROM qualification WHERE provider=?',(provider,))}
+    try:withdrawn=json.loads((qualified.get(model) or {}).get('metadata') or '{}').get('withdrawn') is True
+    except (ValueError,TypeError,AttributeError):withdrawn=True
+    if not withdrawn:result.append(primary)
     for row in config['models']:
         name=row['model']
         if name==model or not compatible(request,row):continue
@@ -80,6 +92,7 @@ def offers(provider,model,api_mode,request):
         if not proof or proof['policy_sha']!=sha or not 0<=now-proof['observed_at']<=config['qualification_ttl_seconds']:continue
         try:checks=json.loads(proof['metadata'])
         except (ValueError,TypeError):continue
+        if checks.get('withdrawn') is True:continue
         if not all(checks.get(k) is True for k in ('chat','tools','tool_continuation','stream','english')):continue
         has_image=any(isinstance(m.get('content'),list) and any(isinstance(p,dict) and p.get('type') in ('image_url','input_image') for p in m['content']) for m in request.get('messages') or [])
         if has_image and checks.get('vision') is not True:continue
