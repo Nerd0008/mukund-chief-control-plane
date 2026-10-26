@@ -1,0 +1,251 @@
+{
+  "date": "2026-10-26",
+  "code_commit": "6e52d87da89d1a5075c712f0a04d2813ffaa9796",
+  "branch": "fix/e3-whole-repo-architecture",
+  "reproduction_before": {
+    "failed": 16,
+    "passed": 1,
+    "provider_calls": 0
+  },
+  "focused_tests": {
+    "passed": 117,
+    "failed": 0
+  },
+  "broad_regression": {
+    "passed": 2455,
+    "failed": 1,
+    "unrelated_preexisting_failure": "scripts/tests/test_status_consistency.py::CanonicalStatusSource::test_10_no_newer_evidence_left_unincorporated",
+    "baseline_reproduced": true,
+    "baseline_commit": "ff2b952430dacef87ebf911da41b816f54b35196"
+  },
+  "host_retry_after_seconds": 13,
+  "live_qualification": [
+    {
+      "model": "meituan/longcat-2.5-preview:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true,
+        "vision": false
+      },
+      "elapsed_seconds": 18.829
+    },
+    {
+      "model": "meituan/longcat-2.0:free",
+      "qualified": false,
+      "error": "provider_model_not_found",
+      "http_status": 404,
+      "failure_scope": "model",
+      "elapsed_seconds": 0.297
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true,
+        "vision": true
+      },
+      "elapsed_seconds": 14.734
+    },
+    {
+      "model": "reflection/beam-1.0-501b-a23b:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true
+      },
+      "elapsed_seconds": 10.688
+    },
+    {
+      "model": "ornith/ornith-1.5-122b:free",
+      "qualified": true,
+      "checks": {
+        "chat": true,
+        "tools": true,
+        "tool_continuation": true,
+        "stream": true,
+        "english": true,
+        "vision": true
+      },
+      "elapsed_seconds": 11.422
+    }
+  ],
+  "paid_alternatives": {
+    "qwen": "insufficient_credits_for_paid_model",
+    "llama": "insufficient_credits_for_paid_model",
+    "http_status": 404,
+    "purchase_made": false
+  },
+  "live_rate_limit_acceptance": {
+    "real_model_calls": 1,
+    "injected_429": true,
+    "real_tool_executions": 0,
+    "provider_configuration_changed": false,
+    "original_error_preserved": true,
+    "selected_models": [
+      "stepfun/step-3.7-flash:free",
+      "reflection/beam-1.0-501b-a23b:free"
+    ],
+    "changed_after_failure": true,
+    "tool_protocol_pass": true,
+    "model_configuration_unchanged": true,
+    "elapsed_seconds": 19.562,
+    "pass": true
+  },
+  "deployment": {
+    "deployed_files": [
+      "workflow_routing.py",
+      "workflow_control.py",
+      "workflow_health.py",
+      "native_controller_router.py",
+      "native_controller_policy.json",
+      "native_router_plugin.py"
+    ],
+    "backup_taken": true,
+    "skipped_runtime_newer": [],
+    "provenance": [
+      {
+        "module": "e3_service.py",
+        "source_sha256": "245ac3bce362e465d1dec58d7b214e77058baa193d1d41771e0d89728ee754dc",
+        "runtime_sha256": "245ac3bce362e465d1dec58d7b214e77058baa193d1d41771e0d89728ee754dc",
+        "status": "MATCH"
+      },
+      {
+        "module": "chief_routing.py",
+        "source_sha256": "e39de53d435f1347652ffa18ac1facc658698210a383cbec105ce6d7f0600a56",
+        "runtime_sha256": "e39de53d435f1347652ffa18ac1facc658698210a383cbec105ce6d7f0600a56",
+        "status": "MATCH"
+      },
+      {
+        "module": "discord_chief_bridge.py",
+        "source_sha256": "b9f38f26f8abe68d7bc1e1215d95a749ac51dfe34d511dbae38195a841c9fa35",
+        "runtime_sha256": "b9f38f26f8abe68d7bc1e1215d95a749ac51dfe34d511dbae38195a841c9fa35",
+        "status": "MATCH"
+      },
+      {
+        "module": "department_dispatch.py",
+        "source_sha256": "8e9f9ab954bd053ae5be26e41c4e1cf60df816d19fd32735afab99c2442efb12",
+        "runtime_sha256": "8e9f9ab954bd053ae5be26e41c4e1cf60df816d19fd32735afab99c2442efb12",
+        "status": "MATCH"
+      },
+      {
+        "module": "workflow_routing.py",
+        "source_sha256": "1e68fbd89c335bcf9a06208da8dd65b548ef6927ca7ccd07253db19b9886e829",
+        "runtime_sha256": "1e68fbd89c335bcf9a06208da8dd65b548ef6927ca7ccd07253db19b9886e829",
+        "status": "MATCH"
+      },
+      {
+        "module": "native_router_plugin.py",
+        "source_sha256": "df4e74cf2a288ae4941d26ee6b3aa0b91f63441f3cdbf51546d800db539d180c",
+        "runtime_sha256": "df4e74cf2a288ae4941d26ee6b3aa0b91f63441f3cdbf51546d800db539d180c",
+        "status": "MATCH"
+      },
+      {
+        "module": "workflow_control.py",
+        "source_sha256": "06825fab97fe5e194563972a28a8d5ff098927a706471410f2642bc13c724db2",
+        "runtime_sha256": "06825fab97fe5e194563972a28a8d5ff098927a706471410f2642bc13c724db2",
+        "status": "MATCH"
+      },
+      {
+        "module": "router_media.py",
+        "source_sha256": "a535ffa90f2b4ffce022d698b5b7d76addd40ed46472425101ec813ab313e240",
+        "runtime_sha256": "a535ffa90f2b4ffce022d698b5b7d76addd40ed46472425101ec813ab313e240",
+        "status": "MATCH"
+      },
+      {
+        "module": "router_gateway_entry.py",
+        "source_sha256": "555b3b1e592f603f88d632cf8e586d6cbfd011c9f02a77b9958eff01cbdf805e",
+        "runtime_sha256": "555b3b1e592f603f88d632cf8e586d6cbfd011c9f02a77b9958eff01cbdf805e",
+        "status": "MATCH"
+      },
+      {
+        "module": "workflow_health.py",
+        "source_sha256": "dcca8c254256f52da6184a7fd50ac5073ce463ec7516fe5cc3eb26af347835f7",
+        "runtime_sha256": "dcca8c254256f52da6184a7fd50ac5073ce463ec7516fe5cc3eb26af347835f7",
+        "status": "MATCH"
+      },
+      {
+        "module": "native_controller_router.py",
+        "source_sha256": "2bd09d5b86d6fbdbea21a409bf9f82a6ef37d0373b88b6d9f3b1241d30fda398",
+        "runtime_sha256": "2bd09d5b86d6fbdbea21a409bf9f82a6ef37d0373b88b6d9f3b1241d30fda398",
+        "status": "MATCH"
+      },
+      {
+        "module": "native_controller_policy.json",
+        "source_sha256": "de54f7ccd922d5b96330f82b648ee382f2fced3c2c92bef23cecbad2a4e70831",
+        "runtime_sha256": "de54f7ccd922d5b96330f82b648ee382f2fced3c2c92bef23cecbad2a4e70831",
+        "status": "MATCH"
+      },
+      {
+        "module": "hermes_cli.main_router.py",
+        "source_sha256": "d6c5ec27fbc50a794ddacf0842672caffc7d30011918ee17c14c1f21575bc71b",
+        "runtime_sha256": "d6c5ec27fbc50a794ddacf0842672caffc7d30011918ee17c14c1f21575bc71b",
+        "status": "MATCH"
+      },
+      {
+        "module": "router_brain.py",
+        "source_sha256": "5b09311d1a3a3ba00189e2aa3b6e96e9d9cc6dc42a03dda9ff22eee1f82d1ef1",
+        "runtime_sha256": "5b09311d1a3a3ba00189e2aa3b6e96e9d9cc6dc42a03dda9ff22eee1f82d1ef1",
+        "status": "MATCH"
+      },
+      {
+        "module": "e3_router.py",
+        "source_sha256": "53ee9dfd07eecdfeec5d84dbe9d7c41d474b9f0e9ef46543f93e9737fbbe960b",
+        "runtime_sha256": "53ee9dfd07eecdfeec5d84dbe9d7c41d474b9f0e9ef46543f93e9737fbbe960b",
+        "status": "MATCH"
+      },
+      {
+        "module": "e3_shadow_orchestrator.py",
+        "source_sha256": "29043c2def442a4d61674130dac3d3424e22e2e201ebdcd32e66724643127393",
+        "runtime_sha256": "29043c2def442a4d61674130dac3d3424e22e2e201ebdcd32e66724643127393",
+        "status": "MATCH"
+      },
+      {
+        "module": "codex_adapter.py",
+        "source_sha256": "aee76929b6473c1d44e887795ec9eeeb5af1da3df67ec1fea5ca50f94129fc4a",
+        "runtime_sha256": "aee76929b6473c1d44e887795ec9eeeb5af1da3df67ec1fea5ca50f94129fc4a",
+        "status": "MATCH"
+      }
+    ],
+    "drift_count": 0,
+    "gateway_pid": 51760,
+    "discord_state": "connected",
+    "gateway_clean_drain": true
+  },
+  "post_deployment_acceptance": {
+    "real_tool_executions": 0,
+    "configuration_changes": 0,
+    "registered_router": true,
+    "loaded_router_sha256": "df4e74cf2a288ae4941d26ee6b3aa0b91f63441f3cdbf51546d800db539d180c",
+    "actual_model": "ornith/ornith-1.5-122b:free",
+    "tool_protocol_pass": true,
+    "pass": true,
+    "elapsed_seconds": 16.062
+  },
+  "safety": {
+    "main_merged": false,
+    "reset_clean_stash_restore_used": false,
+    "default_provider_model_changed": false,
+    "cv_templates_renderers_changed": false,
+    "gmail_calendar_linkedin_configuration_changed": false,
+    "job_search_schedule_changed": false,
+    "real_tool_actions_in_live_tests": 0,
+    "unrelated_dirty_files_committed": false,
+    "credentials_committed": false
+  },
+  "limits": [
+    "Qualification expires after seven days or a policy fingerprint change; refresh with the explicit qualification command.",
+    "No claim that all conceivable provider failures or outages can be prevented. No usable compatible provider returns a bounded failure.",
+    "The pre-existing executive-status evidence check remains failing and is not suppressed."
+  ]
+}
