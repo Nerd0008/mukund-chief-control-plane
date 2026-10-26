@@ -66,3 +66,22 @@ def test_actual_withdrawal_is_remembered_even_without_old_qualification():
 def test_generic_404_is_not_guessed_to_mean_withdrawal():
     e=NS(status_code=404,body={'message':'Unknown endpoint'})
     assert health.metadata(e)['error']=='provider_model_not_found'
+
+
+def test_cv_default_reasoning_does_not_inject_retired_model_thinking_flag(tmp_path,monkeypatch):
+    import hermes_cli.runtime_provider as runtime
+    binding=tmp_path/'binding.json';binding.write_text(json.dumps({'provider':'nous','model':PRIMARY}))
+    monkeypatch.setattr(wr,'BINDING',binding)
+    monkeypatch.setattr(runtime,'resolve_runtime_provider',lambda **kw:{'provider':'nous','api_mode':'chat_completions',
+                         'api_key':'SYNTHETIC_NOT_A_CREDENTIAL','base_url':'https://example.invalid/v1','request_overrides':{}})
+    client=wr.native_client(workflow='career.cv.content')
+    try:
+        assert client._options['extra_body']['reasoning']=={'enabled':True,'effort':'low'}
+        assert 'thinking' not in client._options['extra_body']
+        controller.qualify(PRIMARY,{'withdrawn':True});controller.qualify(STEP,PROOF)
+        class Brain:
+            def rank(self,candidates,**kw):return candidates,{}
+        with patch.object(RouterBrain,'configured',return_value=Brain()):
+            client._route({'messages':[{'role':'user','content':'Synthetic CV content request'}],'temperature':0})
+        assert client.last_route['selected_model']==STEP
+    finally:client.close()

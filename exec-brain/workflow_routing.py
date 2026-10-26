@@ -402,7 +402,7 @@ def native_client(*,async_mode=False,workflow='hermes.native'):
     options=dict(runtime.get('request_overrides') or {})
     if workflow.startswith('career.cv') and runtime['provider']=='nous':
         options['extra_body']={**options.get('extra_body',{}),
-            'reasoning':{'enabled':True,'effort':'low'},'thinking':{'type':'enabled'}}
+            'reasoning':{'enabled':True,'effort':'low'}}
     return RoutedClient(client,runtime['provider'],config['model'],workflow=workflow,
                         async_mode=async_mode,request_options=options)
 
