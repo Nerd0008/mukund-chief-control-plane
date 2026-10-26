@@ -134,6 +134,8 @@ class E3ApplicationService:
                     "error": "e3_chat_no_eligible_worker",
                     "stage2_allowed_workers": state.get("allowed_workers", [])}
 
+        import time
+        started=time.monotonic()
         routing_receipt = None
         if not dry_run and self.orchestrator_factory is None:
             from router_brain import RouterBrain, RouterDecisionError
@@ -156,10 +158,11 @@ class E3ApplicationService:
             "contract_id": f"chat-{plan.get('plan_id') or 'unknown'}",
             "objective": objective,
             "provider_request_options": {"messages": list(messages or [])},
-            "timeout": timeout,
+            "timeout": max(0,timeout-(time.monotonic()-started)),
             "max_tokens": 1024,
             "temperature": 0.0,
         }
+        if contract['timeout']<=0:return {'status':'FAILED','provider_call_made':False,'error':'workflow_deadline_exceeded'}
         result = adapter.dispatch(contract)
         e2_linkage = registry.report_usage(chosen.worker_id, result)
         tool_calls = result.get("tool_calls") or []

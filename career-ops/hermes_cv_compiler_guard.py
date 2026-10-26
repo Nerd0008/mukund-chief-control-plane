@@ -126,9 +126,11 @@ def compile_tool(args,**kwargs):
     import re
     if not all(isinstance(args.get(k),str) and re.search(r'[A-Za-z0-9]',args[k]) for k in ('company','short_role')) or str(args.get('short_role','')).strip().lower()=='tailored':
         return json.dumps({'status':'INPUT_REQUIRED','reason':'company and meaningful short_role are required; provide these and call again. No build attempt consumed.'})
-    worker=state.get('content_worker') or args.get('content_worker','auto')
-    if worker not in ('auto','codex'):
-        return json.dumps({'status':'INPUT_REQUIRED','reason':'content_worker must be auto or codex; no build attempt consumed'})
+    # Model-supplied tool arguments cannot impose an owner worker preference.
+    from workflow_control import CONTENT_WORKER
+    worker=state.get('content_worker') or CONTENT_WORKER.get() or 'auto'
+    if worker not in ('auto','codex','native'):
+        return json.dumps({'status':'INPUT_REQUIRED','reason':'content_worker must be auto, native or codex; no build attempt consumed'})
     activate_job(state)
     if state.get('attempted'):return json.dumps({'status':'FAIL','reason':'compiler already invoked; no retries'})
     state['attempted']=True
@@ -139,7 +141,7 @@ def compile_tool(args,**kwargs):
         remaining=state['deadline']-time.monotonic()
         if remaining<=0:raise ValueError('three-minute deadline reached')
         workspace=OUTPUT_ROOT/('application-'+uuid.uuid4().hex)
-        result=compile_prototype(str(args.get('jd','')),str(args.get('job_id','application')),workspace,RoutedContentPlanner(worker) if worker=='codex' else generate,hard_seconds=min(180,remaining))
+        result=compile_prototype(str(args.get('jd','')),str(args.get('job_id','application')),workspace,RoutedContentPlanner(worker) if worker in ('codex','native') else generate,hard_seconds=min(180,remaining))
         state['workspace']=workspace
         response={k:result.get(k) for k in ['status','stage','reason','elapsed_seconds','content_calls','renders','provider']}
         if time.monotonic()<state['deadline'] and result['delivery_allowed'] and delivery_allowed(result['pdf_path'],OUTPUT_ROOT):
@@ -210,8 +212,9 @@ def install_runtime(runtime,turn_class,media_class):
         state={'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv}
         # Current owner message only: history/JD data must not silently pin workers.
         import re
-        if re.search(r'\b(?:use|using|through|via|with)\s+(?:the\s+)?codex\b',str(message),re.I):
-            state['content_worker']='codex'
+        from workflow_control import requested_worker
+        worker=requested_worker(message)
+        if worker:state['content_worker']=worker
         token=JOB.set(state)
         instruction=('\nCV production: call career_cv_compile once with the full JD, job_id, company and one or two short_role words. PASS automatically exports to Downloads/codex/_CVs with the short filename. No shell copy is needed. '
                      'On provider timeout, report that no CV was produced. Never offer a CV from another JD. Attempt limits are per request, not per session; a new owner-requested build needs no Codex reset. '
@@ -252,11 +255,11 @@ def register(ctx):
             'parameters':{'type':'object','properties':properties,'required':required,'additionalProperties':False}},handler=handler)
     tool('career_cv_master','Read approved CV design/facts. No span editing or character-count constraint.',{},[],master_tool)
     tool('career_cv_compile','Tailor a CV from JD in one bounded compiler invocation; returns verified PDF or failure. Never repair formatting.',
-         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'},'company':{'type':'string'},'short_role':{'type':'string','description':'One or two role words, e.g. Product Engineer'},'content_worker':{'type':'string','enum':['auto','codex'],'description':'Use codex when the owner explicitly requests Codex content planning. Router authorization remains mandatory.'}},['jd','job_id','company','short_role'],compile_tool)
+         {'jd':{'type':'string','minLength':1},'job_id':{'type':'string'},'company':{'type':'string'},'short_role':{'type':'string','description':'One or two role words, e.g. Product Engineer'},'content_worker':{'type':'string','enum':['auto','codex','native'],'description':'Use codex when the owner explicitly requests Codex content planning. Router authorization remains mandatory.'}},['jd','job_id','company','short_role'],compile_tool)
     tool('career_cv_build','Retired span builder; use career_cv_compile.',{},[],retired_build)
     from hermes_cover_tool import cover_tool
     tool('career_cover_compile','Build a verified one-page cover letter from five truthful paragraphs. Native tool: no shell access needed. Use with career_cv_compile for application packages.',
-         {'company':{'type':'string'},'role':{'type':'string'},'paragraphs':{'type':'array','minItems':5,'maxItems':5,'items':{'type':'string'}}},['company','role','paragraphs'],cover_tool)
+         {'company':{'type':'string'},'role':{'type':'string'},'paragraphs':{'type':'array','minItems':5,'maxItems':5,'items':{'type':'string'}},'content_worker':{'type':'string','enum':['auto','native','codex']}},['company','role','paragraphs'],cover_tool)
     def connected_v2(native,adapter):
         install_delivery(type(adapter))
         import logging

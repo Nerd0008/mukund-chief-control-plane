@@ -42,19 +42,32 @@ def export_verified(source,company,role):
     return target
 
 def cover_fact_result(gate,text):
-    """Correct only the known negative generic-tool false positive."""
+    """Exclude only tool mentions wholly inside explicit absence-of-experience clauses."""
     import re
     gate=dict(gate)
-    phrase='enterprise security tooling'
-    occurrences=list(re.finditer(re.escape(phrase),text,re.I))
-    negated=bool(occurrences) and all(re.search(r"(?i)(?:have not|haven't) worked with\s*$",text[max(0,m.start()-60):m.start()]) for m in occurrences)
-    blocked=gate.get('unsupportedFacts',[])
-    removable=[f for f in blocked if f.get('kind')=='tool' and str(f.get('value','')).lower()==phrase] if negated else []
-    if removable and gate.get('available') and gate.get('exit_code')==1:
-        gate['unsupportedFacts']=[f for f in blocked if f not in removable]
-        if not gate['unsupportedFacts'] and not gate.get('invented') and not gate.get('forbidden'):
-            gate.update(verdict='pass',exit_code=0,negation_correction='explicit lack of enterprise-tool experience is not a positive claim')
+    prefix=re.compile(r"(?im)(?:^|(?<=[.!?;\n]))\s*I\s+(?:(?:do not|don't)\s+(?:yet\s+)?have\s+(?:professional\s+)?experience\s+(?:with|supporting|using|of|in)|have\s+no\s+(?:professional\s+)?experience\s+(?:with|supporting|using|of|in)|(?:have not|haven't)\s+(?:yet\s+)?(?:worked with|used|administered|managed|supported))\b")
+    boundary=re.compile(r"[.!?;\n]|\b(?:but|however|although|whereas|nevertheless|yet)\b|\b(?:and\s+)?I\s+(?:have|use|used|manage|managed|administer|support|am|led|lead|built|work|worked)\b|\band\s+(?:use|used|manage|managed|administer|support|have|am|led|lead|built|work|worked)\b",re.I)
+    prefixes=list(prefix.finditer(text))
+    def wholly_negative(fact):
+        if fact.get('kind')!='tool':return False
+        value=str(fact.get('value','')).strip()
+        if not value:return False
+        pattern=re.escape(value).replace(r'\ ',r'\s+')
+        mentions=list(re.finditer(r'(?<!\w)'+pattern+r'(?!\w)',text,re.I))
+        if not mentions:return False
+        for mention in mentions:
+            scopes=[m for m in prefixes if m.end()<=mention.start()]
+            if not scopes or boundary.search(text[scopes[-1].end():mention.start()]):return False
+        return True
+    if gate.get('available') and gate.get('exit_code')==1:
+        blocked=gate.get('unsupportedFacts',[]);remaining=[f for f in blocked if not wholly_negative(f)]
+        if len(remaining)!=len(blocked):
+            gate['unsupportedFacts']=remaining
+            gate['negation_correction']='Explicit lack of tool experience is not a positive skill claim'
+            if not remaining and not gate.get('invented') and not gate.get('forbidden'):
+                gate.update(verdict='pass',exit_code=0)
     return gate
+
 
 def fact_failure_details(gate):
     return {'stage':'fact_verification','reason':'cover letter fact gate did not pass',
@@ -99,7 +112,22 @@ def cover_tool(args,**kwargs):
     attempts.append(fingerprint)
     workspace=ROOT/uuid.uuid4().hex;workspace.mkdir(parents=True)
     out=workspace/'Mukund_Cover_Letter.pdf'
-    spec={'heading':'Application for '+str(args['role']),'salutation':'Dear '+str(args['company'])+' Recruitment Team,','paragraphs':args['paragraphs'],'out':str(out),'qa':str(workspace/'preview.png')}
+    paragraphs=args['paragraphs']
+    (workspace/'content-draft-input.json').write_text(json.dumps({'paragraphs':paragraphs},ensure_ascii=False),encoding='utf-8')
+    from workflow_control import CONTENT_WORKER
+    worker=state.get('content_worker') or CONTENT_WORKER.get() or 'auto'
+    if worker=='codex':
+        if state.get('cover_routing_failed'):return json.dumps({'status':'FAIL','reason':'cover_worker_already_failed','instruction':'Stop this request; no automatic retry.'})
+        try:
+            from cover_content_adapter import plan
+            paragraphs,receipt=plan(paragraphs,args['company'],args['role'],
+                timeout=min(60,state['deadline']-time.monotonic()),worker='codex')
+            (workspace/'routing.json').write_text(json.dumps(receipt),encoding='utf-8')
+        except Exception as exc:
+            from workflow_routing import failure_code
+            state['cover_routing_failed']=True
+            return json.dumps({'status':'FAIL','stage':'content_generation','reason':failure_code(exc),'instruction':'Stop this request; no PDF or automatic retry.'})
+    spec={'heading':'Application for '+str(args['role']),'salutation':'Dear '+str(args['company'])+' Recruitment Team,','paragraphs':paragraphs,'out':str(out),'qa':str(workspace/'preview.png')}
     path=workspace/'content.json';path.write_text(json.dumps(spec,ensure_ascii=False),encoding='utf-8')
     try:
         remaining=min(45,state['deadline']-time.monotonic())

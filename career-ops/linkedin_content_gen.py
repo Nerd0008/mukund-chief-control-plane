@@ -198,18 +198,19 @@ def _strip_image_descriptions(text: str) -> str:
 # Gemini content generation
 # --------------------------------------------------------------------------- #
 
-def _get_gemini_client():
-    """Get a Gemini client, or None if no API key."""
-    if not GEMINI_API_KEY:
-        return None
+def _get_gemini_client(worker=None):
+    """Resolve existing compatible credentials only after the worker constraint."""
+    import sys
+    sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'exec-brain'))
+    from workflow_control import CONTENT_WORKER
+    from workflow_routing import RoutedGenAIClient
+    worker=worker or CONTENT_WORKER.get()
+    if worker=='codex':return RoutedGenAIClient(None,worker='codex')
+    if not GEMINI_API_KEY:return None
     try:
         from google import genai
-        import sys
-        sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'exec-brain'))
-        from workflow_routing import RoutedGenAIClient
-        return RoutedGenAIClient(genai.Client(api_key=GEMINI_API_KEY))
-    except Exception:
-        return None
+        return RoutedGenAIClient(genai.Client(api_key=GEMINI_API_KEY),worker=worker)
+    except ImportError:return None
 
 
 def generate_linkedin_content(

@@ -42,7 +42,7 @@ set CP=C:\Users\mukun\Documents\mukund-chief-control-plane
 set PY=C:\Users\mukun\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe
 set LOGDIR=%CP%\runtime\career-ops\scan-runs
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
-"%PY%" "%CP%\career-ops\discovery\scheduled_orchestrator.py" run --region %REGION% --scheduled --require-live-web --mode high_recall --semantic auto --codex-model gpt-6-sol --codex on --codex-budget 8 --budget-seconds 2700 --scan-timeout 900 --web-queries 28 --limit-per-query 10 --max-urls 60 --per-query-timeout 180 --retries 1 --out-dir "%CP%\runtime\career-ops\discovery" > "%LOGDIR%\%REGION%-unified-last-stdout.json" 2>&1
+"%PY%" "%CP%\career-ops\discovery\scheduled_orchestrator.py" run --region %REGION% --scheduled --require-live-web --mode high_recall --semantic codex --codex-model gpt-6-sol --codex on --codex-budget 8 --budget-seconds 2700 --scan-timeout 900 --web-queries 28 --limit-per-query 10 --max-urls 60 --per-query-timeout 180 --retries 1 --out-dir "%CP%\runtime\career-ops\discovery" > "%LOGDIR%\%REGION%-unified-last-stdout.json" 2>&1
 set RC=%ERRORLEVEL%
 if %RC% neq 0 exit /b %RC%
 rem --- discovery -> tracker handoff (owner instruction 2026-10-09) -------

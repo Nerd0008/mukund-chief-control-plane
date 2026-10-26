@@ -100,6 +100,7 @@ try:
     from pathlib import Path
     sys.path.insert(0,str(Path(os.environ['LOCALAPPDATA'])/'hermes/exec-brain'))
     from workflow_routing import RoutedGenAIClient
+    from router_brain import RouterDecisionError
     client = RoutedGenAIClient(genai.Client(api_key=api_key))
 except Exception as exc:
     print(json.dumps({"error": "model client failed: %s" % exc}))
@@ -110,6 +111,9 @@ for _ in range(runs):
         resp = client.models.generate_content(model=model, contents=prompt)
         raw = str(getattr(resp, "text", "") or "")
     except Exception as exc:
+        if isinstance(exc,RouterDecisionError):
+            responses.append({"error_type":"RouterDecisionError","error":str(exc)})
+            break
         responses.append({"error_type": type(exc).__name__})
         continue
     responses.append({"raw": raw})

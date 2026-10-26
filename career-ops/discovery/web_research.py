@@ -511,9 +511,21 @@ class CodexWebSearchProvider(ResearchProvider):
     def _run_one(self, exe, query: str, *, limit: int, timeout: int, prompt=None) -> dict:
         import subprocess  # noqa: PLC0415
         from workflow_routing import select
-        _, self.router_decision = select('career.discovery.web',
-            [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
-            task=query, family='research', timeout=min(30,timeout))
+        from router_brain import RouterDecisionError
+        started=__import__('time').monotonic()
+        try:
+            _, self.router_decision = select('career.discovery.web',
+                [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
+                task=query, family='research', timeout=min(45,timeout))
+        except RouterDecisionError as exc:
+            return {'query':query,'results':[],'web_search_observed':False,'executed_queries':[],
+                'cli_version':None,'model':self.model,'error':str(exc),'routing_blocked':True,
+                'raw_events':0,'elapsed_s':__import__('time').monotonic()-started}
+        timeout=timeout-(__import__('time').monotonic()-started)
+        if timeout<=0:
+            return {'query':query,'results':[],'web_search_observed':False,'executed_queries':[],
+                'cli_version':None,'model':self.model,'error':'workflow_deadline_exceeded','routing_blocked':True,
+                'raw_events':0,'elapsed_s':__import__('time').monotonic()-started}
         prompt = prompt or CODEX_RESEARCH_PROMPT.format(query=query, limit=limit)
         # The prompt is passed on STDIN, not argv. On Windows the resolver lands on
         # `codex.CMD` (an npm shim) and cmd.exe treats an embedded newline in an
@@ -605,6 +617,10 @@ class CodexWebSearchProvider(ResearchProvider):
                 doc['queries'].append({**q,'executed':False,'web_search_observed':False,'results':[],'error':'overall search budget exhausted'})
                 continue
             res = self._run_one(exe, q["query"], limit=limit_per_query, timeout=min(timeout,max(1,int(remaining))))
+            if res.get('routing_blocked'):
+                doc['routing_blocked']=True;doc['limitation']=res['error']
+                doc['queries'].append(dict(q,executed=False,web_search_observed=False,results=[],error=res['error']))
+                break
             doc["requests"] += 1
             doc["cli_version"] = res.get("cli_version") or doc["cli_version"]
             entry = dict(q)
@@ -622,7 +638,7 @@ class CodexWebSearchProvider(ResearchProvider):
                 entry["results"] = []
             doc["queries"].append(entry)
         doc["available"] = doc["web_search_observed_queries"] > 0
-        if not doc["available"]:
+        if not doc["available"] and not doc.get("routing_blocked"):
             doc["limitation"] = ("no query produced a web_search tool event; the installed "
                                  "Codex runtime could not be shown to perform live web research")
         return doc

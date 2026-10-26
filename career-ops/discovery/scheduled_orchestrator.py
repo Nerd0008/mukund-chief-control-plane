@@ -125,7 +125,7 @@ DEFAULT_RETRIES = 1
 #: Company Watch / watchlist / LinkedIn/recruiter exports older than this are
 #: reported as stale, never silently treated as fresh findings.
 DEFAULT_INGEST_STALE_HOURS = 48
-DEFAULT_SEMANTIC = "auto"
+DEFAULT_SEMANTIC = "codex"
 DEFAULT_CODEX_ESCALATION = "on"
 DEFAULT_CODEX_BUDGET = 0
 
@@ -772,7 +772,7 @@ def run_region(region: str, args, *, deadline: float | None = None,
     doc["manifest"] = manifest["counts"]
 
     # requirement: refuse to call the lane production-ready without a live mechanism
-    doc["production_ready"] = bool(mechanism["operational"]) and mechanism["coverage_complete"] and not bool(doc.get("dedupe",{}).get("error"))
+    doc["production_ready"] = bool(mechanism["operational"]) and mechanism["coverage_complete"] and not bool(doc.get("dedupe",{}).get("error")) and not funnel_doc.get("routing_blocked",False)
     if not doc["production_ready"]:
         doc["no_go"] = ("no functioning current-web search mechanism was proven in this run; "
                         "the live research lane is NOT production-ready and the schedule must "
@@ -781,6 +781,8 @@ def run_region(region: str, args, *, deadline: float | None = None,
         doc["no_go"] = f"Live research incomplete: {mechanism['queries_completed']} of {mechanism['queries_requested']} requested queries completed; no complete-coverage claim or automatic promotion"
     if doc.get("dedupe",{}).get("error"):
         doc["no_go"]="canonical tracker reconciliation failed; no healthy delivery claim"
+    if funnel_doc.get("routing_blocked"):
+        doc["routing_blocked"]=True;doc["no_go"]="AI routing blocked; no healthy zero-results or production-ready claim"
     write_json_atomic(health_file,doc)
     write_json_atomic(region_dir / "latest.json",doc)
     return doc
@@ -935,7 +937,7 @@ def aggregate(region_docs: dict, args) -> dict:
         },
     }
     unified["summary_line"] = pipeline._summary_line(unified)
-    unified["production_ready"] = bool(operational) and not any(d.get("dedupe",{}).get("error") for d in region_docs.values())
+    unified["production_ready"] = bool(operational) and not any(d.get("dedupe",{}).get("error") or d.get("routing_blocked") for d in region_docs.values())
     if not unified["production_ready"]:
         unified["no_go"] = ("no region proved a functioning current-web search mechanism, so "
                             "the live research lane is NOT production-ready and no cutover is "

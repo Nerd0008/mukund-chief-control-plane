@@ -89,7 +89,7 @@ from title_policy import (  # noqa: E402
 from jd_fetcher import fetch_jd  # noqa: E402
 
 SCHEMA_VERSION = 1
-DEFAULT_SEMANTIC = "auto"          # auto -> deepseek when healthy, else deterministic
+DEFAULT_SEMANTIC = "codex"         # job-search-only default; mandatory router still authorizes
 DEFAULT_RUNTIME_DIR = CONTROL_PLANE / "runtime" / "career-ops" / "discovery"
 
 #: source label used for explicitly supplied candidate records
@@ -1006,34 +1006,43 @@ def _semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
                     deepseek_adapter=None, codex_adapter=None,
                     codex_model: str | None = None,
                     codex_workdir: str | None = None, deadline=None) -> dict:
-    if semantic in ('off','deterministic') or deepseek_adapter is not None or codex_adapter is not None:
-        return _execute_semantic_stage(candidates,semantic=semantic,deepseek_model=deepseek_model,
-            batch_size=batch_size,timeout=timeout,mode=mode,max_tokens=max_tokens,
-            deepseek_adapter=deepseek_adapter,codex_adapter=codex_adapter,
-            codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
-    from workflow_routing import select
-    offers=[]
-    if semantic in ('auto','deepseek'):
-        health=deepseek_probe(deepseek_model)
-        if health.get('available'):
-            offers.append({'id':'deepseek','provider':'deepseek','model':deepseek_model,
-                'capabilities':['classification','structured-json'],'evidence':{'health':'observed-available'}})
-    if semantic in ('auto','codex'):
-        offers.append({'id':'codex','provider':'openai','model':codex_model or 'gpt-6-sol',
-                       'capabilities':['classification','structured-json']})
-    chosen,receipt=select('career.discovery.semantic',offers,
-        task='Classify recruitment relevance, seniority and eligibility from structured job descriptions.',
-        timeout=min(30,timeout))
-    attempts=[]
-    for backend in receipt.get('worker_order',[chosen]):
-        if backend not in {o['id'] for o in offers}:raise ValueError('unauthorized semantic fallback')
-        result=_execute_semantic_stage(candidates,semantic=backend,deepseek_model=deepseek_model,
-            batch_size=batch_size,timeout=timeout,mode=mode,max_tokens=max_tokens,
-            codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
-        attempts.append({'provider':result.get('provider'),'classified':result.get('classified',0)})
-        result.update(requested=semantic,router_decision=receipt,routed_attempts=list(attempts))
-        if result.get('provider')!='none' and (result.get('classified',0)>0 or result.get('classifications')):return result
-    return result
+    from router_brain import RouterDecisionError
+    from workflow_control import operation
+    with operation(timeout) as state:
+        try:
+            if semantic in ('off','deterministic') or deepseek_adapter is not None or codex_adapter is not None:
+                return _execute_semantic_stage(candidates,semantic=semantic,deepseek_model=deepseek_model,
+                    batch_size=batch_size,timeout=min(timeout,state.remaining()),mode=mode,max_tokens=max_tokens,
+                    deepseek_adapter=deepseek_adapter,codex_adapter=codex_adapter,
+                    codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
+            from workflow_routing import select
+            offers=[]
+            if semantic in ('auto','deepseek'):
+                health=deepseek_probe(deepseek_model)
+                if health.get('available'):
+                    offers.append({'id':'deepseek','provider':'deepseek','model':deepseek_model,
+                        'capabilities':['classification','structured-json'],'evidence':{'health':'observed-available'}})
+            if semantic in ('auto','codex'):
+                offers.append({'id':'codex','provider':'openai','model':codex_model or 'gpt-6-sol',
+                               'capabilities':['classification','structured-json']})
+            chosen,receipt=select('career.discovery.semantic',offers,
+                task='Classify recruitment relevance, seniority and eligibility from structured job descriptions.',
+                timeout=state.remaining(45))
+            attempts=[]
+            for backend in receipt.get('worker_order',[chosen]):
+                if backend not in {o['id'] for o in offers}:raise ValueError('unauthorized semantic fallback')
+                result=_execute_semantic_stage(candidates,semantic=backend,deepseek_model=deepseek_model,
+                    batch_size=batch_size,timeout=min(timeout,state.remaining()),mode=mode,max_tokens=max_tokens,
+                    codex_model=codex_model,codex_workdir=codex_workdir,deadline=deadline)
+                attempts.append({'provider':result.get('provider'),'classified':result.get('classified',0)})
+                result.update(requested=semantic,router_decision=receipt,routed_attempts=list(attempts))
+                if result.get('provider')!='none' and (result.get('classified',0)>0 or result.get('classifications')):return result
+            return result
+        except RouterDecisionError as exc:
+            return {'provider':'none','requested':semantic,'classified':0,'classifications':{},
+                    'routing_blocked':True,'error':str(exc),'limitation':'Routing blocked: '+str(exc),
+                    'router_decision':exc.receipt}
+
 
 
 def _execute_semantic_stage(candidates: list, *, semantic: str, deepseek_model: str,
@@ -1427,6 +1436,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         "discovery_quality": quality,
         "title_policy_mode": mode,
         "semantic": {k: v for k, v in semantic_doc.items() if k != "classifications"},
+        "routing_blocked":bool(semantic_doc.get("routing_blocked")),
         "codex": {k: v for k, v in codex_doc.items() if k != "classifications"},
         "prefilter": {"counts": pre["counts"], "mode": pre["mode"]},
         "cross_source_dedupe": {
@@ -1609,6 +1619,7 @@ def compare_modes(candidates: list, *, region: str, semantic: str,
         "modes": {k: {kk: vv for kk, vv in v.items() if kk != "rows"} for k, v in results.items()},
         "recall_delta": delta,
         "semantic": semantic_doc,
+        "routing_blocked":bool(semantic_doc.get("routing_blocked")),
         "safety": {"canonical_workbook_written": False, "manifest_written": False,
                    "tracker_probe_run": False, "applications_submitted": 0},
     }

@@ -27,7 +27,7 @@ def main():
     plugins.discover_plugins()
     require_registration(plugins)
     from agent import auxiliary_client
-    if not getattr(auxiliary_client,'_mandatory_router_installed',False):
+    if not getattr(auxiliary_client,'_mandatory_router_installed',False) or getattr(auxiliary_client,'_mandatory_router_contract',None)!='physical-relay-v1':
         raise RuntimeError('Mandatory auxiliary routing unavailable; gateway startup blocked')
     from hermes_cli.main import main as native_main
     return native_main()

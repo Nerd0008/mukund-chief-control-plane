@@ -12,7 +12,8 @@ import native_router_plugin as plugin
 from router_brain import RouterDecisionError
 
 @pytest.fixture(autouse=True)
-def no_live_provider():
+def no_live_provider(tmp_path,monkeypatch):
+    monkeypatch.setattr(wr,"RECEIPT_ROOT",tmp_path/"workflow-receipts")
     wr._cache.clear()
     class Brain:
         def rank(self,rows,**kwargs):return rows,{'status':'FIXTURE','worker_order':[r.worker_id for r in rows]}
@@ -70,7 +71,8 @@ def test_native_protocol_shape_is_preserved(protocol):
     sdk=SDK();client=wr.RoutedClient(sdk,'native','model')
     args={'model':'model','input':'request'}
     assert getattr(client,protocol).create(**args) is sdk.value
-    assert sdk.calls==[args]
+    assert len(sdk.calls)==1 and {k:v for k,v in sdk.calls[0].items() if k!="timeout"}==args
+    assert 0<sdk.calls[0]["timeout"]<=90
 
 
 def test_async_native_stream_is_returned_unchanged():
@@ -92,7 +94,8 @@ def test_native_middleware_preserves_call_payload():
     request={'messages':[{'role':'user','content':'synthetic'}],'tools':[{'type':'function'}]}
     called=[]
     value=plugin.llm_execution(request,lambda x:called.append(x) or 'response',provider='native',model='model')
-    assert value=='response' and called==[request] and called[0] is request
+    assert value=='response' and len(called)==1 and called[0]['messages'] is request['messages'] and called[0]['tools'] is request['tools']
+    assert 0<called[0]['timeout']<=120
 
 
 def test_native_host_fail_open_middleware_cannot_swallow_router_denial():
@@ -105,14 +108,12 @@ def test_native_host_fail_open_middleware_cannot_swallow_router_denial():
     assert calls==[]
 
 
-def test_auxiliary_resolution_replaces_client_and_preserves_identity():
-    Route=namedtuple('Route','client final_model resolved_provider effective_provider')
-    sdk=SDK();original=Route(sdk,'model','provider','provider')
-    module=SimpleNamespace(_resolve_call_client=lambda *a,**k:original)
-    plugin.install_auxiliary(module)
-    result=module._resolve_call_client('vision',async_mode=False)
-    assert isinstance(result.client,wr.RoutedClient) and result.final_model=='model'
-    assert not result.client._allow_cli
+def test_auxiliary_install_fails_closed_on_missing_physical_contract():
+    resolver=lambda *a,**kw:None
+    module=SimpleNamespace(_resolve_call_client=resolver)
+    with pytest.raises(RuntimeError,match='physical-attempt contract'):
+        plugin.install_auxiliary(module)
+    assert module._resolve_call_client is resolver
 
 
 def test_genai_image_keeps_image_capable_backend():
@@ -179,7 +180,7 @@ def test_discovery_auto_uses_brain_choice_not_local_provider_order():
 
 def test_discovery_fallback_follows_only_brain_authorized_order():
     import ast
-    path=ROOT/'career-ops/discovery/pipeline.py';tree=ast.parse(path.read_text())
+    path=ROOT/'career-ops/discovery/pipeline.py';tree=ast.parse(path.read_text(encoding="utf-8"))
     node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='_semantic_stage')
     calls=[]
     def execute(records,**kw):
@@ -194,7 +195,7 @@ def test_discovery_fallback_follows_only_brain_authorized_order():
 
 def test_linkedin_judge_child_wraps_its_client_before_generation():
     import ast
-    path=ROOT/'career-ops/linkedin_factcheck.py';tree=ast.parse(path.read_text())
+    path=ROOT/'career-ops/linkedin_factcheck.py';tree=ast.parse(path.read_text(encoding="utf-8"))
     assignment=next(n for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='_JUDGE_CHILD' for t in n.targets))
     script=ast.literal_eval(assignment.value)
     ast.parse(script)
@@ -236,7 +237,8 @@ def test_genai_structured_config_stays_on_native_backend():
     config={"response_mime_type":"application/json","response_schema":{"type":"object"}}
     with patch.object(wr,"select",side_effect=choose):
         result=wr.RoutedGenAIClient(sdk).models.generate_content(model="text-model",contents="synthetic",config=config)
-    assert seen==["native"] and result["config"] is config
+    assert seen==["native"] and all(result["config"][k]==v for k,v in config.items())
+    assert "http_options" not in config and 0<result["config"]["http_options"]["timeout"]<=90000
 
 
 def test_missing_cli_usage_is_unknown_not_fabricated_zero():
@@ -302,7 +304,7 @@ def test_router_uses_45_seconds_without_retries():
         def rank(self,rows,**kwargs):calls.append(kwargs['timeout']);return rows,{}
     with patch.object(wr.RouterBrain,'configured',return_value=Brain()):
         wr.select('bounded',[wr.cli_offer()],task='synthetic')
-    assert calls==[45]
+    assert len(calls)==1 and 44<calls[0]<=45
 
 
 def test_explicit_codex_never_initializes_or_calls_native():

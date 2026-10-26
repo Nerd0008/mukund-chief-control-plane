@@ -61,20 +61,26 @@ def _default_model() -> str:
             or "gpt-6-sol")
 
 
+_VERSION_CACHE={}
+
+
 def _codex_version_of(exe: Path) -> Optional[str]:
-    """Return the CLI version string if `exe` is a working Codex CLI, else None."""
+    """Validate identity within the caller budget; cache by executable bytes metadata."""
+    from workflow_control import CURRENT
+    state=CURRENT.get()
+    if state:state.remaining()
     try:
-        if not exe.is_file():
-            return None
-        result = subprocess.run(
-            [str(exe), "--version"], capture_output=True, text=True, timeout=20
-        )
-    except Exception:
-        return None
-    if result.returncode != 0:
-        return None
-    version = (result.stdout or "").strip()
-    return version or None
+        if not exe.is_file():return None
+        info=exe.stat();key=(str(exe),info.st_mtime_ns,info.st_size)
+        if key in _VERSION_CACHE:return _VERSION_CACHE[key]
+        result=subprocess.run([str(exe),'--version'],capture_output=True,text=True,
+            timeout=state.remaining(2) if state else 20,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        if result.returncode!=0:return None
+        version=(result.stdout or '').strip() or None
+        if version:_VERSION_CACHE[key]=version
+        return version
+    except __import__('router_brain').RouterDecisionError:raise
+    except Exception:return None
 
 
 def _version_sort_key(version: str) -> Tuple:
@@ -327,8 +333,10 @@ class CodexExecutionAdapter:
         # Execute
         start_time = time.time()
         try:
-            result = subprocess.run(
+            from workflow_control import run_process
+            result = run_process(
                 cmd,
+                cancel_event=contract.get("cancel_event"),
                 capture_output=True,
                 text=True,
                 timeout=timeout,
@@ -422,6 +430,9 @@ class CodexExecutionAdapter:
                     'resolved_version': self._get_version(),
                 }
             }
+
+        except __import__("workflow_control").ProcessCancelled:
+            return {"status":"CANCELLED","error":"workflow_cancelled","exit_code":-1}
 
         except subprocess.TimeoutExpired:
             elapsed = time.time() - start_time
@@ -538,17 +549,16 @@ class CodexExecutionAdapter:
         }
 
     def _get_version(self) -> str:
-        """Get Codex CLI version."""
+        # No post-timeout subprocess: avoid extending a finished/cancelled call.
         try:
-            result = subprocess.run(
-                [str(self.executable), "--version"],
-                capture_output=True, text=True, timeout=10
-            )
-            if result.returncode == 0:
-                return result.stdout.strip().replace('codex-cli ', '')
-        except Exception:
-            pass
-        return 'unknown'
+            info=self.executable.stat();key=(str(self.executable),info.st_mtime_ns,info.st_size)
+            value=_VERSION_CACHE.get(key)
+            if value:return value.replace('codex-cli ','')
+            from workflow_control import CURRENT
+            state=CURRENT.get()
+            if state and (state.cancel.is_set() or state.deadline<=time.monotonic()):return 'unknown'
+            return (_codex_version_of(self.executable) or 'unknown').replace('codex-cli ','')
+        except Exception:return 'unknown'
 
     def _extract_usage(self, output_lines: List[Dict]) -> Optional[Dict[str, Any]]:
         """Extract provider-returned token usage from JSONL output, if exposed.

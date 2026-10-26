@@ -24,6 +24,7 @@ class RouterDecisionError(RuntimeError):
 
 def cli_failure_code(output):
     """Classify locally; never persist provider bodies, stderr, prompts or tokens."""
+    if output.get('status') == 'CANCELLED': return 'workflow_cancelled'
     if output.get('status') == 'TIMEOUT': return 'router_cli_timeout'
     text=' '.join(str(output.get(k) or '') for k in ('error','stderr','final_message')).lower()
     if any(s in text for s in ('usage limit','quota exceeded','insufficient_quota','insufficient balance','rate limit','too many requests')):
@@ -51,10 +52,11 @@ class RouterBrain:
             from codex_adapter import CodexExecutionAdapter
             return cls(CodexExecutionAdapter('router', executable=config['executable']),
                        receipt_root=POLICY_PATH.parent.parent/'runtime/router-brain/decisions')
+        except RouterDecisionError:raise
         except (OSError, ValueError, KeyError) as exc:
             raise RouterDecisionError('router_brain_not_configured') from exc
 
-    def rank(self, candidates, *, objective, task_family, roles, timeout=45):
+    def rank(self, candidates, *, objective, task_family, roles, timeout=45, cancel_event=None, workflow=None, operation_id=None):
         if not candidates:
             return [], {'status': 'NO_ELIGIBLE_WORKER', 'provider_call_made': False}
         if not 0 < timeout <= 45:
@@ -96,13 +98,15 @@ class RouterBrain:
                    'request_sha256': hashlib.sha256(prompt.encode()).hexdigest(),
                    'model_requested': 'gpt-6.1-sol', 'model_identity_observed': False,
                    'reasoning_effort_requested': 'high', 'selection_policy': 'provider_blind_evidence',
-                   'candidate_count': len(candidates), 'provider_call_made': False}
+                   'candidate_count': len(candidates), 'provider_call_made': False,
+                   'workflow': workflow or 'e3.'+str(task_family), 'operation_id': operation_id}
         try:
             with tempfile.TemporaryDirectory(prefix='hermes-router-') as workspace:
                 output = self.adapter.dispatch({'contract_id': 'router-'+request_id,
                     'objective': prompt, 'model': 'gpt-6.1-sol', 'reasoning_effort': 'high',
                     'working_directory': workspace, 'timeout': timeout,
-                    'allowed_tools': [], 'permission_scope': {'read_only': True}})
+                    'allowed_tools': [], 'permission_scope': {'read_only': True},
+                    **({'cancel_event':cancel_event} if cancel_event is not None else {})})
             receipt['provider_call_made'] = True
             metadata=output.get('dispatch_metadata') or {}
             for key in ('resolved_executable','resolved_version'):

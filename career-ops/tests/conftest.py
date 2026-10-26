@@ -24,11 +24,13 @@ def private_verification_evidence(tmp_path, monkeypatch):
     monkeypatch.setattr(verification_evidence, 'ROOT', tmp_path/'verification-evidence')
 
 @pytest.fixture(autouse=True)
-def offline_router_reasoning(monkeypatch):
+def offline_router_reasoning(monkeypatch,tmp_path):
     # External selection is stubbed explicitly in offline regressions.
     source=pathlib.Path(__file__).resolve().parents[2]/'exec-brain'
     monkeypatch.syspath_prepend(str(source))
     import router_brain
+    import workflow_routing
+    monkeypatch.setattr(workflow_routing,'RECEIPT_ROOT',tmp_path/'workflow-receipts')
     class OfflineBrain:
         def rank(self,candidates,**kwargs):
             return candidates, {'status':'OFFLINE_TEST_ROUTED','provider_call_made':False,'worker_order':[c.worker_id for c in candidates]}
