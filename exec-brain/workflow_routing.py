@@ -71,23 +71,27 @@ _flights = {}
 
 
 def failure_code(exc):
-    code=str(exc)
-    if isinstance(exc,RouterDecisionError) and re.fullmatch(r'[a-z_]{1,80}',code):return code
-    if isinstance(exc,TimeoutError):return 'workflow_deadline_exceeded'
-    status=getattr(exc,'status_code',None)
-    if status==401:return 'provider_auth_failed'
-    if status==403:return 'provider_permission_denied'
-    if status==429:return 'provider_rate_limit'
-    if isinstance(status,int) and status>=500:return 'provider_unavailable'
-    safe={'reference_image_too_large','unsupported_reference_image','too_many_reference_images',
-          'media_response_missing_image','media_response_missing_transcript'}
-    return code if code in safe else 'workflow_execution_failed'
+    from workflow_health import metadata
+    return metadata(exc)['error']
+
+
+def invalidate_route(route):
+    """A failed dispatch must not authorize another attempt from cached health."""
+    provider, model = route.get('selected_provider'), route.get('selected_model')
+    if not provider or not model:
+        return
+    with _lock:
+        for key, value in list(_cache.items()):
+            receipt = value[2]
+            if receipt.get('selected_provider') == provider and receipt.get('selected_model') == model:
+                _cache.pop(key, None)
 
 
 def persist(receipt):
     allowed={'request_id','call_id','operation_id','workflow','stage','status','error','elapsed_seconds',
         'selected_provider','selected_model','offer_set_sha256','cached','coalesced','resolved_executable',
-        'resolved_version','cli_status','cli_exit_code','timeout_seconds'}
+        'resolved_version','cli_status','cli_exit_code','timeout_seconds','http_status',
+        'retry_after_seconds','failure_scope','health_recording','logical_call_id','selected_worker'}
     record={k:v for k,v in receipt.items() if k in allowed}
     try:
         RECEIPT_ROOT.mkdir(parents=True,exist_ok=True)
@@ -97,6 +101,20 @@ def persist(receipt):
 
 
 def select(workflow,offers,*,task='',family='analysis',timeout=45):
+    try:
+        from workflow_health import snapshot
+        checked=[]
+        for offer in offers:
+            health=snapshot(offer.get('provider','transport'),offer.get('model','configured'))
+            if health['available']:
+                checked.append(dict(offer,evidence={**offer.get('evidence',{}),
+                    'recent_failures':health['recent_failures'],'observed_successes':health['observed_successes'],
+                    'latency_seconds':health['latency_seconds'],'last_failure_at':health['last_failure_at']}))
+        offers=checked
+        if not offers:raise RouterDecisionError('no_healthy_compatible_worker')
+    except RouterDecisionError as exc:
+        persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc)))
+        raise
     # Coalesce identical in-flight decisions, not unrelated requests or failures.
     key=hashlib.sha256(json.dumps([workflow,offers,str(task)[:12000]],sort_keys=True,default=str).encode()).hexdigest()
     with operation(timeout) as state:
@@ -131,35 +149,111 @@ def select(workflow,offers,*,task='',family='analysis',timeout=45):
 
 
 def execution_receipt(workflow,route,status,elapsed,error=None):
+    from workflow_health import record_failure, record_success, metadata
     state=CURRENT.get();record=dict(route or {},workflow=workflow,call_id=uuid.uuid4().hex,
         operation_id=state.id if state else None,stage='execution',status=status,elapsed_seconds=round(elapsed,3))
     if error is not None:
-        record.update(getattr(error,'receipt',None) or {});record['error']=failure_code(error)
-    persist(record)
+        invalidate_route(record)
+        record.update(metadata(error))
+        try:record_failure(record,error)
+        except RouterDecisionError:record['health_recording']='unavailable'
+    elif status=='COMPLETED':
+        try:record_success(record,elapsed,time.time()-elapsed)
+        except RouterDecisionError:record['health_recording']='unavailable'
+    try:persist(record)
+    except RouterDecisionError:
+        if error is None:raise
+        __import__('logging').getLogger(__name__).error('Failure receipt unavailable; original execution error preserved')
 
 
-def execute(workflow,route,call):
+def ensure_dispatchable(route):
+    from workflow_health import snapshot
+    if route.get('selected_provider') and route.get('selected_model'):
+        if not snapshot(route['selected_provider'],route['selected_model'])['available']:
+            raise RouterDecisionError('worker_health_changed')
+
+
+def execute(workflow,route,call,*,stream=False):
     started=time.monotonic()
     try:
+        ensure_dispatchable(route)
         value=call()
+        if stream and CURRENT.get() and (hasattr(value,'__iter__') or hasattr(value,'__aiter__')):
+            return ObservedStream(value,CURRENT.get(),workflow,route,started)
         if CURRENT.get():CURRENT.get().remaining()
         execution_receipt(workflow,route,'COMPLETED',time.monotonic()-started);return value
     except BaseException as exc:
-        execution_receipt(workflow,route,'FAILED',time.monotonic()-started,exc);raise
+        from workflow_health import unwrap
+        original=unwrap(exc)
+        execution_receipt(workflow,route,'FAILED',time.monotonic()-started,original)
+        if original is exc:raise
+        raise original from None
 
 
-async def aexecute(workflow,route,call):
+async def aexecute(workflow,route,call,*,stream=False):
     started=time.monotonic()
     try:
         state=CURRENT.get()
+        ensure_dispatchable(route)
         try:value=await asyncio.wait_for(call(),state.remaining()) if state else await call()
         except asyncio.TimeoutError:
             if state:state.cancel.set()
             raise WorkflowTimeoutError('workflow_deadline_exceeded') from None
         if state:state.remaining()
+        if stream and state and (hasattr(value,'__iter__') or hasattr(value,'__aiter__')):
+            return ObservedStream(value,state,workflow,route,started)
         execution_receipt(workflow,route,'COMPLETED',time.monotonic()-started);return value
     except BaseException as exc:
-        execution_receipt(workflow,route,'FAILED',time.monotonic()-started,exc);raise
+        from workflow_health import unwrap
+        original=unwrap(exc)
+        execution_receipt(workflow,route,'FAILED',time.monotonic()-started,original)
+        if original is exc:raise
+        raise original from None
+
+
+from workflow_control import DeadlineStream
+
+
+class ObservedStream(DeadlineStream):
+    """Record actual consumption; a created stream is not a successful model call."""
+    def __init__(self,stream,state,workflow,route,started):
+        super().__init__(stream,state)
+        self.workflow=workflow;self.route=route;self.started=started
+        self._settled=False;self._consuming=False;self._settle_lock=threading.Lock()
+        execution_receipt(workflow,route,'STREAM_STARTED',time.monotonic()-started)
+    def _settle(self,status,error=None):
+        with self._settle_lock:
+            if self._settled:return
+            self._settled=True
+        execution_receipt(self.workflow,self.route,status,time.monotonic()-self.started,error)
+    def __iter__(self):
+        self._consuming=True
+        try:
+            yield from super().__iter__()
+        except GeneratorExit:
+            self._settle('CANCELLED');raise
+        except BaseException as exc:
+            self._settle('FAILED',exc);raise
+        else:self._settle('COMPLETED')
+        finally:self._consuming=False
+    async def __aiter__(self):
+        self._consuming=True
+        try:
+            async for chunk in super().__aiter__():yield chunk
+        except (asyncio.CancelledError,GeneratorExit):
+            self._settle('CANCELLED');raise
+        except BaseException as exc:
+            self._settle('FAILED',exc);raise
+        else:self._settle('COMPLETED')
+        finally:self._consuming=False
+    def close(self):
+        try:super().close()
+        finally:
+            if not self._consuming:self._settle('CANCELLED')
+    async def aclose(self):
+        try:await super().aclose()
+        finally:
+            if not self._consuming:self._settle('CANCELLED')
 
 
 def native_offer(provider,model,capabilities=()):
@@ -239,13 +333,14 @@ class RoutedClient:
         self.last_route=None
     def __getattr__(self,name):return getattr(self._native,name)
     def _route(self,kwargs,timeout=45):
-        offers=[native_offer(self._provider,self._model,['preserve-native-request-protocol'])]
+        from native_controller_router import offers as controller_offers
+        offers=controller_offers(self._provider,self._model,'chat_completions',self._native_kwargs(kwargs))
         if self._allow_cli and _plain(kwargs):offers.append(cli_offer())
         chosen,receipt=select(self._workflow,constrain(offers,self._worker),task=_request_task(kwargs),timeout=timeout)
         self.last_route=receipt
         return chosen
     def _native_kwargs(self,kwargs):
-        out={**self._options,**kwargs,'model':self._model}
+        out={**self._options,**kwargs,'model':(self.last_route or {}).get('selected_model') or self._model}
         # Native SDK takes provider personality through extra_body.
         if 'thinking' in out:
             out['extra_body']={**out.get('extra_body',{}),'thinking':out.pop('thinking')}
@@ -256,7 +351,7 @@ class RoutedClient:
             chosen=self._route(kwargs,timeout=state.remaining(45))
             if chosen=='codex':
                 return execute(self._workflow,self.last_route,lambda:_completion(text_via_codex(kwargs['messages'],timeout=state.remaining()),'gpt-6.1-sol'))
-            response=execute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))))
+            response=execute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
     async def _acreate(self,**kwargs):
         with operation(self._timeout(kwargs),self._worker) as state:
@@ -264,7 +359,7 @@ class RoutedClient:
             if chosen=='codex':
                 text=await aexecute(self._workflow,self.last_route,lambda:cancellable_thread(text_via_codex,kwargs['messages'],timeout=state.remaining()))
                 state.remaining();return _completion(text,'gpt-6.1-sol')
-            response=await aexecute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))))
+            response=await aexecute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
 
     def with_options(self,**kwargs):
@@ -280,12 +375,12 @@ class RoutedClient:
     def _protocol(self,protocol,kwargs):
         with operation(self._timeout(kwargs),self._worker) as state:
             self._authorize_native(kwargs,protocol)
-            value=execute(self._workflow+'.'+protocol,self.last_route,lambda:getattr(self._native,protocol).create(**dict(kwargs,timeout=state.remaining())))
+            value=execute(self._workflow+'.'+protocol,self.last_route,lambda:getattr(self._native,protocol).create(**dict(kwargs,timeout=state.remaining())),stream=kwargs.get('stream',False))
             return finish(value,state,kwargs.get('stream',False))
     async def _aprotocol(self,protocol,kwargs):
         with operation(self._timeout(kwargs),self._worker) as state:
             await cancellable_thread(self._authorize_native,kwargs,protocol)
-            value=await aexecute(self._workflow+'.'+protocol,self.last_route,lambda:getattr(self._native,protocol).create(**dict(kwargs,timeout=state.remaining())))
+            value=await aexecute(self._workflow+'.'+protocol,self.last_route,lambda:getattr(self._native,protocol).create(**dict(kwargs,timeout=state.remaining())),stream=kwargs.get('stream',False))
             return finish(value,state,kwargs.get('stream',False))
     def _messages(self,**kwargs):return self._protocol('messages',kwargs)
     def _responses(self,**kwargs):return self._protocol('responses',kwargs)

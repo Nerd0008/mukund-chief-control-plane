@@ -1,6 +1,26 @@
 """Native Hermes routing integration via execution middleware, not observer hooks."""
 import functools
 import inspect
+import threading,time
+
+_request_budgets={}
+_budget_lock=threading.Lock()
+
+def request_budget(context,timeout):
+    from workflow_control import seconds,WorkflowTimeoutError
+    key=context.get("api_request_id")
+    if not isinstance(key,str) or not key:return seconds(timeout,120)
+    now=time.monotonic()
+    with _budget_lock:
+        for old,(deadline,created) in list(_request_budgets.items()):
+            if now-created>86400:_request_budgets.pop(old,None)
+        if key not in _request_budgets:
+            if len(_request_budgets)>=8192:raise RouterDecisionError("controller_request_capacity_exceeded")
+            _request_budgets[key]=(now+seconds(timeout,120),now)
+        remaining=_request_budgets[key][0]-now
+    if remaining<=0:raise WorkflowTimeoutError("workflow_deadline_exceeded")
+    return min(remaining,seconds(timeout,120))
+
 from types import SimpleNamespace
 from workflow_routing import select, RoutedClient, _request_task
 from router_brain import RouterDecisionError
@@ -12,16 +32,19 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
     from workflow_control import operation,finish
     from workflow_routing import execute
     try:
-        with operation(request.get('timeout') or 120) as state:
+        with operation(request_budget(context,request.get('timeout') or 120)) as state:
+            from native_controller_router import offers
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
-                [{'id':'native','provider':provider,'model':model,
-                  'capabilities':['preserve-native-tool-and-stream-protocol']}],
+                offers(provider,model,api_mode,request),
                 task=_request_task(request),timeout=state.remaining(45))
             value=execute('hermes.native.'+str(api_mode or 'chat'),receipt,
-                lambda:next_call(dict(request,timeout=state.remaining())))
+                lambda:next_call(dict(request,model=receipt.get('selected_model') or model,timeout=state.remaining())),
+                stream=request.get('stream',False))
             return finish(value,state,request.get('stream',False))
     except Exception as exc:
         from hermes_cli.middleware import _DownstreamExecutionError
+        if isinstance(exc, _DownstreamExecutionError):
+            raise
         raise _DownstreamExecutionError(exc) from None
 
 
@@ -40,10 +63,11 @@ def install_auxiliary(module):
         state=CURRENT.get()
         if state is None:raise RouterDecisionError('auxiliary_operation_context_missing')
         workflow='hermes.auxiliary.'+str((module._RELAY_AUX_CALL_CONTEXT.get() or {}).get('task') or 'text')
-        _,receipt=select(workflow,[native_offer(provider or 'native',str(kwargs.get('model') or 'configured'),
-            ['preserve-native-'+str(api_mode or 'chat_completions')])],
+        from native_controller_router import offers
+        _,receipt=select(workflow,offers(provider or 'native',str(kwargs.get('model') or 'configured'),
+            api_mode or 'chat_completions',kwargs),
             task=_request_task(kwargs),timeout=state.remaining(45))
-        request=dict(kwargs,timeout=state.remaining())
+        request=dict(kwargs,model=receipt.get('selected_model') or kwargs.get('model'),timeout=state.remaining())
         return request,receipt
     old_sync=module._relay_sync_completion;old_async=module._relay_async_completion
     @functools.wraps(old_sync)
@@ -52,14 +76,14 @@ def install_auxiliary(module):
         if state is None:
             with operation(kwargs.get('timeout') or 90):return sync(client,kwargs,**options)
         request,receipt=authorize(client,kwargs,options.get('provider'),options.get('api_mode'))
-        result=execute(receipt.get('workflow','hermes.auxiliary'),receipt,lambda:old_sync(client,request,**options));return finish(result,state,kwargs.get('stream',False))
+        result=execute(receipt.get('workflow','hermes.auxiliary'),receipt,lambda:old_sync(client,request,**options),stream=kwargs.get('stream',False));return finish(result,state,kwargs.get('stream',False))
     @functools.wraps(old_async)
     async def asynchronous(client,kwargs,**options):
         state=CURRENT.get()
         if state is None:
             with operation(kwargs.get('timeout') or 90):return await asynchronous(client,kwargs,**options)
         request,receipt=await cancellable_thread(authorize,client,kwargs,options.get('provider'),options.get('api_mode'))
-        result=await aexecute(receipt.get('workflow','hermes.auxiliary'),receipt,lambda:old_async(client,request,**options));return finish(result,state,kwargs.get('stream',False))
+        result=await aexecute(receipt.get('workflow','hermes.auxiliary'),receipt,lambda:old_async(client,request,**options),stream=kwargs.get('stream',False));return finish(result,state,kwargs.get('stream',False))
     module._relay_sync_completion=sync;module._relay_async_completion=asynchronous
     old_sync_stream=module._relay_sync_stream
     @functools.wraps(old_sync_stream)
@@ -68,7 +92,8 @@ def install_auxiliary(module):
         if state is None:
             with operation(kwargs.get('timeout') or 90):return sync_stream(client,kwargs,**options)
         request,receipt=authorize(client,kwargs,options.get('provider'),options.get('api_mode'))
-        return finish(old_sync_stream(client,request,**options),state,True)
+        return finish(execute(receipt.get('workflow','hermes.auxiliary'),receipt,
+            lambda:old_sync_stream(client,request,**options),stream=True),state,True)
     module._relay_sync_stream=sync_stream
     for name in ('_call_llm_impl','_async_call_llm_impl'):
         original=getattr(module,name)
@@ -127,6 +152,8 @@ def install_failure_copy(module):
             return 'This workflow stopped at its elapsed-time limit or cancellation. It was not retried automatically. Check any completed actions before resending.'
         if str(code).startswith('bounded_text_worker_'):
             return 'The Codex content worker failed during generation ('+code+'). It was not retried automatically. No unverified document will be delivered.'
+        if code in ('no_healthy_compatible_worker','worker_health_changed'):
+            return 'No healthy model compatible with this request is currently available. The router stopped without replaying actions or bypassing model limits.'
         messages={
             'router_cli_timeout':'The Codex router reached its bounded time limit.',
             'router_cli_usage_limit':'The Codex router reported a usage or rate limit.',

@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "qualification_ttl_seconds": 604800,
+  "provider": "nous",
+  "api_mode": "chat_completions",
+  "models": [
+    {
+      "model": "qwen/qwen3-235b-a22b-thinking-2507",
+      "context_length": 128000,
+      "input_modalities": [
+        "text"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p"
+      ]
+    },
+    {
+      "model": "meta-llama/llama-3.3-70b-instruct",
+      "context_length": 131072,
+      "input_modalities": [
+        "text"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ]
+    },
+    {
+      "model": "meituan/longcat-2.5-preview:free",
+      "context_length": 1048576,
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p"
+      ]
+    },
+    {
+      "model": "meituan/longcat-2.0:free",
+      "context_length": 1048756,
+      "input_modalities": [
+        "text"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p"
+      ]
+    },
+    {
+      "model": "stepfun/step-3.7-flash:free",
+      "context_length": 262144,
+      "input_modalities": [
+        "text",
+        "image",
+        "video"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p"
+      ]
+    },
+    {
+      "model": "reflection/beam-1.0-501b-a23b:free",
+      "context_length": 262144,
+      "input_modalities": [
+        "text"
+      ],
+      "parameters": [
+        "max_tokens",
+        "parallel_tool_calls",
+        "reasoning",
+        "reasoning_effort",
+        "response_format",
+        "structured_outputs",
+        "tool_choice",
+        "tools"
+      ]
+    },
+    {
+      "model": "ornith/ornith-1.5-122b:free",
+      "context_length": 262144,
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ]
+    }
+  ]
+}

@@ -59,7 +59,7 @@ def constrain(offers,worker=None):
     state=CURRENT.get()
     worker=worker or (state.worker if state else None)
     if worker in (None,'auto'):return offers
-    result=[offer for offer in offers if offer['id']==worker]
+    result=[offer for offer in offers if offer['id']==worker or (worker=='native' and offer['id'].startswith('native-'))]
     if not result:raise RouterDecisionError('worker_preference_incompatible')
     return result
 
@@ -104,7 +104,10 @@ class DeadlineStream:
                 except StopIteration:self._remaining();return
                 except Exception:self._remaining();raise
                 self._remaining();yield chunk
-        finally:self.close()
+        finally:
+            if __import__('sys').exc_info()[0] is not None:
+                with __import__('contextlib').suppress(BaseException):self.close()
+            else:self.close()
     async def aclose(self):
         with self._close_lock:
             if self._closed:return
@@ -121,7 +124,10 @@ class DeadlineStream:
                 except StopAsyncIteration:return
                 except asyncio.TimeoutError:raise WorkflowTimeoutError('workflow_deadline_exceeded') from None
                 self.state.remaining();yield chunk
-        finally:await self.aclose()
+        finally:
+            if __import__('sys').exc_info()[0] is not None:
+                with __import__('contextlib').suppress(BaseException):await self.aclose()
+            else:await self.aclose()
     def __enter__(self):return self
     def __exit__(self,*args):self.close()
     async def __aenter__(self):return self
@@ -130,6 +136,9 @@ class DeadlineStream:
 
 def finish(value,state,stream=False):
     state.remaining()
+    if isinstance(value,DeadlineStream):
+        value.state.deadline=min(value.state.deadline,state.deadline)
+        return value
     return DeadlineStream(value,state) if stream and (hasattr(value,'__iter__') or hasattr(value,'__aiter__')) else value
 
 

@@ -43,3 +43,11 @@ def private_direct_search_retry_state(tmp_path, monkeypatch):
     # pending candidate or query-progress files, regardless of test ordering.
     import codex_entry_level_search
     monkeypatch.setattr(codex_entry_level_search, 'SEARCH_STATE_DIR', tmp_path/'direct-search')
+
+
+@pytest.fixture(autouse=True)
+def private_controller_health(tmp_path,monkeypatch):
+    source=pathlib.Path(__file__).resolve().parents[2]/'exec-brain'
+    monkeypatch.syspath_prepend(str(source))
+    import workflow_health
+    monkeypatch.setattr(workflow_health,'DB_PATH',tmp_path/'native-health.sqlite3')
