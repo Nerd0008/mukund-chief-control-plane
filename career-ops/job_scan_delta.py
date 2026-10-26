@@ -283,6 +283,31 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
     return code, "\n".join(outputs), "\n".join(errors), summary
 
 
+def failure_summary(coverage: dict) -> str:
+    """Expose only actionable categories/counts, never a raw JSON/provider tail."""
+    from collections import Counter
+    failures = Counter()
+    completed = total = 0
+    allowed = {'router_cli_timeout','router_cli_failed','router_cli_usage_limit',
+               'router_cli_auth','router_cli_configuration','workflow_deadline_exceeded',
+               'not_attempted_after_routing_block','batch elapsed budget exhausted'}
+    for batch in coverage.get('batches', []):
+        for result in (batch.get('coverage') or {}).get('query_receipts', []):
+            for query in result.get('query_receipts', []):
+                total += 1
+                completed += bool(query.get('complete'))
+                if not query.get('complete'):
+                    reason = query.get('error')
+                    failures[reason if reason in allowed else 'search_worker_failed'] += 1
+        counts = (batch.get('reconciliation') or {}).get('counts') or {}
+        if counts.get('verification_budget_exhausted'):
+            failures['verification_budget_exhausted'] += counts['verification_budget_exhausted']
+        if batch.get('exit_code') and not failures:
+            failures['search_or_tracker_failure'] += 1
+    detail = ', '.join(f'{key}={value}' for key, value in sorted(failures.items()))
+    return f'{completed}/{total} queries completed; {detail or "search incomplete"}. Successful queries are retained for bounded retry; tracker writes require complete coverage.'
+
+
 def write_ok(stdout: str, stderr: str, code: int) -> tuple[bool, str]:
     """Did the guarded writer actually persist this run's rows?
 
@@ -400,7 +425,7 @@ def main() -> int:
         ok, why = write_ok(out, err, code)
         if code not in (0,):
             print("Job scan FAILED: the search did not complete.\n"
-                  f"exit {code}; {(err or out).strip()[-400:]}")
+                  f"exit {code}; {failure_summary(coverage_summary)}")
             return 3
         broken = search_failed(out)
         if broken:

@@ -30,7 +30,9 @@ class CREDENTIAL(ctypes.Structure):
     ]
 
 
-_advapi32 = ctypes.windll.advapi32
+# Independent function objects: another credential helper must not replace
+# our CredReadW pointer types through ctypes.windll's shared DLL cache.
+_advapi32 = ctypes.WinDLL("Advapi32.dll", use_last_error=True)
 _advapi32.CredReadW.restype = wt.BOOL
 _advapi32.CredReadW.argtypes = [wt.LPCWSTR, wt.DWORD, wt.DWORD,
                                 ctypes.POINTER(ctypes.POINTER(CREDENTIAL))]

@@ -52,7 +52,7 @@ def test_offline_production_dry_run_has_distinct_batches_and_exact_accounting(tm
           {'location':'London, United Kingdom','job_title':'Senior SOC Analyst','url':'https://jobs.example/senior'},
           {'location':'London, United Kingdom','job_title':'Intern','url':''}]
     prompts=[];fetches=[]
-    def fake_run(prompt,timeout):prompts.append(prompt);return json.dumps(rows)
+    def fake_run(prompt,timeout,**kwargs):prompts.append(prompt);return json.dumps(rows)
     monkeypatch.setattr(search,'run_codex',fake_run)
     def fake_fetch(url):fetches.append(url);return {'text':'Open role.','is_closed':False,'vacancy_status':{'state':'OPEN','evidence':'fixture active posting'}}
     monkeypatch.setattr(search,'fetch_jd',fake_fetch)

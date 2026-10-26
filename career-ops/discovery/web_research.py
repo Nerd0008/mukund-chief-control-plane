@@ -508,15 +508,47 @@ class CodexWebSearchProvider(ResearchProvider):
                 "installed runtime cannot be shown to perform live web research")
         return out
 
+    def authorize_batch(self, exe, queries, timeout):
+        """One brain decision for this exact, time-bounded read-only query set."""
+        from contextlib import contextmanager
+        import time
+        from workflow_routing import select
+        @contextmanager
+        def scope():
+            started = time.monotonic()
+            previous = getattr(self, '_batch_scope', None)
+            _, receipt = select('career.discovery.web',
+                [{'id':'codex','provider':'openai','model':self.model,
+                  'capabilities':['web-search','read-only']}],
+                task='Bounded query batch: ' + json.dumps(list(queries)),
+                family='research', timeout=min(45, timeout))
+            self._batch_scope = {'queries': frozenset(queries), 'exe': str(exe),
+                'binding': (self.model, self.sandbox, self.workdir),
+                'deadline': started + timeout, 'receipt': receipt}
+            try:
+                yield
+            finally:
+                self._batch_scope = previous
+        return scope()
+
     def _run_one(self, exe, query: str, *, limit: int, timeout: int, prompt=None) -> dict:
         import subprocess  # noqa: PLC0415
         from workflow_routing import select
         from router_brain import RouterDecisionError
         started=__import__('time').monotonic()
         try:
-            _, self.router_decision = select('career.discovery.web',
-                [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
-                task=query, family='research', timeout=min(45,timeout))
+            scope = getattr(self, '_batch_scope', None)
+            if scope is not None:
+                if (__import__('time').monotonic() >= scope['deadline'] or query not in scope['queries']
+                    or str(exe) != scope['exe']
+                    or (self.model, self.sandbox, self.workdir) != scope['binding']):
+                    raise RouterDecisionError('query_outside_authorized_batch')
+                timeout = min(timeout, scope['deadline'] - __import__('time').monotonic())
+                self.router_decision = scope['receipt']
+            else:
+                _, self.router_decision = select('career.discovery.web',
+                    [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
+                    task=query, family='research', timeout=min(45,timeout))
         except RouterDecisionError as exc:
             return {'query':query,'results':[],'web_search_observed':False,'executed_queries':[],
                 'cli_version':None,'model':self.model,'error':str(exc),'routing_blocked':True,

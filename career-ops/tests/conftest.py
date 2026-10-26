@@ -35,3 +35,11 @@ def offline_router_reasoning(monkeypatch,tmp_path):
         def rank(self,candidates,**kwargs):
             return candidates, {'status':'OFFLINE_TEST_ROUTED','provider_call_made':False,'worker_order':[c.worker_id for c in candidates]}
     monkeypatch.setattr(router_brain.RouterBrain,'configured',classmethod(lambda cls:OfflineBrain()))
+
+
+@pytest.fixture(autouse=True)
+def private_direct_search_retry_state(tmp_path, monkeypatch):
+    # Direct-search integration tests must never consume/delete the owner's
+    # pending candidate or query-progress files, regardless of test ordering.
+    import codex_entry_level_search
+    monkeypatch.setattr(codex_entry_level_search, 'SEARCH_STATE_DIR', tmp_path/'direct-search')

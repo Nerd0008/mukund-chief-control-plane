@@ -313,12 +313,18 @@ def is_entry_level(title: str, entry_markers=None) -> bool:
                 and tier_a_signals(title)['discipline_families'])
 
 
+class SearchUnavailable(RuntimeError):
+    def __init__(self, evidence):
+        super().__init__('search unavailable or live web_search not observed')
+        self.evidence = evidence
+
+
 class SearchResponse(str):
     def __new__(cls,text,evidence):
         response=super().__new__(cls,text);response.evidence=evidence;return response
 
 
-def run_codex(prompt: str, timeout: int = 600) -> str:
+def run_codex(prompt: str, timeout: int = 600, *, progress_path=None, persist_progress=True) -> str:
     """Run each requested query in its own observed worker within one budget.
 
     A search event from one query cannot certify the other five queries. Keep
@@ -334,40 +340,63 @@ def run_codex(prompt: str, timeout: int = 600) -> str:
     single_legacy_call = not queries
     queries = queries or ['bounded direct career search']
     started = time.monotonic()
+    from contextlib import nullcontext
+    import query_progress
+    from router_brain import RouterDecisionError
+    key = query_progress.signature(prompt, CODEX_MODEL)
+    saved = query_progress.load(progress_path, key, queries)
     results, receipts = [], []
-    for index, query in enumerate(queries):
-        remaining = timeout - (time.monotonic() - started)
-        if remaining <= 1:
-            receipts.append({'requested_query': query, 'complete': False,
-                             'error': 'batch elapsed budget exhausted', 'executed_queries': []})
-            continue
-        worker_prompt = prompt
-        if not single_legacy_call:
-            worker_prompt = re.sub(query_pattern,
-                lambda match: f'1. "{query}"' if match.group(1) == query else '', prompt, flags=re.M)
-            worker_prompt += '\nExecute EXACTLY this one query: ' + query + '\n'
-        per_query = max(1, min(int(remaining), max(1, int(remaining / (len(queries) - index)))))
-        result = provider._run_one(executable, query, limit=100,
-                                   timeout=per_query, prompt=worker_prompt)
-        complete = bool(result.get('web_search_observed')) and not result.get('error')
-        receipts.append({'requested_query': query, 'complete': complete,
-                         'web_search_observed': bool(result.get('web_search_observed')),
-                         'executed_queries': result.get('executed_queries') or [],
-                         'raw_events': result.get('raw_events', 0),
-                         'error': result.get('error'), 'results_returned': len(result.get('results') or [])})
-        print(f"  query {index + 1}/{len(queries)}: {'complete' if complete else 'INCOMPLETE'}; {len(result.get('results') or [])} records", flush=True)
-        if complete:
-            results.extend(result.get('results') or [])
+    batch = provider.authorize_batch(executable, queries, timeout) if hasattr(provider, 'authorize_batch') else nullcontext()
+    try:
+        with batch:
+            for index, query in enumerate(queries):
+                resumed = query in saved
+                remaining = timeout - (time.monotonic() - started)
+                if remaining <= 1:
+                    receipts.extend({'requested_query': q, 'complete': False,
+                        'error': 'batch elapsed budget exhausted', 'executed_queries': []} for q in queries[index:])
+                    break
+                worker_prompt = prompt
+                if not single_legacy_call:
+                    worker_prompt = re.sub(query_pattern,
+                        lambda match: f'1. "{query}"' if match.group(1) == query else '', prompt, flags=re.M)
+                    worker_prompt += '\nExecute EXACTLY this one query: ' + query + '\n'
+                pending = sum(q not in saved for q in queries[index:])
+                per_query = max(1, min(int(remaining), max(1, int(remaining / max(1, pending)))))
+                result = saved[query] if resumed else provider._run_one(executable, query, limit=100,
+                    timeout=per_query, prompt=worker_prompt)
+                complete = bool(result.get('web_search_observed')) and not result.get('error')
+                receipts.append({'requested_query': query, 'complete': complete, 'resumed': resumed,
+                    'observed_at': result.get('observed_at'),
+                    'web_search_observed': bool(result.get('web_search_observed')),
+                    'executed_queries': result.get('executed_queries') or [],
+                    'raw_events': result.get('raw_events', 0), 'error': result.get('error'),
+                    'results_returned': len(result.get('results') or [])})
+                print(f"  query {index + 1}/{len(queries)}: {'complete' if complete else 'INCOMPLETE'}; {len(result.get('results') or [])} records", flush=True)
+                if complete:
+                    results.extend(result.get('results') or [])
+                    if not resumed:
+                        saved[query] = {k: result.get(k) for k in ('results','web_search_observed','executed_queries','raw_events')}
+                        saved[query]['observed_at'] = time.time()
+                        receipts[-1]['observed_at'] = saved[query]['observed_at']
+                        if persist_progress:
+                            query_progress.save(progress_path, key, saved)
+                if result.get('routing_blocked'):
+                    receipts.extend({'requested_query': q, 'complete': False,
+                        'error': 'not_attempted_after_routing_block', 'executed_queries': []} for q in queries[index+1:])
+                    break
+    except RouterDecisionError as exc:
+        receipts = [{'requested_query': q, 'complete': False, 'error': str(exc),
+                     'executed_queries': []} for q in queries]
     completed = sum(receipt['complete'] for receipt in receipts)
-    if not completed:
-        raise RuntimeError('search unavailable or live web_search not observed: ' +
-                           '; '.join(str(r.get('error') or 'unobserved search') for r in receipts))
-    evidence = {'web_search_observed': True, 'queries_requested': len(queries),
+    evidence = {'web_search_observed': bool(completed), 'queries_requested': len(queries),
                 'queries_completed': completed, 'coverage_complete': completed == len(queries),
                 'query_receipts': receipts, 'retrieved_records': results,
                 'executed_queries': [q for r in receipts for q in r.get('executed_queries', [])],
                 'raw_events': sum(r.get('raw_events') or 0 for r in receipts),
                 'elapsed_s': round(time.monotonic() - started, 2)}
+    if not completed:
+        raise SearchUnavailable(evidence)
     return SearchResponse(json.dumps(results, ensure_ascii=True), evidence)
 
 
@@ -534,8 +563,13 @@ def main() -> int:
         prompt = PROMPT_TEMPLATE.format(region=REGION_LABEL[args.region], queries=qtext)
         print(f"\n--- batch {bi}: {len(queries)} queries ---")
         try:
-            out = run_codex(prompt, timeout=args.timeout) if bi>=0 else json.dumps(pending_records)
+            progress_path = SEARCH_STATE_DIR / f'{args.region}-query-progress-{bi}.json'
+            out = run_codex(prompt, timeout=args.timeout, progress_path=progress_path,
+                            persist_progress=not args.dry_run) if bi>=0 else json.dumps(pending_records)
         except (RuntimeError,OSError) as exc:
+            if isinstance(exc, SearchUnavailable):
+                print('SEARCH_COVERAGE ' + json.dumps({'coverage_complete':False,
+                    'query_receipts':[{'batch':bi, **exc.evidence}], 'market_exhausted':False}))
             print('SEARCH_FAILED '+str(exc),file=sys.stderr)
             return 2
         except subprocess.TimeoutExpired:
@@ -710,6 +744,8 @@ def main() -> int:
     print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha,'selected_batch_indices':selected_batches,'execution_evidence':execution_evidence,'canonical_outcomes':probe.get('outcomes',[]),'candidate_evidence':evidence_files},ensure_ascii=True))
     print(f"Canonical plan: {counts['new_candidates']} proposed NEW rows; {duplicates} duplicate rows avoided.")
     def advance():
+        for batch_id in completed_batches:
+            (SEARCH_STATE_DIR / f'{args.region}-query-progress-{batch_id}.json').unlink(missing_ok=True)
         if args.batch_offset<0 and completed_batches:
             save_cursor(cursor,(completed_batches[-1]+1)%len(batches))
     if not collected:
