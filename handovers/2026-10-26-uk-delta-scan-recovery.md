@@ -42,3 +42,11 @@ The same broad run exposed nine image protocol/content-stop test failures from `
 - Final combined regression: **2,327 passed, 0 failed**, 253.91 seconds. Seventeen existing warnings (Pillow deprecation and a helper-class collection warning).
 - Cron remains enabled every 120 minutes; next scheduled occurrence recorded as 2026-10-26 12:48:38 UTC (London). Historical error status was not reset.
 - Runtime-copy activation of the two independently reproduced credential ABI fixes is recorded after deployment; the search cron already invokes canonical repository source directly.
+
+## Activation
+
+Repair commit: `549be2d76b755bda8cfbb2009dfec1f2662dedd4`, pushed to the approved feature branch. The canonical cron entrypoint is already the repository script; its launcher and schedule needed no edit.
+
+Only `deepseek_keyaccess.py` and `gemini_keyaccess.py` were deployed, after verifying no concurrent runtime source changes. Backup: `e3-deploy-20261026T121109Z`. Installed/source hashes match and independent Windows credential pointer signatures pass without reading credential values or calling providers.
+
+Gateway reloaded with the existing hidden owner-context launcher. New PID 15720 is guarded/alive; Discord connected at 12:11:52 UTC and the existing verified CV attachment guard remains active. No visible console was launched. Historical cron errors remain available; no success counter/status was fabricated. No main merge.
