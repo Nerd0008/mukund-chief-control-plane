@@ -19,3 +19,13 @@ Twelve new regressions cover both evidence directions, complete/partial batches,
 Private campaign logs, original source evidence, workbook backup and per-run outcomes are under Documents/Codex/uk-search-overnight-20261026. None are committed. The originally found candidate was requeued from its original public discovery evidence with fresh verification required; it is not an application submission or restoration of a deleted owner row.
 
 No main merge, Gmail mutation, outreach, applications, CV generation, Calendar action, LinkedIn publishing, quota reset redemption or provider change.
+
+## Failed-stage duplicate poisoning and successful live delivery
+
+Further live investigation proved that the retained Leonardo posting existed only in `uk-cyber-job-tracker.write-tmp.xlsx`, not a real archive or shortlist ledger. A failed canonical replace had left that verified stage behind, and the broad archive glob harvested its URL as if it were committed history. This caused a false `duplicate-cross-month` and prevented a genuine new row from being delivered.
+
+Three new tests reproduced write-stage/rollback-stage false dedupe and failed-replace cleanup. The writer now excludes exactly its known `.write-tmp.xlsx` / `.rollback-tmp.xlsx` transaction filenames from archive evidence. After an OSError replacing the canonical workbook, it attempts to remove only its own stage with the exact staged hash; if cleanup itself fails, archive exclusion still protects future discovery. Actual archives, owner-deletion history and shortlist ledgers remain authoritative. The original failed stage was preserved privately before repair. Writer/integrity/search regressions: 126 passed.
+
+The original candidate was freshly revalidated and applied with the existing direct search pending-delivery path (`--batches 0`) under the same exclusive scan lock. This was not claimed as an additional live-search batch. Confirmed result: applied=true, appended=1, duplicates=0, rejected=0, refreshed=0, passed_deleted=0, listing_deleted=0; canonical workbook now 166 rows and verification PASS. Existing status changes caused by this apply: 0.
+
+New row: Leonardo UK, Graduate Product Security Engineer, requisition R0034173, official employer URL. Availability remains UNCONFIRMED and deadline UNKNOWN. No open-vacancy or deadline claim was manufactured. The campaign's initial accepted-delivery JSON records the exact URL/outcome privately. Automation remains active; searches have the hard 08:00 London cutoff. Laptop was on AC, with standby already disabled on AC; no power setting was changed.

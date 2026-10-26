@@ -438,6 +438,9 @@ def build_cross_month_index(profile: dict, cfg: dict, extra_dirs: list[str] | No
             continue
         for glob in default_archive_globs(cfg["region"]):
             for wb_path in sorted(d.glob(glob)):
+                # Transaction stages are not committed archives, even after a crash.
+                if wb_path.name.casefold().endswith(('.write-tmp.xlsx', '.rollback-tmp.xlsx')):
+                    continue
                 before = len(url_keys)
                 try:
                     wb = openpyxl.load_workbook(wb_path, data_only=False, read_only=True)
@@ -1092,7 +1095,17 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
         return result
 
     staged_hash=sha256_file(tmp_path)
-    tmp_path.replace(tracker_path)
+    try:
+        tmp_path.replace(tracker_path)
+    except OSError:
+        # Never let a failed commit become cross-month duplicate evidence.
+        # Remove only the verified stage this transaction created.
+        try:
+            if tmp_path.exists() and sha256_file(tmp_path) == staged_hash:
+                tmp_path.unlink()
+        except OSError:
+            pass  # archive discovery still explicitly excludes stage paths
+        raise
     after = verify_workbook(tracker_path, cfg, expect_data_rows=expected_rows,
                            expect_appended=len(appends), pre_owned=None if region == 'uk' else pre_owned)
     result.update({
