@@ -99,67 +99,12 @@ def _load_recent_feedback(limit: int = 10) -> list[str]:
 
 
 def _load_persona_block() -> str:
-    """Build a block describing who the user is and how they write."""
-    knowledge_dir = Path.home() / "Documents" / "Chief of staff" / ".mukund_os"
-    profile = _read_json(knowledge_dir / "profile.json", {})
-    voice_profile = _read_json(knowledge_dir / "voice_profile.json", {})
-    lessons = _read_json(knowledge_dir / "lessons.json", [])
-
-    if not profile and not lessons:
-        return ""
-
-    lines = []
-    name = profile.get("name")
-    if name:
-        lines.append(f"- Name: {name}")
-    if profile.get("career_goal"):
-        lines.append(f"- Career goal: {profile['career_goal']}")
-
-    writing_prefs = list(profile.get("writing_preferences", []))
-    vocab_avoid = list(profile.get("vocabulary_to_avoid", []))
-    public_persona = list(profile.get("public_persona", []))
-
-    for lesson in lessons:
-        category = lesson.get("category")
-        text = lesson.get("text")
-        if not text:
-            continue
-        if category == "writing_preference" and text not in writing_prefs:
-            writing_prefs.append(text)
-        elif category == "vocabulary_to_avoid" and text not in vocab_avoid:
-            vocab_avoid.append(text)
-
-    if public_persona:
-        lines.append("- How I want to come across publicly: " + " ".join(public_persona))
-    if writing_prefs:
-        lines.append("- My writing voice and preferences: " + " ".join(writing_prefs))
-    if vocab_avoid:
-        lines.append("- Things to NEVER do or say: " + " ".join(vocab_avoid))
-
-    if voice_profile:
-        for key, label in (
-            ("identity_summary", "- Core identity"),
-            ("values", "- Values"),
-            ("points_of_view", "- Personal viewpoints"),
-            ("voice_rules", "- Voice rules"),
-            ("humour_rules", "- Humour rules"),
-            ("public_boundaries", "- Public-use rules"),
-            ("private_boundaries", "- Private boundaries that must never be used"),
-        ):
-            value = voice_profile.get(key)
-            if isinstance(value, list) and value:
-                lines.append(label + ": " + " ".join(str(item) for item in value))
-            elif isinstance(value, str) and value:
-                lines.append(label + ": " + value)
-
-    if not lines:
-        return ""
-
-    body = "\n".join(lines)
-    return f"""
-    About the author (write this post AS ME, in first person "I", not as a ghostwriter describing me):
-{body}
-    """
+    """Use the same authoritative professional sources as the native lead."""
+    from hermes_owner_context import retrieve
+    context,evidence=retrieve('Write my LinkedIn post')
+    if not context or not all(e.get('complete') for e in evidence):
+        raise RuntimeError('LinkedIn authoritative professional context incomplete')
+    return context
 
 
 def _next_hook_style() -> str:
@@ -206,11 +151,11 @@ def _get_gemini_client(worker=None):
     from workflow_routing import RoutedGenAIClient
     worker=worker or CONTENT_WORKER.get()
     if worker=='codex':return RoutedGenAIClient(None,worker='codex')
-    if not GEMINI_API_KEY:return None
+    if not GEMINI_API_KEY:return RoutedGenAIClient(None,worker=worker)
     try:
         from google import genai
         return RoutedGenAIClient(genai.Client(api_key=GEMINI_API_KEY),worker=worker)
-    except ImportError:return None
+    except ImportError:return RoutedGenAIClient(None,worker=worker)
 
 
 def generate_linkedin_content(
@@ -218,6 +163,7 @@ def generate_linkedin_content(
     source_type: str = "LinkedIn prompt",
     narrative_anchor: str = "",
     career_signal: str = "",
+    source_evidence: tuple | None = None,
 ) -> str:
     """Generate a LinkedIn post in the old bot's style using Gemini."""
     client = _get_gemini_client()
@@ -317,18 +263,20 @@ def generate_linkedin_content(
     """
 
     api_payload = f"{prompt}\n\nInformation to analyze:\n{content}"
-    response = client.models.generate_content(
-        model="gemini-pro-latest",
-        contents=api_payload,
-    )
-    return _humanize_text(_strip_image_descriptions(str(response.text)))
+    from workflow_control import run_stage
+    def write():
+        response=client.models.generate_content(model="gemini-pro-latest",contents=api_payload)
+        return _humanize_text(_strip_image_descriptions(str(response.text or '')))
+    result,_=run_stage('career.linkedin','writing',{'prompt':api_payload},write,
+                       lambda value:isinstance(value,str) and bool(value.strip()),
+                       upstream=source_evidence[1] if source_evidence else None,
+                       handoff=source_evidence[0] if source_evidence else None)
+    return result
 
 
 def research_trending_topics(count: int = 6) -> list[dict]:
-    """Use Gemini with live Google Search grounding to find trending topics."""
+    """Route a distinct, provenance-checked web-research stage."""
     client = _get_gemini_client()
-    if not client:
-        return []
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     prompt = f"""
@@ -353,27 +301,9 @@ def research_trending_topics(count: int = 6) -> list[dict]:
       real one, use an empty list.
     """
 
-    try:
-        from google.genai import types
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                tools=[types.Tool(google_search=types.GoogleSearch())],
-                response_modalities=["TEXT"],
-                http_options=types.HttpOptions(timeout=45000),
-            ),
-        )
-        raw_text = str(response.text) if response.text else ""
-        topics = _parse_topics_json(raw_text, count)
-        if not topics:
-            report_problem("trending-topic research returned no topics",
-                           detail=(raw_text or "")[:800])
-        return topics
-    except Exception as exc:
-        report_problem("trending-topic research failed",
-                       detail=f"{type(exc).__name__}: {exc}")
-        return []
+    # No exception-to-empty-list conversion: a blocked stage is not an empty market.
+    from linkedin_stage_workflow import research
+    return research(prompt,count,client=client,parse=_parse_topics_json)
 
 
 def _parse_topics_json(raw_text: str, count: int) -> list[dict]:
@@ -701,8 +631,9 @@ def review_linkedin_draft(post_text: str) -> dict:
         flags.append("overuse of em dashes")
     return {
         "flags": flags,
-        "personal_narrative": "7/10",
-        "technical_depth": "5/10",
+        "personal_narrative": None,
+        "technical_depth": None,
+        "scoring_performed": False,
         "summary": "No generic-writing flags found." if not flags else "Review: " + ", ".join(flags),
     }
 
@@ -775,7 +706,10 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
             detail=("The news-claim gate will treat this post as ungated.\n"
                     + "\n".join(source_cache["failed"])))
 
-    post_text = generate_linkedin_content(content, source_type="LinkedIn prompt")
+    source_evidence=None
+    if topic.get('research_receipt'):
+        source_evidence=({k:v for k,v in topic.items() if k!='research_receipt'},topic['research_receipt'])
+    post_text = generate_linkedin_content(content, source_type="LinkedIn prompt",source_evidence=source_evidence)
     image_bytes = None
     if post_text and generate_image:
         image_prompt = build_image_prompt(post_text)
@@ -783,7 +717,20 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
     # Run the news-claim gate here so every generated post carries a real,
     # provenance-bearing verdict. A post is never handed on with a fabricated
     # or absent gate record: the publish path refuses those outright.
-    news_fact_gate = factcheck_post(post_text, topic.get("sources") or [])
+    from workflow_control import run_stage
+    from router_brain import RouterDecisionError
+    reviewed=[]
+    def review():
+        gate=factcheck_post(post_text,topic.get('sources') or [])
+        reviewed.append(gate)
+        return gate
+    try:
+        news_fact_gate,_=run_stage('career.linkedin','factual-review',
+            {'post':post_text,'sources':topic.get('sources') or []},review,
+            lambda value:isinstance(value,dict) and value.get('verdict')=='pass')
+    except RouterDecisionError as exc:
+        if str(exc)!='stage_validation_failed' or not reviewed:raise
+        news_fact_gate=reviewed[0]
     verdict = news_fact_gate.get("verdict")
     if post_text and verdict != "pass":
         report_problem(

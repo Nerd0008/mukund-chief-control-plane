@@ -25,6 +25,21 @@ _lock = threading.Lock()
 _cache = {}
 
 
+def _decision_key(workflow,offers,task,family):
+    # A successful tool round updates telemetry, not the authorized task. Health
+    # is still checked before selection and immediately before dispatch. Failed
+    # dispatches explicitly invalidate cached routes. Material evidence stays in
+    # this key; only continuously moving success/latency counters are omitted.
+    stable=[]
+    for offer in offers:
+        item={k:v for k,v in offer.items() if k not in ('execute','client','api_key')}
+        if isinstance(item.get('evidence'),dict):
+            item['evidence']={k:v for k,v in item['evidence'].items() if k not in ('observed_successes','latency_seconds')}
+            if "last_failure_at" in item["evidence"]:item["evidence"]["last_failure_at"]=float(item["evidence"]["last_failure_at"] or 0)
+        stable.append(item)
+    return hashlib.sha256(json.dumps([workflow,family,stable,str(task)[:12000]],sort_keys=True,default=str).encode()).hexdigest()
+
+
 def _select_once(workflow, offers, *, task='', family='analysis', timeout=45):
     """Rank only transport offers the caller can actually execute.
 
@@ -33,8 +48,7 @@ def _select_once(workflow, offers, *, task='', family='analysis', timeout=45):
     """
     if not offers:
         raise RouterDecisionError('no_protocol_compatible_worker')
-    safe = [{k: v for k,v in offer.items() if k not in ('execute','client','api_key')} for offer in offers]
-    key = hashlib.sha256(json.dumps([workflow,safe,str(task)[:12000]],sort_keys=True,default=str).encode()).hexdigest()
+    key = _decision_key(workflow,offers,task,family)
     with _lock:
         cached = _cache.get(key)
         if cached and cached[0] > time.monotonic():
@@ -91,7 +105,9 @@ def persist(receipt):
     allowed={'request_id','call_id','operation_id','workflow','stage','status','error','elapsed_seconds',
         'selected_provider','selected_model','offer_set_sha256','cached','coalesced','resolved_executable',
         'resolved_version','cli_status','cli_exit_code','timeout_seconds','http_status',
-        'retry_after_seconds','failure_scope','health_recording','logical_call_id','selected_worker'}
+        'retry_after_seconds','failure_scope','health_recording','logical_call_id','selected_worker',
+        'request_context_budget','qualified_model_eligibility','context_coverage',
+        'input_sha256','output_sha256','validation_passed','upstream_call_id','output_item_sha256'}
     record={k:v for k,v in receipt.items() if k in allowed}
     try:
         RECEIPT_ROOT.mkdir(parents=True,exist_ok=True)
@@ -102,6 +118,7 @@ def persist(receipt):
 
 def select(workflow,offers,*,task='',family='analysis',timeout=45):
     try:
+        if not offers:raise RouterDecisionError(getattr(offers,'block_reason','no_protocol_compatible_worker'))
         from workflow_health import snapshot
         checked=[]
         for offer in offers:
@@ -116,7 +133,7 @@ def select(workflow,offers,*,task='',family='analysis',timeout=45):
         persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc)))
         raise
     # Coalesce identical in-flight decisions, not unrelated requests or failures.
-    key=hashlib.sha256(json.dumps([workflow,offers,str(task)[:12000]],sort_keys=True,default=str).encode()).hexdigest()
+    key=_decision_key(workflow,offers,task,family)
     with operation(timeout) as state:
         started=time.monotonic();receipt={};leader=False
         with _lock:
@@ -475,7 +492,7 @@ class RoutedGenAIClient:
         image='image' in model.lower() or any('IMAGE' in str(m).upper() for m in modalities)
         tools=get(config,'tools');millis=get(get(config,'http_options'),'timeout')
         timeout=millis/1000 if isinstance(millis,(int,float)) else self._timeout
-        workflow='career.linkedin.image' if image else 'career.linkedin.text'
+        workflow='career.linkedin.image' if image else 'career.linkedin.writing'
         with operation(timeout,self._worker) as state:
             offers=[native_offer('google',model,['image-generation' if image else 'text','google-tools'])] if self._native is not None else []
             plain=isinstance(contents,str) and not image and not tools and config is None and not kwargs

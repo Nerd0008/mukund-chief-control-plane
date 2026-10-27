@@ -107,7 +107,8 @@ class ChiefContextCompiler:
 
     def compile(self, objective: str, *, recent_transcript: Optional[list] = None,
                 department_state: Optional[Dict[str, Any]] = None,
-                task_records: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                task_records: Optional[Dict[str, Any]] = None,
+                required_source_ids: Optional[Iterable[str]] = None) -> Dict[str, Any]:
         candidates = self._sources if self._sources is not None else self._default_sources()
         selected = [s for s in candidates if self._relevant(s, objective)]
         priority = {"owner": 0, "company": 1, "history": 2, "project": 2,
@@ -115,11 +116,14 @@ class ChiefContextCompiler:
         selected.sort(key=lambda s: priority.get(s.kind, 5))
         sections = []
         manifest = []
+        omitted = []
+        required = set(required_source_ids or ())
         remaining = self.max_chars
         for source in selected:
-            clean = _SECRET.sub(r"\1: [REDACTED]", source.text)
-            clean = clean[: min(self.source_limit, remaining)]
+            sanitized = _SECRET.sub(r"\1: [REDACTED]", source.text)
+            clean = sanitized[: min(self.source_limit, remaining)]
             if not clean:
+                omitted.append(source.source_id)
                 continue
             sections.append({"source_id": source.source_id, "kind": source.kind, "text": clean})
             manifest.append({
@@ -128,10 +132,14 @@ class ChiefContextCompiler:
                 "path": source.path,
                 "sha256": hashlib.sha256(source.text.encode("utf-8")).hexdigest(),
                 "chars_included": len(clean),
+                "source_chars": len(source.text),
+                "sanitized_chars": len(sanitized),
+                "included_sha256": hashlib.sha256(clean.encode("utf-8")).hexdigest(),
+                "complete": len(clean)==len(sanitized),
+                "required": source.source_id in required,
             })
             remaining -= len(clean)
-            if remaining <= 0:
-                break
+            # Keep inspecting metadata so exhausted sources are reported as omissions.
         package = {
             "objective": objective,
             "facts": sections,
@@ -140,6 +148,9 @@ class ChiefContextCompiler:
             "task_records": task_records or {},
             "inferences": [],
             "source_manifest": manifest,
+            "required_source_ids": sorted(required),
+            "omitted_source_ids": omitted,
+            "coverage_complete": not omitted and all(m["complete"] for m in manifest),
             "char_budget": self.max_chars,
             "chars_included": sum(len(s["text"]) for s in sections),
         }
@@ -149,6 +160,15 @@ class ChiefContextCompiler:
         warnings = []
         if package.get("chars_included", 0) > self.max_chars:
             warnings.append("context exceeds declared character budget")
+        manifest = package.get("source_manifest", [])
+        included = {m["source_id"]: m for m in manifest}
+        for required in package.get("required_source_ids", []):
+            if required not in included or not included[required].get("complete"):
+                warnings.append("required source incomplete: "+required)
+        for fact in package.get("facts", []):
+            meta = included.get(fact["source_id"], {})
+            if meta.get("included_sha256") != hashlib.sha256(fact["text"].encode("utf-8")).hexdigest():
+                warnings.append("included context hash mismatch: "+fact["source_id"])
         rendered = repr(package)
         if re.search(r"(?i)(api[_ -]?key|password|secret|token)\s*[:=]\s*(?!\[REDACTED\])", rendered):
             warnings.append("context contains an unredacted sensitive field")

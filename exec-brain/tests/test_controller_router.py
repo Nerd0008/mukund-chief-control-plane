@@ -23,6 +23,7 @@ class ProviderError(Exception):
 def isolated(tmp_path,monkeypatch):
     wr._cache.clear();plugin._request_budgets.clear()
     monkeypatch.setattr(wr,'RECEIPT_ROOT',tmp_path/'receipts')
+    controller.qualify(PRIMARY,{k:True for k in ('chat','tools','tool_continuation','stream','english')})
 
 
 def qualified():
@@ -40,7 +41,7 @@ def test_no_unqualified_alternative_and_no_embedding_offer():
     assert len(offers)==3 and not any('embed' in x['model'] for x in offers)
 
 @pytest.mark.parametrize('payload,expected',[
-    ({**REQUEST,'messages':[{'role':'user','content':'x'*130000}]},set()),
+    ({**REQUEST,'messages':[{'role':'user','content':'\u4e00'*130000}]},set()),
     ({**REQUEST,'messages':[{'role':'user','content':[{'type':'image_url','image_url':{'url':'https://example.invalid/image'}}]}]},set()),
     ({**REQUEST,'reasoning_effort':'high'},{QWEN}),
     ({**REQUEST,'response_format':{'type':'json_object'}},{LLAMA}),
@@ -101,12 +102,12 @@ def test_cooldown_expiry_and_inflight_success_cannot_revive_failure():
 def test_qualification_expiry_policy_change_and_partial_checks():
     qualified()
     with health.database() as con:con.execute('UPDATE qualification SET observed_at=0')
-    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==1
+    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==0
     qualified()
     with health.database() as con:con.execute("UPDATE qualification SET policy_sha='stale'")
-    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==1
+    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==0
     controller.qualify(QWEN,{'chat':True})
-    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==1
+    assert len(controller.offers('nous',PRIMARY,'chat_completions',REQUEST))==0
 
 
 def test_dispatch_health_race_prevents_send():

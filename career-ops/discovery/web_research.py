@@ -471,7 +471,11 @@ class CodexWebSearchProvider(ResearchProvider):
     name = "codex-web-search"
 
     def __init__(self, executable: str | Path | None = None, *, sandbox: str = "read-only",
-                 workdir: str | Path | None = None, model: str | None = None):
+                 workdir: str | Path | None = None, model: str | None = None,
+                 workflow: str = "career.discovery.web"):
+        if workflow not in ("career.discovery.web","career.linkedin.research"):
+            raise ValueError("Unsupported research workflow")
+        self.workflow=workflow
         self._executable_override = executable
         self.sandbox = sandbox
         self.workdir = str(workdir) if workdir else str(CONTROL_PLANE)
@@ -517,7 +521,7 @@ class CodexWebSearchProvider(ResearchProvider):
         def scope():
             started = time.monotonic()
             previous = getattr(self, '_batch_scope', None)
-            _, receipt = select('career.discovery.web',
+            _, receipt = select(self.workflow,
                 [{'id':'codex','provider':'openai','model':self.model,
                   'capabilities':['web-search','read-only']}],
                 task='Bounded query batch: ' + json.dumps(list(queries)),
@@ -546,7 +550,7 @@ class CodexWebSearchProvider(ResearchProvider):
                 timeout = min(timeout, scope['deadline'] - __import__('time').monotonic())
                 self.router_decision = scope['receipt']
             else:
-                _, self.router_decision = select('career.discovery.web',
+                _, self.router_decision = select(self.workflow,
                     [{'id':'codex','provider':'openai','model':self.model,'capabilities':['web-search','read-only']}],
                     task=query, family='research', timeout=min(45,timeout))
         except RouterDecisionError as exc:

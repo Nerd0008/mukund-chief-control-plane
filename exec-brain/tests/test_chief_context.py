@@ -65,3 +65,19 @@ def test_live_owner_and_history_adapters_are_bounded_and_provenanced():
         assert {"owner-context-local", "company-registry-local", "discord-chief-history"} <= ids
         assert package["chars_included"] <= package["char_budget"]
         assert compiler.validate(package) == []
+
+
+def test_required_tail_fact_cannot_pass_as_complete():
+    source=ContextSource('required-profile','synthetic.md','A'*4000+' IMPORTANT TAIL FACT','owner')
+    compiler=ChiefContextCompiler(sources=[source])
+    package=compiler.compile('profile',required_source_ids=['required-profile'])
+    assert not package['coverage_complete']
+    assert package['source_manifest'][0]['complete'] is False
+    assert compiler.validate(package)==['required source incomplete: required-profile']
+
+
+def test_exhausted_and_missing_required_sources_are_reported():
+    compiler=ChiefContextCompiler(max_chars=3,sources=[ContextSource('a','a','AAAA','owner'),ContextSource('b','b','BBBB','owner')])
+    package=compiler.compile('profile',required_source_ids=['b','missing'])
+    assert package['omitted_source_ids']==['b']
+    assert len(compiler.validate(package))==2

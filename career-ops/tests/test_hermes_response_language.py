@@ -26,7 +26,7 @@ def test_split_stream_cannot_leak():
     assert out==[lang.FAILURE,None]
 
 def test_gate_never_reexecutes_or_mutates_task_evidence(monkeypatch):
-    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a:('',[]))
+    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a,**k:('',[]))
     out=[];private=[];calls=[]
     class Agent:
         ephemeral_system_prompt='old'
@@ -48,7 +48,7 @@ def test_gate_never_reexecutes_or_mutates_task_evidence(monkeypatch):
     assert agent.ephemeral_system_prompt=='old' and agent.reasoning_callback is not None
 
 def test_callback_restoration_on_failure(monkeypatch):
-    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a:('',[]))
+    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a,**k:('',[]))
     callback=lambda text:None
     class Agent:
         reasoning_callback=staticmethod(callback)
@@ -69,7 +69,7 @@ def test_explicit_language_preserves_final_result():
 def test_no_han_output_loopholes(text):assert lang.checked_text(text)==lang.FAILURE
 
 def test_native_wrapper_does_not_override_english_policy(monkeypatch):
-    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a:('',[]))
+    monkeypatch.setattr(__import__('hermes_owner_context'),'retrieve',lambda *a,**k:('',[]))
     class Agent:
         def run_conversation(self,*a,**kw):return {'final_response':'完成'}
     gmail.install_language_policy(Agent)

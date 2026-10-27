@@ -175,3 +175,41 @@ def run_process(command,*,cancel_event=None,timeout,input=None,**kwargs):
             except subprocess.TimeoutExpired:first=False
     finally:
         if proc.poll() is None:stop_child(proc)
+
+
+def run_stage(workflow,stage,inputs,run,validate,*,upstream=None,handoff=None):
+    """Execute and independently validate one bounded stage; hash-only receipts.
+
+    Upstream receipts are checked against the durable code-written record. A
+    caller/model cannot turn an invented receipt or changed handoff into PASS.
+    """
+    import hashlib,json,uuid
+    from pathlib import Path
+    from workflow_routing import persist,RECEIPT_ROOT
+    def digest(value):
+        return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,default=str).encode()).hexdigest()
+    call_id=uuid.uuid4().hex
+    state=CURRENT.get()
+    record={'workflow':workflow,'stage':stage,'call_id':call_id,
+            'operation_id':state.id if state else call_id,'input_sha256':digest(inputs),
+            'status':'STAGE_STARTED'}
+    persist(record)
+    try:
+        if upstream:
+            uid=upstream.get('call_id','')
+            if not __import__('re').fullmatch(r'[a-f0-9]{32}',uid):raise RouterDecisionError('stage_handoff_unverified')
+            try:saved=json.loads((Path(RECEIPT_ROOT)/(uid+'.json')).read_text(encoding='utf-8'))
+            except (OSError,ValueError):raise RouterDecisionError('stage_handoff_unverified') from None
+            if (saved!=upstream or saved.get('status')!='STAGE_VALIDATED' or
+                digest(inputs if handoff is None else handoff) not in [saved.get('output_sha256'),*saved.get('output_item_sha256',[])]):
+                raise RouterDecisionError('stage_handoff_changed')
+            record['upstream_call_id']=uid
+        result=run()
+        if validate(result) is not True:raise RouterDecisionError('stage_validation_failed')
+        record.update(status='STAGE_VALIDATED',output_sha256=digest(result),validation_passed=True)
+        if isinstance(result,list):record['output_item_sha256']=[digest(item) for item in result]
+        persist(record)
+        return result,record
+    except BaseException as exc:
+        persist(dict(record,status='STAGE_FAILED',error=str(exc) if isinstance(exc,RouterDecisionError) else 'stage_execution_failed'))
+        raise

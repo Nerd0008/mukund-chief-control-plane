@@ -34,6 +34,15 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
     try:
         with operation(request_budget(context,request.get('timeout') or 120)) as state:
             from native_controller_router import offers
+            owner_module=__import__('sys').modules.get('hermes_owner_context')
+            if owner_module is not None:
+                try:coverage=owner_module.verify_dispatch(request)
+                except RuntimeError:raise RouterDecisionError('owner_context_coverage_failed') from None
+                if coverage:
+                    from workflow_routing import persist
+                    import uuid
+                    persist({'workflow':'hermes.owner-context','call_id':uuid.uuid4().hex,
+                             'operation_id':state.id,'stage':'context','status':'CONTEXT_VERIFIED','context_coverage':coverage})
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
                 offers(provider,model,api_mode,request),
                 task=_request_task(request),timeout=state.remaining(45))
@@ -132,7 +141,8 @@ def router_error_classification(*,error=None,**kwargs):
     # Match typed failures only, never keywords in user/model/provider text.
     original=getattr(error,'original',error)
     if not isinstance(original,RouterDecisionError):return None
-    return {'reason':'unknown','retryable':False,'should_compress':False,
+    compress=str(original)=='native_context_capacity_exceeded'
+    return {'reason':'context_overflow' if compress else 'unknown','retryable':False,'should_compress':compress,
             'should_rotate_credential':False,'should_fallback':False,
             'error_context':{'component':'router_brain','router_failure':str(original)}}
 
@@ -146,6 +156,16 @@ def install_failure_copy(module):
         context=getattr(classified,'error_context',None) or {}
         if context.get('component')!='router_brain':return old(classified,**kwargs)
         code=context.get('router_failure')
+        if code=='native_output_budget_exceeded':
+            return 'The requested output budget exceeds qualified model capacity. It must be reduced; compressing history cannot repair this request.'
+        if code=='native_context_capacity_exceeded':
+            return 'The request exceeds every qualified controller context budget. Context compression is required; no model or tool action was executed by this attempt.'
+        if code=='no_qualified_controller':
+            return 'No controller has current successful qualification. Model availability must be verified before this request can run.'
+        if code=='native_request_protocol_incompatible':
+            return 'Qualified controllers cannot handle this request protocol. No model request was sent.'
+        if code=='owner_context_coverage_failed':
+            return 'Required owner context did not reach the model request completely. The request stopped before model execution.'
         if code=='worker_preference_incompatible':
             return 'The requested worker does not support this tool or request protocol. No replacement worker was silently selected.'
         if code in ('workflow_deadline_exceeded','workflow_elapsed_budget_exhausted','workflow_cancelled'):

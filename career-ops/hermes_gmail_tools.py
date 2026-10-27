@@ -23,8 +23,8 @@ def install_language_policy(agent_class):
     old=agent_class.run_conversation
     @functools.wraps(old)
     def run(self,user_message,system_message=None,*args,**kwargs):
-        from hermes_owner_context import retrieve
-        owner_context,evidence=retrieve(user_message)
+        from hermes_owner_context import prepare_turn,dispatch_context
+        owner_context,evidence,contract=prepare_turn(self,user_message,args[0] if args else kwargs.get('conversation_history'))
         self._owner_context_retrieval=evidence
         previous=getattr(self,'ephemeral_system_prompt',None)
         # Native API-time seam: continuing sessions restore frozen system prompts.
@@ -50,7 +50,8 @@ def install_language_policy(agent_class):
         elif kwargs.get('stream_callback'):
             stream=BufferedText(kwargs['stream_callback'],allow);buffers.append(stream);kwargs['stream_callback']=stream
         try:
-            result=checked_result(old(self,user_message,system_message,*args,**kwargs),allow)
+            with dispatch_context(owner_context,evidence,contract):
+                result=checked_result(old(self,user_message,system_message,*args,**kwargs),allow)
             for stream in buffers:stream.flush()
             return result
         finally:
@@ -60,6 +61,7 @@ def install_language_policy(agent_class):
     agent_class._owner_english_policy_installed=True
     import logging
     logging.getLogger(__name__).info('Owner language guard v2 active: final/interim/stream/reasoning English validation; reasoning display preserved')
+    logging.getLogger(__name__).info('Owner context contract v3 active: persistent requirements, full-source wire verification, durable failed-load evidence')
 
 def command(script,verb):
     result=subprocess.run([sys.executable,str(HERE/script),verb],cwd=str(HERE.parent),capture_output=True,text=True,encoding='utf-8',timeout=240)
