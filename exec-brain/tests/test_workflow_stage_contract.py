@@ -72,3 +72,39 @@ def test_public_persona_uses_authoritative_sources(monkeypatch):
     monkeypatch.setattr(owner,'retrieve',lambda q:('AUTHORITATIVE_CURRENT_CONTEXT',[{'complete':True}]))
     assert li._load_persona_block()=='AUTHORITATIVE_CURRENT_CONTEXT'
     assert li.review_linkedin_draft('Synthetic')['scoring_performed'] is False
+
+
+def test_fact_judge_routes_as_verification_not_writing(monkeypatch):
+    from types import SimpleNamespace as NS
+    selected=[]
+    monkeypatch.setattr(wr,'select',lambda workflow,offers,**kw:(selected.append((workflow,kw['family'])) or ('native',{})))
+    sdk=NS(models=NS(generate_content=lambda **kw:NS(text='verified')))
+    client=wr.RoutedGenAIClient(sdk,workflow='career.linkedin.factcheck',family='verification')
+    assert client.models.generate_content(model='fixture',contents='Check this claim').text=='verified'
+    assert selected==[('career.linkedin.factcheck','verification')]
+
+
+def test_reused_topic_is_blocked_before_source_fetch_and_writer(tmp_path,monkeypatch):
+    import linkedin_content_gen as li
+    monkeypatch.setattr(li,'CONTROL_PLANE',tmp_path)
+    registry=tmp_path/'runtime/linkedin/topic_registry.json';registry.parent.mkdir(parents=True)
+    registry.write_text(json.dumps({'topics':[{'topic':'Already covered','status':'used','strict':True,'signals':['fictional used topic']}]}))
+    monkeypatch.setattr(li,'cache_topic_sources',lambda *a:pytest.fail('Source fetch ran for duplicate'))
+    monkeypatch.setattr(li,'generate_linkedin_content',lambda *a,**k:pytest.fail('Writer ran for duplicate'))
+    topic={k:'fictional used topic' for k in ('title','summary','technical_impact','non_technical_impact')}
+    with pytest.raises(RouterDecisionError,match='linkedin_topic_reused'):
+        li.generate_post_from_topic(dict(topic,sources=[]))
+
+
+def test_research_receives_current_used_topic_exclusions(tmp_path,monkeypatch):
+    import linkedin_content_gen as li
+    import linkedin_stage_workflow as stage
+    monkeypatch.setattr(li,'CONTROL_PLANE',tmp_path)
+    monkeypatch.setattr(li,'_get_gemini_client',lambda:None)
+    registry=tmp_path/'runtime/linkedin/topic_registry.json';registry.parent.mkdir(parents=True)
+    registry.write_text(json.dumps({'topics':[{'topic':'Fictional excluded topic','status':'used','strict':True,'signals':['one special signal']}]}))
+    seen=[]
+    monkeypatch.setattr(stage,'research',lambda prompt,*a,**kw:seen.append(prompt) or [])
+    li.research_trending_topics(3)
+    assert 'Fictional excluded topic' in seen[0] and 'one special signal' in seen[0]
+    assert 'physical world' in seen[0]

@@ -101,7 +101,7 @@ try:
     sys.path.insert(0,str(Path(os.environ['LOCALAPPDATA'])/'hermes/exec-brain'))
     from workflow_routing import RoutedGenAIClient
     from router_brain import RouterDecisionError
-    client = RoutedGenAIClient(genai.Client(api_key=api_key))
+    client = RoutedGenAIClient(genai.Client(api_key=api_key),workflow='career.linkedin.factcheck',family='verification')
 except Exception as exc:
     print(json.dumps({"error": "model client failed: %s" % exc}))
     sys.exit(0)

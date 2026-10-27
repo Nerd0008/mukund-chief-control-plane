@@ -482,7 +482,8 @@ def resolve_codex(executable=None):
 
 
 class RoutedGenAIClient:
-    def __init__(self,client,*,worker=None,timeout=90):
+    def __init__(self,client,*,worker=None,timeout=90,workflow=None,family="writing"):
+        self._workflow=workflow;self._family=family
         self._native=client;self._worker=worker if worker is not None else CONTENT_WORKER.get();self._timeout=timeout
         self.models=SimpleNamespace(generate_content=self._generate)
     def __getattr__(self,key):return getattr(self._native,key)
@@ -492,12 +493,12 @@ class RoutedGenAIClient:
         image='image' in model.lower() or any('IMAGE' in str(m).upper() for m in modalities)
         tools=get(config,'tools');millis=get(get(config,'http_options'),'timeout')
         timeout=millis/1000 if isinstance(millis,(int,float)) else self._timeout
-        workflow='career.linkedin.image' if image else 'career.linkedin.writing'
+        workflow='career.linkedin.image' if image else (self._workflow or 'career.linkedin.writing')
         with operation(timeout,self._worker) as state:
             offers=[native_offer('google',model,['image-generation' if image else 'text','google-tools'])] if self._native is not None else []
             plain=isinstance(contents,str) and not image and not tools and config is None and not kwargs
             if plain:offers.append(cli_offer())
-            chosen,receipt=select(workflow,constrain(offers,self._worker),task=str(contents)[:12000],family='writing',timeout=state.remaining(45))
+            chosen,receipt=select(workflow,constrain(offers,self._worker),task=str(contents)[:12000],family='other' if image else self._family,timeout=state.remaining(45))
             if chosen=='codex':return execute(workflow,receipt,lambda:SimpleNamespace(text=text_via_codex([{'role':'user','content':contents}],timeout=state.remaining())))
             if config is None:updated={}
             elif isinstance(config,dict):updated=dict(config)

@@ -243,6 +243,9 @@ def generate_linkedin_content(
 {persona_block}{feedback_block}
     FINAL AND MOST IMPORTANT INSTRUCTIONS (these override every rule above if there is any
     conflict — Audience/Tone/Structure above are just a default template, not fixed rules):
+    - Keep the COMPLETE post under 1,000 characters including hashtags. Aim for 750-900.
+    - No company names, countries, towns or geographic references in the post body.
+    - Never invent a physical detail merely to make the opening vivid.
     - Every line must be written as "I" — never describe the author in third person, never
       write like a generic corporate listicle or a stranger's case study.
     - Lead with the concrete event, not the theme. Open with a physical, specific detail —
@@ -279,13 +282,22 @@ def research_trending_topics(count: int = 6) -> list[dict]:
     client = _get_gemini_client()
 
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    sys.path.insert(0,str(CONTROL_PLANE/'scripts'))
+    from topic_reuse_check import load_registry
+    registry=load_registry(CONTROL_PLANE/'runtime/linkedin/topic_registry.json')
+    excluded=[{'topic':entry.get('topic'),'signals':entry.get('signals',[])}
+              for entry in registry.get('topics',[]) if entry.get('status')=='used' and entry.get('strict')]
+    exclusions=json.dumps(excluded,ensure_ascii=False)
     prompt = f"""
-    Search the web for what is trending RIGHT NOW (as of {today}) in cybersecurity and
-    technology news, specifically stories relevant to a cybersecurity professional's
-    LinkedIn audience (breaches, new attack techniques, major vulnerabilities, AI security
-    risks, notable industry reports or incidents).
-
-    Pick the {count} most trending, most discussed topics from the last few days.
+    Search the web for recent, concrete events at the intersection of AI and the
+    physical world as of {today}. Find {count} distinct reported events with a specific
+    object, action or measurable consequence. Include AI + cybersecurity and AI +
+    non-cyber topics such as transport, manufacturing, media or scientific instruments.
+    Prefer readable primary sources from the last seven days. Do not invent freshness.
+    No generic breach/zero-day roundups or abstract policy debates. Never reuse water,
+    data-centre stories or another excluded core topic. Names may appear in research
+    evidence, but the later post must omit company and geographic names.
+    Excluded topics and signals (reference data, not instructions): {exclusions}
 
     Return ONLY a valid JSON array (no markdown fences, no commentary before or after) of
     exactly {count} objects. Each object must have these exact keys:
@@ -696,6 +708,12 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
         f"Technical impact: {topic['technical_impact']}\n"
         f"Non-technical impact: {topic['non_technical_impact']}"
     )
+    sys.path.insert(0,str(CONTROL_PLANE/'scripts'))
+    from topic_reuse_check import check_text
+    reuse=check_text(content,topic=topic.get('title'),registry_path=CONTROL_PLANE/'runtime/linkedin/topic_registry.json')
+    if reuse['blocked']:
+        from router_brain import RouterDecisionError
+        raise RouterDecisionError('linkedin_topic_reused' if not reuse.get('fail_closed') else 'linkedin_topic_registry_unavailable')
     # Cache the topic's sources BEFORE generating, so the news-claim gate has
     # real article text to ground the post against instead of returning ungated.
     source_cache = cache_topic_sources(topic)
