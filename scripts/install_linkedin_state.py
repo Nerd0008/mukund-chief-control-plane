@@ -28,6 +28,7 @@ def payloads():
     for day in state.JOB_IDS:
         result[HOME/'scripts'/f'publish_scheduled_{day}.py']=(boot+f"from linkedin_scheduled import weekday_main\nif __name__=='__main__':raise SystemExit(weekday_main({day!r}))\n").encode()
     result[HOME/'scripts/publish_scheduled.py']=(boot+"from linkedin_scheduled import main\nif __name__=='__main__':raise SystemExit(main())\n").encode()
+    result[HOME/'scripts/linkedin_weekly.py']=(boot+"from linkedin_weekly import main\nif __name__=='__main__':raise SystemExit(main())\n").encode()
     result[REPO/'runtime/linkedin/verify_draft.py']=(boot+'''from linkedin_state import verify_integrity
 
 def verify_draft(draft_dir):return verify_integrity(Path(draft_dir)/'linkedin_drafts.json')
@@ -38,6 +39,7 @@ if __name__=='__main__':
 ''').encode()
     result[HOME/'skills/operations/linkedin-weekly-posts/scripts/verify_armed_jobs.py']=(boot+"from linkedin_state import main\nif __name__=='__main__':raise SystemExit(main(['check-jobs',*sys.argv[1:]]))\n").encode()
     result[HOME/'skills/operations/linkedin-weekly-posts/SKILL.md']=(REPO/'career-ops/hermes-skills/linkedin-weekly-posts/SKILL.md').read_bytes()
+    result[HOME/'skills/operations/linkedin-weekly-posts/references/image-generation.md']=(REPO/'career-ops/hermes-skills/linkedin-weekly-posts/references/image-generation.md').read_bytes()
     retired='"""Retired unsafe state writer. Preserved in the activation backup for history."""\nimport json\n\ndef main():\n    print(json.dumps({\'phase\':\'RETIRED\',\'publish_performed\':False,\'reason\':\'Use career-ops/linkedin_state.py capture/reconcile/plan; do not hand-write approval or gate records.\'}))\n    return 2\n\nif __name__==\'__main__\':raise SystemExit(main())\n'
     for name in ('create_approved_drafts.py','write_approved_with_override.py','apply_override.py'):
         result[REPO/'runtime/linkedin'/name]=retired.encode()
@@ -45,7 +47,7 @@ if __name__=='__main__':
 
 
 def main(argv=None):
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apply',action='store_true');p.add_argument('--update-weekly-prompt',action='store_true');a=p.parse_args(argv)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apply',action='store_true');p.add_argument('--update-weekly-prompt',action='store_true');p.add_argument('--update-weekly-script',action='store_true');a=p.parse_args(argv)
     jobs=state.read(HOME/'cron/jobs.json');jobs=jobs if isinstance(jobs,list) else jobs['jobs']
     for day in state.JOB_IDS:
         if state.job_state(day)['enabled']:raise SystemExit('Publish jobs must remain paused during installation')
@@ -69,6 +71,17 @@ def main(argv=None):
             result=update_job('7db108b00189',{'prompt':new})
             if not result:raise SystemExit('Weekly prompt update failed')
             manifest.append({'job_id':'7db108b00189','field_changed':'prompt','before_sha256':hashlib.sha256(old.encode()).hexdigest(),'after_sha256':hashlib.sha256(new.encode()).hexdigest()})
+    if a.update_weekly_script:
+        sys.path.insert(0,str(HOME/'hermes-agent'))
+        from cron.jobs import update_job
+        found=[j for j in jobs if j.get('id')=='7db108b00189']
+        if len(found)!=1:raise SystemExit('Weekly draft job missing/duplicated')
+        (backup/'weekly-job.before.json').write_text(json.dumps(found[0],indent=2),encoding='utf-8')
+        updates={'script':'linkedin_weekly.py','no_agent':True,
+            'prompt':'Bounded weekly preparation: research, authoritative profile, writing and both factual gates. Exact output only. No approval, images or publication in this drafting job.'}
+        result=update_job('7db108b00189',updates)
+        if not result:raise SystemExit('Weekly script wiring failed')
+        manifest.append({'job_id':'7db108b00189','fields_changed':list(updates),'enabled_and_schedule_unchanged':True})
     for day in state.JOB_IDS:
         if state.job_state(day)['enabled']:raise SystemExit('Concurrent publish enablement detected; stop and review')
     (backup/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')

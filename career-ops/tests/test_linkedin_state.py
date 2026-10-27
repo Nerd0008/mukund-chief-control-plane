@@ -306,3 +306,57 @@ def test_exact_unmarked_presented_body_can_be_bound_safely(history):
     db,add=history;shown=add('Here is the post:\n'+BODY,role='assistant')
     result=a.verify_message(add('looks good'),BODY,db_path=db)
     assert result['ok'] and result['receipt']['presented_message_id']==shown
+
+
+def scheduler_fixture(jobs):
+    calls=[]
+    def update(job_id,updates):
+        doc=s.read(jobs)
+        job=next(j for j in doc['jobs'] if j['id']==job_id)
+        job.update(updates);jobs.write_text(json.dumps(doc));calls.append((job_id,updates))
+        return job
+    return calls,update
+
+
+def test_enable_publishing_arms_only_exact_approved_future_slot(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history)
+    now=datetime(2026,10,26,12,tzinfo=s.LONDON);calls,update=scheduler_fixture(jobs)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    result=s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=now,updater=update)
+    assert result['publishing_enabled'] and len(result['armed'])==1 and len(calls)==1
+    assert inspect((root,path,db,jobs,mid))['automatic_publish_armed']
+    assert calls[0][1]['next_run_at']=='2026-10-27T08:00:00+00:00'
+
+
+def test_enabled_policy_automatically_arms_a_later_approved_plan(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history)
+    now=datetime(2026,10,26,12,tzinfo=s.LONDON);calls,update=scheduler_fixture(jobs)
+    result=s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=now,updater=update)
+    assert not result['armed'] and not calls
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=now,updater=update)
+    assert len(calls)==1 and inspect((root,path,db,jobs,mid))['automatic_publish_armed']
+
+
+def test_enabled_policy_cannot_arm_stale_failed_or_changed_body(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    doc=s.read(path);doc['post_text']+=' Changed';path.write_text(json.dumps(doc))
+    calls,update=scheduler_fixture(jobs)
+    result=s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON),updater=update)
+    assert not result['armed'] and not calls and result['blocked_slots']==['2026-10-27']
+
+
+def test_disabling_policy_pauses_jobs_without_publishing(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    calls,update=scheduler_fixture(jobs)
+    result=s.set_publishing(False,root=root,db_path=db,jobs_path=jobs,updater=update)
+    assert not result['publishing_enabled'] and result['paused']==['tuesday'] and not result['publish_performed']
+    assert not s.job_state('tuesday',jobs_path=jobs)['enabled']
+
+
+def test_publishing_dry_run_never_enables_scheduler(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history)
+    s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    calls,update=scheduler_fixture(jobs)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,dry_run=True,updater=update)
+    assert not calls and not s.job_state('tuesday',jobs_path=jobs)['enabled']

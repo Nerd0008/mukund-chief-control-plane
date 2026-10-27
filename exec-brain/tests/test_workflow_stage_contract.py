@@ -108,3 +108,40 @@ def test_research_receives_current_used_topic_exclusions(tmp_path,monkeypatch):
     li.research_trending_topics(3)
     assert 'Fictional excluded topic' in seen[0] and 'one special signal' in seen[0]
     assert 'physical world' in seen[0]
+
+
+def test_unreadable_sources_stop_before_writing(monkeypatch):
+    import linkedin_content_gen as li
+    monkeypatch.setattr(li,'cache_topic_sources',lambda t:{'cached':[],'failed':t['sources']})
+    monkeypatch.setattr(li,'generate_linkedin_content',lambda *a,**k:pytest.fail('writer used without readable source'))
+    monkeypatch.setattr(li,'report_problem',lambda *a,**k:None)
+    topic={k:'Synthetic' for k in ('title','summary','technical_impact','non_technical_impact')}
+    with pytest.raises(RouterDecisionError,match='linkedin_sources_unreadable'):
+        li.generate_post_from_topic(dict(topic,sources=['https://synthetic.invalid/article']))
+
+
+def test_news_writer_receives_actual_source_and_bounded_claim_correction(monkeypatch):
+    import linkedin_content_gen as li
+    import linkedin_factcheck as fc
+    monkeypatch.setattr(li,'cache_topic_sources',lambda t:{'cached':t['sources'],'failed':[]})
+    monkeypatch.setattr(fc,'cached_source_text',lambda u:'ACTUAL TESTBED SOURCE WITH QUALIFICATIONS')
+    prompts=[]
+    monkeypatch.setattr(li,'generate_linkedin_content',lambda content,**k:prompts.append(content) or 'Synthetic draft')
+    gates=iter([{'verdict':'block','verification_complete':True,'unsupported_claims':[{'claim':'A stronger claim','reason':'Only testbed evidence'}]}, {'verdict':'pass','verification_complete':True}])
+    monkeypatch.setattr(li,'factcheck_post',lambda *a:next(gates))
+    topic={k:'Synthetic' for k in ('title','summary','technical_impact','non_technical_impact')}
+    result=li.generate_post_from_topic(dict(topic,sources=['https://synthetic.invalid/article']))
+    assert len(prompts)==2 and all('ACTUAL TESTBED SOURCE WITH QUALIFICATIONS' in p for p in prompts)
+    assert 'Only testbed evidence' in prompts[1] and not result['blocked']
+
+
+def test_news_review_outage_is_not_a_content_retry(monkeypatch):
+    import linkedin_content_gen as li
+    monkeypatch.setattr(li,'cache_topic_sources',lambda t:{'cached':t['sources'],'failed':[]})
+    calls=[]
+    monkeypatch.setattr(li,'generate_linkedin_content',lambda *a,**k:calls.append(a) or 'Synthetic draft')
+    monkeypatch.setattr(li,'factcheck_post',lambda *a:{'verdict':'ungated','verification_complete':False,'unsupported_claims':[{'reason':'incomplete'}]})
+    monkeypatch.setattr(li,'report_problem',lambda *a,**k:None)
+    topic={k:'Synthetic' for k in ('title','summary','technical_impact','non_technical_impact')}
+    result=li.generate_post_from_topic(dict(topic,sources=['https://synthetic.invalid/article']))
+    assert len(calls)==1 and result['blocked']

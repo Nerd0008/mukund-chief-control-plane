@@ -155,7 +155,10 @@ sys.modules['google'] = google
 # This child-transport fixture isolates both external SDK and routing dependencies.
 # Routing allow/deny behaviour is covered separately by test_proposed_routes.py.
 router = types.ModuleType('workflow_routing')
-router.RoutedGenAIClient = lambda client: client
+def routed(client, *, workflow, family):
+    assert workflow == 'career.linkedin.factcheck' and family == 'verification'
+    return client
+router.RoutedGenAIClient = routed
 sys.modules['workflow_routing'] = router
 """
         prompt = "A" * 16000 + "A late passage with Unicode: café." + "B" * 100000

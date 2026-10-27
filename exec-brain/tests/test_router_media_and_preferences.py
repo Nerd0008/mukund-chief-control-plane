@@ -63,3 +63,39 @@ def test_explicit_worker_incompatible_with_grounding_fails_closed():
     with pytest.raises(RouterDecisionError,match='incompatible'):
         wr.RoutedGenAIClient(client,worker='codex').models.generate_content(model='google',contents='synthetic',config={'tools':['google_search']})
     assert calls==[]
+
+
+def test_linkedin_image_uses_four_by_five_and_explicit_failure(tmp_path,monkeypatch):
+    import linkedin_content_gen as gen
+    target=tmp_path/'image.png';target.write_bytes(b'validated-provider-image')
+    calls=[]
+    monkeypatch.setattr(media.RoutedImageProvider,'generate',lambda self,prompt,**kw:calls.append(kw) or {'success':True,'image':str(target)})
+    assert gen.generate_image_bytes('Synthetic')==target.read_bytes()
+    assert calls==[{'aspect_ratio':'4:5'}]
+    monkeypatch.setattr(media.RoutedImageProvider,'generate',lambda *a,**kw:{'success':False,'error_type':'media_provider_rate_limit'})
+    with pytest.raises(RouterDecisionError,match='media_provider_rate_limit'):gen.generate_image_bytes('Synthetic')
+
+
+def test_image_four_by_five_reaches_native_payload(monkeypatch,tmp_path):
+    from PIL import Image
+    import gemini_adapter
+    data=io.BytesIO();Image.new('RGB',(8,10),'blue').save(data,format='PNG')
+    body=json.dumps({'candidates':[{'content':{'parts':[{'inlineData':{'data':base64.b64encode(data.getvalue()).decode()}}]}}]})
+    with patch.object(gemini_adapter,'_http_post_json',return_value=(200,body,{})) as request:
+        result=media.RoutedImageProvider().generate('Synthetic',aspect_ratio='4:5')
+    assert result['success']
+    assert request.call_args.args[1]['generationConfig']['imageConfig']['aspectRatio']=='4:5'
+
+
+def test_invalid_image_aspect_never_dispatches(monkeypatch):
+    monkeypatch.setattr(media,'image_key',lambda:pytest.fail('credential read before validation'))
+    result=media.RoutedImageProvider().generate('Synthetic',aspect_ratio='wrong')
+    assert not result['success'] and result['error_type']=='unsupported_aspect_ratio'
+
+
+def test_image_billing_failure_is_explicit_without_retries():
+    import gemini_adapter
+    with patch.object(gemini_adapter,'_http_post_json',return_value=(402,'{}',{})) as request:
+        result=media.RoutedImageProvider().generate('Synthetic',aspect_ratio='4:5')
+    assert result['error_type']=='media_provider_billing' and result['aspect_ratio']=='4:5'
+    assert request.call_count==1 and not result['success']

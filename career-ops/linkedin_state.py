@@ -262,7 +262,74 @@ def reconcile(path,*,message_id=None,root=ROOT,db_path=None,jobs_path=JOBS,perso
         return {**status,'recovery':recovered,'review_errors':errors,'dry_run':dry_run,'publish_performed':False}
 
 
-def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False):
+def publishing_enabled(root=ROOT):
+    path=Path(root)/'publishing-policy.json'
+    if not path.exists():return False
+    policy=read(path)
+    if policy.get('schema_version')!=1 or not isinstance(policy.get('enabled'),bool):raise ValueError('invalid publishing policy')
+    return policy['enabled']
+
+
+def _scheduler_update(job_id,updates,*,jobs_path=JOBS):
+    # Production uses the existing scheduler's locked API. Tests must inject
+    # an updater; a private fixture must never touch the real cron directory.
+    if Path(jobs_path).resolve()!=JOBS.resolve():raise ValueError('private scheduler requires an explicit updater')
+    sys.path.insert(0,str(HOME/'hermes-agent'))
+    from cron.jobs import update_job
+    return update_job(job_id,updates)
+
+
+def refresh_publishing_jobs(*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,updater=None):
+    """Arm only the earliest verified, approved, exact future slot per weekday.
+
+    Empty, already-published and blocked slots never create recurring noise.
+    This changes scheduler readiness, never grants approval or publishes.
+    """
+    now=now or datetime.now(LONDON)
+    if now.tzinfo is None:raise ValueError('timezone-aware scheduling time required')
+    enabled=publishing_enabled(root);ready={};blocked=[]
+    if enabled:
+        for target,slot in sorted(load_slots(Path(root)/'drafts/schedule.json').items()):
+            if datetime.fromisoformat(slot['publish_at'])<=now:continue
+            path=absolute(slot['draft_path'])
+            if not path.is_relative_to((Path(root)/'drafts').resolve()):raise ValueError('scheduled artifact outside canonical drafts')
+            try:
+                status=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
+                if status['target_date']==target and status['content_ready'] and status['slot_matches'] and not status['published']:
+                    ready.setdefault(date.fromisoformat(target).strftime('%A').lower(),slot)
+                else:blocked.append(target)
+            except (OSError,ValueError):blocked.append(target)
+    armed=[];paused=[]
+    for day,job_id in JOB_IDS.items():
+        job=job_state(day,jobs_path=jobs_path)
+        if not job['known']:
+            if day in ready:raise ValueError('publishing job missing: '+day)
+            continue
+        slot=ready.get(day)
+        if slot:
+            updates={'enabled':True,'state':'scheduled','paused_at':None,'paused_reason':None,'next_run_at':slot['publish_at']}
+        elif job['enabled']:
+            updates={'enabled':False,'state':'paused','paused_at':now.isoformat(),'paused_reason':'No future approved, verified exact LinkedIn slot'}
+        else:continue
+        if not slot or not job['enabled'] or job.get('next_run_at')!=slot['publish_at']:
+            result=updater(job_id,updates) if updater else _scheduler_update(job_id,updates,jobs_path=jobs_path)
+            if not result:raise ValueError('scheduler update failed: '+day)
+        if slot:armed.append({'day':day,'next_run_at':slot['publish_at']})
+        else:paused.append(day)
+    return {'publishing_enabled':enabled,'armed':armed,'paused':paused,'blocked_slots':blocked,'publish_performed':False}
+
+
+def set_publishing(enabled,*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,updater=None):
+    if not isinstance(enabled,bool):raise ValueError('publishing enabled must be boolean')
+    with locked(root):
+        path=Path(root)/'publishing-policy.json';before=file_hash(path)
+        doc={'schema_version':1,'enabled':enabled,'exact_owner_approval_required':True,
+             'verified_reviews_required':True,'updated_at':(now or datetime.now(LONDON)).isoformat()}
+        audited_json(path,doc,before,root=root,operation='publishing_policy_changed',body_sha=None)
+        return refresh_publishing_jobs(root=root,db_path=db_path,jobs_path=jobs_path,now=now,updater=updater)
+
+
+def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,now=None,updater=None):
     path=Path(path).resolve();root=Path(root);target=date.fromisoformat(str(target))
     if not path.is_relative_to((root/'drafts').resolve()):raise ValueError('schedule artifact is outside LinkedIn drafts')
     if artifact_date(path)!=target:raise ValueError('schedule date does not match artifact identity')
@@ -281,7 +348,8 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False)
         result={'schema_version':2,'timezone':'Europe/London','slots':slots}
         if file_hash(path)!=artifact_before:raise StateConflict('artifact changed while planning exact slot')
         if not dry_run:audited_json(sched,result,before,root=root,operation='slot_planned',body_sha=status['body_sha256'])
-        return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':False,'job':status['job'],'publish_performed':False}
+        armed=refresh_publishing_jobs(root=root,db_path=db_path,jobs_path=jobs_path,now=now,updater=updater) if not dry_run and publishing_enabled(root) else None
+        return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':bool(armed and armed['armed']),'publishing':armed,'job':job_state(target.strftime('%A').lower(),jobs_path=jobs_path),'publish_performed':False}
 
 
 def capture(body,target,message_id,*,sources=(),image=None,replace=False,root=ROOT,db_path=None,dry_run=False):
@@ -373,11 +441,14 @@ def main(argv=None):
         if command=='cancel':p.add_argument('--reason',default='owner cancelled')
     p=sub.add_parser('capture');p.add_argument('--text-file',required=True);p.add_argument('--date',required=True);p.add_argument('--approve-message-id',required=True,type=int)
     p.add_argument('--source-url',action='append',default=[]);p.add_argument('--image');p.add_argument('--replace',action='store_true');p.add_argument('--dry-run',action='store_true')
+    p=sub.add_parser('publishing');p.add_argument('mode',choices=['enable','disable','status'])
     p=sub.add_parser('week');p.add_argument('--week-of')
     p=sub.add_parser('check-jobs');p.add_argument('--week-of')
     args=parser.parse_args(argv)
     try:
-        if args.command=='capture':result=capture(Path(args.text_file).read_text(encoding='utf-8'),args.date,args.approve_message_id,sources=args.source_url,image=args.image,replace=args.replace,dry_run=args.dry_run)
+        if args.command=='publishing':
+            result=({'publishing_enabled':publishing_enabled(),'publish_performed':False} if args.mode=='status' else set_publishing(args.mode=='enable'))
+        elif args.command=='capture':result=capture(Path(args.text_file).read_text(encoding='utf-8'),args.date,args.approve_message_id,sources=args.source_url,image=args.image,replace=args.replace,dry_run=args.dry_run)
         elif args.command=='status':result=inspect_artifact(args.drafts)
         elif args.command in ('week','check-jobs'):
             result=week_status(args.week_of)

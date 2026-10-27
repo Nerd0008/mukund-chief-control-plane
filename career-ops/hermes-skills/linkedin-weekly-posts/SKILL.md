@@ -38,6 +38,43 @@ Do not treat a previously granted approval as covering a different or edited bod
 
 A new owner message arriving while a reply is still building cuts that reply off and Discord shows "Response interrupted". That is reply latency, not a platform fault, and it is what makes a long multi-tool turn look like a freeze. Keep the path from approval to publish as short as you can.
 
+## Bounded preparation and enabled publishing
+
+The Sunday job runs `linkedin_weekly.py` as an existing Hermes script with `no_agent=true`.
+It prepares one AI + cyber post, one AI + non-cyber post and one personal reflection,
+using current complete professional references, observed source research, actual article
+text and both real factual reviews. It checkpoints under `runtime/linkedin/review/` and
+resumes completed verified slots. It never approves text, generates an unapproved image,
+arms publication or calls LinkedIn. A blocked stage is reported as blocked, never as ready.
+If live LinkedIn profile reading is unavailable, its report explicitly declares the complete
+local professional-reference fallback. Do not claim a full live profile was read.
+
+For manual preparation, use the Hermes interpreter:
+
+```
+python career-ops/linkedin_weekly.py --week-of <Monday-YYYY-MM-DD>
+```
+
+The owner enabled publishing on 27 October 2026. This is capability permission, never approval
+of unseen future text. Check the persisted policy using:
+
+```
+python career-ops/linkedin_state.py publishing status
+```
+
+After authenticated exact-body approval and both passing reviews, use the existing
+`capture`/`reconcile` and `plan --drafts <artifact> --date <YYYY-MM-DD>` flow. With publishing
+enabled, planning automatically arms the earliest verified, approved future dated post for
+that weekday through the locked scheduler API. No second enablement permission is needed.
+Missing, blocked, already-published or stale slots are never armed. Successful scheduled
+publication refreshes the jobs, pausing empty weekdays. Preserve exact-body approval and
+duplicate protections. Use `publishing disable` only when the owner requests it.
+
+Images use the existing routed Nano Banana 2 backend through
+`linkedin_content_gen.generate_image_bytes()` at 4:5. It no longer depends on the old bot
+interpreter or a Lite image model. Billing, permission and rate-limit failures are explicit;
+never disguise them as missing context or silently substitute a different provider.
+
 ## Canonical approval and status contract
 
 Use `career-ops/linkedin_state.py` as the authoritative state surface. Do not infer approval,
@@ -55,7 +92,7 @@ python career-ops/linkedin_state.py check-jobs
 Report the exact `phase`, `owner_approved`, `reviews_ready`, `content_ready`, `slot_matches`
 and `job.enabled` separately. `APPROVED_BUT_BLOCKED` means the owner DID approve but review
 or artifact integrity is incomplete. `APPROVED_READY_PAUSED` means verified content exists
-but automatic publishing is disabled. A planned slot is not an enabled publishing job.
+but automatic publishing is disabled. Check policy and actual job state: planning arms a future ready slot only when publishing is enabled.
 Never tell an owner to approve the same unchanged text again merely because a gate failed.
 
 An owner may use `APPROVE LINKEDIN <sha256>` or reply naturally to the exact post just
@@ -322,7 +359,7 @@ python career-ops/linkedin_state.py plan --drafts <artifact> --date YYYY-MM-DD
 ```
 
 The canonical `schedule.json` is a versioned exact-date manifest pinning artifact path,
-body hash, image hash and Europe/London publish time. Planning does NOT enable a cron job.
+body hash, image hash and Europe/London publish time. Planning automatically arms the exact future slot when the owner-enabled publishing policy is on; otherwise jobs remain paused. Check the returned job state, not a narrative assumption.
 Automatic publishing stays paused until separately authorized and deliberately enabled.
 
 Cancellation uses `linkedin_state.py cancel --drafts <artifact> --reason <reason>` (or the

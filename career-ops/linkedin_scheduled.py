@@ -42,7 +42,11 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
         try:payload=json.loads(proc.stdout)
         except (ValueError,TypeError):pass
         success=bool(proc.returncode==0 and isinstance(payload,dict) and payload.get('performed') and payload.get('post_urn') and state.published(current['body_sha256'],root))
-        return (0 if success else (proc.returncode or 1)),{**result,'publish_performed':success,
+        scheduling=None
+        if success and state.publishing_enabled(root):
+            try:scheduling=state.refresh_publishing_jobs(root=root,db_path=db_path,jobs_path=jobs_path,now=now)
+            except (OSError,ValueError) as exc:scheduling={'error_type':type(exc).__name__,'reason':str(exc)}
+        return (0 if success else (proc.returncode or 1)),{**result,'publish_performed':success,'next_schedule':scheduling,
             'network_calls':None,'reported_publish_attempts':payload.get('network_calls_spent') if isinstance(payload,dict) else None,
             'child_exit_code':proc.returncode,'post_urn':payload.get('post_urn') if success else None,
             'phase':'PUBLISHED' if success else 'PUBLISH_FAILED'}

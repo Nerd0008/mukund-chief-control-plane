@@ -51,6 +51,8 @@ class RoutedImageProvider(ImageGenProvider):
     def generate(self,prompt,aspect_ratio='landscape',*,image_url=None,reference_image_urls=None,**kwargs):
         model=kwargs.get('model') or IMAGE_MODEL
         if model!=IMAGE_MODEL:return error_response(error='media_model_not_authorized',error_type='media_model_not_authorized',provider='e3')
+        aspects={'landscape':'16:9','portrait':'9:16','square':'1:1','4:5':'4:5'}
+        if aspect_ratio not in aspects:return error_response(error='unsupported_aspect_ratio',error_type='unsupported_aspect_ratio',provider='e3')
         try:
             with operation(120) as state:
                 key=image_key()
@@ -60,7 +62,7 @@ class RoutedImageProvider(ImageGenProvider):
                 refs=([image_url] if image_url else [])+list(reference_image_urls or [])
                 if len(refs)>4:raise ValueError('too_many_reference_images')
                 contents=[{'text':prompt},*image_parts(refs,state)]
-                aspect={'landscape':'16:9','portrait':'9:16','square':'1:1'}.get(aspect_ratio,'16:9')
+                aspect=aspects[aspect_ratio]
                 import json
                 from gemini_adapter import _http_post_json,GENERATE_ENDPOINT
                 payload={'contents':[{'parts':contents}],'generationConfig':{'responseModalities':['IMAGE'],'imageConfig':{'aspectRatio':aspect}}}
@@ -68,7 +70,7 @@ class RoutedImageProvider(ImageGenProvider):
                     {'x-goog-api-key':key,'Content-Type':'application/json'},state.remaining()))
                 if status!=200:
                     from router_brain import RouterDecisionError
-                    raise RouterDecisionError('media_provider_rate_limit' if status==429 else 'media_provider_auth' if status==401 else 'media_provider_permission' if status==403 else 'media_provider_unavailable')
+                    raise RouterDecisionError('media_provider_billing' if status==402 else 'media_provider_rate_limit' if status==429 else 'media_provider_auth' if status==401 else 'media_provider_permission' if status==403 else 'media_provider_unavailable')
                 response=json.loads(body);data=None
                 for candidate in response.get('candidates') or []:
                     for part in (candidate.get('content') or {}).get('parts') or []:
@@ -85,7 +87,7 @@ class RoutedImageProvider(ImageGenProvider):
                 return success_response(image=str(target),model=model,prompt=prompt,aspect_ratio=aspect_ratio,provider='e3',
                     modality='image' if refs else 'text',extra={'router_request_id':receipt.get('request_id')})
         except Exception as exc:
-            return error_response(error=failure_code(exc),error_type=failure_code(exc),provider='e3',model=model)
+            return error_response(error=failure_code(exc),error_type=failure_code(exc),provider='e3',model=model,aspect_ratio=aspect_ratio)
 
 
 def register_media(ctx):
