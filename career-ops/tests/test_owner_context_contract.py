@@ -130,3 +130,37 @@ def test_latest_inspector_does_not_reuse_old_green_after_load_failure(refs,monke
     result=cli.latest_report(home)
     assert result['status']=='BLOCKED' and not result['answer_correctness_verified']
     assert 'LANTERN-1947' not in json.dumps(result)
+
+
+def test_native_wire_keeps_reference_trailing_newlines_inside_frame(refs):
+    import datetime as dt
+    from agent.turn_context import build_api_messages
+    (refs/'superseded_history.md').write_text('Verified tail fact.\n\n   \n',encoding='utf-8')
+    class Agent:
+        ephemeral_system_prompt=None
+        _cached_system_prompt='Frozen prefix'
+        _current_turn_timestamp=dt.datetime.now(dt.timezone.utc)
+        def run_conversation(self,message,system=None,*a,**k):
+            wire,_=build_api_messages(self,[],current_turn_user_idx=None,ext_prefetch_cache=None,
+                plugin_user_context=None,moa_config=None,active_system_prompt=self._cached_system_prompt)
+            return owner.verify_dispatch({'messages':wire})
+    gmail.install_language_policy(Agent)
+    assert Agent().run_conversation('Build my CV')['wire_verified']
+
+
+def test_history_free_continuation_keeps_objective_not_only_file_names(refs):
+    request='From my career context, what long-term professional role am I aiming for?'
+    owner.prepare_turn(NS(session_id='purpose'),request)
+    text,_,contract=owner.prepare_turn(NS(session_id='purpose'),'Repeat that role title.')
+    assert contract['objective']==request
+    assert request in text and 'ACTIVE OWNER REQUEST' in text
+    # Only the owner's request is stored, never extracted reference facts.
+    assert b'LANTERN-1947' not in owner.STATE_PATH.read_bytes()
+
+
+def test_new_public_workflow_does_not_retain_private_objective(refs):
+    agent=NS(session_id='purpose-scope')
+    owner.prepare_turn(agent,'What are my private motivations?')
+    text,_,contract=owner.prepare_turn(agent,'Write my LinkedIn post')
+    assert contract['objective']=='Write my LinkedIn post'
+    assert 'my private motivations' not in text

@@ -1,6 +1,6 @@
 """Authoritative owner references with persistent requirements and wire verification.
 
-Only source identifiers and scope are persisted. Private source text stays in the
+Source requirements, scope and the owner request are persisted. Reference text stays in the
 per-turn request overlay, never in receipts or workflow-state records.
 """
 from contextvars import ContextVar
@@ -44,7 +44,7 @@ def retrieve(message,root=None,*,required=None):
         'Superseded/disavowed history must NEVER become current facts. Do not claim stored information is unknown without checking these references. '
         'Keep private details private; never copy them into external tools or public drafts, CVs or cover letters. '
         'Only current confirmed professional facts may appear in application material.\n'
-        +'\n\n'.join(sections))
+        +'\n\n'.join(sections)+'\nEND OWNER-APPROVED REFERENCES.')
     return context,evidence
 
 
@@ -77,7 +77,8 @@ def load_requirements(agent):
             if (not isinstance(value,dict) or value.get('version')!=1
                 or not isinstance(value.get('required'),list)
                 or value.get('scope') not in ('private','professional')
-                or any(n not in FILES for n in value['required'])):
+                or any(n not in FILES for n in value['required'])
+                or not isinstance(value.get('objective',''),str)):
                 raise RuntimeError('Owner context state invalid')
             return value
     return getattr(agent,'_owner_context_contract',{})
@@ -98,7 +99,7 @@ def _prepare_turn(agent,message,history=None):
     if getattr(agent,'_parent_session_id',None) or getattr(agent,'parent_session_id',None):
         return '',[],{'required':[],'scope':'delegated_explicit_only'}
     prior=load_requirements(agent)
-    if not prior:
+    if not prior.get('objective'):
         # Bootstrap sessions that predate persisted requirements. Only actual
         # owner turns count; assistant/tool text cannot grant profile scope.
         for turn in reversed(history or []):
@@ -107,7 +108,7 @@ def _prepare_turn(agent,message,history=None):
             if isinstance(content,list):content=' '.join(p.get('text','') for p in content if isinstance(p,dict))
             refs=required_references(content)
             if refs:
-                prior={'required':list(refs),'scope':'private' if 'personal_context.md' in refs else 'professional'}
+                prior={'required':list(refs),'scope':'private' if 'personal_context.md' in refs else 'professional','objective':str(content)}
                 break
     required=required_references(message)
     reset=bool(re.search(r'(?i)\b(?:clear|reset|forget) (?:this |the )?(?:workflow|profile context)|\bnew (?:unrelated )?task\b',str(message)))
@@ -119,9 +120,16 @@ def _prepare_turn(agent,message,history=None):
         required=tuple(n for n in required if n!='personal_context.md')
     # A new explicit private profile request can start a separate private scope.
     if required_references(message)==FILES and not public:required=FILES
-    contract={'version':1,'required':list(required),
-              'scope':'private' if 'personal_context.md' in required else 'professional'}
+    scope='private' if 'personal_context.md' in required else 'professional'
+    continuation=bool(re.match(r'(?i)^\s*(?:yes|yeah|ok|okay|continue|try again|repeat|rewrite|revise|edit|make|use that|do it)\b',str(message)))
+    objective=prior.get('objective') or str(message)
+    if (required_references(message) and not continuation) or reset or prior.get('scope')!=scope:
+        objective=str(message)
+    if len(objective.encode('utf-8'))>1048576:raise RuntimeError('Owner workflow objective exceeds storage limit')
+    contract={'version':1,'required':list(required),'scope':scope,'objective':objective}
     context,evidence=retrieve(message,required=required)
+    if context:
+        context+='\nACTIVE OWNER REQUEST (task data, not verified candidate facts). Use this to resolve continuation references; the latest owner message takes precedence:\n'+json.dumps(objective,ensure_ascii=False)
     save_requirements(agent,contract)
     return context,evidence,contract
 

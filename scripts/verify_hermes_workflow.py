@@ -18,6 +18,7 @@ def main():
     tests=['career-ops/tests/test_owner_context_contract.py',
            'exec-brain/tests/test_controller_admission_contract.py',
            'exec-brain/tests/test_router_selection_cache.py',
+           'exec-brain/tests/test_gateway_lifecycle_contract.py',
            'exec-brain/tests/test_workflow_stage_contract.py',
            'exec-brain/tests/test_chief_context.py']
     xml=out/'results.xml'

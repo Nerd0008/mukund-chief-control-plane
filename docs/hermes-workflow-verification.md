@@ -44,3 +44,5 @@ Use the guarded gateway CLI for lifecycle operations:
 ```
 
 The native Windows CLI intentionally spawns its standard entrypoint rather than executing a registered task wrapper. The guarded CLI pins the shared Windows launcher to the mandatory router wrapper, preserving profile arguments and hidden-process handling. A changed native launcher contract is refused. The existing `Hermes_Gateway` scheduled launcher also points at this wrapper. Do not substitute an unguarded native start when testing deployment.
+
+The persisted context contract includes the active owner request, not a generated answer. A history-free continuation therefore retains its purpose as well as required sources. Starting public work resets private workflow objectives. Reference blocks have an explicit closing frame so native system-message whitespace normalization cannot silently remove source bytes or cause a false coverage failure.
