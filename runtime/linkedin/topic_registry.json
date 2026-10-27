@@ -1,6 +1,6 @@
 {
   "_note": "Authoritative registry of LinkedIn topics already used. The reuse guard (scripts/topic_reuse_check.py) reads this file and REFUSES a draft whose text matches a used topic. Seeded from every published post, every approved draft, and the old bot's 18 posts. Going forward the publish path records the topic in the ledger so this registry can be rebuilt from evidence.",
-  "updated": "2026-10-18",
+  "updated": "2026-10-27",
   "topics": [
     {
       "topic": "AI + water",
@@ -129,6 +129,16 @@
       "evidence": "old bot post 2026-07-27",
       "strict": false,
       "signals": ["attack surface", "enterprise ai agent", "network exposures"]
+    },
+    {
+      "topic": "Personal: SafePaste project narrative",
+      "status": "retired",
+      "evidence": "Existing career-ops/hermes-skills/linkedin-weekly-posts/SKILL.md: narrative plan (SafePaste, InboxDefender, curiosity) is EXHAUSTED. No publication date inferred.",
+      "strict": true,
+      "signals": [
+        "safepaste",
+        "safe paste"
+      ]
     }
   ]
 }

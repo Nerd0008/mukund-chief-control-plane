@@ -18,6 +18,7 @@ from hermes_owner_context import retrieve
 def accepted(post):
     body=post.get('post_text') or ''
     return (bool(body.strip()) and len(body)<1000 and not post.get('blocked')
+        and post.get('phase') not in ('BLOCKED','REVIEWING') and not post.get('error')
         and fc.provenance_ok(post.get('news_fact_gate'),body)[0]
         and state.personal_ok(post.get('personal_fact_gate'),body))
 
@@ -40,7 +41,7 @@ def complete_reviews(post,*,label,context_hash):
         except RouterDecisionError as exc:
             if str(exc)!='stage_validation_failed' or not reviewed:raise
             pg=reviewed[0]
-        attempts.append({'body_sha256':state.consent.digest(body),'verdict':pg.get('verdict')})
+        attempts.append({'body_sha256':state.consent.digest(body),'verdict':pg.get('verdict'),'post_text':body,'personal_fact_gate':pg})
         post['personal_fact_gate']=pg
         if state.personal_ok(pg,body):
             post['personal_review_attempts']=attempts;return post
@@ -61,6 +62,42 @@ def complete_reviews(post,*,label,context_hash):
             lambda:gen.factcheck_post(changed,sources),lambda g:isinstance(g,dict) and g.get('verdict')=='pass')
         post.update(post_text=changed,news_fact_gate=ng,blocked=False)
     raise RouterDecisionError('linkedin_personal_review_blocked')
+
+
+def personal_reflection(exclusions,*,record=lambda value:None):
+    instruction=('Write a fresh personal professional reflection using only the supplied authoritative profile. '
+        'Do not invent an incident, conversation, date, workplace achievement or recent action. '
+        'Use a real owner preference or ambition and clearly personal judgement. Do not assert external world facts. '
+        'Avoid these exhausted topics and angles: '+exclusions)
+    attempts=[]
+    for attempt in range(2):
+        body=gen.generate_linkedin_content(instruction,source_type='verified professional profile')
+        post={'post_text':body,'blocked':True};reviewed=[]
+        # Preserve the exact draft and actual verdict even when stage validation
+        # rejects it. Failure evidence must not disappear behind a generic error.
+        record({**post,'phase':'REVIEWING','reflection_attempts':list(attempts)})
+        def check():
+            gate=gen.factcheck_post(body,[]);reviewed.append(gate)
+            record({**post,'phase':'REVIEWING','news_fact_gate':gate,'reflection_attempts':list(attempts)})
+            return gate
+        try:
+            gate,_=run_stage('career.linkedin','factual-review',{'post':body,'sources':[]},check,
+                lambda g:isinstance(g,dict) and g.get('verdict')=='pass')
+        except RouterDecisionError as exc:
+            if str(exc)!='stage_validation_failed' or not reviewed:raise
+            gate=reviewed[0]
+        attempts.append({'body_sha256':state.consent.digest(body),'verdict':gate.get('verdict'),'post_text':body,'news_fact_gate':gate})
+        if gate.get('verdict')=='pass':
+            return {**post,'news_fact_gate':gate,'blocked':False,'reflection_attempts':attempts}
+        # A real source-less review found checkable external assertions. Give
+        # those precise findings to the writer once; do not waive them or retry
+        # unavailable judges, exhausted providers or failed source reads.
+        if attempt or not gate.get('llm_used') or not gate.get('world_claims'):raise RouterDecisionError('linkedin_reflection_review_blocked')
+        instruction=('Revise this personal reflection to remove the specific unsupported external-world assertions. '
+            'Keep only verified personal facts and clearly first-person opinions or aspirations. '
+            'Do not replace a removed claim with a new claim or revisit these exhausted topics: '+exclusions+'\n'
+            +json.dumps({'previous_draft':body,'world_claims':gate['world_claims']},ensure_ascii=False))
+    raise RouterDecisionError('linkedin_reflection_review_blocked')
 
 
 def prepare(week_of=None,*,root=state.ROOT):
@@ -107,15 +144,11 @@ def prepare(week_of=None,*,root=state.ROOT):
                     if not candidates:raise RouterDecisionError('linkedin_sources_unreadable')
                     post=gen.generate_post_from_topic(candidates[0],generate_image=False)
                 else:
-                    exclusions=json.dumps([e.get('topic') for e in registry.get('topics',[]) if e.get('status')=='used'],ensure_ascii=False)
-                    body=gen.generate_linkedin_content(
-                        'Write a fresh personal professional reflection using only the supplied authoritative profile. '
-                        'Do not invent an incident, conversation, date, workplace achievement or recent action. '
-                        'Use a real owner preference or ambition and clearly personal judgement. Do not assert external world facts. '
-                        'Avoid these exhausted topics and angles: '+exclusions,source_type='verified professional profile')
-                    gate,_=run_stage('career.linkedin','factual-review',{'post':body,'sources':[]},
-                        lambda:gen.factcheck_post(body,[]),lambda g:isinstance(g,dict) and g.get('verdict')=='pass')
-                    post={'post_text':body,'news_fact_gate':gate,'blocked':False}
+                    exclusions=json.dumps([e.get('topic') for e in registry.get('topics',[]) if e.get('status') in ('used','retired')],ensure_ascii=False)
+                    def record_attempt(value):
+                        doc['posts'][day]={**value,'category':category,'owner_approved':False}
+                        checkpoint()
+                    post=personal_reflection(exclusions,record=record_attempt)
                 post.pop('image_bytes',None);body=post.get('post_text') or ''
                 if check_text(body,registry_path=registry_path)['blocked']:raise RouterDecisionError('linkedin_topic_reused')
                 if len(body)>=1000:raise RouterDecisionError('linkedin_post_length_exceeded')
@@ -129,7 +162,7 @@ def prepare(week_of=None,*,root=state.ROOT):
                 doc['posts'][day]=post
             except Exception as exc:
                 from workflow_routing import failure_code
-                doc['posts'][day]={'phase':'BLOCKED','category':category,'error':failure_code(exc),'owner_approved':False}
+                doc['posts'][day]={**(doc['posts'].get(day) or {}),'phase':'BLOCKED','category':category,'error':failure_code(exc),'owner_approved':False}
                 checkpoint()
                 # Keep completed slots, but never spend quota on later slots after
                 # a quota/auth/provider failure. A content issue can be reviewed.
@@ -147,7 +180,7 @@ def render(doc):
     for day in ('tuesday','wednesday','thursday'):
         post=doc['posts'].get(day) or {'phase':'NOT_COMPLETED'}
         lines+=['',day.title()+': '+post['phase']]
-        if post.get('post_text'):
+        if post.get('post_text') and (post.get('owner_approved') or post.get('phase')=='AWAITING_OWNER_APPROVAL'):
             lines += ['',post['post_text']]
             if not post.get('owner_approved'):lines += ['','APPROVE LINKEDIN '+post['body_sha256']]
             else:lines += ['','Existing exact owner approval preserved.']

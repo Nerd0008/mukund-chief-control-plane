@@ -287,7 +287,7 @@ def research_trending_topics(count: int = 6, *, category: str | None = None) -> 
     from topic_reuse_check import load_registry
     registry=load_registry(CONTROL_PLANE/'runtime/linkedin/topic_registry.json')
     excluded=[{'topic':entry.get('topic'),'signals':entry.get('signals',[])}
-              for entry in registry.get('topics',[]) if entry.get('status')=='used' and entry.get('strict')]
+              for entry in registry.get('topics',[]) if entry.get('status') in ('used','retired') and entry.get('strict')]
     exclusions=json.dumps(excluded,ensure_ascii=False)
     prompt = f"""
     Search the web for recent, concrete events at the intersection of AI and the

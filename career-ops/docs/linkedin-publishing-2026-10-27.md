@@ -54,12 +54,16 @@ guards remain mandatory at dispatch and in the publisher itself.
 
 ## Verification
 
-254 relevant LinkedIn, publication, source coverage, stage handoff, routing and media
+258 relevant LinkedIn, publication, source coverage, stage handoff, routing and media
 regressions passed. Coverage includes unapproved/changed bodies, missing/stale slots,
 private scheduler isolation, weekly resumption, complete profile requirements,
 quota stops, preserved blocked approvals and both gates on corrected wording.
 
-Runtime artifacts, profile evidence, generated drafts, credential material and the
+The existing tracked topic registry now also enforces the already-retired SafePaste
+narrative; no publication date was invented. The full current-week live preparation
+completed with the published Tuesday preserved and two newly verified unapproved drafts.
+
+Private runtime artifacts, profile evidence, generated drafts, credential material and the
 publication ledger are deliberately excluded from this source commit. Unrelated
 dirty Career Ops search files are preserved. No merge of main, tracker change,
 application submission, Gmail mutation or job-search resumption is part of this work.

@@ -98,3 +98,38 @@ def test_existing_blocked_approval_is_preserved_without_claiming_ready(prepared,
     output=weekly.render(doc)
     assert 'Existing exact owner approval preserved.' in output and 'APPROVE LINKEDIN real-sha' not in output
     assert ('research','ai_cyber') not in calls
+
+
+def test_authoritative_registry_blocks_exhausted_safepaste_narrative():
+    registry=weekly.REPO/'runtime/linkedin/topic_registry.json'
+    report=weekly.check_text('I use pattern matching in my SafePaste project.',registry_path=registry)
+    assert report['blocked']
+    assert any(m['status']=='retired' for m in report['matches'])
+
+
+def test_source_less_claim_correction_preserves_failure_evidence(prepared,monkeypatch):
+    root,calls=prepared
+    bodies=iter(['A general assertion about the world.','I would start by asking a question.'])
+    monkeypatch.setattr(weekly.gen,'generate_linkedin_content',lambda *a,**k:next(bodies))
+    gates=iter([{'verdict':'ungated','llm_used':True,'world_claims':[{'claim':'A general assertion about the world.'}]},gate('I would start by asking a question.')])
+    monkeypatch.setattr(weekly.gen,'factcheck_post',lambda *a:next(gates))
+    recorded=[];result=weekly.personal_reflection('Exhausted angle',record=recorded.append)
+    assert not result['blocked'] and len(result['reflection_attempts'])==2
+    assert any(r.get('news_fact_gate',{}).get('world_claims') for r in recorded)
+    assert result['reflection_attempts'][0]['post_text']=='A general assertion about the world.'
+    assert result['reflection_attempts'][0]['news_fact_gate']['world_claims']
+
+
+def test_source_less_judge_outage_is_not_retried(prepared,monkeypatch):
+    root,calls=prepared;written=[];recorded=[]
+    monkeypatch.setattr(weekly.gen,'generate_linkedin_content',lambda *a,**k:written.append(a) or 'Synthetic opinion')
+    monkeypatch.setattr(weekly.gen,'factcheck_post',lambda *a:{'verdict':'ungated','llm_used':False,'available':False})
+    with pytest.raises(RouterDecisionError,match='linkedin_reflection_review_blocked'):
+        weekly.personal_reflection('Exhausted angle',record=recorded.append)
+    assert len(written)==1 and recorded[-1]['news_fact_gate']['available'] is False
+
+
+def test_blocked_phase_cannot_reuse_stale_passing_receipts():
+    body='I would ask a question.'
+    post={'post_text':body,'news_fact_gate':gate(body),'personal_fact_gate':personal(body),'blocked':False,'phase':'BLOCKED','error':'router_cli_usage_limit'}
+    assert not weekly.accepted(post)
