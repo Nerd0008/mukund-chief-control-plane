@@ -11,7 +11,7 @@ import linkedin_personal_review as personal
 
 REPO=Path(__file__).resolve().parent.parent
 ROOT=REPO/'runtime/linkedin'
-HOME=Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/'hermes'
+HOME=Path(os.environ.get('HERMES_HOME') or Path(os.environ.get('LOCALAPPDATA',str(Path.home())))/'hermes')
 JOBS=HOME/'cron/jobs.json'
 JOB_IDS={'tuesday':'beb0251ed70c','wednesday':'f1b1452f18b1','thursday':'8e6048e2dfa7'}
 LONDON=ZoneInfo('Europe/London')
@@ -447,7 +447,7 @@ def prepared_status(target,*,root=ROOT,jobs_path=JOBS):
 
 def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
     today=datetime.now(LONDON).date()
-    monday=date.fromisoformat(week_of) if week_of else today+timedelta(days=(7-today.weekday())%7)
+    monday=date.fromisoformat(week_of) if week_of else today-timedelta(days=today.weekday())
     if monday.weekday()!=0:raise ValueError('week-of must be a Monday')
     days=[]
     for offset,day in [(1,'tuesday'),(2,'wednesday'),(3,'thursday')]:

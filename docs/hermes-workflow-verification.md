@@ -46,3 +46,51 @@ Use the guarded gateway CLI for lifecycle operations:
 The native Windows CLI intentionally spawns its standard entrypoint rather than executing a registered task wrapper. The guarded CLI pins the shared Windows launcher to the mandatory router wrapper, preserving profile arguments and hidden-process handling. A changed native launcher contract is refused. The existing `Hermes_Gateway` scheduled launcher also points at this wrapper. Do not substitute an unguarded native start when testing deployment.
 
 The persisted context contract includes the active owner request, not a generated answer. A history-free continuation therefore retains its purpose as well as required sources. Starting public work resets private workflow objectives. Reference blocks have an explicit closing frame so native system-message whitespace normalization cannot silently remove source bytes or cause a false coverage failure.
+
+
+## Current operational status and protected LinkedIn control
+
+Owner references remain complete, byte-verified reference data. They mix durable
+facts/preferences with dated operational history; historical approvals, run health
+and schedules cannot establish present state. The turn objective uses the host's
+`user_originated_turn_view` plus known notification envelopes, not a bare user role.
+Pre-upgrade contracts that adopted a machine notification recover from genuine
+human history. This classification is not owner authentication or publishing consent.
+
+For LinkedIn, `hermes_diagnostics.snapshot` reads the current week through the
+existing canonical `linkedin_state`, publication ledger and approval verifier, plus
+exact job execution/output evidence. `HERMES_HOME` selects the operational home.
+The read-only `career_workflow_status` tool accepts an optional exact cron job ID
+for other workflows. It does not probe credentials or mutate any service.
+
+A newer execution supersedes the previous job timestamp. Missing/mismatched output
+is unavailable, not an old-success fallback. Per-job Markdown and legacy flat logs
+are selected by timestamp; CRLF/LF, script success and script failure envelopes are
+supported. Prompt examples are never script output. Structured result fields and
+allowlisted error codes are returned without raw prompts or arbitrary error text.
+
+Native LinkedIn requests receive a fresh operational overlay on each physical
+request, and the selector receives the resolved workflow/owner question rather than
+only a vague continuation. The full profile is not removed or summarized. Narrow
+present-status questions use a canonical, code-rendered final status through the
+host's `transform_llm_output` hook BEFORE persistence. Writing, editing, engineering,
+CV and unrelated conversations are not rewritten. Operational input and final
+answer receipts bind sanitized evidence, timestamps and output hashes, not profile
+text. Failure to obtain/record evidence returns unavailable instead of a diagnosis.
+This status boundary does not claim to grade every model's interim reasoning or
+arbitrary historical root-cause explanation.
+
+Generic native cron controls cannot blindly resume/run/rewrite the three protected
+LinkedIn publisher jobs. Exact approved, reviewed future slots and the publishing
+policy determine arming. Already-published and not-due actual runs are successful
+no-actions; missing approval, integrity failures and genuine publication errors have
+distinct outcomes. The existing exact-body consent and publisher checks remain.
+External direct administrative CLI/filesystem access still exists; the native tool
+boundary is not a claim that job files are immutable.
+
+Regression coverage includes stale notes versus published state, incorrect archived
+logs, running executions without output, background notifications, contract migration,
+full-byte context, host before-persistence transforms, protected cron control, duplicate
+publication and unrelated-workflow negative controls. Live acceptance uses synthetic
+references and workflow fixtures through the real router/provider. Real canonical
+state is checked locally; no post or Discord message is sent by acceptance.

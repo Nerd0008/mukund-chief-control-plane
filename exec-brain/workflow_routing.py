@@ -107,7 +107,7 @@ def persist(receipt):
         'resolved_version','cli_status','cli_exit_code','timeout_seconds','http_status',
         'retry_after_seconds','failure_scope','health_recording','logical_call_id','selected_worker',
         'request_context_budget','qualified_model_eligibility','context_coverage',
-        'input_sha256','output_sha256','validation_passed','upstream_call_id','output_item_sha256'}
+        'input_sha256','output_sha256','validation_passed','upstream_call_id','output_item_sha256','operational_evidence'}
     record={k:v for k,v in receipt.items() if k in allowed}
     try:
         RECEIPT_ROOT.mkdir(parents=True,exist_ok=True)

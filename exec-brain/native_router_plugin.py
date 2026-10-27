@@ -43,9 +43,17 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
                     import uuid
                     persist({'workflow':'hermes.owner-context','call_id':uuid.uuid4().hex,
                              'operation_id':state.id,'stage':'context','status':'CONTEXT_VERIFIED','context_coverage':coverage})
+            from hermes_diagnostics import enrich_request,router_task
+            request,diagnostic=enrich_request(request)
+            if diagnostic:
+                from workflow_routing import persist
+                import uuid
+                persist({'workflow':'hermes.operational-evidence','call_id':uuid.uuid4().hex,
+                         'operation_id':state.id,'stage':'current_state','status':'EVIDENCE_READY' if diagnostic.get('evidence_sha256') else 'EVIDENCE_UNAVAILABLE',
+                         'input_sha256':diagnostic.get('evidence_sha256'),'operational_evidence':diagnostic})
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
                 offers(provider,model,api_mode,request),
-                task=_request_task(request),timeout=state.remaining(45))
+                task=router_task(request,_request_task(request)),timeout=state.remaining(45))
             value=execute('hermes.native.'+str(api_mode or 'chat'),receipt,
                 lambda:next_call(dict(request,model=receipt.get('selected_model') or model,timeout=state.remaining())),
                 stream=request.get('stream',False))
@@ -218,6 +226,9 @@ def register(ctx):
     if str(career) not in sys.path:sys.path.insert(0,str(career))
     from hermes_linkedin_control import install as install_linkedin_control
     install_linkedin_control()
+    from hermes_diagnostics import transform_output
+    ctx.register_hook('transform_llm_output',transform_output)
+    __import__('logging').getLogger(__name__).info('Operational evidence v1 active: fresh LinkedIn state, exact execution logs, protected cron and before-persistence status transform')
     ctx.register_hook('transform_api_error_classification',router_error_classification)
     from agent import turn_recovery
     install_failure_copy(turn_recovery)

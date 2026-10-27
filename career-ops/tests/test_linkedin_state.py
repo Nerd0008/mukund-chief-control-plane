@@ -396,3 +396,14 @@ def test_integrity_failure_remains_an_error_with_exact_reason(tmp_path,history):
     code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,
         now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**k:pytest.fail('publisher invoked'))
     assert code==1 and result['reason_code']=='approved_text_integrity_failed'
+
+
+@pytest.mark.parametrize('today,monday',[('2026-10-27','2026-10-26'),('2026-11-01','2026-10-26'),('2026-11-02','2026-11-02')])
+def test_default_week_status_is_current_week_not_next_week(tmp_path,monkeypatch,today,monday):
+    class Clock(datetime):
+        @classmethod
+        def now(cls,tz=None):return cls.fromisoformat(today+'T12:00:00+00:00')
+    monkeypatch.setattr(s,'datetime',Clock)
+    jobs=tmp_path/'jobs.json';jobs.write_text('{"jobs":[]}')
+    result=s.week_status(root=tmp_path/'empty',jobs_path=jobs)
+    assert result['week_of']==monday
