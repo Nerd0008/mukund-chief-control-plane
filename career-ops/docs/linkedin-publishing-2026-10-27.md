@@ -54,7 +54,7 @@ guards remain mandatory at dispatch and in the publisher itself.
 
 ## Verification
 
-258 relevant LinkedIn, publication, source coverage, stage handoff, routing and media
+259 relevant LinkedIn, publication, source coverage, stage handoff, routing and media
 regressions passed. Coverage includes unapproved/changed bodies, missing/stale slots,
 private scheduler isolation, weekly resumption, complete profile requirements,
 quota stops, preserved blocked approvals and both gates on corrected wording.
@@ -62,6 +62,8 @@ quota stops, preserved blocked approvals and both gates on corrected wording.
 The existing tracked topic registry now also enforces the already-retired SafePaste
 narrative; no publication date was invented. The full current-week live preparation
 completed with the published Tuesday preserved and two newly verified unapproved drafts.
+Canonical `week` status exposes these prepared drafts as awaiting owner approval,
+so it cannot contradict preparation by reporting that no draft exists.
 
 Private runtime artifacts, profile evidence, generated drafts, credential material and the
 publication ledger are deliberately excluded from this source commit. Unrelated

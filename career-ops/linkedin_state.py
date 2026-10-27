@@ -412,6 +412,35 @@ def _personal_runner(body,label):
     return personal.review(cfg,body,label=label,scratch=ROOT/'.gate-scratch'/('state-'+uuid.uuid4().hex))
 
 
+def prepared_status(target,*,root=ROOT,jobs_path=JOBS):
+    """Expose verified unapproved preparation in the same canonical status view.
+
+    A private preparation file is not approval and cannot arm publication.
+    """
+    monday=target-timedelta(days=target.weekday());day=target.strftime('%A').lower()
+    path=Path(root)/'review'/monday.isoformat()/'weekly.json'
+    if not path.exists():return None
+    try:
+        doc=read(path);post=(doc.get('posts') or {}).get(day)
+        if not isinstance(post,dict):return None
+        body=body_of(post)
+        exact=post.get('target_date')==target.isoformat() and post.get('body_sha256')==consent.digest(body)
+        n_ok,n_reason=news.provenance_ok(post.get('news_fact_gate'),body)
+        p_ok=personal_ok(post.get('personal_fact_gate'),body)
+        ready=bool(exact and n_ok and p_ok and not post.get('blocked') and post.get('phase')=='AWAITING_OWNER_APPROVAL' and not post.get('error'))
+        return {'phase':'AWAITING_OWNER_APPROVAL' if ready else 'DRAFT_BLOCKED',
+            'artifact':str(path),'post_text':body,'body_sha256':consent.digest(body),
+            'owner_approved':False,'approval_detail':'Prepared draft has not received authenticated exact-body owner approval',
+            'news_review_passed':bool(n_ok),'news_review_detail':n_reason,'personal_review_passed':bool(p_ok),
+            'reviews_ready':ready,'content_ready':False,'automatic_publish_armed':False,
+            'published':False,'slot_matches':False,'target_date':target.isoformat(),
+            'job':job_state(day,jobs_path=jobs_path)}
+    except (OSError,ValueError,TypeError,AttributeError):
+        return {'phase':'DRAFT_BLOCKED','artifact':str(path),'owner_approved':False,
+            'content_ready':False,'reviews_ready':False,'automatic_publish_armed':False,
+            'approval_detail':'Preparation unreadable or invalid','job':job_state(day,jobs_path=jobs_path)}
+
+
 def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
     today=datetime.now(LONDON).date()
     monday=date.fromisoformat(week_of) if week_of else today+timedelta(days=(7-today.weekday())%7)
@@ -422,7 +451,7 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
         if path.is_file():
             row=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
             row['post_text']=body_of(read(path))
-        else:row={'phase':'NO_ARTIFACT','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path)}
+        else:row=prepared_status(target,root=root,jobs_path=jobs_path) or {'phase':'NO_ARTIFACT','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path)}
         days.append({'day':day,'date':target.isoformat(),**row})
     count=sum(row['automatic_publish_armed'] for row in days)
     return {'week_of':monday.isoformat(),'timezone':'Europe/London','days':days,'automatic_posts_armed':count,

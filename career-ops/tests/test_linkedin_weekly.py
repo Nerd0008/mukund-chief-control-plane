@@ -133,3 +133,11 @@ def test_blocked_phase_cannot_reuse_stale_passing_receipts():
     body='I would ask a question.'
     post={'post_text':body,'news_fact_gate':gate(body),'personal_fact_gate':personal(body),'blocked':False,'phase':'BLOCKED','error':'router_cli_usage_limit'}
     assert not weekly.accepted(post)
+
+
+def test_canonical_week_exposes_prepared_drafts_without_inventing_approval(prepared):
+    root,calls=prepared;weekly.prepare('2026-11-02',root=root)
+    status=weekly.state.week_status('2026-11-02',root=root)
+    assert all(row['phase']=='AWAITING_OWNER_APPROVAL' for row in status['days'])
+    assert all(row['reviews_ready'] and not row['owner_approved'] and not row['content_ready'] for row in status['days'])
+    assert status['automatic_posts_armed']==0
