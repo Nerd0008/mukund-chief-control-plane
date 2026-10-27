@@ -8,6 +8,14 @@ import linkedin_scheduled as scheduled
 import linkedin_factcheck as fc
 import linkedin_publish as publish
 
+@pytest.fixture(autouse=True)
+def private_scheduler_updates(monkeypatch):
+    def update(job_id,updates,*,jobs_path):
+        assert Path(jobs_path).resolve()!=s.JOBS.resolve(), 'tests must not mutate live cron'
+        return scheduler_fixture(jobs_path)[1](job_id,updates)
+    monkeypatch.setattr(s,'_scheduler_update',update)
+
+
 BODY='A source-grounded post.\n\nWhat would you check first?'
 
 @pytest.fixture
@@ -42,6 +50,7 @@ def artifact(tmp_path,history,*,reviewed=True,body=BODY,enabled=False,target='20
         'news_fact_gate':gate(body),'personal_fact_gate':personal(body) if reviewed else {},'approved':False}
     path.write_text(json.dumps(doc),encoding='utf-8');(folder/'frozen_text.txt').write_text(body,encoding='utf-8')
     jobs=tmp_path/'jobs.json';jobs.write_text(json.dumps({'jobs':[{'id':s.JOB_IDS['tuesday'],'enabled':enabled}]}))
+    if enabled:(root/'publishing-policy.json').write_text(json.dumps({'schema_version':1,'enabled':True}))
     return root,path,db,jobs,message
 
 
@@ -172,7 +181,7 @@ def test_shared_lock_blocks_overlapping_mutations(tmp_path):
 
 def test_slot_is_exact_date_hash_and_london_time(tmp_path,history):
     root,path,db,jobs,mid=artifact(tmp_path,history)
-    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     slot=s.load_slots(root/'drafts/schedule.json')['2026-10-27']
     assert slot['publish_at']=='2026-10-27T08:00:00+00:00' and slot['body_sha256']==a.digest(BODY)
     assert inspect((root,path,db,jobs,mid))['phase']=='APPROVED_READY_PAUSED'
@@ -185,7 +194,7 @@ def test_no_manifest_does_not_select_newest_folder(tmp_path,history):
 
 
 def test_paused_dry_run_has_no_child_or_ledger_write(tmp_path,history):
-    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     before={str(p):p.read_bytes() for p in root.rglob('*') if p.is_file()};calls=[]
     code,result=scheduled.run_day('tuesday',target_date='2026-10-27',root=root,db_path=db,jobs_path=jobs,runner=lambda *a,**k:calls.append(a))
     assert code==0 and result['phase']=='APPROVED_READY_PAUSED' and not result['publish_performed'] and not calls
@@ -193,15 +202,15 @@ def test_paused_dry_run_has_no_child_or_ledger_write(tmp_path,history):
 
 
 def test_disabled_job_cannot_execute(tmp_path,history):
-    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     calls=[];code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**k:calls.append(a))
-    assert code==1 and not calls and not result['publish_performed']
+    assert code==0 and result['phase']=='PUBLISHING_PAUSED' and not calls and not result['publish_performed']
 
 
 def test_future_execute_cannot_publish(tmp_path,history):
-    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     calls=[];code,result=scheduled.run_day('tuesday',target_date='2026-10-27',root=root,db_path=db,jobs_path=jobs,dry_run=False,now=datetime(2026,10,25,12,tzinfo=s.LONDON),runner=lambda *a,**k:calls.append(a))
-    assert code==1 and result['phase']=='NOT_DUE' and not calls
+    assert code==0 and result['phase']=='NOT_DUE' and not calls
 
 
 def test_weekday_wrapper_preserves_dry_run_and_nonzero(monkeypatch):
@@ -211,7 +220,7 @@ def test_weekday_wrapper_preserves_dry_run_and_nonzero(monkeypatch):
 
 
 def test_cancel_preserves_historical_approval_but_blocks_publication(tmp_path,history):
-    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     s.cancel_artifact(path,'owner cancelled',root=root)
     assert s.read(path)['owner_approval']['hermes_message_id']==mid and inspect((root,path,db,jobs,mid))['phase']=='CANCELLED'
     assert not s.load_slots(root/'drafts/schedule.json')
@@ -219,7 +228,7 @@ def test_cancel_preserves_historical_approval_but_blocks_publication(tmp_path,hi
 
 def test_published_record_cannot_be_scheduled_again(tmp_path,history):
     root,path,db,jobs,mid=artifact(tmp_path,history);(root/'published').mkdir();(root/'published/posts.jsonl').write_text(json.dumps({'result':'published','body_sha256':a.digest(BODY)})+'\n')
-    with pytest.raises(ValueError):s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    with pytest.raises(ValueError):s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
 
 
 def test_unknown_job_configuration_does_not_claim_enabled(tmp_path):
@@ -255,25 +264,26 @@ def test_audit_failure_prevents_artifact_write(tmp_path,history,monkeypatch):
 
 def test_scheduled_child_failure_is_not_success(tmp_path,history):
     import subprocess
-    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**kw:subprocess.CompletedProcess(a,7,'synthetic failure',''))
     assert code==7 and not result['publish_performed'] and result['phase']=='PUBLISH_FAILED'
 
 
 def test_scheduled_success_requires_ledger_and_is_deduplicated(tmp_path,history):
     import subprocess
-    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs);calls=[]
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON));calls=[]
     def child(*args,**kw):
         calls.append(args);(root/'published').mkdir(exist_ok=True);(root/'published/posts.jsonl').write_text(json.dumps({'result':'published','body_sha256':a.digest(BODY),'post_urn':'urn:li:share:synthetic'})+'\n')
         return subprocess.CompletedProcess(args,0,json.dumps({'performed':True,'post_urn':'urn:li:share:synthetic','network_calls_spent':1}),'')
     kwargs=dict(root=root,db_path=db,jobs_path=jobs,dry_run=False,now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=child)
     assert scheduled.run_day('tuesday',**kwargs)[0]==0
-    assert scheduled.run_day('tuesday',**kwargs)[0]==1 and len(calls)==1
+    code,result=scheduled.run_day('tuesday',**kwargs)
+    assert code==0 and result['phase']=='ALREADY_PUBLISHED' and result['outcome']=='NO_ACTION' and len(calls)==1
 
 
 def test_exit_zero_without_confirmation_cannot_report_published(tmp_path,history):
     import subprocess
-    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True);s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**kw:subprocess.CompletedProcess(a,0,'{}',''))
     assert code==1 and not result['publish_performed']
 
@@ -321,7 +331,7 @@ def scheduler_fixture(jobs):
 def test_enable_publishing_arms_only_exact_approved_future_slot(tmp_path,history):
     root,path,db,jobs,mid=artifact(tmp_path,history)
     now=datetime(2026,10,26,12,tzinfo=s.LONDON);calls,update=scheduler_fixture(jobs)
-    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     result=s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=now,updater=update)
     assert result['publishing_enabled'] and len(result['armed'])==1 and len(calls)==1
     assert inspect((root,path,db,jobs,mid))['automatic_publish_armed']
@@ -339,7 +349,7 @@ def test_enabled_policy_automatically_arms_a_later_approved_plan(tmp_path,histor
 
 def test_enabled_policy_cannot_arm_stale_failed_or_changed_body(tmp_path,history):
     root,path,db,jobs,mid=artifact(tmp_path,history)
-    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
     doc=s.read(path);doc['post_text']+=' Changed';path.write_text(json.dumps(doc))
     calls,update=scheduler_fixture(jobs)
     result=s.set_publishing(True,root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON),updater=update)
@@ -360,3 +370,29 @@ def test_publishing_dry_run_never_enables_scheduler(tmp_path,history):
     calls,update=scheduler_fixture(jobs)
     s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,dry_run=True,updater=update)
     assert not calls and not s.job_state('tuesday',jobs_path=jobs)['enabled']
+
+
+def test_catchup_wrong_weekday_is_no_action_not_cron_failure(tmp_path):
+    calls=[]
+    code,result=scheduled.run_day('wednesday',root=tmp_path,dry_run=False,
+        now=datetime(2026,10,27,19,36,tzinfo=s.LONDON),runner=lambda *a,**k:calls.append(a))
+    assert code==0 and result['phase']=='NOT_DUE' and result['network_calls']==0 and not calls
+
+
+def test_policy_off_cannot_be_bypassed_by_raw_enabled_job(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    (root/'publishing-policy.json').write_text(json.dumps({'schema_version':1,'enabled':False}))
+    assert not inspect((root,path,db,jobs,mid))['automatic_publish_armed']
+    calls=[];code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,
+        now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**k:calls.append(a))
+    assert code==0 and result['phase']=='PUBLISHING_PAUSED' and not calls
+
+
+def test_integrity_failure_remains_an_error_with_exact_reason(tmp_path,history):
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    (path.parent/'frozen_text.txt').write_text('Wrong bytes')
+    code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,dry_run=False,
+        now=datetime(2026,10,27,8,tzinfo=s.LONDON),runner=lambda *a,**k:pytest.fail('publisher invoked'))
+    assert code==1 and result['reason_code']=='approved_text_integrity_failed'

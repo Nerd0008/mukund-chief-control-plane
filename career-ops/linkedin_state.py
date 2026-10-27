@@ -190,11 +190,12 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     identity_ok=bool(target and day==target.strftime('%A').lower())
     content_ready=bool(identity_ok and review['owner_approved'] and review['reviews_ready'] and frozen_ok and image_ok and not doc.get('cancelled'))
     is_published=published(sha,root)
+    policy_on=publishing_enabled(root)
     if doc.get('cancelled'):phase='CANCELLED'
     elif is_published:phase='PUBLISHED'
     elif not review['owner_approved']:phase='AWAITING_OWNER_APPROVAL'
     elif not content_ready:phase='APPROVED_BUT_BLOCKED'
-    elif not job['enabled']:phase='APPROVED_READY_PAUSED'
+    elif not job['enabled'] or not policy_on:phase='APPROVED_READY_PAUSED'
     elif not slot_ok:phase='APPROVED_READY_UNSCHEDULED'
     else:phase='SCHEDULED'
     return {'schema_version':2,'phase':phase,'artifact':str(path),'body_sha256':sha,'body_chars':len(body),
@@ -202,7 +203,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
         'content_ready':content_ready,'published':is_published,'cancelled':bool(doc.get('cancelled')),
         'target_date':target.isoformat() if target else None,'publish_at':slot.get('publish_at') if slot else None,
         'slot_matches':bool(slot_ok),'slot_detail':slot_reason,'job':job,
-        'automatic_publish_armed':bool(content_ready and slot_ok and job['enabled'] and not is_published)}
+        'publishing_enabled':policy_on,'automatic_publish_armed':bool(content_ready and slot_ok and job['enabled'] and policy_on and not is_published)}
 
 
 def recover_news(body,old,*,root=ROOT):
@@ -279,7 +280,7 @@ def _scheduler_update(job_id,updates,*,jobs_path=JOBS):
     return update_job(job_id,updates)
 
 
-def refresh_publishing_jobs(*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,updater=None):
+def refresh_publishing_jobs(*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,updater=None,days=None):
     """Arm only the earliest verified, approved, exact future slot per weekday.
 
     Empty, already-published and blocked slots never create recurring noise.
@@ -299,8 +300,11 @@ def refresh_publishing_jobs(*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,upd
                     ready.setdefault(date.fromisoformat(target).strftime('%A').lower(),slot)
                 else:blocked.append(target)
             except (OSError,ValueError):blocked.append(target)
+    selected=set(JOB_IDS) if days is None else set(days)
+    if not selected<=set(JOB_IDS):raise ValueError('unknown publishing weekday')
     armed=[];paused=[]
     for day,job_id in JOB_IDS.items():
+        if day not in selected:continue
         job=job_state(day,jobs_path=jobs_path)
         if not job['known']:
             if day in ready:raise ValueError('publishing job missing: '+day)

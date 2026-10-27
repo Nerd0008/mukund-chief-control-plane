@@ -212,6 +212,12 @@ def register(ctx):
     if not hasattr(middleware,'_DownstreamExecutionError'):
         raise RuntimeError('Native middleware denial contract unavailable; abort deployment')
     ctx.register_middleware('llm_execution',llm_execution)
+    from pathlib import Path
+    import sys
+    career=Path.home()/'Documents/mukund-chief-control-plane/career-ops'
+    if str(career) not in sys.path:sys.path.insert(0,str(career))
+    from hermes_linkedin_control import install as install_linkedin_control
+    install_linkedin_control()
     ctx.register_hook('transform_api_error_classification',router_error_classification)
     from agent import turn_recovery
     install_failure_copy(turn_recovery)

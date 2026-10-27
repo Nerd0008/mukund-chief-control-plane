@@ -11,9 +11,15 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
     if now.tzinfo is None:raise ValueError('timezone-aware execution time required')
     now=now.astimezone(state.LONDON);target=date.fromisoformat(str(target_date)) if target_date else now.date()
     if day not in state.JOB_IDS or target.strftime('%A').lower()!=day:
-        return 1,{'phase':'NOT_DUE','reason':'requested weekday is not the exact execution/preview date','publish_performed':False}
+        return (1 if dry_run else 0),{'ok':not dry_run,'phase':'NOT_DUE','outcome':'NO_ACTION','reason_code':'weekday_not_due','reason':'requested weekday is not the exact execution/preview date','publish_performed':False,'network_calls':0}
     root=Path(root);slots=state.load_slots(root/'drafts/schedule.json');slot=slots.get(target.isoformat())
-    if not slot:return 1,{'phase':'NOT_SCHEDULED','target_date':target.isoformat(),'reason':'no exact dated manifest entry','publish_performed':False}
+    if not slot:
+        pending=state.prepared_status(target,root=root,jobs_path=jobs_path) or {}
+        phase='AWAITING_OWNER_APPROVAL' if pending.get('phase')=='AWAITING_OWNER_APPROVAL' else 'NOT_SCHEDULED'
+        return (1 if dry_run else 0),{'ok':not dry_run,'phase':phase,'outcome':'NO_ACTION',
+            'target_date':target.isoformat(),'reason_code':'awaiting_owner_approval' if phase=='AWAITING_OWNER_APPROVAL' else 'no_approved_slot',
+            'reason':'No approved exact dated manifest entry; no publication attempted','publish_performed':False,'network_calls':0}
+
     path=state.absolute(slot['draft_path'])
     if not path.is_relative_to((root/'drafts').resolve()):raise ValueError('scheduled artifact is outside the canonical drafts directory')
     snapshot=state.inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
@@ -22,10 +28,27 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
         result['would_publish_if_enabled_and_due']=bool(snapshot['content_ready'] and snapshot['slot_matches'] and not snapshot['published'])
         result['writes']=0
         return (0 if result['would_publish_if_enabled_and_due'] else 1),result
+    if snapshot['published']:
+        return 0,{**result,'ok':True,'phase':'ALREADY_PUBLISHED','outcome':'NO_ACTION','reason_code':'already_published','reason':'This exact body is already published; no publication attempted'}
     if target!=now.date() or now<datetime.combine(target,time(8),state.LONDON):
-        return 1,{**result,'phase':'NOT_DUE','reason':'future or stale date cannot publish'}
+        return 0,{**result,'ok':True,'phase':'NOT_DUE','outcome':'NO_ACTION','reason_code':'date_or_time_not_due','reason':'Future or stale date cannot publish'}
     if not snapshot['automatic_publish_armed']:
-        return 1,{**result,'reason':'publishing job disabled, content blocked, or manifest invalid'}
+        if snapshot['cancelled']:
+            phase,reason,code='CANCELLED','owner_cancelled',0
+        elif not snapshot['text_integrity_passed']:
+            phase,reason,code='BLOCKED_INTEGRITY','approved_text_integrity_failed',1
+        elif not snapshot['slot_matches']:
+            phase,reason,code='BLOCKED_MANIFEST','exact_manifest_mismatch',1
+        elif not snapshot['owner_approved']:
+            phase,reason,code='AWAITING_OWNER_APPROVAL','owner_approval_required',0
+        elif not snapshot['reviews_ready']:
+            phase,reason,code='BLOCKED_REVIEW','factual_reviews_incomplete_or_failed',1
+        elif not snapshot['image_available']:
+            phase,reason,code='BLOCKED_IMAGE','approved_image_unavailable',1
+        else:
+            phase,reason,code='PUBLISHING_PAUSED','publishing_policy_or_job_paused',0
+        return code,{**result,'ok':code==0,'phase':phase,'outcome':'BLOCKED' if code else 'NO_ACTION','reason_code':reason,'reason':reason.replace('_',' ')}
+
     # Recheck after taking the shared mutation lock, then keep the exact identity
     # stable through the bounded child call. The child independently checks consent/gates.
     with state.locked(root):
@@ -49,7 +72,7 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
         return (0 if success else (proc.returncode or 1)),{**result,'publish_performed':success,'next_schedule':scheduling,
             'network_calls':None,'reported_publish_attempts':payload.get('network_calls_spent') if isinstance(payload,dict) else None,
             'child_exit_code':proc.returncode,'post_urn':payload.get('post_urn') if success else None,
-            'phase':'PUBLISHED' if success else 'PUBLISH_FAILED'}
+            'ok':success,'outcome':'PUBLISHED' if success else 'FAILED','phase':'PUBLISHED' if success else 'PUBLISH_FAILED'}
 
 
 def main(argv=None):
