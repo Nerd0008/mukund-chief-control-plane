@@ -36,3 +36,11 @@ Hermes remains the session/tool-loop controller. The RouterBrain remains a provi
 Failure checks must be retained when changing retrieval, request assembly, routing or workflow wrappers. Fresh live tests and deployment/hash evidence are separate from green unit tests. No passing test authorizes a post or application submission.
 
 The existing two-minute routing-decision cache ignores moving success/latency counters. It still checks current health on every selection and dispatch, invalidates on failure, and binds task family, task, permission/capability contract and eligible candidates. This avoids paying for a fresh brain decision on each successful round of an unchanged stage.
+
+Use the guarded gateway CLI for lifecycle operations:
+
+```powershell
+& "$env:LOCALAPPDATA/hermes/hermes-agent/venv/Scripts/python.exe" "$env:LOCALAPPDATA/hermes/exec-brain/hermes_cli.main_router.py" gateway restart
+```
+
+The native Windows CLI intentionally spawns its standard entrypoint rather than executing a registered task wrapper. The guarded CLI pins the shared Windows launcher to the mandatory router wrapper, preserving profile arguments and hidden-process handling. A changed native launcher contract is refused. The existing `Hermes_Gateway` scheduled launcher also points at this wrapper. Do not substitute an unguarded native start when testing deployment.

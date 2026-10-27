@@ -21,7 +21,27 @@ def install_guard(middleware,plugins):
     middleware._mandatory_router_guard=True
 
 
+def install_windows_lifecycle(module,entry=None):
+    """Preserve the mandatory wrapper when guarded CLI start/restart respawns."""
+    if getattr(module,'_router_gateway_lifecycle',False):return
+    from pathlib import Path
+    wrapper=str(Path(entry) if entry else Path(__file__).with_name('hermes_cli.main_router.py'))
+    original=module._gateway_run_argv
+    @functools.wraps(original)
+    def argv(python_exe,profile_arg):
+        native=original(python_exe,profile_arg)
+        if native[:3]!=[python_exe,'-m','hermes_cli.main']:
+            raise RuntimeError('Gateway lifecycle contract changed; refusing unguarded launch')
+        return [python_exe,wrapper,*native[3:]]
+    module._gateway_run_argv=argv
+    module._router_gateway_lifecycle=True
+
+
 def main():
+    import os
+    if os.name=='nt':
+        from hermes_cli import gateway_windows
+        install_windows_lifecycle(gateway_windows)
     from hermes_cli import middleware,plugins
     install_guard(middleware,plugins)
     plugins.discover_plugins()
