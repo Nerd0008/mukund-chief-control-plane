@@ -18,6 +18,9 @@ LANGUAGE_POLICY=('Owner communication language: English by default on every chat
     'Do not copy the language of old assistant messages or tool output into your response. '
     'Do not blame Windows locale/encoding for coherent foreign-language prose generated in your own answer without evidence.')
 
+WORKFLOW_GUIDANCE=('For LinkedIn show-existing/build requests use career_linkedin_workflow action show/build; reviewed drafts are in weekly preparation as well as dated folders. Never infer no draft from content_ready=false. Use action prepare for bounded weekly research/writing/reviews, and approve with the exact body hash; the authenticated current owner message is resolved automatically when no internal ID is supplied to capture, image and schedule. For a missed slot, action publish requires an explicit current authenticated publish-now instruction and all existing guards. This tool preserves competing versions and never invents consent. Never create gen_images scratch scripts or use the retired desktop bot interpreter. For job-search reports use career_search_report before reading logs; report-only questions never authorize starting another scan. Current workflow/stage evidence overrides historical operational notes.')
+
+
 def install_language_policy(agent_class):
     if getattr(agent_class,'_owner_english_policy_installed',False):return
     old=agent_class.run_conversation
@@ -29,7 +32,7 @@ def install_language_policy(agent_class):
         previous=getattr(self,'ephemeral_system_prompt',None)
         # Native API-time seam: continuing sessions restore frozen system prompts.
         # Do not persist private reference payloads into that frozen cache/history.
-        self.ephemeral_system_prompt=(previous or '')+'\n'+LANGUAGE_POLICY+owner_context
+        self.ephemeral_system_prompt=(previous or '')+'\n'+LANGUAGE_POLICY+'\n'+WORKFLOW_GUIDANCE+owner_context
         from hermes_response_language import checked_result, checked_text, BufferedText
         allow=False  # Owner requires English across every displayed response channel.
         saved={};buffers=[]
@@ -68,6 +71,28 @@ def command(script,verb):
     try:data=json.loads(result.stdout)
     except ValueError:return json.dumps({'ok':False,'error':'local monitor returned no valid status','exit_code':result.returncode})
     return json.dumps(data)
+
+def linkedin_workflow_tool(args,**kwargs):
+    try:
+        from career_workflow_bridge import linkedin
+        return json.dumps(linkedin(args),ensure_ascii=False)
+    except Exception as exc:
+        from workflow_routing import failure_code
+        current={}
+        try:
+            from career_workflow_bridge import show
+            row=next((r for r in show(week_of=args.get('week_of'))['days'] if r['day']==args.get('day') and r.get('body_sha256')==args.get('body_sha256')),None)
+            if row:current={k:row.get(k) for k in ('phase','body_sha256','owner_approved','reviews_ready','content_ready','automatic_publish_armed')}
+        except Exception:pass
+        return json.dumps({'ok':False,'phase':'WORKFLOW_BLOCKED','error':failure_code(exc),'detail':str(exc) if isinstance(exc,ValueError) else type(exc).__name__,'current_state':current,'approval_retained':current.get('owner_approved') is True,'publish_performed':False})
+
+
+def search_report_tool(args,**kwargs):
+    try:
+        from career_workflow_bridge import search_report
+        return json.dumps(search_report(),ensure_ascii=False)
+    except Exception as exc:return json.dumps({'ok':False,'reason_code':'current_search_report_unavailable','error_type':type(exc).__name__,'writes':0})
+
 
 def workflow_status_tool(args,**kwargs):
     from hermes_diagnostics import snapshot,latest_run
@@ -119,6 +144,8 @@ def register(ctx):
     install_turn_guidance(GatewayTurnMixin)
     ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=2000)
     for name,description,handler,props in [
+        ('career_linkedin_workflow','Bounded LinkedIn show/build/prepare/approve/image/plan. Reuse exact reviewed drafts. Approval requires a real authenticated owner message; never publish from an approval-free request.',linkedin_workflow_tool,{'action':{'type':'string','enum':['show','build','prepare','approve','image','plan','publish']},'day':{'type':'string','enum':['tuesday','wednesday','thursday']},'week_of':{'type':'string'},'body_sha256':{'type':'string','pattern':'^[0-9a-f]{64}$'},'approval_message_id':{'type':'integer'}}),
+        ('career_search_report','Read the current UK scan state and exact latest completed scan/coverage/writer evidence. No search/model/tracker/schedule writes.',search_report_tool,{}),
         ('career_workflow_status','Read CURRENT canonical LinkedIn status or exact latest execution for a cron job_id. Read-only, no provider call. Historical profile/log snippets are not live state. Never infer a cause when evidence is unavailable.',workflow_status_tool,{'job_id':{'type':'string','pattern':'^[0-9a-f]{8,32}$'}}),
         ('career_gmail_status','Check existing local Gmail OAuth and approved monitoring status. No connector needed; no secrets printed.',status_tool,{}),
         ('career_gmail_scan','Read new recruitment Gmail using existing local OAuth. DRY RUN only: no tracker/Calendar/checkpoint/Gmail writes.',scan_tool,{}),

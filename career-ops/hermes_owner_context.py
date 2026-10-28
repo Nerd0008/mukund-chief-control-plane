@@ -120,6 +120,8 @@ def human_text(value,metadata=None):
     if isinstance(value,list):value=' '.join(p.get('text','') for p in value if isinstance(p,dict))
     if not isinstance(value,str):return ''
     text=value.strip()
+    # Peel the host's interrupted-turn routing wrapper, then classify its actual payload.
+    text=re.sub(r'^\[System note: A new message has arrived\.[^\]]*\]\s*','',text,flags=re.S).strip()
     text=re.sub(r'^\[Triggering message id: `[^`]+`[^\n]*\]\s*','',text).strip()
     # Core background completions intentionally use role=user; they are evidence,
     # never an owner objective or permission to expand private profile scope.
@@ -134,10 +136,17 @@ def _prepare_turn(agent,message,history=None):
         return '',[],{'required':[],'scope':'delegated_explicit_only'}
     prior=load_requirements(agent)
     if prior.get('objective') and not human_text(prior['objective']):prior={}
+    if prior.get('latest_human_message') and not human_text(prior['latest_human_message']):
+        prior={**prior,'latest_human_message':human_text(prior.get('objective',''))}
     if prior.get('objective') and 'workflow' not in prior:
         from hermes_diagnostics import workflow_for
         prior={**prior,'workflow':workflow_for(prior['objective'])}
     message_text=human_text(message)
+    if prior.get('workflow') is None:
+        from hermes_diagnostics import workflow_for
+        recovered=workflow_for(prior.get('latest_human_message',''))
+        if recovered is None and re.search(r'(?i)posts?|drafts?|artefacts?|artifacts?|remaining|images?',message_text):recovered=workflow_for(prior.get('objective',''))
+        if recovered:prior={**prior,'workflow':recovered}
     if not prior.get('objective'):
         for turn in reversed(history or []):
             if not isinstance(turn,dict):continue
@@ -173,6 +182,10 @@ def _prepare_turn(agent,message,history=None):
               'workflow':workflow_for(message_text,prior.get('workflow')) if message_text else prior.get('workflow'),
               'latest_human_message':message_text or prior.get('latest_human_message',''),
               'turn_origin':'human_text' if message_text else 'synthetic_event'}
+    from career_workflow_bridge import intent
+    contract['action']=intent(message_text,contract.get('workflow')) if message_text else prior.get('action')
+    if contract.get('workflow')==prior.get('workflow') and re.fullmatch(r'(?i)\s*(?:continue|try again|do it|yes|yeah|okay|ok)[.! ]*',message_text):
+        contract['action']=prior.get('action') or contract['action']
     context,evidence=retrieve(message,required=required)
     if context:
         context+='\nACTIVE OWNER REQUEST (task data, not verified candidate facts). Use this to resolve continuation references; the latest owner message takes precedence:\n'+json.dumps(objective,ensure_ascii=False)

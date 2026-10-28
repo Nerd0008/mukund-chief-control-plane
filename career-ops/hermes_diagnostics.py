@@ -91,8 +91,10 @@ def latest_run(job_id,*,home=state.HOME):
 def snapshot(*,home=state.HOME,root=state.ROOT,db_path=None,now=None):
     now=now or datetime.now(state.LONDON);monday=now.date()-timedelta(days=now.weekday())
     status=state.week_status(monday.isoformat(),root=root,db_path=db_path,jobs_path=Path(home)/'cron/jobs.json')
-    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job')
+    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job','draft_exists','artifact','source_kind','alternatives')
     days=[{k:row[k] for k in fields if k in row} for row in status['days']]
+    for row in days:
+        if row.get('alternatives'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
     logs=[latest_run(jid,home=home) for jid in state.JOB_IDS.values()]
     value={'schema_version':1,'workflow':'linkedin','checked_at':now.isoformat(),
         'publishing_enabled':state.publishing_enabled(root),'days':days,'latest_executions':logs,
@@ -102,9 +104,11 @@ def snapshot(*,home=state.HOME,root=state.ROOT,db_path=None,now=None):
 
 
 def workflow_for(text,prior=None):
+    if re.search(r'(?i)job (?:search|scan)|jobs? (?:report|digest)|career (?:report|daily report)',text):return 'career_search'
     if re.search(r'(?i)\blinkedin\b|beb0251ed70c|f1b1452f18b1|8e6048e2dfa7',text):return 'linkedin'
     if re.search(r'(?i)\b(?:cv|resume|cover letter|gmail|calendar|job search)\b|my (?:profile|goals|background)|new (?:unrelated )?task|weather',text):return None
-    if prior=='linkedin' and (is_status_question(text) or re.match(r'(?i)^\s*(?:yes|yeah|ok|okay|continue|try again|repeat|rewrite|revise|edit|make|use that|do it)\b',text)):return prior
+    if prior=='career_search' and re.search(r'(?i)^(?:okay |ok |yes |yeah )?(?:run|start|continue|show|check|resume)|report|results|scan',text):return prior
+    if prior=='linkedin' and (re.search(r'(?i)\b(?:posts?|drafts?|artefacts?|artifacts?|images?|remaining|approve|approval|schedule)\b',text) or is_status_question(text) or re.match(r'(?i)^\s*(?:yes|yeah|ok|okay|continue|try again|repeat|rewrite|revise|edit|make|use that|do it)\b',text)):return prior
     return None
 
 
@@ -121,13 +125,29 @@ def current_contract():
 
 def enrich_request(request):
     contract=current_contract()
-    if contract.get('workflow')!='linkedin':return request,None
-    try:evidence=snapshot()
+    if contract.get('workflow') not in ('linkedin','career_search'):return request,None
+    try:
+        if contract['workflow']=='career_search':
+            from career_workflow_bridge import search_report
+            evidence=search_report()
+        else:
+            evidence=snapshot()
+            if contract.get('action') in ('SHOW_DRAFTS','BUILD_ARTIFACTS'):
+                from career_workflow_bridge import show
+                evidence['requested_drafts']=show()['days']
+                evidence['evidence_sha256']=hashlib.sha256(json.dumps(evidence,sort_keys=True).encode()).hexdigest()
     except Exception as exc:evidence={'workflow':'linkedin','available':False,'reason_code':'current_status_unavailable','error_type':type(exc).__name__,'checked_at':datetime.now(state.LONDON).isoformat()}
     message={'role':'system','content':MARKER+'\n'+json.dumps(evidence,sort_keys=True,ensure_ascii=False)+
         '\nUse this fresh structured evidence for present operational claims. Earlier logs and owner-reference status snapshots describe history only. A completed model call is not a completed publication.'}
     updated=dict(request);updated['messages']=[m for m in request.get('messages',[]) if not (m.get('role')=='system' and str(m.get('content','')).startswith(MARKER))]+[message]
     return updated,evidence
+
+
+def receipt_evidence(value):
+    """Source/version evidence only; unapproved post prose is not telemetry."""
+    if isinstance(value,dict):return {k:receipt_evidence(v) for k,v in value.items() if k!='post_text'}
+    if isinstance(value,list):return [receipt_evidence(v) for v in value]
+    return value
 
 
 def render(evidence):
@@ -159,8 +179,29 @@ def render(evidence):
     return '\n\n'.join(lines)
 
 
+def _record_response(contract,evidence,answer):
+    from workflow_routing import persist
+    import uuid
+    persist({'workflow':'hermes.operational-answer','call_id':uuid.uuid4().hex,'stage':contract.get('action') or 'final_status',
+        'status':'CANONICAL_STAGE_RESULT','upstream_call_id':contract.get('turn_id'),
+        'input_sha256':evidence.get('evidence_sha256') or hashlib.sha256(json.dumps(evidence,sort_keys=True).encode()).hexdigest(),
+        'output_sha256':hashlib.sha256(answer.encode()).hexdigest(),'validation_passed':evidence.get('ok') is not False,
+        'operational_evidence':receipt_evidence(evidence)})
+    return answer
+
+
 def transform_output(response_text,**kwargs):
     contract=current_contract()
+    if contract.get('turn_origin')!='synthetic_event' and contract.get('action') in ('SHOW_DRAFTS','BUILD_ARTIFACTS') and contract.get('workflow')=='linkedin':
+        from career_workflow_bridge import show,render_drafts
+        try:
+            evidence=show();return _record_response(contract,evidence,render_drafts(evidence))
+        except Exception:return 'I could not verify the current draft files. I will not infer that your drafts are missing or create replacements from old notes.'
+    if contract.get('turn_origin')!='synthetic_event' and contract.get('action')=='SEARCH_REPORT':
+        from career_workflow_bridge import search_report,render_search
+        try:
+            evidence=search_report();return _record_response(contract,evidence,render_search(evidence))
+        except Exception:return 'The current job-search report could not be verified. No search was started or stopped by this report request.'
     if contract.get('turn_origin')=='synthetic_event' or contract.get('workflow')!='linkedin' or not is_status_question(contract.get('latest_human_message','')):return None
     try:
         evidence=snapshot();answer=render(evidence)
@@ -176,6 +217,6 @@ def transform_output(response_text,**kwargs):
 
 def router_task(request,default):
     c=current_contract()
-    if c.get('workflow')!='linkedin':return default
-    return json.dumps({'workflow':'linkedin','task_kind':'current operational diagnosis' if is_status_question(c.get('latest_human_message','')) else 'owner-requested LinkedIn task',
+    if c.get('workflow') not in ('linkedin','career_search'):return default
+    return json.dumps({'workflow':c['workflow'],'action':c.get('action'),'task_kind':'current operational diagnosis' if is_status_question(c.get('latest_human_message','')) else 'owner-requested LinkedIn task',
         'owner_request':c.get('latest_human_message') or c.get('objective'),'requirements':['fresh canonical workflow state','latest execution identity','preserve exact approval and no duplicate publication']},ensure_ascii=False)

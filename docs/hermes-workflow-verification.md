@@ -94,3 +94,46 @@ full-byte context, host before-persistence transforms, protected cron control, d
 publication and unrelated-workflow negative controls. Live acceptance uses synthetic
 references and workflow fixtures through the real router/provider. Real canonical
 state is checked locally; no post or Discord message is sent by acceptance.
+
+
+## Manual workflow recovery (28 October 2026)
+
+The native `career_linkedin_workflow` tool is the bounded path for show/build,
+weekly prepare, authenticated approve, image and plan. Show/build reuses existing
+reviewed preparation and exposes competing versions; it never invents new text or
+approval. Approval authenticates the real owner message against the exact selected
+body, preserves the replaced unapproved version, reuses only matching review records,
+then generates a required body-bound image through the existing routed Nano Banana
+helper and plans the existing publisher. A missed dated slot returns a needs-publish-instruction state; the bounded publish action requires a current authenticated explicit publish-now instruction, uses the existing publisher with zero retries, and reports success only with a returned URN and ledger evidence. It cannot move a dated post to another day.
+A failure retains valid consent and leaves the job unarmed. Past-date planning still
+requires a valid future schedule; an approval does not silently move a dated post.
+
+Reviewed weekly preparation takes precedence over a differing unchecked dated file;
+published, cancelled or authenticated approved dated artifacts retain their identity.
+Both versions are visible. The ordinary status receipt contains locations/hashes and
+existence, while requested post text is supplied only for explicit show/build stages
+and stripped from operational telemetry. Full professional references remain intact.
+
+Workflow/stage context survives natural artifact/post follow-ups. The interrupted-turn
+System-note wrapper is peeled before classifying its actual human/background payload;
+old contaminated latest-human fields are repaired. Explicit new tasks still exit the
+workflow. Per-turn guidance exposes the bounded tools even in continuing sessions.
+A scoped pre-tool hook refuses scratch LinkedIn execution only within these bounded
+stages, with unrelated workflows and explicit investigation left available.
+
+`career_search_report` reads exact execution and matching delta-run coverage/writer
+schemas. A report question cannot start a scan. Running, paused, absent and previous
+completed evidence stay distinct; missing fields never become zero new jobs. The
+owner's two-hour UK scanner and daily digest remain enabled independently.
+
+Generic worker HTTP 500/502/504 responses cool down that model; explicit HTTP 503,
+connection failure, quota and billing endpoint conditions retain provider-wide scope.
+No expired qualification or permission/limit is bypassed. Empty worker pools retain
+bounded cooldown metadata and transient copy, without automatic action replay.
+
+Acceptance includes the pictured show/build sequence, reviewed-vs-unchecked version
+selection, real consent verification, mocked image success/failure through the bounded
+stage, required-image scheduling refusal, wrapped background notifications, correct
+search schemas, narrow negative controls, model-vs-provider circuit scope and host
+failure-copy behavior. Synthetic fixtures are not a claim of real-profile live testing
+or a live image-provider success; those must be stated separately when performed.

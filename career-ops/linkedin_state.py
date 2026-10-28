@@ -177,7 +177,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     frozen=path.parent/'frozen_text.txt'
     frozen_ok=verify_integrity(path,doc)[0]
     image=absolute(doc['image_path']) if doc.get('image_path') else None
-    image_ok=image is None or image.is_file()
+    image_ok=(bool(image and image.is_file() and doc.get('image_body_sha256')==sha) if doc.get('image_required') else image is None or image.is_file())
     target=artifact_date(path);day=doc.get('day') or (target.strftime('%A').lower() if target else None)
     job=job_state(day,jobs_path=jobs_path) if day in JOB_IDS else {'known':False,'enabled':False,'reason':'no publishing weekday'}
     slots=load_slots(Path(root)/'drafts/schedule.json');slot=slots.get(target.isoformat()) if target else None
@@ -378,7 +378,7 @@ def capture(body,target,message_id,*,sources=(),image=None,replace=False,root=RO
             doc={'schema_version':2,'post_text':body,'day':day,'news_fact_gate':{'sources':list(sources)},'personal_fact_gate':{}}
         doc.update(owner_approval=approval['receipt'],approved=True,confirm_token=consent.digest(body))
         if image is not None:doc['image_path']=str(Path(image).resolve())
-        elif prior and prior.get('image_path'):doc['image_path']=prior['image_path']
+        elif prior and not changed and prior.get('image_path'):doc['image_path']=prior['image_path']
         if not dry_run:
             if changed:
                 version=path.parent/'.versions'/consent.digest(body_of(prior))
@@ -452,10 +452,20 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
     days=[]
     for offset,day in [(1,'tuesday'),(2,'wednesday'),(3,'thursday')]:
         target=monday+timedelta(days=offset);path=Path(root)/'drafts'/f'approved_{target:%Y%m%d}_{day}'/'linkedin_drafts.json'
+        prepared=prepared_status(target,root=root,jobs_path=jobs_path)
         if path.is_file():
             row=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
-            row['post_text']=body_of(read(path))
-        else:row=prepared_status(target,root=root,jobs_path=jobs_path) or {'phase':'NO_ARTIFACT','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path)}
+            row['post_text']=body_of(read(path));row['source_kind']='DATED_ARTIFACT'
+            if prepared and prepared.get('body_sha256')!=row.get('body_sha256'):
+                # Unapproved scratch output cannot hide an existing reviewed draft.
+                if prepared.get('reviews_ready') and not row.get('owner_approved') and not row.get('published') and not row.get('cancelled'):
+                    alternative=row;row={**prepared,'source_kind':'REVIEWED_PREPARED'}
+                else:alternative={**prepared,'source_kind':'PREPARED'}
+                row['alternatives']=[{k:alternative.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')}]
+        else:
+            row=({**prepared,'source_kind':'REVIEWED_PREPARED' if prepared.get('reviews_ready') else 'PREPARED'} if prepared else
+                {'phase':'NO_ARTIFACT','source_kind':'NONE','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path)})
+        row['draft_exists']=bool(row.get('post_text'))
         days.append({'day':day,'date':target.isoformat(),**row})
     count=sum(row['automatic_publish_armed'] for row in days)
     return {'week_of':monday.isoformat(),'timezone':'Europe/London','days':days,'automatic_posts_armed':count,

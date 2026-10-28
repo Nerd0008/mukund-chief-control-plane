@@ -43,14 +43,14 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
                     import uuid
                     persist({'workflow':'hermes.owner-context','call_id':uuid.uuid4().hex,
                              'operation_id':state.id,'stage':'context','status':'CONTEXT_VERIFIED','context_coverage':coverage})
-            from hermes_diagnostics import enrich_request,router_task
+            from hermes_diagnostics import enrich_request,router_task,receipt_evidence
             request,diagnostic=enrich_request(request)
             if diagnostic:
                 from workflow_routing import persist
                 import uuid
                 persist({'workflow':'hermes.operational-evidence','call_id':uuid.uuid4().hex,
                          'operation_id':state.id,'stage':'current_state','status':'EVIDENCE_READY' if diagnostic.get('evidence_sha256') else 'EVIDENCE_UNAVAILABLE',
-                         'input_sha256':diagnostic.get('evidence_sha256'),'operational_evidence':diagnostic})
+                         'input_sha256':diagnostic.get('evidence_sha256'),'operational_evidence':receipt_evidence(diagnostic)})
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
                 offers(provider,model,api_mode,request),
                 task=router_task(request,_request_task(request)),timeout=state.remaining(45))
@@ -152,7 +152,7 @@ def router_error_classification(*,error=None,**kwargs):
     compress=str(original)=='native_context_capacity_exceeded'
     return {'reason':'context_overflow' if compress else 'unknown','retryable':False,'should_compress':compress,
             'should_rotate_credential':False,'should_fallback':False,
-            'error_context':{'component':'router_brain','router_failure':str(original)}}
+            'error_context':{'component':'router_brain','router_failure':str(original),'retry_after_seconds':(original.receipt or {}).get('retry_after_seconds')}}
 
 
 def install_failure_copy(module):
@@ -181,7 +181,7 @@ def install_failure_copy(module):
         if str(code).startswith('bounded_text_worker_'):
             return 'The Codex content worker failed during generation ('+code+'). It was not retried automatically. No unverified document will be delivered.'
         if code in ('no_healthy_compatible_worker','worker_health_changed'):
-            return 'No healthy model compatible with this request is currently available. The router stopped without replaying actions or bypassing model limits.'
+            return ('Compatible workers are temporarily unavailable'+(' for up to '+str(context['retry_after_seconds'])+' seconds' if context.get('retry_after_seconds') else '')+'. No actions were replayed. Earlier steps may have completed; preserve their state before continuing.')
         messages={
             'router_cli_timeout':'The Codex router reached its bounded time limit.',
             'router_cli_usage_limit':'The Codex router reported a usage or rate limit.',
@@ -192,6 +192,23 @@ def install_failure_copy(module):
                 ' No downstream model call was made for this attempt. '
                 'The request stopped without automatic retries. No failed document was attached.')
     module.nonretryable_copy=copy
+    terminal=getattr(module,'nonretryable_client_error_result',None)
+    if terminal:
+        @functools.wraps(terminal)
+        def report(*args,**kwargs):
+            bound=inspect.signature(terminal).bind_partial(*args,**kwargs)
+            classified=bound.arguments.get('classified');detail=getattr(classified,'error_context',None) or {}
+            agent=bound.arguments.get('agent')
+            if agent is not None and detail.get('component')=='router_brain' and detail.get('router_failure') in ('no_healthy_compatible_worker','worker_health_changed'):
+                class DiagnosticAgent:
+                    def __getattr__(self,name):return getattr(agent,name)
+                    def __setattr__(self,name,value):setattr(agent,name,value)
+                    def _emit_diagnostic_status(self,message):
+                        wait=detail.get('retry_after_seconds')
+                        return agent._emit_diagnostic_status('Router workers are temporarily unavailable'+(' (cooldown up to '+str(wait)+' seconds)' if wait else '')+'. No automatic action replay was attempted.')
+                bound.arguments['agent']=DiagnosticAgent()
+            return terminal(*bound.args,**bound.kwargs)
+        module.nonretryable_client_error_result=report
     module._router_failure_copy_installed=True
 
 
@@ -228,6 +245,8 @@ def register(ctx):
     install_linkedin_control()
     from hermes_diagnostics import transform_output
     ctx.register_hook('transform_llm_output',transform_output)
+    from career_workflow_bridge import guard
+    ctx.register_hook('pre_tool_call',guard)
     __import__('logging').getLogger(__name__).info('Operational evidence v1 active: fresh LinkedIn state, exact execution logs, protected cron and before-persistence status transform')
     ctx.register_hook('transform_api_error_classification',router_error_classification)
     from agent import turn_recovery

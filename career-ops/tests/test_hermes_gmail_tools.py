@@ -33,7 +33,7 @@ def test_native_gmail_registration(monkeypatch):
         def register_system_prompt_section(self,*a,**kw):self.prompt=a[1]
         def register_tool(self,**kw):self.tools[kw['name']]=kw
     ctx=Context();g.register(ctx)
-    assert set(ctx.tools)=={'career_gmail_status','career_gmail_scan','career_gmail_jobs','career_gmail_assessments','career_workflow_status'}
+    assert set(ctx.tools)=={'career_gmail_status','career_gmail_scan','career_gmail_jobs','career_gmail_assessments','career_workflow_status','career_linkedin_workflow','career_search_report'}
     assert ctx.tools['career_gmail_status']['handler'] is g.status_tool
     assert 'read-only' in ctx.prompt
 

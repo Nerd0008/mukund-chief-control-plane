@@ -120,17 +120,21 @@ def select(workflow,offers,*,task='',family='analysis',timeout=45):
     try:
         if not offers:raise RouterDecisionError(getattr(offers,'block_reason','no_protocol_compatible_worker'))
         from workflow_health import snapshot
-        checked=[]
+        checked=[];cooldowns=[]
         for offer in offers:
             health=snapshot(offer.get('provider','transport'),offer.get('model','configured'))
             if health['available']:
                 checked.append(dict(offer,evidence={**offer.get('evidence',{}),
                     'recent_failures':health['recent_failures'],'observed_successes':health['observed_successes'],
                     'latency_seconds':health['latency_seconds'],'last_failure_at':health['last_failure_at']}))
+            else:cooldowns.append(health['cooldown_until'])
         offers=checked
-        if not offers:raise RouterDecisionError('no_healthy_compatible_worker')
+        if not offers:
+            import math
+            delay=max(1,math.ceil(min(cooldowns)-time.time())) if cooldowns else None
+            raise RouterDecisionError('no_healthy_compatible_worker',{'retry_after_seconds':delay})
     except RouterDecisionError as exc:
-        persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc)))
+        persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc),retry_after_seconds=(exc.receipt or {}).get('retry_after_seconds')))
         raise
     # Coalesce identical in-flight decisions, not unrelated requests or failures.
     key=_decision_key(workflow,offers,task,family)

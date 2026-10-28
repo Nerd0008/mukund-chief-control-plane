@@ -83,7 +83,8 @@ def metadata(error):
         category = 'workflow_cancelled'
     else:
         category = 'workflow_execution_failed'
-    scope = ('provider' if category in ('provider_unavailable','provider_connection_error',
+    scope = ('model' if category=='provider_unavailable' and status!=503 else
+             'provider' if category in ('provider_unavailable','provider_connection_error',
               'provider_billing_blocked','provider_quota_exhausted') else
              'model' if category in ('provider_rate_limit','provider_model_not_found','provider_model_withdrawn','provider_model_billing_blocked','provider_timeout') else 'request')
     return {'error':category, 'http_status':status, 'retry_after_seconds':retry_after(error), 'failure_scope':scope}
