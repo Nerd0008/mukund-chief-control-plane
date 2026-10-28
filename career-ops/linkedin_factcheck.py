@@ -112,7 +112,8 @@ for _ in range(runs):
         raw = str(getattr(resp, "text", "") or "")
     except Exception as exc:
         if isinstance(exc,RouterDecisionError):
-            responses.append({"error_type":"RouterDecisionError","error":str(exc)})
+            responses.append({"error_type":"RouterDecisionError","error":str(exc),
+                              "retry_after_seconds":(exc.receipt or {}).get('retry_after_seconds')})
             break
         responses.append({"error_type": type(exc).__name__})
         continue
@@ -511,6 +512,13 @@ SOURCE:
             if valid_runs >= requested:
                 break
             judged = run_judge(prompt, model=model, api_key=api_key, runs=requested - valid_runs)
+            blocked=next((row for row in judged.get('responses',[]) if isinstance(row,dict) and row.get('error_type')=='RouterDecisionError'),None)
+            if blocked:
+                result['operational_error']=blocked.get('error','router_blocked')
+                result['retry_after_seconds']=blocked.get('retry_after_seconds')
+                result['reason']='Verification blocked by routing/resource availability; content is not rejected and must not be rewritten automatically'
+                result['audit'].append({'attempt':attempt+1,'result':judged,'operational_block':True})
+                return result
             run_answers = judged.get("runs", [])
             receipt = judged.get("receipt") or {}
             receipt_ok = (receipt.get("prompt_chars") == len(prompt)

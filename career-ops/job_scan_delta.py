@@ -302,7 +302,7 @@ def failure_summary(coverage: dict) -> str:
     completed = total = 0
     allowed = {'router_cli_timeout','router_cli_failed','router_cli_usage_limit',
                'router_cli_auth','router_cli_configuration','workflow_deadline_exceeded',
-               'not_attempted_after_routing_block','batch elapsed budget exhausted'}
+               'not_attempted_after_routing_block','batch elapsed budget exhausted','codex_rate_limited','codex_busy','router_cli_rate_limited','router_cli_busy'}
     for batch in coverage.get('batches', []):
         for result in (batch.get('coverage') or {}).get('query_receipts', []):
             for query in result.get('query_receipts', []):

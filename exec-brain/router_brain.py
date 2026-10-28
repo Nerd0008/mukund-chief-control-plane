@@ -25,6 +25,8 @@ class RouterDecisionError(RuntimeError):
 def cli_failure_code(output):
     """Classify locally; never persist provider bodies, stderr, prompts or tokens."""
     if output.get('status') == 'CANCELLED': return 'workflow_cancelled'
+    if output.get('status') == 'RATE_LIMITED': return 'router_cli_rate_limited'
+    if output.get('status') == 'BUSY': return 'router_cli_busy'
     if output.get('status') == 'TIMEOUT': return 'router_cli_timeout'
     text=' '.join(str(output.get(k) or '') for k in ('error','stderr','final_message')).lower()
     if any(s in text for s in ('usage limit','quota exceeded','insufficient_quota','insufficient balance','rate limit','too many requests')):
@@ -107,11 +109,14 @@ class RouterBrain:
                     'working_directory': workspace, 'timeout': timeout,
                     'allowed_tools': [], 'permission_scope': {'read_only': True},
                     **({'cancel_event':cancel_event} if cancel_event is not None else {})})
-            receipt['provider_call_made'] = True
+            receipt['provider_call_made'] = output.get('request_dispatched',True) is True
+            retry=output.get('retry_after_seconds')
+            if isinstance(retry,(int,float)) and 0<=retry<=86400:receipt['retry_after_seconds']=retry
+            if output.get('http_status')==429:receipt['http_status']=429
             metadata=output.get('dispatch_metadata') or {}
             for key in ('resolved_executable','resolved_version'):
                 if isinstance(metadata.get(key),str): receipt[key]=metadata[key]
-            receipt['cli_status']=output.get('status') if output.get('status') in ('COMPLETED','FAILED','TIMEOUT') else 'UNKNOWN'
+            receipt['cli_status']=output.get('status') if output.get('status') in ('COMPLETED','FAILED','TIMEOUT','RATE_LIMITED','BUSY','STATE_UNAVAILABLE') else 'UNKNOWN'
             if type(output.get('exit_code')) is int: receipt['cli_exit_code']=output['exit_code']
             receipt['timeout_seconds']=timeout
             progress=output.get('execution_progress')

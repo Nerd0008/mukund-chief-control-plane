@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E3 Codex CLI ExecutionAdapter — non-interactive Codex execution."""
+"""E3 Codex CLI ExecutionAdapter â€” non-interactive Codex execution."""
 
 import json
 import os
@@ -9,6 +9,7 @@ import subprocess
 import time
 import uuid
 import hashlib
+from codex_admission import AdmissionBlocked
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -21,7 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 #   2. PATH via shutil.which("codex")
 #   3. validated installed builds under %LOCALAPPDATA%\OpenAI\Codex\bin\*\codex.exe
 # Every candidate must pass `codex.exe --version` before it is accepted, and only
-# the resolved path/version are ever recorded — never credentials.
+# the resolved path/version are ever recorded â€” never credentials.
 CODEX_EXECUTABLE_ENV = ("CODEX_EXECUTABLE", "CODEX_CLI_PATH")
 CODEX_BIN_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "OpenAI" / "Codex" / "bin"
 
@@ -85,7 +86,7 @@ def execution_progress(stdout, stderr):
     signals=(' '.join(errors)+' '+text(stderr)).lower()
     result['error_category']='none'
     for category,markers in (
-        ('usage_limit',('rate limit','too many requests','usage limit','quota exceeded','429')),
+        ('usage_limit',('rate limit','too many requests','usage limit','quota exceeded')),
         ('authentication',('unauthorized','authentication','login required','401')),
         ('certificate',('certificate verify','tls handshake')),
         ('connection',('connection reset','connection refused','connection error','stream disconnected','error sending request'))):
@@ -212,8 +213,8 @@ def parse_doctor_identity(report: Dict[str, Any],
     Provenance contract (2026-09-24 release-reproducibility remediation):
 
     * ``configured_provider`` / ``configured_model`` come from the CLI's own
-      configuration report (``config.load``). They are *declarations* — what the
-      CLI is told to use — and are never promoted to observed identity.
+      configuration report (``config.load``). They are *declarations* â€” what the
+      CLI is told to use â€” and are never promoted to observed identity.
     * ``provider`` is only filled when a live probe actually reports a provider
       (``network.websocket_reachability`` handshake). Otherwise it stays
       ``unknown`` and ``provider_provenance`` records that the CLI did not
@@ -368,9 +369,9 @@ class CodexExecutionAdapter:
         # Execute
         start_time = time.time()
         try:
-            from workflow_control import run_process
+            from codex_admission import run as run_process
             result = run_process(
-                cmd,
+                cmd, model=model,
                 cancel_event=contract.get("cancel_event"),
                 capture_output=True,
                 text=True,
@@ -468,6 +469,15 @@ class CodexExecutionAdapter:
 
         except __import__("workflow_control").ProcessCancelled:
             return {"status":"CANCELLED","error":"workflow_cancelled","exit_code":-1}
+
+        except AdmissionBlocked as exc:
+            return {'dispatch_id':dispatch_id,'status':exc.kind,'provider':'openai','model':model,
+                'request_dispatched':exc.request_dispatched,'retry_after_seconds':exc.retry_after_seconds,
+                'http_status':429 if exc.kind=='RATE_LIMITED' else None,
+                'final_message':None,'exit_code':-1,'error':'codex_'+exc.kind.lower(),
+                'dispatch_metadata':{'resolved_executable':str(self.executable),'resolved_version':self._get_version(),
+                                     'timeout':timeout,'execution_profile':self.execution_profile},
+                'runtime_s':time.time()-start_time}
 
         except subprocess.TimeoutExpired as exc:
             progress=execution_progress(exc.output,exc.stderr)
@@ -636,11 +646,11 @@ class CodexExecutionAdapter:
         return None
 
 
-# ─── E2 linkage (public interface only) ──────────────────────────
+# â”€â”€â”€ E2 linkage (public interface only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # The E2 runtime (governor.py + governor.db) lives next to this module in the
 # deployed runtime root; in the repository checkout it does not. E3 must never
-# SQL-write governor.db directly — it only ever calls the public E2 function.
+# SQL-write governor.db directly â€” it only ever calls the public E2 function.
 E2_RUNTIME_ROOT = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "exec-brain"
 
 
@@ -688,7 +698,7 @@ def report_usage_to_e2(result: Dict[str, Any]) -> Optional[str]:
         con.close()
 
 
-# ─── Bounded readiness smoke ─────────────────────────────────────
+# â”€â”€â”€ Bounded readiness smoke â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # One deterministic, harmless, non-interactive prompt: no tool use, no file
 # access, no repository change. Exactly one of these is spent per re-validation.

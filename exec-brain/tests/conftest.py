@@ -11,3 +11,9 @@ def private_controller_health(tmp_path,monkeypatch):
     if importlib.util.find_spec('workflow_health') is not None:
         import workflow_health
         monkeypatch.setattr(workflow_health,'DB_PATH',tmp_path/'native-health.sqlite3')
+
+
+@pytest.fixture(autouse=True)
+def private_codex_admission(tmp_path,monkeypatch):
+    import codex_admission
+    monkeypatch.setattr(codex_admission,'ROOT',tmp_path/'codex-admission')

@@ -156,8 +156,55 @@ def stop_child(proc):
     except subprocess.TimeoutExpired:proc.kill();proc.communicate(timeout=5)
 
 
-def run_process(command,*,cancel_event=None,timeout,input=None,**kwargs):
+def _observed_process(command, *, stop_on_stderr, cancel_event, timeout, input=None, **kwargs):
+    """Observe transport errors before the CLI's internal retry sleep expires."""
+    kwargs.pop('capture_output',None)
+    proc=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,**kwargs)
+    stopped=threading.Event();out=[];err=[]
+    def read_out():
+        value=proc.stdout.read()
+        if value:out.append(value)
+    def read_err():
+        for line in proc.stderr:
+            err.append(line)
+            if stop_on_stderr(line):stopped.set()
+    def write_input():
+        try:
+            if input is not None:proc.stdin.write(input);proc.stdin.flush()
+        except (BrokenPipeError,OSError):pass
+        finally:
+            try:proc.stdin.close()
+            except OSError:pass
+    threads=[threading.Thread(target=f,daemon=True) for f in (read_out,read_err,write_input)]
+    for thread in threads:thread.start()
+    deadline=time.monotonic()+seconds(timeout);failure=None
+    while proc.poll() is None:
+        if cancel_event is not None and cancel_event.is_set():failure=ProcessCancelled();break
+        if stopped.is_set():break
+        if time.monotonic()>=deadline:failure=subprocess.TimeoutExpired(command,timeout);break
+        time.sleep(.02)
+    if proc.poll() is None:
+        if __import__('os').name=='nt':
+            subprocess.run(['taskkill','/PID',str(proc.pid),'/T','/F'],capture_output=True,
+                timeout=5,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+        else:proc.kill()
+        try:proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:proc.kill();proc.wait(timeout=5)
+    for thread in threads:thread.join(timeout=5)
+    separator='' if kwargs.get('text') or kwargs.get('encoding') or kwargs.get('universal_newlines') else b''
+    stdout=separator.join(out);stderr=separator.join(err)
+    if isinstance(failure,subprocess.TimeoutExpired):
+        failure.output=stdout;failure.stderr=stderr
+    if failure:raise failure
+    return subprocess.CompletedProcess(command,proc.returncode,stdout,stderr)
+
+
+def run_process(command,*,cancel_event=None,timeout,input=None,stop_on_stderr=None,**kwargs):
     """communicate() polling keeps stdin private and makes cancellation observable."""
+    if stop_on_stderr is not None:
+        if cancel_event is not None and cancel_event.is_set():raise ProcessCancelled()
+        return _observed_process(command,stop_on_stderr=stop_on_stderr,cancel_event=cancel_event,
+                                 timeout=timeout,input=input,**kwargs)
     if cancel_event is None:
         return subprocess.run(command,input=input,timeout=timeout,**kwargs)
     if cancel_event.is_set():raise ProcessCancelled()

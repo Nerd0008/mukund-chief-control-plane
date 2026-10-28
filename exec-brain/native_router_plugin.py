@@ -186,6 +186,13 @@ def install_failure_copy(module):
             return 'The Codex content worker failed during generation ('+code+'). It was not retried automatically. No unverified document will be delivered.'
         if code in ('no_healthy_compatible_worker','worker_health_changed'):
             return ('Compatible workers are temporarily unavailable'+(' for up to '+str(context['retry_after_seconds'])+' seconds' if context.get('retry_after_seconds') else '')+'. No actions were replayed. Earlier steps may have completed; preserve their state before continuing.')
+        if code=='router_cli_rate_limited':
+            delay=context.get('retry_after_seconds')
+            return ('The Codex routing model returned HTTP 429 (rate limited).'+
+                    (' Its cooldown has '+str(delay)+' seconds remaining.' if delay is not None else '')+
+                    ' No downstream worker ran for this attempt. Completed workflow actions are preserved; no actions were replayed.')
+        if code=='router_cli_busy':
+            return 'The shared Codex model slot was busy until this request deadline. No additional model call or workflow action was started.'
         messages={
             'router_cli_timeout':'The Codex router reached its bounded time limit.',
             'router_cli_usage_limit':'The Codex router reported a usage or rate limit.',

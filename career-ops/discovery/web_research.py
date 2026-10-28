@@ -577,9 +577,13 @@ class CodexWebSearchProvider(ResearchProvider):
                "executed_queries": [], "cli_version": None, "model": self.model,
                "error": None, "raw_events": 0, "elapsed_s": None}
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+            from codex_admission import run as admitted_run, AdmissionBlocked
+            proc = admitted_run(cmd, model=self.model, capture_output=True, text=True, timeout=timeout,
                                   input=prompt, encoding="utf-8", errors="replace",
                                   creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
+        except AdmissionBlocked as exc:
+            out.update(error='codex_'+exc.kind.lower(),routing_blocked=True,retry_after_seconds=exc.retry_after_seconds)
+            return out
         except Exception as exc:  # noqa: BLE001
             out["error"] = f"{type(exc).__name__}: {exc}"
             return out

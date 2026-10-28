@@ -303,6 +303,8 @@ def text_via_codex(messages,timeout=90):
         metadata=result.get('dispatch_metadata') or {}
         receipt={k:metadata[k] for k in ('resolved_executable','resolved_version') if k in metadata}
         receipt.update(error=code,cli_status=result.get('status'),cli_exit_code=result.get('exit_code'))
+        if result.get('retry_after_seconds') is not None:receipt['retry_after_seconds']=result['retry_after_seconds']
+        if result.get('http_status')==429:receipt['http_status']=429
         raise RouterDecisionError(code,receipt)
     for row in result.get('raw_output') or []:
         if row.get('type') in ('item.started','item.completed') and (row.get('item') or {}).get('type') not in ('reasoning','agent_message'):
