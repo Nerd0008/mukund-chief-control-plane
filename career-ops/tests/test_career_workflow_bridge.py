@@ -247,7 +247,7 @@ def test_bounded_publish_uses_existing_publisher_and_requires_ledger_evidence(pr
         def now(cls,tz=None):return cls(2026,10,29,12,tzinfo=state.LONDON)
     monkeypatch.setattr(bridge,'datetime',Clock)
     calls=[]
-    def runner(command,**kw):calls.append(command);return NS(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:synthetic:test','network_calls_spent':1}))
+    def runner(command,**kw):calls.append(command);assert 'creationflags' in kw;return NS(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:synthetic:test','network_calls_spent':1}))
     contract={'workflow':'linkedin','latest_human_message':'Publish it now','session_key':hashlib.sha256(b'owner').hexdigest(),'turn_origin':'human_text'}
     with owner.dispatch_context('',[],contract):
         result=bridge.publish_now(row,**opts(prepared),runner=runner)
@@ -277,3 +277,24 @@ def test_bounded_publish_reports_success_only_after_real_private_ledger_write(pr
         again=bridge.publish_now(row,**opts(prepared),runner=runner)
     assert result['ok'] and result['publish_performed'] and result['post_urn']=='urn:synthetic:proof'
     assert again['phase']=='ALREADY_PUBLISHED' and not again['publish_performed'] and len(calls)==1
+
+
+
+def test_repeated_approved_stage_reports_already_published_without_image_or_post(prepared):
+    root,jobs,db,add,posts=prepared;args=action_args(prepared)
+    args['approval_message_id']=add('APPROVE LINKEDIN '+args['body_sha256'])
+    bridge.linkedin(args,**opts(prepared),generator=lambda body:b'\x89PNG\r\nfixture')
+    ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+    ledger.write_text(json.dumps({'result':'published','body_sha256':args['body_sha256']})+'\n')
+    def forbidden(*a,**k):raise AssertionError('no duplicate generation')
+    assert bridge.linkedin(args,**opts(prepared),generator=forbidden)['phase']=='ALREADY_PUBLISHED'
+
+
+@pytest.mark.parametrize('message,action',[('APPROVE LINKEDIN '+'a'*64,'APPROVAL'),('Approved','APPROVAL'),('Publish it now','PUBLISH_NOW')])
+def test_approval_and_publish_stages_use_bounded_tool(prepared,message,action):
+    a=NS(session_id='approval-stage');owner.prepare_turn(a,'Show my LinkedIn posts')
+    t,e,c=owner.prepare_turn(a,message)
+    assert c['workflow']=='linkedin' and c['action']==action
+    with owner.dispatch_context(t,e,c):
+        assert bridge.guard('terminal',{'command':'python gen_images2.py'})['action']=='block'
+        assert bridge.guard('career_linkedin_workflow',{'action':'approve'}) is None

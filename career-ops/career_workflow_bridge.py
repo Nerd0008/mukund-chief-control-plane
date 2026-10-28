@@ -14,6 +14,8 @@ def intent(text,workflow):
         if re.search(r'(?i)^(?:please |can you )?(?:run|start|resume|find|search for)\b',text):return 'RUN_SEARCH'
         return 'QUERY'
     if workflow!='linkedin':return None
+    if re.match(r'(?i)^(?:approved[,!. ]+)?(?:(?:please|can you|could you) )?(?:publish|post)\b.*\bnow\b',text):return 'PUBLISH_NOW'
+    if re.match(r'(?i)^approve(?:d)?\b',text) or (re.match(r'(?i)^(?:perfect|yes|schedule)\b',text) and re.search(r'(?i)\bapproved\b',text)):return 'APPROVAL'
     if re.search(r'(?i)^(?:please |can you )?(?:investigate|debug|fix|repair)\b',text):return 'INVESTIGATE'
     if re.search(r'(?i)\bbuild\b.*(?:artefact|artifact)',text):return 'BUILD_ARTIFACTS'
     if re.search(r'(?i)\b(?:show|see|give|remaining|rest of)\b.*(?:posts?|drafts?|remaining|week)|show me (?:them|the remaining ones)',text):return 'SHOW_DRAFTS'
@@ -38,6 +40,7 @@ def render_drafts(doc):
             lines += ['Source: '+str(row.get('artifact')),'Version: '+row['body_sha256'],row['post_text']]
             if row.get('reviews_ready') and not row.get('owner_approved'):lines+=['APPROVE LINKEDIN '+row['body_sha256']]
             elif not row.get('reviews_ready'):lines+=['Review checks are incomplete; this is not ready for approval or publication.']
+            elif row.get('owner_approved') and not row.get('content_ready'):lines+=['Your approval is preserved. Required image or integrity checks are incomplete; do not approve the unchanged text again.']
             if row.get('alternatives'):lines+=['Another version is preserved separately; it has not silently replaced this selected draft.']
         else:lines+=['No dated draft is available.']
     lines+=['','No image was generated, approval granted or post published by this retrieval.']
@@ -109,7 +112,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
     doc=state.read(path);command=[sys.executable,str(state.REPO/'career-ops/linkedin_publish.py'),'publish','--drafts',str(path),'--approve-publish','--confirm-token',row['body_sha256'],'--max-retries','0']
     if doc.get('image_path'):command+=['--image',doc['image_path']]
     if runner is None and Path(root).resolve()!=state.ROOT.resolve():raise ValueError('private fixture requires an injected publisher')
-    result=(runner or subprocess.run)(command,cwd=str(state.REPO),capture_output=True,text=True,encoding='utf-8',timeout=180)
+    result=(runner or subprocess.run)(command,cwd=str(state.REPO),capture_output=True,text=True,encoding='utf-8',timeout=180,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
     try:payload=json.loads(result.stdout)
     except ValueError:payload={}
     verified=bool(result.returncode==0 and payload.get('performed') and payload.get('post_urn') and state.published(row['body_sha256'],root))
@@ -119,7 +122,9 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
 
 
 def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None):
-    mode=args.get('action','show');opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
+    mode=args.get('action','show')
+    if mode not in ('show','build','prepare','approve','image','plan','publish'):raise ValueError('unsupported LinkedIn action')
+    opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
     if mode in ('show','build'):return show(**opts)  # Reviewed preparation is already an artifact; never regenerate it merely to display it.
     if mode=='prepare':
         import linkedin_weekly
@@ -127,6 +132,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         doc=linkedin_weekly.prepare(monday,root=root)
         return {'ok':bool(doc['ok']),'preparation':show(**opts),'publish_performed':False}
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
+    if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     if mode=='approve':
         if not row.get('reviews_ready'):raise ValueError('reviewed preparation required; use prepare first')
         if row['source_kind'] in ('REVIEWED_PREPARED','PREPARED'):
@@ -200,7 +206,7 @@ def render_search(doc):
 def guard(tool_name,args=None,**kwargs):
     from hermes_diagnostics import current_contract
     c=current_contract();args=args or {}
-    if c.get('workflow')!='linkedin' or c.get('action') not in ('SHOW_DRAFTS','BUILD_ARTIFACTS','PREPARE','IMAGE'):return None
+    if c.get('workflow')!='linkedin' or c.get('action') not in ('SHOW_DRAFTS','BUILD_ARTIFACTS','PREPARE','IMAGE','APPROVAL','PUBLISH_NOW'):return None
     if tool_name not in ('terminal','write_file','execute_code','python','patch'):return None
     payload=json.dumps(args).lower()
     if re.search(r'linkedin|gen_images|career_ops|pythob',payload) and (tool_name!='terminal' or re.search(r'python|gen_images|<<|powershell.*-c',payload)):

@@ -108,7 +108,7 @@ def workflow_for(text,prior=None):
     if re.search(r'(?i)\blinkedin\b|beb0251ed70c|f1b1452f18b1|8e6048e2dfa7',text):return 'linkedin'
     if re.search(r'(?i)\b(?:cv|resume|cover letter|gmail|calendar|job search)\b|my (?:profile|goals|background)|new (?:unrelated )?task|weather',text):return None
     if prior=='career_search' and re.search(r'(?i)^(?:okay |ok |yes |yeah )?(?:run|start|continue|show|check|resume)|report|results|scan',text):return prior
-    if prior=='linkedin' and (re.search(r'(?i)\b(?:posts?|drafts?|artefacts?|artifacts?|images?|remaining|approve|approval|schedule)\b',text) or is_status_question(text) or re.match(r'(?i)^\s*(?:yes|yeah|ok|okay|continue|try again|repeat|rewrite|revise|edit|make|use that|do it)\b',text)):return prior
+    if prior=='linkedin' and (re.search(r'(?i)\b(?:posts?|drafts?|artefacts?|artifacts?|images?|remaining|approved?|approval|publish|schedule)\b',text) or is_status_question(text) or re.match(r'(?i)^\s*(?:yes|yeah|ok|okay|continue|try again|repeat|rewrite|revise|edit|make|use that|do it)\b',text)):return prior
     return None
 
 
