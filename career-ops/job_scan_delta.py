@@ -248,12 +248,19 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
     outputs, errors, receipts = [], [], []
     code = 0
     next_offset = offset % max(1, pool_size)
-    for _ in range(min(max(1, max_batches), max(1, pool_size))):
+    requested_batches = min(max(1, max_batches), max(1, pool_size))
+    stop_reason = 'max_batches_reached'
+    batch_timeout = max(1, timeout)
+    for _ in range(requested_batches):
         remaining = budget_seconds - (time.monotonic() - started)
-        if remaining <= 305:
+        # Admission includes the child's 300s hard-timeout grace and a margin.
+        # Never squeeze an optional later batch: six workers sharing a remnant
+        # budget caused five 18-30s timeouts in the 28 October production run.
+        if remaining < batch_timeout + 305:
+            stop_reason = 'insufficient_budget_for_full_batch'
             break
         current = next_offset
-        code, out, err = run_search(current, max(1, min(timeout, int(remaining) - 305)), dry_run=dry_run)
+        code, out, err = run_search(current, batch_timeout, dry_run=dry_run)
         outputs.append(out)
         errors.append(err)
         coverage = parse_tagged(out, "SEARCH_COVERAGE") or {}
@@ -264,12 +271,14 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
                          "new_rows": len(current_run_roles(out, dry_run=dry_run))})
         if not complete:
             code = code or 3
+            stop_reason = 'batch_incomplete'
             break
         next_offset = (current + 1) % max(1, pool_size)
         if not dry_run:
             write_atomic(CURSOR, json.dumps({"next_offset": next_offset, "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}))
         roles = current_run_roles(out, dry_run=dry_run)
         if any((row.get("availability") or {}).get("state") == "OPEN" for row in roles):
+            stop_reason = 'confirmed_open_found'
             break
         # Unverified leads remain labelled; use the remaining bounded budget
         # to look for independently confirmed-open vacancies.
@@ -277,7 +286,10 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
                "completed_batches": sum(r["complete"] for r in receipts),
                "next_offset": next_offset, "elapsed_seconds": round(time.monotonic() - started, 2),
                "coverage_complete": bool(receipts) and all(r["complete"] for r in receipts),
-               "market_exhausted": False, "batches": receipts}
+               "market_exhausted": False, "batches": receipts,
+               "stop_reason": stop_reason,
+               "deferred_batches": requested_batches - len(receipts)
+                   if stop_reason == 'insufficient_budget_for_full_batch' else 0}
     if not receipts:
         code = 3
     return code, "\n".join(outputs), "\n".join(errors), summary
@@ -298,14 +310,19 @@ def failure_summary(coverage: dict) -> str:
                 completed += bool(query.get('complete'))
                 if not query.get('complete'):
                     reason = query.get('error')
-                    failures[reason if reason in allowed else 'search_worker_failed'] += 1
+                    # Keep raw command/provider details private; surface a stable
+                    # cause for the subprocess timeouts captured in older receipts.
+                    if isinstance(reason, str) and reason.startswith('TimeoutExpired:'):
+                        failures['search_worker_timeout'] += 1
+                    else:
+                        failures[reason if reason in allowed else 'search_worker_failed'] += 1
         counts = (batch.get('reconciliation') or {}).get('counts') or {}
         if counts.get('verification_budget_exhausted'):
             failures['verification_budget_exhausted'] += counts['verification_budget_exhausted']
         if batch.get('exit_code') and not failures:
             failures['search_or_tracker_failure'] += 1
     detail = ', '.join(f'{key}={value}' for key, value in sorted(failures.items()))
-    return f'{completed}/{total} queries completed; {detail or "search incomplete"}. Successful queries are retained for bounded retry; tracker writes require complete coverage.'
+    return f'{completed}/{total} queries completed; {detail or "search incomplete"}. Successful queries are retained for bounded retry; incomplete batches cannot write tracker rows.'
 
 
 def write_ok(stdout: str, stderr: str, code: int) -> tuple[bool, str]:
@@ -426,6 +443,20 @@ def main() -> int:
         if code not in (0,):
             print("Job scan FAILED: the search did not complete.\n"
                   f"exit {code}; {failure_summary(coverage_summary)}")
+            # Earlier complete batches may already have committed verified rows.
+            # A later failure must neither hide those rows nor report proposals
+            # from the failed batch as saved. Keep the nonzero failure status.
+            saved_rows = [r for r in current_run_roles(out, dry_run=args.dry_run)
+                          if not already_seen(r["company"], r["title"], r["url"], seen)]
+            if saved_rows:
+                print("\nCompleted batches saved these rows before the later failure:"
+                      if not args.dry_run else "\nCompleted batches proposed these rows:")
+                print(build_digest(saved_rows, now))
+                if not args.dry_run:
+                    for r in saved_rows:
+                        for key in role_keys(r["company"], r["title"], r["url"]):
+                            seen[key] = now.isoformat()
+                    save_ledger(LEDGER, seen)
             return 3
         broken = search_failed(out)
         if broken:

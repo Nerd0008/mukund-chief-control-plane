@@ -349,20 +349,23 @@ def run_codex(prompt: str, timeout: int = 600, *, progress_path=None, persist_pr
     batch = provider.authorize_batch(executable, queries, timeout) if hasattr(provider, 'authorize_batch') else nullcontext()
     try:
         with batch:
+            pending = sum(q not in saved for q in queries)
+            available = timeout - (time.monotonic() - started)
+            # Allocate once after router authorization. Process overhead or an
+            # earlier timeout must not progressively shrink later worker budgets.
+            per_query = max(1, int(available / max(1, pending)))
             for index, query in enumerate(queries):
                 resumed = query in saved
                 remaining = timeout - (time.monotonic() - started)
-                if remaining <= 1:
-                    receipts.extend({'requested_query': q, 'complete': False,
-                        'error': 'batch elapsed budget exhausted', 'executed_queries': []} for q in queries[index:])
-                    break
+                if not resumed and remaining < per_query:
+                    receipts.append({'requested_query': query, 'complete': False,
+                        'error': 'batch elapsed budget exhausted', 'executed_queries': []})
+                    continue
                 worker_prompt = prompt
                 if not single_legacy_call:
                     worker_prompt = re.sub(query_pattern,
                         lambda match: f'1. "{query}"' if match.group(1) == query else '', prompt, flags=re.M)
                     worker_prompt += '\nExecute EXACTLY this one query: ' + query + '\n'
-                pending = sum(q not in saved for q in queries[index:])
-                per_query = max(1, min(int(remaining), max(1, int(remaining / max(1, pending)))))
                 result = saved[query] if resumed else provider._run_one(executable, query, limit=100,
                     timeout=per_query, prompt=worker_prompt)
                 complete = bool(result.get('web_search_observed')) and not result.get('error')
