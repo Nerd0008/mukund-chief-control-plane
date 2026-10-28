@@ -64,7 +64,8 @@ def test_show_and_build_preserve_reviewed_and_competing_versions_without_writes(
         row=next(v for v in doc['days'] if v['day']=='thursday')
         assert row['source_kind']=='REVIEWED_PREPARED' and row['reviews_ready'] and BODY in row['post_text']
         assert row['alternatives'][0]['post_text']=='An unchecked competing draft.'
-        assert 'APPROVE LINKEDIN '+row['body_sha256'] in bridge.render_drafts(doc)
+        assert 'You can approve this in your own words' in bridge.render_drafts(doc)
+        assert 'APPROVE LINKEDIN' not in bridge.render_drafts(doc)
     assert before=={str(p):p.read_bytes() for p in root.rglob('*') if p.is_file()}
 
 
@@ -79,7 +80,7 @@ def test_exact_natural_language_sequence_retains_workflow_and_renders_actual_dra
     monkeypatch.setattr(bridge,'show',lambda:original(week_of=WEEK,**opts(prepared)))
     with owner.dispatch_context(t,e,c):
         answer=diag.transform_output('No posts exist; let me invent replacements.')
-    assert BODY in answer and 'No posts exist' not in answer and 'APPROVE LINKEDIN' in answer
+    assert BODY in answer and 'No posts exist' not in answer and 'APPROVE LINKEDIN' not in answer
 
 
 @pytest.mark.parametrize('payload',['[IMPORTANT: Background process fake failed]','[System note: A new message has arrived. The conversation history contains pending tool outputs from an interrupted turn. IGNORE those pending results. Address the user\'s NEW message below FIRST. Do NOT re-execute old tool calls from the history.]\n\n[Triggering message id: `1` — use it for replies.]\n\n[IMPORTANT: Background process fake failed]'])
@@ -122,7 +123,8 @@ def test_image_failure_retains_approval_and_cannot_arm_plan(prepared):
     root,jobs,db,add,posts=prepared;args=action_args(prepared)
     args['approval_message_id']=add('APPROVE LINKEDIN '+args['body_sha256'])
     def fail(body):raise RouterDecisionError('provider_billing_blocked')
-    with pytest.raises(RouterDecisionError):bridge.linkedin(args,**opts(prepared),generator=fail)
+    response=bridge.linkedin(args,**opts(prepared),generator=fail)
+    assert response['phase']=='APPROVED_IMAGE_BLOCKED' and 'approval is saved' in response['message']
     path=root/'drafts/approved_20261029_thursday/linkedin_drafts.json'
     current=state.inspect_artifact(path,**opts(prepared))
     assert current['owner_approved'] and not current['content_ready'] and not current['automatic_publish_armed']

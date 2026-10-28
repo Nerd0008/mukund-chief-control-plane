@@ -8,7 +8,7 @@ content is reviewed in full. The independent news gate remains mandatory.
 import hashlib
 import re
 
-SCOPE_VERSION = 1
+SCOPE_VERSION = 2
 PERSONAL = re.compile(r"\b(?:I|me|my|mine|we|our|ours|Mukund|Didwania)\b", re.I)
 IMPLICIT = re.compile(r"^\s*(?:[-*•]\s*)?(?:[a-z]+ed|built|led|ran|wrote|grew|taught|held|oversaw|won|made|hold|responsible|proficient|skilled|education|employment|experience|projects|certifications|as an?)\b", re.I)
 ATTRIBUTED = re.compile(
@@ -18,12 +18,35 @@ ATTRIBUTED = re.compile(
 )
 
 
-def personal_text(body):
+def _legacy_personal_text(body):
     body = body.strip()
     clauses = re.split(r"(?<=[.!?])\s+|\n+", body)
     if PERSONAL.search(body) or any(IMPLICIT.search(c) for c in clauses):
         return body  # never infer ownership away from a mixed or career post
     return "\n".join(c for c in clauses if not ATTRIBUTED.search(c))
+
+
+REPORT_ATTRIBUTION = re.compile(
+    r"^\s*(?:(?:both|these|the)\s+(?:numbers|figures|percentages)\s+(?:come|came)\s+from\b.*\b(?:report|index|study)\b|"
+    r"(?:according to|as reported by)\b|(?:the|a|an)\s+(?:report|study|index)\s+(?:states|reports|finds|found)\b)", re.I)
+
+
+def personal_text(body):
+    body=body.strip()
+    clauses=re.split(r"(?<=[.!?])\s+|\n+",body)
+    if PERSONAL.search(body) or any(IMPLICIT.search(c) for c in clauses):
+        return body  # mixed/personal achievements are always reviewed in full
+    kept=[]
+    for paragraph in re.split(r"\n\s*\n",body):
+        sentences=re.split(r"(?<=[.!?])\s+|\n+",paragraph)
+        # Attribution extends only through this paragraph, never into another
+        # paragraph or a personal claim. The independent news review still
+        # checks the full public post and every numerical assertion.
+        attributed=False
+        for sentence in sentences:
+            attributed=attributed or bool(REPORT_ATTRIBUTION.search(sentence))
+            if not attributed and not ATTRIBUTED.search(sentence):kept.append(sentence)
+    return "\n".join(kept)
 
 
 def review(cfg, body, *, label, scratch):
@@ -41,6 +64,8 @@ def scope_matches(gate, body):
         # Older exact-body receipts reviewed the entire text. No omission is
         # inferred from their missing scope metadata.
         return "reviewed_text_sha256" not in gate
-    return (gate.get("scope_version") == SCOPE_VERSION
+    version=gate.get("scope_version")
+    projection=_legacy_personal_text if version==1 else personal_text
+    return (version in (1,SCOPE_VERSION)
             and gate.get("reviewed_text_sha256") == hashlib.sha256(
-                personal_text(body).encode("utf-8")).hexdigest())
+                projection(body).encode("utf-8")).hexdigest())

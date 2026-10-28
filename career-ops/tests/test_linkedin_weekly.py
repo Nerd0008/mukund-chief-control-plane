@@ -35,7 +35,8 @@ def test_weekly_mix_has_three_real_stage_contracts_and_no_approval(prepared):
     assert not doc['publish_performed'] and doc['images_generated']==0
     assert not (root/'drafts').exists() and not (root/'published').exists()
     assert [c for c in calls if c[0]=='research']==[('research','ai_cyber'),('research','ai_noncyber')]
-    assert weekly.render(doc).count('APPROVE LINKEDIN ')==3
+    assert weekly.render(doc).count('Tell me naturally if you approve')==3
+    assert 'APPROVE LINKEDIN' not in weekly.render(doc)
 
 
 def test_weekly_resume_reuses_exact_completed_reviewed_posts(prepared):

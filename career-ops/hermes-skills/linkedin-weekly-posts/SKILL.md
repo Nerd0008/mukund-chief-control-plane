@@ -89,19 +89,33 @@ python career-ops/linkedin_state.py status --drafts <exact-artifact.json>
 python career-ops/linkedin_state.py check-jobs
 ```
 
-Report the exact `phase`, `owner_approved`, `reviews_ready`, `content_ready`, `slot_matches`
-and `job.enabled` separately. `APPROVED_BUT_BLOCKED` means the owner DID approve but review
+Check `phase`, `owner_approved`, `reviews_ready`, `content_ready`, `slot_matches` and `job.enabled` internally. Explain approval, factual review, image and scheduling state separately in brief plain English. Show technical identifiers only if the owner asks. `APPROVED_BUT_BLOCKED` means the owner DID approve but review
 or artifact integrity is incomplete. `APPROVED_READY_PAUSED` means verified content exists
 but automatic publishing is disabled. Check policy and actual job state: planning arms a future ready slot only when publishing is enabled.
 Never tell an owner to approve the same unchanged text again merely because a gate failed.
 
-An owner may use `APPROVE LINKEDIN <sha256>` or reply naturally to the exact post just
-presented. Show the full post and its `APPROVE LINKEDIN <sha256>` version marker in the
-presentation; the owner does not have to type the marker. Natural consent is accepted only
-when the canonical verifier authenticates the owner/platform message and binds the reply to
-the latest exact presented post in that session. Negation, background/tool output, another
-user, an unrelated historical "yes", or a different body is refused. Never hand-write a
-receipt or guess a Hermes message id. Discord IDs and Hermes message IDs are different.
+The owner speaks naturally. Show the full exact post, then accept short replies,
+ordinary sentences, dates and image preferences through the canonical verifier.
+Do not expose hashes or require a command, a special phrase or a short-message limit.
+Hashes remain internal exact-version evidence. Administrative approval instructions
+are not new post presentations. A genuinely revised or multiply-presented post still
+needs clear version/day context. Ask a short natural clarification only when needed.
+
+Separate approval from publication preferences: “not today” corrects the date, and
+“skip the image” changes the image preference. Preserve verified approval through
+failed reviews or unavailable images. A later date/image-only instruction reuses the
+existing exact-body approval; it cannot create new approval. Never overwrite another
+post's date silently. Use the owner's authenticated message timestamp in London to
+resolve relative dates. Do not publish immediately when the owner requested a future date.
+
+The ordinary approval is not a fact-check override. A natural “publish it anyway”
+requires a recorded factual warning for this exact presented post, or an explicit
+acknowledgement of that warning. It never bypasses personal-claim checks. Unsupported
+factual claims remain blocked unless correctly resolved or genuinely overridden.
+
+Keep owner-facing updates brief and in plain English. Prefer “Your approval is saved;
+the factual review is still blocking it” over phase codes, hashes or another approval
+request. Report success only from saved state. A backend error must not erase approval.
 
 Persist and review an existing approval through:
 

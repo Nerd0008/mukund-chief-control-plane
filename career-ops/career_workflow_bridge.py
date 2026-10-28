@@ -14,6 +14,11 @@ def intent(text,workflow):
         if re.search(r'(?i)^(?:please |can you )?(?:run|start|resume|find|search for)\b',text):return 'RUN_SEARCH'
         return 'QUERY'
     if workflow!='linkedin':return None
+    from linkedin_conversation import interpret
+    if not re.search(r'(?i)^(?:please |can you )?(?:investigate|debug|fix|repair)\b',text):
+        spoken=interpret(text)
+        if spoken['approved'] or spoken['skip_image'] or spoken['publish_at']:
+            return 'PUBLISH_NOW' if spoken['publish_now'] else 'APPROVAL'
     if re.match(r'(?i)^(?:approved[,!. ]+)?(?:(?:please|can you|could you) )?(?:publish|post)\b.*\bnow\b',text):return 'PUBLISH_NOW'
     if re.match(r'(?i)^approve(?:d)?\b',text) or (re.match(r'(?i)^(?:perfect|yes|schedule)\b',text) and re.search(r'(?i)\bapproved\b',text)):return 'APPROVAL'
     if re.search(r'(?i)^(?:please |can you )?(?:investigate|debug|fix|repair)\b',text):return 'INVESTIGATE'
@@ -35,11 +40,12 @@ def render_drafts(doc):
     for row in doc['days']:
         if row.get('published'):
             lines.append(row['day'].title()+': already published; it will not be posted again.');continue
-        lines+=['',row['day'].title()+' '+row['date']+' — '+row['phase']]
+        labels={'AWAITING_OWNER_APPROVAL':'Ready for your review','DRAFT_BLOCKED':'Factual checks need attention','APPROVED_BUT_BLOCKED':'Approved; checks need attention','SCHEDULED':'Scheduled','NO_ARTIFACT':'No draft yet','APPROVED_READY_PAUSED':'Approved and ready','APPROVED_READY_UNSCHEDULED':'Approved; waiting for a time'}
+        lines+=['',row['day'].title()+' '+row['date']+' — '+labels.get(row['phase'],'Draft status available')]
         if row.get('draft_exists'):
-            lines += ['Source: '+str(row.get('artifact')),'Version: '+row['body_sha256'],row['post_text']]
-            if row.get('reviews_ready') and not row.get('owner_approved'):lines+=['APPROVE LINKEDIN '+row['body_sha256']]
-            elif not row.get('reviews_ready'):lines+=['Review checks are incomplete; this is not ready for approval or publication.']
+            lines += [row['post_text']]
+            if row.get('reviews_ready') and not row.get('owner_approved'):lines+=['You can approve this in your own words, and tell me when to post or whether to skip the image.']
+            elif not row.get('reviews_ready'):lines+=['You can approve the text now. Publication will wait for the factual checks.']
             elif row.get('owner_approved') and not row.get('content_ready'):lines+=['Your approval is preserved. Required image or integrity checks are incomplete; do not approve the unchanged text again.']
             if row.get('alternatives'):lines+=['Another version is preserved separately; it has not silently replaced this selected draft.']
         else:lines+=['No dated draft is available.']
@@ -100,12 +106,20 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
     from hermes_diagnostics import current_contract
     from hermes_owner_context import human_text
     message=human_text(current_contract().get('latest_human_message',''))
-    explicit=re.match(r'(?i)^(?:approved[,!. ]+)?(?:(?:please|can you|could you) )?(?:publish|post)\b.*\bnow\b',message)
-    if not explicit or re.search(r'(?i)\b(?:not|never|wait|hold|stop|if|when|once|after|unless)\b|don.t|can.t',message):raise ValueError('explicit current owner instruction to publish now required')
-    current_approval_message(db_path=db_path)  # authenticate this instruction, not only an older receipt
+    from linkedin_conversation import interpret
+    spoken=interpret(message)
+    if not spoken['approved'] or not spoken['publish_now']:raise ValueError('Tell me explicitly if you want this post published now.')
+    message_id=current_approval_message(db_path=db_path)
     path=Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'
     status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if status['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
+    if spoken.get('skip_image') and status['owner_approved'] and status['body_sha256']==row['body_sha256']:
+        with state.locked(root):
+            before=state.file_hash(path);doc=state.read(path)
+            doc.update(image_required=False,image_path=None,image_sha256=None,image_body_sha256=None,
+                       preference_message_id=message_id)
+            state.audited_json(path,doc,before,root=root,operation='owner_requested_text_only_publication',body_sha=row['body_sha256'])
+        status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if not state.publishing_enabled(root) or not status['content_ready'] or status['body_sha256']!=row['body_sha256']:raise ValueError('enabled publishing, exact approval, reviews and required image must pass')
     if row['date']!=datetime.now(state.LONDON).date().isoformat():raise ValueError('publish-now cannot move a dated post to another day')
     import subprocess,sys
@@ -134,26 +148,59 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     if mode=='approve':
-        if not row.get('reviews_ready'):raise ValueError('reviewed preparation required; use prepare first')
         if row['source_kind'] in ('REVIEWED_PREPARED','PREPARED'):
             source=state.read(row['artifact'])['posts'][row['day']]
         else:source=state.read(row['artifact'])
         message_id=args.get('approval_message_id') or current_approval_message(db_path=db_path)
-        result=state.capture(row['post_text'],row['date'],message_id,replace=True,root=root,db_path=db_path)
+        approval=state.consent.verify_message(message_id,row['post_text'],db_path=db_path)
+        preferences=(approval.get('receipt') or {}).get('preferences') or approval.get('preferences') or {}
+        skip_image=preferences.get('skip_image',False) or source.get('image_required') is False
+        capture_id=message_id
+        if not approval['ok']:
+            existing=state.consent.verify_receipt(source.get('owner_approval'),row['post_text'],db_path=db_path)
+            if not (approval.get('authenticated_owner') and existing['ok'] and
+                    (preferences.get('skip_image') or preferences.get('publish_at'))):
+                raise ValueError(approval['reason'])
+            capture_id=existing['receipt']['hermes_message_id']
+        due=datetime.fromisoformat(preferences.get('publish_at') or source['requested_publish_at']) if (preferences.get('publish_at') or source.get('requested_publish_at')) else datetime.combine(date.fromisoformat(row['date']),state.time(8),state.LONDON)
+        target=due.date().isoformat()
+        target_path=Path(root)/'drafts'/f"approved_{due:%Y%m%d}_{due.strftime('%A').lower()}"/'linkedin_drafts.json'
+        conflict=target!=row['date'] and target_path.exists() and state.body_of(state.read(target_path))!=row['post_text']
+        capture_target=row['date'] if conflict else target
+        result=state.capture(row['post_text'],capture_target,capture_id,replace=(capture_target==row['date']),root=root,db_path=db_path)
         path=Path(result['artifact'])
         with state.locked(root):
             before=state.file_hash(path);doc=state.read(path)
             if state.consent.digest(state.body_of(doc))!=row['body_sha256']:raise state.StateConflict('captured version changed')
-            doc.update(news_fact_gate=source.get('news_fact_gate'),personal_fact_gate=source.get('personal_fact_gate'),image_required=True)
-            state.audited_json(path,doc,before,root=root,operation='verified_reviews_reused_for_exact_approved_body',body_sha=row['body_sha256'])
-        # Continue the approved workflow in this bounded call. Failure retains consent,
-        # and never schedules a missing image or unreviewed post.
-        image_result=image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
-        if not image_result['ok']:return image_result
-        due=datetime.combine(date.fromisoformat(row['date']),state.time(8),state.LONDON)
+            doc.update(news_fact_gate=source.get('news_fact_gate'),personal_fact_gate=source.get('personal_fact_gate'),
+                       image_required=not skip_image,requested_publish_at=due.isoformat(),
+                       preference_message_id=message_id)
+            if skip_image:doc.update(image_path=None,image_sha256=None,image_body_sha256=None)
+            if preferences.get('override'):
+                override=state.consent.verify_message(message_id,row['post_text'],db_path=db_path,require_override=True)
+                if override['ok']:
+                    doc['owner_override']={'approved_by':'Mukund','body_sha256':row['body_sha256'],
+                        'reason':'Owner explicitly acknowledged the fact-check warning and approved this exact version despite it.'}
+            state.audited_json(path,doc,before,root=root,operation='natural_owner_approval_and_preferences',body_sha=row['body_sha256'])
+        status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
+        if not status['reviews_ready']:
+            return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','message':'Your approval is saved. The post is held for factual review; you do not need to approve this unchanged text again.',
+                    'approval':result,'publish_performed':False}
+        if conflict:
+            return {'ok':True,'phase':'SCHEDULE_CONFLICT','message':'Your approval is saved. Another post already has that date. Which post should use that slot?',
+                    'approval':result,'publish_performed':False}
+        selected={**row,'date':capture_target,'day':due.strftime('%A').lower()}
+        image_result={'ok':True,'phase':'IMAGE_SKIPPED'}
+        if not skip_image:
+            try:image_result=image(selected,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
+            except Exception as exc:
+                return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','message':'Your approval is saved. Image generation is unavailable. You can say “skip the image”.',
+                        'blocker_type':type(exc).__name__,'publish_performed':False}
         if due<=datetime.now(state.LONDON):
-            return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'image':image_result,'instruction':'The dated 08:00 slot has passed. An explicit publish-now instruction is required; no date or time was silently changed.','publish_performed':False}
-        return {'ok':True,'approval':result,'image':image_result,'plan':state.plan_slot(path,row['date'],root=root,db_path=db_path,jobs_path=jobs_path),'publish_performed':False}
+            return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'image':image_result,
+                    'message':'Your approval is saved. That time has passed; tell me when you want it posted.','publish_performed':False}
+        return {'ok':True,'approval':result,'image':image_result,
+                'plan':state.plan_slot(path,capture_target,root=root,db_path=db_path,jobs_path=jobs_path),'publish_performed':False}
     if mode=='publish':return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path)
     if mode=='image':return image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
     if mode=='plan':

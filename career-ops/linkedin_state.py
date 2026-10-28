@@ -183,7 +183,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     slots=load_slots(Path(root)/'drafts/schedule.json');slot=slots.get(target.isoformat()) if target else None
     slot_ok=False;slot_reason='no exact dated schedule slot'
     if slot:
-        when=datetime.combine(target,time(8),LONDON).isoformat()
+        when=doc.get('requested_publish_at') or datetime.combine(target,time(8),LONDON).isoformat()
         slot_ok=(not slot.get('legacy') and absolute(slot.get('draft_path',''))==path and slot.get('body_sha256')==sha and slot.get('publish_at')==when
             and (not slot.get('image_sha256') or (image is not None and file_hash(image)==slot['image_sha256'])))
         slot_reason='exact artifact/hash/date matched' if slot_ok else 'schedule artifact/hash/time/image changed'
@@ -344,7 +344,9 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
         sched=root/'drafts/schedule.json';before=file_hash(sched);slots=load_slots(sched);doc=read(path)
         image=absolute(doc['image_path']) if doc.get('image_path') else None
         value={'draft_path':str(path),'body_sha256':status['body_sha256'],
-            'image_sha256':file_hash(image) if image else None,'publish_at':datetime.combine(target,time(8),LONDON).isoformat()}
+            'image_sha256':file_hash(image) if image else None,'publish_at':doc.get('requested_publish_at') or datetime.combine(target,time(8),LONDON).isoformat()}
+        requested=datetime.fromisoformat(value['publish_at'])
+        if requested.tzinfo is None or requested.astimezone(LONDON).date()!=target:raise ValueError('Requested publication time must match the dated post.')
         prior=slots.get(target.isoformat())
         if prior and (absolute(prior['draft_path'])!=path or (prior.get('body_sha256')!=status['body_sha256'] and published(prior.get('body_sha256'),root))):
             raise StateConflict('another post already occupies this exact date')

@@ -182,7 +182,7 @@ def render(doc):
         lines+=['',day.title()+': '+post['phase']]
         if post.get('post_text') and (post.get('owner_approved') or post.get('phase')=='AWAITING_OWNER_APPROVAL'):
             lines += ['',post['post_text']]
-            if not post.get('owner_approved'):lines += ['','APPROVE LINKEDIN '+post['body_sha256']]
+            if not post.get('owner_approved'):lines += ['','Tell me naturally if you approve this post and when you want it published.']
             else:lines += ['','Existing exact owner approval preserved.']
         elif post.get('error'):lines += ['Reason: '+post['error']]
     return '\n'.join(lines)
