@@ -173,6 +173,13 @@ def run_process(command,*,cancel_event=None,timeout,input=None,**kwargs):
                 stdout,stderr=proc.communicate(input=input if first else None,timeout=min(.1,left))
                 return subprocess.CompletedProcess(command,proc.returncode,stdout,stderr)
             except subprocess.TimeoutExpired:first=False
+    except subprocess.TimeoutExpired:
+        # The cancellable polling path used to discard all captured progress.
+        # Terminate only our child tree, then retain capture for the adapter's
+        # allowlisted diagnostics. Never persist raw output at this layer.
+        stop_child(proc)
+        stdout,stderr=proc.communicate()
+        raise subprocess.TimeoutExpired(command,timeout,output=stdout,stderr=stderr) from None
     finally:
         if proc.poll() is None:stop_child(proc)
 

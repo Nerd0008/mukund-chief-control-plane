@@ -61,6 +61,41 @@ def _default_model() -> str:
             or "gpt-6-sol")
 
 
+def execution_progress(stdout, stderr):
+    """Protocol milestones only; no prompt, output, reasoning or error bodies."""
+    def text(value):
+        return value.decode('utf-8',errors='replace') if isinstance(value,bytes) else str(value or '')
+    result={key:False for key in ('thread_started','turn_started','final_message_observed','tool_event_observed')}
+    errors=[]
+    for line in text(stdout).splitlines():
+        try:event=json.loads(line)
+        except (ValueError,TypeError):continue
+        if not isinstance(event,dict):continue
+        kind=event.get('type')
+        if kind=='thread.started':result['thread_started']=True
+        elif kind=='turn.started':result['turn_started']=True
+        elif kind in ('error','turn.failed'):errors.append(str(event))
+        elif kind in ('item.started','item.completed'):
+            item=event.get('item')
+            if not isinstance(item,dict):continue
+            item_kind=item.get('type')
+            if item_kind in ('agent_message','message') and kind=='item.completed':result['final_message_observed']=True
+            elif item_kind=='error':errors.append(str(item))
+            elif item_kind not in ('reasoning','agent_message','message'):result['tool_event_observed']=True
+    signals=(' '.join(errors)+' '+text(stderr)).lower()
+    result['error_category']='none'
+    for category,markers in (
+        ('usage_limit',('rate limit','too many requests','usage limit','quota exceeded','429')),
+        ('authentication',('unauthorized','authentication','login required','401')),
+        ('certificate',('certificate verify','tls handshake')),
+        ('connection',('connection reset','connection refused','connection error','stream disconnected','error sending request'))):
+        if any(marker in signals for marker in markers):
+            result['error_category']=category
+            break
+    if errors and result['error_category']=='none':result['error_category']='other'
+    return result
+
+
 _VERSION_CACHE={}
 
 
@@ -434,7 +469,8 @@ class CodexExecutionAdapter:
         except __import__("workflow_control").ProcessCancelled:
             return {"status":"CANCELLED","error":"workflow_cancelled","exit_code":-1}
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as exc:
+            progress=execution_progress(exc.output,exc.stderr)
             elapsed = time.time() - start_time
             objective_hash = hashlib.sha256(objective.encode()).hexdigest()[:12]
             sanitized_summary = objective[:50] + "..." if len(objective) > 50 else objective
@@ -442,6 +478,7 @@ class CodexExecutionAdapter:
             return {
                 'dispatch_id': dispatch_id,
                 'status': 'TIMEOUT',
+                'execution_progress': progress,
                 'provider': 'openai',
                 'model': model or 'unknown',
                 'final_message': None,

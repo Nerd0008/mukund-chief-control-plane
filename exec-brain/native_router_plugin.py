@@ -53,7 +53,11 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
                          'input_sha256':diagnostic.get('evidence_sha256'),'operational_evidence':receipt_evidence(diagnostic)})
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
                 offers(provider,model,api_mode,request),
-                task=router_task(request,_request_task(request)),timeout=state.remaining(45))
+                task=router_task(request,_request_task(request)),
+                # High-reasoning selection can exceed 45s. Reserve at least a
+                # quarter of the existing request budget for the chosen worker;
+                # never extend the parent deadline or replay actions on timeout.
+                timeout=min(90,state.remaining()*.75))
             value=execute('hermes.native.'+str(api_mode or 'chat'),receipt,
                 lambda:next_call(dict(request,model=receipt.get('selected_model') or model,timeout=state.remaining())),
                 stream=request.get('stream',False))

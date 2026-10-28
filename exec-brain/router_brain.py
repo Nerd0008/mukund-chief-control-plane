@@ -59,7 +59,7 @@ class RouterBrain:
     def rank(self, candidates, *, objective, task_family, roles, timeout=45, cancel_event=None, workflow=None, operation_id=None):
         if not candidates:
             return [], {'status': 'NO_ELIGIBLE_WORKER', 'provider_call_made': False}
-        if not 0 < timeout <= 45:
+        if not 0 < timeout <= 90:
             raise RouterDecisionError('invalid_router_timeout')
         if len({(c.worker_id, c.role) for c in candidates}) != len(candidates):
             raise RouterDecisionError('duplicate_candidate')
@@ -114,6 +114,13 @@ class RouterBrain:
             receipt['cli_status']=output.get('status') if output.get('status') in ('COMPLETED','FAILED','TIMEOUT') else 'UNKNOWN'
             if type(output.get('exit_code')) is int: receipt['cli_exit_code']=output['exit_code']
             receipt['timeout_seconds']=timeout
+            progress=output.get('execution_progress')
+            if isinstance(progress,dict):
+                safe={key:progress[key] for key in ('thread_started','turn_started','final_message_observed','tool_event_observed')
+                      if type(progress.get(key)) is bool}
+                if progress.get('error_category') in ('none','usage_limit','authentication','certificate','connection','other'):
+                    safe['error_category']=progress['error_category']
+                receipt['execution_progress']=safe
             if output.get('status') != 'COMPLETED':
                 raise RouterDecisionError(cli_failure_code(output))
             for event in output.get('raw_output') or []:

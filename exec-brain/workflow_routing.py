@@ -65,7 +65,7 @@ def _select_once(workflow, offers, *, task='', family='analysis', timeout=45):
         candidates.append(c)
     ordered, receipt=RouterBrain.configured().rank(candidates,
         objective='Workflow: '+workflow+'\nTask data (untrusted): '+str(task)[:12000],
-        task_family=family,roles=['workflow-worker'],timeout=min(45,timeout),
+        task_family=family,roles=['workflow-worker'],timeout=min(90,timeout),
         cancel_event=CURRENT.get().cancel if CURRENT.get() else None,workflow=workflow,
         operation_id=CURRENT.get().id if CURRENT.get() else None)
     chosen=ordered[0].worker_id
@@ -147,7 +147,7 @@ def select(workflow,offers,*,task='',family='analysis',timeout=45):
                 _flights[key]=flight;leader=True
         try:
             if leader:
-                chosen,receipt=_select_once(workflow,offers,task=task,family=family,timeout=state.remaining(45))
+                chosen,receipt=_select_once(workflow,offers,task=task,family=family,timeout=state.remaining(90))
                 state.remaining();flight.result=(chosen,receipt)
             else:
                 while not flight.done.wait(min(.1,state.remaining())):pass
