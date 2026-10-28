@@ -31,6 +31,8 @@ def cli_failure_code(output):
     text=' '.join(str(output.get(k) or '') for k in ('error','stderr','final_message')).lower()
     if any(s in text for s in ('usage limit','quota exceeded','insufficient_quota','insufficient balance','rate limit','too many requests')):
         return 'router_cli_usage_limit'
+    if 'model_not_found' in text or 'not supported when using codex' in text:
+        return 'router_cli_model_unsupported'
     if any(s in text for s in ('unauthorized','authentication','not logged in','login required','401')):
         return 'router_cli_auth'
     if any(s in text for s in ('unrecognized','unexpected argument','unknown argument','not found','no such file')):

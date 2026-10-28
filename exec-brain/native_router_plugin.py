@@ -198,6 +198,7 @@ def install_failure_copy(module):
             'router_cli_usage_limit':'The Codex router reported a usage or rate limit.',
             'router_cli_auth':'The Codex router requires authentication.',
             'router_cli_configuration':'The Codex router CLI configuration failed.',
+            'router_cli_model_unsupported':'The selected Codex installation cannot use the configured routing model.',
         }
         return (messages.get(code,'The Codex router could not authorize this request.')+
                 ' No downstream model call was made for this attempt. '
@@ -210,13 +211,15 @@ def install_failure_copy(module):
             bound=inspect.signature(terminal).bind_partial(*args,**kwargs)
             classified=bound.arguments.get('classified');detail=getattr(classified,'error_context',None) or {}
             agent=bound.arguments.get('agent')
-            if agent is not None and detail.get('component')=='router_brain' and detail.get('router_failure') in ('no_healthy_compatible_worker','worker_health_changed'):
+            if agent is not None and detail.get('component')=='router_brain':
                 class DiagnosticAgent:
                     def __getattr__(self,name):return getattr(agent,name)
                     def __setattr__(self,name,value):setattr(agent,name,value)
                     def _emit_diagnostic_status(self,message):
-                        wait=detail.get('retry_after_seconds')
-                        return agent._emit_diagnostic_status('Router workers are temporarily unavailable'+(' (cooldown up to '+str(wait)+' seconds)' if wait else '')+'. No automatic action replay was attempted.')
+                        if detail.get('router_failure') in ('no_healthy_compatible_worker','worker_health_changed'):
+                            wait=detail.get('retry_after_seconds')
+                            return agent._emit_diagnostic_status('Router workers are temporarily unavailable'+(' (cooldown up to '+str(wait)+' seconds)' if wait else '')+'. No automatic action replay was attempted.')
+                        return agent._emit_diagnostic_status('❌ '+copy(classified).split('. ')[0])
                 bound.arguments['agent']=DiagnosticAgent()
             return terminal(*bound.args,**bound.kwargs)
         module.nonretryable_client_error_result=report

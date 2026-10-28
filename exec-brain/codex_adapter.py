@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Tuple
 # (bin/247581e40ee272fb/codex.exe) that went stale after a Codex update and
 # made the whole adapter unimportable ("Codex CLI not found"). Resolution order:
 #   1. explicit override: CODEX_EXECUTABLE (env) / CODEX_CLI_PATH (env)
-#   2. PATH via shutil.which("codex")
-#   3. validated installed builds under %LOCALAPPDATA%\OpenAI\Codex\bin\*\codex.exe
+#   2. validated native desktop builds under %LOCALAPPDATA%\OpenAI\Codex\bin\*\codex.exe
+#   3. PATH via shutil.which("codex") (native preferred over a shim)
 # Every candidate must pass `codex.exe --version` before it is accepted, and only
 # the resolved path/version are ever recorded â€” never credentials.
 CODEX_EXECUTABLE_ENV = ("CODEX_EXECUTABLE", "CODEX_CLI_PATH")
@@ -142,7 +142,7 @@ def _installed_codex_candidates() -> List[Path]:
 def _resolve_codex_executable() -> Path:
     """Resolve the Codex CLI executable deterministically.
 
-    Order: explicit override -> PATH -> validated installed bin candidates.
+    Order: explicit override -> validated native desktop builds -> PATH fallback.
     A candidate is only accepted after `--version` succeeds. When several
     installed builds validate, the highest validated version wins (ties broken
     by path) so the choice is deterministic and recorded.
@@ -159,12 +159,9 @@ def _resolve_codex_executable() -> Path:
             )
         return candidate
 
-    on_path = shutil.which("codex")
-    if on_path:
-        candidate = _prefer_native_executable(Path(on_path))
-        if _codex_version_of(candidate) is not None:
-            return candidate
-
+    # A Windows service does not inherit the desktop app's PATH. Prefer the
+    # validated native desktop installation in both environments; a valid npm
+    # shim version alone does not establish support for the routing model.
     validated = [
         (p, v)
         for p, v in ((p, _codex_version_of(p)) for p in _installed_codex_candidates())
@@ -173,6 +170,12 @@ def _resolve_codex_executable() -> Path:
     if validated:
         validated.sort(key=lambda pv: (_version_sort_key(pv[1]), str(pv[0])))
         return validated[-1][0]
+
+    on_path = shutil.which("codex")
+    if on_path:
+        candidate = _prefer_native_executable(Path(on_path))
+        if _codex_version_of(candidate) is not None:
+            return candidate
 
     raise RuntimeError(
         "Codex CLI not found: checked "
