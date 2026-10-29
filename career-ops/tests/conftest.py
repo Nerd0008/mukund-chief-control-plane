@@ -57,3 +57,9 @@ def private_controller_health(tmp_path,monkeypatch):
 def private_codex_admission(tmp_path,monkeypatch):
     import codex_admission
     monkeypatch.setattr(codex_admission,'ROOT',tmp_path/'codex-admission')
+
+
+@pytest.fixture(autouse=True)
+def private_application_package_receipts(tmp_path, monkeypatch):
+    import application_package_state
+    monkeypatch.setattr(application_package_state, 'ROOT', tmp_path/'application-packages')

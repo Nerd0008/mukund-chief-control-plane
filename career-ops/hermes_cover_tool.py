@@ -97,7 +97,7 @@ def build(spec_path):
     if before!={str(f):digest(f) for f in dependencies()}:raise ValueError('immutable cover dependency changed')
     out.with_suffix('.verification.json').write_text(json.dumps({'status':'PASS','sha256':digest(out),'dependencies':before}))
 
-def cover_tool(args,**kwargs):
+def _cover_tool(args,**kwargs):
     from hermes_cv_compiler_guard import JOB,activate_job
     import time
     state=JOB.get()
@@ -142,6 +142,20 @@ def cover_tool(args,**kwargs):
         state['cover_succeeded']=True
         return json.dumps({'status':'PASS','verified_pdf':str(exported),'compiler_pdf':str(out),'verification_report':str(exported.with_suffix('.verification.json'))})
     except subprocess.TimeoutExpired:return json.dumps({'status':'FAIL','reason':'cover generation elapsed-time limit'})
+def cover_tool(args,**kwargs):
+    from hermes_cv_compiler_guard import JOB
+    import application_package_state as package
+    state=JOB.get()
+    if state and state.get('resuming') and not state.get('cover_called') and state.get('cover_args')==args and 'cover' in package.accepted(state):
+        state['cover_called']=True
+        return json.dumps(state['results']['cover'])
+    response=_cover_tool(args,**kwargs)
+    if state:
+        state['cover_called']=True
+        package.record(state,'cover',args,json.loads(response))
+    return response
+
+
 if __name__=='__main__':
     try:build(sys.argv[1])
     except Exception:print('Cover verification failed');raise SystemExit(1)

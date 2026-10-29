@@ -45,7 +45,7 @@ def test_native_budget_only_cv():
         async def send_document(self,*a,**kw):return True
     g.install_runtime(runtime,Turn,Media)
     r=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
-    assert r['limit']==4 and 'career_cv_compile' in r['context']
+    assert r['limit']==g.AGENT_TURNS and 'career_cv_compile' in r['context']
     assert 'vision_analyze is allowed' in r['context']
     assert 'CURRENT inbound message' in r['context']
     assert 'Do not label a provider failure' in r['context']
@@ -172,7 +172,7 @@ def test_unrelated_turn_keeps_normal_tools_after_cv_history():
     assert result['limit']==150 and result['patch'] is None
     assert 'career_cover_compile' in result['context']
     result=asyncio.run(Turn()._run_agent('Tailor my CV','',[]))
-    assert result['limit']==4 and result['patch']['action']=='block'
+    assert result['limit']==g.AGENT_TURNS and result['patch']['action']=='block'
 
 
 def test_jd_attachment_can_activate_compiler_without_history_lock(monkeypatch):
@@ -185,7 +185,7 @@ def test_jd_attachment_can_activate_compiler_without_history_lock(monkeypatch):
             assert g.pre_tool('tool_call',{'calls':[{'name':'career_cv_compile','arguments':{'jd':'Attached graduate role','job_id':'test','company':'Accenture','short_role':'Security Analyst'}}]}) is None
             result=json.loads(g.compile_tool({'jd':'Attached graduate role','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))
             assert result.get('reason')!='native CV job context required'
-            assert runtime._current_max_iterations()==4
+            assert runtime._current_max_iterations()==g.AGENT_TURNS
             assert g.pre_tool('patch',{'path':'cv_template.py'})['action']=='block'
             assert json.loads(g.compile_tool({'jd':'retry','job_id':'test','company':'Accenture','short_role':'Security Analyst'}))['reason']=='compiler already invoked; no retries'
             return result
