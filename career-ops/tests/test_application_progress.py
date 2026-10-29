@@ -249,3 +249,19 @@ def test_identical_bytes_from_different_request_receipt_are_not_reused(tmp_path)
     package.record(state,'cv',{}, {'status':'PASS','compiler_pdf':str(source),'verified_pdf':str(exported)})
     exported.with_suffix('.verification.json').write_text(json.dumps({'source':str(other)}))
     assert not package.source_matches(state['results']['cv'])
+
+
+def test_cv_planner_reserves_routing_and_generation_inside_parent_limit(monkeypatch):
+    import cv_content_adapter as adapter
+    import workflow_routing
+    bank=json.loads((adapter.cv.HERE/'fact_bank.json').read_text(encoding='utf-8'))
+    selections={slot:next(iter(variants)) for slot,variants in bank['slots'].items()}
+    observed={}
+    def complete(messages,**kwargs):
+        observed.update(kwargs)
+        return NS(model='fixture',choices=[NS(finish_reason='stop',message=NS(content=json.dumps({'selections':selections})))]),{'selected_provider':'fixture'}
+    monkeypatch.setattr(workflow_routing,'complete_text',complete)
+    result=adapter.generate({'jd':'Synthetic graduate role','capacities':[],'mode':'generate','worker':'codex'})
+    assert set(result)==set(bank['slots'])
+    assert observed['timeout']==120 and observed['max_tokens']==1024
+    assert observed['worker']=='codex'

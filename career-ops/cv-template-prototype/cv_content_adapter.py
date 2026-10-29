@@ -49,7 +49,9 @@ def generate(request):
         {'role':'user','content':json.dumps({'job_description':request['jd'],'capacities':request['capacities'],
             'writing_policy':policy(),'available_evidence_variants':bank['slots'],'mode':request['mode'],
             'affected':request.get('affected',[])},ensure_ascii=False)}]
-    response,receipt=complete_text(messages,workflow='career.cv.plan',timeout=90,max_tokens=8192,worker=request.get('worker'))
+    # Selection and generation share this budget. Reserve useful generation
+    # time after the bounded routing decision; the parent still enforces 180s.
+    response,receipt=complete_text(messages,workflow='career.cv.plan',timeout=120,max_tokens=1024,worker=request.get('worker'))
     choice=response.choices[0]
     generate.last_metadata={'provider':receipt.get('selected_provider'),
         'model':response.model,'model_calls':1,'router_decision':receipt,
