@@ -286,7 +286,7 @@ def cli_offer():
             'capabilities':['reasoning','text','structured-json','bounded-no-tools']}
 
 
-def text_via_codex(messages,timeout=90):
+def text_via_codex(messages,timeout=90,response_schema=None):
     from codex_adapter import CodexExecutionAdapter
     import tempfile
     prompt=('Complete the supplied conversation as the assistant. Do not use tools or read files. '
@@ -296,7 +296,7 @@ def text_via_codex(messages,timeout=90):
         state=CURRENT.get()
         adapter=CodexExecutionAdapter('bounded_text')
         result=adapter.dispatch({'objective':prompt,'model':'gpt-6.1-sol',
-            'reasoning_effort':'high','working_directory':workspace,'timeout':state.remaining(90) if state else min(90,timeout),
+            'reasoning_effort':'high','working_directory':workspace,**({'output_schema':response_schema} if response_schema else {}),'timeout':state.remaining(90) if state else min(90,timeout),
             **({'cancel_event':state.cancel} if state else {})})
     if result.get('status')!='COMPLETED':
         code=cli_failure_code(result).replace('router_cli_','bounded_text_worker_')
@@ -320,7 +320,8 @@ def _request_task(kwargs):
 
 def _plain(kwargs):
     if kwargs.get('tools') or kwargs.get('functions') or kwargs.get('stream'):return False
-    if set(kwargs)-{'model','messages','max_tokens','temperature','timeout','stream'}:return False
+    if set(kwargs)-{'model','messages','max_tokens','temperature','timeout','stream','response_format'}:return False
+    if kwargs.get('response_format') and kwargs['response_format'].get('type')!='json_schema':return False
     if kwargs.get('temperature',0) not in (0,0.0):return False
     for message in kwargs.get('messages') or []:
         content=message.get('content')
@@ -373,14 +374,14 @@ class RoutedClient:
         with operation(self._timeout(kwargs),self._worker) as state:
             chosen=self._route(kwargs,timeout=state.remaining(45))
             if chosen=='codex':
-                return execute(self._workflow,self.last_route,lambda:_completion(text_via_codex(kwargs['messages'],timeout=state.remaining()),'gpt-6.1-sol'))
+                return execute(self._workflow,self.last_route,lambda:_completion(text_via_codex(kwargs['messages'],timeout=state.remaining(),**({'response_schema':kwargs['response_format']['json_schema']['schema']} if kwargs.get('response_format',{}).get('type')=='json_schema' else {})),'gpt-6.1-sol'))
             response=execute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
     async def _acreate(self,**kwargs):
         with operation(self._timeout(kwargs),self._worker) as state:
             chosen=await cancellable_thread(self._route,kwargs,timeout=state.remaining(45))
             if chosen=='codex':
-                text=await aexecute(self._workflow,self.last_route,lambda:cancellable_thread(text_via_codex,kwargs['messages'],timeout=state.remaining()))
+                text=await aexecute(self._workflow,self.last_route,lambda:cancellable_thread(text_via_codex,kwargs['messages'],timeout=state.remaining(),**({'response_schema':kwargs['response_format']['json_schema']['schema']} if kwargs.get('response_format',{}).get('type')=='json_schema' else {})))
                 state.remaining();return _completion(text,'gpt-6.1-sol')
             response=await aexecute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
@@ -430,7 +431,7 @@ def native_client(*,async_mode=False,workflow='hermes.native'):
                         async_mode=async_mode,request_options=options)
 
 
-def _complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None):
+def _complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None,response_schema=None):
     # Explicit owner transport constraints narrow eligibility; the brain still
     # authorizes the remaining offer. Never initialize unused native credentials.
     if worker not in (None,'auto','codex','native'):raise RouterDecisionError('unsupported_worker_preference')
@@ -439,19 +440,19 @@ def _complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None):
         _,receipt=select(workflow,[cli_offer()],task=_request_task({'messages':messages}),timeout=min(45,timeout))
         remaining=deadline-time.monotonic()
         if remaining<=0:raise RouterDecisionError('workflow_elapsed_budget_exhausted')
-        return execute(workflow,receipt,lambda:_completion(text_via_codex(messages,timeout=remaining),'gpt-6.1-sol')),receipt
+        return execute(workflow,receipt,lambda:_completion(text_via_codex(messages,timeout=remaining,**({'response_schema':response_schema} if response_schema else {})),'gpt-6.1-sol')),receipt
     client=native_client(workflow=workflow)
     try:
-        response=client.chat.completions.create(model='router-auto',messages=messages,max_tokens=max_tokens,temperature=0,timeout=timeout)
+        response=client.chat.completions.create(model='router-auto',messages=messages,max_tokens=max_tokens,temperature=0,timeout=timeout,**({'response_format':{'type':'json_schema','json_schema':{'name':'cv_response','strict':True,'schema':response_schema}}} if response_schema else {}))
         return response,client.last_route
     finally:
         close=getattr(client._native,'close',None)
         if callable(close):close()
 
 
-def complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None):
+def complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None,response_schema=None):
     with operation(timeout,worker) as state:
-        return _complete_text(messages,workflow=workflow,timeout=state.remaining(),max_tokens=max_tokens,worker=state.worker)
+        return _complete_text(messages,workflow=workflow,timeout=state.remaining(),max_tokens=max_tokens,worker=state.worker,**({'response_schema':response_schema} if response_schema else {}))
 
 
 def make_executor(worker,*,model=None):

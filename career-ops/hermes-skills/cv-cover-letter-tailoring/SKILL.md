@@ -21,7 +21,7 @@ Use owner-confirmed facts supplied in current owner context and the compiler's c
 3. Unless the owner requested CV only, call `career_cover_compile` with company, role and five truthful paragraphs totalling at most 2,855 characters. Follow the owner's writing preferences. Include relevant evidence and specific motivation for this role.
 4. Return the verified PDF paths from PASS results as attachments. Compilation, export and delivery are distinct. Do not say a file was delivered until the adapter confirms it. Do not ask the owner to locate a Windows folder on their phone.
 
-The compiler preserves the approved layout and validates facts. Never relax its checks, change the template, use shell/Python PDF repair, substitute another application's document or attach a failed/stale PDF.
+The compiler writes substantially role-specific wording from verified facts, independently reviews factual support and JD relevance, and preserves the approved mirror layout. A generic default or cosmetic synonym changes must not pass as tailoring. Never relax its checks, change the template, use shell/Python PDF repair, substitute another application's document or attach a failed/stale PDF.
 
 On a short continuation, resume the pending application package and reuse matching verified outputs. Build only the missing or changed part. A provider failure must not erase an already successful document. A cover correction is bounded by the tool's existing correction budget; repeating rejected text is not progress.
 

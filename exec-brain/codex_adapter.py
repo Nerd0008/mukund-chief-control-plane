@@ -357,6 +357,14 @@ class CodexExecutionAdapter:
                         "--config", 'model_reasoning_effort="' + effort + '"'])
 
         cwd = contract.get('working_directory')
+        if contract.get('output_schema') is not None:
+            if self.execution_profile!='bounded_text' or not isinstance(contract['output_schema'],dict) or not cwd:
+                raise ValueError('Structured output requires a bounded text workspace and schema object')
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w',suffix='.schema.json',dir=cwd,encoding='utf-8',delete=False) as schema_file:
+                json.dump(contract['output_schema'],schema_file)
+                schema_path=schema_file.name
+            cmd.extend(['--output-schema',schema_path])
         if cwd:
             cmd.extend(["--cd", cwd])
 

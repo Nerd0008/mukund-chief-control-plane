@@ -27,12 +27,13 @@ def resolve_plan(plan):
 class RoutedContentPlanner:
     """Picklable explicit worker constraint survives the compiler subprocess."""
     def __init__(self,worker):self.worker=worker
+    requires_tailoring=True
     def __call__(self,request):return generate(dict(request,worker=self.worker))
     @property
     def last_metadata(self):return getattr(generate,'last_metadata',None)
 
 
-def generate(request):
+def legacy_generate(request):
     import os
     sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[2]/'exec-brain'))
     from workflow_routing import complete_text
@@ -63,3 +64,11 @@ def generate(request):
     if request['mode']=='shorten': return {key:content[key] for key in request['affected']}
     return content
 
+
+
+def generate(request):
+    from cv_role_writer import generate as write
+    try:return write(request)
+    finally:generate.last_metadata=getattr(write,'last_metadata',None)
+
+generate.requires_tailoring=True

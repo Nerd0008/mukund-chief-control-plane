@@ -63,13 +63,15 @@ def content_check(layout, content):
         if not isinstance(item,dict) or not isinstance(item.get('text'),str):
             failures.append({'slot':key,'reason':'invalid structured content'}); continue
         text=item['text']
+        if s['bullet'] and re.match(r'^\s*(?:[\u2022\u2023\u25aa]|[-*])\s',text):
+            failures.append({'slot':key,'reason':'duplicate template bullet marker'})
         for reason in writing_check(text): failures.append({'slot':key,'reason':'writing policy: '+reason})
         if not text.strip() or '\n\n' in text or any(c in text for c in '<>\ufffd'):
             failures.append({'slot':key,'reason':'blank line, markup, or invalid text'}); continue
         if s['section']=='Technical Skills' and (':' not in text or not text.split(':',1)[1].strip()):
             failures.append({'slot':key,'reason':'missing skill label/value'}); continue
-        # A selected source must be explicit and the content must be verbatim from it.
-        # Paraphrase claims require a future independently reviewed fact validator.
+        # Legacy selections remain exact. Fresh paraphrases require an authenticated
+        # independent factual/relevance review bound to these exact owner facts.
         sources=item.get('sources',[])
         if not sources or any(k not in slots for k in sources):
             failures.append({'slot':key,'reason':'missing fact provenance'}); continue
@@ -81,6 +83,9 @@ def content_check(layout, content):
             variant=bank.get('slots',{}).get(key,{}).get(item['variant'])
             verified=(bank.get('master_sha256')==layout['master_sha256'] and variant is not None and
                       text==variant['text'] and sources==variant['sources'])
+        elif 'review_receipt' in item:
+            from cv_tailoring_grounding import valid_item
+            verified=valid_item(key,item,layout)
         else: verified=norm(text) in norm(hay)
         if not verified: failures.append({'slot':key,'reason':'unverified/invented content'})
         if (s['bullet'] or s['section']=='Professional Summary') and not text.rstrip().endswith(('.', '!', '?')):

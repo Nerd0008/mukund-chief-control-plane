@@ -261,7 +261,7 @@ def test_cv_planner_reserves_routing_and_generation_inside_parent_limit(monkeypa
         observed.update(kwargs)
         return NS(model='fixture',choices=[NS(finish_reason='stop',message=NS(content=json.dumps({'selections':selections})))]),{'selected_provider':'fixture'}
     monkeypatch.setattr(workflow_routing,'complete_text',complete)
-    result=adapter.generate({'jd':'Synthetic graduate role','capacities':[],'mode':'generate','worker':'codex'})
+    result=adapter.legacy_generate({'jd':'Synthetic graduate role','capacities':[],'mode':'generate','worker':'codex'})
     assert set(result)==set(bank['slots'])
     assert observed['timeout']==120 and observed['max_tokens']==1024
     assert observed['worker']=='codex'

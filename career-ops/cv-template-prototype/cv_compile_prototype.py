@@ -1,7 +1,7 @@
-"""Bounded offline compiler harness; intentionally not a Hermes tool.
+"""Bounded CV compiler with immutable mirror layout and verified content.
 
-The future content adapter must be a picklable function taking one request.
-It gets no filesystem/tool access from this interface. No provider is wired.
+A picklable content planner runs in an isolated subprocess under one deadline.
+Production planners require independent factual and JD-relevance review.
 """
 import ctypes, hashlib, json, multiprocessing as mp, os, pathlib, time
 from contextlib import contextmanager
@@ -11,7 +11,7 @@ def dependency_paths():
     layout=cv.load_layout()
     paths=[cv.HERE/'layout.json',cv.HERE/'cv_template.py',pathlib.Path(__file__),pathlib.Path(layout['master_source'])]
     paths += [pathlib.Path('C:/Windows/Fonts')/f for f in layout['fonts'].values()]
-    paths += [cv.HERE/name for name in ['cv_pdf_compatibility.py','cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
+    paths += [cv.HERE/name for name in ['cv_pdf_compatibility.py','cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','cv_role_writer.py','cv_tailoring_grounding.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
     return paths
 
 @contextmanager
@@ -47,11 +47,12 @@ def worker(generator,request,workspace):
         timings['content_generation_seconds']=time.monotonic()-t
         provider_metadata=getattr(generator,'last_metadata',None)
         if provider_metadata:model_calls+=provider_metadata.get('model_calls',0)
+        if request.get('tailoring_required') and not all('review_receipt' in item for item in content.values()):raise ValueError('reviewed tailoring missing')
         save(w/'content-draft.json',content)
         stage='fit_validation'; save(w/'stage.json',{'stage':stage})
         failures=cv.fit(layout,content)
         if failures:
-            if any(f['reason']!='content capacity exceeded' for f in failures): raise ValueError(str(failures))
+            if any(f['reason'] not in ('content capacity exceeded','content underfills slot, leaving unexpected blank line') for f in failures): raise ValueError(str(failures))
             stage='targeted_shortening'; save(w/'stage.json',{'stage':stage})
             affected=sorted({f['slot'] for f in failures}); calls+=1
             t=time.monotonic(); revised=generator(dict(request,mode='shorten',affected=affected,content=content))
@@ -67,12 +68,17 @@ def worker(generator,request,workspace):
         stage='validation'; save(w/'stage.json',{'stage':stage})
         t=time.monotonic(); result=cv.validate(layout,content,w/'candidate.pdf')
         timings['validation_seconds']=time.monotonic()-t
+        if request.get('tailoring_required'):
+            from cv_tailoring_grounding import matches_jd
+            if not matches_jd(content,request['jd']):raise ValueError('tailoring review does not match requested JD')
+            result['tailoring']={'review':'PASS','jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest()}
         result.update(timings,content_calls=calls,renders=renders,total_worker_seconds=time.monotonic()-started)
         if provider_metadata: result['provider']=dict(provider_metadata,model_calls=model_calls)
         save(w/'result.json',result)
     except Exception as e:
-        save(w/'result.json',dict(status='FAIL',stage=stage,reason=str(e),content_calls=calls,renders=renders,
-                                 provider=getattr(generator,'last_metadata',None)))
+        metadata=getattr(generator,'last_metadata',None)
+        save(w/'result.json',dict(status='FAIL',stage=(metadata or {}).get('stage') or stage,reason=str(e),content_calls=calls,renders=renders,
+                                 provider=metadata))
 
 def compile_prototype(jd,job_id,workspace,generator,hard_seconds=180):
     started=time.monotonic(); layout=cv.load_layout()
@@ -82,9 +88,11 @@ def compile_prototype(jd,job_id,workspace,generator,hard_seconds=180):
     if workspace.exists() and any(workspace.iterdir()): raise ValueError('fresh bounded workspace required')
     workspace.mkdir(parents=True,exist_ok=True)
     paths=dependency_paths()
-    request={'jd':jd,'job_id':job_id,'mode':'generate','capacities':[
+    request={'workspace':str(workspace),'jd':jd,'job_id':job_id,'mode':'generate','capacities':[
         {k:s[k] for k in ['id','section','width','font_size','leading','max_lines','variable']} for s in layout['slots']],
         'verified_sources':[{k:s[k] for k in ['id','text']} for s in layout['slots']],
+        'deadline_monotonic':started+hard_seconds-5,
+        'tailoring_required':bool(getattr(generator,'requires_tailoring',False)),
         'rule':'Use only evidenced source text; no new facts, markup, styles, or layout decisions.'}
     proc=None
     with protect(paths) as before:
@@ -104,7 +112,7 @@ def compile_prototype(jd,job_id,workspace,generator,hard_seconds=180):
         elapsed=time.monotonic()-started
         if elapsed>=hard_seconds: result.update(status='FAIL',reason='hard wall-clock timeout')
         result.update(elapsed_seconds=elapsed,target_seconds=120,hard_seconds=hard_seconds,
-                      hashes_before=before,hashes_after=after,delivery_allowed=result['status']=='PASS',
+                      hashes_before=before,hashes_after=after,tailoring_required=request['tailoring_required'],delivery_allowed=result['status']=='PASS',
                       not_deployed=True,owner_visual_acceptance=False)
         if result['delivery_allowed']:
             result['pdf_path']=str(workspace/'candidate.pdf')
@@ -123,6 +131,11 @@ def delivery_allowed(pdf,output_root):
         if report.get('hashes_before')!=hashes or report.get('hashes_after')!=hashes:return False
         if report.get('pdf_sha256')!=cv.digest(pdf):return False
         content=json.loads((pdf.parent/'content-draft.json').read_text(encoding='utf-8'))
+        if report.get('tailoring_required'):
+            from cv_tailoring_grounding import matches_jd
+            analysis=json.loads((pdf.parent/'analysis.json').read_text(encoding='utf-8'))
+            if not matches_jd(content,analysis['jd']):return False
+            if report.get('tailoring',{}).get('jd_sha256')!=hashlib.sha256(analysis['jd'].encode()).hexdigest():return False
         return cv.validate(cv.load_layout(),content,pdf)['status']=='PASS'
     except Exception:return False
 

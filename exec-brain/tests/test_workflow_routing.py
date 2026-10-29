@@ -140,14 +140,14 @@ def test_cv_adapter_requires_a_routed_result_before_resolving_facts():
         with pytest.raises(RouterDecisionError):cv.generate(request)
 
 
-def test_cv_routed_plan_remains_inside_original_fact_bank():
+def test_legacy_cv_selector_remains_available_for_archived_renderer_fixtures():
     sys.path.insert(0,str(ROOT/'career-ops/cv-template-prototype'))
     import cv_content_adapter as cv
     bank=json.loads((ROOT/'career-ops/cv-template-prototype/fact_bank.json').read_text())
     selections={k:next(iter(v)) for k,v in bank['slots'].items()}
     response=SimpleNamespace(model='fixture',choices=[SimpleNamespace(finish_reason='stop',message=SimpleNamespace(content=json.dumps({'selections':selections})))])
     with patch.object(wr,'complete_text',return_value=(response,{'selected_provider':'fixture'})) as call:
-        content=cv.generate({'jd':'synthetic','capacities':[],'mode':'generate'})
+        content=cv.legacy_generate({'jd':'synthetic','capacities':[],'mode':'generate'})
     assert set(content)==set(bank['slots']) and call.call_args.kwargs['workflow']=='career.cv.plan'
     assert cv.generate.last_metadata['provider']=='fixture'
 
@@ -350,3 +350,18 @@ def test_codex_cv_preference_survives_pickling_and_reaches_worker():
     with patch.object(cv,'generate',return_value={'fixture':'result'}) as generate:
         assert planner({'jd':'synthetic'})=={'fixture':'result'}
         assert generate.call_args.args[0]['worker']=='codex'
+
+
+def test_structured_codex_text_preserves_schema_contract():
+    captured={}
+    schema={'type':'object','properties':{'answer':{'type':'string'}},'required':['answer'],'additionalProperties':False}
+    def text(messages,**kwargs):captured.update(kwargs);return '{"answer":"yes"}'
+    with patch.object(wr,'select',return_value=('codex',{})),patch.object(wr,'execute',side_effect=lambda workflow,route,call:call()),patch.object(wr,'text_via_codex',side_effect=text):
+        response,_=wr.complete_text([{'role':'user','content':'fixture'}],workflow='fixture',worker='codex',response_schema=schema)
+    assert captured['response_schema']==schema
+    assert json.loads(response.choices[0].message.content)=={'answer':'yes'}
+
+
+def test_schema_capability_is_eligible_without_enabling_tools():
+    assert wr._plain({'messages':[{'role':'user','content':'fixture'}], 'response_format':{'type':'json_schema','json_schema':{'schema':{}}}})
+    assert not wr._plain({'messages':[], 'response_format':{'type':'json_object'}})
