@@ -43,7 +43,7 @@ def review_state(doc,body,*,db_path=None):
     if not n_ok and isinstance(doc.get('owner_override'),dict):
         ov=doc['owner_override']
         override=(ov.get('body_sha256')==consent.digest(body) and bool(ov.get('reason')) and
-            consent.verify_receipt(doc.get('owner_approval'),body,db_path=db_path,require_override=True)['ok'])
+            consent.verify_receipt(ov.get('receipt') or doc.get('owner_approval'),body,db_path=db_path,require_override=True)['ok'])
     return {'owner_approved':bool(approval['ok'] and not doc.get('cancelled')),'historical_owner_approval':approval['ok'],'approval_detail':approval['reason'],
         'approval_message_id':doc.get('owner_approval',{}).get('hermes_message_id') if isinstance(doc.get('owner_approval'),dict) else None,
         'personal_review_passed':bool(personal_ok(pg,body)),'news_review_passed':bool(n_ok),

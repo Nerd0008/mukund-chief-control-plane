@@ -94,7 +94,7 @@ def test_date_only_followup_preserves_approval_and_skipped_image(prepared):
     old_receipt=state.read(root/'drafts/approved_20261029_thursday/linkedin_drafts.json')['owner_approval']
     args['approval_message_id']=mid=add('Tomorrow at 9 am, please.')
     with sqlite3.connect(db) as c:c.execute('UPDATE messages SET timestamp=? WHERE id=?',(datetime(2026,10,28,12,tzinfo=state.LONDON).timestamp(),mid))
-    result=bridge.linkedin(args,**opts(prepared),generator=lambda body:pytest.fail('skipped image must stay skipped'))
+    result=bridge.linkedin(args,**opts(prepared),generator=lambda body:pytest.fail('skipped image must stay skipped'),now=datetime(2026,10,28,12,tzinfo=state.LONDON))
     assert result['plan']['slot']['publish_at']=='2026-10-29T09:00:00+00:00'
     doc=state.read(root/'drafts/approved_20261029_thursday/linkedin_drafts.json')
     assert doc['owner_approval']['hermes_message_id']==old_receipt['hermes_message_id']
@@ -150,3 +150,59 @@ def test_named_post_can_be_approved_from_legacy_multiple_hash_presentations(hist
     add('Wednesday 2026-10-28 — ready\n\n'+BODY+'\nAPPROVE LINKEDIN '+approval.digest(BODY)+'\n\nThursday 2026-10-29 — ready\n\n'+other+'\nAPPROVE LINKEDIN '+approval.digest(other),role='assistant')
     assert not approval.verify_message(add('Approved'),BODY,db_path=db)['ok']
     assert approval.verify_message(add('Approve the Wednesday post.'),BODY,db_path=db)['ok']
+
+
+def test_override_receipt_survives_plain_reapproval_and_cannot_be_forged(prepared):
+    root,jobs,db,add,posts=prepared
+    body=posts['thursday']['post_text'];add(body,role='assistant')
+    add('The fact-check blocked this exact post because a claim is unsupported.',role='assistant')
+    override=approval.verify_message(add('Publish it anyway, skip the image.'),body,db_path=db,require_override=True)
+    assert override['ok']
+    plain=approval.verify_message(add('Approved for Thursday at 8 am, skip the image.'),body,db_path=db)
+    doc={'post_text':body,'owner_approval':plain['receipt'],'news_fact_gate':{'verdict':'block'},
+         'personal_fact_gate':posts['thursday']['personal_fact_gate'],
+         'owner_override':{'body_sha256':approval.digest(body),'reason':'Explicit owner decision','receipt':override['receipt']}}
+    assert state.review_state(doc,body,db_path=db)['reviews_ready']
+    doc['owner_override']['receipt']=plain['receipt']
+    assert not state.review_state(doc,body,db_path=db)['reviews_ready']
+    doc['owner_override']['receipt']=override['receipt']
+    doc['owner_override']['body_sha256']=approval.digest(body+'changed')
+    assert not state.review_state(doc,body,db_path=db)['reviews_ready']
+
+
+def test_blocked_post_natural_override_then_schedule_and_execute(prepared,monkeypatch):
+    from types import SimpleNamespace
+    import linkedin_scheduled as scheduled
+    import linkedin_publish as publisher
+    root,jobs,db,add,posts=prepared
+    body=posts['thursday']['post_text']
+    source=root/'review/2026-10-26/weekly.json'
+    weekly=state.read(source)
+    weekly['posts']['thursday']['news_fact_gate']={'verdict':'block','body_sha256':approval.digest(body)}
+    source.write_text(json.dumps(weekly))
+    (root/'drafts/approved_20261029_thursday/linkedin_drafts.json').write_text(json.dumps(weekly['posts']['thursday']))
+    add(body,role='assistant')
+    add('The fact-check blocked this exact post because a claim is unsupported.',role='assistant')
+    args=action_args(prepared)
+    args['approval_message_id']=add('I understand the fact-check warning. I approve this post despite the warning. Skip the image.')
+    result=bridge.linkedin(args,**opts(prepared),now=datetime(2026,10,27,12,tzinfo=state.LONDON))
+    assert result['plan']['planned']
+    path=root/'drafts/approved_20261029_thursday/linkedin_drafts.json'
+    original=state.read(path)['owner_override']['receipt']
+    args['approval_message_id']=add('Approved for Thursday at 8 am, skip the image.')
+    bridge.linkedin(args,**opts(prepared),now=datetime(2026,10,27,12,tzinfo=state.LONDON))
+    doc=state.read(path)
+    assert doc['owner_override']['receipt']==original
+    monkeypatch.setattr(publisher,'APPROVAL_DB',db)
+    assert publisher._override_ok(doc,body)[0]
+    calls=[]
+    def endpoint(command,**kwargs):
+        calls.append(command)
+        ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+        ledger.write_text(json.dumps({'body_sha256':approval.digest(body),'result':'published','post_urn':'urn:test:isolated'})+'\n')
+        return SimpleNamespace(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:test:isolated','network_calls_spent':1}))
+    when=datetime(2026,10,29,8,tzinfo=state.LONDON)
+    code,result=scheduled.run_day('thursday',root=root,db_path=db,jobs_path=jobs,now=when,dry_run=False,runner=endpoint)
+    assert code==0 and result['publish_performed'] and len(calls)==1
+    code,repeated=scheduled.run_day('thursday',root=root,db_path=db,jobs_path=jobs,now=when,dry_run=False,runner=endpoint)
+    assert code==0 and not repeated['publish_performed'] and len(calls)==1

@@ -135,7 +135,8 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
         'blocker_category':payload.get('blocker_category'),'network_calls':payload.get('network_calls_spent')}
 
 
-def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None):
+def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None):
+    now=now or datetime.now(state.LONDON)
     mode=args.get('action','show')
     if mode not in ('show','build','prepare','approve','image','plan','publish'):raise ValueError('unsupported LinkedIn action')
     opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
@@ -175,12 +176,19 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             doc.update(news_fact_gate=source.get('news_fact_gate'),personal_fact_gate=source.get('personal_fact_gate'),
                        image_required=not skip_image,requested_publish_at=due.isoformat(),
                        preference_message_id=message_id)
+            # Preserve independently authenticated override consent across date/image changes.
+            old_override=source.get('owner_override')
+            if isinstance(old_override,dict) and old_override.get('body_sha256')==row['body_sha256']:
+                old_receipt=old_override.get('receipt') or source.get('owner_approval')
+                if state.consent.verify_receipt(old_receipt,row['post_text'],db_path=db_path,require_override=True)['ok']:
+                    doc['owner_override']={**old_override,'receipt':old_receipt}
             if skip_image:doc.update(image_path=None,image_sha256=None,image_body_sha256=None)
             if preferences.get('override'):
                 override=state.consent.verify_message(message_id,row['post_text'],db_path=db_path,require_override=True)
                 if override['ok']:
                     doc['owner_override']={'approved_by':'Mukund','body_sha256':row['body_sha256'],
-                        'reason':'Owner explicitly acknowledged the fact-check warning and approved this exact version despite it.'}
+                        'reason':'Owner explicitly acknowledged the fact-check warning and approved this exact version despite it.',
+                        'receipt':override['receipt']}
             state.audited_json(path,doc,before,root=root,operation='natural_owner_approval_and_preferences',body_sha=row['body_sha256'])
         status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
         if not status['reviews_ready']:
@@ -196,7 +204,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             except Exception as exc:
                 return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','message':'Your approval is saved. Image generation is unavailable. You can say “skip the image”.',
                         'blocker_type':type(exc).__name__,'publish_performed':False}
-        if due<=datetime.now(state.LONDON):
+        if due<=now:
             return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'image':image_result,
                     'message':'Your approval is saved. That time has passed; tell me when you want it posted.','publish_performed':False}
         return {'ok':True,'approval':result,'image':image_result,

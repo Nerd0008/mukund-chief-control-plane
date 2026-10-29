@@ -366,7 +366,9 @@ APPROVAL_DB = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "state.db"
 
 def _owner_approval_ok(draft: dict, body: str, *, require_override=False, db_path=None) -> tuple[bool,str]:
     from linkedin_approval import verify_receipt
-    result=verify_receipt(draft.get("owner_approval"),body,
+    override=draft.get("owner_override") or {}
+    receipt=override.get("receipt") if require_override and isinstance(override,dict) else None
+    result=verify_receipt(receipt or draft.get("owner_approval"),body,
         db_path=APPROVAL_DB if db_path is None else db_path,require_override=require_override)
     return result["ok"],result["reason"]
 

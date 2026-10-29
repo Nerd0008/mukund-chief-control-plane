@@ -101,7 +101,7 @@ def test_approval_image_plan_pipeline_preserves_other_version_and_uses_existing_
     add(posts['thursday']['post_text']+'\nAPPROVE LINKEDIN '+args['body_sha256'],role='assistant')
     args['approval_message_id']=add('Approved')
     generated=[]
-    result=bridge.linkedin(args,**opts(prepared),generator=lambda body:generated.append(body) or b'\x89PNG\r\nsynthetic-only-image')
+    result=bridge.linkedin(args,**opts(prepared),generator=lambda body:generated.append(body) or b'\x89PNG\r\nsynthetic-only-image',now=datetime(2026,10,27,12,tzinfo=state.LONDON))
     assert result['ok'] and result['plan']['planned'] and not result['publish_performed']
     assert generated==[posts['thursday']['post_text']]
     folder=root/'drafts/approved_20261029_thursday';doc=state.read(folder/'linkedin_drafts.json')
