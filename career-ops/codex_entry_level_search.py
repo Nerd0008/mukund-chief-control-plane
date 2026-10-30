@@ -815,10 +815,19 @@ def main() -> int:
     canonical=Path(tw.region_config(profiles,args.region)['tracker'])
     backup_dir=profiles.get('backup_dir') if canonical.resolve()==tracker.resolve() else str(tracker.parent/'backups')
     try:
-        result=tw.write_records(profiles,args.region,records,apply=True,
-            tracker_override=str(tracker),backup_dir=backup_dir,cleanup_existing=False)
+        from tracker_delivery import write_or_defer
+        result,deferred=write_or_defer(
+            lambda: tw.write_records(profiles,args.region,records,apply=True,
+                tracker_override=str(tracker),backup_dir=backup_dir,cleanup_existing=False),
+            tracker,collected,
+            lambda rows: retain_candidates(args.region,rows,'workbook in use; delivery deferred'),advance)
+        if deferred:
+            deferred['proposed_new_rows']=counts['new_candidates']
+            print('TRACKER_WRITE_DEFERRED '+json.dumps(deferred,ensure_ascii=True))
+            return 0
     except (ValueError,OSError) as exc:
         retain_candidates(args.region,collected,'writer unavailable')
+        print('TRACKER_WRITE_FAILED '+json.dumps({'stage':'tracker_commit','applied':False,'error_type':type(exc).__name__,'winerror':getattr(exc,'winerror',None),'errno':getattr(exc,'errno',None)}))
         print('TRACKER_WRITE_BLOCKED '+str(exc),file=sys.stderr)
         return 2
     print('TRACKER_WRITE_RESULT '+json.dumps(result,default=str,ensure_ascii=True))

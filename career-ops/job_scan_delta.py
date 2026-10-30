@@ -267,6 +267,7 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
         complete = code == 0 and coverage.get("coverage_complete") is True
         receipts.append({"batch_offset": current, "exit_code": code, "complete": complete,
                          "coverage": coverage,
+                         "delivery_failure": parse_tagged(out, "TRACKER_WRITE_FAILED"),
                          "reconciliation": parse_tagged(out, "SEARCH_RECONCILIATION"),
                          "new_rows": len(current_run_roles(out, dry_run=dry_run))})
         if not complete:
@@ -276,6 +277,9 @@ def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
         next_offset = (current + 1) % max(1, pool_size)
         if not dry_run:
             write_atomic(CURSOR, json.dumps({"next_offset": next_offset, "updated_at": dt.datetime.now(dt.timezone.utc).isoformat()}))
+        if parse_tagged(out, "TRACKER_WRITE_DEFERRED"):
+            stop_reason = 'tracker_delivery_deferred'
+            break
         roles = current_run_roles(out, dry_run=dry_run)
         if any((row.get("availability") or {}).get("state") == "OPEN" for row in roles):
             stop_reason = 'confirmed_open_found'
@@ -319,6 +323,8 @@ def failure_summary(coverage: dict) -> str:
         counts = (batch.get('reconciliation') or {}).get('counts') or {}
         if counts.get('verification_budget_exhausted'):
             failures['verification_budget_exhausted'] += counts['verification_budget_exhausted']
+        if batch.get('delivery_failure'):
+            failures['tracker_write_failed'] += 1
         if batch.get('exit_code') and not failures:
             failures['search_or_tracker_failure'] += 1
     detail = ', '.join(f'{key}={value}' for key, value in sorted(failures.items()))
@@ -458,6 +464,12 @@ def main() -> int:
                             seen[key] = now.isoformat()
                     save_ledger(LEDGER, seen)
             return 3
+        deferred = tagged_records(out, "TRACKER_WRITE_DEFERRED")
+        if deferred:
+            pending=sum(int(d.get('proposed_new_rows',0)) for d in deferred)
+            print(f"Search completed. Excel tracker delivery is pending: {pending} proposed new row(s) retained for fresh verification and retry. No pending row is claimed as saved. Save and close the UK workbook to allow delivery; search coverage has advanced.")
+            if not current_run_roles(out):
+                return 0
         broken = search_failed(out)
         if broken:
             print(f"Job scan WARNING: the search ran but produced nothing - {broken}. "
