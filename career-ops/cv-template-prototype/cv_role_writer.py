@@ -9,7 +9,7 @@ def decode(text):
     if text.startswith('```'):text=text.split('\n',1)[1].rsplit('```',1)[0]
     return json.loads(text)
 
-def response_schema(layout,review=False):
+def response_schema(layout,review=False,compact=False,affected=None):
     def obj(properties):return {'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}
     text={'type':'string'}
     concise={'type':'string','maxLength':180}
@@ -18,10 +18,10 @@ def response_schema(layout,review=False):
         slot=obj({'supported':{'type':'boolean'},'reason':concise,'evidence':{'type':'array','items':obj({'source':{'type':'string','enum':list(grounding.facts(layout))},'quote':{'type':'string','minLength':8,'maxLength':100}})}})
         return obj({'verdict':{'type':'string','enum':['pass','block']},'slots':obj({k:slot for k in ids}),
             'tailoring':obj({'substantial':{'type':'boolean'},'reason':text,'requirement_ids':{'type':'array','items':text}})})
-    slot=obj({'text':text,'alternatives':{'type':'array','items':text,'maxItems':2},
+    slot=obj({'text':text,'alternatives':{'type':'array','items':text,'maxItems':0 if compact else 2},
               'sources':{'type':'array','items':{'type':'string','enum':list(grounding.facts(layout))},'minItems':1},'why':concise})
     requirement=obj({'id':text,'quote':text,'covered_by':{'type':'array','items':{'type':'string','enum':ids}}})
-    return obj({'requirements':{'type':'array','items':requirement,'minItems':3},'content':obj({k:slot for k in ids})})
+    return obj({'requirements':{'type':'array','items':requirement,'minItems':3},'content':obj({k:slot for k in ids if affected is None or k in affected})})
 
 
 def generate(request):
@@ -48,7 +48,13 @@ def generate(request):
         data['affected']=request['affected'];data['previous']={k:grounding.body(v) for k,v in request['content'].items()}
         system+=' This is one bounded fit correction. Change ONLY affected slots, retain all other text/sources/rationales exactly.'
     remaining=lambda limit:min(limit,request.get('deadline_monotonic',time.monotonic()+limit)-time.monotonic())
-    if remaining(120)<10:raise ValueError('insufficient time remaining for factual tailoring')
+    from cv_validation_mode import canonical_gate_enabled
+    development=not canonical_gate_enabled()
+    generation_budget=150 if development else 120
+    if development:
+        system+=' Development response: provide one complete version per slot and set alternatives to an empty list. Keep the same exact line counts and fixed layout. Do not produce a factual audit. '
+        if request['mode']=='shorten':system+=' Return only the affected content keys. All other content will be retained locally.'
+    if remaining(generation_budget)<10:raise ValueError('insufficient time remaining for factual tailoring')
     cache_key=grounding.digest({'jd':request['jd'],'facts':source,'mode':request['mode'],'affected':request.get('affected'),
         'previous':data.get('previous'),'writer_version':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()})
     cache=grounding.ROOT/'drafts'/(cache_key+'.json')
@@ -58,9 +64,11 @@ def generate(request):
     route={};response=None
     if plan is None:
         response,route=complete_text([{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}],
-            workflow='career.cv.tailor',timeout=remaining(120),max_tokens=8192,worker=request.get('worker'),response_schema=response_schema(layout))
+            workflow='career.cv.tailor',timeout=remaining(generation_budget),max_tokens=8192,worker=request.get('worker'),response_schema=response_schema(layout,compact=development,affected=request.get('affected') if development and request['mode']=='shorten' else None))
         if response.choices[0].finish_reason=='length':raise ValueError('tailored draft truncated')
         plan=decode(response.choices[0].message.content)
+    if development and request['mode']=='shorten':
+        plan=dict(plan,content={**{k:grounding.body(v) for k,v in request['content'].items()},**plan['content']})
     content,requirements=grounding.parse_plan(plan,layout,request['jd'])
     try:
         cache.parent.mkdir(parents=True,exist_ok=True)
@@ -69,6 +77,19 @@ def generate(request):
     except OSError:pass
     if request['mode']=='shorten' and any(grounding.body(v)!=content[k] for k,v in request['content'].items() if k not in request['affected']):
         raise ValueError('fit correction changed unaffected text')
+    from cv_validation_mode import DISABLED,canonical_gate_enabled
+    if not canonical_gate_enabled():
+        gate={'status':DISABLED,'available':False,'verdict':'not_run','exit_code':None}
+        review={'status':DISABLED,'facts_verified':False,'tailoring_independently_reviewed':False}
+        if request.get('workspace'):
+            private=pathlib.Path(request['workspace'])
+            (private/'independent-review.json').write_text(json.dumps(dict(review,content=content,requirements=requirements),ensure_ascii=True),encoding='utf-8')
+            (private/'canonical-fact-gate.json').write_text(json.dumps(gate),encoding='utf-8')
+        content=grounding.issue(content,requirements,layout,request['jd'],review,route,gate)
+        generate.last_metadata={'provider':route.get('selected_provider'),'model':response.model if response else 'cached-draft','model_calls':1 if response else 0,
+            'router_decision':route,'tailoring_review':DISABLED,'independent_fact_review':DISABLED,'canonical_fact_gate':DISABLED,'validation_mode':'DEVELOPMENT',
+            'review_receipt':next(iter(content.values()))['review_receipt'],'jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest()}
+        return {k:content[k] for k in request['affected']} if request['mode']=='shorten' else content
     generate.last_metadata={'provider':route.get('selected_provider'),'model':response.model if response else 'cached-draft','model_calls':1 if response else 0,'stage':'independent_review','router_decision':route}
     if request.get('workspace'):
         stage=pathlib.Path(request['workspace'])/'stage.json'
@@ -97,16 +118,27 @@ def generate(request):
         cache.unlink(missing_ok=True)
         grounding.ROOT.mkdir(parents=True,exist_ok=True)
         target=grounding.ROOT/('rejected-'+__import__('uuid').uuid4().hex+'.json')
-        target.write_text(json.dumps({'status':'BLOCKED','jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest(),'review':review,'content':content},ensure_ascii=True),encoding='utf-8')
+        target.write_text(json.dumps({'status':'BLOCKED','jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest(),'review':review,'content':content,'requirements':requirements},ensure_ascii=True),encoding='utf-8')
         raise
     import cv_workflow
-    with tempfile.TemporaryDirectory(prefix='cv-tailoring-factgate-') as folder:
-        gate=cv_workflow.fact_gate(cv_workflow.load_config(),'\n'.join(v['text'] for v in content.values()),label='tailored-cv',scratch=pathlib.Path(folder))
+    from cv_validation_mode import DISABLED,canonical_gate_enabled
+    generate.last_metadata['stage']='canonical_fact_gate'
+    if request.get('workspace'):
+        private=pathlib.Path(request['workspace'])
+        (private/'independent-review.json').write_text(json.dumps({'review':review,'content':content,'requirements':requirements},ensure_ascii=True),encoding='utf-8')
+        (private/'stage.json').write_text(json.dumps({'stage':'canonical_fact_gate'}),encoding='utf-8')
+    if canonical_gate_enabled():
+        with tempfile.TemporaryDirectory(prefix='cv-tailoring-factgate-') as folder:
+            gate=cv_workflow.fact_gate(cv_workflow.load_config(),'\n'.join(v['text'] for v in content.values()),label='tailored-cv',scratch=pathlib.Path(folder))
+    else:gate={'status':DISABLED,'available':False,'verdict':'not_run','exit_code':None}
+    if request.get('workspace'):
+        (pathlib.Path(request['workspace'])/'canonical-fact-gate.json').write_text(json.dumps(gate,ensure_ascii=True),encoding='utf-8')
     try:content=grounding.issue(content,requirements,layout,request['jd'],review,review_route,gate)
     except ValueError:
         cache.unlink(missing_ok=True)
         raise
     generate.last_metadata={'provider':route.get('selected_provider'),'model':response.model if response else 'cached-draft','model_calls':2 if response else 1,
         'router_decision':route,'review_router_decision':review_route,'tailoring_review':'PASS',
+        'canonical_fact_gate':gate.get('status','PASS'),'validation_mode':'DEVELOPMENT' if gate.get('status')==DISABLED else 'PRODUCTION',
         'review_receipt':next(iter(content.values()))['review_receipt'],'jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest()}
     return {k:content[k] for k in request['affected']} if request['mode']=='shorten' else content

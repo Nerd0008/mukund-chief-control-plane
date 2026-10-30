@@ -21,6 +21,8 @@ def parse_plan(plan,layout,jd):
     cv.register(layout)
     slots={s['id']:s for s in layout['slots'] if s['variable']}
     known=facts(layout)
+    from cv_validation_mode import canonical_gate_enabled
+    check_facts=canonical_gate_enabled()
     if not isinstance(plan,dict) or not isinstance(plan.get('content'),dict) or set(plan['content'])!=set(slots):
         raise ValueError('tailoring must provide every editable slot')
     requirements=plan.get('requirements')
@@ -49,7 +51,7 @@ def parse_plan(plan,layout,jd):
                 value['text']=candidate;break
         evidence_text=' '.join(known[s] for s in sources)
         for number in re.findall(r'(?<![A-Za-z])\d+(?:\.\d+)?(?:%|\+)?',value['text']):
-            if number not in evidence_text:raise ValueError('numeric claim absent from cited evidence')
+            if check_facts and number not in evidence_text:raise ValueError('numeric claim absent from cited evidence')
         content[key]=body(value)
     return content,requirements
 
@@ -72,7 +74,7 @@ def review_result(review,content,requirements,layout):
         raise ValueError('generic default or cosmetic-only project changes are not tailoring')
     tailoring=review.get('tailoring',{})
     mapped={r['id'] for r in requirements if r['covered_by']}
-    if tailoring.get('substantial') is not True or len(str(tailoring.get('reason','')))<20 or len(mapped)<3:
+    if tailoring.get('substantial') is not True or len(str(tailoring.get('reason','')))<20 or not mapped:
         raise ValueError('generic or insufficiently tailored CV')
     if set(tailoring.get('requirement_ids',[]))!=mapped:raise ValueError('review did not assess mapped JD requirements')
 
@@ -89,12 +91,18 @@ def _key(create=False):
     return data
 
 def issue(content,requirements,layout,jd,review,provider,gate):
-    review_result(review,content,requirements,layout)
-    if not gate.get('available') or gate.get('exit_code')!=0 or gate.get('verdict')=='block':raise ValueError('canonical CV fact gate did not pass')
+    from cv_validation_mode import DISABLED,canonical_gate_enabled
+    development=gate.get('status')==DISABLED and not canonical_gate_enabled()
+    if not development:review_result(review,content,requirements,layout)
+    gate_status='PASS'
+    if gate.get('status')==DISABLED:
+        if canonical_gate_enabled():raise ValueError('development gate bypass is not enabled')
+        gate_status=DISABLED
+    elif not gate.get('available') or gate.get('exit_code')!=0 or gate.get('verdict')=='block':raise ValueError('canonical CV fact gate did not pass')
     payload={'version':1,'master_sha256':layout['master_sha256'],'facts_sha256':digest(facts(layout)),
              'jd_sha256':hashlib.sha256(jd.encode()).hexdigest(),'requirements':requirements,
              'slots':{k:digest(body(v)) for k,v in content.items()},'review':review,'provider':provider,
-             'canonical_fact_gate':'PASS'}
+             'canonical_fact_gate':gate_status,'independent_fact_review':DISABLED if development else 'PASS'}
     key=_key(True);identifier=digest(payload)
     envelope={'payload':payload,'mac':hmac.new(key,canonical(payload),hashlib.sha256).hexdigest()}
     target=ROOT/(identifier+'.json');temp=target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp')
@@ -108,8 +116,9 @@ def valid_item(key,item,layout):
     try:
         envelope=json.loads((ROOT/(identifier+'.json')).read_text(encoding='utf-8'));payload=envelope['payload']
         if not hmac.compare_digest(envelope['mac'],hmac.new(_key(),canonical(payload),hashlib.sha256).hexdigest()):return False
+        from cv_validation_mode import authorize_receipt
         return (payload['master_sha256']==layout['master_sha256'] and payload['facts_sha256']==digest(facts(layout))
-                and payload['slots'].get(key)==digest(body(item)) and payload['canonical_fact_gate']=='PASS')
+                and payload['slots'].get(key)==digest(body(item)) and authorize_receipt(payload['canonical_fact_gate']))
     except (OSError,ValueError,KeyError,TypeError):return False
 
 

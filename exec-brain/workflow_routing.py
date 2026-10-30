@@ -296,7 +296,7 @@ def text_via_codex(messages,timeout=90,response_schema=None):
         state=CURRENT.get()
         adapter=CodexExecutionAdapter('bounded_text')
         result=adapter.dispatch({'objective':prompt,'model':'gpt-6.1-sol',
-            'reasoning_effort':'high','working_directory':workspace,**({'output_schema':response_schema} if response_schema else {}),'timeout':state.remaining(90) if state else min(90,timeout),
+            'reasoning_effort':'high','working_directory':workspace,**({'output_schema':response_schema} if response_schema else {}),'timeout':state.remaining(timeout) if state else timeout,
             **({'cancel_event':state.cancel} if state else {})})
     if result.get('status')!='COMPLETED':
         code=cli_failure_code(result).replace('router_cli_','bounded_text_worker_')

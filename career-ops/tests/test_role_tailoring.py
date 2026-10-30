@@ -195,3 +195,19 @@ def test_canonical_fact_gate_rejection_does_not_poison_retry_cache(monkeypatch):
         writer.generate({'jd':JD,'mode':'generate','worker':'codex'})
     assert not list((grounding.ROOT/'drafts').glob('*.json'))
     assert writer.generate.last_metadata['model_calls']==2
+
+
+def test_unmet_job_requirements_do_not_override_approved_substantial_tailoring():
+    layout,content,requirements,review=fixture()
+    requirements[0]['covered_by']=[]
+    requirements[1]['covered_by']=[]
+    review['tailoring']['requirement_ids']=[requirements[2]['id']]
+    grounding.review_result(review,content,requirements,layout)
+
+
+def test_no_supported_job_requirement_still_fails_tailoring():
+    layout,content,requirements,review=fixture()
+    for requirement in requirements:requirement['covered_by']=[]
+    review['tailoring']['requirement_ids']=[]
+    with pytest.raises(ValueError,match='insufficiently tailored'):
+        grounding.review_result(review,content,requirements,layout)

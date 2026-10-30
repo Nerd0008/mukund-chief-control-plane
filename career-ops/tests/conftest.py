@@ -63,3 +63,8 @@ def private_codex_admission(tmp_path,monkeypatch):
 def private_application_package_receipts(tmp_path, monkeypatch):
     import application_package_state
     monkeypatch.setattr(application_package_state, 'ROOT', tmp_path/'application-packages')
+
+
+@pytest.fixture(autouse=True)
+def private_cv_validation_mode(tmp_path, monkeypatch):
+    monkeypatch.setenv('CV_VALIDATION_CONFIG_PATH', str(tmp_path/'cv-validation-mode.json'))

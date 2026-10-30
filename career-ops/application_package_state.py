@@ -112,7 +112,9 @@ def render(state):
     lines = []
     for kind in needed:
         label = 'CV' if kind == 'cv' else 'Cover letter'
-        if kind in files: lines.append(label + (': delivery previously confirmed.' if state.get('resuming') and not state.get('resend') and delivered(files[kind]) else ': verified and ready.'))
+        if kind in files:
+            development=state.get('results',{}).get(kind,{}).get('validation_mode')=='DEVELOPMENT'
+            lines.append(label + (': delivery previously confirmed.' if state.get('resuming') and not state.get('resend') and delivered(files[kind]) else ': ready.' if development else ': verified and ready.'))
         else:
             result = state.get('results', {}).get(kind, {})
             reason = result.get('reason') or state.get('blocked_reason') or 'not completed within this attempt'
@@ -129,7 +131,9 @@ def required(state):
 
 def outcome(state):
     files=accepted(state)
-    return 'VERIFIED_READY' if all(k in files for k in required(state)) else 'PARTIAL' if files else 'INCOMPLETE'
+    if all(k in files for k in required(state)):
+        return 'DEVELOPMENT_READY' if any(state.get('results',{}).get(k,{}).get('validation_mode')=='DEVELOPMENT' for k in files) else 'VERIFIED_READY'
+    return 'PARTIAL' if files else 'INCOMPLETE'
 
 
 def trim_history(history):

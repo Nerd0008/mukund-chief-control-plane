@@ -11,7 +11,7 @@ def dependency_paths():
     layout=cv.load_layout()
     paths=[cv.HERE/'layout.json',cv.HERE/'cv_template.py',pathlib.Path(__file__),pathlib.Path(layout['master_source'])]
     paths += [pathlib.Path('C:/Windows/Fonts')/f for f in layout['fonts'].values()]
-    paths += [cv.HERE/name for name in ['cv_pdf_compatibility.py','cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','cv_role_writer.py','cv_tailoring_grounding.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
+    paths += [cv.HERE/name for name in ['cv_validation_mode.py','cv_pdf_compatibility.py','cv_writing_policy.py','fact_bank.json','cv_content_adapter.py','cv_role_writer.py','cv_tailoring_grounding.py','approval.json','output/original-content-reproduction.pdf'] if (cv.HERE/name).exists()]
     return paths
 
 @contextmanager
@@ -71,7 +71,7 @@ def worker(generator,request,workspace):
         if request.get('tailoring_required'):
             from cv_tailoring_grounding import matches_jd
             if not matches_jd(content,request['jd']):raise ValueError('tailoring review does not match requested JD')
-            result['tailoring']={'review':'PASS','jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest()}
+            result['tailoring']={'review':(provider_metadata or {}).get('tailoring_review','PASS'),'jd_sha256':hashlib.sha256(request['jd'].encode()).hexdigest()}
         result.update(timings,content_calls=calls,renders=renders,total_worker_seconds=time.monotonic()-started)
         if provider_metadata: result['provider']=dict(provider_metadata,model_calls=model_calls)
         save(w/'result.json',result)

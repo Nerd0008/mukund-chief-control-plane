@@ -365,3 +365,25 @@ def test_structured_codex_text_preserves_schema_contract():
 def test_schema_capability_is_eligible_without_enabling_tools():
     assert wr._plain({'messages':[{'role':'user','content':'fixture'}], 'response_format':{'type':'json_schema','json_schema':{'schema':{}}}})
     assert not wr._plain({'messages':[], 'response_format':{'type':'json_object'}})
+
+
+def test_text_worker_honors_requested_budget_instead_of_hidden_90_second_cap():
+    import codex_adapter
+    observed=[]
+    def dispatch(contract):
+        observed.append(contract['timeout'])
+        return {'status':'COMPLETED','final_message':'fixture','raw_output':[]}
+    with patch.object(codex_adapter,'CodexExecutionAdapter',return_value=SimpleNamespace(dispatch=dispatch)):
+        with wr.operation(150):assert wr.text_via_codex([],timeout=150)=='fixture'
+    assert 140<observed[0]<=150
+
+
+def test_longer_text_budget_cannot_extend_parent_deadline():
+    import codex_adapter
+    observed=[]
+    def dispatch(contract):
+        observed.append(contract['timeout'])
+        return {'status':'COMPLETED','final_message':'fixture','raw_output':[]}
+    with patch.object(codex_adapter,'CodexExecutionAdapter',return_value=SimpleNamespace(dispatch=dispatch)):
+        with wr.operation(12):assert wr.text_via_codex([],timeout=150)=='fixture'
+    assert 0<observed[0]<=12
