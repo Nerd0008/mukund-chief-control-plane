@@ -204,7 +204,7 @@ def test_direct_search_dedupes_and_carries_resolved_destination(monkeypatch,tmp_
     monkeypatch.setattr(search,'read_tracker_urls',lambda p:({posting_key(TARGET)} if already_tracked else set(),set(),None,Book(),{},2,None))
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'location':'London, United Kingdom','company':'Example','title':TITLE,'url':SOURCE}]))
-    monkeypatch.setattr(search,'fetch_jd',lambda url:{'vacancy_status':{'state':'OPEN','page_title':TITLE},'resolved_url':TARGET})
+    monkeypatch.setattr(search,'fetch_jd',lambda url:{'text':'Graduate cyber security internship in London. No prior professional experience required.', 'vacancy_status':{'state':'OPEN','page_title':TITLE},'resolved_url':TARGET})
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0
     report=json.loads(next(x.split(' ',1)[1] for x in capsys.readouterr().out.splitlines() if x.startswith('SEARCH_RECONCILIATION ')))

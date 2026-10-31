@@ -133,11 +133,13 @@ def screen_rows(path, *, timeout: int = 15, limit: int = 0,
 
         fetched += 1
         entry["is_closed"] = bool(jd.get("is_closed"))
-        hits = clearance_hits(text)
+        from owner_rejection_policy import clearance_only, required_clearance_evidence
+        mandatory = required_clearance_evidence(text) if clearance_only('uk') else None
+        hits = [e['token'] for e in mandatory] if mandatory is not None else clearance_hits(text)
         if hits:
             flagged += 1
             entry.update(outcome="FLAGGED", hits=hits,
-                         evidence=clearance_evidence(text))
+                         evidence=mandatory if mandatory is not None else clearance_evidence(text))
         else:
             entry["outcome"] = "CLEAR"
 
@@ -192,8 +194,14 @@ def apply_flags(path, rows, *, profiles, backup_dir=None, dry_run=False):
         wb = openpyxl.load_workbook(path)
         ws = wb[cfg["sheet"]]
         target = {r["row"] for r in flagged}
+        expected = {r["row"]: r for r in flagged}
         changed = []
         for r in sorted(target):
+            identity=expected[r]
+            if any(key in identity and str(ws.cell(r,col).value or '') != str(identity[key] or '')
+                   for key,col in (('company',2),('title',3),('url',4))):
+                wb.close()
+                return {'applied':False,'error':'flagged application identity changed; workbook untouched','row':r}
             current = str(ws.cell(r, 6).value or "")
             if current.strip().lower() not in SCREENABLE:
                 changed.append({"row": r, "skipped": f"status is {current!r}"})

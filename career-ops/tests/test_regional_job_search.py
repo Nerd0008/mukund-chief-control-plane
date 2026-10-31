@@ -225,14 +225,19 @@ def test_eligibility_accepts_a_region_matching_internship():
 def test_eligibility_rejects_the_wrong_region(region, bad_location):
     v = _eval(region, {"company": "X", "title": "Cybersecurity Intern",
                        "location": bad_location, "url": "https://regional-fixture.invalid/x"})
-    assert v["decision"] == "rejected"
-    assert any("location" in r for r in v["reasons"])
+    if region == 'uk':
+        assert v['decision'] == 'accepted'
+        assert 'Location needs review' in v['review_flags']
+    else:
+        assert v["decision"] == "rejected"
+        assert any("location" in r for r in v["reasons"])
 
 
 def test_eligibility_rejects_senior_titles_and_clearance_requirements():
     senior = _eval("uk", {"company": "X", "title": "Senior Security Manager",
                           "location": "London, UK", "url": "https://regional-fixture.invalid/s"})
-    assert senior["decision"] == "rejected"
+    assert senior['decision'] == 'accepted'
+    assert senior['review_flags']
     cleared = _eval("uk", {"company": "X", "title": "Cybersecurity Intern", "location": "London, UK",
                            "url": "https://regional-fixture.invalid/c",
                            "summary": "Must hold DV clearance"})
@@ -264,8 +269,8 @@ def test_eligibility_rejects_a_hyphenated_clearance_requirement():
     v = _eval("uk", {"company": "X", "title": "Cybersecurity Intern", "location": "London, UK",
                      "url": "https://regional-fixture.invalid/h",
                      "summary": "Requires British-citizenship and long-uk-residency"})
-    assert v["decision"] == "rejected"
-    assert any("clearance" in r for r in v["reasons"])
+    assert v['decision'] == 'accepted'
+    assert 'Clearance or citizenship wording needs review' in v['review_flags']
 
 
 def test_eligibility_rejects_a_bare_remote_posting_outside_its_region():

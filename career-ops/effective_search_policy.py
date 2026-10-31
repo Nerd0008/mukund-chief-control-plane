@@ -25,7 +25,7 @@ def effective_policy(region="uk", *, path=None):
         source = Path(row['owner_policy_path'])
         owner_raw = source.read_bytes()
         owner = yaml.safe_load(owner_raw) or {}
-        authority = {'owner_scope': owner['role_scope'], 'owner_policy_path': str(source),
+        authority = {'rejection_policy': owner.get('rejection_policy', {}), 'owner_scope': owner['role_scope'], 'owner_policy_path': str(source),
                      'owner_policy_sha256': hashlib.sha256(owner_raw).hexdigest()}
     return {"schema_version": config["schema_version"], "region": region, **row, **authority,
             "policy_path": str(target), "policy_sha256": hashlib.sha256(raw).hexdigest(),
@@ -62,6 +62,10 @@ def discovery_portals(config, region):
     # in a country-keyword collection filter. Explicit foreign blocks remain.
     result.setdefault('location_filter', {})['allow'] = []
     result['location_filter']['always_allow'] = []
+    from owner_rejection_policy import clearance_only
+    if clearance_only(region):
+        result['title_filter'] = {'positive': [], 'negative': []}
+        result['location_filter']['block'] = []
     return result
 
 

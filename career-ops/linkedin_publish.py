@@ -540,12 +540,13 @@ def _preflight(*, drafts_path, kind, index, approve, confirm_token,
 
     # A date-stamped scheduled artifact cannot be published early or in a
     # later week merely by calling the lower-level CLI instead of its wrapper.
+    # Missed posts may be published any time after the scheduled date.
     from linkedin_state import artifact_date, LONDON
     from datetime import datetime as _date_time, time as _day_time
     target_date=artifact_date(Path(drafts_path))
     if target_date is not None:
         now=_date_time.now(LONDON)
-        due=now.date()==target_date and now>=_date_time.combine(target_date,_day_time(8),LONDON)
+        due=(now.date()==target_date and now>=_date_time.combine(target_date,_day_time(8),LONDON)) or now.date()>target_date
         check("scheduled_date_due",due,"scheduled artifact is due" if due else
             f"scheduled artifact is only publishable on {target_date.isoformat()} after 08:00 Europe/London")
 

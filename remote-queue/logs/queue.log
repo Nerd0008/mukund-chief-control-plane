@@ -3081,3 +3081,212 @@ error: unable to unlink old 'runtime/career-ops/scan-runs/singapore-unified-last
 [2026-10-07T18:42:03.418974Z] git pull: success (with stash/restore)
 [2026-10-07T18:44:02.344266Z] git pull: success
 [2026-10-07T18:46:02.893711Z] git pull: success (with stash/restore)
+[2026-10-09T20:02:05.402732Z] git pull: success
+[2026-10-09T20:04:04.736983Z] git pull: success (with stash/restore)
+[2026-10-09T20:05:14.129400Z] git pull: success (with stash/restore)
+[2026-10-09T20:06:03.386058Z] git pull: success (with stash/restore)
+[2026-10-09T20:08:02.979537Z] git pull: success (with stash/restore)
+[2026-10-09T20:10:04.201423Z] git pull: success (with stash/restore)
+[2026-10-09T20:12:03.162762Z] git pull: success (with stash/restore)
+[2026-10-09T20:14:03.064719Z] git pull: success (with stash/restore)
+[2026-10-09T20:16:03.609156Z] git pull: success (with stash/restore)
+[2026-10-09T20:18:03.073817Z] git pull: success (with stash/restore)
+[2026-10-09T20:20:03.460237Z] git pull: success (with stash/restore)
+[2026-10-09T20:22:03.019908Z] git pull: success (with stash/restore)
+[2026-10-09T20:24:03.154773Z] git pull: success (with stash/restore)
+[2026-10-09T20:26:03.074890Z] git pull: success (with stash/restore)
+[2026-10-09T20:28:02.991794Z] git pull: success (with stash/restore)
+[2026-10-09T20:30:04.628544Z] git pull: success (with stash/restore)
+[2026-10-09T20:32:03.074996Z] git pull: success (with stash/restore)
+[2026-10-09T20:34:03.019027Z] git pull: success (with stash/restore)
+[2026-10-09T20:36:03.011366Z] git pull: success (with stash/restore)
+[2026-10-09T20:36:03.851052Z] Kill switch active
+[2026-10-24T16:29:41.589240Z] Kill switch active
+[2026-10-24T16:30:01.721801Z] Kill switch active
+[2026-10-24T16:32:01.784503Z] Kill switch active
+[2026-10-24T16:34:01.889486Z] Kill switch active
+[2026-10-24T16:36:02.053947Z] Kill switch active
+[2026-10-24T16:38:02.097404Z] Kill switch active
+[2026-10-24T16:40:01.977956Z] Kill switch active
+[2026-10-24T16:42:01.876917Z] Kill switch active
+[2026-10-24T16:44:01.792770Z] Kill switch active
+[2026-10-24T16:46:01.807705Z] Kill switch active
+[2026-10-24T16:48:01.819269Z] Kill switch active
+[2026-10-24T16:50:01.801311Z] Kill switch active
+[2026-10-24T16:52:01.801322Z] Kill switch active
+[2026-10-24T16:54:01.826478Z] Kill switch active
+[2026-10-24T16:56:01.854196Z] Kill switch active
+[2026-10-24T16:58:01.838897Z] Kill switch active
+[2026-10-24T17:00:01.868100Z] Kill switch active
+[2026-10-24T17:02:01.840598Z] Kill switch active
+[2026-10-24T17:04:01.849862Z] Kill switch active
+[2026-10-24T17:06:01.925548Z] Kill switch active
+[2026-10-24T17:08:01.884609Z] Kill switch active
+[2026-10-24T17:10:01.892700Z] Kill switch active
+[2026-10-24T17:12:01.913835Z] Kill switch active
+[2026-10-24T17:14:01.896043Z] Kill switch active
+[2026-10-24T17:16:02.019037Z] Kill switch active
+[2026-10-24T17:18:01.937596Z] Kill switch active
+[2026-10-24T17:20:01.956850Z] Kill switch active
+[2026-10-24T17:22:01.949835Z] Kill switch active
+[2026-10-24T17:24:01.993271Z] Kill switch active
+[2026-10-24T17:26:01.969295Z] Kill switch active
+[2026-10-24T17:28:01.994530Z] Kill switch active
+[2026-10-24T17:30:01.980253Z] Kill switch active
+[2026-10-24T17:32:02.033298Z] Kill switch active
+[2026-10-24T17:34:02.007053Z] Kill switch active
+[2026-10-24T17:36:02.077891Z] Kill switch active
+[2026-10-24T17:38:03.056458Z] Kill switch active
+[2026-10-24T17:40:02.612720Z] Kill switch active
+[2026-10-24T17:42:02.045428Z] Kill switch active
+[2026-10-24T17:44:02.046579Z] Kill switch active
+[2026-10-24T17:46:02.093994Z] Kill switch active
+[2026-10-24T17:48:02.065045Z] Kill switch active
+[2026-10-24T17:50:02.078454Z] Kill switch active
+[2026-10-24T17:52:02.104170Z] Kill switch active
+[2026-10-24T17:54:02.102038Z] Kill switch active
+[2026-10-24T17:56:02.111205Z] Kill switch active
+[2026-10-24T17:58:02.101326Z] Kill switch active
+[2026-10-24T18:00:02.137125Z] Kill switch active
+[2026-10-24T18:02:02.103821Z] Kill switch active
+[2026-10-24T18:04:02.143829Z] Kill switch active
+[2026-10-24T18:06:02.173649Z] Kill switch active
+[2026-10-24T18:08:02.119501Z] Kill switch active
+[2026-10-24T18:10:02.155567Z] Kill switch active
+[2026-10-24T18:12:02.143091Z] Kill switch active
+[2026-10-24T18:14:02.314250Z] Kill switch active
+[2026-10-24T18:16:02.253053Z] Kill switch active
+[2026-10-24T18:18:02.478012Z] Kill switch active
+[2026-10-24T18:20:02.270935Z] Kill switch active
+[2026-10-24T18:22:02.339418Z] Kill switch active
+[2026-10-24T18:24:02.339416Z] Kill switch active
+[2026-10-24T18:26:02.307417Z] Kill switch active
+[2026-10-24T18:28:02.280741Z] Kill switch active
+[2026-10-24T18:30:02.351828Z] Kill switch active
+[2026-10-24T18:32:02.336912Z] Kill switch active
+[2026-10-24T18:34:02.365742Z] Kill switch active
+[2026-10-24T18:36:02.580850Z] Kill switch active
+[2026-10-24T18:38:02.299939Z] Kill switch active
+[2026-10-24T18:40:02.367678Z] Kill switch active
+[2026-10-24T18:42:02.360014Z] Kill switch active
+[2026-10-24T18:44:02.459834Z] Kill switch active
+[2026-10-24T18:46:02.353347Z] Kill switch active
+[2026-10-24T18:48:02.378860Z] Kill switch active
+[2026-10-24T18:50:02.502704Z] Kill switch active
+[2026-10-24T18:52:02.392158Z] Kill switch active
+[2026-10-24T18:54:02.428009Z] Kill switch active
+[2026-10-24T18:56:02.496979Z] Kill switch active
+[2026-10-24T18:58:02.470805Z] Kill switch active
+[2026-10-24T19:00:01.491229Z] Kill switch active
+[2026-10-24T19:02:01.519980Z] Kill switch active
+[2026-10-24T19:04:01.538932Z] Kill switch active
+[2026-10-24T19:06:01.543065Z] Kill switch active
+[2026-10-24T19:08:01.508185Z] Kill switch active
+[2026-10-24T19:10:01.667530Z] Kill switch active
+[2026-10-24T19:12:01.602642Z] Kill switch active
+[2026-10-24T19:14:01.803334Z] Kill switch active
+[2026-10-24T19:16:01.638280Z] Kill switch active
+[2026-10-24T19:18:01.629175Z] Kill switch active
+[2026-10-24T19:20:01.586097Z] Kill switch active
+[2026-10-24T19:22:01.661864Z] Kill switch active
+[2026-10-24T19:24:01.679133Z] Kill switch active
+[2026-10-24T19:26:01.652759Z] Kill switch active
+[2026-10-24T19:28:01.612494Z] Kill switch active
+[2026-10-24T19:30:01.958759Z] Kill switch active
+[2026-10-24T19:32:01.609536Z] Kill switch active
+[2026-10-24T19:34:01.661146Z] Kill switch active
+[2026-10-24T19:36:01.682846Z] Kill switch active
+[2026-10-24T19:38:01.744810Z] Kill switch active
+[2026-10-24T19:40:01.676031Z] Kill switch active
+[2026-10-24T19:42:01.747358Z] Kill switch active
+[2026-10-24T19:44:01.671228Z] Kill switch active
+[2026-10-24T19:46:01.676343Z] Kill switch active
+[2026-10-24T19:48:01.832180Z] Kill switch active
+[2026-10-24T19:50:01.773956Z] Kill switch active
+[2026-10-24T19:52:01.753864Z] Kill switch active
+[2026-10-24T19:54:01.682735Z] Kill switch active
+[2026-10-24T19:56:01.731850Z] Kill switch active
+[2026-10-24T19:58:01.687405Z] Kill switch active
+[2026-10-24T20:00:01.729582Z] Kill switch active
+[2026-10-24T20:02:01.739789Z] Kill switch active
+[2026-10-24T20:04:01.763102Z] Kill switch active
+[2026-10-24T20:06:01.755941Z] Kill switch active
+[2026-10-24T20:08:01.749232Z] Kill switch active
+[2026-10-24T20:10:01.780684Z] Kill switch active
+[2026-10-24T20:12:01.793189Z] Kill switch active
+[2026-10-24T20:14:01.787367Z] Kill switch active
+[2026-10-24T20:16:01.766871Z] Kill switch active
+[2026-10-24T20:18:01.865517Z] Kill switch active
+[2026-10-24T20:20:01.912914Z] Kill switch active
+[2026-10-24T20:22:01.854755Z] Kill switch active
+[2026-10-24T20:24:01.922019Z] Kill switch active
+[2026-10-24T20:26:01.816296Z] Kill switch active
+[2026-10-24T20:28:01.778539Z] Kill switch active
+[2026-10-24T20:30:01.798005Z] Kill switch active
+[2026-10-24T20:32:01.925899Z] Kill switch active
+[2026-10-24T20:34:01.831597Z] Kill switch active
+[2026-10-24T20:36:02.066810Z] Kill switch active
+[2026-10-24T20:38:01.888226Z] Kill switch active
+[2026-10-24T20:40:01.899379Z] Kill switch active
+[2026-10-24T20:42:02.026785Z] Kill switch active
+[2026-10-24T20:44:01.882841Z] Kill switch active
+[2026-10-24T20:46:01.909326Z] Kill switch active
+[2026-10-24T20:48:01.934290Z] Kill switch active
+[2026-10-24T20:50:01.932401Z] Kill switch active
+[2026-10-24T20:52:02.035671Z] Kill switch active
+[2026-10-24T20:54:01.951177Z] Kill switch active
+[2026-10-24T20:56:01.994295Z] Kill switch active
+[2026-10-24T20:58:01.998317Z] Kill switch active
+[2026-10-24T21:00:02.064524Z] Kill switch active
+[2026-10-24T21:02:01.908004Z] Kill switch active
+[2026-10-24T21:04:01.968389Z] Kill switch active
+[2026-10-24T21:06:02.096830Z] Kill switch active
+[2026-10-24T21:08:02.144363Z] Kill switch active
+[2026-10-24T21:10:01.986196Z] Kill switch active
+[2026-10-24T21:12:02.119051Z] Kill switch active
+[2026-10-24T21:14:02.101124Z] Kill switch active
+[2026-10-24T21:16:02.277092Z] Kill switch active
+[2026-10-24T21:18:02.097210Z] Kill switch active
+[2026-10-24T21:20:02.131184Z] Kill switch active
+[2026-10-24T21:22:01.942529Z] Kill switch active
+[2026-10-24T21:24:01.975717Z] Kill switch active
+[2026-10-24T21:26:01.983904Z] Kill switch active
+[2026-10-24T21:28:02.120555Z] Kill switch active
+[2026-10-24T21:30:02.012941Z] Kill switch active
+[2026-10-24T21:32:02.159444Z] Kill switch active
+[2026-10-24T21:34:02.020507Z] Kill switch active
+[2026-10-24T21:36:02.070451Z] Kill switch active
+[2026-10-24T21:38:02.191675Z] Kill switch active
+[2026-10-24T21:40:02.071341Z] Kill switch active
+[2026-10-24T21:42:02.227461Z] Kill switch active
+[2026-10-24T21:44:02.129219Z] Kill switch active
+[2026-10-24T21:46:02.256130Z] Kill switch active
+[2026-10-24T21:48:02.118394Z] Kill switch active
+[2026-10-24T21:50:02.152075Z] Kill switch active
+[2026-10-24T21:52:02.242169Z] Kill switch active
+[2026-10-24T21:54:02.174881Z] Kill switch active
+[2026-10-24T21:56:02.087288Z] Kill switch active
+[2026-10-24T21:58:02.034209Z] Kill switch active
+[2026-10-24T22:00:02.035315Z] Kill switch active
+[2026-10-24T22:02:02.113852Z] Kill switch active
+[2026-10-24T22:04:02.072003Z] Kill switch active
+[2026-10-24T22:06:02.051718Z] Kill switch active
+[2026-10-24T22:08:02.061811Z] Kill switch active
+[2026-10-24T22:10:02.079057Z] Kill switch active
+[2026-10-24T22:12:02.053676Z] Kill switch active
+[2026-10-24T22:14:02.073832Z] Kill switch active
+[2026-10-24T22:16:02.084662Z] Kill switch active
+[2026-10-24T22:18:02.077506Z] Kill switch active
+[2026-10-24T22:20:02.106893Z] Kill switch active
+[2026-10-24T22:22:02.122407Z] Kill switch active
+[2026-10-24T22:24:02.122174Z] Kill switch active
+[2026-10-24T22:26:02.123705Z] Kill switch active
+[2026-10-24T22:28:02.123329Z] Kill switch active
+[2026-10-24T22:30:02.103757Z] Kill switch active
+[2026-10-24T22:32:02.228719Z] Kill switch active
+[2026-10-24T22:34:02.157437Z] Kill switch active
+[2026-10-24T22:36:02.172172Z] Kill switch active
+[2026-10-24T22:38:02.154389Z] Kill switch active
+[2026-10-24T22:40:02.208493Z] Kill switch active
+[2026-10-24T22:42:02.187754Z] Kill switch active
+[2026-10-24T22:44:02.228704Z] Kill switch active

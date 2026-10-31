@@ -1,0 +1,62 @@
+{
+  "region": "uk",
+  "command": [
+    "node",
+    "scan.mjs",
+    "--dry-run",
+    "--quiet"
+  ],
+  "cwd": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "lane_env": {
+    "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\effective-portals\\uk-ips0symj.yml",
+    "CAREER_OPS_PROFILE": "config/profile.yml",
+    "CAREER_OPS_PIPELINE": "data/pipeline.md",
+    "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+  },
+  "effective_search_policy": {
+    "schema_version": 1,
+    "region": "uk",
+    "mode": "high_recall",
+    "include": [
+      "internships",
+      "placements",
+      "graduate roles",
+      "junior IT only with affirmative no-experience or internship/graduate-equivalent JD evidence"
+    ],
+    "exclude": [
+      "apprenticeships"
+    ],
+    "unverified_leads": "retain with explicit flags; never count as confirmed-open vacancies",
+    "owner_policy_path": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\mukund-chief-of-staff\\career-system\\policy.yaml",
+    "owner_scope": {
+      "confirmed_by": "direct user instruction, 2026-10-25",
+      "standard": [
+        "internships",
+        "placements",
+        "graduate roles"
+      ],
+      "junior_it": {
+        "require_jd_evidence": true,
+        "permitted_experience": [
+          "none",
+          "internship_or_graduate_equivalent"
+        ],
+        "unresolved": "review_only"
+      }
+    },
+    "owner_policy_sha256": "2bc3d4accd5caa854c23db6a7697bc94de35c01820884bdb4bc00b6fccb6040e",
+    "policy_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\search_policy.json",
+    "policy_sha256": "cf298d7b9faae073e150751711cdc3a1ad492f56ebfcbf6550db6c35ccd4e474",
+    "eligibility_source": "existing owner profile, regional policy and explicit vacancy evidence",
+    "legacy_policy_conflicts": []
+  },
+  "started_at": "2026-10-26T23:45:03+00:00",
+  "finished_at": "2026-10-26T23:46:41+00:00",
+  "duration_s": 98.6,
+  "exit_code": 0,
+  "dry_run": true,
+  "ok": true,
+  "stdout_capture_ok": true,
+  "stdout_tail": "- 2nd Shift | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Food Services Specialist - Restaurants | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RF/Microwave Engineer, Satellites (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | RAN Validation Engineer (Starlink Mobile) | Palo Alto, CA [Trust: 85/100 — company_domain_mismatch]\n  + Disney | Sr Machine Learning Engineer | New York, NY [Trust: 85/100 — company_domain_mismatch]\n  + Uber | Staff Machine Learning Engineer - Uber AI Solutions | San Francisco, CA [Trust: 85/100 — company_domain_mismatch]\n  + Geisinger | Physician Assistant Emergency Medicine | Reedsville, PA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Reliability Technician, Root Cause (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. Mechanical Design Engineer (Starship Components) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | GNC Engineer, Fleet Management (Starshield) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + Sunrun | Energy Sales Retail Associate | Palm Springs, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Build Engineer (Starship Mechanisms) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Yield Engineer, RF Final Test Integration (Starlink/Akoustis) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Middleware Administrator - Infrastructure Engineer II | Addison, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Materials Engineer, Polymers (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Industrial Controls Technician | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Information System Security Officer | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Design Verification Engineer (Silicon Engineering) | Austin, TX [Trust: 85/100 — company_domain_mismatch]\n  + Sunrun | Certified Field Performance Technician (Talent Pool, Future Evergreen) | Kīhei, HI [Trust: 85/100 — company_domain_mismatch]\n  + Securitas Inc. | Retail Shopping Center Security Officer | Rancho Cucamonga, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Test Engineer (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RF Engineer (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + Manpower Engineering | Field Service Engineer - MI/OH/IN/KY | Indianapolis, IN [Trust: 85/100 — company_domain_mismatch]\n  + GardaWorld Security Services U.S. | Armed  Security Officer - Hiring Immediately! | Brentwood, TN [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Reliability Engineer (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. IT Network Engineer | Brownsville, TX [Trust: 85/100 — company_domain_mismatch]\n  + Uber | Sr Staff Software Engineer | San Francisco, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Propulsion Technician (Raptor) - 2nd Shift | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + House of Sport | Retail Sales Associate (All Positions) - HIRING EVENT | Baton Rouge, LA [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Sr. Quantitative Finance Analyst | Chicago, IL [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sourcing Specialist, Construction (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RFIC Design Engineer (RFIC Engineering) | Irvine, CA [Trust: 85/100 — company_domain_mismatch]\n  + Akron Childrens Hospital | Regional Float Medical Assistant II ACHP - New Rates of Pay and $2,000 Sign on bonus available | Akron, OH [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+  "stderr_tail": ""
+}

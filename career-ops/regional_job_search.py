@@ -344,6 +344,10 @@ from experience_screening import experience_hits  # noqa: E402
 # eligibility — the single shared filter all four regions call
 # --------------------------------------------------------------------------- #
 
+from owner_rejection_policy import apply_owner_gate
+
+
+@apply_owner_gate
 def evaluate_record(region: str, record: dict, policy: dict, title_policy: dict,
                     scope: dict) -> dict:
     """Decide one candidate record. Never invents an owner fact."""
@@ -575,6 +579,7 @@ def build_record(region: str, candidate: dict, policy: dict, run_id: str, scan: 
     }
     from application_deadlines import extract_application_deadline, deadline_label
     info=candidate.get('deadline_info') or extract_application_deadline(candidate.get('jd_text') or '',candidate.get('url'))
+    rec['review_flags'] = candidate.get('review_flags', [])
     rec['availability']=candidate.get('vacancy_status') or {'state':'UNKNOWN','evidence':'availability not checked'}
     rec['deadline_info']=info
     rec['deadline']=deadline_label(info)

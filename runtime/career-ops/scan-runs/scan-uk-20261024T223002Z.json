@@ -1,0 +1,48 @@
+{
+  "region": "uk",
+  "command": [
+    "node",
+    "scan.mjs",
+    "--dry-run",
+    "--quiet"
+  ],
+  "cwd": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0",
+  "lane_env": {
+    "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\effective-portals\\uk-e_gauwbs.yml",
+    "CAREER_OPS_PROFILE": "config/profile.yml",
+    "CAREER_OPS_PIPELINE": "data/pipeline.md",
+    "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+  },
+  "effective_search_policy": {
+    "schema_version": 1,
+    "region": "uk",
+    "mode": "high_recall",
+    "include": [
+      "internships",
+      "placements",
+      "graduate",
+      "junior",
+      "trainee",
+      "entry-level cyber and IT-security"
+    ],
+    "exclude": [
+      "apprenticeships"
+    ],
+    "unverified_leads": "retain with explicit flags; never count as confirmed-open vacancies",
+    "policy_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\career-ops\\search_policy.json",
+    "policy_sha256": "5e518e9bb6d5d34da2015904892d76c036fc4b9b9f9476dc12909b40a009c1b3",
+    "eligibility_source": "existing owner profile, regional policy and explicit vacancy evidence",
+    "legacy_policy_conflicts": [
+      "Installed portal and older Chief-of-Staff policy say internship-only; current direct and unified production mode is high_recall. Scope confirmation remains recorded separately."
+    ]
+  },
+  "started_at": "2026-10-24T22:30:02+00:00",
+  "finished_at": "2026-10-24T22:31:34+00:00",
+  "duration_s": 91.1,
+  "exit_code": 0,
+  "dry_run": true,
+  "ok": true,
+  "stdout_capture_ok": true,
+  "stdout_tail": "agement (Starshield) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + Sunrun | Energy Sales Retail Associate | Palm Springs, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Build Engineer (Starship Mechanisms) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Yield Engineer, RF Final Test Integration (Starlink/Akoustis) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Middleware Administrator - Infrastructure Engineer II | Addison, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Materials Engineer, Polymers (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Industrial Controls Technician | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Risk Analysis Specialist II | Atlanta, GA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Information System Security Officer | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Design Verification Engineer (Silicon Engineering) | Austin, TX [Trust: 85/100 — company_domain_mismatch]\n  + Sunrun | Certified Field Performance Technician (Talent Pool, Future Evergreen) | Kīhei, HI [Trust: 85/100 — company_domain_mismatch]\n  + Securitas Inc. | Retail Shopping Center Security Officer | Rancho Cucamonga, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Test Engineer (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RF Engineer (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + Manpower Engineering | Field Service Engineer - MI/OH/IN/KY | Indianapolis, IN [Trust: 85/100 — company_domain_mismatch]\n  + GardaWorld Security Services U.S. | Armed  Security Officer - Hiring Immediately! | Brentwood, TN [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Reliability Engineer (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + Uber | Sr Staff Software Engineer | San Francisco, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Propulsion Technician (Raptor) - 2nd Shift | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + House of Sport | Retail Sales Associate (All Positions) - HIRING EVENT | Baton Rouge, LA [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Sr. Quantitative Finance Analyst | Chicago, IL [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sourcing Specialist, Construction (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RFIC Design Engineer (RFIC Engineering) | Irvine, CA [Trust: 85/100 — company_domain_mismatch]\n  + Akron Childrens Hospital | Regional Float Medical Assistant II ACHP - New Rates of Pay and $2,000 Sign on bonus available | Akron, OH [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Material Flow Technician (Starship) | Brownsville, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Mechanical Engineer | Waco, TX [Trust: 85/100 — company_domain_mismatch]\n  + Advanced Technology Services | Industrial Maintenance Technician | Greenwood, SC [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Process Operator Specialist | Brownsville, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Environmental Health & Safety Specialist (Falcon/Dragon) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Fabrication Technician - 2nd Shift | Waco, TX [Trust: 85/100 — company_domain_mismatch]\n  + General Dynamics Information Technology | Tableau Administrator/Data Visualization | Springfield, VA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Financial Analyst | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Supplier Development Engineer, Mechanical (Starlink Aviation) | Woodinville, WA [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+  "stderr_tail": ""
+}

@@ -986,6 +986,11 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
             link_cell.number_format=marker
             link_cell.comment=Comment('UNCONFIRMED — availability not confirmed. Check before applying.\n'+str(availability.get('evidence') or 'No positive open verification.'), 'Career Ops')
 
+        if record.get('review_flags'):
+            previous = link_cell.comment.text + '\n\n' if link_cell.comment else ''
+            link_cell.comment = Comment(previous + 'Review flags:\n' + '\n'.join(record['review_flags']), 'Career Ops')
+            link_cell.number_format = '"REVIEW — "@'
+
     # explicit refresh of non-owned columns on duplicate rows
     refresh_map = set(cfg.get("refreshable_columns", []))
     reversed_map = {}
@@ -1131,12 +1136,41 @@ def _write_records_unlocked(profile: dict, region: str, records: list[dict], *, 
     return result
 
 
+REVIEW_LEADS_ROOT = Path(__file__).resolve().parents[1] / 'runtime/career-ops/review-leads'
+
+
+def _owner_writer_result(result, region, records, *, persist_review=False):
+    from owner_rejection_policy import clearance_only
+    if not clearance_only(region): return result
+    review = []
+    for outcome in result.get('outcomes', []):
+        if outcome.get('decision') == 'rejected':
+            outcome['decision'] = 'review_only'
+            outcome['review_flags'] = [outcome.get('reason') or 'Record integrity needs review']
+            record = next((r for r in records if extract_url(r.get('url')) == outcome.get('url')
+                           and r.get('company') == outcome.get('company')
+                           and r.get('title') == outcome.get('title')), {})
+            review.append({**record, **outcome})
+    result['review_records'] = review
+    result.setdefault('counts', {})['review_only'] = len(review)
+    result['counts']['rejected'] = 0
+    if review and persist_review and not result.get('error'):
+        directory = REVIEW_LEADS_ROOT
+        directory.mkdir(parents=True, exist_ok=True)
+        import uuid
+        target = directory / (uuid.uuid4().hex + '.json')
+        target.write_text(json.dumps({'kind': 'record_integrity_review', 'records': review}, ensure_ascii=True), encoding='utf-8')
+        result['review_records_path'] = str(target)
+    return result
+
+
 def write_records(profile,region,records,**kwargs):
     """One shared fail-fast lock for mailbox and discovery writes."""
-    if not kwargs.get('apply',False):return _write_records_unlocked(profile,region,records,**kwargs)
+    records = list(records)
+    if not kwargs.get('apply',False):return _owner_writer_result(_write_records_unlocked(profile,region,records,**kwargs),region,records)
     import os
     cfg=region_config(profile,region);path=Path(kwargs.get('tracker_override') or cfg['tracker'])
     lock=path.with_suffix(path.suffix+'.career-mail.lock')
     fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY)
-    try:return _write_records_unlocked(profile,region,records,**kwargs)
+    try:return _owner_writer_result(_write_records_unlocked(profile,region,records,**kwargs),region,records,persist_review=True)
     finally:os.close(fd);lock.unlink()

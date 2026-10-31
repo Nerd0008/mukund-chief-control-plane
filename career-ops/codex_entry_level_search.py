@@ -199,7 +199,7 @@ PROMPT_TEMPLATE = (
 )
 
 #: A title is entry-level when it carries one of these markers. Deterministic and
-#: local — the model's own judgement is not trusted for the accept decision.
+#: local â€” the model's own judgement is not trusted for the accept decision.
 #: This is the fallback list; the live vocabulary comes from the owner profile
 #: (``owner_search_profile.entry_level_terms``) so a profile edit changes the
 #: search. Kept as the floor so a profile with no readable entry words still
@@ -210,17 +210,17 @@ ENTRY_MARKERS = (
     "0-1 year", "0 - 1 year", "no experience", "fresher", "associate",
     "scheme",
 )
-# Removed: "analyst", "engineer" — these matched mid-level roles like
+# Removed: "analyst", "engineer" â€” these matched mid-level roles like
 # "Security Analyst" and "Software Engineer" that are not internships.
 # A title must carry an explicit early-career signal; a job title that only
 # says "analyst" or "engineer" is not entry-level.
-#: Hard negatives — a title carrying one of these is never entry-level.
+#: Hard negatives â€” a title carrying one of these is never entry-level.
 SENIOR_MARKERS = (
     "senior", "lead ", "principal", "manager", "head of", "director",
     "vp ", "chief", "architect", "3+ year", "5+ year", "experienced",
 )
 
-#: Clearance/citizenship tokens — checked against the FULL JD text, not just
+#: Clearance/citizenship tokens â€” checked against the FULL JD text, not just
 #: the title. A job requiring SC/DV/CTC or British citizenship is not eligible
 #: for the owner (Indian citizen on UK Graduate visa). Phrases allow a hyphen
 #: or space so the owner's own hyphenated spelling matches an advert's spaced
@@ -239,7 +239,7 @@ def _profile_terms():
     """Live entry-level vocabulary from the owner profile; fallback on failure.
 
     Returns ``(entry_terms, clearance_terms, profile_sha256)``. A profile that
-    cannot be read is reported on stderr and the known-good fallback is used —
+    cannot be read is reported on stderr and the known-good fallback is used â€”
     the run continues, but the artifact records that it was not profile-driven.
     """
     try:
@@ -433,6 +433,7 @@ def writer_records(collected):
     return [{'company':job['company'],'title':job['title'],'location':job['location'],
              'url':job['url'],'date_found':datetime.now().date().isoformat(),
              'deadline':deadline_label(job['deadline_info']),'availability':job['availability'],
+             'review_flags':job.get('review_flags', []),
              'source':'Codex direct entry-level search'} for job in collected]
 
 
@@ -562,6 +563,8 @@ def main() -> int:
     existing_urls={posting_key(u) for u in existing_urls if posting_key(u)}
     seen = set()
     seen_identities = set()
+    from owner_rejection_policy import clearance_only, required_clearance_evidence
+    owner_leads = clearance_only(args.region)
     collected, rejected, decisions = [], [], []
     evidence_files = []
     counts={'retrieved_records':0,'already_tracked':0,'repeated_in_run':0,'invalid_records':0,'timeouts':0,'review_only':0,'incomplete_batches':0,'verification_budget_exhausted':0}
@@ -621,7 +624,8 @@ def main() -> int:
             key = posting_key(url)
             if not key or not title:
                 counts['invalid_records']+=1
-                decisions.append({'title':title,'reason':'invalid title or posting URL'})
+                decisions.append({'title':title,'url':url,'record':j,'decision':'review_only','reason':'incomplete record needs review'})
+                print('SEARCH_REVIEW_LEADS ' + json.dumps({'records': [{**j, 'title':title, 'url':url, 'review_flags':['Incomplete title or posting URL']}]}, ensure_ascii=True))
                 continue
             job_identities = identity_keys(j.get("company"), url)
             if key in existing_urls:
@@ -640,15 +644,16 @@ def main() -> int:
                 continue
             seen.add(key)
             seen_identities |= job_identities
-            if not is_entry_level(title, entry_terms):
+            review_flags = []
+            if not is_entry_level(title, entry_terms) and not owner_leads:
                 rejected.append((title, url, "not entry-level by title"))
                 continue
             role_ok, role_reason = role_decision(args.region, title)
-            if not role_ok:
+            if not role_ok and not owner_leads:
                 rejected.append((title, url, role_reason))
                 continue
             title_signals=tier_a_signals(title)
-            if title_signals['non_cyber'] and not title_signals['strong_cyber']:
+            if title_signals['non_cyber'] and not title_signals['strong_cyber'] and not owner_leads:
                 rejected.append((title,url,'non-cyber role title'))
                 continue
             # Fetch full JD and check clearance/citizenship + liveness
@@ -674,7 +679,7 @@ def main() -> int:
             evidence_files.append({"title": title, "url": url,
                                    "path": save_evidence(candidate, jd)})
             verified=record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
-            if jd.get("is_closed") or verified['state']=='CLOSED':
+            if (jd.get("is_closed") or verified['state']=='CLOSED') and not owner_leads:
                 rejected.append((title, url, "job page says position is closed/filled"))
                 continue
             deadline = jd.get("deadline")
@@ -682,7 +687,7 @@ def main() -> int:
                 import datetime as _dt
                 try:
                     dl = _dt.date.fromisoformat(deadline)
-                    if dl < _dt.date.today():
+                    if dl < _dt.date.today() and not owner_leads:
                         rejected.append((title, url, f"deadline passed ({deadline})"))
                         continue
                 except ValueError:
@@ -708,7 +713,8 @@ def main() -> int:
             seen_identities |= resolved_identities
             if url!=source_url:
                 record_verification({'company':j.get('company') or 'Unknown','title':title,'url':url},jd)
-            clearance = clearance_hits(jd_text)
+            clearance = ([e["context"] for e in required_clearance_evidence(jd_text)]
+                         if owner_leads else clearance_hits(jd_text))
             if clearance:
                 rejected.append((title, url, f"clearance/citizenship required: {', '.join(clearance)}"))
                 continue
@@ -716,16 +722,21 @@ def main() -> int:
             # Analyst" and "Cyber Security Analyst" pass the title gate whether
             # they want a graduate or five years on a service desk.
             experience = experience_hits(jd_text)
-            if experience:
+            if experience and not owner_leads:
                 rejected.append((title, url, f"prior experience required: {experience[0][:100]}"))
                 continue
             identity=verified.get("posting_identity") or jd.get('discovered_posting') or {}
             candidate.update({k:v for k,v in identity.items() if k in ('company','title','location','country','country_code') and v})
             signals=tier_a_signals(' '.join((candidate.get('title') or '',jd_text)))
-            if not signals['discipline_families']:
+            if not signals['discipline_families'] and not owner_leads:
                 rejected.append((title,url,'no supported cyber/IT discipline evidence'))
                 continue
-            candidate.update(jd_text=jd_text,vacancy_status=verified,jd_is_closed=jd.get('is_closed'),
+            if owner_leads:
+                if not is_entry_level(title, entry_terms): review_flags.append('Title needs early-career review')
+                if not role_ok: review_flags.append(role_reason)
+                if not signals['discipline_families']: review_flags.append('Cyber/IT discipline needs review')
+                candidate['review_flags'] = review_flags
+            candidate.update(jd_text=jd_text,jd_screening_required=True,vacancy_status=verified,jd_is_closed=jd.get('is_closed'),
                              deadline_info=jd.get('deadline_info'))
             gate=shared_pipeline.deterministic_gates(args.region,candidate,policy,scope)
             if gate['decision']!='accepted':
@@ -740,14 +751,15 @@ def main() -> int:
                 "url": url,
                 "source_url": source_url,
                 "availability": verified,
+                "review_flags": gate.get("review_flags", []),
                 "application_resolution": jd.get('application_resolution'),
                 "deadline": deadline or "",
                 "deadline_info": jd.get("deadline_info") or deadline_from_value(deadline),
             })
 
     collected.sort(key=deadline_priority)
-    print(f"\n=== {len(collected)} eligible discoveries BEFORE canonical reconciliation, "
-          f"{len(rejected)} rejected by eligibility/liveness/title checks ===")
+    print(f"\n=== {len(collected)} retained leads BEFORE canonical reconciliation, "
+          f"{len(rejected)} rejected by the configured owner rule ===")
     for c in collected:
         print(f"  + {c['company']} | {c['title']} | {c['location']} | Deadline: {deadline_label(c['deadline_info'])}")
     for t, _u, why in rejected[:10]:
@@ -764,15 +776,22 @@ def main() -> int:
         if not args.dry_run:retain_candidates(args.region,collected,'canonical reconciliation failed')
         print('CANONICAL_RECONCILIATION_BLOCKED '+str(probe['error']),file=sys.stderr)
         return 2
+    if probe.get('review_records'):
+        print('SEARCH_REVIEW_LEADS ' + json.dumps({'records': probe['review_records']}, ensure_ascii=True))
+        if not args.dry_run:
+            held_urls = {r.get('url') for r in probe['review_records']}
+            retain_candidates(args.region, [r for r in collected if r.get('url') in held_urls], 'record integrity review; not an eligibility rejection')
     canonical_counts=probe.get('counts') or {}
     duplicates=canonical_counts.get('duplicates',0)
     counts['already_tracked']+=duplicates
     counts['canonical_duplicates']=duplicates
     counts['review_only']=sum(job['availability']['state']!='OPEN' for job in collected)
-    counts['eligible_candidates_before_canonical_dedupe']=len(collected)
+    counts['eligible_candidates_before_canonical_dedupe']=len(collected)  # legacy transport key: leads, not verified eligibility
+    counts['retained_leads_before_canonical_dedupe']=len(collected)
+    counts['flagged_leads']=sum(bool(job.get('review_flags')) for job in collected)
     counts.update({'new_candidates':canonical_counts.get('appended',0),'rejected':len(rejected),'distinct_query_batches':batch_count})
     decisions.extend({'title':t,'url':u,'reason':why} for t,u,why in rejected)
-    decisions.extend({'title':j['title'],'url':j['url'],'source_url':j['source_url'],'application_resolution':j['application_resolution'],'reason':'eligible discovery; see canonical outcome','deadline_info':j['deadline_info']} for j in collected)
+    decisions.extend({'title':j['title'],'url':j['url'],'source_url':j['source_url'],'application_resolution':j['application_resolution'],'reason':'retained lead; see canonical outcome','review_flags':j.get('review_flags', []),'deadline_info':j['deadline_info']} for j in collected)
     print('SEARCH_RECONCILIATION '+json.dumps({'counts':counts,'decisions':decisions,'query_batches':[batches[i] for i in selected_batches],'profile_sha256':profile_sha,'selected_batch_indices':selected_batches,'execution_evidence':execution_evidence,'canonical_outcomes':probe.get('outcomes',[]),'candidate_evidence':evidence_files},ensure_ascii=True))
     print(f"Canonical plan: {counts['new_candidates']} proposed NEW rows; {duplicates} duplicate rows avoided.")
     def advance():
@@ -801,7 +820,7 @@ def main() -> int:
         return 2
     if not counts['new_candidates']:
         if counts['timeouts']:return 2
-        pending_path.unlink(missing_ok=True)
+        if not probe.get('review_records'): pending_path.unlink(missing_ok=True)
         advance()
         print("\nNo new roles; tracker unchanged.")
         return 0
@@ -844,7 +863,7 @@ def main() -> int:
     if counts["timeouts"]:
         print("SEARCH_PARTIAL: one or more batches timed out",file=sys.stderr)
         return 2
-    pending_path.unlink(missing_ok=True)
+    if not probe.get('review_records') and not result.get('review_records'): pending_path.unlink(missing_ok=True)
     advance()
     print(f"Guarded writer appended {count} rows; duplicates: {(result.get('counts') or {}).get('duplicates',0)}")
     return 0

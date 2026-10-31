@@ -577,12 +577,13 @@ def test_pipeline_source_declares_its_own_funnel_counters(tmp_path):
 # fail-closed behaviour
 # --------------------------------------------------------------------------- #
 
-def test_unverified_results_become_unverified_leads_while_dead_links_are_refused(tmp_path):
+def test_unverified_results_become_unverified_leads_while_dead_links_are_refused(tmp_path,monkeypatch):
     """Owner instruction 2026-10-22: still add if not verified open.
 
     An unverified destination is an accepted lead (flagged). A destination that FAILED
     validation (dead link) is a negative result and is still refused.
     """
+    monkeypatch.setattr(pipeline,'fetch_jd',lambda *a,**k:{'text':'Graduate cyber security role in London. No prior work experience required.', 'fetch_state':'fetched', 'vacancy_status':{'state':'UNKNOWN','evidence':'eligibility JD fixture; availability unconfirmed'}})
     # This is a transport/availability test. Supply affirmative scope evidence
     # independently, so an unknown junior JD cannot mask the transport result.
     export = json.loads(UNVERIFIED_EXPORT.read_text(encoding="utf-8"))

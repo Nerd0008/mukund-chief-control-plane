@@ -25,8 +25,8 @@ def interpret(text, *, now=None):
     edits = re.sub(r"\b(?:do not|don't|don’t)\s+(?:change|rewrite|edit|revise)\b",'',text,flags=re.I)
     if re.search(r'\b(?:rewrite|revise|change|edit|fix)\b',edits,re.I):
         return result
-    polite = r'(?:(?:please|yes|yeah|yep|okay|ok|perfect|great)[,!\.\s]+)*'
-    start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|tuesday|wednesday|thursday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
+    polite = r'(?:(?:please|yes|yeah|yep|okay|ok|perfect|great)[,!\\.\\s]+)*'
+    start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|missed|tuesday|wednesday|thursday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
     affirmative = bool(re.match('(?i)^'+polite+start,text))
     affirmative |= bool(re.fullmatch(r'(?i)(?:yes|yeah|yep|okay|ok|perfect|looks good|go ahead)[!. ]*',text))
     affirmative |= bool(re.search(r'\bI\s+approve\s+(?:this|the|it|that)\b',text))
@@ -38,7 +38,7 @@ def interpret(text, *, now=None):
         return result
     result['approved'] = affirmative
     result['skip_image'] = bool(re.search(r'\b(?:skip|omit|without|no)\s+(?:the\s+|an?\s+)?images?\b|\b(?:do not|don.t)\s+(?:generate|include|use|add)\s+(?:an?\s+|the\s+)?images?\b',text,re.I))
-    result['override'] = bool(re.search(r'\b(?:despite|anyway|override)\b',text,re.I))
+    result['override'] = bool(re.search(r'\b(?:despite|anyway|override|publish\s+(?:the\s+)?missed|publish\s+right\s+now|publish\s+now)\b',text,re.I))
     now = (now or datetime.now(LONDON)).astimezone(LONDON)
     target = None
     if re.search(r'\btomorrow\b',text,re.I):

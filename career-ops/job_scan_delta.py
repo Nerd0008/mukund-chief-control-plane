@@ -236,8 +236,19 @@ def current_run_roles(stdout: str, *, dry_run: bool = False) -> list[dict]:
                 detail = delivery.get(posting_key(row["url"]), {})
                 roles.append(dict(row, status="Not Applied",
                     availability=detail.get("availability", {"state": "UNKNOWN"}),
+                    review_flags=detail.get("review_flags", []),
                     deadline=detail.get("deadline", "")))
     return roles
+
+
+def current_review_roles(stdout):
+    """Retained incomplete records have their own receipt, separate from new rows."""
+    records = {}
+    for doc in tagged_records(stdout, 'SEARCH_REVIEW_LEADS'):
+        for row in doc.get('records', []):
+            key = posting_key(row.get('url')) or ct_key(row.get('company', ''), row.get('title') or row.get('job_title') or '')
+            if key: records['review:' + key] = row
+    return records
 
 
 def run_searches(offset: int, timeout: int, *, dry_run: bool = False,
@@ -371,8 +382,12 @@ def build_digest(items: list[dict], when: dt.datetime) -> str:
                      else f"{i}. {it['title']}")
         lines.append(f"   {it['url']}")
         availability = it.get("availability") or {}
-        if availability.get("state") != "OPEN":
+        if availability.get('state') == 'CLOSED':
+            lines.append('   Availability: CLOSED — retained for review')
+        elif availability.get("state") != "OPEN":
             lines.append("   Availability: UNVERIFIED — lead, not a confirmed-open vacancy")
+        if it.get('review_flags'):
+            lines.append('   Review: ' + '; '.join(it['review_flags']))
         if it.get("deadline"):
             lines.append(f"   Deadline: {it['deadline']}")
         lines.append("")
@@ -492,6 +507,16 @@ def main() -> int:
     if baseline:
         print(f"Job scan baseline established: {len(baseline_rows)} existing role(s) recorded as "
               f"already seen. Only roles found from now on will be reported.")
+
+    review = {key: row for key, row in current_review_roles(out).items() if key not in seen}
+    if review:
+        print(f'{len(review)} lead(s) retained for review; not rejected and not added as verified vacancies:')
+        for key, row in review.items():
+            print(f"- {row.get('company') or 'Employer unknown'} — {row.get('title') or row.get('job_title') or 'Title unknown'}")
+            if row.get('url'): print(row['url'])
+            print('  Review: ' + '; '.join(row.get('review_flags') or ['Record details need checking']))
+            if not args.dry_run: seen[key] = now.isoformat()
+        if not args.dry_run: save_ledger(LEDGER, seen)
 
     if not new:
         if not ok:

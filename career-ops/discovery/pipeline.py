@@ -861,6 +861,10 @@ def prefilter(candidates: list, *, mode: str, funnel: Funnel) -> dict:
 # stage 5 — deterministic eligibility gates (authoritative)
 # --------------------------------------------------------------------------- #
 
+from owner_rejection_policy import apply_owner_gate
+
+
+@apply_owner_gate
 def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> dict:
     """Region/location, work authorisation, clearance, experience and URL validity.
 
@@ -956,6 +960,9 @@ def deterministic_gates(region: str, rec: dict, policy: dict, scope: dict) -> di
         reasons.append(scope_reason)
     else:
         flags.append(scope_reason)
+    from clearance_screening import is_readable
+    if rec.get('jd_screening_required') and not is_readable(rec.get('jd_text')):
+        reasons.append('eligibility UNSCREENED: readable job description unavailable; unconfirmed availability does not waive clearance/experience screening')
     clearance = rjs.clearance_hits(blob)
     if clearance:
         reasons.append(f"clearance/citizenship requirement stated: {', '.join(clearance)}")
@@ -1192,7 +1199,18 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     funnel.set('historical_seed_records',sum(bool(c.get('historical_seed')) for c in candidates))
     funnel.set('current_source_records',sum(not c.get('historical_seed') for c in candidates))
     # 1. prefilter --------------------------------------------------------- #
-    pre = prefilter(candidates, mode=mode, funnel=funnel)
+    from owner_rejection_policy import clearance_only
+    owner_leads = clearance_only(region)
+    pre = prefilter(candidates, mode=mode, funnel=Funnel() if owner_leads else funnel)
+    if owner_leads:
+        for rec, decision in zip(candidates, pre['decisions']):
+            if decision['decision'] != 'pass':
+                rec.setdefault('review_flags', []).append('Title review: ' + decision['reason'])
+                decision['diagnostic_decision'] = decision['decision']
+                decision['decision'] = 'pass'
+            funnel.source_stages(rec.get('sources'), 'after_hard_negative_prefilter')
+        funnel.set('after_hard_negative_prefilter', len(candidates))
+        pre['counts'].update(kept=len(candidates), removed=0)
     kept = [c for c, d in zip(candidates, pre["decisions"]) if d["decision"] == "pass"]
 
     # 2. semantic ----------------------------------------------------------- #
@@ -1206,7 +1224,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     for rec in kept:
         funnel.source_stages(rec.get("sources"), "semantically_reviewed")
     for cls in classifications.values():
-        if not cls.get("valid"):
+        if not cls.get("valid") and not owner_leads:
             funnel.reject("semantic_contract_guard_rejected: "
                           + "; ".join(cls.get("guard", {}).get("violations", [])[:2]))
     if semantic_doc.get("requested") == "off":
@@ -1272,6 +1290,13 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
     for rec in accepted:
         funnel.source_stages(rec.get("sources"), "semantic_accept")
 
+    if owner_leads:
+        for rec in kept:
+            cls = classifications.get(candidate_id(rec), {})
+            if not cls.get('accepted') and semantic_doc.get('requested') != 'off':
+                rec.setdefault('review_flags', []).append('Classification needs review: ' + str(cls.get('primary_label') or 'unclassified'))
+        accepted = list(kept)
+
     # 3.5 JD fetch for clearance/eligibility checks ------------------------ #
     jd_attempts=0
     rate_limited_hosts=set()
@@ -1306,6 +1331,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
             rec['discovered_posting'] = jd_result['discovered_posting']
         rec['jd_validation_source']=jd_result.get('validation_source')
         rec["jd_text"] = jd_result.get("text") or ""
+        rec["jd_screening_required"] = True
         rec["jd_fetch_state"] = jd_result.get("fetch_state", "fetch_failed")
         from application_deadlines import extract_application_deadline, deadline_priority
         rec["deadline_info"] = jd_result.get("deadline_info") or extract_application_deadline(rec["jd_text"],url)
@@ -1328,7 +1354,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
 
     # 4. deterministic gates ------------------------------------------------ #
     scope = rjs.lane_scope(region, schedules["regions"][region])
-    if semantic_doc.get("requested") != "off":
+    if semantic_doc.get("requested") != "off" and not owner_leads:
         for rec in kept:
             cls = classifications.get(candidate_id(rec)) or {}
             if not cls.get("accepted"):
@@ -1389,6 +1415,7 @@ def run_funnel(candidates: list, *, region: str, mode: str, semantic: str,
         rec = next((c for c in accepted if candidate_id(c) == entry["candidate_id"]), None)
         if rec is None:
             continue
+        rec['review_flags'] = entry.get('review_flags', [])
         records.append(rjs.build_record(region, rec, policy, run_id, {"stage": "discovery"}))
     probe = tw.write_records(profiles, region, records, apply=False,cleanup_existing=False) if records else (
         {"tracker": str(tw.region_config(profiles, region)["tracker"]), "counts": {},

@@ -60,6 +60,12 @@ def private_codex_admission(tmp_path,monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def private_record_review_queue(tmp_path, monkeypatch):
+    import tracker_writer
+    monkeypatch.setattr(tracker_writer, 'REVIEW_LEADS_ROOT', tmp_path/'review-leads')
+
+
+@pytest.fixture(autouse=True)
 def private_application_package_receipts(tmp_path, monkeypatch):
     import application_package_state
     monkeypatch.setattr(application_package_state, 'ROOT', tmp_path/'application-packages')

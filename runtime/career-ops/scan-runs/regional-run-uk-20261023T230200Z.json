@@ -1,0 +1,326 @@
+{
+  "run_id": "uk-20261023T230200Z",
+  "region": "uk",
+  "display_name": "United Kingdom",
+  "started_at": "2026-10-23T23:02:00+00:00",
+  "dry_run": true,
+  "applications_submitted": 0,
+  "employer_contacts": 0,
+  "canonical_workbook_written": false,
+  "lane_kind": "career-ops-install-lane",
+  "lane_ready": true,
+  "lane_missing": [],
+  "scheduled": true,
+  "scan": {
+    "ok": true,
+    "refused": false,
+    "exit_code": 0,
+    "duration_s": 88.7,
+    "dry_run": true,
+    "stdout_capture_ok": true,
+    "command": [
+      "node",
+      "scan.mjs",
+      "--dry-run",
+      "--quiet"
+    ],
+    "lane_env": {
+      "CAREER_OPS_PORTALS": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\effective-portals\\uk-fd_iesuh.yml",
+      "CAREER_OPS_PROFILE": "config/profile.yml",
+      "CAREER_OPS_PIPELINE": "data/pipeline.md",
+      "CAREER_OPS_SCAN_HISTORY": "data/scan-history.tsv"
+    },
+    "recorded_to": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\scan-uk-20261023T230200Z.json",
+    "warning": null,
+    "counters": {
+      "jobs_found": null,
+      "filtered_title": null,
+      "filtered_location": null,
+      "filtered_age": null,
+      "duplicates": null,
+      "new_offers_added": null,
+      "errors": null
+    },
+    "stdout_tail": " | Brentwood, TN [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Hardware Reliability Engineer (Starlink) | Redmond, WA [Trust: 85/100 — company_domain_mismatch]\n  + Uber | Sr Staff Software Engineer | San Francisco, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Propulsion Technician (Raptor) - 2nd Shift | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + House of Sport | Retail Sales Associate (All Positions) - HIRING EVENT | Baton Rouge, LA [Trust: 85/100 — company_domain_mismatch]\n  + Bank of America | Sr. Quantitative Finance Analyst | Chicago, IL [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sourcing Specialist, Construction (Starlink) | Lockhart, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Sr. RFIC Design Engineer (RFIC Engineering) | Irvine, CA [Trust: 85/100 — company_domain_mismatch]\n  + Akron Childrens Hospital | Regional Float Medical Assistant II ACHP - New Rates of Pay and $2,000 Sign on bonus available | Akron, OH [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Material Flow Technician (Starship) | Brownsville, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Mechanical Engineer | Waco, TX [Trust: 85/100 — company_domain_mismatch]\n  + Advanced Technology Services | Industrial Maintenance Technician | Greenwood, SC [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Process Operator Specialist | Brownsville, TX [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Environmental Health & Safety Specialist (Falcon/Dragon) | El Segundo, CA [Trust: 85/100 — company_domain_mismatch]\n  + SpaceX | Fabrication Technician - 2nd Shift | Waco, TX [Trust: 85/100 — company_domain_mismatch]\n  + General Dynamics Information Technology | Tableau Administrator/Data Visualization | Springfield, VA [Trust: 85/100 — company_domain_mismatch]\n\n(dry run — run without --dry-run to save results)\n\n→ Run /career-ops pipeline to evaluate new offers.\n→ Share results and get help: https://discord.gg/8pRpHETxa4\n",
+    "stderr_tail": ""
+  },
+  "candidates": {
+    "scan_offers_without_url": 0,
+    "url_bearing_candidates": 93,
+    "source": "C:\\Users\\mukun\\Documents\\ChatGPT\\CV customizer\\career-ops-career-ops-v1.29.0\\data\\pipeline.md",
+    "note": "scan offers carry no posting URL, so they are reported for URL resolution and can never become tracker rows on their own; only URL-bearing candidates can be accepted"
+  },
+  "idempotency": {
+    "run_key": "2314bab223a4187b58ef85b6b781e3f9",
+    "previous_run_key": "ec0be05a0e31d86e3a4803a8246c4a17",
+    "replay_of_previous_run": false,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json",
+    "note": "a replayed run marks every accepted candidate duplicate-prior-run; the shared tracker dedupe independently refuses anything already in the workbook or a cross-month ledger"
+  },
+  "eligibility": {
+    "input": 93,
+    "accepted": 37,
+    "accepted_before_idempotency": 37,
+    "rejected": 56,
+    "duplicate_prior_run": 0,
+    "rejected_sample": [
+      {
+        "company": "T-Tech",
+        "title": "IT Field Engineer",
+        "reasons": [
+          "no cyber/IT-security/technology-risk discipline signal in the title (the generic word 'security' alone is not sufficient)"
+        ]
+      },
+      {
+        "company": "Johnson Controls / ADT",
+        "title": "Technical Support Advisor",
+        "reasons": [
+          "no early-career level signal (graduate/junior/analyst/L1/...) in the title"
+        ]
+      },
+      {
+        "company": "Ada",
+        "title": "Technical Support Advisor",
+        "reasons": [
+          "no early-career level signal (graduate/junior/analyst/L1/...) in the title"
+        ]
+      },
+      {
+        "company": "capitalone",
+        "title": "Technology Graduate",
+        "reasons": [
+          "no cyber/IT-security/technology-risk discipline signal in the title (the generic word 'security' alone is not sufficient)",
+          "location country unresolved for '2 Locations'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "capita",
+        "title": "Level 3 SOC Analyst",
+        "reasons": [
+          "location country unresolved for 'Belfast'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "bnh",
+        "title": "Associate Cybersecurity Analyst (COMSEC)",
+        "reasons": [
+          "location country unresolved for 'posted: 2026-08-27'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "cambridgemobiletelematics",
+        "title": "IT Security Engineer",
+        "reasons": [
+          "location country unresolved for 'Cambridge, MA'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "altapointe",
+        "title": "Hospital Unit Support Specialist, AM (BayPointe)",
+        "reasons": [
+          "location country unresolved for 'posted: 2026-08-19'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "altapointe",
+        "title": "Hospital Unit Support Specialist, AM (EastPointe)",
+        "reasons": [
+          "location country unresolved for 'posted: 2026-08-19'; explicit country evidence required"
+        ]
+      },
+      {
+        "company": "amtrustgroup",
+        "title": "Security Engineer II",
+        "reasons": [
+          "location country unresolved for 'posted: 2026-08-18'; explicit country evidence required"
+        ]
+      }
+    ]
+  },
+  "dedupe": {
+    "engine": "career-ops/tracker_writer.py (shared with the UK lane)",
+    "tracker": "C:\\Users\\mukun\\Downloads\\codex\\uk-cyber-job-tracker.xlsx",
+    "counts": {
+      "input": 37,
+      "appended": 0,
+      "duplicates": 37,
+      "rejected": 0,
+      "refreshed": 0,
+      "passed_deleted": 0,
+      "listing_deleted": 1
+    },
+    "cross_month_index": {
+      "sources": {
+        "uk-cyber-job-tracker.backup.xlsx": 199,
+        "uk-cyber-job-tracker.backup4.xlsx": 14,
+        "uk-cyber-job-tracker.pre-amey-qinetiq-lhv-20261017-233746.xlsx": 40,
+        "uk-cyber-job-tracker.pre-colfix.bak.xlsx": 1,
+        "uk-cyber-job-tracker.xlsx": 48,
+        "ledger:data/scan-history.tsv": 146
+      },
+      "keys": 422
+    },
+    "outcomes": [
+      {
+        "company": "Crown Agents Bank",
+        "title": "Information Security Analyst",
+        "url": "https://jobs.smartrecruiters.com/CrownAgentsBank/744000126513120-information-security-analyst",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "One Big Circle",
+        "title": "IT & Security Analyst",
+        "url": "https://onebigcircle.co.uk/careers/it-security-analyst/",
+        "decision": "duplicate",
+        "reason": "already present in canonical workbook",
+        "existing_row": 3
+      },
+      {
+        "company": "Alpha FMC",
+        "title": "Junior IT Support Engineer",
+        "url": "https://job-boards.greenhouse.io/alphafmc/jobs/7859436002",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "City IT / CEF",
+        "title": "IT Service Desk Analyst",
+        "url": "https://jobs.lever.co/cef/89fc740a-5a57-479a-ae47-80c38e5948a7",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Scottish Government",
+        "title": "IT Service Desk Analyst (4456)",
+        "url": "https://www.jobsgopublic.com/job/it-service-desk-analyst-4456-80991",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "The Pensions Regulator",
+        "title": "Service Desk Analyst",
+        "url": "https://www.jobsgopublic.com/jobs/it-support?jobId=74109",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Vp plc",
+        "title": "IT Service Desk Analyst (1st Line)",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a72ec728426b08f481f1c06",
+        "decision": "duplicate",
+        "reason": "same company+title already present (posting URL may have moved)",
+        "existing_row": 121
+      },
+      {
+        "company": "Mid Yorkshire Teaching NHS Trust",
+        "title": "Service Desk Analyst",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a850091de4d32c2a34366fa",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Silver Birch Care",
+        "title": "IT Support Specialist",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a8cdc95b9c9ec725f5bfe06",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Sherwood Forest Hospitals NHS Foundation Trust",
+        "title": "Service Desk Technician",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a7e0a240e0eda050e23c011",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Attio",
+        "title": "Technical Support Specialist",
+        "url": "https://jobs.ashbyhq.com/attio/a64c85fa-fcf4-4796-9f38-87505290380c",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "GoCardless",
+        "title": "Security Operations Analyst",
+        "url": "https://job-boards.greenhouse.io/gocardless/jobs/8066856?gh_src=885sh6b71us",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "Undisclosed global ship owner via Additional Resources",
+        "title": "Junior IT Support Engineer / IT Support Technician",
+        "url": "https://www.jobs.service.gov.uk/jobs/6a76230e13170e423c0ee89c",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "cisecurity",
+        "title": "Associate Information Security Auditor - Remote",
+        "url": "https://cisecurity.wd1.myworkdayjobs.com/cis_external_career_site/job/Remote/Associate-Information-Security-Auditor---Remote_JR100224",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "immersivelabs",
+        "title": "Cyber Security Engineer - Red Team - Remote within UK",
+        "url": "https://jobs.ashbyhq.com/immersivelabs/1c279ea7-d98b-402d-9853-c195739a7e64",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "blackrock",
+        "title": "Identity Security Engineer - SailPoint, Associate",
+        "url": "https://blackrock.wd1.myworkdayjobs.com/blackrock_professional/job/Edinburgh-Scotland/Identity-Security-Engineer---SailPoint--Associate_R265072",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "bakerhughes",
+        "title": "Technical Support Engineer Stimulation",
+        "url": "https://bakerhughes.wd5.myworkdayjobs.com/bakerhughes/job/GB-Scotland-Portlethen-Sites-2-3--4-Badentoy-Crescent-Badentoy-Industrial-Estate/Technical-Support-Engineer-Stimulation_R168381",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "carrier",
+        "title": "Technical Support Specialist",
+        "url": "https://carrier.wd5.myworkdayjobs.com/jobs/job/TCUK-Plymouth-Porsham-Close-Belliver-Industrial-Estate-Plymouth-Devon-PL6-7DB-UK/Technical-Support-Specialist_30213558",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "aveva",
+        "title": "IT GRC SOX Specialist - Regulatory Frameworks",
+        "url": "https://aveva.wd3.myworkdayjobs.com/aveva_careers/job/Cambridge-United-Kingdom/IT-GRC-SOX-Specialist---Regulatory-Frameworks_R015052",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      },
+      {
+        "company": "NTT DATA",
+        "title": "SOC Level 2 Security Analyst",
+        "url": "https://www.welcometothejungle.com/en/companies/ntt-ltd/jobs/soc-level-2-security-analyst_birmingham",
+        "decision": "duplicate-cross-month",
+        "reason": "present in archived workbook or region shortlist ledger"
+      }
+    ],
+    "applied": false
+  },
+  "would_append": 0,
+  "manifest_written_to": null,
+  "finished_at": "2026-10-23T23:03:30+00:00",
+  "work_authorisation": {
+    "status": "authorised",
+    "basis": "config/profile.yml#location.visa_status — UK Graduate-visa work authorisation through 23 Dec 2027",
+    "current_permission": true,
+    "sponsorship_now": "not required",
+    "tracker_visa_pathway": null
+  },
+  "status": "ok",
+  "writes": {
+    "canonical_workbook": false,
+    "tracker_dry_run_only": true,
+    "run_health_files": true,
+    "state_file": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\career-ops\\scan-runs\\regional-run-state.json"
+  }
+}

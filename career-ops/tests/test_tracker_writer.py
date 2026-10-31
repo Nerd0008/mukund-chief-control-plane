@@ -460,7 +460,10 @@ def test_new_listing_page_record_is_rejected(tmp_path):
     rec = make_record(url="https://uk.indeed.com/Cyber-Security-Internship-jobs")
     res = tw.write_records(PROFILES, "uk", [rec], apply=True,
                            tracker_override=str(copy), backup_dir=str(tmp_path))
-    assert res["counts"]["rejected"] == 1
+    assert res["counts"]["rejected"] == 0
+    assert res['counts']['review_only'] == 1
+    assert res['outcomes'][0]['decision'] == 'review_only'
+    assert Path(res['review_records_path']).exists()
     assert res["counts"]["appended"] == 0
     assert "search/category page" in res["outcomes"][0]["reason"]
 

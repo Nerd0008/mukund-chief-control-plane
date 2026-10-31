@@ -16,6 +16,8 @@ Returns a dict with:
 from __future__ import annotations
 
 import re
+import ssl
+from functools import lru_cache
 import json,time
 from job_liveness import assess, closure_evidence
 from application_deadlines import extract_application_deadline
@@ -96,6 +98,26 @@ def _html_to_text(html: str) -> str:
     return html.strip()
 
 
+@lru_cache(maxsize=1)
+def _additional_public_ca_context():
+    # Preserve Windows/system trust and add the installed Mozilla CA roots.
+    # Never suppress hostname verification or accept an untrusted certificate.
+    import certifi
+    context=ssl.create_default_context()
+    context.load_verify_locations(cafile=certifi.where())
+    return context
+
+
+def _verified_open(request,timeout):
+    started=time.monotonic()
+    try:return urllib.request.urlopen(request,timeout=timeout)
+    except urllib.error.URLError as exc:
+        if not isinstance(exc.reason,ssl.SSLCertVerificationError):raise
+        remaining=timeout-(time.monotonic()-started)
+        if remaining<=0:raise
+        return urllib.request.urlopen(request,timeout=remaining,context=_additional_public_ca_context())
+
+
 def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
     """Fetch a job posting URL and return extracted text.
 
@@ -141,7 +163,7 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=request_timeout) as resp:
+        with _verified_open(req, timeout=request_timeout) as resp:
             result["status"] = resp.status
             final_url=resp.geturl() if callable(getattr(resp,'geturl',None)) else url
             result['final_url']=final_url
@@ -206,7 +228,7 @@ def fetch_jd(url: str, timeout=None, *, _depth=0, _seen=None) -> dict:
             if frame and urlparse(frame).hostname==urlparse(source).hostname:
                 try:
                     request=urllib.request.Request(frame,headers={'User-Agent':USER_AGENT})
-                    with urllib.request.urlopen(request,timeout=remaining()) as response:
+                    with _verified_open(request,timeout=remaining()) as response:
                         fragment=response.read(MAX_BYTES).decode('utf-8','replace')
                     if fragment_route(page,fragment,source,frame):
                         result['vacancy_status']={'state':'OPEN','page_title':page['title'],
@@ -305,7 +327,7 @@ def _active_ats_record(url,timeout):
     if not endpoint:return None
     try:
         req=urllib.request.Request(endpoint,headers={'Accept':'application/json','User-Agent':USER_AGENT})
-        with urllib.request.urlopen(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
+        with _verified_open(req,timeout=timeout) as response:data=json.loads(response.read(MAX_BYTES).decode('utf-8'))
         if not isinstance(data,dict):return None
         if vendor in ('Ashby','Workable'):
             # Documented unauthenticated GET feeds of published jobs. Never infer

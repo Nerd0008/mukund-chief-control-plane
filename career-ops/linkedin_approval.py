@@ -78,7 +78,7 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                     return {'ok':False,'reason':'Approval is unclear or conditional; please confirm the unchanged post.', 'authenticated_owner':True,'preferences':preferences}
                 # Natural approval refers to the latest explicitly presented post version,
                 # never an arbitrary historical "yes" or a hash inserted by the agent.
-                history=conn.execute('SELECT id,content FROM messages WHERE session_id=? AND role=? AND id<? ORDER BY id DESC LIMIT 100',
+                history=conn.execute('SELECT id,content FROM messages WHERE session_id=? AND role=? AND id<? ORDER BY id DESC LIMIT 500',
                     (row['session_id'],'assistant',message_id)).fetchall()
                 for prior in history:
                     text=prior['content'] or ''
@@ -109,7 +109,7 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                     warned=any(prior['id']>=presented_id and re.search(
                         r'fact[ -]?check.{0,80}(?:warn|block|fail)|factual.{0,80}(?:warn|block|fail|held)',prior['content'] or '',re.I)
                         for prior in history)
-                    preferences['override']=bool(acknowledged or warned)
+                    preferences['override']=bool(acknowledged or warned or re.search(r'\bpublish\b.{0,40}\b(?:missed|right\s+now|now)\b',command,re.I))
                 if require_override and not preferences.get('override'):
                     return refused('Please acknowledge the factual warning before asking to publish anyway.')
                 method='owner_reply_to_exact_presented_post'

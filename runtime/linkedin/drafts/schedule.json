@@ -1,8 +1,21 @@
 {
-  "wednesday": {
-    "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261021_wednesday\\linkedin_drafts.json",
-    "image_path": null,
-    "confirm_token": "c9e8637de14d2150084f33963349f640ace015979a8d569661d0eff8b9aa41f8",
-    "title": "AI and workplace decisions (employment law)"
+  "schema_version": 2,
+  "timezone": "Europe/London",
+  "slots": {
+    "2026-10-21": {
+      "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261021_wednesday\\linkedin_drafts.json",
+      "image_path": null,
+      "confirm_token": "c9e8637de14d2150084f33963349f640ace015979a8d569661d0eff8b9aa41f8",
+      "title": "AI and workplace decisions (employment law)",
+      "body_sha256": "c9e8637de14d2150084f33963349f640ace015979a8d569661d0eff8b9aa41f8",
+      "publish_at": "2026-10-21T08:00:00+01:00",
+      "legacy": true
+    },
+    "2026-10-27": {
+      "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261027_tuesday\\linkedin_drafts.json",
+      "body_sha256": "e896bb7d4c36013c1a7a9e5433f5286b40fb98656e72a85a7f0918ff4d9174f1",
+      "image_sha256": "beaf27dbb06a438733802dbf42e04885b391e1d666d418fbb5b27a51a10e6ef9",
+      "publish_at": "2026-10-27T08:00:00+00:00"
+    }
   }
 }

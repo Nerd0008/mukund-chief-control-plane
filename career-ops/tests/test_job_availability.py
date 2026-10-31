@@ -128,7 +128,8 @@ def test_expired_response_rejected_by_actual_search_command(tmp_path,monkeypatch
     report=json.loads(next(l.split(' ',1)[1] for l in capsys.readouterr().out.splitlines() if l.startswith('SEARCH_RECONCILIATION ')))
     assert report['counts']['new_candidates']==0 and report['counts']['rejected']==1
 
-def test_unknown_admitted_only_as_flagged_lead(tmp_path,monkeypatch,capsys):
+@pytest.mark.parametrize('readable_jd',[False,True])
+def test_unknown_availability_requires_independent_eligibility_screening(tmp_path,monkeypatch,capsys,readable_jd):
     import codex_entry_level_search as search
     p=tmp_path/'tracker';p.touch();monkeypatch.setitem(search.TRACKERS,'uk',p)
     class Book:
@@ -137,11 +138,12 @@ def test_unknown_admitted_only_as_flagged_lead(tmp_path,monkeypatch,capsys):
     monkeypatch.setattr(search.osp,'load_profile',lambda:{})
     monkeypatch.setattr(search,'_profile_terms',lambda:(search.ENTRY_MARKERS,(),None))
     monkeypatch.setattr(search,'run_codex',lambda *a,**k:json.dumps([{'company':'Example','job_title':'Cyber Intern','location':'London, United Kingdom','url':'https://employer.com/unknown'}]))
-    monkeypatch.setattr(search,'fetch_jd',lambda url:{'status':403,'fetch_state':'bot_wall','text':'','vacancy_status':{'state':'UNKNOWN','evidence':'blocked'}})
+    monkeypatch.setattr(search,'fetch_jd',lambda url:{'status':403,'fetch_state':'bot_wall','text':'Cyber internship in London. Applications welcome from graduates.' if readable_jd else '', 'vacancy_status':{'state':'UNKNOWN','evidence':'blocked'}})
     monkeypatch.setattr(sys,'argv',['search','--batches','1','--dry-run'])
     assert search.main()==0
     report=json.loads(next(l.split(' ',1)[1] for l in capsys.readouterr().out.splitlines() if l.startswith('SEARCH_RECONCILIATION ')))
-    assert report['counts']['new_candidates']==1 and report['counts']['unverified_candidates']==1
+    assert report['counts']['new_candidates']==int(readable_jd) and report['counts']['unverified_candidates']==1
+    if not readable_jd:assert report['counts']['rejected']==1
 
 def test_refresh_prioritises_unchecked_records_instead_of_repeating_first_page():
     records=[{'location':'London, United Kingdom','company':'Example','title':'Intern','url':'https://employer.com/'+str(i)} for i in range(4)]

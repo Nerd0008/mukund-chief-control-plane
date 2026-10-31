@@ -402,8 +402,23 @@ def test_company_watch_findings_enter_the_funnel_with_attributable_exclusions(tm
 # full funnel run (offline, deterministic semantic, codex off)
 # --------------------------------------------------------------------------- #
 
+
 @pytest.fixture
-def run_doc(tmp_path_factory):
+def legacy_scope(monkeypatch):
+    """Historical strict policy remains testable; current rule has its own matrix."""
+    import copy
+    import effective_search_policy as policy
+    original = policy.effective_policy
+    def configured(region='uk', **kwargs):
+        result = copy.deepcopy(original(region, **kwargs))
+        if region == 'uk' and not kwargs.get('path'):
+            result['rejection_policy'] = {}
+            result.setdefault('owner_scope', {}).setdefault('junior_it', {})['require_jd_evidence'] = True
+        return result
+    monkeypatch.setattr(policy, 'effective_policy', configured)
+
+@pytest.fixture
+def run_doc(tmp_path_factory, legacy_scope):
     out = tmp_path_factory.mktemp("discovery-run")
     rc, doc = run_cli(["run", "--region", "uk", "--records", str(CANDIDATES),
                        "--semantic", "deterministic", "--codex", "off",
@@ -463,7 +478,7 @@ def test_run_health_file_is_written_and_does_not_touch_trackers(tmp_path):
     assert h(tracker) == before
 
 
-def test_zero_attribution_names_the_first_empty_stage(tmp_path):
+def test_zero_attribution_names_the_first_empty_stage(tmp_path, legacy_scope):
     """A run whose candidates all lack an application URL must say so."""
     records = tmp_path / "nourl.json"
     records.write_text(json.dumps({"records": [
@@ -490,7 +505,7 @@ def test_zero_attribution_names_the_first_empty_stage(tmp_path):
                for r in doc["funnel"]["rejections_by_reason"])
 
 
-def test_semantic_rejections_are_counted_and_attributed(tmp_path):
+def test_semantic_rejections_are_counted_and_attributed(tmp_path, legacy_scope):
     """A run whose semantics accept nothing must blame the semantic stage, not a gate."""
     import pipeline as pl
     records = tmp_path / "sem.json"

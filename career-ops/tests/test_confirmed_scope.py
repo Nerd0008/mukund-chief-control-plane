@@ -3,6 +3,21 @@ import pytest
 import regional_job_search as regional
 from pipeline import deterministic_gates
 
+
+@pytest.fixture
+def legacy_scope(monkeypatch):
+    """Historical strict policy remains testable; current rule has its own matrix."""
+    import copy
+    import effective_search_policy as policy
+    original = policy.effective_policy
+    def configured(region='uk', **kwargs):
+        result = copy.deepcopy(original(region, **kwargs))
+        if region == 'uk' and not kwargs.get('path'):
+            result['rejection_policy'] = {}
+            result.setdefault('owner_scope', {}).setdefault('junior_it', {})['require_jd_evidence'] = True
+        return result
+    monkeypatch.setattr(policy, 'effective_policy', configured)
+
 SCOPE = {'always_allow':['UK','United Kingdom'], 'allow':['UK','United Kingdom'], 'block':['Canada','India']}
 
 
@@ -26,7 +41,7 @@ SCOPE = {'always_allow':['UK','United Kingdom'], 'allow':['UK','United Kingdom']
     ('Graduate SOC Analyst', 'You must have three years of professional experience.', False),
     ('Cyber Security Apprentice', 'No prior experience required.', False),
 ])
-def test_confirmed_owner_scope(worker, title, jd, accepted):
+def test_confirmed_owner_scope(worker, title, jd, accepted, legacy_scope):
     rec = {'company':'Acme','title':title,'location':'London, UK',
            'url':'https://careers.example/jobs/12345678','jd_text':jd}
     if worker == 'unified':
