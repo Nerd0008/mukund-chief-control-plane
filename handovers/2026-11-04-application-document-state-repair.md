@@ -31,3 +31,11 @@ The acceptance process exposed and corrected missing owner-instruction delivery 
 The owner's pre-existing CV DEVELOPMENT mode remains active. The live result is DEVELOPMENT_READY; this does not assert that disabled canonical CV factual checks passed. The cover's existing factual verifier remained active and rejected a quantified employment claim on an earlier attempt; the planner now omits quantified workplace metrics in cover prose. No verification gate was weakened.
 
 No synthetic acceptance documents were sent to Discord, no employer was contacted and no application was submitted. Delivery adapter behavior is tested in isolation; a fresh public Discord attachment delivery is not claimed. Deployment acceptance requires gateway reload and matching dispatcher/source fingerprints in the startup log.
+
+## Deployment accepted
+
+Final suite: **121 passed in 73.64 seconds**; four post-change registration/persistence/clarification/sharing-lock smoke checks also passed. Source commit: `4ac46048c77cf15487449a0f6f50a42c689fba44`, pushed to `fix/e3-whole-repo-architecture`; no main merge.
+
+The existing Windows gateway restart command replaced the gateway with PID 23336. Discord reconnected at 17:49:14 UK time. Startup logged `Application stage dispatcher active; source=230101321db1` and `Approved flow CV compiler active ... source=4d169903a42d`, matching the committed source files. Heartbeat and scheduler initialization were verified.
+
+The CLI reported a clean drain, but the detailed runtime log records one interrupted pre-existing turn. Startup scheduled automatic recovery for that one session. No manual replay or additional publishing action was issued as part of this repair. This distinction is retained rather than relying on the CLI summary.
