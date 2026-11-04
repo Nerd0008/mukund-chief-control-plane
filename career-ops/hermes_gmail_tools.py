@@ -1,5 +1,6 @@
 """Native tools for the owner-approved local read-only Career Ops Gmail path."""
-import functools,json,pathlib,subprocess,sys
+import contextvars,functools,json,pathlib,subprocess,sys
+_FAILED_PREPARATIONS=contextvars.ContextVar("linkedin_failed_preparations",default=None)
 HERE=pathlib.Path(__file__).resolve().parent
 GUIDANCE=('Local Career Ops Gmail access exists independently of manage_connections. '
           'For Gmail access, application-email or newsletter-job requests use career_gmail_status first, '
@@ -18,7 +19,7 @@ LANGUAGE_POLICY=('Owner communication language: English by default on every chat
     'Do not copy the language of old assistant messages or tool output into your response. '
     'Do not blame Windows locale/encoding for coherent foreign-language prose generated in your own answer without evidence.')
 
-WORKFLOW_GUIDANCE=('For LinkedIn show-existing/build requests use career_linkedin_workflow action show/build; reviewed drafts are in weekly preparation as well as dated folders. Never infer no draft from content_ready=false. Use action prepare for bounded weekly research/writing/reviews, and approve with the exact body hash; the authenticated current owner message is resolved automatically when no internal ID is supplied to capture, image and schedule. Use action publish for a natural current publish instruction. It captures authenticated approval and image preferences before invoking the existing publisher. Do not require a hash command. Report content_blockers exactly; missing schedule is separate from content readiness. Never retry a blocked stage or patch its JSON through the shell. This tool preserves competing versions and never invents consent. Never create gen_images scratch scripts or use the retired desktop bot interpreter. For job-search reports use career_search_report before reading logs; report-only questions never authorize starting another scan. Current workflow/stage evidence overrides historical operational notes.')
+WORKFLOW_GUIDANCE=('For LinkedIn show-existing/build requests use career_linkedin_workflow action show/build; reviewed drafts are in weekly preparation as well as dated folders. Never infer no draft from content_ready=false. Use action prepare for bounded weekly research/writing/reviews, and approve with the exact body hash; the authenticated current owner message is resolved automatically when no internal ID is supplied to capture, image and schedule. For an exact chat draft the owner has instructed you to publish now, call publish_chat with the exact displayed post_text and its source URLs; it verifies the owner Discord message, reviews the exact text and preserves it separately. Never retry a failed identical stage. Use action publish for a natural current publish instruction on an existing artifact. It captures authenticated approval and image preferences before invoking the existing publisher. Do not require a hash command. Report content_blockers exactly; missing schedule is separate from content readiness. Never retry a blocked stage or patch its JSON through the shell. This tool preserves competing versions and never invents consent. Never create gen_images scratch scripts or use the retired desktop bot interpreter. For job-search reports use career_search_report before reading logs; report-only questions never authorize starting another scan. Current workflow/stage evidence overrides historical operational notes.')
 
 
 def install_language_policy(agent_class):
@@ -37,8 +38,9 @@ def install_language_policy(agent_class):
         allow=False  # Owner requires English across every displayed response channel.
         saved={};buffers=[]
         original_iterations=getattr(self,'max_iterations',None)
-        if contract.get('workflow')=='linkedin' and contract.get('action') in ('APPROVAL','PUBLISH_NOW') and isinstance(original_iterations,int):
-            self.max_iterations=min(original_iterations,8)
+        if contract.get('workflow')=='linkedin' and isinstance(original_iterations,int):
+            limit=8 if contract.get('action') in ('APPROVAL','PUBLISH_NOW') else 12
+            self.max_iterations=min(original_iterations,limit)
         # Preserve the existing reasoning display, applying the same language gate.
         for name in ('reasoning_callback','interim_assistant_callback','stream_delta_callback'):
             callback=getattr(self,name,None)
@@ -55,12 +57,14 @@ def install_language_policy(agent_class):
             stream=BufferedText(args[2],allow);buffers.append(stream);args[2]=stream
         elif kwargs.get('stream_callback'):
             stream=BufferedText(kwargs['stream_callback'],allow);buffers.append(stream);kwargs['stream_callback']=stream
+        retry_token=_FAILED_PREPARATIONS.set({})
         try:
             with dispatch_context(owner_context,evidence,contract):
                 result=checked_result(old(self,user_message,system_message,*args,**kwargs),allow)
             for stream in buffers:stream.flush()
             return result
         finally:
+            _FAILED_PREPARATIONS.reset(retry_token)
             self.ephemeral_system_prompt=previous
             if original_iterations is not None:self.max_iterations=original_iterations
             for name,callback in saved.items():setattr(self,name,callback)
@@ -79,7 +83,13 @@ def command(script,verb):
 def linkedin_workflow_tool(args,**kwargs):
     try:
         from career_workflow_bridge import linkedin
-        return json.dumps(linkedin(args),ensure_ascii=False)
+        cache=_FAILED_PREPARATIONS.get()
+        key=json.dumps(args,sort_keys=True)
+        if cache is not None and args.get('action') in ('prepare','publish_chat') and key in cache:
+            return json.dumps({**cache[key],'repeated_stage_suppressed':True,'message':'This stage already stopped in this turn; inspect its blockers instead of retrying.'},ensure_ascii=False)
+        result=linkedin(args)
+        if cache is not None and ((args.get('action')=='prepare' and not result.get('ok')) or (args.get('action')=='publish_chat' and not result.get('publish_performed') and result.get('phase')!='ALREADY_PUBLISHED')):cache[key]=result
+        return json.dumps(result,ensure_ascii=False)
     except Exception as exc:
         from workflow_routing import failure_code
         current={}
@@ -148,7 +158,7 @@ def register(ctx):
     install_turn_guidance(GatewayTurnMixin)
     ctx.register_system_prompt_section('career-local-gmail',GUIDANCE,max_chars=2000)
     for name,description,handler,props in [
-        ('career_linkedin_workflow','Bounded LinkedIn show/build/prepare/approve/image/plan. Reuse exact reviewed drafts. Approval requires a real authenticated owner message; never publish from an approval-free request.',linkedin_workflow_tool,{'action':{'type':'string','enum':['show','build','prepare','approve','image','plan','publish']},'day':{'type':'string','enum':['monday','tuesday','wednesday','thursday','friday','saturday','sunday']},'week_of':{'type':'string'},'body_sha256':{'type':'string','pattern':'^[0-9a-f]{64}$'},'approval_message_id':{'type':'integer'}}),
+        ('career_linkedin_workflow','Bounded LinkedIn show/build/prepare/approve/image/plan. Reuse exact reviewed drafts. Approval requires a real authenticated owner message; never publish from an approval-free request.',linkedin_workflow_tool,{'action':{'type':'string','enum':['show','build','prepare','approve','image','plan','publish','publish_chat']},'day':{'type':'string','enum':['monday','tuesday','wednesday','thursday','friday','saturday','sunday']},'week_of':{'type':'string'},'body_sha256':{'type':'string','pattern':'^[0-9a-f]{64}$'},'approval_message_id':{'type':'integer'},'post_text':{'type':'string'},'sources':{'type':'array','items':{'type':'string'}}}),
         ('career_search_report','Read the current UK scan state and exact latest completed scan/coverage/writer evidence. No search/model/tracker/schedule writes.',search_report_tool,{}),
         ('career_workflow_status','Read CURRENT canonical LinkedIn status or exact latest execution for a cron job_id. Read-only, no provider call. Historical profile/log snippets are not live state. Never infer a cause when evidence is unavailable.',workflow_status_tool,{'job_id':{'type':'string','pattern':'^[0-9a-f]{8,32}$'}}),
         ('career_gmail_status','Check existing local Gmail OAuth and approved monitoring status. No connector needed; no secrets printed.',status_tool,{}),

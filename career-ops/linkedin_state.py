@@ -132,7 +132,7 @@ def audited_json(path,doc,expected,*,root,operation,body_sha):
 
 
 def artifact_date(path):
-    match=re.fullmatch(r'approved_(\d{8})_(monday|tuesday|wednesday|thursday|friday|saturday|sunday)',Path(path).parent.name)
+    match=re.fullmatch(r'approved_(\d{8})_(monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:_([0-9a-f]{64}))?',Path(path).parent.name)
     if not match:return None
     result=datetime.strptime(match[1],'%Y%m%d').date()
     if result.strftime('%A').lower()!=match[2]:raise ValueError('artifact date and weekday disagree')
@@ -204,7 +204,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
             and (not slot.get('image_sha256') or (image is not None and file_hash(image)==slot['image_sha256'])))
         slot_reason='exact artifact/hash/date matched' if slot_ok else 'schedule artifact/hash/time/image changed'
     job_matches=bool(slot and job.get('next_run_at')==slot.get('publish_at'))
-    identity_ok=bool(target and day==target.strftime('%A').lower())
+    identity_ok=bool(target and day==target.strftime('%A').lower() and (len(path.parent.name.rsplit('_',1)[-1])!=64 or path.parent.name.rsplit('_',1)[-1]==sha))
     content_ready=bool(identity_ok and review['owner_approved'] and review['reviews_ready'] and frozen_ok and image_ok and not doc.get('cancelled'))
     blockers=[]
     for okay,code in [(review['owner_approved'],'owner_approval_required'),(review['personal_review_passed'],'personal_review_required'),(review['reviews_ready'],'factual_review_required'),(identity_ok,'artifact_date_mismatch'),(frozen_ok,'text_integrity_failed'),(image_ok,'required_image_unavailable'),(not doc.get('cancelled'),'owner_cancelled')]:
@@ -379,12 +379,13 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
         return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':bool(armed and armed['armed']),'publishing':armed,'job':job_state(target.strftime('%A').lower(),jobs_path=jobs_path,root=root),'publish_performed':False}
 
 
-def capture(body,target,message_id,*,sources=(),image=None,replace=False,root=ROOT,db_path=None,dry_run=False):
+def capture(body,target,message_id,*,sources=(),image=None,replace=False,distinct=False,root=ROOT,db_path=None,dry_run=False):
     root=Path(root);target=date.fromisoformat(str(target));day=target.strftime('%A').lower()
     if day not in WEEKDAYS:raise ValueError('invalid publishing weekday')
     body=body.strip();approval=consent.verify_message(message_id,body,db_path=db_path)
     if not approval['ok']:raise ValueError(approval['reason'])
-    path=root/'drafts'/f'approved_{target:%Y%m%d}_{day}'/'linkedin_drafts.json'
+    suffix=('_'+consent.digest(body)) if distinct else ''
+    path=root/'drafts'/f'approved_{target:%Y%m%d}_{day}{suffix}'/'linkedin_drafts.json'
     with (nullcontext() if dry_run else locked(root)):
         before=file_hash(path);prior=read(path) if path.exists() else None
         if prior and prior.get('cancelled'):raise ValueError('cancelled artifact cannot be replaced implicitly')

@@ -63,7 +63,7 @@ def _selected(day,sha,**options):
 
 
 def image(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None):
-    path=Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'
+    path=Path(row.get('captured_artifact') or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
     current=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if current['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False}
     if not current['owner_approved'] or not current['reviews_ready']:raise ValueError('exact owner approval and passing reviews required before image generation')
@@ -111,7 +111,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
     spoken=interpret(message)
     if not spoken['approved'] or not spoken['publish_now']:raise ValueError('Tell me explicitly if you want this post published now.')
     message_id=current_approval_message(db_path=db_path)
-    path=Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'
+    path=Path(row.get('captured_artifact') or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
     status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if status['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     if spoken.get('skip_image') and status['owner_approved'] and status['body_sha256']==row['body_sha256']:
@@ -139,7 +139,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
 def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None,runner=None):
     now=now or datetime.now(state.LONDON)
     mode=args.get('action','show')
-    if mode not in ('show','build','prepare','approve','image','plan','publish'):raise ValueError('unsupported LinkedIn action')
+    if mode not in ('show','build','prepare','approve','image','plan','publish','publish_chat'):raise ValueError('unsupported LinkedIn action')
     opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
     if mode in ('show','build'):return show(**opts)  # Reviewed preparation is already an artifact; never regenerate it merely to display it.
     if mode=='prepare':
@@ -147,6 +147,40 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         monday=args.get('week_of') or show(**opts)['week_of']
         doc=linkedin_weekly.prepare(monday,root=root)
         return {'ok':bool(doc['ok']),'preparation':show(**opts),'publish_performed':False}
+    if mode=='publish_chat':
+        body=args.get('post_text');sources=args.get('sources') or []
+        if not isinstance(body,str) or not body.strip() or len(body.strip())>=1000:raise ValueError('A displayed post under 1000 characters is required')
+        if not isinstance(sources,list) or any(not isinstance(u,str) or not u.startswith('https://') for u in sources):raise ValueError('sources must be HTTPS URLs')
+        from hermes_diagnostics import current_contract
+        from linkedin_conversation import interpret
+        spoken=interpret(current_contract().get('latest_human_message',''))
+        if not spoken['approved'] or not spoken['publish_now']:raise ValueError('An authenticated instruction to publish this post now is required')
+        message_id=args.get('approval_message_id') or current_approval_message(db_path=db_path)
+        approval=state.consent.verify_message(message_id,body,db_path=db_path)
+        if not approval['ok']:raise ValueError(approval['reason'])
+        if state.published(state.consent.digest(body),root):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False}
+        import linkedin_weekly  # installs the existing scripts and content-generator paths
+        from topic_reuse_check import check_text
+        if check_text(body,registry_path=Path(root)/'topic_registry.json')['blocked']:raise ValueError('topic already used or excluded')
+        target=now.date().isoformat()
+        result=state.capture(body,target,message_id,sources=sources,distinct=True,root=root,db_path=db_path)
+        path=Path(result['artifact'])
+        with state.locked(root):
+            before=state.file_hash(path);doc=state.read(path)
+            doc['image_required']=not spoken.get('skip_image',False)
+            state.audited_json(path,doc,before,root=root,operation='chat_publication_preferences',body_sha=result['body_sha256'])
+        import linkedin_content_gen as gen
+        status=state.reconcile(path,root=root,db_path=db_path,jobs_path=jobs_path,
+            personal_runner=state._personal_runner,news_runner=gen.factcheck_post)
+        if not status['reviews_ready']:
+            return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','approval':result,'content_blockers':status['content_blockers'],
+                    'review_errors':status.get('review_errors',[]),'publish_performed':False}
+        row={'date':target,'day':now.strftime('%A').lower(),'body_sha256':result['body_sha256'],'captured_artifact':str(path)}
+        if not spoken.get('skip_image',False):
+            try:image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
+            except Exception as exc:
+                return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','approval':result,'message':'Your approval is saved. Image generation is unavailable; you can say publish now without image.','blocker_type':type(exc).__name__,'publish_performed':False}
+        return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner)
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     requested_publish=(mode=='publish')

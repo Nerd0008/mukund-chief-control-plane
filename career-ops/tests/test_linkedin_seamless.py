@@ -119,3 +119,82 @@ def test_status_reports_image_requirement_without_guessing_a_schedule_loop(prepa
     with owner.dispatch_context('',[],{'workflow':'linkedin','action':'PUBLISH_NOW','turn_origin':'human_text'}):
         answer=diag.transform_output('It is a chicken and egg scheduling defect.')
     assert 'required image is unavailable' in answer and 'chicken' not in answer and 'approval is saved' in answer
+
+
+@pytest.mark.parametrize('text',['nah publish it now','build it and publish it','publish it today now'])
+def test_incident_instructions_are_immediate(text):
+    parsed=interpret(text,now=datetime(2026,11,4,18,tzinfo=state.LONDON))
+    assert parsed['approved'] and parsed['publish_now'] and parsed['publish_at'] is None
+    assert bridge.intent(text,'linkedin')=='PUBLISH_NOW'
+
+@pytest.mark.parametrize('text',['do not build it and publish it','build it and publish it if ready','publish it tomorrow now','publish it today at 8 am'])
+def test_immediate_repair_does_not_override_conditions_or_schedules(text):
+    parsed=interpret(text,now=datetime(2026,11,4,18,tzinfo=state.LONDON))
+    assert not parsed['publish_now']
+
+
+def test_fresh_chat_post_same_day_approval_review_and_dedup(prepared,monkeypatch):
+    import linkedin_content_gen as gen
+    import linkedin_weekly
+    import topic_reuse_check as topics
+    from test_linkedin_state import gate,personal
+    root,jobs,db,add,posts=prepared
+    old=root/'drafts/approved_20261029_thursday/linkedin_drafts.json'
+    old_bytes=old.read_bytes()
+    ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+    ledger.write_text(json.dumps({'result':'published','body_sha256':consent.digest(state.body_of(state.read(old)))})+'\n')
+    body='A fresh synthetic post about software security.'
+    add('Here is a draft:\n```\n'+body+'\n```',role='assistant');mid=add('publish it today now skip the image')
+    monkeypatch.setattr(topics,'check_text',lambda *a,**k:{'blocked':False})
+    monkeypatch.setattr(gen,'factcheck_post',lambda text,sources:gate(text))
+    monkeypatch.setattr(state,'_personal_runner',lambda text,label:personal(text))
+    class Clock(datetime):
+        @classmethod
+        def now(cls,tz=None):return cls(2026,10,29,12,tzinfo=state.LONDON)
+    monkeypatch.setattr(bridge,'datetime',Clock)
+    calls=[]
+    def publish(command,**kw):
+        calls.append(command);ledger=root/'published/posts.jsonl'
+        with ledger.open('a') as f:f.write(json.dumps({'result':'published','body_sha256':consent.digest(body)})+'\n')
+        return NS(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:test:chat'}))
+    contract={'workflow':'linkedin','action':'PUBLISH_NOW','latest_human_message':'publish it today now skip the image','session_key':hashlib.sha256(b'owner').hexdigest(),'turn_origin':'human_text'}
+    args={'action':'publish_chat','post_text':body,'sources':['https://example.invalid/story'],'approval_message_id':mid}
+    with owner.dispatch_context('',[],contract):
+        result=bridge.linkedin(args,**opts(prepared),runner=publish)
+        assert result['publish_performed'],result
+        assert bridge.linkedin(args,**opts(prepared),runner=publish)['phase']=='ALREADY_PUBLISHED'
+    assert len(calls)==1 and old.read_bytes()==old_bytes
+    assert (root/('drafts/approved_20261029_thursday_'+consent.digest(body))/'linkedin_drafts.json').exists()
+
+def test_chat_draft_requires_exact_presented_text(prepared):
+    root,jobs,db,add,posts=prepared
+    add('Different public text',role='assistant');mid=add('publish')
+    contract={'workflow':'linkedin','action':'PUBLISH_NOW','latest_human_message':'publish','turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract),pytest.raises(ValueError):
+        bridge.linkedin({'action':'publish_chat','post_text':'Invented unseen text','approval_message_id':mid},**opts(prepared))
+
+
+def test_failed_prepare_is_not_repeated_in_same_turn(monkeypatch):
+    import hermes_gmail_tools as tools
+    calls=[]
+    monkeypatch.setattr(bridge,'linkedin',lambda args: calls.append(args) or {'ok':False,'publish_performed':False})
+    token=tools._FAILED_PREPARATIONS.set({})
+    try:
+        args={'action':'prepare','week_of':'2026-10-26'}
+        assert not json.loads(tools.linkedin_workflow_tool(args))['ok']
+        assert json.loads(tools.linkedin_workflow_tool(args))['repeated_stage_suppressed']
+        assert len(calls)==1
+    finally:tools._FAILED_PREPARATIONS.reset(token)
+
+def test_chat_draft_blocked_review_never_calls_publisher(prepared,monkeypatch):
+    import linkedin_weekly,linkedin_content_gen as gen,topic_reuse_check as topics
+    from test_linkedin_state import personal
+    root,jobs,db,add,posts=prepared;body='An unverified synthetic claim.'
+    add('Here is a draft:\n```\n'+body+'\n```',role='assistant');mid=add('publish')
+    monkeypatch.setattr(topics,'check_text',lambda *a,**k:{'blocked':False})
+    monkeypatch.setattr(gen,'factcheck_post',lambda text,sources:{'verdict':'block','sources':sources})
+    monkeypatch.setattr(state,'_personal_runner',lambda text,label:personal(text))
+    contract={'workflow':'linkedin','action':'PUBLISH_NOW','latest_human_message':'publish','turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract):
+        result=bridge.linkedin({'action':'publish_chat','post_text':body,'sources':['https://example.invalid/story'],'approval_message_id':mid},**opts(prepared),runner=lambda *a,**k:pytest.fail('publisher must not run'))
+    assert result['phase']=='APPROVED_BUT_BLOCKED' and not result['publish_performed']
