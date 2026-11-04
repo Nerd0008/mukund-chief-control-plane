@@ -10,7 +10,7 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
     now=now or datetime.now(state.LONDON)
     if now.tzinfo is None:raise ValueError('timezone-aware execution time required')
     now=now.astimezone(state.LONDON);target=date.fromisoformat(str(target_date)) if target_date else now.date()
-    if day not in state.JOB_IDS or target.strftime('%A').lower()!=day:
+    if day not in state.WEEKDAYS or target.strftime('%A').lower()!=day:
         return (1 if dry_run else 0),{'ok':not dry_run,'phase':'NOT_DUE','outcome':'NO_ACTION','reason_code':'weekday_not_due','reason':'requested weekday is not the exact execution/preview date','publish_performed':False,'network_calls':0}
     root=Path(root);slots=state.load_slots(root/'drafts/schedule.json');slot=slots.get(target.isoformat())
     if not slot:
@@ -30,7 +30,7 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
         return (0 if result['would_publish_if_enabled_and_due'] else 1),result
     if snapshot['published']:
         return 0,{**result,'ok':True,'phase':'ALREADY_PUBLISHED','outcome':'NO_ACTION','reason_code':'already_published','reason':'This exact body is already published; no publication attempted'}
-    if target!=now.date() or now<datetime.combine(target,time(8),state.LONDON):
+    if target!=now.date() or now<datetime.fromisoformat(slot['publish_at']).astimezone(state.LONDON):
         return 0,{**result,'ok':True,'phase':'NOT_DUE','outcome':'NO_ACTION','reason_code':'date_or_time_not_due','reason':'Future or stale date cannot publish'}
     if not snapshot['automatic_publish_armed']:
         if snapshot['cancelled']:
@@ -76,7 +76,7 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
 
 
 def main(argv=None):
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('day',choices=tuple(state.JOB_IDS))
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('day',choices=state.WEEKDAYS)
     p.add_argument('--date',help='exact preview date; real execution must be today')
     mode=p.add_mutually_exclusive_group();mode.add_argument('--dry-run',action='store_true');mode.add_argument('--execute',action='store_true')
     args=p.parse_args(argv)

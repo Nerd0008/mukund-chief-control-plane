@@ -25,7 +25,7 @@ failure instead of inventing readiness. After state inspection, apply the existi
 def payloads():
     boot=f"import sys\nfrom pathlib import Path\nsys.path.insert(0,str(Path({str(REPO)!r})/'career-ops'))\n"
     result={}
-    for day in state.JOB_IDS:
+    for day in state.job_ids():
         result[HOME/'scripts'/f'publish_scheduled_{day}.py']=(boot+f"from linkedin_scheduled import weekday_main\nif __name__=='__main__':raise SystemExit(weekday_main({day!r}))\n").encode()
     result[HOME/'scripts/publish_scheduled.py']=(boot+"from linkedin_scheduled import main\nif __name__=='__main__':raise SystemExit(main())\n").encode()
     result[HOME/'scripts/linkedin_weekly.py']=(boot+"from linkedin_weekly import main\nif __name__=='__main__':raise SystemExit(main())\n").encode()
@@ -49,7 +49,7 @@ if __name__=='__main__':
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--apply',action='store_true');p.add_argument('--update-weekly-prompt',action='store_true');p.add_argument('--update-weekly-script',action='store_true');a=p.parse_args(argv)
     jobs=state.read(HOME/'cron/jobs.json');jobs=jobs if isinstance(jobs,list) else jobs['jobs']
-    for day in state.JOB_IDS:
+    for day in state.job_ids():
         if state.job_state(day)['enabled']:raise SystemExit('Publish jobs must remain paused during installation')
     data=payloads();changes=[(path,content,state.file_hash(path)) for path,content in data.items() if not path.exists() or path.read_bytes()!=content]
     if not a.apply:
@@ -82,7 +82,7 @@ def main(argv=None):
         result=update_job('7db108b00189',updates)
         if not result:raise SystemExit('Weekly script wiring failed')
         manifest.append({'job_id':'7db108b00189','fields_changed':list(updates),'enabled_and_schedule_unchanged':True})
-    for day in state.JOB_IDS:
+    for day in state.job_ids():
         if state.job_state(day)['enabled']:raise SystemExit('Concurrent publish enablement detected; stop and review')
     (backup/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
     print(json.dumps({'installed':True,'backup':str(backup),'updates':len(manifest),'publish_jobs_enabled':0,'publish_performed':False},indent=2));return 0

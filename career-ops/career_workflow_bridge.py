@@ -54,8 +54,9 @@ def render_drafts(doc):
 
 
 def _selected(day,sha,**options):
-    if day not in state.JOB_IDS:raise ValueError('day must be tuesday, wednesday or thursday')
-    row=next(r for r in show(**options)['days'] if r['day']==day)
+    if day not in state.WEEKDAYS:raise ValueError('invalid publishing weekday')
+    row=next((r for r in show(**options)['days'] if r['day']==day),None)
+    if row is None:raise ValueError('no dated draft')
     if not row.get('draft_exists'):raise ValueError('no dated draft')
     if sha!=row['body_sha256']:raise ValueError('version mismatch: retrieve and approve the exact selected draft first')
     return row

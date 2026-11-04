@@ -26,11 +26,11 @@ def interpret(text, *, now=None):
     if re.search(r'\b(?:rewrite|revise|change|edit|fix)\b',edits,re.I):
         return result
     polite = r'(?:(?:please|yes|yeah|yep|okay|ok|perfect|great)[,!\\.\\s]+)*'
-    start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|missed|tuesday|wednesday|thursday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
+    start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|missed|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
     affirmative = bool(re.match('(?i)^'+polite+start,text))
     affirmative |= bool(re.fullmatch(r'(?i)(?:yes|yeah|yep|okay|ok|perfect|looks good|go ahead)[!. ]*',text))
     affirmative |= bool(re.search(r'\bI\s+approve\s+(?:this|the|it|that)\b',text))
-    affirmative |= bool(re.match(r'(?i)^(?:the\s+)?(?:tuesday|wednesday|thursday)(?:\x27s)?\s+(?:post\s+)?(?:is\s+)?approved\b',text))
+    affirmative |= bool(re.match(r'(?i)^(?:the\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:\x27s)?\s+(?:post\s+)?(?:is\s+)?approved\b',text))
     if '?' in text and not re.match(r'(?i)^(?:please\s+)?(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b',text):
         affirmative = False
     settings_only = bool(re.match(r'(?i)^(?:tomorrow\b|today\b|(?:skip|omit|without|no)\s+(?:the\s+|an?\s+)?image\b)',text)) and '?' not in text

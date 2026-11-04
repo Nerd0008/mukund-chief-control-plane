@@ -15,6 +15,22 @@ HOME=Path(os.environ.get('HERMES_HOME') or Path(os.environ.get('LOCALAPPDATA',st
 JOBS=HOME/'cron/jobs.json'
 JOB_IDS={'tuesday':'beb0251ed70c','wednesday':'f1b1452f18b1','thursday':'8e6048e2dfa7'}
 LONDON=ZoneInfo('Europe/London')
+WEEKDAYS=('monday','tuesday','wednesday','thursday','friday','saturday','sunday')
+
+
+def job_ids(root=ROOT):
+    # Old installations retain the existing job IDs until a registry is installed.
+    path=Path(root)/'publish_slots.json'
+    if not path.exists():return dict(JOB_IDS)
+    doc=read(path)
+    entries=doc.get('weekdays')
+    if doc.get('schema_version')!=1 or not isinstance(entries,dict) or not entries:
+        raise ValueError('invalid publishing slot registry')
+    if any(d not in WEEKDAYS or not isinstance(j,str) or not j.strip() for d,j in entries.items()):
+        raise ValueError('invalid publishing weekday or job ID')
+    if len(set(entries.values()))!=len(entries):raise ValueError('publishing jobs must have unique IDs')
+    return dict(entries)
+
 
 class StateConflict(RuntimeError):pass
 
@@ -116,7 +132,7 @@ def audited_json(path,doc,expected,*,root,operation,body_sha):
 
 
 def artifact_date(path):
-    match=re.fullmatch(r'approved_(\d{8})_(tuesday|wednesday|thursday)',Path(path).parent.name)
+    match=re.fullmatch(r'approved_(\d{8})_(monday|tuesday|wednesday|thursday|friday|saturday|sunday)',Path(path).parent.name)
     if not match:return None
     result=datetime.strptime(match[1],'%Y%m%d').date()
     if result.strftime('%A').lower()!=match[2]:raise ValueError('artifact date and weekday disagree')
@@ -136,7 +152,7 @@ def load_slots(path):
     # Legacy entries are migrated by exact dated artifact identity, never weekday guessing.
     result={}
     for day,slot in doc.items():
-        if day not in JOB_IDS or not isinstance(slot,dict) or not slot.get('draft_path'):raise ValueError('unknown legacy schedule entry')
+        if day not in WEEKDAYS or not isinstance(slot,dict) or not slot.get('draft_path'):raise ValueError('unknown legacy schedule entry')
         target=artifact_date(absolute(slot['draft_path']))
         if not target or target.strftime('%A').lower()!=day:raise ValueError('legacy schedule identity is ambiguous')
         result[target.isoformat()]={**slot,'body_sha256':slot.get('body_sha256') or slot.get('confirm_token'),
@@ -144,10 +160,10 @@ def load_slots(path):
     return result
 
 
-def job_state(day,*,jobs_path=JOBS):
+def job_state(day,*,jobs_path=JOBS,root=ROOT):
     try:
         data=read(jobs_path);jobs=data if isinstance(data,list) else data.get('jobs',[])
-        found=[j for j in jobs if j.get('id')==JOB_IDS[day]]
+        found=[j for j in jobs if j.get('id')==job_ids(root)[day]]
         if len(found)!=1:return {'known':False,'enabled':False,'reason':'publishing job missing or duplicated'}
         job=found[0]
         enabled=job.get('enabled') is True and not job.get('paused_at') and job.get('state') not in ('paused','completed','cancelled')
@@ -179,7 +195,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     image=absolute(doc['image_path']) if doc.get('image_path') else None
     image_ok=(bool(image and image.is_file() and doc.get('image_body_sha256')==sha) if doc.get('image_required') else image is None or image.is_file())
     target=artifact_date(path);day=doc.get('day') or (target.strftime('%A').lower() if target else None)
-    job=job_state(day,jobs_path=jobs_path) if day in JOB_IDS else {'known':False,'enabled':False,'reason':'no publishing weekday'}
+    job=job_state(day,jobs_path=jobs_path,root=root) if day in job_ids(root) else {'known':False,'enabled':False,'reason':'no publishing weekday'}
     slots=load_slots(Path(root)/'drafts/schedule.json');slot=slots.get(target.isoformat()) if target else None
     slot_ok=False;slot_reason='no exact dated schedule slot'
     if slot:
@@ -300,12 +316,13 @@ def refresh_publishing_jobs(*,root=ROOT,db_path=None,jobs_path=JOBS,now=None,upd
                     ready.setdefault(date.fromisoformat(target).strftime('%A').lower(),slot)
                 else:blocked.append(target)
             except (OSError,ValueError):blocked.append(target)
-    selected=set(JOB_IDS) if days is None else set(days)
-    if not selected<=set(JOB_IDS):raise ValueError('unknown publishing weekday')
+    registry=job_ids(root)
+    selected=set(registry) if days is None else set(days)
+    if not selected<=set(registry):raise ValueError('unknown publishing weekday')
     armed=[];paused=[]
-    for day,job_id in JOB_IDS.items():
+    for day,job_id in registry.items():
         if day not in selected:continue
-        job=job_state(day,jobs_path=jobs_path)
+        job=job_state(day,jobs_path=jobs_path,root=root)
         if not job['known']:
             if day in ready:raise ValueError('publishing job missing: '+day)
             continue
@@ -355,12 +372,12 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
         if file_hash(path)!=artifact_before:raise StateConflict('artifact changed while planning exact slot')
         if not dry_run:audited_json(sched,result,before,root=root,operation='slot_planned',body_sha=status['body_sha256'])
         armed=refresh_publishing_jobs(root=root,db_path=db_path,jobs_path=jobs_path,now=now,updater=updater) if not dry_run and publishing_enabled(root) else None
-        return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':bool(armed and armed['armed']),'publishing':armed,'job':job_state(target.strftime('%A').lower(),jobs_path=jobs_path),'publish_performed':False}
+        return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':bool(armed and armed['armed']),'publishing':armed,'job':job_state(target.strftime('%A').lower(),jobs_path=jobs_path,root=root),'publish_performed':False}
 
 
 def capture(body,target,message_id,*,sources=(),image=None,replace=False,root=ROOT,db_path=None,dry_run=False):
     root=Path(root);target=date.fromisoformat(str(target));day=target.strftime('%A').lower()
-    if day not in JOB_IDS:raise ValueError('scheduled capture supports Tuesday/Wednesday/Thursday only')
+    if day not in WEEKDAYS:raise ValueError('invalid publishing weekday')
     body=body.strip();approval=consent.verify_message(message_id,body,db_path=db_path)
     if not approval['ok']:raise ValueError(approval['reason'])
     path=root/'drafts'/f'approved_{target:%Y%m%d}_{day}'/'linkedin_drafts.json'
@@ -440,11 +457,11 @@ def prepared_status(target,*,root=ROOT,jobs_path=JOBS):
             'news_review_passed':bool(n_ok),'news_review_detail':n_reason,'personal_review_passed':bool(p_ok),
             'reviews_ready':ready,'content_ready':False,'automatic_publish_armed':False,
             'published':False,'slot_matches':False,'target_date':target.isoformat(),
-            'job':job_state(day,jobs_path=jobs_path)}
+            'job':job_state(day,jobs_path=jobs_path,root=root)}
     except (OSError,ValueError,TypeError,AttributeError):
         return {'phase':'DRAFT_BLOCKED','artifact':str(path),'owner_approved':False,
             'content_ready':False,'reviews_ready':False,'automatic_publish_armed':False,
-            'approval_detail':'Preparation unreadable or invalid','job':job_state(day,jobs_path=jobs_path)}
+            'approval_detail':'Preparation unreadable or invalid','job':job_state(day,jobs_path=jobs_path,root=root)}
 
 
 def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
@@ -452,9 +469,10 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
     monday=date.fromisoformat(week_of) if week_of else today-timedelta(days=today.weekday())
     if monday.weekday()!=0:raise ValueError('week-of must be a Monday')
     days=[]
-    for offset,day in [(1,'tuesday'),(2,'wednesday'),(3,'thursday')]:
+    for offset,day in enumerate(WEEKDAYS):
         target=monday+timedelta(days=offset);path=Path(root)/'drafts'/f'approved_{target:%Y%m%d}_{day}'/'linkedin_drafts.json'
         prepared=prepared_status(target,root=root,jobs_path=jobs_path)
+        if day not in job_ids(root) and not path.is_file() and not prepared:continue
         if path.is_file():
             row=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
             row['post_text']=body_of(read(path));row['source_kind']='DATED_ARTIFACT'
@@ -466,7 +484,7 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
                 row['alternatives']=[{k:alternative.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')}]
         else:
             row=({**prepared,'source_kind':'REVIEWED_PREPARED' if prepared.get('reviews_ready') else 'PREPARED'} if prepared else
-                {'phase':'NO_ARTIFACT','source_kind':'NONE','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path)})
+                {'phase':'NO_ARTIFACT','source_kind':'NONE','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path,root=root)})
         row['draft_exists']=bool(row.get('post_text'))
         days.append({'day':day,'date':target.isoformat(),**row})
     count=sum(row['automatic_publish_armed'] for row in days)

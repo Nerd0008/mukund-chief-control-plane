@@ -84,13 +84,13 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                     text=prior['content'] or ''
                     hashes=set(re.findall(r'APPROVE LINKEDIN ([0-9a-f]{64})',text,re.I))
                     if _presented(text,body):
-                        headers=list(re.finditer(r'(?im)^\*{0,2}(tuesday|wednesday|thursday)\b[^\n]*',text))
+                        headers=list(re.finditer(r'(?im)^\*{0,2}(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b[^\n]*',text))
                         if len({m.group(1).lower() for m in headers})>1:
-                            requested=set(re.findall(r'\b(tuesday|wednesday|thursday)\b',command,re.I))
+                            requested=set(re.findall(r'\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b',command,re.I))
                             requested={d.lower() for d in requested}
                             matching=[m for m in headers if m.group(1).lower() in requested]
                             if len(requested)!=1 or len(matching)!=1:
-                                return refused('Which post do you mean: Tuesday, Wednesday or Thursday?')
+                                return refused('Which dated post do you mean? Please name its weekday.')
                             chosen=matching[0];index=headers.index(chosen)
                             section=text[chosen.end():headers[index+1].start() if index+1<len(headers) else len(text)]
                             if not _presented(section,body):return refused('That reply refers to a different post.')
