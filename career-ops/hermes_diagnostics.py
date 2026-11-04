@@ -91,11 +91,11 @@ def latest_run(job_id,*,home=state.HOME):
 def snapshot(*,home=state.HOME,root=state.ROOT,db_path=None,now=None):
     now=now or datetime.now(state.LONDON);monday=now.date()-timedelta(days=now.weekday())
     status=state.week_status(monday.isoformat(),root=root,db_path=db_path,jobs_path=Path(home)/'cron/jobs.json')
-    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job','draft_exists','artifact','source_kind','alternatives')
+    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job','draft_exists','artifact','source_kind','alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail')
     days=[{k:row[k] for k in fields if k in row} for row in status['days']]
     for row in days:
-        if row.get('alternatives'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
-    logs=[latest_run(jid,home=home) for jid in state.JOB_IDS.values()]
+        if row.get('alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
+    logs=[latest_run(jid,home=home) for jid in state.job_ids(root).values()]
     value={'schema_version':1,'workflow':'linkedin','checked_at':now.isoformat(),
         'publishing_enabled':state.publishing_enabled(root),'days':days,'latest_executions':logs,
         'authority':'current canonical files and exact latest job execution; historical profile snapshots are not live state'}
@@ -159,7 +159,7 @@ def render(evidence):
         if phase=='PUBLISHED':detail='already published. The existing post must not be posted again.'
         elif phase=='AWAITING_OWNER_APPROVAL':detail='draft awaits your exact-text approval.'
         elif phase=='NO_ARTIFACT':detail='no current dated draft exists.'
-        elif phase=='APPROVED_BUT_BLOCKED':detail='your approval is preserved, but review or integrity checks are incomplete.'
+        elif phase=='APPROVED_BUT_BLOCKED':detail='your approval is preserved. Remaining checks: '+', '.join(day.get('content_blockers') or ['review or integrity checks'])+'.'
         elif phase=='APPROVED_READY_PAUSED':detail='approved and reviewed; automatic publication is not armed.'
         elif phase=='SCHEDULED':detail='approved, reviewed and scheduled for '+str(day.get('date'))+'.'
         else:detail=phase.replace('_',' ').lower()+'.'

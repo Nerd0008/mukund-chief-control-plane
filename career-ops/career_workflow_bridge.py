@@ -269,6 +269,6 @@ def guard(tool_name,args=None,**kwargs):
     if c.get('workflow')!='linkedin' or c.get('action') not in ('SHOW_DRAFTS','BUILD_ARTIFACTS','PREPARE','IMAGE','APPROVAL','PUBLISH_NOW'):return None
     if tool_name not in ('terminal','write_file','execute_code','python','patch'):return None
     payload=json.dumps(args).lower()
-    if re.search(r'linkedin|gen_images|career_ops|pythob',payload) and (tool_name!='terminal' or re.search(r'python|gen_images|<<|powershell.*-c',payload)):
+    if tool_name!='terminal' or re.search(r'python|pythob|gen_images|execute_code|<<|powershell.*-c|pwsh.*-c|set-content|writealltext|out-file|>\s*[^&]',payload):
         return {'action':'block','message':'Use career_linkedin_workflow for this LinkedIn stage (show/build/prepare/image/approve/plan). It preserves exact versions, review provenance and the supported Hermes image router. Do not create scratch compilers or use the retired desktop bot. Read-only shell inspection remains available outside the bounded stage.'}
     return None
