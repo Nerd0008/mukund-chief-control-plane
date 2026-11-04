@@ -155,7 +155,7 @@ def test_cooldown_is_recorded_and_banner_does_not_claim_permanent_rejection():
     assert 'seconds' in module.nonretryable_copy(classified)
 
 
-@pytest.mark.parametrize('workflow,action,command,blocked',[('linkedin','BUILD_ARTIFACTS','python gen_images5.py',True),('linkedin','SHOW_DRAFTS','cat career-ops/linkedin_state.py',False),('linkedin','INVESTIGATE','python inspect_linkedin.py',False),('career_search','RUN_SEARCH','python job_scan_delta.py',False),(None,None,'python unrelated.py',False)])
+@pytest.mark.parametrize('workflow,action,command,blocked',[('linkedin','BUILD_ARTIFACTS','python gen_images5.py',True),('linkedin','SHOW_DRAFTS','cat career-ops/linkedin_state.py',False),('linkedin','INVESTIGATE','python inspect_linkedin.py',True),('career_search','RUN_SEARCH','python job_scan_delta.py',False),(None,None,'python unrelated.py',False)])
 def test_stage_guard_is_narrow(workflow,action,command,blocked):
     with owner.dispatch_context('',[],{'workflow':workflow,'action':action}):
         assert bool(bridge.guard('terminal',{'command':command}))==blocked
@@ -227,9 +227,10 @@ def test_vague_continuation_retains_stage_not_only_workflow(prepared,prompt,expe
         assert contract['workflow']=='linkedin' and contract['action']==expected
 
 
-def test_status_does_not_block_generic_debugging_shell():
+def test_status_cannot_resume_mutating_scratch_scripts():
     with owner.dispatch_context('',[],{'workflow':'linkedin','action':'STATUS'}):
-        assert bridge.guard('terminal',{'command':'python inspect_linkedin_status.py'}) is None
+        assert bridge.guard('terminal',{'command':'python inspect_linkedin_status.py'})['action']=='block'
+        assert bridge.guard('terminal',{'command':'cat career-ops/linkedin_state.py'}) is None
 
 
 @pytest.mark.parametrize('message',['Why can’t you publish now?','Do not publish now','Publish now if the image passes','Show my posts','Approved'])

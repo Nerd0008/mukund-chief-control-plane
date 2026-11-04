@@ -266,7 +266,7 @@ def render_search(doc):
 def guard(tool_name,args=None,**kwargs):
     from hermes_diagnostics import current_contract
     c=current_contract();args=args or {}
-    if c.get('workflow')!='linkedin' or c.get('action') not in ('SHOW_DRAFTS','BUILD_ARTIFACTS','PREPARE','IMAGE','APPROVAL','PUBLISH_NOW'):return None
+    if c.get('workflow')!='linkedin':return None
     if tool_name not in ('terminal','write_file','execute_code','python','patch'):return None
     payload=json.dumps(args).lower()
     if tool_name!='terminal' or re.search(r'python|pythob|gen_images|execute_code|<<|powershell.*-c|pwsh.*-c|set-content|writealltext|out-file|>\s*[^&]',payload):
