@@ -80,3 +80,11 @@ def test_completed_fact_decision_is_reused_and_new_evidence_rechecks(tmp_path,mo
     assert b['review_reused'] and len(count)==1 and b['verdict']=='block'
     fc.verify_post('A factual claim.',[url],source_texts={url:'New evidence.'},api_key='test')
     assert len(count)==2
+
+
+def test_quoted_image_prompt_does_not_invalidate_the_public_post(history):
+    db,add=history;body='The public post. #Security'
+    add(body,role='assistant')
+    add('Image generation is blocked by billing.\n\nThe prompt I would have used:\n> Visual medium: analogue photograph\n> A locked door.\n\nPublish the text-only post instead.',role='assistant')
+    result=consent.verify_message(add('wtf publish man skip the image'),body,db_path=db)
+    assert result['ok'] and result['receipt']['preferences']['skip_image']
