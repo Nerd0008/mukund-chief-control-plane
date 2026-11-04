@@ -67,7 +67,7 @@ def test_registry_rejects_bad_or_duplicate_ids(tmp_path):
 
 
 def test_custom_day_identity_and_natural_multi_post_approval(history):
-    db,add=history;body='Friday synthetic post.'
+    db,add=history;body='A synthetic custom-slot post.'
     add('Thursday 2026-11-05\nA different post.\n\nFriday 2026-11-06\n'+body,role='assistant')
     assert not approval.verify_message(add('Approved'),body,db_path=db)['ok']
     assert approval.verify_message(add('Friday post approved'),body,db_path=db)['ok']
