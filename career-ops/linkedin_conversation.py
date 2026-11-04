@@ -29,7 +29,8 @@ def interpret(text, *, now=None):
     polite = r'(?:(?:please|yes|yeah|yep|okay|ok|perfect|great)[,!\.\s]+)*'
     start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|missed|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
     direct_publish=bool(re.fullmatch(r'(?i)(?:please\s+)?(?:publish|post)(?:\s+(?:it|this|the post|man))?[.! ]*(?:[, ]+(?:skip|without|no)\s+(?:the\s+)?image[.! ]*)?',text))
-    affirmative = direct_publish or bool(re.match('(?i)^'+polite+start,text))
+    explicit_override=bool(re.fullmatch(r'(?i)(?:please\s+)?(?:override|skip)\s+(?:the\s+)?fact[ -]?check[.! ]*',text))
+    affirmative = explicit_override or direct_publish or bool(re.match('(?i)^'+polite+start,text))
     affirmative |= bool(re.fullmatch(r'(?i)(?:yes|yeah|yep|okay|ok|perfect|looks good|go ahead)[!. ]*',text))
     affirmative |= bool(re.search(r'\bI\s+approve\s+(?:this|the|it|that)\b',text))
     affirmative |= bool(re.match(r'(?i)^(?:the\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:\x27s)?\s+(?:post\s+)?(?:is\s+)?approved\b',text))
@@ -40,7 +41,7 @@ def interpret(text, *, now=None):
         return result
     result['approved'] = affirmative
     result['skip_image'] = bool(re.search(r'\b(?:skip|omit|without|no)\s+(?:the\s+|an?\s+)?images?\b|\b(?:do not|don.t)\s+(?:generate|include|use|add)\s+(?:an?\s+|the\s+)?images?\b',text,re.I))
-    result['override'] = bool(re.search(r'\b(?:despite|anyway|override)\b',text,re.I))
+    result['override'] = bool(explicit_override or re.search(r'\b(?:despite|anyway|override)\b',text,re.I))
     now = (now or datetime.now(LONDON)).astimezone(LONDON)
     target = None
     if re.search(r'\btomorrow\b',text,re.I):

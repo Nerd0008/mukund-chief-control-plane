@@ -36,6 +36,9 @@ def install_language_policy(agent_class):
         from hermes_response_language import checked_result, checked_text, BufferedText
         allow=False  # Owner requires English across every displayed response channel.
         saved={};buffers=[]
+        original_iterations=getattr(self,'max_iterations',None)
+        if contract.get('workflow')=='linkedin' and contract.get('action') in ('APPROVAL','PUBLISH_NOW') and isinstance(original_iterations,int):
+            self.max_iterations=min(original_iterations,8)
         # Preserve the existing reasoning display, applying the same language gate.
         for name in ('reasoning_callback','interim_assistant_callback','stream_delta_callback'):
             callback=getattr(self,name,None)
@@ -59,6 +62,7 @@ def install_language_policy(agent_class):
             return result
         finally:
             self.ephemeral_system_prompt=previous
+            if original_iterations is not None:self.max_iterations=original_iterations
             for name,callback in saved.items():setattr(self,name,callback)
     agent_class.run_conversation=run
     agent_class._owner_english_policy_installed=True

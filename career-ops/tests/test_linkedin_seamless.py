@@ -88,3 +88,12 @@ def test_quoted_image_prompt_does_not_invalidate_the_public_post(history):
     add('Image generation is blocked by billing.\n\nThe prompt I would have used:\n> Visual medium: analogue photograph\n> A locked door.\n\nPublish the text-only post instead.',role='assistant')
     result=consent.verify_message(add('wtf publish man skip the image'),body,db_path=db)
     assert result['ok'] and result['receipt']['preferences']['skip_image']
+
+
+@pytest.mark.parametrize('phrase',['Override fact check','skip fact check'])
+def test_natural_override_needs_the_exact_post_and_warning(history,phrase):
+    db,add=history;body='A public post.'
+    add(body,role='assistant')
+    assert not consent.verify_message(add(phrase),body,db_path=db,require_override=True)['ok']
+    add('The fact-check blocked this post because a historical claim needs a source.',role='assistant')
+    assert consent.verify_message(add(phrase),body,db_path=db,require_override=True)['ok']
