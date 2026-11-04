@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import uuid
 import ast
+import time
 
 ROOT = Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'hermes/runtime/career-ops/application-packages'
 
@@ -37,14 +38,22 @@ def load(session_id):
 
 def save(state):
     if not state.get('session_id'): return
-    record = {key: state[key] for key in ('session_id','request_id','cv_args','cover_args','results','content_worker','cv_only','cover_only') if key in state}
+    record = {key: state[key] for key in ('session_id','request_id','cv_args','cover_args','results','content_worker','cv_only','cover_only','intake','phase','eligibility','plan','routing','plan_response','owner_reference_evidence','blocked_reason','diagnostic','events') if key in state}
+    record['schema_version'] = 2
     record['active'] = bool(state.get('cv_active'))
     ROOT.mkdir(parents=True, exist_ok=True)
     target = ROOT / (hashlib.sha256(str(state['session_id']).encode()).hexdigest()+'.json')
     temporary = target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp')
     try:
         temporary.write_text(json.dumps(record, ensure_ascii=True), encoding='utf-8')
-        os.replace(temporary, target)
+        for attempt in range(6):
+            try:
+                os.replace(temporary, target)
+                break
+            except OSError as exc:
+                if getattr(exc,'winerror',None) not in (5,32,33) or attempt==5:
+                    raise
+                time.sleep(.02 * (2 ** attempt))
     finally: temporary.unlink(missing_ok=True)
 
 
@@ -117,10 +126,12 @@ def render(state):
             lines.append(label + (': delivery previously confirmed.' if state.get('resuming') and not state.get('resend') and delivered(files[kind]) else ': ready.' if development else ': verified and ready.'))
         else:
             result = state.get('results', {}).get(kind, {})
-            reason = result.get('reason') or state.get('blocked_reason') or 'not completed within this attempt'
+            reason = result.get('reason') or state.get('blocked_reason') or (state.get('diagnostic') if not files else None) or 'The document compiler has not run; no verified document was produced'
             lines.append(label + ': incomplete — ' + str(reason)[:300] + '.')
     for kind, path in files.items():
         if not (state.get('resuming') and not state.get('resend') and delivered(path)): lines.append('MEDIA:' + path)
+    if state.get('phase') in ('OWNER_INPUT_REQUIRED','INELIGIBLE'):
+        lines.insert(0, 'Application: '+state['phase']+'.')
     if state.get('receipt_error'): lines.append(state['receipt_error']+'. Existing verified files are preserved.')
     return '\n'.join(lines)
 
@@ -133,7 +144,7 @@ def outcome(state):
     files=accepted(state)
     if all(k in files for k in required(state)):
         return 'DEVELOPMENT_READY' if any(state.get('results',{}).get(k,{}).get('validation_mode')=='DEVELOPMENT' for k in files) else 'VERIFIED_READY'
-    return 'PARTIAL' if files else 'INCOMPLETE'
+    return 'PARTIAL' if files else state.get('phase') if state.get('phase') in ('OWNER_INPUT_REQUIRED','INELIGIBLE','PLANNING_FAILED','CV_FAILED','COVER_FAILED') else 'INCOMPLETE'
 
 
 def trim_history(history):

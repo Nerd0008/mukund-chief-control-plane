@@ -91,7 +91,9 @@ def test_development_pdf_matches_production_design_and_normal_filename(tmp_path,
     assert not guard.verified_attachment(result['verified_pdf'])
 
 
-def test_live_context_recognizes_development_switch():
+def test_live_context_recognizes_development_switch(monkeypatch):
+    import application_package_flow
+    monkeypatch.setattr(application_package_flow,'prepare',lambda *args,**kwargs:None)
     import asyncio
     mode.configure(True)
     runtime=NS(_current_max_iterations=lambda:150)

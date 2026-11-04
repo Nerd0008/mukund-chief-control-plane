@@ -265,3 +265,10 @@ def test_cv_planner_reserves_routing_and_generation_inside_parent_limit(monkeypa
     assert set(result)==set(bank['slots'])
     assert observed['timeout']==120 and observed['max_tokens']==1024
     assert observed['worker']=='codex'
+
+@pytest.fixture(autouse=True)
+def legacy_agent_seam(monkeypatch):
+    # These tests exercise the legacy coordinator/guard seam. The mandatory
+    # intake dispatcher is covered separately by test_application_package_flow.
+    import application_package_flow
+    monkeypatch.setattr(application_package_flow, 'prepare', lambda *args, **kwargs: None)

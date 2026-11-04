@@ -20,7 +20,8 @@ def cv_request(message,history=()):
     supplies context only for an otherwise bare JD/link, not arbitrary work.
     """
     import re
-    text=str(message)
+    from application_package_flow import owner_text, wants_documents
+    text=owner_text(message)
     from application_package_state import retry, prior_production
     if retry(text): return prior_production(history, cv_request)
     cv_words=r'\bCV\b|\bresume\b|curriculum vitae|cover letter'
@@ -29,7 +30,7 @@ def cv_request(message,history=()):
     if re.search(maintenance,text,re.I) and re.search(engineering,text,re.I):
         return False
     production=r'\b(?:tailor|generate|build|rebuild|compile|write|create|customize|customise|produce)\b'
-    if re.search(cv_words,text,re.I) and re.search(production,text,re.I):
+    if wants_documents(message):
         return True
     if re.search(r'\b(?:here is|here.s|use|tailor to)\b.{0,40}(?:\bJD\b|job description)',text,re.I):
         return True
@@ -45,7 +46,7 @@ def cv_request(message,history=()):
 
 def active_job():
     state=JOB.get()
-    return state if state and state.get('cv_active',True) else None
+    return state if state and state.get('cv_active',True) and not state.get('foreground_complete') else None
 
 
 def activate_job(state):
@@ -72,7 +73,7 @@ def invokes_compiler(tool_name,args):
 
 def pre_tool(tool_name,args,**kwargs):
     state=JOB.get()
-    if not state:return None
+    if not state or state.get('foreground_complete'):return None
     if invokes_compiler(tool_name,args):activate_job(state)
     if not active_job():return None
     if time.monotonic()>=state['deadline']:
@@ -261,14 +262,18 @@ def install_runtime(runtime,turn_class,media_class):
         import application_package_state as package
         session_id=kwargs.get('session_id') or (args[1] if len(args)>1 else None)
         previous=package.load(session_id) if package.retry(message) else {}
-        is_cv=cv_request(message,history) or bool(previous)
+        from application_package_flow import prepare, dispatch, owner_text
+        intake=prepare(message,history,previous,package.load(session_id))
+        if intake and intake.get('owner_clarification') and not previous:previous=package.load(session_id)
+        is_cv=cv_request(message,history) or bool(previous) or bool(intake)
         state={**previous,'session_id':session_id,'request_id':previous.get('request_id') or uuid.uuid4().hex,
                'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv,
                'resuming':bool(previous),'resend':bool(__import__('re').search(r'send again',str(message),__import__('re').I))}
+        if intake is not None:state['intake']=intake
         import re
         if is_cv and not previous:
-            state['cv_only']=bool(re.search(r'CV only|only (?:a |the |my )?CV',str(message),re.I))
-            state['cover_only']=bool(re.search(r'cover letter only|only (?:a |the |my )?cover letter',str(message),re.I))
+            state['cv_only']=bool(re.search(r'CV only|only (?:a |the |my )?CV',owner_text(message),re.I))
+            state['cover_only']=bool(re.search(r'cover letter only|only (?:a |the |my )?cover letter',owner_text(message),re.I))
         if is_cv:
             history=package.trim_history(history)
             try: package.save(state)
@@ -276,14 +281,23 @@ def install_runtime(runtime,turn_class,media_class):
         elif not package.retry(message) and not re.search(r'\bCV\b|cover letter|\bJD\b|application package',str(message),re.I):
             package.save({'session_id':session_id,'cv_active':False})
         if previous and all(kind in package.accepted(state) for kind in package.required(state)):
-            return {'final_response':package.render(state),'failed':False,'application_status':package.outcome(state),'application_delivery':'pending','messages':[]}
+            state['phase']='DOCUMENTS_READY'
+            package.save(state)
+            return {'final_response':package.render(state),'failed':False,'application_status':package.outcome(state),'application_delivery':'pending','messages':[],'agent_persisted':False}
 
         # Current owner message only: history/JD data must not silently pin workers.
         import re
         from workflow_control import requested_worker
-        worker=requested_worker(message)
+        from application_package_flow import owner_text
+        worker=requested_worker(owner_text(message))
         if worker:state['content_worker']=worker
         token=JOB.set(state)
+        if intake is not None:
+            try:
+                return await asyncio.to_thread(dispatch,state)
+            finally:
+                state['foreground_complete']=True
+                JOB.reset(token)
         instruction=('\nCV production: call career_cv_compile once with the full JD, job_id, company and one or two short_role words. PASS automatically exports to Downloads/codex/_CVs with the short filename. No shell copy is needed. '
                      'On provider timeout, report that no CV was produced. Never offer a CV from another JD. Attempt limits are per request, not per session; a new owner-requested build needs no Codex reset. '
                      'For an application package, generate a cover letter too: call career_cover_compile with company, role and five evidence-grounded paragraphs (maximum 2855 characters). Attach both verified PDFs. No shell is needed. '
@@ -304,19 +318,22 @@ def install_runtime(runtime,turn_class,media_class):
         if not canonical_gate_enabled():
             instruction+=' Local development setting: the canonical CV fact gate is disabled by the owner. Do not claim it passed or ask the owner to override it. The separate factual content reviewer is also disabled in development. Mirror-layout and document integrity checks still apply. Keep normal PDF appearance and filenames, with no visible test label. The validation mode is recorded in private run reports.'
         if previous:
-            context_prompt += '\nRESUME THIS APPLICATION ONLY: '+json.dumps({k:previous[k] for k in ('cv_args','cover_args') if k in previous})+'\nAlready verified documents: '+', '.join(package.accepted(state))+'. Reuse those receipts; call only the missing compiler. Do not reload skills or JD files.'
+            context_prompt += '\nSaved application receipts: '+json.dumps({k:previous[k] for k in ('cv_args','cover_args','intake','phase') if k in previous})+'\nAlready verified documents: '+', '.join(package.accepted(state))+'. Reuse valid receipts. If intake is missing, ask for the JD; do not narrate a build or resume an empty plan.'
         async def execute():
             return await old_run(self,message,context_prompt+'\nApplication documents: unless the owner requests CV only, provide both CV and cover letter using career_cv_compile and career_cover_compile. The cover tool needs no shell. Five truthful paragraphs, maximum 2855 characters; attach only verified PDFs.'+(instruction if is_cv else ""),history,*args,**kwargs)
         try:
             result=await execute()
             if state.get('cv_active'):
+                preserve_explanation(state,result.get('pre_transform_response') or result.get('final_response') if isinstance(result,dict) else '')
                 text=package.render(state)
                 if isinstance(result,dict):
                     result=dict(result,final_response=text,failed=not bool(package.accepted(state)),
                                 application_status=package.outcome(state),
                                 application_delivery='pending')
             return result
-        finally:JOB.reset(token)
+        finally:
+            state['foreground_complete']=True
+            JOB.reset(token)
     turn_class._run_agent=run;turn_class._fast_cv_guard_installed=True
     if hasattr(turn_class,'_run_agent_timeout_result'):
         old_timeout=turn_class._run_agent_timeout_result
@@ -327,9 +344,23 @@ def install_runtime(runtime,turn_class,media_class):
             return old_timeout(self,worker,turn_ctx)
         turn_class._run_agent_timeout_result=timeout
 
+def preserve_explanation(state,text):
+    """Retain actionable text before finalization replaces the visible reply."""
+    import re
+    if not isinstance(text,str) or not text.strip():return
+    if text.startswith(('CV: incomplete','Cover letter: incomplete','CV: ready','CV: verified','Application: ')):return
+    text='\n'.join(line for line in text.splitlines() if not line.strip().startswith('MEDIA:'))
+    text=re.sub(r'(?i)(bearer\s+|api[_ -]?key\s*[:=]\s*|(?:access|refresh)[_ -]?token\s*[:=]\s*)\S+',r'\1[REDACTED]',text)
+    state['diagnostic']=text[:4000]
+    import application_package_state as package
+    try:package.save(state)
+    except OSError:state['receipt_error']='Application explanation could not be saved'
+
+
 def transform_output(response_text,**kwargs):
     state=active_job()
     if state:
+        preserve_explanation(state,response_text)
         from application_package_state import render
         return render(state)
     return None
@@ -354,7 +385,9 @@ def register(ctx):
          {'company':{'type':'string'},'role':{'type':'string'},'paragraphs':{'type':'array','minItems':5,'maxItems':5,'items':{'type':'string'}},'content_worker':{'type':'string','enum':['auto','native','codex']}},['company','role','paragraphs'],cover_tool)
     def connected_v2(native,adapter):
         install_delivery(type(adapter))
+        import application_package_flow
         import logging
+        logging.getLogger('gateway.platforms.base').info('Application stage dispatcher active; source=%s',cv.digest(pathlib.Path(application_package_flow.__file__))[:12])
         logging.getLogger('gateway.platforms.base').info('Approved flow CV compiler active on %s; attachment guard=%s; source=%s',
             type(adapter).__module__,getattr(type(adapter),'_fast_cv_delivery_installed',False),cv.digest(pathlib.Path(__file__))[:12])
     ctx.register_platform_handler('discord',connected_v2)

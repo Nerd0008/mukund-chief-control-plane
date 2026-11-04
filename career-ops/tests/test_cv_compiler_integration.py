@@ -242,3 +242,10 @@ def test_explicit_codex_cv_tool_passes_picklable_planner(tmp_path,monkeypatch):
         assert result['status']=='FAIL' and len(called)==1
         assert isinstance(called[0],g.RoutedContentPlanner) and called[0].worker=='codex'
     finally:g.JOB.reset(token)
+
+@pytest.fixture(autouse=True)
+def legacy_agent_seam(monkeypatch):
+    # These tests exercise the legacy coordinator/guard seam. The mandatory
+    # intake dispatcher is covered separately by test_application_package_flow.
+    import application_package_flow
+    monkeypatch.setattr(application_package_flow, 'prepare', lambda *args, **kwargs: None)
