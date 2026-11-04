@@ -46,7 +46,7 @@ def test_publish_approval_and_text_only_execute_once(prepared,monkeypatch):
 
 def test_image_block_is_not_a_schedule_circularity(prepared):
     root,jobs,db,add,posts=prepared;body=posts['thursday']['post_text'];add(body,role='assistant');mid=add('Approved')
-    path=Path(state.capture(body,'2026-10-29',mid,root=root,db_path=db)['artifact'])
+    path=Path(state.capture(body,'2026-10-29',mid,root=root,db_path=db,replace=True)['artifact'])
     doc=state.read(path);doc.update(news_fact_gate=posts['thursday']['news_fact_gate'],personal_fact_gate=posts['thursday']['personal_fact_gate'],image_required=True)
     path.write_text(json.dumps(doc))
     result=state.inspect_artifact(path,**opts(prepared))
