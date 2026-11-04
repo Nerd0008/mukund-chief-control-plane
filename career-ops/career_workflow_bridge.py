@@ -121,7 +121,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
                        preference_message_id=message_id)
             state.audited_json(path,doc,before,root=root,operation='owner_requested_text_only_publication',body_sha=row['body_sha256'])
         status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
-    if not state.publishing_enabled(root) or not status['content_ready'] or status['body_sha256']!=row['body_sha256']:raise ValueError('enabled publishing, exact approval, reviews and required image must pass')
+    if not state.publishing_enabled(root) or not status['content_ready'] or status['body_sha256']!=row['body_sha256']:raise ValueError('Cannot publish: '+', '.join(status['content_blockers'] or ['publishing_policy_or_version']))
     if row['date']!=datetime.now(state.LONDON).date().isoformat():raise ValueError('publish-now cannot move a dated post to another day')
     import subprocess,sys
     doc=state.read(path);command=[sys.executable,str(state.REPO/'career-ops/linkedin_publish.py'),'publish','--drafts',str(path),'--approve-publish','--confirm-token',row['body_sha256'],'--max-retries','0']
@@ -136,7 +136,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
         'blocker_category':payload.get('blocker_category'),'network_calls':payload.get('network_calls_spent')}
 
 
-def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None):
+def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None,runner=None):
     now=now or datetime.now(state.LONDON)
     mode=args.get('action','show')
     if mode not in ('show','build','prepare','approve','image','plan','publish'):raise ValueError('unsupported LinkedIn action')
@@ -149,13 +149,15 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         return {'ok':bool(doc['ok']),'preparation':show(**opts),'publish_performed':False}
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
-    if mode=='approve':
+    requested_publish=(mode=='publish')
+    if mode in ('approve','publish'):
         if row['source_kind'] in ('REVIEWED_PREPARED','PREPARED'):
             source=state.read(row['artifact'])['posts'][row['day']]
         else:source=state.read(row['artifact'])
         message_id=args.get('approval_message_id') or current_approval_message(db_path=db_path)
         approval=state.consent.verify_message(message_id,row['post_text'],db_path=db_path)
         preferences=(approval.get('receipt') or {}).get('preferences') or approval.get('preferences') or {}
+        requested_publish=requested_publish or preferences.get('publish_now',False)
         skip_image=preferences.get('skip_image',False) or source.get('image_required') is False
         capture_id=message_id
         if not approval['ok']:
@@ -194,7 +196,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
         if not status['reviews_ready']:
             return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','message':'Your approval is saved. The post is held for factual review; you do not need to approve this unchanged text again.',
-                    'approval':result,'publish_performed':False}
+                    'approval':result,'content_blockers':status['content_blockers'],'publish_performed':False}
         if conflict:
             return {'ok':True,'phase':'SCHEDULE_CONFLICT','message':'Your approval is saved. Another post already has that date. Which post should use that slot?',
                     'approval':result,'publish_performed':False}
@@ -205,6 +207,8 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             except Exception as exc:
                 return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','message':'Your approval is saved. Image generation is unavailable. You can say “skip the image”.',
                         'blocker_type':type(exc).__name__,'publish_performed':False}
+        if requested_publish:
+            return publish_now(selected,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner)
         if due<=now:
             return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'image':image_result,
                     'message':'Your approval is saved. That time has passed; tell me when you want it posted.','publish_performed':False}

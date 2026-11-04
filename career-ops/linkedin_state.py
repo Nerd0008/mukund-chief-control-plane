@@ -206,6 +206,9 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     job_matches=bool(slot and job.get('next_run_at')==slot.get('publish_at'))
     identity_ok=bool(target and day==target.strftime('%A').lower())
     content_ready=bool(identity_ok and review['owner_approved'] and review['reviews_ready'] and frozen_ok and image_ok and not doc.get('cancelled'))
+    blockers=[]
+    for okay,code in [(review['owner_approved'],'owner_approval_required'),(review['personal_review_passed'],'personal_review_required'),(review['reviews_ready'],'factual_review_required'),(identity_ok,'artifact_date_mismatch'),(frozen_ok,'text_integrity_failed'),(image_ok,'required_image_unavailable'),(not doc.get('cancelled'),'owner_cancelled')]:
+        if not okay:blockers.append(code)
     is_published=published(sha,root)
     policy_on=publishing_enabled(root)
     if doc.get('cancelled'):phase='CANCELLED'
@@ -218,7 +221,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     return {'schema_version':2,'phase':phase,'artifact':str(path),'body_sha256':sha,'body_chars':len(body),
         **review,'artifact_identity_valid':identity_ok,'text_integrity_passed':bool(frozen_ok),'image_available':image_ok,
         'content_ready':content_ready,'published':is_published,'cancelled':bool(doc.get('cancelled')),
-        'target_date':target.isoformat() if target else None,'publish_at':slot.get('publish_at') if slot else None,
+        'target_date':target.isoformat() if target else None,'publish_at':slot.get('publish_at') if slot else None,'content_blockers':blockers,
         'slot_matches':bool(slot_ok),'slot_detail':slot_reason,'job':job,
         'publishing_enabled':policy_on,'automatic_publish_armed':bool(content_ready and slot_ok and job_matches and job['enabled'] and policy_on and not is_published)}
 
@@ -358,7 +361,7 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
     with (nullcontext() if dry_run else locked(root)):
         artifact_before=file_hash(path)
         status=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
-        if not status['content_ready'] or status['published']:raise ValueError('only verified, owner-approved, unpublished content can be planned')
+        if not status['content_ready'] or status['published']:raise ValueError('Cannot plan: '+', '.join(status['content_blockers'] or ['already_published']))
         sched=root/'drafts/schedule.json';before=file_hash(sched);slots=load_slots(sched);doc=read(path)
         image=absolute(doc['image_path']) if doc.get('image_path') else None
         value={'draft_path':str(path),'body_sha256':status['body_sha256'],

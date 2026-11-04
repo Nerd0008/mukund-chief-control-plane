@@ -10,6 +10,7 @@ DAYS = ('monday','tuesday','wednesday','thursday','friday','saturday','sunday')
 def interpret(text, *, now=None):
     text = str(text or '').strip()
     text = re.sub(r'(?s)^\[Replying to: .*?\]\s*\n\s*','',text,count=1).strip()
+    text=re.sub(r'(?i)^(?:(?:bro|wtf|man)[,! ]+)+','',text).strip()
     result = {'approved':False,'skip_image':False,'publish_now':False,'publish_at':None,'override':False}
     if not text or len(text)>20000:
         return result
@@ -27,7 +28,8 @@ def interpret(text, *, now=None):
         return result
     polite = r'(?:(?:please|yes|yeah|yep|okay|ok|perfect|great)[,!\.\s]+)*'
     start = r"(?:i\s+approve\b|approved?\b|(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b|(?:publish|post|schedule)\s+(?:it|this|the|my|missed|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b|go\s+ahead\b|looks\s+(?:good|great|fine|perfect)\b)"
-    affirmative = bool(re.match('(?i)^'+polite+start,text))
+    direct_publish=bool(re.fullmatch(r'(?i)(?:please\s+)?(?:publish|post)(?:\s+(?:it|this|the post|man))?[.! ]*(?:[, ]+(?:skip|without|no)\s+(?:the\s+)?image[.! ]*)?',text))
+    affirmative = direct_publish or bool(re.match('(?i)^'+polite+start,text))
     affirmative |= bool(re.fullmatch(r'(?i)(?:yes|yeah|yep|okay|ok|perfect|looks good|go ahead)[!. ]*',text))
     affirmative |= bool(re.search(r'\bI\s+approve\s+(?:this|the|it|that)\b',text))
     affirmative |= bool(re.match(r'(?i)^(?:the\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:\x27s)?\s+(?:post\s+)?(?:is\s+)?approved\b',text))
@@ -38,7 +40,7 @@ def interpret(text, *, now=None):
         return result
     result['approved'] = affirmative
     result['skip_image'] = bool(re.search(r'\b(?:skip|omit|without|no)\s+(?:the\s+|an?\s+)?images?\b|\b(?:do not|don.t)\s+(?:generate|include|use|add)\s+(?:an?\s+|the\s+)?images?\b',text,re.I))
-    result['override'] = bool(re.search(r'\b(?:despite|anyway|override|publish\s+(?:the\s+)?missed|publish\s+right\s+now|publish\s+now)\b',text,re.I))
+    result['override'] = bool(re.search(r'\b(?:despite|anyway|override)\b',text,re.I))
     now = (now or datetime.now(LONDON)).astimezone(LONDON)
     target = None
     if re.search(r'\btomorrow\b',text,re.I):
@@ -60,7 +62,7 @@ def interpret(text, *, now=None):
                 hour = hour%12+(12 if suffix=='pm' else 0)
             if not 0<=hour<=23 or not 0<=minute<=59:raise ValueError('Please give a valid publication time.')
         result['publish_at'] = datetime.combine(target,time(hour,minute),LONDON).isoformat()
-    result['publish_now'] = bool(re.search(r'\b(?:publish|post)\s+(?:it\s+|this\s+post\s+)?now\b',text,re.I) and not re.search(r'\bnot\s+now\b',text,re.I) and target is None)
+    result['publish_now'] = bool(direct_publish or re.search(r'\b(?:publish|post)\s+(?:it\s+|this\s+post\s+)?now\b',text,re.I) and not re.search(r'\bnot\s+now\b',text,re.I) and target is None)
     return result
 
 

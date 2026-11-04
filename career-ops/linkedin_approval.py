@@ -109,7 +109,7 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                     warned=any(prior['id']>=presented_id and re.search(
                         r'fact[ -]?check.{0,80}(?:warn|block|fail)|factual.{0,80}(?:warn|block|fail|held)',prior['content'] or '',re.I)
                         for prior in history)
-                    preferences['override']=bool(acknowledged or warned or re.search(r'\bpublish\b.{0,40}\b(?:missed|right\s+now|now)\b',command,re.I))
+                    preferences['override']=bool(acknowledged or warned)
                 if require_override and not preferences.get('override'):
                     return refused('Please acknowledge the factual warning before asking to publish anyway.')
                 method='owner_reply_to_exact_presented_post'

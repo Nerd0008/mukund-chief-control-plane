@@ -10,7 +10,7 @@ import linkedin_state as state
 
 
 def protected_day(reference,*,resolver=None):
-    for day,job_id in state.JOB_IDS.items():
+    for day,job_id in state.job_ids().items():
         if reference==job_id:return day
     if not reference:return None
     if resolver is None:
@@ -18,7 +18,7 @@ def protected_day(reference,*,resolver=None):
         resolver=resolve_job_ref
     job=resolver(reference)
     if job:
-        return next((day for day,jid in state.JOB_IDS.items() if jid==job.get('id')),None)
+        return next((day for day,jid in state.job_ids().items() if jid==job.get('id')),None)
     return None
 
 
@@ -31,7 +31,7 @@ def manage(day,action,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,now=No
         return {'success':armed,'phase':'SCHEDULED' if armed else 'NOT_ARMED',
             'reason_code':'approved_future_slot_armed' if armed else 'no_approved_verified_future_slot',
             'message':'Protected LinkedIn jobs use exact approved future slots; no stale occurrence was resumed.',
-            **result,'job':state.job_state(day,jobs_path=jobs_path),'publish_performed':False,'network_calls':0}
+            **result,'job':state.job_state(day,jobs_path=jobs_path,root=root),'publish_performed':False,'network_calls':0}
     if action in ('run','run_now','trigger'):
         if now.strftime('%A').lower()!=day:
             return {'success':True,'phase':'NOT_DUE','outcome':'NO_ACTION','publish_performed':False,'network_calls':0}
