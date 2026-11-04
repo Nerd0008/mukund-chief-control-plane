@@ -716,8 +716,24 @@ def verify_post(post_text: str, sources: list[str], *,
 
     combined = combine_sources(source_texts)
     body = post_prose(post_text)
+    # Completed decisions (including blocks) are stable for identical evidence.
+    # Never resample a rejected post until it happens to pass. New evidence,
+    # wording, policy, judge configuration or UTC date creates a different key.
+    review_key=sha256_text(json.dumps({'body':body,'sources':source_texts,'model':model,
+        'gate_version':GATE_VERSION,'judge_runs':JUDGE_RUNS,'date':now_utc()[:10],
+        'forbidden':forbidden_phrases or []},sort_keys=True,ensure_ascii=False))
+    audit_dir=Path(__file__).resolve().parent.parent/'runtime/linkedin/gate-runs'
+    if use_llm and not unavailable:
+        for cached_path in sorted(audit_dir.glob('*-'+sha256_text(body)[:12]+'-*.json'),reverse=True):
+            try:
+                cached=json.loads(cached_path.read_text(encoding='utf-8')).get('gate',{})
+                if (cached.get('review_key')==review_key and cached.get('verification_complete') is True
+                    and cached.get('verdict') in ('pass','block')):
+                    return {**cached,'review_reused':True,'audit_path':str(cached_path)}
+            except (OSError,ValueError,AttributeError):continue
 
     record: dict = {
+        "review_key": review_key,
         "gate_name": GATE_NAME,
         "gate_version": GATE_VERSION,
         "ran_at": now_utc(),

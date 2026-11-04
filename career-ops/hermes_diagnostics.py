@@ -192,6 +192,18 @@ def _record_response(contract,evidence,answer):
 
 def transform_output(response_text,**kwargs):
     contract=current_contract()
+    if contract.get('workflow')=='linkedin' and contract.get('action') in ('APPROVAL','PUBLISH_NOW'):
+        try:
+            from career_workflow_bridge import show
+            evidence=show();rows=[r for r in evidence['days'] if r.get('owner_approved') and not r.get('published')]
+            if len(rows)==1 and rows[0].get('content_blockers'):
+                row=rows[0];labels={'required_image_unavailable':'the required image is unavailable',
+                    'factual_review_required':'the factual review needs attention','personal_review_required':'personal claims need verification',
+                    'text_integrity_failed':'the saved text differs from its frozen version','artifact_date_mismatch':'the dated artifact identity is inconsistent',
+                    'owner_cancelled':'the post was cancelled'}
+                reasons=[labels.get(c,c) for c in row['content_blockers']]
+                return 'Your text approval is saved. The post has not been published because '+', '.join(reasons)+'. A missing schedule is separate from these content checks. You do not need to repeat approval of unchanged text.'
+        except Exception:pass
     if contract.get('turn_origin')!='synthetic_event' and contract.get('action') in ('SHOW_DRAFTS','BUILD_ARTIFACTS') and contract.get('workflow')=='linkedin':
         from career_workflow_bridge import show,render_drafts
         try:
