@@ -73,3 +73,26 @@ def test_custom_day_identity_and_natural_multi_post_approval(history):
     assert approval.verify_message(add('Friday post approved'),body,db_path=db)['ok']
     assert interpret('Schedule Friday')['approved']
     with pytest.raises(ValueError):s.artifact_date(Path('approved_20261106_monday/linkedin_drafts.json'))
+
+
+def test_earliest_custom_slot_only_and_fail_closed_guards(tmp_path,history):
+    db,add=history;root=tmp_path/'linkedin';root.mkdir();jobs=tmp_path/'jobs.json'
+    (root/'publish_slots.json').write_text(json.dumps({'schema_version':1,'weekdays':{'friday':'custom'}}))
+    jobs.write_text(json.dumps({'jobs':[{'id':'custom','enabled':False}]}))
+    (root/'publishing-policy.json').write_text('{"schema_version":1,"enabled":true}')
+    paths=[];calls,update=scheduler_fixture(jobs);now=datetime(2026,11,4,tzinfo=s.LONDON)
+    for target in ['2026-11-06','2026-11-13']:
+        body='Synthetic dated post '+target
+        add(body,role='assistant');mid=add('Approved')
+        path=Path(s.capture(body,target,mid,root=root,db_path=db)['artifact']);doc=s.read(path)
+        doc.update(news_fact_gate=gate(body),personal_fact_gate=personal(body))
+        path.write_text(json.dumps(doc));s.plan_slot(path,target,root=root,db_path=db,jobs_path=jobs,now=now,updater=update);paths.append(path)
+    assert s.inspect_artifact(paths[0],root=root,db_path=db,jobs_path=jobs)['automatic_publish_armed']
+    assert not s.inspect_artifact(paths[1],root=root,db_path=db,jobs_path=jobs)['automatic_publish_armed']
+    assert s.read(jobs)['jobs'][0]['next_run_at']=='2026-11-06T08:00:00+00:00'
+    for key,value in [('owner_approval',None),('personal_fact_gate',{}),('news_fact_gate',{'verdict':'block'})]:
+        original=paths[0].read_text();doc=json.loads(original);doc[key]=value;paths[0].write_text(json.dumps(doc))
+        with pytest.raises(ValueError):s.plan_slot(paths[0],'2026-11-06',root=root,db_path=db,jobs_path=jobs,now=now,updater=update)
+        paths[0].write_text(original)
+    (paths[0].parent/'frozen_text.txt').write_text('Changed text')
+    with pytest.raises(ValueError):s.plan_slot(paths[0],'2026-11-06',root=root,db_path=db,jobs_path=jobs,now=now,updater=update)

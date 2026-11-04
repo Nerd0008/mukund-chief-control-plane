@@ -203,6 +203,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
         slot_ok=(not slot.get('legacy') and absolute(slot.get('draft_path',''))==path and slot.get('body_sha256')==sha and slot.get('publish_at')==when
             and (not slot.get('image_sha256') or (image is not None and file_hash(image)==slot['image_sha256'])))
         slot_reason='exact artifact/hash/date matched' if slot_ok else 'schedule artifact/hash/time/image changed'
+    job_matches=bool(slot and job.get('next_run_at')==slot.get('publish_at'))
     identity_ok=bool(target and day==target.strftime('%A').lower())
     content_ready=bool(identity_ok and review['owner_approved'] and review['reviews_ready'] and frozen_ok and image_ok and not doc.get('cancelled'))
     is_published=published(sha,root)
@@ -212,14 +213,14 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     elif not review['owner_approved']:phase='AWAITING_OWNER_APPROVAL'
     elif not content_ready:phase='APPROVED_BUT_BLOCKED'
     elif not job['enabled'] or not policy_on:phase='APPROVED_READY_PAUSED'
-    elif not slot_ok:phase='APPROVED_READY_UNSCHEDULED'
+    elif not slot_ok or not job_matches:phase='APPROVED_READY_UNSCHEDULED'
     else:phase='SCHEDULED'
     return {'schema_version':2,'phase':phase,'artifact':str(path),'body_sha256':sha,'body_chars':len(body),
         **review,'artifact_identity_valid':identity_ok,'text_integrity_passed':bool(frozen_ok),'image_available':image_ok,
         'content_ready':content_ready,'published':is_published,'cancelled':bool(doc.get('cancelled')),
         'target_date':target.isoformat() if target else None,'publish_at':slot.get('publish_at') if slot else None,
         'slot_matches':bool(slot_ok),'slot_detail':slot_reason,'job':job,
-        'publishing_enabled':policy_on,'automatic_publish_armed':bool(content_ready and slot_ok and job['enabled'] and policy_on and not is_published)}
+        'publishing_enabled':policy_on,'automatic_publish_armed':bool(content_ready and slot_ok and job_matches and job['enabled'] and policy_on and not is_published)}
 
 
 def recover_news(body,old,*,root=ROOT):
