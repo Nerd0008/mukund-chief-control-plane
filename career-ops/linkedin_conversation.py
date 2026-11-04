@@ -75,7 +75,7 @@ def is_instruction(text):
 def has_draft_body(text):
     # An actual changed draft remains a barrier, even if surrounded by instructions.
     # Quoted image-generation prompts are not new public post versions.
-    if re.search(r'(?i)image generation|image prompt|visual medium|prompt I would have used',text) and not re.search(r'(?m)^#[A-Za-z]',text):
+    if re.search(r'(?i)image generation is blocked|visual medium:|prompt I would have used',text) and not re.search(r'(?m)^#[A-Za-z]',text):
         return False
     blocks = re.findall(r'```[^\n]*\n([\s\S]*?)```',text)
     blocks += ['\n'.join(re.findall(r'(?m)^> ?(.*)$',text))]

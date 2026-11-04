@@ -97,3 +97,25 @@ def test_natural_override_needs_the_exact_post_and_warning(history,phrase):
     assert not consent.verify_message(add(phrase),body,db_path=db,require_override=True)['ok']
     add('The fact-check blocked this post because a historical claim needs a source.',role='assistant')
     assert consent.verify_message(add(phrase),body,db_path=db,require_override=True)['ok']
+
+
+def test_publication_turn_budget_is_restored_on_failure(monkeypatch):
+    import hermes_gmail_tools as tools
+    monkeypatch.setattr(owner,'prepare_turn',lambda *a,**kw:('',[],{'workflow':'linkedin','action':'PUBLISH_NOW','turn_origin':'human_text'}))
+    class Agent:
+        max_iterations=150
+        ephemeral_system_prompt='original'
+        def run_conversation(self,*args,**kw):
+            assert self.max_iterations==8
+            raise RuntimeError('synthetic failure')
+    tools.install_language_policy(Agent);agent=Agent()
+    with pytest.raises(RuntimeError,match='synthetic failure'):agent.run_conversation('publish')
+    assert agent.max_iterations==150 and agent.ephemeral_system_prompt=='original'
+
+
+def test_status_reports_image_requirement_without_guessing_a_schedule_loop(prepared,monkeypatch):
+    import hermes_diagnostics as diag
+    monkeypatch.setattr(bridge,'show',lambda:{'days':[{'owner_approved':True,'published':False,'content_blockers':['required_image_unavailable']}]})
+    with owner.dispatch_context('',[],{'workflow':'linkedin','action':'PUBLISH_NOW','turn_origin':'human_text'}):
+        answer=diag.transform_output('It is a chicken and egg scheduling defect.')
+    assert 'required image is unavailable' in answer and 'chicken' not in answer and 'approval is saved' in answer
