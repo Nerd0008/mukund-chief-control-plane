@@ -26,6 +26,21 @@ from workflow_routing import select, RoutedClient, _request_task
 from router_brain import RouterDecisionError
 
 
+def wait_native_capacity(candidates,state):
+    """Wait once before a NEW model dispatch; never replay model/tool actions.
+
+    Respect cancellation, the existing deadline and provider cooldown. Long
+    auth/billing outages retain their existing refusal rather than being retried.
+    """
+    from workflow_health import snapshot
+    health=[snapshot(o.get('provider','transport'),o.get('model','configured')) for o in candidates]
+    if not health or any(h['available'] for h in health):return
+    delay=max(0,min(h['cooldown_until'] for h in health)-time.time())+0.1
+    if delay>31 or state.remaining()<=delay+1:return
+    if state.cancel.wait(delay):raise RouterDecisionError('workflow_cancelled')
+    state.remaining()
+
+
 def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
     # The native tool-loop requires its existing protocol-compatible transport.
     # CLI workers are not offered as emulated Hermes function-call transports.
@@ -51,8 +66,10 @@ def llm_execution(request,next_call,provider='',model='',api_mode='',**context):
                 persist({'workflow':'hermes.operational-evidence','call_id':uuid.uuid4().hex,
                          'operation_id':state.id,'stage':'current_state','status':'EVIDENCE_READY' if diagnostic.get('evidence_sha256') else 'EVIDENCE_UNAVAILABLE',
                          'input_sha256':diagnostic.get('evidence_sha256'),'operational_evidence':receipt_evidence(diagnostic)})
+            candidates=offers(provider,model,api_mode,request)
+            wait_native_capacity(candidates,state)
             _,receipt=select('hermes.native.'+str(api_mode or 'chat'),
-                offers(provider,model,api_mode,request),
+                candidates,
                 task=router_task(request,_request_task(request)),
                 # High-reasoning selection can exceed 45s. Reserve at least a
                 # quarter of the existing request budget for the chosen worker;
