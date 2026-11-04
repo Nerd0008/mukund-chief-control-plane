@@ -737,7 +737,7 @@ def generate_post_from_topic(topic: dict, generate_image: bool = False) -> dict:
         source_evidence=({k:v for k,v in topic.items() if k!='research_receipt'},topic['research_receipt'])
     from workflow_control import run_stage
     from router_brain import RouterDecisionError
-    attempts=[];correction=''
+    attempts=[];correction='\nUse only factual claims explicitly established by the supplied source text. Do not add historical dates, continuity since a year, causal claims or universal claims such as all/none/always unless those sources establish them. Keep personal interpretation clearly separate from external facts.'
     for attempt in range(2):
         post_text=generate_linkedin_content(content+correction,source_type="verified news article",source_evidence=source_evidence)
         reviewed=[]

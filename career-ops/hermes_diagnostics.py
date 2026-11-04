@@ -94,7 +94,7 @@ def snapshot(*,home=state.HOME,root=state.ROOT,db_path=None,now=None):
     fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job','draft_exists','artifact','source_kind','alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail')
     days=[{k:row[k] for k in fields if k in row} for row in status['days']]
     for row in days:
-        if row.get('alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
+        if row.get('alternatives'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
     logs=[latest_run(jid,home=home) for jid in state.job_ids(root).values()]
     value={'schema_version':1,'workflow':'linkedin','checked_at':now.isoformat(),
         'publishing_enabled':state.publishing_enabled(root),'days':days,'latest_executions':logs,
