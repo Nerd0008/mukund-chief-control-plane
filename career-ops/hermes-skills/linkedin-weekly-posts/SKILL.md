@@ -135,14 +135,7 @@ An `owner_override` record authorises publishing a post a gate **refused** (verd
 `ungated`). It does not repair a gate record that was produced for different text: that record
 simply does not cover these bytes, and the only fix is to re-run the gate over the current text.
 
-```python
-draft['owner_override'] = {
-    'approved_by': 'Mukund',
-    'approved_at': '<timestamp>',
-    'reason': 'Owner explicitly approved this exact text in Discord',
-    'body_sha256': raw_sha
-}
-```
+Use the bounded workflow tool to record an authenticated override. Do not construct or edit this record by hand.
 
 The override binds to the **raw** body hash, so it cannot leak to an edited draft. It never rewrites
 the gate verdict: both records are preserved and the override is reported as an override rather than
@@ -752,3 +745,14 @@ The default weekly drafting mix remains Tuesday, Wednesday and Thursday. Custom 
 Dispatcher IDs live in runtime/linkedin/publish_slots.json. To provision a new weekday without editing code, run scripts/register_linkedin_slot.py <weekday> --apply with the Hermes interpreter. This installs a paused wrapper/job and registers its ID. It does not approve content, create a dated manifest entry, or enable recurring publication. Friday is already registered. Re-running registration repairs the wrapper and preserves the existing job identity. A missing registered job is reported for repair rather than silently duplicated.
 
 Use the existing authenticated capture/review/plan path for a custom date. Only approved, verified, intact and unpublished content is eligible. The earliest exact future slot per weekday is armed; later slots remain unarmed until promoted. Empty weekdays pause. Verify computed state and the job's exact next_run_at before saying a post is scheduled. NOT_DUE, no approved slot and already published are normal no-action outcomes for execution; actual integrity/review failures remain errors. Never use the handover's draft text as approval.
+
+
+## Publication recovery contract — 4 November 2026
+
+After showing a single exact post, ordinary “publish” is authenticated approval plus immediate-publication intent. Use career_linkedin_workflow action publish. It captures the latest real owner approval and image choice, then invokes the existing publisher. Future dates remain scheduling requests. Never require a hash command. Never hand-edit receipts, frozen text, gate output, image_required or schedule.json through scripts. Never retry a completed fact-check with unchanged text and sources to obtain a different verdict. Complete exact-evidence reviews are reused, including blocks; new evidence or wording receives a new review.
+
+A quoted image-generation prompt is not a new public post presentation. “Skip the image” must be saved on the post. Image billing failure must not trigger receipt repair, post rewrites or another text approval. Report content_blockers from canonical state. In particular required_image_unavailable explains why an approved/reviewed post is not content_ready. slot_matches is a separate scheduling check; never describe it as a circular dependency. Immediate publishing does not require an automatic schedule manifest.
+
+A genuine factual warning is explained once, with the unsupported claim and missing evidence. “Override fact check” or “publish it anyway” may provide informed override consent only in the context of that exact post and warning. Ordinary publish is never itself a factual override. Personal-claim checks stay in force. An owner-requested edit changes the post version; show the corrected final version and accept normal conversational approval of it. Do not invent or patch approval records.
+
+Approval/publication turns have a bounded eight-iteration model budget. A blocked bounded tool result is a stop condition, not a request for a shell workaround. Show the actual failed checks once. Preserve partial effects across restart. A successful exit or model promise is insufficient to claim publication; require the publisher response, post URN and ledger evidence. Never replay an uncertain publish automatically.
