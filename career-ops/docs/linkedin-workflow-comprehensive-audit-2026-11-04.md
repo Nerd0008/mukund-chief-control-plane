@@ -55,3 +55,5 @@ Actual network limitations: source sites can block retrieval, model services can
 ## Expected owner experience
 
 Show final text. Owner says publish. Resolve the exact post and authenticated message internally, preserve any text-only preference, reuse the existing exact-evidence reviews, then call the guarded publisher once. Return the LinkedIn result only after URN and ledger verification. If there is a genuine factual warning, explain the exact claim once; normal “override fact check” or “publish it anyway” works in that context. If the owner edits the post, show the new final version and accept ordinary conversational approval. No hash command, repeated unchanged approval, silent rewrite, shell patch or automatic uncertain publication replay.
+
+Additional guard correction: status/why previously changed the action to STATUS and reopened generic interpreter execution, allowing pending repair scripts to resume. Mutation guards now remain active on LinkedIn status and investigation turns too. Canonical workflow/status tools and read-only file inspection remain available.
