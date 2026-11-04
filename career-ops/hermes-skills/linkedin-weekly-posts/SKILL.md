@@ -743,3 +743,12 @@ explicit date-bound plan and must not silently change a recurring weekday's beha
 ## OAuth Note
 
 LinkedIn did not return a refresh token for this app. `linkedin_auth.oauth_ready()` therefore accepts **either** a refresh token **or** a non-expired access token, so an access-token-only credential set still counts as ready. Check `linkedin_auth.py status` for the reason string and expiry.
+
+
+## Custom publishing slots (4 November 2026)
+
+The default weekly drafting mix remains Tuesday, Wednesday and Thursday. Custom approved posts may use any weekday. The exact date and requested Europe/London time govern publication.
+
+Dispatcher IDs live in runtime/linkedin/publish_slots.json. To provision a new weekday without editing code, run scripts/register_linkedin_slot.py <weekday> --apply with the Hermes interpreter. This installs a paused wrapper/job and registers its ID. It does not approve content, create a dated manifest entry, or enable recurring publication. Friday is already registered. Re-running registration repairs the wrapper and preserves the existing job identity. A missing registered job is reported for repair rather than silently duplicated.
+
+Use the existing authenticated capture/review/plan path for a custom date. Only approved, verified, intact and unpublished content is eligible. The earliest exact future slot per weekday is armed; later slots remain unarmed until promoted. Empty weekdays pause. Verify computed state and the job's exact next_run_at before saying a post is scheduled. NOT_DUE, no approved slot and already published are normal no-action outcomes for execution; actual integrity/review failures remain errors. Never use the handover's draft text as approval.
