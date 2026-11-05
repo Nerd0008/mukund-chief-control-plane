@@ -154,20 +154,23 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         from hermes_diagnostics import current_contract
         from linkedin_conversation import interpret
         spoken=interpret(current_contract().get('latest_human_message',''))
-        if not spoken['approved'] or not spoken['publish_now']:raise ValueError('An authenticated instruction to publish this post now is required')
-        message_id=args.get('approval_message_id') or current_approval_message(db_path=db_path)
+        if not spoken['approved'] or not (spoken['publish_now'] or spoken['publish_at']):raise ValueError('An authenticated instruction to publish now or at a specific time is required')
+        message_id=args.get('approval_message_id')
+        if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
         approval=state.consent.verify_message(message_id,body,db_path=db_path)
         if not approval['ok']:raise ValueError(approval['reason'])
         if state.published(state.consent.digest(body),root):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False}
         import linkedin_weekly  # installs the existing scripts and content-generator paths
         from topic_reuse_check import check_text
         if check_text(body,registry_path=Path(root)/'topic_registry.json')['blocked']:raise ValueError('topic already used or excluded')
-        target=now.date().isoformat()
+        due=datetime.fromisoformat(spoken['publish_at']) if spoken['publish_at'] else None
+        target=(due.date() if due else now.date()).isoformat()
         result=state.capture(body,target,message_id,sources=sources,distinct=True,root=root,db_path=db_path)
         path=Path(result['artifact'])
         with state.locked(root):
             before=state.file_hash(path);doc=state.read(path)
             doc['image_required']=not spoken.get('skip_image',False)
+            if due:doc['requested_publish_at']=due.isoformat()
             state.audited_json(path,doc,before,root=root,operation='chat_publication_preferences',body_sha=result['body_sha256'])
         import linkedin_content_gen as gen
         status=state.reconcile(path,root=root,db_path=db_path,jobs_path=jobs_path,
@@ -175,11 +178,16 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         if not status['reviews_ready']:
             return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','approval':result,'content_blockers':status['content_blockers'],
                     'review_errors':status.get('review_errors',[]),'publish_performed':False}
-        row={'date':target,'day':now.strftime('%A').lower(),'body_sha256':result['body_sha256'],'captured_artifact':str(path)}
+        row={'date':target,'day':date.fromisoformat(target).strftime('%A').lower(),'body_sha256':result['body_sha256'],'captured_artifact':str(path)}
         if not spoken.get('skip_image',False):
             try:image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
             except Exception as exc:
                 return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','approval':result,'message':'Your approval is saved. Image generation is unavailable; you can say publish now without image.','blocker_type':type(exc).__name__,'publish_performed':False}
+        if due:
+            if due<=now:return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'message':'Approval is saved, but the requested time has passed.','publish_performed':False}
+            plan=state.plan_slot(path,target,root=root,db_path=db_path,jobs_path=jobs_path,now=now)
+            armed=any(item.get('day')==row['day'] and item.get('next_run_at')==due.isoformat() for item in (plan.get('publishing') or {}).get('armed',[]))
+            return {'ok':True,'phase':'SCHEDULED' if armed else 'APPROVED_READY_PAUSED','approval':result,'plan':plan,'publish_performed':False}
         return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner)
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}

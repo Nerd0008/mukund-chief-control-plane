@@ -198,3 +198,43 @@ def test_chat_draft_blocked_review_never_calls_publisher(prepared,monkeypatch):
     with owner.dispatch_context('',[],contract):
         result=bridge.linkedin({'action':'publish_chat','post_text':body,'sources':['https://example.invalid/story'],'approval_message_id':mid},**opts(prepared),runner=lambda *a,**k:pytest.fail('publisher must not run'))
     assert result['phase']=='APPROVED_BUT_BLOCKED' and not result['publish_performed']
+
+
+def test_exact_incident_schedule_chat_and_arm(history,tmp_path,monkeypatch):
+    import sqlite3,linkedin_weekly,linkedin_content_gen as gen,topic_reuse_check as topics
+    from test_linkedin_state import gate,personal,scheduler_fixture
+    root=tmp_path/'linkedin';root.mkdir();(root/'publishing-policy.json').write_text('{"schema_version":1,"enabled":true}')
+    jobs=tmp_path/'jobs.json';jobs.write_text(json.dumps({'jobs':[{'id':j,'enabled':False} for j in state.JOB_IDS.values()]}))
+    monkeypatch.setattr(state,'_scheduler_update',lambda jid,updates,**kw:scheduler_fixture(jobs)[1](jid,updates))
+    db,add=history;body='A fresh personal post about a synthetic project.'
+    add('Here is the draft:\n```\n'+body+'\n```',role='assistant');mid=add('Perfect approved publish at 8 am')
+    stamp=datetime(2026,11,5,3,46,tzinfo=state.LONDON).timestamp()
+    with sqlite3.connect(db) as c:c.execute('update messages set timestamp=? where id=?',(stamp,mid))
+    monkeypatch.setattr(bridge,'current_approval_message',lambda **kw:mid)
+    monkeypatch.setattr(topics,'check_text',lambda *a,**kw:{'blocked':False})
+    monkeypatch.setattr(gen,'factcheck_post',lambda body,sources:gate(body))
+    monkeypatch.setattr(state,'_personal_runner',lambda body,label:personal(body))
+    now=datetime(2026,11,5,3,46,tzinfo=state.LONDON)
+    contract={'workflow':'linkedin','action':'APPROVAL','latest_human_message':'Perfect approved publish at 8 am','turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract):
+        result=bridge.linkedin({'action':'publish_chat','post_text':body,'approval_message_id':1567746920628224051},root=root,jobs_path=jobs,db_path=db,now=now,generator=lambda body:b'\x89PNG\r\n\x1a\nsynthetic')
+    assert result['phase']=='SCHEDULED',result
+    slot=state.load_slots(root/'drafts/schedule.json')['2026-11-05']
+    assert slot['publish_at']=='2026-11-05T08:00:00+00:00'
+    assert slot['body_sha256']==consent.digest(body)
+    assert state.job_state('thursday',jobs_path=jobs,root=root)['enabled']
+    assert not result['publish_performed']
+    import linkedin_scheduled as scheduled
+    calls=[]
+    def fake_publish(command,**kw):
+        calls.append(command);ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+        ledger.write_text(json.dumps({'result':'published','body_sha256':consent.digest(body)})+'\n')
+        return NS(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:test:scheduled'}))
+    code,receipt=scheduled.run_day('thursday',dry_run=False,root=root,jobs_path=jobs,db_path=db,now=datetime(2026,11,5,8,0,tzinfo=state.LONDON),runner=fake_publish)
+    assert code==0 and receipt['publish_performed'] and len(calls)==1
+    code,receipt=scheduled.run_day('thursday',dry_run=False,root=root,jobs_path=jobs,db_path=db,now=datetime(2026,11,5,8,1,tzinfo=state.LONDON),runner=fake_publish)
+    assert receipt['phase']=='ALREADY_PUBLISHED' and len(calls)==1
+
+def test_clock_without_day_is_today_not_immediate():
+    parsed=interpret('Perfect approved publish at 8 am',now=datetime(2026,11,5,3,46,tzinfo=state.LONDON))
+    assert parsed['approved'] and not parsed['publish_now'] and parsed['publish_at']=='2026-11-05T08:00:00+00:00'

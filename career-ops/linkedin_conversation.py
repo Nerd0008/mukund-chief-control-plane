@@ -54,6 +54,8 @@ def interpret(text, *, now=None):
         shift = (DAYS.index(named.group(1).lower())-now.weekday())%7
         target = now.date()+timedelta(days=shift or 7)
     clock = re.search(r'\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b',text,re.I)
+    if clock and target is None:
+        target = now.date()  # An unqualified time refers to today, not an inferred future day.
     immediate = bool(affirmative and re.search(r'\b(?:publish|post)\b',text,re.I) and re.search(r'\bnow\b',text,re.I) and not re.search(r'\bnot\s+now\b',text,re.I) and target in (None, now.date()) and not clock)
     if target is not None and not immediate:
         hour,minute = 8,0
