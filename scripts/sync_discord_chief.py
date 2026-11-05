@@ -159,15 +159,19 @@ def main():
             except Exception:
                 existing = []
         merged = existing + recs
-        # Dedupe: identity = direction + message_id when message_id is present
-        # (a Discord message ID appears only once per direction); fallback identity
-        # = timestamp + direction + content hash. Content matching alone never
-        # dedupes distinct messages.
+        # Dedupe: identity = direction + timestamp + message_id when message_id is
+        # present; fallback identity = timestamp + direction + content hash.
+        # Content matching alone never dedupes distinct messages.
+        #
+        # timestamp is part of the message_id key because Discord reuses a message
+        # ID when a background-process completion is posted as a reply to that
+        # message. Keying on the ID alone silently dropped those completion
+        # notices (verified: 21 records lost across 11 archive days).
         seen_ids, seen_fb, uniq = set(), set(), []
         for r in merged:
             mid = r.get("message_id")
             if mid:
-                key = (r.get("direction"), str(mid))
+                key = (r.get("direction"), str(r.get("timestamp")), str(mid))
                 if key in seen_ids:
                     continue
                 seen_ids.add(key)
