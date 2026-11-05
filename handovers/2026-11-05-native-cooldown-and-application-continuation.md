@@ -28,3 +28,11 @@ Legacy empty checkpoints can recover a JD on retry without inventing permission.
 The current native tool transport has one configured provider. This repair does not add or qualify a backup provider and cannot guarantee the remote endpoint remains available. It does not bypass health, quota, authentication, factual checks or approval controls. CV development mode remains the owner's existing setting; do not claim its disabled factual gate passed. Cover verification remains enforced.
 
 No applications, email, Calendar changes or LinkedIn publication are part of this repair. Preserve unrelated dirty runtime files. Do not merge main.
+
+## Deployment acceptance
+
+Repair source commit: `69aae3b547e6a2e2399862b27ffc6e90c4be1c6e`, pushed to `fix/e3-whole-repo-architecture`; no main merge. Targeted deployment at 18:28:39 UTC copied only `native_router_plugin.py` and `workflow_routing.py`; backup manifest is in `%LOCALAPPDATA%/hermes/exec-brain/backups/e3-deploy-20261105T182839Z/manifest.json`. Both deployed hashes matched repository source. Four original failure simulations then passed against the deployed copy, including the 2.65-second retry waiting 27.45 simulated seconds and succeeding, and insufficient-budget refusal without another dispatch.
+
+Gateway restart drained with zero active sessions/API/cron work and closed SessionDB cleanly. New PID 31696 connected to Discord at 18:30:15 UTC. Agent log confirms router source `06aade23bd69`, `repository_match=True`, `cooldown_wait=True`; gateway log confirms application dispatcher source `378d7bd9c9b9` and compiler-guard source `30b8fac93b8b`. Fresh heartbeat verified after startup; old PID was gone.
+
+The proven empty application checkpoint was recovered from its latest original session JD and explicit owner document-drafting permission, with a private before-image backup. Cached and session JD identity matched after removing only whitespace and its trailing original Revolut URL. Recovered state remains eligibility-unconfirmed and runs no document stages or deliveries. The private live acceptance PDFs were not inserted into the owner's workflow or sent to Discord. Unrelated dirty runtime files remain deliberately uncommitted.
