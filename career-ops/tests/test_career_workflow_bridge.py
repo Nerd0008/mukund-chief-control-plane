@@ -119,16 +119,17 @@ def test_unapproved_or_changed_body_cannot_generate_or_schedule(prepared):
     assert not calls
 
 
-def test_image_failure_retains_approval_and_cannot_arm_plan(prepared):
+def test_image_failure_retains_approval_and_schedules_text_only(prepared):
     root,jobs,db,add,posts=prepared;args=action_args(prepared)
     args['approval_message_id']=add('APPROVE LINKEDIN '+args['body_sha256'])
     def fail(body):raise RouterDecisionError('provider_billing_blocked')
-    response=bridge.linkedin(args,**opts(prepared),generator=fail)
-    assert response['phase']=='APPROVED_IMAGE_BLOCKED' and 'approval is saved' in response['message']
+    response=bridge.linkedin(args,**opts(prepared),generator=fail,now=datetime(2026,10,27,12,tzinfo=state.LONDON))
+    assert response['image']['phase']=='IMAGE_UNAVAILABLE_TEXT_ONLY'
+    assert response['image']['reason']=='provider_billing_blocked'
     path=root/'drafts/approved_20261029_thursday/linkedin_drafts.json'
     current=state.inspect_artifact(path,**opts(prepared))
-    assert current['owner_approved'] and not current['content_ready'] and not current['automatic_publish_armed']
-    with pytest.raises(ValueError):bridge.linkedin(action_args(prepared,'plan'),**opts(prepared))
+    assert current['owner_approved'] and current['content_ready'] and current['automatic_publish_armed']
+    assert state.read(path)['image_required'] is False
 
 
 def test_model_500_leaves_other_workers_eligible_but_503_remains_provider_wide():

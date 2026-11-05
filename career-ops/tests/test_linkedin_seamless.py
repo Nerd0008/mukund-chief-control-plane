@@ -270,3 +270,15 @@ def test_approve_with_discord_platform_id_resolves_authenticated_current(prepare
     result=bridge.linkedin(args,**opts(prepared),generator=lambda body:b'\x89PNG\r\n\x1a\nsynthetic')
     assert result['approval']['owner_approved']
     assert result['approval']['body_sha256']==consent.digest(body)
+
+
+def test_image_failure_falls_back_to_text_only_and_schedules(prepared):
+    root,jobs,db,add,posts=prepared;body=posts['thursday']['post_text']
+    add(body,role='assistant');mid=add('Perfect approved for Thursday at 8 am')
+    args=action_args(prepared);args['approval_message_id']=mid
+    def broken_image(body):raise RuntimeError('provider unavailable')
+    result=bridge.linkedin(args,**opts(prepared),generator=broken_image,now=datetime(2026,10,27,12,tzinfo=state.LONDON))
+    assert result['image']['phase']=='IMAGE_UNAVAILABLE_TEXT_ONLY'
+    assert result['image']['reason'] and result['plan']['planned']
+    path=Path(result['approval']['artifact']);doc=state.read(path)
+    assert doc['image_required'] is False and doc['owner_approval']['body_sha256']==consent.digest(body)

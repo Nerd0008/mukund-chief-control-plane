@@ -90,6 +90,23 @@ def image(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None
     return {'ok':True,'phase':'IMAGE_READY','image':str(asset),'publish_performed':False}
 
 
+def image_fallback(path,sha,exc,*,root=state.ROOT,db_path=None,jobs_path=state.JOBS):
+    """Owner preference: continue text-only when image generation fails."""
+    if isinstance(exc,state.StateConflict):raise exc
+    from workflow_routing import failure_code
+    code=failure_code(exc)
+    with state.locked(root):
+        status=state.inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
+        if status['body_sha256']!=sha or not status['owner_approved'] or not status['reviews_ready'] or status['published']:
+            raise state.StateConflict('post changed or is not eligible for image fallback')
+        before=state.file_hash(path);doc=state.read(path)
+        doc.update(image_required=False,image_path=None,image_sha256=None,image_body_sha256=None,
+                   image_fallback_reason=code)
+        state.audited_json(path,doc,before,root=root,operation='owner_preference_text_only_on_image_failure',body_sha=sha)
+    return {'ok':True,'phase':'IMAGE_UNAVAILABLE_TEXT_ONLY','reason':code,
+            'message':'Image generation was unavailable ('+code+'); continuing with text only.'}
+
+
 def current_approval_message(*,db_path=None):
     from hermes_diagnostics import current_contract
     from hermes_owner_context import human_text
@@ -215,16 +232,16 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','approval':result,'content_blockers':status['content_blockers'],
                     'review_errors':status.get('review_errors',[]),'publish_performed':False}
         row={'date':target,'day':date.fromisoformat(target).strftime('%A').lower(),'body_sha256':result['body_sha256'],'captured_artifact':str(path)}
+        image_result={'ok':True,'phase':'IMAGE_SKIPPED'}
         if not spoken.get('skip_image',False):
-            try:image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
-            except Exception as exc:
-                return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','approval':result,'message':'Your approval is saved. Image generation is unavailable; you can say publish now without image.','blocker_type':type(exc).__name__,'publish_performed':False}
+            try:image_result=image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
+            except Exception as exc:image_result=image_fallback(path,row['body_sha256'],exc,root=root,db_path=db_path,jobs_path=jobs_path)
         if due:
             if due<=now:return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'message':'Approval is saved, but the requested time has passed.','publish_performed':False}
             plan=state.plan_slot(path,target,root=root,db_path=db_path,jobs_path=jobs_path,now=now)
             armed=any(item.get('day')==row['day'] and item.get('next_run_at')==due.isoformat() for item in (plan.get('publishing') or {}).get('armed',[]))
-            return {'ok':True,'phase':'SCHEDULED' if armed else 'APPROVED_READY_PAUSED','approval':result,'plan':plan,'publish_performed':False}
-        return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner,verified_instruction=(message_id,approval) if retry else None)
+            return {'ok':True,'phase':'SCHEDULED' if armed else 'APPROVED_READY_PAUSED','approval':result,'plan':plan,'image':image_result,'publish_performed':False}
+        return {**publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner,verified_instruction=(message_id,approval) if retry else None),'image':image_result}
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     requested_publish=(mode=='publish')
@@ -283,11 +300,9 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         image_result={'ok':True,'phase':'IMAGE_SKIPPED'}
         if not skip_image:
             try:image_result=image(selected,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
-            except Exception as exc:
-                return {'ok':True,'phase':'APPROVED_IMAGE_BLOCKED','message':'Your approval is saved. Image generation is unavailable. You can say “skip the image”.',
-                        'blocker_type':type(exc).__name__,'publish_performed':False}
+            except Exception as exc:image_result=image_fallback(path,row['body_sha256'],exc,root=root,db_path=db_path,jobs_path=jobs_path)
         if requested_publish:
-            return publish_now(selected,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner)
+            return {**publish_now(selected,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner),'image':image_result}
         if due<=now:
             return {'ok':True,'phase':'APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION','approval':result,'image':image_result,
                     'message':'Your approval is saved. That time has passed; tell me when you want it posted.','publish_performed':False}
