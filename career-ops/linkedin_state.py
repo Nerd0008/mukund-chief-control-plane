@@ -474,8 +474,13 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
     monday=date.fromisoformat(week_of) if week_of else today-timedelta(days=today.weekday())
     if monday.weekday()!=0:raise ValueError('week-of must be a Monday')
     days=[]
+    slots=load_slots(Path(root)/'drafts/schedule.json')
     for offset,day in enumerate(WEEKDAYS):
         target=monday+timedelta(days=offset);path=Path(root)/'drafts'/f'approved_{target:%Y%m%d}_{day}'/'linkedin_drafts.json'
+        canonical=path;slot=slots.get(target.isoformat());scheduled_path=None
+        if slot and slot.get('draft_path'):
+            candidate=absolute(slot['draft_path'])
+            if candidate.is_relative_to((Path(root)/'drafts').resolve()):scheduled_path=candidate;path=candidate
         prepared=prepared_status(target,root=root,jobs_path=jobs_path)
         if day not in job_ids(root) and not path.is_file() and not prepared:continue
         if path.is_file():
@@ -483,13 +488,17 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
             row['post_text']=body_of(read(path));row['source_kind']='DATED_ARTIFACT'
             if prepared and prepared.get('body_sha256')!=row.get('body_sha256'):
                 # Unapproved scratch output cannot hide an existing reviewed draft.
-                if prepared.get('reviews_ready') and not row.get('owner_approved') and not row.get('published') and not row.get('cancelled'):
+                if scheduled_path is None and prepared.get('reviews_ready') and not row.get('owner_approved') and not row.get('published') and not row.get('cancelled'):
                     alternative=row;row={**prepared,'source_kind':'REVIEWED_PREPARED'}
                 else:alternative={**prepared,'source_kind':'PREPARED'}
                 row['alternatives']=[{k:alternative.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')}]
         else:
             row=({**prepared,'source_kind':'REVIEWED_PREPARED' if prepared.get('reviews_ready') else 'PREPARED'} if prepared else
                 {'phase':'NO_ARTIFACT','source_kind':'NONE','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path,root=root)})
+        if scheduled_path is not None and canonical.is_file() and canonical.resolve()!=scheduled_path:
+            other=inspect_artifact(canonical,root=root,db_path=db_path,jobs_path=jobs_path)
+            other.update(post_text=body_of(read(canonical)),source_kind='DATED_ARTIFACT')
+            row.setdefault('alternatives',[]).append({k:other.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')})
         row['draft_exists']=bool(row.get('post_text'))
         days.append({'day':day,'date':target.isoformat(),**row})
     count=sum(row['automatic_publish_armed'] for row in days)

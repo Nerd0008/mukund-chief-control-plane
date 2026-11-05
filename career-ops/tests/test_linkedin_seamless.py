@@ -223,6 +223,12 @@ def test_exact_incident_schedule_chat_and_arm(history,tmp_path,monkeypatch):
     assert slot['publish_at']=='2026-11-05T08:00:00+00:00'
     assert slot['body_sha256']==consent.digest(body)
     assert state.job_state('thursday',jobs_path=jobs,root=root)['enabled']
+    canonical=root/'drafts/approved_20261105_thursday/linkedin_drafts.json';canonical.parent.mkdir(parents=True)
+    canonical.write_text(json.dumps({'post_text':'Different old draft','day':'thursday'}))
+    view=state.week_status('2026-11-02',root=root,jobs_path=jobs,db_path=db)
+    thursday=next(row for row in view['days'] if row['day']=='thursday')
+    assert thursday['body_sha256']==consent.digest(body) and thursday['automatic_publish_armed']
+    assert any(row['post_text']=='Different old draft' for row in thursday['alternatives'])
     assert not result['publish_performed']
     import linkedin_scheduled as scheduled
     calls=[]
