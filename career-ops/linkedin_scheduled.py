@@ -1,12 +1,31 @@
 """Exact-date scheduled LinkedIn publisher. Dry-run has no account/ledger writes."""
 from __future__ import annotations
-import argparse,json,os,subprocess,sys
+import argparse,json,os,sqlite3,subprocess,sys
 from datetime import date,datetime,time
 from pathlib import Path
 import linkedin_state as state
 
 
-def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,jobs_path=state.JOBS,now=None,runner=None):
+def claimed_occurrence(job,slot,now,*,execution_db):
+    """A currently running scheduler execution must own this exact occurrence."""
+    if not job.get('known') or not job.get('enabled') or not job.get('job_id'):return False
+    if execution_db is None:return False
+    try:
+        wanted=datetime.fromisoformat(slot['publish_at'])
+        if wanted.tzinfo is None or wanted>now:return False
+        with sqlite3.connect(Path(execution_db).resolve().as_uri()+'?mode=ro',uri=True) as con:
+            rows=con.execute("SELECT scheduled_instant,started_at FROM executions WHERE job_id=? AND status='running' AND finished_at IS NULL AND source='builtin'",(job['job_id'],)).fetchall()
+        matches=[]
+        for instant,started in rows:
+            if not instant or not started:continue
+            occurrence=datetime.fromisoformat(instant.replace('Z','+00:00'))
+            start=datetime.fromisoformat(started.replace('Z','+00:00'))
+            if occurrence.tzinfo and start.tzinfo and occurrence==wanted and start<=now and (now-start).total_seconds()<=900:matches.append(instant)
+        return len(matches)==1
+    except (OSError,sqlite3.Error,TypeError,ValueError,KeyError):return False
+
+
+def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,jobs_path=state.JOBS,execution_db=None,now=None,runner=None):
     now=now or datetime.now(state.LONDON)
     if now.tzinfo is None:raise ValueError('timezone-aware execution time required')
     now=now.astimezone(state.LONDON);target=date.fromisoformat(str(target_date)) if target_date else now.date()
@@ -23,16 +42,22 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
     path=state.absolute(slot['draft_path'])
     if not path.is_relative_to((root/'drafts').resolve()):raise ValueError('scheduled artifact is outside the canonical drafts directory')
     snapshot=state.inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
+    if execution_db is None and Path(jobs_path).resolve()==state.JOBS.resolve():execution_db=state.HOME/'cron/executions.db'
+    claimed=claimed_occurrence(snapshot['job'],slot,now,execution_db=execution_db)
+    occurrence_ready=bool(snapshot['content_ready'] and snapshot['slot_matches'] and snapshot['publishing_enabled'] and snapshot['job']['enabled'] and not snapshot['published'] and claimed)
     result={**snapshot,'dry_run':dry_run,'publish_performed':False,'network_calls':0}
     if dry_run:
         result['would_publish_if_enabled_and_due']=bool(snapshot['content_ready'] and snapshot['slot_matches'] and not snapshot['published'])
+        result['scheduler_occurrence_claimed']=claimed
+        result['scheduler_armed_for_slot']=bool(snapshot['automatic_publish_armed'])
+        result['scheduler_ready_now']=bool((snapshot['automatic_publish_armed'] or occurrence_ready) and target==now.date() and now>=datetime.fromisoformat(slot['publish_at']).astimezone(state.LONDON))
         result['writes']=0
         return (0 if result['would_publish_if_enabled_and_due'] else 1),result
     if snapshot['published']:
         return 0,{**result,'ok':True,'phase':'ALREADY_PUBLISHED','outcome':'NO_ACTION','reason_code':'already_published','reason':'This exact body is already published; no publication attempted'}
     if target!=now.date() or now<datetime.fromisoformat(slot['publish_at']).astimezone(state.LONDON):
         return 0,{**result,'ok':True,'phase':'NOT_DUE','outcome':'NO_ACTION','reason_code':'date_or_time_not_due','reason':'Future or stale date cannot publish'}
-    if not snapshot['automatic_publish_armed']:
+    if not (snapshot['automatic_publish_armed'] or occurrence_ready):
         if snapshot['cancelled']:
             phase,reason,code='CANCELLED','owner_cancelled',0
         elif not snapshot['text_integrity_passed']:
@@ -45,6 +70,8 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
             phase,reason,code='BLOCKED_REVIEW','factual_reviews_incomplete_or_failed',1
         elif not snapshot['image_available']:
             phase,reason,code='BLOCKED_IMAGE','approved_image_unavailable',1
+        elif snapshot['publishing_enabled'] and snapshot['job']['enabled']:
+            phase,reason,code='BLOCKED_OCCURRENCE','no_matching_active_scheduler_occurrence',1
         else:
             phase,reason,code='PUBLISHING_PAUSED','publishing_policy_or_job_paused',0
         return code,{**result,'ok':code==0,'phase':phase,'outcome':'BLOCKED' if code else 'NO_ACTION','reason_code':reason,'reason':reason.replace('_',' ')}
@@ -53,7 +80,9 @@ def run_day(day,*,target_date=None,dry_run=True,root=state.ROOT,db_path=None,job
     # stable through the bounded child call. The child independently checks consent/gates.
     with state.locked(root):
         current=state.inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
-        if not current['automatic_publish_armed'] or current['body_sha256']!=snapshot['body_sha256']:
+        current_claim=claimed_occurrence(current['job'],slot,now,execution_db=execution_db)
+        current_occurrence_ready=bool(current['content_ready'] and current['slot_matches'] and current['publishing_enabled'] and current['job']['enabled'] and not current['published'] and current_claim)
+        if not (current['automatic_publish_armed'] or current_occurrence_ready) or current['body_sha256']!=snapshot['body_sha256']:
             raise state.StateConflict('scheduled state changed before execution')
         command=[sys.executable,str(state.REPO/'career-ops/linkedin_publish.py'),'publish','--drafts',str(path),
             '--approve-publish','--confirm-token',current['body_sha256']]

@@ -407,3 +407,50 @@ def test_default_week_status_is_current_week_not_next_week(tmp_path,monkeypatch,
     jobs=tmp_path/'jobs.json';jobs.write_text('{"jobs":[]}')
     result=s.week_status(root=tmp_path/'empty',jobs_path=jobs)
     assert result['week_of']==monday
+
+
+def _execution_database(path,job_id,*,instant='2026-10-27T08:00:00+00:00',status='running',started='2026-10-27T08:00:08+00:00',source='builtin'):
+    with sqlite3.connect(path) as c:
+        c.execute('CREATE TABLE executions(job_id TEXT,status TEXT,finished_at TEXT,source TEXT,scheduled_instant TEXT,started_at TEXT)')
+        c.execute('INSERT INTO executions VALUES(?,?,?,?,?,?)',(job_id,status,None,source,instant,started))
+
+def test_scheduler_pre_advance_claim_executes_exact_occurrence_once(tmp_path,history):
+    import subprocess
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    data=json.loads(jobs.read_text());data['jobs'][0]['next_run_at']='2026-11-03T08:00:00+00:00';jobs.write_text(json.dumps(data))
+    execution=tmp_path/'executions.db';_execution_database(execution,s.JOB_IDS['tuesday'])
+    calls=[]
+    def publisher(command,**kw):
+        calls.append(command);ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+        ledger.write_text(json.dumps({'result':'published','body_sha256':a.digest(BODY)})+'\n')
+        return subprocess.CompletedProcess(command,0,json.dumps({'performed':True,'post_urn':'urn:li:share:test'}),'')
+    kwargs=dict(root=root,db_path=db,jobs_path=jobs,execution_db=execution,dry_run=False,now=datetime(2026,10,27,8,0,9,tzinfo=s.LONDON),runner=publisher)
+    code,result=scheduled.run_day('tuesday',**kwargs)
+    assert code==0 and result['publish_performed'] and len(calls)==1 and '--approve-publish' in calls[0]
+    assert scheduled.run_day('tuesday',**kwargs)[1]['phase']=='ALREADY_PUBLISHED' and len(calls)==1
+
+@pytest.mark.parametrize('instant,status,source,started',[('2026-11-03T08:00:00+00:00','running','builtin','2026-10-27T08:00:08+00:00'),('2026-10-27T08:00:00+00:00','completed','builtin','2026-10-27T08:00:08+00:00'),('2026-10-27T08:00:00+00:00','running','direct','2026-10-27T08:00:08+00:00'),('2026-10-27T08:00:00+00:00','running','builtin','2026-10-27T07:00:00+00:00')])
+def test_advanced_job_refuses_nonmatching_or_stale_execution(tmp_path,history,instant,status,source,started):
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    data=json.loads(jobs.read_text());data['jobs'][0]['next_run_at']='2026-11-03T08:00:00+00:00';jobs.write_text(json.dumps(data))
+    execution=tmp_path/'executions.db';_execution_database(execution,s.JOB_IDS['tuesday'],instant=instant,status=status,source=source,started=started)
+    calls=[];code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,execution_db=execution,dry_run=False,now=datetime(2026,10,27,8,0,9,tzinfo=s.LONDON),runner=lambda *a,**kw:calls.append(a))
+    assert not result['publish_performed'] and not calls
+
+
+@pytest.mark.parametrize('failure',['paused_job','changed_manifest','cancelled'])
+def test_claimed_occurrence_does_not_bypass_safety_checks(tmp_path,history,failure):
+    root,path,db,jobs,mid=artifact(tmp_path,history,enabled=True)
+    s.plan_slot(path,'2026-10-27',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,26,12,tzinfo=s.LONDON))
+    data=json.loads(jobs.read_text());data['jobs'][0]['next_run_at']='2026-11-03T08:00:00+00:00'
+    if failure=='paused_job':data['jobs'][0]['enabled']=False
+    jobs.write_text(json.dumps(data))
+    execution=tmp_path/'executions.db';_execution_database(execution,s.JOB_IDS['tuesday'])
+    if failure=='changed_manifest':
+        manifest=root/'drafts/schedule.json';doc=json.loads(manifest.read_text());doc['slots']['2026-10-27']['body_sha256']='0'*64;manifest.write_text(json.dumps(doc))
+    if failure=='cancelled':
+        doc=s.read(path);doc['cancelled']=True;path.write_text(json.dumps(doc))
+    calls=[];code,result=scheduled.run_day('tuesday',root=root,db_path=db,jobs_path=jobs,execution_db=execution,dry_run=False,now=datetime(2026,10,27,8,0,9,tzinfo=s.LONDON),runner=lambda *a,**kw:calls.append(a))
+    assert not calls and not result['publish_performed']
