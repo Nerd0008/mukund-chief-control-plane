@@ -1,0 +1,26 @@
+{
+  "task_id": "agent-hermes-cron-health-monitor-2026-11-05",
+  "created_at": "2026-11-05",
+  "objective": "Implement and connect Mukund's Hermes cron health monitor on the actual Hermes host. Owner request in Codex: track which cron jobs fired, succeeded, failed, were missed, timed out, or produced incomplete expected output; keep the health-monitor chat concise, and put full evidence-backed failure diagnoses in the THREE EXISTING LinkedIn, CV, and applications chats in the Hermes project, with references back to the appropriate diagnosis. Owner explicitly instructed to proceed autonomously using existing access. This is an observability task, not permission to run business jobs or repair their business logic.",
+  "authority": "tasks-or-issues/hermes-github-remote-queue.md",
+  "priority": "high",
+  "allowed_scope": [
+    "Inspect current Hermes runtime and repository instructions; discover the actual cron scheduler, job definitions, execution history and output logs. Do not assume September inventories or this repository reflect the current host.",
+    "Implement an idempotent, lightweight deterministic monitor using existing scheduler/health infrastructure where possible. Read run history without triggering LinkedIn/CV/application jobs, account actions or business retries. Record scheduled/start/end times, run IDs, exit/result, duration, freshness and verifiable expected-output checks.",
+    "Distinguish success, failure, missed, running, stalled, disabled, unknown and monitoring-source-unavailable. Use each job's real schedule/timezone and grace period; never call missing evidence success. Detect the monitor's own stale heartbeat.",
+    "Discover the three EXISTING intended chats using supported authorized Hermes project/session metadata locally. Route each incident diagnosis only to its matching existing chat, with incident/run ID, failing step, relevant redacted evidence, confirmed cause versus hypotheses, recommended fix and verification steps. Keep all raw logs/diagnoses/chat contents private on the host. Never create substitute chats or invent chat URLs. If these are Codex chats with no supported posting API, implement the monitor and local diagnosis artifacts, explicitly report routing as unavailable, and do not claim delivery.",
+    "Store full private diagnosis artifacts locally and maintain per-run incident IDs plus deduplication. In the monitor summary include only status, timestamps and a verified diagnosis chat reference when actually available; mark delivery pending/unavailable otherwise. Do not report a diagnosis as posted without delivery confirmation.",
+    "Commit implementation, focused tests and documentation. Publish ONLY a sanitized machine-readable connection/status summary at state/hermes-cron-health/status.json and concise state/hermes-cron-health/status.md for the connected Codex GitHub reader. Explicitly allowlist summary fields: schema_version, observed_at_utc, monitor_state, source_available, routing_state, category (linkedin/cv/applications), opaque job/run/incident IDs, scheduled/start/completed timestamps, status, exit code, duration and evidence freshness. The repo is PUBLIC: do not publish chat links/IDs, prompts, raw outputs, errors containing private data, local usernames/paths, CV contents, job/application details, database files or credentials. Keep diagnosis links in local private state only.",
+    "Install/enable only the bounded health-monitor schedule on the Hermes host using normal supported mechanisms if available; preserve existing job schedules and kill switches. Verify initial read-only scan and one monitor execution with current evidence before declaring connected. Document exact remaining unavailable dependency if not possible.",
+    "Test meaningful cases in isolated fixtures: failed run, missed start, timeout/stall, unknown/no history, disabled job, stale heartbeat, incident deduplication and routing delivery failure. No external business actions during tests."
+  ],
+  "requires_owner_approval": false,
+  "status": "pending",
+  "stop_conditions": [
+    "Do not bypass any existing kill switch, policy gate or required account/credential setup.",
+    "No browser/GUI control, external LinkedIn/account actions, applications submission, business-job retries, destructive operations or changes outside monitor scope.",
+    "Never export private runtime databases, transcripts, diagnosis content or secrets to GitHub. Publish only explicitly allowlisted health metadata.",
+    "If the local bridge is on an obsolete host, report that truthfully and do not claim access to the current Hermes instance."
+  ],
+  "notes": "This task is authorized by Mukund's current request to build/connect the monitor and proceed without repeated questions. Preserve in-flight tasks. Discover chat mappings locally where supported; do not guess. Final result must clearly distinguish code implemented, monitor installed, live evidence verified, diagnosis routing configured and delivery actually confirmed. Existing Codex monitor chat can read sanitized GitHub status; it has no direct host or cross-chat API today."
+}
