@@ -103,14 +103,46 @@ def current_approval_message(*,db_path=None):
     raise ValueError('current owner message could not be matched to authenticated Discord history')
 
 
-def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=None):
+def retry_chat_approval(body,*,db_path=None):
+    """Resolve a retry to the immediately preceding owner instruction in this session."""
+    from hermes_diagnostics import current_contract
+    from hermes_owner_context import human_text
+    from linkedin_conversation import has_draft_body
+    contract=current_contract();message=human_text(contract.get('latest_human_message',''))
+    if not re.match(r'(?i)^try again(?:[.! ]*(?:\n|$))',message):
+        raise ValueError('An authenticated instruction to publish now or at a specific time is required')
+    current=current_approval_message(db_path=db_path)
+    path=Path(db_path or state.HOME/'state.db')
+    with sqlite3.connect(path.resolve().as_uri()+'?mode=ro',uri=True) as con:
+        row=con.execute("SELECT session_id FROM messages WHERE id=? AND role='user'",(current,)).fetchone()
+        if not row:raise ValueError('Retry message unavailable')
+        previous=con.execute("SELECT id FROM messages WHERE session_id=? AND role='user' AND id<? ORDER BY id DESC LIMIT 1",(row[0],current)).fetchone()
+        if not previous:raise ValueError('No previous owner instruction to retry')
+        approval=state.consent.verify_message(previous[0],body,db_path=db_path)
+        if not approval['ok']:raise ValueError(approval['reason'])
+        # A clearly presented new version after approval invalidates a retry of the old version.
+        for (content,) in con.execute("SELECT content FROM messages WHERE session_id=? AND role='assistant' AND id>? AND id<? ORDER BY id",(row[0],previous[0],current)):
+            text=content or ''
+            if ('```' in text or re.search(r'(?i)\b(?:revised post|updated post|final text)\s*:',text)) and has_draft_body(text) and not state.consent._presented(text,body):
+                raise ValueError('A newer draft was presented after approval; please review it')
+    spoken=approval['receipt']['preferences']
+    if not (spoken.get('publish_now') or spoken.get('publish_at')):raise ValueError('Previous approval has no publication time')
+    return previous[0],approval
+
+
+def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=None,verified_instruction=None):
     from hermes_diagnostics import current_contract
     from hermes_owner_context import human_text
     message=human_text(current_contract().get('latest_human_message',''))
     from linkedin_conversation import interpret
     spoken=interpret(message)
+    if verified_instruction is not None:
+        message_id,approved=verified_instruction
+        proof=state.consent.verify_message(message_id,state.body_of(state.read(Path(row['captured_artifact']))),db_path=db_path)
+        if not proof['ok']:raise ValueError(proof['reason'])
+        spoken=proof['receipt']['preferences']
+    else:message_id=current_approval_message(db_path=db_path)
     if not spoken['approved'] or not spoken['publish_now']:raise ValueError('Tell me explicitly if you want this post published now.')
-    message_id=current_approval_message(db_path=db_path)
     path=Path(row.get('captured_artifact') or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
     status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if status['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
@@ -154,11 +186,15 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         from hermes_diagnostics import current_contract
         from linkedin_conversation import interpret
         spoken=interpret(current_contract().get('latest_human_message',''))
-        if not spoken['approved'] or not (spoken['publish_now'] or spoken['publish_at']):raise ValueError('An authenticated instruction to publish now or at a specific time is required')
-        message_id=args.get('approval_message_id')
-        if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
-        approval=state.consent.verify_message(message_id,body,db_path=db_path)
-        if not approval['ok']:raise ValueError(approval['reason'])
+        retry=False
+        if not spoken['approved'] or not (spoken['publish_now'] or spoken['publish_at']):
+            message_id,approval=retry_chat_approval(body,db_path=db_path);retry=True
+        else:
+            message_id=args.get('approval_message_id')
+            if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
+            approval=state.consent.verify_message(message_id,body,db_path=db_path)
+            if not approval['ok']:raise ValueError(approval['reason'])
+        spoken=approval['receipt']['preferences']
         if state.published(state.consent.digest(body),root):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False}
         import linkedin_weekly  # installs the existing scripts and content-generator paths
         from topic_reuse_check import check_text
@@ -188,7 +224,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             plan=state.plan_slot(path,target,root=root,db_path=db_path,jobs_path=jobs_path,now=now)
             armed=any(item.get('day')==row['day'] and item.get('next_run_at')==due.isoformat() for item in (plan.get('publishing') or {}).get('armed',[]))
             return {'ok':True,'phase':'SCHEDULED' if armed else 'APPROVED_READY_PAUSED','approval':result,'plan':plan,'publish_performed':False}
-        return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner)
+        return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner,verified_instruction=(message_id,approval) if retry else None)
     row=_selected(args.get('day'),args.get('body_sha256'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     requested_publish=(mode=='publish')

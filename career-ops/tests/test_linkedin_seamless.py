@@ -238,3 +238,25 @@ def test_exact_incident_schedule_chat_and_arm(history,tmp_path,monkeypatch):
 def test_clock_without_day_is_today_not_immediate():
     parsed=interpret('Perfect approved publish at 8 am',now=datetime(2026,11,5,3,46,tzinfo=state.LONDON))
     assert parsed['approved'] and not parsed['publish_now'] and parsed['publish_at']=='2026-11-05T08:00:00+00:00'
+
+
+def test_retry_uses_previous_exact_authenticated_schedule(history,monkeypatch):
+    import sqlite3
+    db,add=history;body='A specific approved post.'
+    add('Here is the draft:\n```\n'+body+'\n```',role='assistant')
+    approved=add('Perfect approved publish at 8 am')
+    with sqlite3.connect(db) as c:c.execute('update messages set timestamp=? where id=?',(datetime(2026,11,5,3,46,tzinfo=state.LONDON).timestamp(),approved))
+    add('The previous attempt was blocked.',role='assistant')
+    current=add('Try again\n\nEarlier explanation was pasted here.')
+    monkeypatch.setattr(bridge,'current_approval_message',lambda **kwargs:current)
+    contract={'workflow':'linkedin','latest_human_message':'Try again\n\nEarlier explanation was pasted here.','turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract):
+        mid,receipt=bridge.retry_chat_approval(body,db_path=db)
+    assert mid==approved and receipt['receipt']['preferences']['publish_at']=='2026-11-05T08:00:00+00:00'
+    with owner.dispatch_context('',[],contract),pytest.raises(ValueError):bridge.retry_chat_approval('Different text',db_path=db)
+
+def test_retry_does_not_skip_intervening_owner_cancellation(history,monkeypatch):
+    db,add=history;body='A specific approved post.'
+    add(body,role='assistant');add('Perfect approved publish at 8 am');add('Cancel this post');current=add('Try again')
+    monkeypatch.setattr(bridge,'current_approval_message',lambda **kwargs:current)
+    with owner.dispatch_context('',[],{'workflow':'linkedin','latest_human_message':'Try again','turn_origin':'human_text'}),pytest.raises(ValueError):bridge.retry_chat_approval(body,db_path=db)
