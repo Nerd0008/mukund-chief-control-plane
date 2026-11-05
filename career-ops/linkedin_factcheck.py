@@ -648,6 +648,14 @@ Return ONLY JSON, no prose, in exactly this shape:
 
 If the post makes no factual claim about the outside world, return
 {{"claims": []}}.
+Distinguish an author's cautious practical takeaway from a testable claim.
+A contextual observation that something can make a task easier or harder,
+without asserting frequency, an observed event, a measurement, a product
+capability, or a causal scientific or medical claim, is rhetorical advice.
+For example, "A quiet dashboard can make it easy to miss what the logs are
+telling us" is a contextual takeaway, not a claim needing a news source.
+Do not generalise this to all sentences containing "can": "the flaw can
+execute arbitrary code" remains a checkable technical capability.
 Be strict. A general statement presented as a fact about the world counts.
 
 POST:

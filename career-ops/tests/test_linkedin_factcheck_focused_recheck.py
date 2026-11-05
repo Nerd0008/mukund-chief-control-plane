@@ -194,6 +194,15 @@ sys.modules['workflow_routing'] = router
         self.assertTrue(result["used"])
         self.assertEqual(len(result["claims"]), 1)
 
+    def test_source_less_prompt_distinguishes_takeaway_and_capability(self):
+        with patch.object(fc, "run_judge", return_value={"reason": None, "runs": [[]] * 3}) as judge:
+            result = fc.llm_check_no_world_claims("A quiet dashboard can make it easy to miss what the logs are telling us.", api_key="fake")
+        self.assertTrue(result["used"])
+        prompt = judge.call_args.args[0]
+        self.assertIn("contextual takeaway", prompt)
+        self.assertIn("the flaw can", prompt)
+        self.assertIn("remains a checkable technical capability", prompt)
+
     def test_source_less_partial_run_cannot_pass(self):
         with patch.object(fc, "run_judge", return_value={"reason": None, "runs": [[]]}):
             result = fc.llm_check_no_world_claims("My own reflection", api_key="fake")
