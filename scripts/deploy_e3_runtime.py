@@ -169,12 +169,15 @@ def patch_eb(runtime_root: Path, backup_dir: Path, dry_run: bool) -> dict:
     return record
 
 
-def deploy(runtime_root: Path, dry_run: bool, *, allow_runtime_newer: bool = False) -> dict:
+def deploy(runtime_root: Path, dry_run: bool, *, allow_runtime_newer: bool = False, modules=None) -> dict:
+    selected = list(E3_MODULES) if modules is None else list(dict.fromkeys(modules))
+    if not selected or any(name not in E3_MODULES for name in selected):
+        raise ValueError("Deployment subset must contain declared E3 module names")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup_dir = runtime_root / "backups" / f"e3-deploy-{stamp}"
     files = []
 
-    for name in E3_MODULES:
+    for name in selected:
         src = SRC_DIR / name
         dst = runtime_root / name
         entry = {"name": name, "source": str(src), "destination": str(dst)}
@@ -207,7 +210,8 @@ def deploy(runtime_root: Path, dry_run: bool, *, allow_runtime_newer: bool = Fal
             entry["destination_sha256_after"] = _sha256(dst)
         files.append(entry)
 
-    eb_record = patch_eb(runtime_root, backup_dir, dry_run)
+    eb_record = (patch_eb(runtime_root, backup_dir, dry_run) if modules is None else
+                 {"action": "skipped", "reason": "targeted module deployment"})
 
     manifest = {
         "deployed_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -251,6 +255,7 @@ def main() -> int:
     parser.add_argument("--runtime-root", default=None)
     parser.add_argument("--allow-runtime-newer", action="store_true",
                         help="explicitly authorize backup-backed overwrite of newer runtime code")
+    parser.add_argument("--module", action="append", choices=E3_MODULES, help="deploy only this declared module; repeat as needed")
     parser.add_argument("--restore", default=None,
                         help="restore a previous backup directory")
     args = parser.parse_args()
@@ -261,7 +266,7 @@ def main() -> int:
         print(json.dumps(report, indent=2))
         return 0
 
-    report = deploy(runtime_root, args.dry_run, allow_runtime_newer=args.allow_runtime_newer)
+    report = deploy(runtime_root, args.dry_run, allow_runtime_newer=args.allow_runtime_newer, modules=args.module)
     print(json.dumps({k: report[k] for k in
                       ("deployed_at_utc", "source_git_sha", "runtime_root",
                        "backup_dir", "dry_run", "copied", "skipped_runtime_newer", "eb_py")}, indent=2))

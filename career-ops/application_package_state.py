@@ -128,6 +128,8 @@ def render(state):
             result = state.get('results', {}).get(kind, {})
             reason = result.get('reason') or state.get('blocked_reason') or (state.get('diagnostic') if not files else None) or 'The document compiler has not run; no verified document was produced'
             lines.append(label + ': incomplete — ' + str(reason)[:300] + '.')
+    if state.get('eligibility',{}).get('outcome')=='UNCONFIRMED_DRAFT_AUTHORIZED':
+        lines.insert(0,'Document drafting authorized. Eligibility warnings remain unconfirmed; no application was submitted.')
     for kind, path in files.items():
         if not (state.get('resuming') and not state.get('resend') and delivered(path)): lines.append('MEDIA:' + path)
     if state.get('phase') in ('OWNER_INPUT_REQUIRED','INELIGIBLE'):

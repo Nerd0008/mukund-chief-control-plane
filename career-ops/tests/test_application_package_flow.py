@@ -349,3 +349,97 @@ def test_actual_gateway_persists_direct_dispatch_without_agent_flush(monkeypatch
         is_context_overflow_failure=False))
     assert len(saved)==2 and all(entry[1]['skip_db'] is False for entry in saved)
     assert saved[-1][0]['content']==dispatch_result['final_response']
+
+import application_continuation as continuation
+
+
+@pytest.mark.parametrize('message',["its okay draft","it's okay, draft","go ahead","draft anyway","okay proceed","just draft it","write both please"])
+def test_document_permission_resumes_warning_without_inventing_eligibility(monkeypatch,tmp_path,message):
+    monkeypatch.setattr(flow,'plan',lambda s:valid_plan())
+    calls=compilers(monkeypatch,tmp_path)
+    Turn=install(monkeypatch)
+    jd=JD+'\nWe can only consider applicants enrolled on a sandwich degree programme with an expected graduation in 2029.'
+    first=asyncio.run(Turn()._run_agent('Generate CV and cover letter\n[Content of JD.txt]:\n'+jd,'',[],None,'fixture'))
+    assert first['application_status']=='OWNER_INPUT_REQUIRED' and not calls
+    before=package.load('fixture')
+    result=asyncio.run(Turn()._run_agent(message,'',[],None,'fixture'))
+    saved=package.load('fixture')
+    assert calls==['cv','cover'] and result['application_status']=='VERIFIED_READY'
+    assert saved['request_id']==before['request_id']
+    assert saved['eligibility']['outcome']=='UNCONFIRMED_DRAFT_AUTHORIZED'
+    assert saved['intake']['document_authorization']['eligibility_confirmed'] is False
+    assert 'remain unconfirmed' in result['final_response']
+
+
+def test_unrelated_turn_preserves_checkpoint_and_does_not_draft(monkeypatch):
+    calls=[]
+    async def narrator(*a,**k):calls.append(True);return {'final_response':'other task'}
+    Turn=install(monkeypatch,narrator)
+    package.save(state())
+    before=package.load('fixture')
+    asyncio.run(Turn()._run_agent('What is the weather?','',[],None,'fixture'))
+    assert calls and package.load('fixture')==before
+    assert continuation.resume('go ahead',[{'role':'user','content':'What is the weather?'}],before) is None
+
+
+def test_cancel_preserves_intake_but_deactivates(monkeypatch):
+    package.save(state());Turn=install(monkeypatch)
+    result=asyncio.run(Turn()._run_agent('cancel this application','',[],None,'fixture'))
+    assert result['application_status']=='CANCELLED' and package.load('fixture')=={}
+    stored=json.loads(next(package.ROOT.glob('*.json')).read_text())
+    assert not stored['active'] and stored['intake']['jd']==JD
+
+
+def test_recovers_legacy_lost_intake_only_from_latest_job():
+    history=[{'role':'user','content':'Generate CV and cover letter\n[Content of JD.txt]:\n'+JD},
+             {'role':'assistant','content':'Owner input required'}, {'role':'user','content':'its okay draft'}]
+    intake=continuation.resume('draft anyway',history,{})
+    assert intake and intake['jd']==JD.strip() and continuation.draft_authorized(intake)
+    assert continuation.resume('draft anyway',history+[{'role':'user','content':'Research LinkedIn news'}],{}) is None
+    intake['jd']+=' changed job'
+    assert not continuation.draft_authorized(intake)
+
+
+@pytest.mark.parametrize('message',["don't draft","why can't you draft?","publish it","send email please","cancel","draft LinkedIn please","its not okay draft","draft new posts please"])
+def test_other_intents_cannot_authorize_documents(message):
+    assert continuation.resume(message,[],state()) is None
+
+
+def test_draft_anyway_does_not_bypass_mandatory_clearance(monkeypatch,tmp_path):
+    calls=compilers(monkeypatch,tmp_path)
+    saved=state();saved['intake']['jd']+='\nApplicants must hold security clearance.'
+    saved['intake']=continuation.resume('draft anyway',[],saved)
+    result=flow.dispatch(saved)
+    assert result['application_status']=='INELIGIBLE' and not calls
+    assert 'must hold security clearance' in result['final_response']
+
+
+def test_negated_clearance_does_not_block_drafting(monkeypatch,tmp_path):
+    monkeypatch.setattr(flow,'plan',lambda s:valid_plan())
+    calls=compilers(monkeypatch,tmp_path)
+    Turn=install(monkeypatch)
+    result=asyncio.run(Turn()._run_agent('Generate CV and cover letter\n[Content of JD.txt]:\n'+JD+'\nSecurity clearance is not required.','',[],None,'fixture'))
+    assert result['application_status']=='VERIFIED_READY' and calls==['cv','cover']
+
+
+def test_short_permission_cannot_reuse_saved_intake_after_different_jd():
+    history=[{'role':'user','content':'[Content of JD.txt]:\n'+JD+'\nDifferent requisition R999'}]
+    assert continuation.resume('go ahead',history,state()) is None
+
+
+def test_legacy_retry_recovers_jd_without_inventing_drafting_permission():
+    history=[{'role':'user','content':'Generate CV and cover letter\n[Content of JD.txt]:\n'+JD}]
+    intake=continuation.resume('try again',history,{})
+    assert intake['jd']==JD.strip()
+    assert not continuation.draft_authorized(intake)
+    assert continuation.resume('try again',history+[{'role':'user','content':'Research LinkedIn news'}],state()) is None
+
+
+def test_generic_retry_after_other_task_does_not_dispatch_saved_application(monkeypatch):
+    package.save(state())
+    calls=[]
+    async def narrator(*a,**k):calls.append(True);return {'final_response':'other task'}
+    Turn=install(monkeypatch,narrator)
+    result=asyncio.run(Turn()._run_agent('try again','',[{'role':'user','content':'What is the weather?'}],None,'fixture'))
+    assert calls and result['final_response']=='other task'
+    assert package.load('fixture')['intake']['jd']==JD

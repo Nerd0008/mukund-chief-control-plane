@@ -261,10 +261,18 @@ def install_runtime(runtime,turn_class,media_class):
     async def run(self,message,context_prompt,history,*args,**kwargs):
         import application_package_state as package
         session_id=kwargs.get('session_id') or (args[1] if len(args)>1 else None)
-        previous=package.load(session_id) if package.retry(message) else {}
+        stored=package.load(session_id)
+        from application_continuation import resume, cancelled, context_matches
+        if stored and cancelled(message):
+            stored.update(cv_active=False,phase='CANCELLED')
+            package.save(stored)
+            return {'final_response':'Application drafting stopped. The saved JD and document receipts are preserved.',
+                    'failed':False,'application_status':'CANCELLED','agent_persisted':False,'messages':[]}
+        continuation=resume(message,history,stored)
+        previous=stored if continuation or (package.retry(message) and context_matches(history,stored)) else {}
         from application_package_flow import prepare, dispatch, owner_text
-        intake=prepare(message,history,previous,package.load(session_id))
-        if intake and intake.get('owner_clarification') and not previous:previous=package.load(session_id)
+        intake=continuation or prepare(message,history,previous,stored)
+        if intake and intake.get('owner_clarification') and not previous:previous=stored
         is_cv=cv_request(message,history) or bool(previous) or bool(intake)
         state={**previous,'session_id':session_id,'request_id':previous.get('request_id') or uuid.uuid4().hex,
                'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv,
@@ -278,8 +286,8 @@ def install_runtime(runtime,turn_class,media_class):
             history=package.trim_history(history)
             try: package.save(state)
             except OSError: state['receipt_error']='Application resume receipt could not be saved'
-        elif not package.retry(message) and not re.search(r'\bCV\b|cover letter|\bJD\b|application package',str(message),re.I):
-            package.save({'session_id':session_id,'cv_active':False})
+        # An unrelated or ambiguous turn must not destroy a saved application.
+        # Only the explicit cancellation branch above changes active=False.
         if previous and all(kind in package.accepted(state) for kind in package.required(state)):
             state['phase']='DOCUMENTS_READY'
             package.save(state)

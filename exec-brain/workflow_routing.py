@@ -105,7 +105,7 @@ def persist(receipt):
     allowed={'request_id','call_id','operation_id','workflow','stage','status','error','elapsed_seconds',
         'selected_provider','selected_model','offer_set_sha256','cached','coalesced','resolved_executable',
         'resolved_version','cli_status','cli_exit_code','timeout_seconds','http_status',
-        'retry_after_seconds','failure_scope','health_recording','logical_call_id','selected_worker',
+        'retry_after_seconds','worker_cooldowns','failure_scope','health_recording','logical_call_id','selected_worker',
         'request_context_budget','qualified_model_eligibility','context_coverage',
         'input_sha256','output_sha256','validation_passed','upstream_call_id','output_item_sha256','operational_evidence'}
     record={k:v for k,v in receipt.items() if k in allowed}
@@ -120,21 +120,24 @@ def select(workflow,offers,*,task='',family='analysis',timeout=45):
     try:
         if not offers:raise RouterDecisionError(getattr(offers,'block_reason','no_protocol_compatible_worker'))
         from workflow_health import snapshot
-        checked=[];cooldowns=[]
+        checked=[];cooldowns=[];blocked_workers=[]
         for offer in offers:
             health=snapshot(offer.get('provider','transport'),offer.get('model','configured'))
             if health['available']:
                 checked.append(dict(offer,evidence={**offer.get('evidence',{}),
                     'recent_failures':health['recent_failures'],'observed_successes':health['observed_successes'],
                     'latency_seconds':health['latency_seconds'],'last_failure_at':health['last_failure_at']}))
-            else:cooldowns.append(health['cooldown_until'])
+            else:
+                cooldowns.append(health['cooldown_until'])
+                blocked_workers.append({'provider':offer.get('provider'),'model':offer.get('model'),
+                    'last_failure_code':health.get('last_failure_code'),'cooldown_until':health['cooldown_until']})
         offers=checked
         if not offers:
             import math
             delay=max(1,math.ceil(min(cooldowns)-time.time())) if cooldowns else None
-            raise RouterDecisionError('no_healthy_compatible_worker',{'retry_after_seconds':delay})
+            raise RouterDecisionError('no_healthy_compatible_worker',{'retry_after_seconds':delay,'worker_cooldowns':blocked_workers[:8]})
     except RouterDecisionError as exc:
-        persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc),retry_after_seconds=(exc.receipt or {}).get('retry_after_seconds')))
+        persist(dict(workflow=workflow,call_id=uuid.uuid4().hex,stage='selection',status='BLOCKED',error=failure_code(exc),retry_after_seconds=(exc.receipt or {}).get('retry_after_seconds'),worker_cooldowns=(exc.receipt or {}).get('worker_cooldowns')))
         raise
     # Coalesce identical in-flight decisions, not unrelated requests or failures.
     key=_decision_key(workflow,offers,task,family)

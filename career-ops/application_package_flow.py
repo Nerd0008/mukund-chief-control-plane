@@ -178,6 +178,9 @@ def plan(state):
     prompt = (
         'Plan the requested application documents in English. Return a JSON object only. '
         'The owner_request is the drafting instruction; the JD supplies role data. '
+        'document_authorization permits drafting despite eligibility warnings, never an assertion that the candidate meets them. '
+        'If that authorization matches this JD, prepare truthful documents without claiming student status, clearance or work permission. '
+        'Only an explicit mandatory security-clearance requirement remains a drafting block. '
         'An explicit owner_clarification is current owner evidence for this application; '
         'it takes precedence over older reference snapshots and does not modify the global profile. '
         'An explicit request for private test documents for a fictional role is allowed; '
@@ -197,6 +200,8 @@ def plan(state):
     data = {'jd': state['intake']['jd'], 'jd_sha256': state['intake']['jd_sha256'],
             'owner_request':state['intake'].get('owner_request',''),
             'owner_clarification':state['intake'].get('owner_clarification',''),
+            'document_authorization':state['intake'].get('document_authorization'),
+            'eligibility_evidence':state.get('eligibility'),
             'requested_documents': package.required(state), 'verified_cv_facts': json.loads(master_tool({})),
             'owner_references': references}
     response, receipt = complete_text([{'role': 'system', 'content': prompt},
@@ -240,9 +245,16 @@ def _dispatch_stages(state):
     intake['jd_sha256'] = digest
     package.save(state)
     checkpoint(state, 'ELIGIBILITY_CHECK')
+    from owner_rejection_policy import required_clearance_evidence
+    clearance=required_clearance_evidence(intake['jd'])
+    if clearance:
+        state['eligibility']={'outcome':'INELIGIBLE','clearance_evidence':clearance}
+        return failure(state,'INELIGIBLE','The JD explicitly requires security clearance: '+clearance[0]['context'])
+    from application_continuation import draft_authorized
+    authorized=draft_authorized(intake)
     from student_eligibility import student_requirement
     requirement = student_requirement(intake['jd'])
-    if requirement:
+    if requirement and not authorized:
         answer=intake.get('owner_clarification','') or intake.get('owner_request','')
         if re.match(r'(?i)^no\b',answer):
             return failure(state,'INELIGIBLE','You confirmed that you do not meet the JD current-student requirement. No application documents were started.')
@@ -253,13 +265,15 @@ def _dispatch_stages(state):
                        and ('sandwich' not in intake['jd'].lower() or 'sandwich' in answer.lower()))
         if confirmed:
             requirement=''
-    if requirement:
+    if requirement and not authorized:
         evidence = next((line.strip() for line in intake['jd'].splitlines()
                          if re.search(r'(?i)only consider applicants enrolled|currently enrolled|sandwich degree', line)), requirement)
         state['eligibility'] = {'outcome': 'OWNER_INPUT_REQUIRED', 'evidence': evidence,
             'reason': 'The JD requires current student enrolment, which is not established by the saved owner profile.'}
         return failure(state, 'OWNER_INPUT_REQUIRED', state['eligibility']['reason'] + ' JD: ' + evidence)
-    state['eligibility'] = {'outcome': 'NO_STUDENT_BLOCK', 'evidence': 'No unresolved explicit current-student requirement detected; remaining eligibility is checked in the plan.'}
+    state['eligibility'] = ({'outcome':'UNCONFIRMED_DRAFT_AUTHORIZED','evidence':requirement or 'Owner authorized document preparation only; eligibility remains unconfirmed.'}
+        if authorized else {'outcome':'NO_STUDENT_BLOCK','evidence':'No unresolved explicit current-student requirement detected; remaining eligibility is checked in the plan.'})
+    if authorized and state.get('plan',{}).get('outcome')!='READY_TO_COMPILE':state.pop('plan',None)
     if intake.get('owner_clarification') and state.get('plan',{}).get('outcome')!='READY_TO_COMPILE':
         state.pop('plan',None)
     if not state.get('plan'):
@@ -275,7 +289,8 @@ def _dispatch_stages(state):
     if value['outcome'] != 'READY_TO_COMPILE':
         state['eligibility'] = {'outcome': value['outcome'], 'reason': value['reason']}
         return failure(state, value['outcome'], value['reason'])
-    state['eligibility'] = {'outcome': 'ELIGIBLE', 'reason': 'Structured planner checked the supplied JD against authoritative owner references.'}
+    state['eligibility'] = ({'outcome':'UNCONFIRMED_DRAFT_AUTHORIZED','reason':'Owner authorized truthful document preparation despite warnings; no eligibility declaration was made.'}
+        if authorized else {'outcome':'ELIGIBLE','reason':'Structured planner checked the supplied JD against authoritative owner references.'})
     checkpoint(state, 'APPLICATION_PLANNED')
     failures = []
     for kind in package.required(state):

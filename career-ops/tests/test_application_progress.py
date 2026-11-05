@@ -41,8 +41,9 @@ def test_unrelated_session_and_intervening_task_do_not_inherit_job():
     async def run(self,*a,**k):return {'active':bool(guard.active_job())}
     Turn,_=install(run)
     assert not asyncio.run(Turn()._run_agent('Try again','',[],None,'two'))['active']
-    asyncio.run(Turn()._run_agent('What is the weather?','',[],None,'one'))
-    assert not package.load('one')
+    result=asyncio.run(Turn()._run_agent('What is the weather?','',[],None,'one'))
+    assert not result['active']
+    assert package.load('one')['request_id']=='a'  # unrelated work must preserve resumable state
 
 
 def test_both_receipts_recover_on_empty_history_without_llm_or_compiler(monkeypatch):

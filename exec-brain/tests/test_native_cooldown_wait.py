@@ -20,3 +20,39 @@ def test_cancelled_wait_does_not_dispatch(monkeypatch):
     monkeypatch.setattr(workflow_health,'snapshot',lambda *a:{'available':False,'cooldown_until':105})
     with pytest.raises(RouterDecisionError,match='workflow_cancelled'):
         plugin.wait_native_capacity([{}],NS(remaining=lambda:90,cancel=NS(wait=lambda seconds:True)))
+
+
+
+def test_eager_host_alias_gets_temporary_cooldown_diagnosis(monkeypatch):
+    import sys
+    from types import SimpleNamespace as NS
+    from router_brain import RouterDecisionError
+    import workflow_routing
+    emitted=[]
+    def terminal(agent,classified):
+        agent._emit_diagnostic_status("Custom endpoint rejected the request and retrying won't help")
+        return 'original-contract'
+    recovery=NS(nonretryable_copy=lambda *a,**k:'old',nonretryable_client_error_result=terminal)
+    consumer=NS(nonretryable_client_error_result=terminal)
+    monkeypatch.setitem(sys.modules,'agent.turn_api_error',consumer)
+    plugin.install_failure_copy(recovery)
+    error=RouterDecisionError('no_healthy_compatible_worker',{'retry_after_seconds':28,
+        'worker_cooldowns':[{'provider':'custom','model':'fixture','last_failure_code':'provider_timeout'}]})
+    classified=NS(**plugin.router_error_classification(error=error))
+    agent=NS(_emit_diagnostic_status=emitted.append)
+    assert consumer.nonretryable_client_error_result(agent,classified)=='original-contract'
+    assert len(emitted)==1 and 'timed out' in emitted[0] and '28 seconds' in emitted[0]
+    assert 'rejected' not in emitted[0] and "won't help" not in emitted[0]
+
+
+def test_blocked_selection_receipt_preserves_actual_worker_cause(monkeypatch,tmp_path):
+    import json
+    import workflow_health
+    import workflow_routing
+    monkeypatch.setattr(workflow_routing,'RECEIPT_ROOT',tmp_path)
+    monkeypatch.setattr(workflow_health,'snapshot',lambda *a:{'available':False,'cooldown_until':plugin.time.time()+28,'last_failure_code':'provider_timeout'})
+    with pytest.raises(RouterDecisionError,match='no_healthy_compatible_worker'):
+        workflow_routing.select('fixture',[{'id':'one','provider':'custom','model':'fixture'}])
+    receipt=json.loads(next(tmp_path.glob('*.json')).read_text())
+    assert receipt['worker_cooldowns'][0]['last_failure_code']=='provider_timeout'
+    assert receipt['retry_after_seconds']>=28

@@ -139,3 +139,22 @@ class TestSecretRefusal(DeployRuntimeTest):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+class TestTargetedDeployment(DeployRuntimeTest):
+    def test_only_named_modules_deploy_and_eb_is_untouched(self):
+        name='native_router_plugin.py'
+        original=self.make_runtime_newer(name).read_bytes()
+        other=self.make_runtime_newer('workflow_routing.py').read_bytes()
+        (self.root/'eb.py').write_text('    args = ap.parse_args()')
+        report=self.d.deploy(self.root,False,modules=[name],allow_runtime_newer=True)
+        self.assertEqual(report['copied'],[name])
+        self.assertEqual((self.root/'workflow_routing.py').read_bytes(),other)
+        self.assertEqual((self.root/'eb.py').read_text(),'    args = ap.parse_args()')
+        self.assertEqual((Path(report['backup_dir'])/name).read_bytes(),original)
+        self.assertEqual((self.root/name).read_bytes(),(self.d.SRC_DIR/name).read_bytes())
+
+    def test_undeclared_module_is_rejected_before_changes(self):
+        with self.assertRaises(ValueError):
+            self.d.deploy(self.root,False,modules=['../config.yaml'])

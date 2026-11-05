@@ -173,7 +173,7 @@ def router_error_classification(*,error=None,**kwargs):
     compress=str(original)=='native_context_capacity_exceeded'
     return {'reason':'context_overflow' if compress else 'unknown','retryable':False,'should_compress':compress,
             'should_rotate_credential':False,'should_fallback':False,
-            'error_context':{'component':'router_brain','router_failure':str(original),'retry_after_seconds':(original.receipt or {}).get('retry_after_seconds')}}
+            'error_context':{'component':'router_brain','router_failure':str(original),'retry_after_seconds':(original.receipt or {}).get('retry_after_seconds'),'worker_cooldowns':(original.receipt or {}).get('worker_cooldowns')}}
 
 
 def install_failure_copy(module):
@@ -202,7 +202,12 @@ def install_failure_copy(module):
         if str(code).startswith('bounded_text_worker_'):
             return 'The Codex content worker failed during generation ('+code+'). It was not retried automatically. No unverified document will be delivered.'
         if code in ('no_healthy_compatible_worker','worker_health_changed'):
-            return ('Compatible workers are temporarily unavailable'+(' for up to '+str(context['retry_after_seconds'])+' seconds' if context.get('retry_after_seconds') else '')+'. No actions were replayed. Earlier steps may have completed; preserve their state before continuing.')
+            workers=context.get('worker_cooldowns') or []
+            causes={row.get('last_failure_code') for row in workers if isinstance(row,dict)}
+            cause=('The configured worker timed out. ' if 'provider_timeout' in causes else
+                   'The configured worker could not be reached. ' if 'provider_connection_error' in causes else
+                   'The configured worker reported a rate limit. ' if 'provider_rate_limit' in causes else '')
+            return (cause+'Compatible workers are temporarily unavailable'+(' for up to '+str(context['retry_after_seconds'])+' seconds' if context.get('retry_after_seconds') else '')+'. No actions were replayed. Earlier steps may have completed; preserve their state before continuing.')
         if code=='router_cli_rate_limited':
             delay=context.get('retry_after_seconds')
             return ('The Codex routing model returned HTTP 429 (rate limited).'+
@@ -234,12 +239,16 @@ def install_failure_copy(module):
                     def __setattr__(self,name,value):setattr(agent,name,value)
                     def _emit_diagnostic_status(self,message):
                         if detail.get('router_failure') in ('no_healthy_compatible_worker','worker_health_changed'):
-                            wait=detail.get('retry_after_seconds')
-                            return agent._emit_diagnostic_status('Router workers are temporarily unavailable'+(' (cooldown up to '+str(wait)+' seconds)' if wait else '')+'. No automatic action replay was attempted.')
+                            return agent._emit_diagnostic_status(copy(classified))
                         return agent._emit_diagnostic_status('❌ '+copy(classified).split('. ')[0])
                 bound.arguments['agent']=DiagnosticAgent()
             return terminal(*bound.args,**bound.kwargs)
         module.nonretryable_client_error_result=report
+        # The host imports this function eagerly; update only the exact old alias.
+        import sys
+        consumer=sys.modules.get('agent.turn_api_error')
+        if consumer is not None and getattr(consumer,'nonretryable_client_error_result',None) is terminal:
+            consumer.nonretryable_client_error_result=report
     module._router_failure_copy_installed=True
 
 
@@ -264,6 +273,13 @@ def install_turn_preference(turn_class):
 
 
 def register(ctx):
+    from pathlib import Path
+    import hashlib,logging
+    deployed=Path(__file__);source=Path.home()/'Documents/mukund-chief-control-plane/exec-brain'/deployed.name
+    digest=hashlib.sha256(deployed.read_bytes()).hexdigest()
+    matches=source.exists() and source.read_bytes()==deployed.read_bytes()
+    logging.getLogger(__name__).info('Native router loaded; source=%s; repository_match=%s; cooldown_wait=True',digest[:12],matches)
+    if not matches:logging.getLogger(__name__).error('Native router deployment differs from repository; verify deployment before claiming current source is active')
     from hermes_cli import middleware
     if not hasattr(middleware,'_DownstreamExecutionError'):
         raise RuntimeError('Native middleware denial contract unavailable; abort deployment')
