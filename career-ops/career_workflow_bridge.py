@@ -232,7 +232,8 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         if row['source_kind'] in ('REVIEWED_PREPARED','PREPARED'):
             source=state.read(row['artifact'])['posts'][row['day']]
         else:source=state.read(row['artifact'])
-        message_id=args.get('approval_message_id') or current_approval_message(db_path=db_path)
+        message_id=args.get('approval_message_id')
+        if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
         approval=state.consent.verify_message(message_id,row['post_text'],db_path=db_path)
         preferences=(approval.get('receipt') or {}).get('preferences') or approval.get('preferences') or {}
         requested_publish=requested_publish or preferences.get('publish_now',False)

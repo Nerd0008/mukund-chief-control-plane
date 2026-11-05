@@ -260,3 +260,13 @@ def test_retry_does_not_skip_intervening_owner_cancellation(history,monkeypatch)
     add(body,role='assistant');add('Perfect approved publish at 8 am');add('Cancel this post');current=add('Try again')
     monkeypatch.setattr(bridge,'current_approval_message',lambda **kwargs:current)
     with owner.dispatch_context('',[],{'workflow':'linkedin','latest_human_message':'Try again','turn_origin':'human_text'}),pytest.raises(ValueError):bridge.retry_chat_approval(body,db_path=db)
+
+
+def test_approve_with_discord_platform_id_resolves_authenticated_current(prepared,monkeypatch):
+    root,jobs,db,add,posts=prepared;body=posts['thursday']['post_text']
+    add('Thursday draft:\n```\n'+body+'\n```',role='assistant');mid=add('Approved publish')
+    monkeypatch.setattr(bridge,'current_approval_message',lambda **kw:mid)
+    args=action_args(prepared);args['approval_message_id']=1567760970267492483
+    result=bridge.linkedin(args,**opts(prepared),generator=lambda body:b'\x89PNG\r\n\x1a\nsynthetic')
+    assert result['approval']['owner_approved']
+    assert result['approval']['body_sha256']==consent.digest(body)
