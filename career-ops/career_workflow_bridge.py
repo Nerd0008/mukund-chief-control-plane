@@ -53,17 +53,59 @@ def render_drafts(doc):
     return '\n\n'.join(lines)
 
 
-def _selected(day,sha,**options):
+def _selected(day,sha,post_id=None,**options):
+    if post_id and day is None:
+        if not re.fullmatch(r'[0-9a-f]{32}',post_id):raise ValueError('invalid post ID')
+        root=Path(options.get('root',state.ROOT));jobs=options.get('jobs_path',state.JOBS);db=options.get('db_path')
+        found=[]
+        for path in (root/'drafts').glob('approved_*/linkedin_drafts.json'):
+            try:
+                doc=state.read(path)
+                if doc.get('post_id')!=post_id:continue
+                status=state.inspect_artifact(path,root=root,jobs_path=jobs,db_path=db)
+                if not status['artifact_identity_valid']:raise ValueError('post artifact identity invalid')
+                target=status['target_date']
+                found.append({**status,'day':date.fromisoformat(target).strftime('%A').lower(),'date':target,
+                              'source_kind':'DATED_ARTIFACT','post_text':state.body_of(doc),'draft_exists':True})
+            except (OSError,TypeError):continue
+        if len(found)>1:raise ValueError('post ID is duplicated across artifacts')
+        if not found:
+            for path in (root/'review').glob('*/weekly.json'):
+                try:doc=state.read(path)
+                except (OSError,ValueError):continue
+                for entry in (doc.get('posts') or {}).values():
+                    if not isinstance(entry,dict) or entry.get('post_id')!=post_id or not entry.get('target_date'):continue
+                    target=date.fromisoformat(entry['target_date'])
+                    prepared=state.prepared_status(target,root=root,jobs_path=jobs)
+                    if prepared and prepared.get('post_id')==post_id:
+                        found.append({**prepared,'day':target.strftime('%A').lower(),'date':target.isoformat(),
+                                      'source_kind':'REVIEWED_PREPARED' if prepared.get('reviews_ready') else 'PREPARED','draft_exists':True})
+        if len(found)!=1:raise ValueError('post ID does not uniquely identify a post')
+        row=found[0]
+        if sha and sha!=row['body_sha256']:raise ValueError('version mismatch: retrieve and approve the exact selected draft first')
+        return row
     if day not in state.WEEKDAYS:raise ValueError('invalid publishing weekday')
     row=next((r for r in show(**options)['days'] if r['day']==day),None)
     if row is None:raise ValueError('no dated draft')
+    if post_id and row.get('post_id')!=post_id:
+        matches=[v for v in row.get('alternatives',[]) if v.get('post_id')==post_id]
+        if len(matches)!=1:raise ValueError('post ID does not uniquely identify a draft for this day')
+        alt=matches[0];path=Path(alt['artifact'])
+        if alt.get('source_kind') in ('PREPARED','REVIEWED_PREPARED'):
+            prepared=state.prepared_status(date.fromisoformat(row['date']),root=options.get('root',state.ROOT),jobs_path=options.get('jobs_path',state.JOBS))
+            row={**prepared,'day':day,'date':row['date'],'source_kind':alt['source_kind'],'draft_exists':True}
+        else:
+            status=state.inspect_artifact(path,root=options.get('root',state.ROOT),jobs_path=options.get('jobs_path',state.JOBS),db_path=options.get('db_path'))
+            row={**status,'day':day,'date':row['date'],'source_kind':'DATED_ARTIFACT','post_text':state.body_of(state.read(path)),'draft_exists':True}
     if not row.get('draft_exists'):raise ValueError('no dated draft')
-    if sha!=row['body_sha256']:raise ValueError('version mismatch: retrieve and approve the exact selected draft first')
+    if post_id and row.get('post_id')!=post_id:raise ValueError('post ID mismatch')
+    if sha and sha!=row['body_sha256']:raise ValueError('version mismatch: retrieve and approve the exact selected draft first')
+    if not sha and not post_id:raise ValueError('post ID or exact body hash required')
     return row
 
 
 def image(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None):
-    path=Path(row.get('captured_artifact') or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
+    path=Path(row.get('captured_artifact') or (row.get('artifact') if row.get('source_kind')=='DATED_ARTIFACT' else None) or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
     current=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if current['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False}
     if not current['owner_approved'] or not current['reviews_ready']:raise ValueError('exact owner approval and passing reviews required before image generation')
@@ -160,7 +202,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
         spoken=proof['receipt']['preferences']
     else:message_id=current_approval_message(db_path=db_path)
     if not spoken['approved'] or not spoken['publish_now']:raise ValueError('Tell me explicitly if you want this post published now.')
-    path=Path(row.get('captured_artifact') or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
+    path=Path(row.get('captured_artifact') or (row.get('artifact') if row.get('source_kind')=='DATED_ARTIFACT' else None) or (Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'))
     status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
     if status['published']:return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     if spoken.get('skip_image') and status['owner_approved'] and status['body_sha256']==row['body_sha256']:
@@ -188,7 +230,7 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
 def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None,runner=None):
     now=now or datetime.now(state.LONDON)
     mode=args.get('action','show')
-    if mode not in ('show','build','prepare','approve','image','plan','publish','publish_chat'):raise ValueError('unsupported LinkedIn action')
+    if mode not in ('show','build','prepare','approve','image','plan','publish','publish_chat','draft_chat'):raise ValueError('unsupported LinkedIn action')
     opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
     if mode in ('show','build'):return show(**opts)  # Reviewed preparation is already an artifact; never regenerate it merely to display it.
     if mode=='prepare':
@@ -196,6 +238,43 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         monday=args.get('week_of') or show(**opts)['week_of']
         doc=linkedin_weekly.prepare(monday,root=root)
         return {'ok':bool(doc['ok']),'preparation':show(**opts),'publish_performed':False}
+    if mode=='draft_chat':
+        body=args.get('post_text');sources=args.get('sources') or []
+        if not isinstance(body,str) or not body.strip() or len(body.strip())>=1000:raise ValueError('A post under 1000 characters is required')
+        if not isinstance(sources,list) or any(not isinstance(u,str) or not u.startswith('https://') for u in sources):raise ValueError('sources must be HTTPS URLs')
+        from hermes_diagnostics import current_contract
+        contract=current_contract()
+        if contract.get('workflow')!='linkedin' or contract.get('turn_origin')!='human_text':raise ValueError('An authenticated owner draft request is required')
+        if Path(root).resolve()==state.ROOT.resolve():current_approval_message(db_path=db_path)
+        body=body.strip();sha=state.consent.digest(body)
+        requested_id=args.get('post_id')
+        if requested_id:
+            existing=_selected(None,None,post_id=requested_id,root=root,jobs_path=jobs_path,db_path=db_path)
+            if existing.get('source_kind')!='DATED_ARTIFACT' or existing.get('owner_approved') or existing.get('published') or existing.get('slot_matches'):
+                raise ValueError('Only an unapproved, unscheduled chat draft can be edited in place')
+            target=date.fromisoformat(existing['date']);day=existing['day'];path=Path(existing['artifact'])
+            if args.get('target_date') and args['target_date']!=target.isoformat():raise ValueError('Changing a post date requires a separate scheduling action')
+            with state.locked(root):
+                before=state.file_hash(path);doc=state.read(path)
+                if doc.get('post_id')!=requested_id or doc.get('owner_approval'):raise state.StateConflict('draft changed while editing')
+                doc.update(post_text=body,approved=False,news_fact_gate={'sources':sources},personal_fact_gate={})
+                state.audited_json(path,doc,before,root=root,operation='chat_draft_revised',body_sha=sha)
+            return {'ok':True,'phase':'AWAITING_OWNER_APPROVAL','post_id':requested_id,'body_sha256':sha,
+                    'artifact':str(path),'owner_approved':False,'publish_performed':False}
+        target=date.fromisoformat(args.get('target_date') or now.date().isoformat());day=target.strftime('%A').lower()
+        path=Path(root)/'drafts'/f'approved_{target:%Y%m%d}_{day}_{sha}'/'linkedin_drafts.json'
+        with state.locked(root):
+            before=state.file_hash(path)
+            if before:
+                doc=state.read(path)
+                if state.body_of(doc)!=body or not doc.get('post_id'):raise state.StateConflict('existing artifact cannot be reused as a new post')
+            else:
+                import uuid
+                doc={'schema_version':2,'post_id':uuid.uuid4().hex,'post_text':body,'day':day,
+                     'approved':False,'news_fact_gate':{'sources':sources},'personal_fact_gate':{}}
+                state.audited_json(path,doc,None,root=root,operation='chat_draft_registered',body_sha=sha)
+        return {'ok':True,'phase':'AWAITING_OWNER_APPROVAL','post_id':doc['post_id'],'body_sha256':sha,
+                'artifact':str(path),'owner_approved':False,'publish_performed':False}
     if mode=='publish_chat':
         body=args.get('post_text');sources=args.get('sources') or []
         if not isinstance(body,str) or not body.strip() or len(body.strip())>=1000:raise ValueError('A displayed post under 1000 characters is required')
@@ -218,7 +297,11 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         if check_text(body,registry_path=Path(root)/'topic_registry.json')['blocked']:raise ValueError('topic already used or excluded')
         due=datetime.fromisoformat(spoken['publish_at']) if spoken['publish_at'] else None
         target=(due.date() if due else now.date()).isoformat()
-        result=state.capture(body,target,message_id,sources=sources,distinct=True,root=root,db_path=db_path)
+        registered=None
+        if args.get('post_id'):
+            registered=_selected(None,sha,post_id=args['post_id'],root=root,jobs_path=jobs_path,db_path=db_path)
+            if registered['date']!=target:raise ValueError('post ID date does not match the requested publication date')
+        result=state.capture(body,target,message_id,sources=sources,distinct=True,post_id=args.get('post_id'),artifact_path=registered['artifact'] if registered else None,root=root,db_path=db_path)
         path=Path(result['artifact'])
         with state.locked(root):
             before=state.file_hash(path);doc=state.read(path)
@@ -242,7 +325,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             armed=any(item.get('day')==row['day'] and item.get('next_run_at')==due.isoformat() for item in (plan.get('publishing') or {}).get('armed',[]))
             return {'ok':True,'phase':'SCHEDULED' if armed else 'APPROVED_READY_PAUSED','approval':result,'plan':plan,'image':image_result,'publish_performed':False}
         return {**publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner,verified_instruction=(message_id,approval) if retry else None),'image':image_result}
-    row=_selected(args.get('day'),args.get('body_sha256'),**opts)
+    row=_selected(args.get('day'),args.get('body_sha256'),post_id=args.get('post_id'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
     requested_publish=(mode=='publish')
     if mode in ('approve','publish'):
@@ -267,7 +350,8 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         target_path=Path(root)/'drafts'/f"approved_{due:%Y%m%d}_{due.strftime('%A').lower()}"/'linkedin_drafts.json'
         conflict=target!=row['date'] and target_path.exists() and state.body_of(state.read(target_path))!=row['post_text']
         capture_target=row['date'] if conflict else target
-        result=state.capture(row['post_text'],capture_target,capture_id,replace=(capture_target==row['date']),root=root,db_path=db_path)
+        selected_path=row.get('artifact') if row.get('source_kind')=='DATED_ARTIFACT' and capture_target==row['date'] else None
+        result=state.capture(row['post_text'],capture_target,capture_id,replace=(capture_target==row['date']),distinct=bool(row.get('post_id') and row.get('source_kind') in ('PREPARED','REVIEWED_PREPARED')),post_id=row.get('post_id'),artifact_path=selected_path,root=root,db_path=db_path)
         path=Path(result['artifact'])
         with state.locked(root):
             before=state.file_hash(path);doc=state.read(path)
@@ -296,7 +380,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         if conflict:
             return {'ok':True,'phase':'SCHEDULE_CONFLICT','message':'Your approval is saved. Another post already has that date. Which post should use that slot?',
                     'approval':result,'publish_performed':False}
-        selected={**row,'date':capture_target,'day':due.strftime('%A').lower()}
+        selected={**row,'date':capture_target,'day':due.strftime('%A').lower(),'captured_artifact':str(path)}
         image_result={'ok':True,'phase':'IMAGE_SKIPPED'}
         if not skip_image:
             try:image_result=image(selected,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
@@ -311,7 +395,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
     if mode=='publish':return publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path)
     if mode=='image':return image(row,root=root,jobs_path=jobs_path,db_path=db_path,generator=generator)
     if mode=='plan':
-        path=Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'
+        path=Path(row['artifact']) if row.get('source_kind')=='DATED_ARTIFACT' else Path(root)/'drafts'/f"approved_{date.fromisoformat(row['date']):%Y%m%d}_{row['day']}"/'linkedin_drafts.json'
         return {'ok':True,'plan':state.plan_slot(path,row['date'],root=root,db_path=db_path,jobs_path=jobs_path),'publish_performed':False}
     raise ValueError('unsupported LinkedIn action')
 

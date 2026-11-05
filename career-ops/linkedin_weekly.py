@@ -1,6 +1,6 @@
 """Resumable weekly LinkedIn preparation. Never approves, images, arms or publishes."""
 from __future__ import annotations
-import argparse,json,sys
+import argparse,json,sys,uuid
 from datetime import date,datetime,timedelta
 from pathlib import Path
 REPO=Path(__file__).resolve().parents[1]
@@ -156,7 +156,7 @@ def prepare(week_of=None,*,root=state.ROOT):
                 post=complete_reviews(post,label='linkedin-weekly-'+day,context_hash=context_hash)
                 body=post['post_text']
                 if check_text(body,registry_path=registry_path)['blocked']:raise RouterDecisionError('linkedin_topic_reused')
-                post.update(body_sha256=state.consent.digest(body),category=category,
+                post.update(post_id=post.get('post_id') or uuid.uuid4().hex,body_sha256=state.consent.digest(body),category=category,
                     profile_context_sha256=context_hash,target_date=target.isoformat(),phase='AWAITING_OWNER_APPROVAL',owner_approved=False)
                 if not accepted(post):raise RouterDecisionError('linkedin_review_incomplete')
                 doc['posts'][day]=post

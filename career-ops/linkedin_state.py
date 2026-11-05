@@ -1,6 +1,6 @@
 """Canonical LinkedIn approval/review/schedule state. Status is computed, never guessed."""
 from __future__ import annotations
-import argparse,hashlib,json,os,re,sys,tempfile
+import argparse,hashlib,json,os,re,sys,tempfile,uuid
 from contextlib import contextmanager,nullcontext
 from datetime import date,datetime,time,timedelta,timezone
 from pathlib import Path
@@ -197,14 +197,16 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     target=artifact_date(path);day=doc.get('day') or (target.strftime('%A').lower() if target else None)
     job=job_state(day,jobs_path=jobs_path,root=root) if day in job_ids(root) else {'known':False,'enabled':False,'reason':'no publishing weekday'}
     slots=load_slots(Path(root)/'drafts/schedule.json');slot=slots.get(target.isoformat()) if target else None
+    post_id=doc.get('post_id')
     slot_ok=False;slot_reason='no exact dated schedule slot'
     if slot:
         when=doc.get('requested_publish_at') or datetime.combine(target,time(8),LONDON).isoformat()
         slot_ok=(not slot.get('legacy') and absolute(slot.get('draft_path',''))==path and slot.get('body_sha256')==sha and slot.get('publish_at')==when
+            and (not slot.get('post_id') or (post_id is not None and slot.get('post_id')==post_id))
             and (not slot.get('image_sha256') or (image is not None and file_hash(image)==slot['image_sha256'])))
         slot_reason='exact artifact/hash/date matched' if slot_ok else 'schedule artifact/hash/time/image changed'
     job_matches=bool(slot and job.get('next_run_at')==slot.get('publish_at'))
-    identity_ok=bool(target and day==target.strftime('%A').lower() and (len(path.parent.name.rsplit('_',1)[-1])!=64 or path.parent.name.rsplit('_',1)[-1]==sha))
+    identity_ok=bool(target and day==target.strftime('%A').lower() and (bool(post_id) or len(path.parent.name.rsplit('_',1)[-1])!=64 or path.parent.name.rsplit('_',1)[-1]==sha))
     content_ready=bool(identity_ok and review['owner_approved'] and review['reviews_ready'] and frozen_ok and image_ok and not doc.get('cancelled'))
     blockers=[]
     for okay,code in [(review['owner_approved'],'owner_approval_required'),(review['personal_review_passed'],'personal_review_required'),(review['reviews_ready'],'factual_review_required'),(identity_ok,'artifact_date_mismatch'),(frozen_ok,'text_integrity_failed'),(image_ok,'required_image_unavailable'),(not doc.get('cancelled'),'owner_cancelled')]:
@@ -218,7 +220,7 @@ def inspect_artifact(path,*,root=ROOT,db_path=None,jobs_path=JOBS):
     elif not job['enabled'] or not policy_on:phase='APPROVED_READY_PAUSED'
     elif not slot_ok or not job_matches:phase='APPROVED_READY_UNSCHEDULED'
     else:phase='SCHEDULED'
-    return {'schema_version':2,'phase':phase,'artifact':str(path),'body_sha256':sha,'body_chars':len(body),
+    return {'schema_version':2,'phase':phase,'artifact':str(path),'post_id':post_id,'body_sha256':sha,'body_chars':len(body),
         **review,'artifact_identity_valid':identity_ok,'text_integrity_passed':bool(frozen_ok),'image_available':image_ok,
         'content_ready':content_ready,'published':is_published,'cancelled':bool(doc.get('cancelled')),
         'target_date':target.isoformat() if target else None,'publish_at':slot.get('publish_at') if slot else None,'content_blockers':blockers,
@@ -366,6 +368,7 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
         image=absolute(doc['image_path']) if doc.get('image_path') else None
         value={'draft_path':str(path),'body_sha256':status['body_sha256'],
             'image_sha256':file_hash(image) if image else None,'publish_at':doc.get('requested_publish_at') or datetime.combine(target,time(8),LONDON).isoformat()}
+        if status.get('post_id'):value['post_id']=status['post_id']
         requested=datetime.fromisoformat(value['publish_at'])
         if requested.tzinfo is None or requested.astimezone(LONDON).date()!=target:raise ValueError('Requested publication time must match the dated post.')
         prior=slots.get(target.isoformat())
@@ -379,16 +382,19 @@ def plan_slot(path,target,*,root=ROOT,db_path=None,jobs_path=JOBS,dry_run=False,
         return {'planned':True,'slot':value,'dry_run':dry_run,'job_enablement_changed':bool(armed and armed['armed']),'publishing':armed,'job':job_state(target.strftime('%A').lower(),jobs_path=jobs_path,root=root),'publish_performed':False}
 
 
-def capture(body,target,message_id,*,sources=(),image=None,replace=False,distinct=False,root=ROOT,db_path=None,dry_run=False):
+def capture(body,target,message_id,*,sources=(),image=None,replace=False,distinct=False,post_id=None,artifact_path=None,root=ROOT,db_path=None,dry_run=False):
     root=Path(root);target=date.fromisoformat(str(target));day=target.strftime('%A').lower()
     if day not in WEEKDAYS:raise ValueError('invalid publishing weekday')
     body=body.strip();approval=consent.verify_message(message_id,body,db_path=db_path)
     if not approval['ok']:raise ValueError(approval['reason'])
     suffix=('_'+consent.digest(body)) if distinct else ''
-    path=root/'drafts'/f'approved_{target:%Y%m%d}_{day}{suffix}'/'linkedin_drafts.json'
+    path=(Path(artifact_path).resolve() if artifact_path else root/'drafts'/f'approved_{target:%Y%m%d}_{day}{suffix}'/'linkedin_drafts.json')
+    if artifact_path and (not path.is_relative_to((root/'drafts').resolve()) or artifact_date(path)!=target):raise ValueError('artifact identity does not match target date')
+    if post_id is not None and (not isinstance(post_id,str) or not re.fullmatch(r'[0-9a-f]{32}',post_id)):raise ValueError('invalid post ID')
     with (nullcontext() if dry_run else locked(root)):
         before=file_hash(path);prior=read(path) if path.exists() else None
         if prior and prior.get('cancelled'):raise ValueError('cancelled artifact cannot be replaced implicitly')
+        if prior and post_id and prior.get('post_id')!=post_id:raise StateConflict('post ID differs from existing artifact')
         changed=prior is not None and body_of(prior)!=body
         if changed and not replace:raise StateConflict('existing body differs; explicit replacement with fresh exact approval required')
         if prior and published(consent.digest(body_of(prior)),root):raise ValueError('published artifact cannot be replaced')
@@ -400,6 +406,9 @@ def capture(body,target,message_id,*,sources=(),image=None,replace=False,distinc
             doc=dict(prior)
         else:
             doc={'schema_version':2,'post_text':body,'day':day,'news_fact_gate':{'sources':list(sources)},'personal_fact_gate':{}}
+        # Existing ID-less artifacts remain untouched; new posts receive an immutable ID.
+        assigned_id=(prior.get('post_id') if prior else None) or post_id or (uuid.uuid4().hex if prior is None else None)
+        if assigned_id:doc['post_id']=assigned_id
         doc.update(owner_approval=approval['receipt'],approved=True,confirm_token=consent.digest(body))
         if image is not None:doc['image_path']=str(Path(image).resolve())
         elif prior and not changed and prior.get('image_path'):doc['image_path']=prior['image_path']
@@ -414,7 +423,7 @@ def capture(body,target,message_id,*,sources=(),image=None,replace=False,distinc
             audited_json(path,doc,before,root=root,operation='approved_body_captured',body_sha=consent.digest(body))
             frozen=path.parent/'frozen_text.txt'
             audited_write(frozen,(body+'\n').encode('utf-8'),file_hash(frozen),root=root,operation='approved_text_frozen',body_sha=consent.digest(body))
-        return {'captured':True,'artifact':str(path),'body_sha256':consent.digest(body),'owner_approved':True,
+        return {'captured':True,'artifact':str(path),'post_id':doc.get('post_id'),'body_sha256':consent.digest(body),'owner_approved':True,
             'dry_run':dry_run,'publish_performed':False,'job_enablement_changed':False}
 
 
@@ -457,7 +466,7 @@ def prepared_status(target,*,root=ROOT,jobs_path=JOBS):
         p_ok=personal_ok(post.get('personal_fact_gate'),body)
         ready=bool(exact and n_ok and p_ok and not post.get('blocked') and post.get('phase')=='AWAITING_OWNER_APPROVAL' and not post.get('error'))
         return {'phase':'AWAITING_OWNER_APPROVAL' if ready else 'DRAFT_BLOCKED',
-            'artifact':str(path),'post_text':body,'body_sha256':consent.digest(body),
+            'artifact':str(path),'post_id':post.get('post_id'),'post_text':body,'body_sha256':consent.digest(body),
             'owner_approved':False,'approval_detail':'Prepared draft has not received authenticated exact-body owner approval',
             'news_review_passed':bool(n_ok),'news_review_detail':n_reason,'personal_review_passed':bool(p_ok),
             'reviews_ready':ready,'content_ready':False,'automatic_publish_armed':False,
@@ -486,19 +495,30 @@ def week_status(week_of=None,*,root=ROOT,db_path=None,jobs_path=JOBS):
         if path.is_file():
             row=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
             row['post_text']=body_of(read(path));row['source_kind']='DATED_ARTIFACT'
-            if prepared and prepared.get('body_sha256')!=row.get('body_sha256'):
+            if prepared and (prepared.get('body_sha256')!=row.get('body_sha256') or (prepared.get('post_id') and prepared.get('post_id')!=row.get('post_id'))):
                 # Unapproved scratch output cannot hide an existing reviewed draft.
                 if scheduled_path is None and prepared.get('reviews_ready') and not row.get('owner_approved') and not row.get('published') and not row.get('cancelled'):
                     alternative=row;row={**prepared,'source_kind':'REVIEWED_PREPARED'}
                 else:alternative={**prepared,'source_kind':'PREPARED'}
-                row['alternatives']=[{k:alternative.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')}]
+                row['alternatives']=[{k:alternative.get(k) for k in ('artifact','post_id','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')}]
         else:
             row=({**prepared,'source_kind':'REVIEWED_PREPARED' if prepared.get('reviews_ready') else 'PREPARED'} if prepared else
                 {'phase':'NO_ARTIFACT','source_kind':'NONE','owner_approved':None,'approval_detail':'No canonical artifact; chat drafts or chat approvals are not inferred.','automatic_publish_armed':False,'job':job_state(day,jobs_path=jobs_path,root=root)})
         if scheduled_path is not None and canonical.is_file() and canonical.resolve()!=scheduled_path:
             other=inspect_artifact(canonical,root=root,db_path=db_path,jobs_path=jobs_path)
             other.update(post_text=body_of(read(canonical)),source_kind='DATED_ARTIFACT')
-            row.setdefault('alternatives',[]).append({k:other.get(k) for k in ('artifact','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')})
+            row.setdefault('alternatives',[]).append({k:other.get(k) for k in ('artifact','post_id','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')})
+        # Keep distinct same-day posts addressable, even when they are not scheduled.
+        represented={str(Path(row['artifact']).resolve())} if row.get('source_kind')=='DATED_ARTIFACT' and row.get('artifact') else set()
+        represented.update(str(Path(v['artifact']).resolve()) for v in row.get('alternatives',[]) if v.get('source_kind')=='DATED_ARTIFACT' and v.get('artifact'))
+        for candidate in (Path(root)/'drafts').glob(f'approved_{target:%Y%m%d}_{day}_*/linkedin_drafts.json'):
+            if str(candidate.resolve()) in represented:continue
+            try:
+                other=inspect_artifact(candidate,root=root,db_path=db_path,jobs_path=jobs_path)
+                if not other.get('post_id'):continue  # Existing historical artifacts are not migrated.
+                other.update(post_text=body_of(read(candidate)),source_kind='DATED_ARTIFACT')
+                row.setdefault('alternatives',[]).append({k:other.get(k) for k in ('artifact','post_id','body_sha256','phase','reviews_ready','owner_approved','source_kind','post_text')})
+            except (OSError,ValueError,TypeError):continue
         row['draft_exists']=bool(row.get('post_text'))
         days.append({'day':day,'date':target.isoformat(),**row})
     count=sum(row['automatic_publish_armed'] for row in days)

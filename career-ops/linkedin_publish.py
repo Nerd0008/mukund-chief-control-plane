@@ -765,6 +765,7 @@ def _cmd_publish_unlocked(args) -> int:
                           sleep=None if args.no_backoff else __import__("time").sleep)
     record = {"result": "published" if result["ok"] else "failed",
               "kind": args.kind, "index": args.index, "body_sha256": body_sha,
+              **({"post_id": draft["post_id"]} if draft.get("post_id") else {}),
               "topic": topic_title,
               "post_urn": result.get("post_urn"), "post_url": result.get("post_url"),
               "image_urn": image_urn,

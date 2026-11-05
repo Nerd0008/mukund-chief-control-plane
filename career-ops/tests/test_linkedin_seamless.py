@@ -288,3 +288,65 @@ def test_image_failure_falls_back_to_text_only_and_schedules(prepared):
     assert result['image']['reason'] and result['plan']['planned']
     path=Path(result['approval']['artifact']);doc=state.read(path)
     assert doc['image_required'] is False and doc['owner_approval']['body_sha256']==consent.digest(body)
+
+
+def test_new_post_ids_distinguish_same_text_and_bind_scheduled_artifact(history,tmp_path,monkeypatch):
+    from test_linkedin_state import gate,personal,scheduler_fixture
+    db,add=history;body='Same synthetic text for two separate posts.'
+    add(body,role='assistant');mid=add('Approved')
+    root=tmp_path/'linkedin';root.mkdir();(root/'publishing-policy.json').write_text('{"schema_version":1,"enabled":true}')
+    jobs=tmp_path/'jobs.json';jobs.write_text(json.dumps({'jobs':[{'id':j,'enabled':False} for j in state.JOB_IDS.values()]}))
+    monkeypatch.setattr(state,'_scheduler_update',lambda jid,updates,**kw:scheduler_fixture(jobs)[1](jid,updates))
+    first=state.capture(body,'2026-10-29',mid,root=root,db_path=db)
+    second=state.capture(body,'2026-10-29',mid,root=root,db_path=db,distinct=True)
+    assert len(first['post_id'])==32 and first['post_id']!=second['post_id']
+    for record in (first,second):
+        path=Path(record['artifact']);doc=state.read(path)
+        doc.update(news_fact_gate=gate(body),personal_fact_gate=personal(body),image_required=False,requested_publish_at='2026-10-29T08:00:00+00:00')
+        path.write_text(json.dumps(doc))
+    state.plan_slot(second['artifact'],'2026-10-29',root=root,db_path=db,jobs_path=jobs,now=datetime(2026,10,27,12,tzinfo=state.LONDON))
+    opts={'week_of':'2026-10-26','root':root,'db_path':db,'jobs_path':jobs}
+    assert bridge._selected('thursday',None,post_id=second['post_id'],**opts)['artifact']==second['artifact']
+    assert bridge._selected('thursday',None,post_id=first['post_id'],**opts)['artifact']==first['artifact']
+    assert bridge._selected(None,None,post_id=first['post_id'],**opts)['artifact']==first['artifact']
+    assert bridge._selected(None,None,post_id=second['post_id'],**opts)['artifact']==second['artifact']
+    with pytest.raises(ValueError):bridge._selected('thursday',None,post_id='f'*32,**opts)
+    slots=state.load_slots(root/'drafts/schedule.json');assert slots['2026-10-29']['post_id']==second['post_id']
+    slots['2026-10-29']['post_id']=first['post_id']
+    (root/'drafts/schedule.json').write_text(json.dumps({'schema_version':2,'timezone':'Europe/London','slots':slots}))
+    assert not state.inspect_artifact(second['artifact'],root=root,db_path=db,jobs_path=jobs)['slot_matches']
+
+def test_existing_idless_capture_is_not_migrated(history,tmp_path):
+    db,add=history;body='Legacy approved post';add(body,role='assistant');mid=add('Approved')
+    root=tmp_path/'linkedin';path=root/'drafts/approved_20261029_thursday/linkedin_drafts.json';path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({'post_text':body,'day':'thursday'}))
+    result=state.capture(body,'2026-10-29',mid,root=root,db_path=db)
+    assert result['post_id'] is None and 'post_id' not in state.read(path)
+
+
+def test_chat_draft_gets_id_before_approval_and_keeps_it(history,tmp_path):
+    db,add=history;root=tmp_path/'linkedin';body='New unapproved chat draft.'
+    contract={'workflow':'linkedin','turn_origin':'human_text','latest_human_message':'Draft a post'}
+    with owner.dispatch_context('',[],contract):
+        draft=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29'},root=root,db_path=db)
+        repeat=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29'},root=root,db_path=db)
+    assert draft['post_id']==repeat['post_id'] and not draft['owner_approved']
+    add(body,role='assistant');mid=add('Approved')
+    approved=state.capture(body,'2026-10-29',mid,root=root,db_path=db,distinct=True)
+    assert approved['post_id']==draft['post_id'] and approved['owner_approved']
+    assert bridge._selected(None,None,post_id=draft['post_id'],root=root,db_path=db)['artifact']==draft['artifact']
+
+
+def test_chat_revision_preserves_post_id_and_requires_new_text_approval(history,tmp_path):
+    db,add=history;root=tmp_path/'linkedin';contract={'workflow':'linkedin','turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract):
+        first=bridge.linkedin({'action':'draft_chat','post_text':'First version','target_date':'2026-10-29'},root=root,db_path=db)
+        revised=bridge.linkedin({'action':'draft_chat','post_id':first['post_id'],'post_text':'Changed version'},root=root,db_path=db)
+    assert revised['post_id']==first['post_id'] and revised['artifact']==first['artifact']
+    assert revised['body_sha256']!=first['body_sha256']
+    assert bridge._selected(None,None,post_id=first['post_id'],root=root,db_path=db)['post_text']=='Changed version'
+    add('Changed version',role='assistant');mid=add('Approved')
+    result=state.capture('Changed version','2026-10-29',mid,root=root,db_path=db,post_id=first['post_id'],artifact_path=first['artifact'])
+    assert result['post_id']==first['post_id'] and result['owner_approved']
+    with owner.dispatch_context('',[],contract),pytest.raises(ValueError):
+        bridge.linkedin({'action':'draft_chat','post_id':first['post_id'],'post_text':'Unapproved rewrite'},root=root,db_path=db)

@@ -91,7 +91,7 @@ def latest_run(job_id,*,home=state.HOME):
 def snapshot(*,home=state.HOME,root=state.ROOT,db_path=None,now=None):
     now=now or datetime.now(state.LONDON);monday=now.date()-timedelta(days=now.weekday())
     status=state.week_status(monday.isoformat(),root=root,db_path=db_path,jobs_path=Path(home)/'cron/jobs.json')
-    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','body_sha256','job','draft_exists','artifact','source_kind','alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail')
+    fields=('day','date','phase','owner_approved','reviews_ready','content_ready','published','slot_matches','automatic_publish_armed','publishing_enabled','post_id','body_sha256','job','draft_exists','artifact','source_kind','alternatives','content_blockers','image_available','text_integrity_passed','news_review_detail')
     days=[{k:row[k] for k in fields if k in row} for row in status['days']]
     for row in days:
         if row.get('alternatives'):row['alternatives']=[{k:v for k,v in alt.items() if k!='post_text'} for alt in row['alternatives']]
