@@ -350,3 +350,90 @@ def test_chat_revision_preserves_post_id_and_requires_new_text_approval(history,
     assert result['post_id']==first['post_id'] and result['owner_approved']
     with owner.dispatch_context('',[],contract),pytest.raises(ValueError):
         bridge.linkedin({'action':'draft_chat','post_id':first['post_id'],'post_text':'Unapproved rewrite'},root=root,db_path=db)
+
+
+def test_corrected_chat_approval_selects_unique_hash_and_runs_missing_reviews(prepared):
+    from test_linkedin_state import gate,personal
+    root,jobs,db,add,posts=prepared;body='Corrected synthetic news post.';url='https://example.invalid/evidence'
+    contract={'workflow':'linkedin','turn_origin':'human_text','latest_human_message':'Draft a post'}
+    with owner.dispatch_context('',[],contract):
+        draft=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29','sources':[url]},**opts(prepared))
+    add('Corrected draft:\n```\n'+body+'\n```',role='assistant');mid=add('Approved')
+    seen=[]
+    def news_review(text,sources):seen.append((text,sources));return gate(text,sources)
+    result=bridge.linkedin({'action':'approve','day':'thursday','week_of':WEEK,'body_sha256':consent.digest(body),'approval_message_id':str(mid)},**opts(prepared),personal_runner=lambda text,label:personal(text),news_runner=news_review,now=datetime(2026,10,29,12,tzinfo=state.LONDON))
+    assert result['approval']['post_id']==draft['post_id'] and seen==[(body,[url])]
+    assert result['phase']=='APPROVED_READY_NEEDS_PUBLISH_INSTRUCTION' and not result['publish_performed']
+    status=state.inspect_artifact(draft['artifact'],**opts(prepared))
+    assert status['owner_approved'] and status['reviews_ready']
+
+def test_review_action_resumes_existing_approval_without_reapproval(prepared):
+    from test_linkedin_state import gate,personal
+    root,jobs,db,add,posts=prepared;body='Approved synthetic post for review.';url='https://example.invalid/source'
+    with owner.dispatch_context('',[],{'workflow':'linkedin','turn_origin':'human_text'}):
+        draft=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29'},**opts(prepared))
+    add(body,role='assistant');mid=add('Approved')
+    saved=state.capture(body,'2026-10-29',mid,root=root,db_path=db,post_id=draft['post_id'],artifact_path=draft['artifact'])
+    result=bridge.linkedin({'action':'review','post_id':draft['post_id'],'sources':[url]},**opts(prepared),personal_runner=lambda text,label:personal(text),news_runner=lambda text,sources:gate(text,sources))
+    assert result['review']['reviews_ready'] and result['review']['owner_approved'] and not result['publish_performed']
+    assert state.read(saved['artifact'])['owner_approval']['hermes_message_id']==mid
+
+def test_completed_fact_block_is_not_retried(tmp_path,history):
+    from test_linkedin_state import artifact,gate,personal
+    root,path,db,jobs,mid=artifact(tmp_path,history);doc=state.read(path);doc['personal_fact_gate']=personal(doc['post_text'])
+    doc['news_fact_gate']={**gate(doc['post_text']),'verdict':'block'};path.write_text(json.dumps(doc))
+    result=state.reconcile(path,root=root,db_path=db,jobs_path=jobs,news_runner=lambda *a:pytest.fail('completed block must not be retried'))
+    assert not result['reviews_ready'] and result['owner_approved']
+
+
+def test_review_releases_lock_and_rejects_concurrent_changes(tmp_path,history):
+    from test_linkedin_state import artifact,gate
+    root,path,db,jobs,mid=artifact(tmp_path,history);doc=state.read(path);doc['news_fact_gate']={'sources':[]};path.write_text(json.dumps(doc))
+    def concurrent_review(body,sources):
+        with state.locked(root):
+            changed=state.read(path);changed['concurrent_marker']='kept';path.write_text(json.dumps(changed))
+        return gate(body)
+    with pytest.raises(state.StateConflict,match='changed during review'):
+        state.reconcile(path,root=root,db_path=db,jobs_path=jobs,news_runner=concurrent_review)
+    assert state.read(path)['concurrent_marker']=='kept'
+
+def test_approval_accepts_sources_and_reviews_without_losing_owner_consent(prepared):
+    from test_linkedin_state import personal,gate
+    root,jobs,db,add,posts=prepared;body='A newly approved synthetic post.';url='https://example.invalid/article'
+    with owner.dispatch_context('',[],{'workflow':'linkedin','turn_origin':'human_text'}):
+        draft=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29'},**opts(prepared))
+    add(body,role='assistant');mid=add('Approved')
+    seen=[]
+    def review(text,sources):seen.extend(sources);return gate(text,sources)
+    result=bridge.linkedin({'action':'approve','post_id':draft['post_id'],'approval_message_id':mid,'sources':[url]},**opts(prepared),personal_runner=lambda text,label:personal(text),news_runner=review,now=datetime(2026,10,29,12,tzinfo=state.LONDON))
+    assert seen==[url] and result['approval']['owner_approved'] and not result['publish_performed']
+
+
+def test_build_does_not_claim_to_create_missing_version(prepared):
+    result=bridge.linkedin({'action':'build','day':'thursday','week_of':WEEK,'body_sha256':'a'*64},**opts(prepared))
+    assert not result['ok'] and result['phase']=='DRAFT_NOT_FOUND' and result['writes']==0
+
+def test_publish_chat_by_registered_id_keeps_version_and_uses_simulated_publisher(prepared,monkeypatch):
+    import linkedin_weekly,linkedin_content_gen as gen,topic_reuse_check as topics
+    from test_linkedin_state import gate,personal
+    root,jobs,db,add,posts=prepared;body='Registered corrected synthetic post.';url='https://example.invalid/source'
+    with owner.dispatch_context('',[],{'workflow':'linkedin','turn_origin':'human_text'}):
+        draft=bridge.linkedin({'action':'draft_chat','post_text':body,'target_date':'2026-10-29','sources':[url]},**opts(prepared))
+    add(body,role='assistant');mid=add('publish without image')
+    monkeypatch.setattr(topics,'check_text',lambda *a,**kw:{'blocked':False})
+    monkeypatch.setattr(gen,'factcheck_post',lambda text,sources:gate(text,sources))
+    monkeypatch.setattr(state,'_personal_runner',lambda text,label:personal(text))
+    class Clock(datetime):
+        @classmethod
+        def now(cls,tz=None):return cls(2026,10,29,12,tzinfo=state.LONDON)
+    monkeypatch.setattr(bridge,'datetime',Clock)
+    calls=[]
+    def publisher(command,**kw):
+        calls.append(command);ledger=root/'published/posts.jsonl';ledger.parent.mkdir(exist_ok=True)
+        ledger.write_text(json.dumps({'result':'published','body_sha256':consent.digest(body)})+'\n')
+        return NS(returncode=0,stdout=json.dumps({'performed':True,'post_urn':'urn:test:registered'}))
+    contract={'workflow':'linkedin','action':'PUBLISH_NOW','latest_human_message':'publish without image','session_key':hashlib.sha256(b'owner').hexdigest(),'turn_origin':'human_text'}
+    with owner.dispatch_context('',[],contract):
+        result=bridge.linkedin({'action':'publish_chat','post_text':body,'post_id':draft['post_id'],'sources':[url],'approval_message_id':mid},**opts(prepared),runner=publisher)
+    assert result['publish_performed'] and len(calls)==1
+    assert state.read(draft['artifact'])['post_id']==draft['post_id']

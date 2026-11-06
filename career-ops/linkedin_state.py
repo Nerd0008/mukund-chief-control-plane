@@ -252,37 +252,36 @@ def recover_news(body,old,*,root=ROOT):
 
 def reconcile(path,*,message_id=None,root=ROOT,db_path=None,jobs_path=JOBS,personal_runner=None,news_runner=None,dry_run=False):
     path=Path(path).resolve();root=Path(root)
+    # Keep the state lock only for snapshots/commits, not slow provider calls.
     with (nullcontext() if dry_run else locked(root)):
         if dry_run:personal_runner=None;news_runner=None
         before=file_hash(path);doc=read(path);body=body_of(doc)
         if doc.get('cancelled'):raise ValueError('cancelled artifact cannot be reconciled/armed')
-        if message_id is None:
-            approval=consent.verify_receipt(doc.get('owner_approval'),body,db_path=db_path)
-        else:approval=consent.verify_message(message_id,body,db_path=db_path)
+        approval=consent.verify_receipt(doc.get('owner_approval'),body,db_path=db_path) if message_id is None else consent.verify_message(message_id,body,db_path=db_path)
         if not approval['ok']:raise ValueError(approval['reason'])
         doc['owner_approval']=approval['receipt'];doc['approved']=True;doc['confirm_token']=consent.digest(body)
-        # Persist consent before expensive/failed review, independently of its outcome.
         if not dry_run:
             audited_json(path,doc,before,root=root,operation='approval_recorded',body_sha=consent.digest(body))
             before=file_hash(path)
-        doc['news_fact_gate'],recovered=recover_news(body,doc.get('news_fact_gate'),root=root)
-        errors=[]
-        if not news.provenance_ok(doc['news_fact_gate'],body)[0] and news_runner:
-            try:doc['news_fact_gate']=news_runner(body,list(doc['news_fact_gate'].get('sources') or []))
-            except Exception as exc:errors.append('news review unavailable: '+type(exc).__name__)
-        if not personal_ok(doc.get('personal_fact_gate'),body) and personal_runner:
-            try:doc['personal_fact_gate']=personal_runner(body,path.parent.name)
-            except Exception as exc:errors.append('personal review unavailable: '+type(exc).__name__)
-        if not dry_run:
+    doc['news_fact_gate'],recovered=recover_news(body,doc.get('news_fact_gate'),root=root)
+    errors=[]
+    if not news.provenance_ok(doc['news_fact_gate'],body)[0] and news_runner and not (doc['news_fact_gate'].get('verification_complete') is True and doc['news_fact_gate'].get('verdict')=='block'):
+        try:doc['news_fact_gate']=news_runner(body,list(doc['news_fact_gate'].get('sources') or []))
+        except Exception as exc:errors.append('news review unavailable: '+type(exc).__name__)
+    if not personal_ok(doc.get('personal_fact_gate'),body) and personal_runner:
+        try:doc['personal_fact_gate']=personal_runner(body,path.parent.name)
+        except Exception as exc:errors.append('personal review unavailable: '+type(exc).__name__)
+    if dry_run:
+        status=review_state(doc,body,db_path=db_path)
+        status.update(phase='DRY_RUN',content_ready=bool(status['owner_approved'] and status['reviews_ready']))
+    else:
+        with locked(root):
+            if file_hash(path)!=before:raise StateConflict('artifact changed during review; results discarded')
             audited_json(path,doc,before,root=root,operation='reviews_reconciled',body_sha=consent.digest(body))
             frozen=path.parent/'frozen_text.txt'
             if not frozen.exists():audited_write(frozen,(body+'\n').encode('utf-8'),None,root=root,operation='text_frozen',body_sha=consent.digest(body))
-            # A differing frozen text needs explicit investigation, never a silent overwrite.
             status=inspect_artifact(path,root=root,db_path=db_path,jobs_path=jobs_path)
-        else:
-            status=review_state(doc,body,db_path=db_path)
-            status.update(phase='DRY_RUN',content_ready=bool(status['owner_approved'] and status['reviews_ready']))
-        return {**status,'recovery':recovered,'review_errors':errors,'dry_run':dry_run,'publish_performed':False}
+    return {**status,'recovery':recovered,'review_errors':errors,'dry_run':dry_run,'publish_performed':False}
 
 
 def publishing_enabled(root=ROOT):

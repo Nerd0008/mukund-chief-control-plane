@@ -87,6 +87,9 @@ def _selected(day,sha,post_id=None,**options):
     if day not in state.WEEKDAYS:raise ValueError('invalid publishing weekday')
     row=next((r for r in show(**options)['days'] if r['day']==day),None)
     if row is None:raise ValueError('no dated draft')
+    if not post_id and sha and row.get('body_sha256')!=sha:
+        candidates=[v for v in row.get('alternatives',[]) if v.get('body_sha256')==sha]
+        if len(candidates)==1 and candidates[0].get('post_id'):post_id=candidates[0]['post_id']
     if post_id and row.get('post_id')!=post_id:
         matches=[v for v in row.get('alternatives',[]) if v.get('post_id')==post_id]
         if len(matches)!=1:raise ValueError('post ID does not uniquely identify a draft for this day')
@@ -227,12 +230,21 @@ def publish_now(row,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,runner=N
         'blocker_category':payload.get('blocker_category'),'network_calls':payload.get('network_calls_spent')}
 
 
-def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None,runner=None):
+def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=None,now=None,runner=None,personal_runner=None,news_runner=None):
     now=now or datetime.now(state.LONDON)
     mode=args.get('action','show')
-    if mode not in ('show','build','prepare','approve','image','plan','publish','publish_chat','draft_chat'):raise ValueError('unsupported LinkedIn action')
+    if mode not in ('show','build','prepare','approve','image','plan','publish','publish_chat','draft_chat','review'):raise ValueError('unsupported LinkedIn action')
     opts={'root':root,'jobs_path':jobs_path,'db_path':db_path,'week_of':args.get('week_of')}
-    if mode in ('show','build'):return show(**opts)  # Reviewed preparation is already an artifact; never regenerate it merely to display it.
+    if mode in ('show','build'):
+        result=show(**opts)  # Both actions are read-only; neither imports a chat draft.
+        if mode=='build' and (args.get('body_sha256') or args.get('post_id')):
+            candidates=[]
+            for row in result['days']:
+                if args.get('day') and row.get('day')!=args['day']:continue
+                candidates.extend([row,*row.get('alternatives',[])])
+            if not any((not args.get('body_sha256') or x.get('body_sha256')==args['body_sha256']) and (not args.get('post_id') or x.get('post_id')==args['post_id']) for x in candidates):
+                return {'ok':False,'phase':'DRAFT_NOT_FOUND','reason':'build is read-only; use draft_chat for new or revised text','publish_performed':False,'network_calls':0,'writes':0}
+        return result
     if mode=='prepare':
         import linkedin_weekly
         monday=args.get('week_of') or show(**opts)['week_of']
@@ -287,6 +299,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             message_id,approval=retry_chat_approval(body,db_path=db_path);retry=True
         else:
             message_id=args.get('approval_message_id')
+            if isinstance(message_id,str) and message_id.isdigit():message_id=int(message_id)
             if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
             approval=state.consent.verify_message(message_id,body,db_path=db_path)
             if not approval['ok']:raise ValueError(approval['reason'])
@@ -299,7 +312,7 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         target=(due.date() if due else now.date()).isoformat()
         registered=None
         if args.get('post_id'):
-            registered=_selected(None,sha,post_id=args['post_id'],root=root,jobs_path=jobs_path,db_path=db_path)
+            registered=_selected(None,state.consent.digest(body),post_id=args['post_id'],root=root,jobs_path=jobs_path,db_path=db_path)
             if registered['date']!=target:raise ValueError('post ID date does not match the requested publication date')
         result=state.capture(body,target,message_id,sources=sources,distinct=True,post_id=args.get('post_id'),artifact_path=registered['artifact'] if registered else None,root=root,db_path=db_path)
         path=Path(result['artifact'])
@@ -327,12 +340,31 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         return {**publish_now(row,root=root,jobs_path=jobs_path,db_path=db_path,runner=runner,verified_instruction=(message_id,approval) if retry else None),'image':image_result}
     row=_selected(args.get('day'),args.get('body_sha256'),post_id=args.get('post_id'),**opts)
     if row.get('published'):return {'ok':True,'phase':'ALREADY_PUBLISHED','publish_performed':False,'network_calls':0}
+    if mode=='review':
+        if row.get('source_kind')!='DATED_ARTIFACT' or not row.get('owner_approved'):raise ValueError('review requires an approved dated artifact')
+        path=Path(row['artifact']);new_sources=args.get('sources')
+        if new_sources is not None:
+            if not isinstance(new_sources,list) or any(not isinstance(u,str) or not u.startswith('https://') for u in new_sources):raise ValueError('sources must be HTTPS URLs')
+            with state.locked(root):
+                before=state.file_hash(path);doc=state.read(path)
+                body=state.body_of(doc)
+                if state.consent.digest(body)!=row['body_sha256'] or doc.get('cancelled') or not state.consent.verify_receipt(doc.get('owner_approval'),body,db_path=db_path)['ok']:
+                    raise state.StateConflict('draft or approval changed before review')
+                prior=doc.get('news_fact_gate') or {}
+                if set(prior.get('sources') or [])!=set(new_sources):doc['news_fact_gate']={'sources':new_sources}
+                state.audited_json(path,doc,before,root=root,operation='review_sources_recorded',body_sha=row['body_sha256'])
+        if Path(root).resolve()==state.ROOT.resolve():
+            import linkedin_content_gen as gen
+            personal_runner=personal_runner or state._personal_runner;news_runner=news_runner or gen.factcheck_post
+        status=state.reconcile(path,root=root,db_path=db_path,jobs_path=jobs_path,personal_runner=personal_runner,news_runner=news_runner)
+        return {'ok':True,'phase':status['phase'],'post_id':row.get('post_id'),'review':status,'publish_performed':False}
     requested_publish=(mode=='publish')
     if mode in ('approve','publish'):
         if row['source_kind'] in ('REVIEWED_PREPARED','PREPARED'):
             source=state.read(row['artifact'])['posts'][row['day']]
         else:source=state.read(row['artifact'])
         message_id=args.get('approval_message_id')
+        if isinstance(message_id,str) and message_id.isdigit():message_id=int(message_id)
         if not message_id or message_id > 9007199254740991:message_id=current_approval_message(db_path=db_path)
         approval=state.consent.verify_message(message_id,row['post_text'],db_path=db_path)
         preferences=(approval.get('receipt') or {}).get('preferences') or approval.get('preferences') or {}
@@ -356,7 +388,12 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
         with state.locked(root):
             before=state.file_hash(path);doc=state.read(path)
             if state.consent.digest(state.body_of(doc))!=row['body_sha256']:raise state.StateConflict('captured version changed')
-            doc.update(news_fact_gate=source.get('news_fact_gate'),personal_fact_gate=source.get('personal_fact_gate'),
+            existing_news=source.get('news_fact_gate') or {}
+            supplied_sources=args.get('sources')
+            if supplied_sources is not None:
+                if not isinstance(supplied_sources,list) or any(not isinstance(u,str) or not u.startswith('https://') for u in supplied_sources):raise ValueError('sources must be HTTPS URLs')
+                if set(existing_news.get('sources') or [])!=set(supplied_sources):existing_news={'sources':supplied_sources}
+            doc.update(news_fact_gate=existing_news,personal_fact_gate=source.get('personal_fact_gate'),
                        image_required=not skip_image,requested_publish_at=due.isoformat(),
                        preference_message_id=message_id)
             # Preserve independently authenticated override consent across date/image changes.
@@ -375,8 +412,14 @@ def linkedin(args,*,root=state.ROOT,jobs_path=state.JOBS,db_path=None,generator=
             state.audited_json(path,doc,before,root=root,operation='natural_owner_approval_and_preferences',body_sha=row['body_sha256'])
         status=state.inspect_artifact(path,root=root,jobs_path=jobs_path,db_path=db_path)
         if not status['reviews_ready']:
-            return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','message':'Your approval is saved. The post is held for factual review; you do not need to approve this unchanged text again.',
-                    'approval':result,'content_blockers':status['content_blockers'],'publish_performed':False}
+            if Path(root).resolve()==state.ROOT.resolve():
+                import linkedin_content_gen as gen
+                personal_runner=personal_runner or state._personal_runner;news_runner=news_runner or gen.factcheck_post
+            if personal_runner or news_runner:
+                status=state.reconcile(path,root=root,db_path=db_path,jobs_path=jobs_path,personal_runner=personal_runner,news_runner=news_runner)
+        if not status['reviews_ready']:
+            return {'ok':True,'phase':'APPROVED_BUT_BLOCKED','message':'Your approval is saved. Review remains incomplete or blocked; do not approve the unchanged text again.',
+                    'approval':result,'content_blockers':status['content_blockers'],'review_errors':status.get('review_errors',[]),'news_review_detail':status.get('news_review_detail'),'publish_performed':False}
         if conflict:
             return {'ok':True,'phase':'SCHEDULE_CONFLICT','message':'Your approval is saved. Another post already has that date. Which post should use that slot?',
                     'approval':result,'publish_performed':False}
