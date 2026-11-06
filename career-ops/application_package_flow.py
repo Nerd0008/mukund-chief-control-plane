@@ -46,8 +46,16 @@ def wants_documents(message):
                          r'(?:\bCV\b|\bresume\b|cover letter)', text))
 
 
+def asks_application_question(message):
+    """An explicit request to answer a question takes precedence over a saved JD."""
+    text = owner_text(message)
+    return bool(re.search(r'(?i)\b(?:answer|respond to|response to)\b.{0,100}\b(?:question|prompt)\b|\b(?:question|prompt)\b.{0,100}\b(?:answer|respond)\b', text, re.S) or re.search(r'(?i)\b(?:tell us|describe|explain)\b.{0,500}\bin your response\b', text, re.S))
+
+
 def prepare(message, history, previous, session_record=None):
     """Return a bound intake or None for feedback/general conversational work."""
+    if asks_application_question(message) and not wants_documents(message):
+        return None
     if is_feedback(message) and not wants_documents(message):
         return None
     if (session_record and session_record.get('phase')=='OWNER_INPUT_REQUIRED'

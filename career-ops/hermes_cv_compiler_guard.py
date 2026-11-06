@@ -74,6 +74,8 @@ def invokes_compiler(tool_name,args):
 def pre_tool(tool_name,args,**kwargs):
     state=JOB.get()
     if not state or state.get('foreground_complete'):return None
+    if invokes_compiler(tool_name,args) and state.get('question_only'):
+        return {'action':'block','message':'The owner asked for an answer to an application question. Answer it directly; do not compile documents.'}
     if invokes_compiler(tool_name,args):activate_job(state)
     if not active_job():return None
     if time.monotonic()>=state['deadline']:
@@ -270,13 +272,15 @@ def install_runtime(runtime,turn_class,media_class):
                     'failed':False,'application_status':'CANCELLED','agent_persisted':False,'messages':[]}
         continuation=resume(message,history,stored)
         previous=stored if continuation or (package.retry(message) and context_matches(history,stored)) else {}
-        from application_package_flow import prepare, dispatch, owner_text
+        from application_package_flow import prepare, dispatch, owner_text, asks_application_question, wants_documents
+        question_only=asks_application_question(message) and not wants_documents(message)
+        if question_only:previous={};continuation=None
         intake=continuation or prepare(message,history,previous,stored)
         if intake and intake.get('owner_clarification') and not previous:previous=stored
-        is_cv=cv_request(message,history) or bool(previous) or bool(intake)
+        is_cv=not question_only and (cv_request(message,history) or bool(previous) or bool(intake))
         state={**previous,'session_id':session_id,'request_id':previous.get('request_id') or uuid.uuid4().hex,
                'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv,
-               'resuming':bool(previous),'resend':bool(__import__('re').search(r'send again',str(message),__import__('re').I))}
+               'question_only':question_only,'resuming':bool(previous),'resend':bool(__import__('re').search(r'send again',str(message),__import__('re').I))}
         if intake is not None:state['intake']=intake
         import re
         if is_cv and not previous:
@@ -328,7 +332,7 @@ def install_runtime(runtime,turn_class,media_class):
         if previous:
             context_prompt += '\nSaved application receipts: '+json.dumps({k:previous[k] for k in ('cv_args','cover_args','intake','phase') if k in previous})+'\nAlready verified documents: '+', '.join(package.accepted(state))+'. Reuse valid receipts. If intake is missing, ask for the JD; do not narrate a build or resume an empty plan.'
         async def execute():
-            return await old_run(self,message,context_prompt+'\nApplication documents: unless the owner requests CV only, provide both CV and cover letter using career_cv_compile and career_cover_compile. The cover tool needs no shell. Five truthful paragraphs, maximum 2855 characters; attach only verified PDFs.'+(instruction if is_cv else ""),history,*args,**kwargs)
+            return await old_run(self,message,context_prompt+(('\nApplication documents: unless the owner requests CV only, provide both CV and cover letter using career_cv_compile and career_cover_compile. The cover tool needs no shell. Five truthful paragraphs, maximum 2855 characters; attach only verified PDFs.'+instruction) if is_cv else ''),history,*args,**kwargs)
         try:
             result=await execute()
             if state.get('cv_active'):
