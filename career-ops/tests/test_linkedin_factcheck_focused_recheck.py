@@ -188,6 +188,16 @@ sys.modules['workflow_routing'] = router
         gate["verification_complete"] = True
         self.assertTrue(fc.provenance_ok(gate, body)[0])
 
+    def test_judge_discovery_uses_available_fallback_after_transient_failure(self):
+        from types import SimpleNamespace
+        fc._JUDGE_PROBE_CACHE.clear()
+        with patch.object(fc, "JUDGE_CANDIDATES", ("missing-python", "configured-python")), \
+             patch.object(fc.subprocess, "run", side_effect=[SimpleNamespace(returncode=1), SimpleNamespace(returncode=0), SimpleNamespace(returncode=0)]) as probe:
+            self.assertEqual(fc.resolve_judge_interpreter(), "configured-python")
+            self.assertTrue(fc._has_genai("missing-python"))
+            self.assertEqual(probe.call_count, 3)
+        fc._JUDGE_PROBE_CACHE.clear()
+
     def test_source_less_claims_still_work(self):
         with patch.object(fc, "run_judge", return_value={"reason": None, "runs": [[{"claim": "The moon is cheese"}]] * 3}):
             result = fc.llm_check_no_world_claims("The moon is cheese", api_key="fake")

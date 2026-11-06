@@ -79,6 +79,8 @@ JUDGE_CANDIDATES = (
     str(Path.home() / "Desktop" / "Pythob Bot" / "chief_of_staff_bot"
         / ".venv" / "bin" / "python"),
     sys.executable,
+    str(Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local")))
+        / "Python" / "bin" / "python.exe"),
 )
 
 _JUDGE_PROBE_CACHE: dict[str, bool] = {}
@@ -146,7 +148,9 @@ def _has_genai(interp: str) -> bool:
         ok = proc.returncode == 0
     except Exception:
         ok = False
-    _JUDGE_PROBE_CACHE[interp] = ok
+    # A transient process or dependency failure must not poison the gateway
+    # for its lifetime. Successful probes can safely be reused.
+    if ok:_JUDGE_PROBE_CACHE[interp] = True
     return ok
 
 
