@@ -281,6 +281,7 @@ def install_runtime(runtime,turn_class,media_class):
         state={**previous,'session_id':session_id,'request_id':previous.get('request_id') or uuid.uuid4().hex,
                'deadline':time.monotonic()+180 if is_cv else None,'attempted':False,'cv_active':is_cv,
                'question_only':question_only,'resuming':bool(previous),'resend':bool(__import__('re').search(r'send again',str(message),__import__('re').I))}
+        if question_only:state.update(question_message=message,question_checkpoint=stored)
         if intake is not None:state['intake']=intake
         import re
         if is_cv and not previous:
@@ -370,6 +371,15 @@ def preserve_explanation(state,text):
 
 
 def transform_output(response_text,**kwargs):
+    question_state=JOB.get()
+    if question_state and question_state.get('question_only') and not question_state.get('foreground_complete'):
+        from application_question_recovery import stale_status,recover
+        if stale_status(response_text):
+            try:return recover(question_state['question_message'],question_state.get('question_checkpoint') or {})
+            except Exception as exc:
+                import logging
+                logging.getLogger('gateway.platforms.base').warning('Application question recovery failed; error_type=%s',type(exc).__name__)
+                return 'I could not safely produce an answer to your application question. The previous CV status was unrelated; please try again.'
     state=active_job()
     if state:
         preserve_explanation(state,response_text)
