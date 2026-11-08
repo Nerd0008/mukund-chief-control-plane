@@ -128,7 +128,10 @@ class E3ShadowOrchestrator:
         if db_path:
             self._connect()
             self.capability_registry = CapabilityRegistry(self.con)
-            self.router = E3Router(self.capability_registry)
+            self.router = E3Router(
+                self.capability_registry,
+                worker_registry=self.worker_registry,
+            )
 
     def _connect(self):
         """Connect to orchestration DB."""
@@ -136,6 +139,47 @@ class E3ShadowOrchestrator:
             init_db(self.db_path)
             self.con = sqlite3.connect(str(self.db_path))
             self.con.row_factory = sqlite3.Row
+
+    @staticmethod
+    def _is_image_node(node: Dict[str, Any]) -> bool:
+        """Whether a node is explicitly an image request, never inferred from text."""
+        roles = set(node.get("capability_roles") or [])
+        modalities = set(node.get("response_modalities") or [])
+        return bool(node.get("image_config") or "vision" in roles or "image" in modalities)
+
+    @classmethod
+    def _apply_owner_route_preference(cls, candidates: List[RouterCandidate],
+                                      node: Dict[str, Any], task_family: str) -> List[RouterCandidate]:
+        """Keep LongCat first for ordinary general-purpose text work.
+
+        Coding/repository work retains the ordinary evidence-based ranking,
+        whose Codex capability is purpose-built for it.  Image nodes are left
+        untouched so Google remains image-only.
+        """
+        general_families = {
+            "other", "writing", "research", "analysis", "summarization",
+            "decision-support", "monitoring",
+        }
+        if task_family not in general_families or cls._is_image_node(node):
+            return candidates
+        return sorted(candidates, key=lambda candidate: (
+            0 if candidate.worker_id == "longcat-2.0" else 1,
+            -candidate.score, candidate.worker_id, candidate.role,
+        ))
+
+    @classmethod
+    def _approved_fallbacks(cls, node: Dict[str, Any], primary_worker: str,
+                            registry: Any) -> List[str]:
+        """Return the explicit bounded text fallback for a primary failure.
+
+        Codex is the only approved automatic text fallback.  DeepSeek may lack
+        credit, Google is image-only, and no disabled provider may re-enter
+        routing through a fallback path.
+        """
+        if (primary_worker == "codex-cli" or cls._is_image_node(node)
+                or not registry.is_routable("codex-cli")):
+            return []
+        return ["codex-cli"]
 
     def rehearse(self, objective: str, fingerprint: TaskFingerprint,
                  simulate_outputs: Optional[Dict[str, Any]] = None,
@@ -443,6 +487,7 @@ class E3ShadowOrchestrator:
             adapter_registry: Optional[Any] = None,
             repair_objective_builder: Optional[Any] = None,
             role_by_node: Optional[Dict[str, str]] = None,
+            return_verified_content: bool = False,
     ) -> Dict[str, Any]:
         """Run the full E3 pipeline *including* the production execution leg.
 
@@ -461,6 +506,20 @@ class E3ShadowOrchestrator:
         if self.db_path is None:
             raise ValueError("orchestrate_and_execute requires a bound orchestration db_path")
         self._connect()
+
+        # Build the exact production execution registry before routing so the
+        # selector cannot assign a worker that Stage 2 would later refuse.
+        if adapter_registry is not None:
+            registry = adapter_registry
+        else:
+            # A caller that did not explicitly provide a deterministic test
+            # registry is asking for the real execution path.  It must fail
+            # closed until the owner-recorded Stage 2 allowlist is live; an
+            # absent/disabled record must never mean "all routable workers".
+            from stage2_control import require_enabled
+            stage2_state = require_enabled()
+            allowed = stage2_state.get("allowed_workers", [])
+            registry = ExecutionAdapterRegistry(allowed_workers=allowed)
 
         out: Dict[str, Any] = {
             "objective": objective,
@@ -484,9 +543,35 @@ class E3ShadowOrchestrator:
         candidates_by_node: Dict[str, List[RouterCandidate]] = {}
         if self.router:
             for node in plan["nodes"]:
-                candidates_by_node[node["node_id"]] = self.router.propose_candidates(
+                proposed = self.router.propose_candidates(
                     node, fingerprint.task_family, fingerprint)
+                # Hard production filter: team assembly may only see workers
+                # that are routable under the same adapter registry / Stage 2
+                # allowlist the executor will enforce.
+                candidates_by_node[node["node_id"]] = [
+                    candidate for candidate in proposed
+                    if registry.is_routable(candidate.worker_id)
+                ]
+                candidates_by_node[node["node_id"]] = self._apply_owner_route_preference(
+                    candidates_by_node[node["node_id"]], node,
+                    fingerprint.task_family)
         out["candidates_by_node"] = {k: len(v) for k, v in candidates_by_node.items()}
+        out["candidate_rankings"] = {
+            node_id: [
+                {
+                    "worker_id": candidate.worker_id,
+                    "provider": candidate.provider,
+                    "model": candidate.model,
+                    "role": candidate.role,
+                    "confidence": candidate.confidence,
+                    "score": candidate.score,
+                    "score_components": candidate.score_components,
+                    "rationale": candidate.concise_rationale,
+                }
+                for candidate in candidates
+            ]
+            for node_id, candidates in candidates_by_node.items()
+        }
 
         if self.capability_registry:
             assembler = TeamAssembler(self.capability_registry, self.router)
@@ -514,7 +599,15 @@ class E3ShadowOrchestrator:
             out["outcome"] = "TEAM_INCOMPLETE"
             return out
 
-        registry = adapter_registry or ExecutionAdapterRegistry()
+        fallback_workers_by_node = {
+            assignment.node_id: self._approved_fallbacks(
+                next(node for node in plan["nodes"]
+                     if node["node_id"] == assignment.node_id),
+                assignment.worker_id, registry)
+            for assignment in assembly.assignments
+        }
+        out["fallback_workers_by_node"] = fallback_workers_by_node
+
         store = OrchestrationStore(self.db_path)
         try:
             executor = E3ProductionExecutor(store, registry,
@@ -525,6 +618,8 @@ class E3ShadowOrchestrator:
                 max_repair_attempts=max_repair_attempts,
                 dispatch_timeout=dispatch_timeout,
                 role_by_node=role_by_node,
+                return_verified_content=return_verified_content,
+                fallback_workers_by_node=fallback_workers_by_node,
             )
         finally:
             store.close()

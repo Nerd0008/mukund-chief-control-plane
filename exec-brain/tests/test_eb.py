@@ -326,7 +326,12 @@ class TestMatrix(EBTest):
                    "deepseek_adapter.py", "deepseek_keyaccess.py",
                    "gemini_adapter.py", "gemini_keyaccess.py",
                    "generic_openai_adapter.py",
-                   "orchestration.db",
+                   "orchestration.db", "e3-stage2-state.json", "stage2_control.py",
+                   # The owner-approved Chief routing bridge is deployed beside
+                   # the E3 runtime.  Both modules are deterministic local
+                   # routing surfaces; naming them explicitly preserves this
+                   # guard's fail-closed behavior for every other file.
+                   "chief_routing.py", "discord_chief_bridge.py",
                    # E3 orchestration modules + CLI bindings (deployed)
                    "e3_cli.py", "e3_planner.py", "e3_router.py",
                    "e3_team_assembly.py", "e3_integrator.py", "e3_verifier.py",

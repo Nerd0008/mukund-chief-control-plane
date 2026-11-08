@@ -13,6 +13,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -106,11 +107,25 @@ class TestExecutionAdapterRegistry(unittest.TestCase):
         self.assertEqual(reg.routable_worker_ids(), ["deepseek-v41-flash"])
         self.assertIsNotNone(reg.adapter_for("deepseek-v41-flash"))
 
-    def test_real_roster_marks_only_three_workers_routable(self):
+    def test_real_roster_includes_live_verified_longcat(self):
         import worker_registry as wr
         reg = ExecutionAdapterRegistry(worker_registry=wr.WorkerRegistry())
         self.assertEqual(reg.routable_worker_ids(),
-                         ["codex-cli", "deepseek-v41-flash", "google-nano-banana-2"])
+                         ["codex-cli", "deepseek-v41-flash",
+                          "google-nano-banana-2", "longcat-2.0"])
+        self.assertIn("longcat-2.0", reg.bindings)
+        self.assertEqual(reg.bindings["longcat-2.0"]["provider"], "longcat")
+
+    def test_stage2_allowlist_filters_otherwise_routable_workers(self):
+        import worker_registry as wr
+        reg = ExecutionAdapterRegistry(
+            worker_registry=wr.WorkerRegistry(),
+            allowed_workers=["longcat-2.0"],
+        )
+        self.assertTrue(reg.is_routable("longcat-2.0"))
+        self.assertFalse(reg.is_routable("deepseek-v41-flash"))
+        self.assertFalse(reg.is_routable("codex-cli"))
+        self.assertEqual(reg.routable_worker_ids(), ["longcat-2.0"])
 
     def test_usage_reporter_failure_never_fabricates_a_request_id(self):
         def boom(_):
@@ -184,6 +199,31 @@ class TestExecutorPersistence(unittest.TestCase):
         self.assertEqual(read["evidence"][0]["final_success"], 1)
         self.assertEqual(read["evidence"][0]["first_pass_success"], 1)
 
+    def test_verified_content_is_opt_in_for_gateway_consumers(self):
+        adapter = FakeAdapter(["gateway-visible"])
+        fp, plan, dag = _plan_and_dag()
+        node_id = plan["nodes"][0]["node_id"]
+        from e3_team_assembly import TeamAssignment
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(
+            node_id, "deepseek-v41-flash", "builder", "HIGH", "unit-test"))
+        assembly.complete = True
+
+        execu = E3ProductionExecutor(self.store, _registry(adapter))
+        run = execu.execute_plan(
+            plan, dag, assembly, fp, "task",
+            verification_test_cases_by_node={
+                node_id: [{"name": "c", "field": "content_present",
+                           "expected": True}]},
+            role_by_node=self._role_by_node(plan),
+            return_verified_content=True,
+        )
+        self.assertEqual(run["outcome"], "EXECUTION_COMPLETE")
+        self.assertEqual(run["verified_outputs"][0]["content"], "gateway-visible")
+        self.assertEqual(run["verified_outputs"][0]["final_verification"], "PASS")
+        # Existing node/audit payload remains content-redacted.
+        self.assertNotIn("output", run["nodes"][0])
+
     def test_rejection_triggers_repair_and_reverification(self):
         adapter = FakeAdapter(["not-validated", "validated"])
         fp, plan, dag = _plan_and_dag()
@@ -239,6 +279,73 @@ class TestExecutorPersistence(unittest.TestCase):
         read = self.store.read_back(node_id)
         self.assertEqual(read["node"]["state"], "FAILED")
         self.assertNotIn("COMPLETE", [e["new_state"] for e in read["state_events"]])
+
+    def test_provider_empty_longcat_fails_over_once_to_codex(self):
+        """A completed-but-empty text response is a provider failure, not a reply."""
+        longcat = FakeAdapter([None], provider="longcat", model="LongCat-Flash")
+        codex = FakeAdapter(["Codex fallback response"], provider="openai",
+                             model="codex-cli")
+        workers = {
+            "longcat-2.0": {"worker_id": "longcat-2.0", "provider": "longcat",
+                            "model": "LongCat-Flash", "routable": True},
+            "codex-cli": {"worker_id": "codex-cli", "provider": "openai",
+                          "model": "codex-cli", "routable": True},
+            "google-nano-banana-2": {
+                "worker_id": "google-nano-banana-2", "provider": "google",
+                "model": "gemini-image", "routable": True},
+        }
+        registry = ExecutionAdapterRegistry(
+            worker_registry=FakeWorkerRegistry(workers),
+            adapter_factories={
+                "longcat-2.0": lambda: longcat,
+                "codex-cli": lambda: codex,
+            },
+            usage_reporters={
+                "longcat-2.0": lambda _result: "e2-longcat",
+                "codex-cli": lambda _result: "e2-codex",
+            },
+        )
+        fp, plan, dag = _plan_and_dag(task_family="other")
+        node_id = plan["nodes"][0]["node_id"]
+        from e3_team_assembly import TeamAssignment
+        assembly = TeamAssembler(None).assemble_team(plan, candidates_by_node={})
+        assembly.add_assignment(TeamAssignment(node_id, "longcat-2.0", "builder",
+                                               "HIGH", "owner primary"))
+        assembly.complete = True
+
+        run = E3ProductionExecutor(self.store, registry).execute_plan(
+            plan, dag, assembly, fp, "ordinary text task",
+            verification_test_cases_by_node={
+                node_id: [{"name": "visible", "field": "content_present",
+                           "expected": True}]},
+            role_by_node=self._role_by_node(plan),
+            max_repair_attempts=0,
+            fallback_workers_by_node={node_id: ["codex-cli"]},
+        )
+        node = run["nodes"][0]
+        self.assertEqual(run["outcome"], "EXECUTION_COMPLETE")
+        self.assertEqual(node["assigned_worker_id"], "longcat-2.0")
+        self.assertEqual(node["worker_id"], "codex-cli")
+        self.assertEqual([attempt["worker_id"] for attempt in node["dispatch_attempts"]],
+                         ["longcat-2.0", "codex-cli"])
+        self.assertEqual(node["failovers"], [{
+            "attempt": 1, "from_worker": "longcat-2.0",
+            "to_worker": "codex-cli", "reason": "provider_error",
+        }])
+        self.assertEqual(len(longcat.calls), 1)
+        self.assertEqual(len(codex.calls), 1)
+
+    def test_empty_text_is_provider_error_but_image_output_is_not(self):
+        self.assertEqual(
+            __import__("e3_execution").classify_dispatch_failure({
+                "status": "COMPLETED", "content_present": False,
+                "image_mime": None}),
+            "provider_error")
+        self.assertEqual(
+            __import__("e3_execution").classify_dispatch_failure({
+                "status": "COMPLETED", "content_present": False,
+                "image_mime": "image/png"}),
+            "verification_fail")
 
     def test_no_test_cases_blocks_without_dispatching(self):
         adapter = FakeAdapter(["anything"])
@@ -376,6 +483,31 @@ class TestOrchestratorDispatchWiring(unittest.TestCase):
         self.assertEqual(out["outcome"], "TEAM_INCOMPLETE")
         self.assertIn("escalation", out)
         self.assertEqual(self.adapter.calls, [])
+
+    def test_default_production_registry_requires_stage2_enablement(self):
+        """No injected test registry means a real-path Stage 2 gate."""
+        orch = E3ShadowOrchestrator(db_path=self.db)
+        fp, plan, _ = _plan_and_dag()
+        with patch("stage2_control.require_enabled",
+                   side_effect=RuntimeError("Stage 2 is disabled")):
+            with self.assertRaisesRegex(RuntimeError, "Stage 2 is disabled"):
+                orch.orchestrate_and_execute("task", fp, plan=plan)
+
+    def test_general_text_prefers_longcat_and_never_offers_google_as_fallback(self):
+        from e3_router import RouterCandidate
+        candidates = [
+            RouterCandidate("codex-cli", "openai", "codex-cli", "builder",
+                            "HIGH", [], "coding", score=100),
+            RouterCandidate("longcat-2.0", "longcat", "LongCat-Flash", "builder",
+                            "HIGH", [], "general", score=70),
+        ]
+        ordered = E3ShadowOrchestrator._apply_owner_route_preference(
+            candidates, {"capability_roles": ["builder"]}, "other")
+        self.assertEqual([candidate.worker_id for candidate in ordered],
+                         ["longcat-2.0", "codex-cli"])
+        registry = _registry(FakeAdapter(["x"]))
+        self.assertEqual(E3ShadowOrchestrator._approved_fallbacks(
+            {"capability_roles": ["vision"]}, "longcat-2.0", registry), [])
 
 
 class TestDependencyOrderedMultiNodeExecution(unittest.TestCase):

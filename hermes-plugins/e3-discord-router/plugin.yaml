@@ -1,0 +1,3 @@
+name: e3-discord-router
+version: "0.1.0"
+description: Route authorized Discord messages through Mukund's E3 Stage 2 selector before native Hermes dispatch.

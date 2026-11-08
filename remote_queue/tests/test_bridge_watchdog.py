@@ -106,7 +106,7 @@ class _WorkerCase(unittest.TestCase):
         self.output_file = self.temp_dir / "output.txt"
         self.exit_file = self.temp_dir / "exit.txt"
 
-    def _run_worker(self, chat_child_cmd, idle_timeout, task_id="test-bridge"):
+    def _run_worker(self, chat_child_cmd, idle_timeout, task_id="test-bridge", run=None):
         """Run the worker with a fake 'hermes' whose ``chat`` invocation is swapped."""
         real_popen = subprocess.Popen
         spawned = {}
@@ -125,7 +125,7 @@ class _WorkerCase(unittest.TestCase):
             "time": vw.time,
             "argv": sys.argv,
         }
-        vw.subprocess = _SubprocessShim(popen=fake_popen)
+        vw.subprocess = _SubprocessShim(popen=fake_popen, run=run)
         vw.time = fake_time
         sys.argv = [
             "visible_worker.py",
@@ -174,6 +174,22 @@ class TestVisibleWorkerWatchdog(_WorkerCase):
         self.assertIn("Status: FAILED", output)
         # Only the worker's own child tree was terminated.
         self.assertIsNotNone(child.poll(), "the fake Hermes child was left running")
+
+    def test_watchdog_falls_back_when_taskkill_reports_failure(self):
+        """A nonzero taskkill result must not strand the worker child."""
+        sleeper = _write_script(
+            self.temp_dir, "fallback-sleeper.py", "import time\ntime.sleep(600)\n"
+        )
+
+        def failed_taskkill(cmd, **kwargs):
+            self.assertEqual(cmd[0], "taskkill")
+            return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="denied")
+
+        rc, _output, child, _fake_time = self._run_worker(
+            [sys.executable, str(sleeper)], idle_timeout=2, run=failed_taskkill)
+
+        self.assertEqual(rc, 124)
+        self.assertIsNotNone(child.poll(), "fallback termination did not stop child")
 
     def test_working_child_keeps_the_stream_alive_and_completes(self):
         chatter = _write_script(

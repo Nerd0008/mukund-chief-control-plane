@@ -288,13 +288,14 @@ class TestOrchestrateAndExecuteContentStopEscalation(unittest.TestCase):
             "orchestrator content stop escalation test", self.fingerprint)
         self.node_id = self.plan["nodes"][0]["node_id"]
 
-    def _adapter_registry(self, adapter):
+    def _adapter_registry(self, adapter, allowed_workers=None):
         from e3_execution import ExecutionAdapterRegistry
         from worker_registry import WorkerRegistry
         return ExecutionAdapterRegistry(
             worker_registry=WorkerRegistry(),
             adapter_factories={GOOGLE_WORKER: lambda: adapter},
             usage_reporters={GOOGLE_WORKER: lambda r: None},
+            allowed_workers=allowed_workers,
         )
 
     def _execute(self, adapter):
@@ -307,6 +308,36 @@ class TestOrchestrateAndExecuteContentStopEscalation(unittest.TestCase):
             max_repair_attempts=0, dispatch_timeout=5,
             adapter_registry=self._adapter_registry(adapter),
         )
+
+    def test_stage2_allowlist_filters_higher_ranked_disallowed_candidate_before_team_assembly(self):
+        """A qualified but disallowed worker must never beat an allowed worker."""
+        registry = CapabilityRegistry(self.orchestrator.con)
+        registry.register_worker(
+            "deepseek-v41-flash", "deepseek", "deepseek-flash",
+            roles=["builder"], state="QUALIFIED", task_family="code")
+        registry.register_worker(
+            GOOGLE_WORKER, "google", "gemini-3.1-flash-image",
+            roles=["builder"], state="EVALUATING", task_family="code")
+
+        fp = TaskFingerprint(
+            task_family="code", reasoning_depth=1, risk_class="R1",
+            required_roles=["builder"], verification_type="deterministic")
+        plan = self.orchestrator.planner.plan(
+            "stage2 allowed-worker routing filter test", fp)
+        node_id = plan["nodes"][0]["node_id"]
+        out = self.orchestrator.orchestrate_and_execute(
+            "stage2 allowed-worker routing filter test", fp,
+            plan=plan,
+            verification_test_cases_by_node={node_id: [
+                {"name": "dispatch completed", "field": "status",
+                 "expected": "COMPLETED"}]},
+            max_repair_attempts=0, dispatch_timeout=5,
+            adapter_registry=self._adapter_registry(
+                _PassingAdapter(), allowed_workers=[GOOGLE_WORKER]),
+        )
+        self.assertTrue(out["team_complete"])
+        self.assertEqual(out["team_assignments"][0]["worker"], GOOGLE_WORKER)
+        self.assertEqual(out["outcome"], "EXECUTION_COMPLETE")
 
     def test_content_stop_escalation_is_returned_not_only_repeated_failure(self):
         adapter = _AlwaysContentStopAdapter()

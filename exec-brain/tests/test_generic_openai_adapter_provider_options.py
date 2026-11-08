@@ -35,13 +35,20 @@ class ProviderRequestOptionsTests(unittest.TestCase):
     def _restore(self):
         goa._http_post_json = self.original_post
 
-    def test_opt_in_options_are_sent_without_changing_base_contract(self):
+    def test_longcat_visible_response_default_is_sent(self):
         result = self.adapter.dispatch({
-            "contract_id": "offline-options", "objective": "x",
-            "provider_request_options": {"thinking": {"type": "disabled"}},
+            "contract_id": "offline-default-options", "objective": "x",
         })
         self.assertEqual(result["status"], "COMPLETED")
         self.assertEqual(self.payloads[0]["thinking"], {"type": "disabled"})
+
+    def test_contract_options_override_the_provider_default(self):
+        result = self.adapter.dispatch({
+            "contract_id": "offline-options", "objective": "x",
+            "provider_request_options": {"thinking": {"type": "enabled"}},
+        })
+        self.assertEqual(result["status"], "COMPLETED")
+        self.assertEqual(self.payloads[0]["thinking"], {"type": "enabled"})
         self.assertEqual(self.payloads[0]["model"], "LongCat-2.0")
 
     def test_invalid_options_fail_before_network_dispatch(self):

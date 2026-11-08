@@ -136,6 +136,11 @@ PROVIDER_CONFIGS: Dict[str, Dict[str, Any]] = {
         "cancellation_support": "SUPPORTED_PROCESS_KILL",
         "env_var": "LONGCAT_API_KEY",
         "credential_target": "longcat",
+        # LongCat's default thinking mode can consume the response budget
+        # without returning visible assistant content.  The recorded bounded
+        # compatibility probe completed only with thinking disabled; make that
+        # safe request shape the provider default for ordinary text dispatch.
+        "default_request_options": {"thinking": {"type": "disabled"}},
     },
 }
 
@@ -355,8 +360,13 @@ class GenericOpenAIAdapter:
             "max_tokens": max_tokens,
             "temperature": temperature,
         }
-        # Provider-specific options are opt-in per contract.  They are never
-        # inferred from a worker id and normal execution keeps provider defaults.
+        # Provider defaults capture documented compatibility requirements (for
+        # example LongCat's visible-response mode).  A contract can explicitly
+        # add or override those values for a deliberate request shape.
+        default_options = self.config.get("default_request_options") or {}
+        if not isinstance(default_options, dict):
+            raise ValueError("invalid_default_request_options")
+        payload.update(default_options)
         provider_options = contract.get("provider_request_options") or {}
         if not isinstance(provider_options, dict):
             return self._error_result(dispatch_id, contract_id, objective, model,
