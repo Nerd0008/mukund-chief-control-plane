@@ -345,7 +345,8 @@ class CodexExecutionAdapter:
             cmd.extend(["--model", model])
 
         if self.execution_profile in ("router", "bounded_text", "classification"):
-            allowed_models = ("gpt-6-sol", "gpt-6.1-sol") if self.execution_profile == "classification" else ("gpt-6.1-sol",)
+            allowed_models = (("gpt-6-sol", "gpt-6.1-terra") if self.execution_profile == "classification"
+                              else ("gpt-6-sol", "gpt-6.1-terra"))
             if model not in allowed_models:
                 raise ValueError("Model is not approved for this bounded profile")
             effort = contract.get("reasoning_effort", "high")

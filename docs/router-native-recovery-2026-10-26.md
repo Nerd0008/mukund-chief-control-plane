@@ -15,7 +15,7 @@ The original middleware reproduction had 16 failures and one pass. No production
 
 The existing native SDK client, provider, credentials, streaming and tool protocol remain in place. The native controller policy permits a bounded catalog of models on that same endpoint. Alternative models require an explicit live qualification, current policy fingerprint, fresh proof, compatible context/input/parameters and healthy circuit evidence. Provider-suggested alternate IDs do not grant eligibility. Embedding models cannot enter this pool.
 
-The Codex `gpt-6.1-sol` high reasoning brain ranks opaque handles on capability and observed evidence. There is no automatic primary score boost. Codex remains a text worker only where the existing request contract allows it; this change does not turn its CLI into a native function-calling transport. The configured default provider/model is not changed.
+The Codex `gpt-6-sol` high reasoning brain ranks opaque handles on capability and observed evidence. There is no automatic primary score boost. Codex remains a text worker only where the existing request contract allows it; this change does not turn its CLI into a native function-calling transport. The configured default provider/model is not changed.
 
 Native conversation calls, auxiliary physical calls and compatible SDK workflow calls use the shared selection and health gate. The selected model is applied to the actual request. `responses` and `messages` transports are not silently converted to chat completions.
 

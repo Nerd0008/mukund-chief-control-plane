@@ -285,7 +285,7 @@ def native_offer(provider,model,capabilities=()):
 
 
 def cli_offer():
-    return {'id':'codex','provider':'openai','model':'gpt-6.1-sol',
+    return {'id':'codex','provider':'openai','model':'gpt-6-sol',
             'capabilities':['reasoning','text','structured-json','bounded-no-tools']}
 
 
@@ -298,7 +298,7 @@ def text_via_codex(messages,timeout=90,response_schema=None):
     with tempfile.TemporaryDirectory(prefix='hermes-text-worker-') as workspace:
         state=CURRENT.get()
         adapter=CodexExecutionAdapter('bounded_text')
-        result=adapter.dispatch({'objective':prompt,'model':'gpt-6.1-sol',
+        result=adapter.dispatch({'objective':prompt,'model':'gpt-6-sol',
             'reasoning_effort':'high','working_directory':workspace,**({'output_schema':response_schema} if response_schema else {}),'timeout':state.remaining(timeout) if state else timeout,
             **({'cancel_event':state.cancel} if state else {})})
     if result.get('status')!='COMPLETED':
@@ -377,7 +377,7 @@ class RoutedClient:
         with operation(self._timeout(kwargs),self._worker) as state:
             chosen=self._route(kwargs,timeout=state.remaining(45))
             if chosen=='codex':
-                return execute(self._workflow,self.last_route,lambda:_completion(text_via_codex(kwargs['messages'],timeout=state.remaining(),**({'response_schema':kwargs['response_format']['json_schema']['schema']} if kwargs.get('response_format',{}).get('type')=='json_schema' else {})),'gpt-6.1-sol'))
+                return execute(self._workflow,self.last_route,lambda:_completion(text_via_codex(kwargs['messages'],timeout=state.remaining(),**({'response_schema':kwargs['response_format']['json_schema']['schema']} if kwargs.get('response_format',{}).get('type')=='json_schema' else {})),'gpt-6-sol'))
             response=execute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
     async def _acreate(self,**kwargs):
@@ -385,7 +385,7 @@ class RoutedClient:
             chosen=await cancellable_thread(self._route,kwargs,timeout=state.remaining(45))
             if chosen=='codex':
                 text=await aexecute(self._workflow,self.last_route,lambda:cancellable_thread(text_via_codex,kwargs['messages'],timeout=state.remaining(),**({'response_schema':kwargs['response_format']['json_schema']['schema']} if kwargs.get('response_format',{}).get('type')=='json_schema' else {})))
-                state.remaining();return _completion(text,'gpt-6.1-sol')
+                state.remaining();return _completion(text,'gpt-6-sol')
             response=await aexecute(self._workflow,self.last_route,lambda:self._native.chat.completions.create(**self._native_kwargs(dict(kwargs,timeout=state.remaining()))),stream=kwargs.get('stream',False))
             return finish(response,state,kwargs.get('stream',False))
 
@@ -443,7 +443,7 @@ def _complete_text(messages,*,workflow,timeout=90,max_tokens=8192,worker=None,re
         _,receipt=select(workflow,[cli_offer()],task=_request_task({'messages':messages}),timeout=min(45,timeout))
         remaining=deadline-time.monotonic()
         if remaining<=0:raise RouterDecisionError('workflow_elapsed_budget_exhausted')
-        return execute(workflow,receipt,lambda:_completion(text_via_codex(messages,timeout=remaining,**({'response_schema':response_schema} if response_schema else {})),'gpt-6.1-sol')),receipt
+        return execute(workflow,receipt,lambda:_completion(text_via_codex(messages,timeout=remaining,**({'response_schema':response_schema} if response_schema else {})),'gpt-6-sol')),receipt
     client=native_client(workflow=workflow)
     try:
         response=client.chat.completions.create(model='router-auto',messages=messages,max_tokens=max_tokens,temperature=0,timeout=timeout,**({'response_format':{'type':'json_schema','json_schema':{'name':'cv_response','strict':True,'schema':response_schema}}} if response_schema else {}))

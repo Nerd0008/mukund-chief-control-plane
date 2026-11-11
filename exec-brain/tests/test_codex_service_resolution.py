@@ -43,7 +43,7 @@ def test_invalid_desktop_builds_do_not_hide_the_only_working_launcher(monkeypatc
 
 
 def test_model_incompatibility_is_not_collapsed_into_generic_configuration():
-    result={'status':'FAILED','stderr':"The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT account. model_not_found"}
+    result={'status':'FAILED','stderr':"The 'gpt-6-sol' model is not supported when using Codex with a ChatGPT account. model_not_found"}
     assert cli_failure_code(result)=='router_cli_model_unsupported'
 
 

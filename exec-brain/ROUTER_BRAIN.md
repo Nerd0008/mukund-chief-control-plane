@@ -1,6 +1,6 @@
 # Codex reasoning for the E3 router
 
-Owner decision, 25 October 2026: GPT-6.1 Sol via the existing Codex CLI powers
+Owner decision, 25 October 2026: GPT-6 Sol via the existing Codex CLI powers
 router reasoning. Worker selection is provider-neutral and evidence-based.
 
 `E3ApplicationService.execute` and `execute_chat` invoke `RouterBrain` after
@@ -11,7 +11,7 @@ engineering orchestration is not a substitute for the application service.
 
 The existing `CodexExecutionAdapter` has an additional `router` profile. Its
 normal worker profiles retain their contracts. Router invocations request
-`gpt-6.1-sol`, high reasoning, read-only sandbox, no inherited user configuration
+`gpt-6-sol`, high reasoning, read-only sandbox, no inherited user configuration
 or repository rules, no persisted Codex session, disabled shell/unified-exec,
 disabled multi-agent and disabled web search. No worker is run by this role.
 The native-executable preference found in the installed adapter is preserved

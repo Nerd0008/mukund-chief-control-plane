@@ -1,9 +1,9 @@
 # Router-core acceptance — 25 October 2026
 
-Owner authorized GPT-6.1 Sol through the existing Codex CLI for router reasoning,
+Owner authorized GPT-6 Sol through the existing Codex CLI for router reasoning,
 and clarified that worker selection must be unbiased and evidence-based.
 
-- Model requested: `gpt-6.1-sol`; reasoning requested: `high`.
+- Model requested: `gpt-6-sol`; reasoning requested: `high`.
 - Existing validated native Codex CLI: 0.163.0-alpha.10.2. The older 0.156.1
   command shim rejected this model. There is no silent model substitution.
 - Router CLI profile is read-only, ephemeral, with user config/repository rules,

@@ -22,7 +22,7 @@ def valid_topics(topics):
 def research(prompt,count,*,client,parse,worker=None,timeout=180):
     if type(count) is not int or not 1<=count<=12:
         raise ValueError('LinkedIn topic count must be between 1 and 12')
-    offers=[{'id':'codex','provider':'openai','model':'gpt-6.1-sol',
+    offers=[{'id':'codex','provider':'openai','model':'gpt-6-sol',
              'capabilities':['web-search','read-only','observed-search-events']}]
     native=getattr(client,'_native',None) if client is not None else None
     if native is not None:

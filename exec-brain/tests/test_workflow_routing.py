@@ -310,7 +310,7 @@ def test_router_uses_45_seconds_without_retries():
 def test_explicit_codex_never_initializes_or_calls_native():
     with patch.object(wr,'native_client',side_effect=AssertionError('No native access')),patch.object(wr,'text_via_codex',return_value='synthetic') as worker:
         response,receipt=wr.complete_text([{'role':'user','content':'synthetic'}],workflow='career.cv.plan',worker='codex')
-    assert receipt['selected_provider']=='openai' and response.model=='gpt-6.1-sol'
+    assert receipt['selected_provider']=='openai' and response.model=='gpt-6-sol'
     assert 0<worker.call_args.kwargs['timeout']<=90
 
 

@@ -50,7 +50,7 @@ class RouterBrain:
         """No implicit fallback to local ranking or another reasoning model."""
         try:
             config = json.loads(POLICY_PATH.read_text(encoding='utf-8'))
-            if (config.get('enabled') is not True or config.get('model') != 'gpt-6.1-sol'
+            if (config.get('enabled') is not True or config.get('model') != 'gpt-6.1-terra'
                     or config.get('selection_policy') != 'provider_blind_evidence'):
                 raise ValueError('invalid router policy')
             from codex_adapter import CodexExecutionAdapter
@@ -100,14 +100,14 @@ class RouterBrain:
         started = time.monotonic()
         receipt = {'request_id': request_id, 'prompt_version': PROMPT_VERSION,
                    'request_sha256': hashlib.sha256(prompt.encode()).hexdigest(),
-                   'model_requested': 'gpt-6.1-sol', 'model_identity_observed': False,
+                   'model_requested': 'gpt-6.1-terra', 'model_identity_observed': False,
                    'reasoning_effort_requested': 'high', 'selection_policy': 'provider_blind_evidence',
                    'candidate_count': len(candidates), 'provider_call_made': False,
                    'workflow': workflow or 'e3.'+str(task_family), 'operation_id': operation_id}
         try:
             with tempfile.TemporaryDirectory(prefix='hermes-router-') as workspace:
                 output = self.adapter.dispatch({'contract_id': 'router-'+request_id,
-                    'objective': prompt, 'model': 'gpt-6.1-sol', 'reasoning_effort': 'high',
+                    'objective': prompt, 'model': 'gpt-6.1-terra', 'reasoning_effort': 'high',
                     'working_directory': workspace, 'timeout': timeout,
                     'allowed_tools': [], 'permission_scope': {'read_only': True},
                     **({'cancel_event':cancel_event} if cancel_event is not None else {})})

@@ -114,7 +114,7 @@ def test_cli_router_profile_is_bounded_and_read_only(tmp_path):
     events='\n'.join([json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'{}'}}),json.dumps({'type':'turn.completed'})])
     with patch.object(codex_adapter,'_resolve_codex_executable',return_value=Path('codex')),patch.object(codex_adapter.subprocess,'run',return_value=SimpleNamespace(returncode=0,stdout=events,stderr='')) as run:
         adapter=codex_adapter.CodexExecutionAdapter('router')
-        result=adapter.dispatch({'model':'gpt-6.1-sol','objective':'synthetic','reasoning_effort':'high','working_directory':str(tmp_path),'timeout':15})
+        result=adapter.dispatch({'model':'gpt-6.1-terra','objective':'synthetic','reasoning_effort':'high','working_directory':str(tmp_path),'timeout':15})
         command=run.call_args_list[0].args[0]
         assert command[command.index('--sandbox')+1]=='read-only'
         assert '--ephemeral' in command and '--ignore-user-config' in command

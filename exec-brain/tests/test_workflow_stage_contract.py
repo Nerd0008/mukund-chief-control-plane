@@ -42,7 +42,7 @@ def test_linkedin_codex_research_uses_search_adapter_not_google_tools(monkeypatc
     topic={'title':'Synthetic','summary':'Synthetic summary','technical_impact':'Impact',
            'non_technical_impact':'Impact','url':'https://example.invalid/source',
            'sources':['https://example.invalid/source']}
-    route={'selected_provider':'openai','selected_model':'gpt-6.1-sol'}
+    route={'selected_provider':'openai','selected_model':'gpt-6-sol'}
     monkeypatch.setattr(li,'select',lambda workflow,offers,**k:('codex',route))
     monkeypatch.setattr(CodexWebSearchProvider,'resolve',lambda self:'never-executed')
     for observed in (False,True):
