@@ -89,6 +89,12 @@ def apply_changes(path: Path, changes: list[dict], *, profiles: dict, backup_dir
     backup = backup_dir / f'{path.stem}.pre-status-{stamp}{path.suffix}'
     shutil.copy2(path, backup)
 
+    # Re-bind every URL cell's hyperlink from its own visible text before saving.
+    # A pre-existing target/text drift (e.g. a trailing slash) would otherwise fail
+    # post-write verification and roll back the entire status write.
+    from tracker_integrity import bind_links
+    bind_links(ws, cfg)
+
     tmp = path.with_suffix('.tmp.xlsx')
     wb.save(tmp)
     wb.close()
