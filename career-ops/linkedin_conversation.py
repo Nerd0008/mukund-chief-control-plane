@@ -21,8 +21,6 @@ def interpret(text, *, now=None):
         return result
     if re.search(r'\b(?:if|unless|provided|once|after|until)\b',text,re.I):
         return result  # conditional consent is not executable consent
-    if re.search(r'\b(?:both|all|two|three)\s+(?:posts?|drafts?|versions?)\b',text,re.I):
-        return result
     edits = re.sub(r"\b(?:do not|don't|don’t)\s+(?:change|rewrite|edit|revise)\b",'',text,flags=re.I)
     if re.search(r'\b(?:rewrite|revise|change|edit|fix)\b',edits,re.I):
         return result
@@ -35,6 +33,9 @@ def interpret(text, *, now=None):
     affirmative |= bool(re.fullmatch(r'(?i)(?:yes|yeah|yep|okay|ok|perfect|looks good|go ahead)[!. ]*',text))
     affirmative |= bool(re.search(r'\bI\s+approve\s+(?:this|the|it|that)\b',text))
     affirmative |= bool(re.match(r'(?i)^(?:the\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:\x27s)?\s+(?:post\s+)?(?:is\s+)?approved\b',text))
+    day = r'(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)'
+    affirmative |= bool(re.fullmatch(r'(?i)(?:the\s+)?'+day+r'(?:\s*,\s*'+day+r')*(?:\s*,?\s+and\s+'+day+r')\s+(?:posts?\s+)?(?:are\s+)?approved[.! ]*', text))
+    affirmative |= bool(re.fullmatch(r'(?i)(?:i\s+)?(?:approve\s+(?:all\s+)?(?:the\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?|(?:all\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?\s+(?:are\s+)?approved)[.! ]*', text))
     if '?' in text and not re.match(r'(?i)^(?:please\s+)?(?:can|could|would)\s+you\s+(?:please\s+)?(?:publish|post|schedule)\b',text):
         affirmative = False
     settings_only = bool(re.match(r'(?i)^(?:tomorrow\b|today\b|(?:skip|omit|without|no)\s+(?:the\s+|an?\s+)?image\b)',text)) and '?' not in text

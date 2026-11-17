@@ -85,15 +85,22 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                     hashes=set(re.findall(r'APPROVE LINKEDIN ([0-9a-f]{64})',text,re.I))
                     if _presented(text,body):
                         headers=list(re.finditer(r'(?im)^\*{0,2}(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b[^\n]*',text))
+                        if re.fullmatch(r'(?i)(?:i\s+)?(?:approve\s+(?:all\s+)?(?:the\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?|(?:all\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?\s+(?:are\s+)?approved)[.! ]*',command.strip()) and len(headers)<2:
+                            return refused('Multiple posts were not presented together for approval.')
                         if len({m.group(1).lower() for m in headers})>1:
                             requested=set(re.findall(r'\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b',command,re.I))
                             requested={d.lower() for d in requested}
+                            all_match=re.fullmatch(r'(?i)(?:i\s+)?(?:approve\s+(?:all\s+)?(?:the\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?|(?:all\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?\s+(?:are\s+)?approved)[.! ]*',command.strip())
+                            if all_match:
+                                count=2 if re.search(r'\b(?:two|both)\b',command,re.I) else 3
+                                requested={m.group(1).lower() for m in headers} if len(headers)==count else set()
                             matching=[m for m in headers if m.group(1).lower() in requested]
-                            if len(requested)!=1 or len(matching)!=1:
+                            if not requested or len(matching)!=len(requested):
                                 return refused('Which dated post do you mean? Please name its weekday.')
-                            chosen=matching[0];index=headers.index(chosen)
-                            section=text[chosen.end():headers[index+1].start() if index+1<len(headers) else len(text)]
-                            if not _presented(section,body):return refused('That reply refers to a different post.')
+                            sections=[text[m.end():headers[headers.index(m)+1].start() if headers.index(m)+1<len(headers) else len(text)] for m in matching]
+                            sections=[section for section in sections if _presented(section,body)]
+                            if len(sections)!=1:return refused('That reply refers to a different or ambiguous post.')
+                            section=sections[0]
                             hashes=set(re.findall(r'APPROVE LINKEDIN ([0-9a-f]{64})',section,re.I))
                         if hashes and hashes!={expected}:
                             return refused('More than one post version was presented; please identify the post.')

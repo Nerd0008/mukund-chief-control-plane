@@ -109,6 +109,26 @@ def test_multiple_visible_posts_need_a_natural_day_reference(history):
     assert not approval.verify_message(add('Approve the Thursday post.'),BODY,db_path=db)['ok']
 
 
+@pytest.mark.parametrize('reply', ['Tuesday, Wednesday and Thursday approved', 'all three approved', 'Approve all three'])
+def test_multi_post_approval_binds_each_exact_presented_body(history, reply):
+    db,add=history
+    bodies=['First unique post.', 'Second unique post.', 'Third unique post.']
+    add('\n\n'.join(day+' 2026-11-17\n\n'+body for day,body in zip(('Tuesday','Wednesday','Thursday'),bodies)),role='assistant')
+    mid=add(reply)
+    for body in bodies:
+        assert approval.verify_message(mid,body,db_path=db)['ok']
+    assert not approval.verify_message(mid,'Unpresented text.',db_path=db)['ok']
+
+
+def test_multi_post_approval_does_not_authorize_an_unselected_day(history):
+    db,add=history
+    add('Tuesday 2026-11-17\n\nFirst.\n\nWednesday 2026-11-18\n\nSecond.\n\nThursday 2026-11-19\n\nThird.',role='assistant')
+    mid=add('Tuesday and Thursday approved')
+    assert approval.verify_message(mid,'First.',db_path=db)['ok']
+    assert approval.verify_message(mid,'Third.',db_path=db)['ok']
+    assert not approval.verify_message(mid,'Second.',db_path=db)['ok']
+
+
 def test_report_metrics_are_not_candidate_achievements():
     import linkedin_personal_review as personal
     body='Both numbers come from an independent annual index of AI progress. In controlled simulation, robotic manipulation succeeds 89.4% of the time. On real household tasks, it succeeds 12%.'
