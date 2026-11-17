@@ -16,6 +16,26 @@
       "body_sha256": "e896bb7d4c36013c1a7a9e5433f5286b40fb98656e72a85a7f0918ff4d9174f1",
       "image_sha256": "beaf27dbb06a438733802dbf42e04885b391e1d666d418fbb5b27a51a10e6ef9",
       "publish_at": "2026-10-27T08:00:00+00:00"
+    },
+    "2026-11-05": {
+      "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261105_thursday_e451d1164857d63d0b01f5d082f2ec2f495e7a23415ced67903cadceae7e2af7\\linkedin_drafts.json",
+      "body_sha256": "e451d1164857d63d0b01f5d082f2ec2f495e7a23415ced67903cadceae7e2af7",
+      "image_sha256": null,
+      "publish_at": "2026-11-05T08:00:00+00:00"
+    },
+    "2026-11-18": {
+      "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261118_wednesday\\linkedin_drafts.json",
+      "body_sha256": "626dc8753116a3a06734d02589412de4d40e7c2b22b7e2d81be67fb7a30410ac",
+      "image_sha256": null,
+      "publish_at": "2026-11-18T08:00:00+00:00",
+      "post_id": "b211effa2b9748e18b874ebd458a1b36"
+    },
+    "2026-11-19": {
+      "draft_path": "C:\\Users\\mukun\\Documents\\mukund-chief-control-plane\\runtime\\linkedin\\drafts\\approved_20261119_thursday\\linkedin_drafts.json",
+      "body_sha256": "0b9d8c86b804d81a7ca466a49fde7ee2fb98b73022ed31524fd14f5dc887d6d1",
+      "image_sha256": null,
+      "publish_at": "2026-11-19T08:00:00+00:00",
+      "post_id": "64757a20ecef45b7b838d957498a17f3"
     }
   }
 }
