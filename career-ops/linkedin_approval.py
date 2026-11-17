@@ -80,11 +80,14 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                 # never an arbitrary historical "yes" or a hash inserted by the agent.
                 history=conn.execute('SELECT id,content FROM messages WHERE session_id=? AND role=? AND id<? ORDER BY id DESC LIMIT 500',
                     (row['session_id'],'assistant',message_id)).fetchall()
+                carried_days=None
                 for prior in history:
                     text=prior['content'] or ''
                     hashes=set(re.findall(r'APPROVE LINKEDIN ([0-9a-f]{64})',text,re.I))
                     if _presented(text,body):
                         headers=list(re.finditer(r'(?im)^\*{0,2}(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b[^\n]*',text))
+                        if carried_days is not None and len(headers)==1 and headers[0].group(1).lower() not in carried_days:
+                            return refused('The unchanged post does not match this weekday.')
                         if re.fullmatch(r'(?i)(?:i\s+)?(?:approve\s+(?:all\s+)?(?:the\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?|(?:all\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?\s+(?:are\s+)?approved)[.! ]*',command.strip()) and len(headers)<2:
                             return refused('Multiple posts were not presented together for approval.')
                         if len({m.group(1).lower() for m in headers})>1:
@@ -98,6 +101,8 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                             if not requested or len(matching)!=len(requested):
                                 return refused('Which dated post do you mean? Please name its weekday.')
                             sections=[text[m.end():headers[headers.index(m)+1].start() if headers.index(m)+1<len(headers) else len(text)] for m in matching]
+                            if carried_days is not None:
+                                sections=[text[m.end():headers[headers.index(m)+1].start() if headers.index(m)+1<len(headers) else len(text)] for m in matching if m.group(1).lower() in carried_days]
                             sections=[section for section in sections if _presented(section,body)]
                             if len(sections)!=1:return refused('That reply refers to a different or ambiguous post.')
                             section=sections[0]
@@ -105,8 +110,20 @@ def verify_message(message_id,body,*,db_path=None,require_override=False):
                         if hashes and hashes!={expected}:
                             return refused('More than one post version was presented; please identify the post.')
                         presented_id=prior['id'];break
-                    if not has_draft_body(text):
+                    dated_draft=bool(re.search(r'(?im)^\*{0,2}(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(?:\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))\b',text))
+                    if not has_draft_body(text) and not dated_draft:
                         continue
+                    # A later multi-post presentation may explicitly retain one
+                    # earlier version while replacing others. Only follow an
+                    # unambiguous, owner-selected weekday marked unchanged.
+                    unchanged=set(m.group(1).lower() for m in re.finditer(
+                        r'(?im)^\*{0,2}(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b[^\n]{0,60}\b(?:stays as it was|remains unchanged|is unchanged)\b',text))
+                    requested={d.lower() for d in re.findall(r'\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b',command,re.I)}
+                    group_approval=bool(re.fullmatch(r'(?i)(?:i\s+)?(?:approve\s+(?:all\s+)?(?:the\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?|(?:all\s+)?(?:two|three|both)(?:\s+(?:posts|drafts|versions))?\s+(?:are\s+)?approved)[.! ]*',command.strip()))
+                    if not group_approval: unchanged &= requested
+                    if unchanged:
+                        carried_days=unchanged if carried_days is None else carried_days & unchanged
+                        if carried_days: continue
                     return refused('The latest draft differs from this version; please review that draft.')
 
                 if presented_id is None:return refused('natural approval has no exact presented-post context')

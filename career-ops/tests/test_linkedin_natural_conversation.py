@@ -129,6 +129,23 @@ def test_multi_post_approval_does_not_authorize_an_unselected_day(history):
     assert not approval.verify_message(mid,'Second.',db_path=db)['ok']
 
 
+def test_explicit_unchanged_day_carries_forward_exact_body(history):
+    db,add=history
+    add('Tuesday 2026-11-17\n\nFirst.\n\nWednesday 2026-11-18\n\nSecond.\n\nThursday 2026-11-19\n\nThird.',role='assistant')
+    add('Tuesday 2026-11-17\n\nNew first.\n\nThursday 2026-11-19\n\nNew third.\n\nWednesday 18 stays as it was.',role='assistant')
+    mid=add('Tuesday, Wednesday and Thursday approved')
+    assert approval.verify_message(mid,'Second.',db_path=db)['ok']
+    assert not approval.verify_message(mid,'First.',db_path=db)['ok']
+    assert approval.verify_message(mid,'New first.',db_path=db)['ok']
+
+
+def test_unrelated_new_draft_does_not_carry_old_approval(history):
+    db,add=history
+    add('Wednesday 2026-11-18\n\nSecond.',role='assistant')
+    add('Wednesday 2026-11-18\n\nRevised second.',role='assistant')
+    assert not approval.verify_message(add('Wednesday approved'),'Second.',db_path=db)['ok']
+
+
 def test_report_metrics_are_not_candidate_achievements():
     import linkedin_personal_review as personal
     body='Both numbers come from an independent annual index of AI progress. In controlled simulation, robotic manipulation succeeds 89.4% of the time. On real household tasks, it succeeds 12%.'
