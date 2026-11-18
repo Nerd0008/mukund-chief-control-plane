@@ -33,7 +33,7 @@ def retrieve(message,root=None,*,required=None):
         path=root/name
         if not path.is_file():raise RuntimeError('Required owner context unavailable: '+name)
         data=path.read_bytes()
-        if not data or len(data)>128000:raise RuntimeError('Required owner context invalid: '+name)
+        if not data:raise RuntimeError('Required owner context invalid: '+name)
         content=data.decode('utf-8')
         digest=hashlib.sha256(data).hexdigest()
         sections.append('SOURCE '+name+'\n'+content)
