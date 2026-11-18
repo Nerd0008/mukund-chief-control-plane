@@ -118,6 +118,38 @@ DONE_ASSESSMENTS = {
     "tpp group", "barclays", "natwest", "turnkey", "wtw",
 }
 
+#: Assessments the owner has not confirmed, whatever the parsed deadline says.
+#: These are ranked first and written as urgent, because an unconfirmed
+#: assessment invite is an open loop for the owner.
+#: key: the employer token to look for in the parsed company or role.
+URGENT_ASSESSMENTS = {
+    "fca": ("Financial Conduct Authority", "2027 Cyber Graduate Programme - London"),
+    "fidelity": ("Fidelity International", "Technology Graduate Programme 2027 - Cyber Security"),
+}
+
+
+def _is_urgent(company, role):
+    """True when the parsed employer/role is an unconfirmed assessment invite.
+
+    The monitor's own extraction can mislabel an invite: a subject line becomes
+    the company, or the company is dropped entirely and the subject lands in the
+    role. Match on the parsed values rather than on a message ID, which changes
+    with every new invite.
+    """
+    company_key = _key(company or "")
+    role_key = _key(role or "")
+    for token, (co, ro) in URGENT_ASSESSMENTS.items():
+        co_key, ro_key = _key(co), _key(ro)
+        # The employer token can appear alone, inside the parsed company, or
+        # inside a subject line that the monitor captured as the role.
+        if token in company_key or token in role_key:
+            return True
+        if company_key and (company_key == co_key or company_key in ro_key):
+            return True
+        if role_key and (role_key == ro_key or role_key in co_key):
+            return True
+    return False
+
 
 def _parse_assessments(pending_review_path):
     """Assessment records from the Gmail monitor's pending-review file.
@@ -167,6 +199,7 @@ def _parse_assessments(pending_review_path):
             "deadline_kind": dl.get("kind"),
             "link": rec.get("assessment_interview_link"),
             "received": rec.get("assessment_received_date") or rec.get("last_update_timestamp"),
+            "urgent": _is_urgent(company, role),
         })
     out.sort(key=lambda x: (str(x["deadline"] or "9999"), str(x["received"])))
     return out
@@ -211,9 +244,15 @@ def _build_tasks(today, additions, completed_keys, tracker_rows, assessments):
         detail = f"Assessment type: {atype}"
         if dl:
             detail += f" · Deadline: {dl}"
+        else:
+            detail += " · Deadline: none stated in the email"
         if a["link"]:
             detail += f" · Link: {a['link']}"
-        add("assessment", f"ASSESSMENT — {company} — {role}", detail,
+        title = f"ASSESSMENT — {company} — {role}"
+        if a.get("urgent"):
+            title = "URGENT — " + title
+            detail = "URGENT: complete this assessment. " + detail
+        add("assessment", title, detail,
             deadline=_to_dt(dl), link=a["link"], key=_key("assessment:" + company + role))
 
     for r in tracker_rows:
@@ -245,16 +284,27 @@ def _slot(start, index):
 def _event(task, start, end, calendar_id):
     eid = "task" + __import__("hashlib").sha256(
         (OWNER_TAG + task["key"] + str(start.date())).encode()).hexdigest()[:32]
+    urgent = task["title"].startswith("URGENT — ")
     body = {
         "id": eid,
         "summary": task["title"][:180],
         "description": "\n".join([task["detail"], f"Task key: {task['key']}"]),
         "start": {"dateTime": _iso(start.astimezone())},
         "end": {"dateTime": _iso(end.astimezone())},
-        "extendedProperties": {"private": {"ownerTag": OWNER_TAG, "taskKey": task["key"]}},
+        "extendedProperties": {"private": {"ownerTag": OWNER_TAG, "taskKey": task["key"],
+                                           "urgent": "true" if urgent else "false"}},
         "reminders": {"useDefault": False,
                       "overrides": [{"method": "popup", "minutes": 15}]},
     }
+    if urgent:
+        # Red is the calendar's own urgent colour, and the earlier popup makes
+        # the reminder land before the slot rather than only during it.
+        body["colorId"] = "11"
+        body["reminders"]["overrides"] = [
+            {"method": "popup", "minutes": 1440},
+            {"method": "popup", "minutes": 120},
+            {"method": "popup", "minutes": 15},
+        ]
     return body
 
 
