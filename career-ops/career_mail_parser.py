@@ -17,7 +17,15 @@ MONTHS = {name.lower(): i for i, name in enumerate(
     "January February March April May June July August September October November December".split(), 1)}
 PATTERNS = [
     ("deadline_extension", r"deadline (?:has been |is |was )?(?:extended|extension)|extended (?:the |your )?deadline"),
-    ("rejection", r"not (?:be |been |to )?(?:proceeding|progressing|successful|selected|move forward|moving forward)|not to (?:move forward|progress|proceed)|decided to progress with other candidates|unsuccessful|other candidates"),
+    ("rejection", r"not (?:be |been |to )?(?:proceeding|progressing|successful|selected|move forward|moving forward)|not to (?:move forward|progress|proceed)|decided to progress with other candidates|"
+     # Bare "unsuccessful"/"other candidates" matched boilerplate such as "we are
+     # unable to inform unsuccessful applicants", turning receipts into rejections.
+     # Require the candidate to be the subject of the decision.
+     r"(?<!inform )(?<!to inform )unsuccessful (?:applicant|candidate|application)|"
+     r"(?:you|your application|application) (?:has |have |is |are |was |were )?(?:been )?unsuccessful|"
+     r"(?:we|i) (?:have )?(?:decided|regret) .{0,80}unsuccessful|"
+     r"decided to (?:progress|take) .{0,60}other candidates|"
+     r"other candidates? (?:have been |were )?(?:selected|successful|chosen|progressed)"),
     ("withdrawal", r"application (?:has been |was |is )?withdrawn|withdrawal of your application"),
     ("offer", r"offer of employment|pleased to offer you|formal offer|conditional offer"),
     ("assessment_centre", r"assessment cent(?:re|er)"),
