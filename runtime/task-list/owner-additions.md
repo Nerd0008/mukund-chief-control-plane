@@ -9,4 +9,3 @@ delivered (or once they become stale).
 (none — delivered 09:10 local, archived to owner-additions.delivered-20261025.md)
 
 ## 2026-10-26
-
