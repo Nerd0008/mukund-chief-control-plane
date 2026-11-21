@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-21",
+  "tasks_total": 7,
+  "events_planned": 7,
+  "dropped_completed": 1,
+  "tracker_counts": {
+    "Not Applied": 210,
+    "Applied": 53,
+    "Not Eligible - clearance/citizenship required": 1,
+    "Rejected": 34
+  },
+  "assessments_found": 4,
+  "dry_run": false,
+  "events_written": 7,
+  "events_removed": 0,
+  "calendar": "primary"
+}
